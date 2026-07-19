@@ -1,71 +1,45 @@
 /*
  * PanelUI theme — Coss UI design tokens, translated for React Native.
  * Source of truth: cosscom/coss packages/ui/src/styles/globals.css
+ * (color-mix()/--alpha() expressions precomputed to static values.)
  *
- * Colors are declared with light-dark() — Uniwind's first-class themed-value
- * syntax — so every utility referencing them updates natively when the theme
- * changes. color-mix()/--alpha() expressions from the web original are
- * precomputed to static values.
+ * Structured the way Uniwind expects themed tokens (see uniwind's own
+ * test.css / expo-example): utility names declared in @theme, per-theme
+ * values defined with @variant blocks inside :root.
  *
  * Usage (in your app's global.css):
  *   @import 'tailwindcss';
  *   @import 'uniwind';
  *   @import 'panelui-native/theme.css';
  *   @source './node_modules/panelui-native/src';
- *
- * Override any token by redefining it in an @theme block after the import.
  */
 
 @theme {
-  /* white / color-mix(neutral-950 96%, white) */
-  --color-background: light-dark(#ffffff, #141414);
-  /* neutral-800 / neutral-100 */
-  --color-foreground: light-dark(#262626, #f5f5f5);
-
-  /* white / color-mix(background 98%, white) */
-  --color-card: light-dark(#ffffff, #191919);
-  --color-card-foreground: light-dark(#262626, #f5f5f5);
-
-  /* white / color-mix(background 96%, white) */
-  --color-popover: light-dark(#ffffff, #1d1d1d);
-  --color-popover-foreground: light-dark(#262626, #f5f5f5);
-
-  --color-primary: light-dark(#262626, #f5f5f5);
-  --color-primary-foreground: light-dark(#fafafa, #262626);
-
-  /* black 4% / white 4% */
-  --color-secondary: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
-  --color-secondary-foreground: light-dark(#262626, #f5f5f5);
-
-  --color-muted: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
-  /* color-mix(neutral-500 90%, black) / color-mix(neutral-500 90%, white) */
-  --color-muted-foreground: light-dark(#686868, #818181);
-
-  --color-accent: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
-  --color-accent-foreground: light-dark(#262626, #f5f5f5);
-
-  /* red-500 / color-mix(red-500 90%, white); foreground: red-700 / red-400 */
-  --color-destructive: light-dark(#ef4444, #f15757);
-  --color-destructive-foreground: light-dark(#b91c1c, #f87171);
-
-  /* blue-500; foreground: blue-700 / blue-400 */
-  --color-info: light-dark(#3b82f6, #3b82f6);
-  --color-info-foreground: light-dark(#1d4ed8, #60a5fa);
-
-  /* emerald-500; foreground: emerald-700 / emerald-400 */
-  --color-success: light-dark(#10b981, #10b981);
-  --color-success-foreground: light-dark(#047857, #34d399);
-
-  /* amber-500; foreground: amber-700 / amber-400 */
-  --color-warning: light-dark(#f59e0b, #f59e0b);
-  --color-warning-foreground: light-dark(#b45309, #fbbf24);
-
-  /* black 8% / white 6% */
-  --color-border: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.06));
-  /* black 10% / white 8% */
-  --color-input: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.08));
-  /* neutral-400 / neutral-500 */
-  --color-ring: light-dark(#a3a3a3, #737373);
+  --color-background: unset;
+  --color-foreground: unset;
+  --color-card: unset;
+  --color-card-foreground: unset;
+  --color-popover: unset;
+  --color-popover-foreground: unset;
+  --color-primary: unset;
+  --color-primary-foreground: unset;
+  --color-secondary: unset;
+  --color-secondary-foreground: unset;
+  --color-muted: unset;
+  --color-muted-foreground: unset;
+  --color-accent: unset;
+  --color-accent-foreground: unset;
+  --color-destructive: unset;
+  --color-destructive-foreground: unset;
+  --color-info: unset;
+  --color-info-foreground: unset;
+  --color-success: unset;
+  --color-success-foreground: unset;
+  --color-warning: unset;
+  --color-warning-foreground: unset;
+  --color-border: unset;
+  --color-input: unset;
+  --color-ring: unset;
 
   /* Coss radius scale: --radius: 0.625rem (10px) */
   --radius-xs: 4px;
@@ -74,4 +48,101 @@
   --radius-lg: 10px;
   --radius-xl: 14px;
   --radius-2xl: 16px;
+}
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: #ffffff;
+      /* neutral-800 */
+      --color-foreground: #262626;
+
+      --color-card: #ffffff;
+      --color-card-foreground: #262626;
+
+      --color-popover: #ffffff;
+      --color-popover-foreground: #262626;
+
+      --color-primary: #262626;
+      --color-primary-foreground: #fafafa;
+
+      /* secondary/muted/accent: black at 4% */
+      --color-secondary: rgba(0, 0, 0, 0.04);
+      --color-secondary-foreground: #262626;
+
+      --color-muted: rgba(0, 0, 0, 0.04);
+      /* color-mix(neutral-500 90%, black) */
+      --color-muted-foreground: #686868;
+
+      --color-accent: rgba(0, 0, 0, 0.04);
+      --color-accent-foreground: #262626;
+
+      /* status: {hue}-500, foreground {hue}-700 */
+      --color-destructive: #ef4444;
+      --color-destructive-foreground: #b91c1c;
+
+      --color-info: #3b82f6;
+      --color-info-foreground: #1d4ed8;
+
+      --color-success: #10b981;
+      --color-success-foreground: #047857;
+
+      --color-warning: #f59e0b;
+      --color-warning-foreground: #b45309;
+
+      /* border: black 8%, input: black 10% */
+      --color-border: rgba(0, 0, 0, 0.08);
+      --color-input: rgba(0, 0, 0, 0.1);
+      /* neutral-400 */
+      --color-ring: #a3a3a3;
+    }
+
+    @variant dark {
+      /* color-mix(neutral-950 96%, white) */
+      --color-background: #141414;
+      /* neutral-100 */
+      --color-foreground: #f5f5f5;
+
+      /* color-mix(background 98%, white) */
+      --color-card: #191919;
+      --color-card-foreground: #f5f5f5;
+
+      /* color-mix(background 96%, white) */
+      --color-popover: #1d1d1d;
+      --color-popover-foreground: #f5f5f5;
+
+      --color-primary: #f5f5f5;
+      --color-primary-foreground: #262626;
+
+      /* secondary/muted/accent: white at 4% */
+      --color-secondary: rgba(255, 255, 255, 0.04);
+      --color-secondary-foreground: #f5f5f5;
+
+      --color-muted: rgba(255, 255, 255, 0.04);
+      /* color-mix(neutral-500 90%, white) */
+      --color-muted-foreground: #818181;
+
+      --color-accent: rgba(255, 255, 255, 0.04);
+      --color-accent-foreground: #f5f5f5;
+
+      /* color-mix(red-500 90%, white), foreground {hue}-400 */
+      --color-destructive: #f15757;
+      --color-destructive-foreground: #f87171;
+
+      --color-info: #3b82f6;
+      --color-info-foreground: #60a5fa;
+
+      --color-success: #10b981;
+      --color-success-foreground: #34d399;
+
+      --color-warning: #f59e0b;
+      --color-warning-foreground: #fbbf24;
+
+      /* border: white 6%, input: white 8% */
+      --color-border: rgba(255, 255, 255, 0.06);
+      --color-input: rgba(255, 255, 255, 0.08);
+      /* neutral-500 */
+      --color-ring: #737373;
+    }
+  }
 }

@@ -15,7 +15,7 @@ const buttonVariants = tv({
   variants: {
     variant: {
       primary: {
-        root: 'bg-primary shadow-sm',
+        root: 'border-primary bg-primary shadow-sm',
         label: 'text-primary-foreground',
       },
       secondary: {
@@ -23,7 +23,7 @@ const buttonVariants = tv({
         label: 'text-secondary-foreground',
       },
       outline: {
-        root: 'border-input bg-background shadow-sm',
+        root: 'border-input bg-popover shadow-sm',
         label: 'text-foreground',
       },
       ghost: {
@@ -31,18 +31,18 @@ const buttonVariants = tv({
         label: 'text-foreground',
       },
       destructive: {
-        root: 'bg-destructive shadow-sm',
-        label: 'text-destructive-foreground',
+        root: 'border-destructive bg-destructive shadow-sm',
+        label: 'text-white',
       },
     },
     size: {
-      sm: { root: 'h-9 px-3', label: 'text-sm' },
-      md: { root: 'h-11 px-4', label: 'text-sm' },
-      lg: { root: 'h-12 px-6', label: 'text-base' },
+      sm: { root: 'h-9 gap-1.5 px-2.5', label: 'text-sm' },
+      md: { root: 'h-11 px-4', label: 'text-base' },
+      lg: { root: 'h-12 px-6', label: 'text-lg' },
       icon: { root: 'h-11 w-11 px-0' },
     },
     disabled: {
-      true: { root: 'opacity-50' },
+      true: { root: 'opacity-[0.64]' },
     },
   },
   defaultVariants: {

@@ -1,5 +1,8 @@
 /*
- * PanelUI theme — Coss UI-inspired design tokens for React Native.
+ * PanelUI theme — Coss UI design tokens, translated for React Native.
+ * Source of truth: cosscom/coss packages/ui/src/styles/globals.css
+ * (color-mix()/--alpha() expressions are precomputed to static values,
+ * since they must resolve at runtime on native.)
  *
  * Usage (in your app's global.css):
  *   @import 'tailwindcss';
@@ -9,7 +12,9 @@
  */
 
 :root {
+  /* --background: white */
   --background: #ffffff;
+  /* --foreground: neutral-800 */
   --foreground: #262626;
 
   --card: #ffffff;
@@ -18,76 +23,87 @@
   --popover: #ffffff;
   --popover-foreground: #262626;
 
+  /* --primary: neutral-800 / neutral-50 */
   --primary: #262626;
   --primary-foreground: #fafafa;
 
-  --secondary: #f5f5f5;
+  /* --secondary/muted/accent: black at 4% */
+  --secondary: rgba(0, 0, 0, 0.04);
   --secondary-foreground: #262626;
 
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
+  --muted: rgba(0, 0, 0, 0.04);
+  /* color-mix(neutral-500 90%, black) */
+  --muted-foreground: #686868;
 
-  --accent: #f5f5f5;
+  --accent: rgba(0, 0, 0, 0.04);
   --accent-foreground: #262626;
 
+  /* status: {hue}-500 with {hue}-700 foreground (for text on tints) */
   --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #b91c1c;
 
   --info: #3b82f6;
-  --info-foreground: #ffffff;
+  --info-foreground: #1d4ed8;
 
-  --success: #16a34a;
-  --success-foreground: #ffffff;
+  --success: #10b981;
+  --success-foreground: #047857;
 
   --warning: #f59e0b;
-  --warning-foreground: #431407;
+  --warning-foreground: #b45309;
 
-  --border: rgba(0, 0, 0, 0.1);
-  --input: rgba(0, 0, 0, 0.15);
+  /* --border: black 8%, --input: black 10% */
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.1);
+  /* --ring: neutral-400 */
   --ring: #a3a3a3;
-
-  --surface-shadow: rgba(0, 0, 0, 0.04);
 }
 
 .dark {
-  --background: #0a0a0a;
+  /* color-mix(neutral-950 96%, white) */
+  --background: #141414;
+  /* neutral-100 */
   --foreground: #f5f5f5;
 
-  --card: #171717;
+  /* color-mix(background 98%, white) */
+  --card: #191919;
   --card-foreground: #f5f5f5;
 
-  --popover: #171717;
+  /* color-mix(background 96%, white) */
+  --popover: #1d1d1d;
   --popover-foreground: #f5f5f5;
 
   --primary: #f5f5f5;
-  --primary-foreground: #171717;
+  --primary-foreground: #262626;
 
-  --secondary: #262626;
+  /* --secondary/muted/accent: white at 4% */
+  --secondary: rgba(255, 255, 255, 0.04);
   --secondary-foreground: #f5f5f5;
 
-  --muted: #262626;
-  --muted-foreground: #a3a3a3;
+  --muted: rgba(255, 255, 255, 0.04);
+  /* color-mix(neutral-500 90%, white) */
+  --muted-foreground: #818181;
 
-  --accent: #262626;
+  --accent: rgba(255, 255, 255, 0.04);
   --accent-foreground: #f5f5f5;
 
+  /* destructive: color-mix(red-500 90%, white); foreground: {hue}-400 */
   --destructive: #f15757;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #f87171;
 
-  --info: #4f8ff7;
-  --info-foreground: #ffffff;
+  --info: #3b82f6;
+  --info-foreground: #60a5fa;
 
-  --success: #38cb6e;
-  --success-foreground: #052e16;
+  --success: #10b981;
+  --success-foreground: #34d399;
 
-  --warning: #fbbf24;
-  --warning-foreground: #431407;
+  --warning: #f59e0b;
+  --warning-foreground: #fbbf24;
 
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
+  /* --border: white 6%, --input: white 8% */
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.08);
+  /* --ring: neutral-500 */
   --ring: #737373;
-
-  --surface-shadow: rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -117,6 +133,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Coss radius scale: --radius: 0.625rem (10px) */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;

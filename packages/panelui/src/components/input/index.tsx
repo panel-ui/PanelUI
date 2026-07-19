@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useState } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
 import { tv } from 'tailwind-variants';
+import { useCSSVariable } from 'uniwind';
 import { Text } from '../../primitives/text';
 
 const inputVariants = tv({
@@ -17,10 +18,10 @@ const inputVariants = tv({
       true: { field: 'border-ring' },
     },
     invalid: {
-      true: { field: 'border-destructive' },
+      true: { field: 'border-destructive/40' },
     },
     disabled: {
-      true: { field: 'opacity-50' },
+      true: { field: 'opacity-[0.64]' },
     },
   },
 });
@@ -51,6 +52,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     ref
   ) => {
     const [focused, setFocused] = useState(false);
+    const placeholderColor = useCSSVariable('--muted-foreground');
     const slots = inputVariants({
       focused,
       invalid: !!errorMessage,
@@ -84,7 +86,9 @@ export const Input = forwardRef<TextInput, InputProps>(
           accessibilityLabel={label}
           accessibilityState={{ disabled: !!disabled }}
           className={slots.field({ className })}
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={
+            typeof placeholderColor === 'string' ? placeholderColor : undefined
+          }
           {...props}
         />
         {errorMessage ? (

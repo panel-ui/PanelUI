@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { useCSSVariable } from 'uniwind';
 import { CheckIcon } from '../../icons';
 import { Text } from '../../primitives/text';
 
@@ -37,6 +38,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
   ({ className, checked, onCheckedChange, disabled, label }, ref) => {
     const progress = useSharedValue(checked ? 1 : 0);
     const slots = checkboxVariants({ disabled: !!disabled });
+    const checkColor = useCSSVariable('--primary-foreground');
 
     useEffect(() => {
       progress.value = checked
@@ -62,7 +64,10 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       >
         <View className={slots.box()}>
           <Animated.View style={fillStyle} className={slots.fill()}>
-            <CheckIcon size={12} />
+            <CheckIcon
+              size={12}
+              color={typeof checkColor === 'string' ? checkColor : '#fff'}
+            />
           </Animated.View>
         </View>
         {label ? <Text className={slots.label()}>{label}</Text> : null}

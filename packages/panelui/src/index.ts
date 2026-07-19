@@ -16,7 +16,25 @@ export {
 export { Alert, type AlertProps } from './components/alert';
 export { Avatar, type AvatarProps } from './components/avatar';
 export { Badge, type BadgeProps } from './components/badge';
+export {
+  BottomSheet,
+  type BottomSheetProps,
+  type BottomSheetContentProps,
+} from './components/bottom-sheet';
 export { Button, type ButtonProps } from './components/button';
+export {
+  Dialog,
+  type DialogProps,
+  type DialogContentProps,
+} from './components/dialog';
+export { Select, type SelectProps, type SelectItemProps } from './components/select';
+export {
+  Tabs,
+  type TabsProps,
+  type TabsListProps,
+  type TabsTriggerProps,
+  type TabsContentProps,
+} from './components/tabs';
 export { Card, type CardProps } from './components/card';
 export { Checkbox, type CheckboxProps } from './components/checkbox';
 export { Input, type InputProps } from './components/input';

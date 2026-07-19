@@ -26,7 +26,7 @@ const selectVariants = tv({
   },
   variants: {
     selected: {
-      true: { item: 'bg-accent', itemLabel: 'font-medium' },
+      true: { item: 'bg-black/5 dark:bg-white/8', itemLabel: 'font-medium' },
     },
     disabled: {
       true: { trigger: 'opacity-50' },

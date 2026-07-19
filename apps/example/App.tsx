@@ -13,6 +13,8 @@ import {
   Card,
   Checkbox,
   Dialog,
+  Frame,
+  InlineSelect,
   Input,
   PanelUIProvider,
   RadioGroup,
@@ -45,6 +47,7 @@ function Gallery() {
   const [enabled, setEnabled] = useState(true);
   const [plan, setPlan] = useState('pro');
   const [fruit, setFruit] = useState<string | undefined>();
+  const [region, setRegion] = useState<string | undefined>();
 
   return (
     <ScrollView
@@ -167,6 +170,47 @@ function Gallery() {
         </View>
       </Section>
 
+      <Section title="Frame">
+        <Frame>
+          <Frame.Header>
+            <View className="flex-1">
+              <Frame.Title>Team members</Frame.Title>
+              <Frame.Description>People with access to this project.</Frame.Description>
+            </View>
+            <Badge variant="secondary">3</Badge>
+          </Frame.Header>
+          <Frame.Panel>
+            <Frame.Row>
+              <Avatar size="sm" fallback="KA" />
+              <View className="flex-1">
+                <Text size="sm" weight="medium">Khalid Abdi</Text>
+                <Text size="xs" muted>khalid@example.com</Text>
+              </View>
+              <Badge variant="outline">Owner</Badge>
+            </Frame.Row>
+            <Frame.Row>
+              <Avatar size="sm" fallback="JD" />
+              <View className="flex-1">
+                <Text size="sm" weight="medium">Jamie Doe</Text>
+                <Text size="xs" muted>jamie@example.com</Text>
+              </View>
+              <Badge variant="outline">Editor</Badge>
+            </Frame.Row>
+            <Frame.Row>
+              <Avatar size="sm" fallback="SM" />
+              <View className="flex-1">
+                <Text size="sm" weight="medium">Sam Miller</Text>
+                <Text size="xs" muted>sam@example.com</Text>
+              </View>
+              <Badge variant="outline">Viewer</Badge>
+            </Frame.Row>
+          </Frame.Panel>
+          <Frame.Footer>
+            <Button size="sm" variant="outline">Invite member</Button>
+          </Frame.Footer>
+        </Frame>
+      </Section>
+
       <Section title="Card">
         <Card>
           <Card.Header>
@@ -228,7 +272,21 @@ function Gallery() {
             </RadioGroup>
             <View className="gap-1.5">
               <Text size="sm" weight="medium">
-                Favorite fruit
+                Region (inline — no sheet)
+              </Text>
+              <InlineSelect
+                value={region}
+                onValueChange={setRegion}
+                placeholder="Select a region"
+              >
+                <InlineSelect.Item value="us" label="United States" />
+                <InlineSelect.Item value="eu" label="Europe" />
+                <InlineSelect.Item value="apac" label="Asia Pacific" />
+              </InlineSelect>
+            </View>
+            <View className="gap-1.5">
+              <Text size="sm" weight="medium">
+                Favorite fruit (bottom sheet)
               </Text>
               <Select
                 value={fruit}

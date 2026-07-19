@@ -7,13 +7,13 @@ import { Text, type TextProps } from '../../primitives/text';
 const alertVariants = tv({
   slots: {
     root: 'w-full gap-0.5 rounded-xl border px-3.5 py-3',
-    title: 'text-sm font-medium text-card-foreground',
-    description: 'text-sm text-muted-foreground',
+    title: 'text-sm font-medium text-foreground',
+    description: 'text-sm text-foreground/70',
   },
   variants: {
     variant: {
       default: {
-        root: 'border-border bg-transparent dark:bg-white/4',
+        root: 'border-border bg-black/2 dark:bg-white/4',
       },
       info: {
         root: 'border-info/32 bg-info/4',

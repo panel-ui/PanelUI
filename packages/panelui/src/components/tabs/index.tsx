@@ -134,7 +134,7 @@ function TabsList({ className, children, ...props }: TabsListProps) {
   return (
     <View
       accessibilityRole="tablist"
-      className={cn('flex-row rounded-lg bg-muted p-1', className)}
+      className={cn('flex-row rounded-lg bg-black/5 p-1 dark:bg-white/5', className)}
       {...props}
     >
       <TabsIndicator />

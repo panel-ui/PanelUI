@@ -11,9 +11,9 @@ import { Text } from '../../primitives/text';
 
 const avatarVariants = tv({
   slots: {
-    root: 'items-center justify-center overflow-hidden rounded-full border border-border bg-muted',
+    root: 'items-center justify-center overflow-hidden rounded-full border border-border bg-black/5 dark:bg-white/10',
     image: 'absolute inset-0 h-full w-full',
-    fallback: 'font-medium text-muted-foreground',
+    fallback: 'font-medium text-foreground/70',
   },
   variants: {
     size: {

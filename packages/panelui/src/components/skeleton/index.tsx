@@ -28,7 +28,7 @@ export const Skeleton = memo(function Skeleton({ className }: SkeletonProps) {
   return (
     <Animated.View
       style={animatedStyle}
-      className={cn('rounded-md bg-foreground/8', className)}
+      className={cn('rounded-md bg-black/8 dark:bg-white/10', className)}
     />
   );
 });

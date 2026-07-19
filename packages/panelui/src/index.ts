@@ -27,6 +27,12 @@ export {
   type DialogProps,
   type DialogContentProps,
 } from './components/dialog';
+export { Frame, type FrameProps } from './components/frame';
+export {
+  InlineSelect,
+  type InlineSelectProps,
+  type InlineSelectItemProps,
+} from './components/inline-select';
 export { Select, type SelectProps, type SelectItemProps } from './components/select';
 export {
   Tabs,

@@ -18,15 +18,16 @@ import { BottomSheet } from '../bottom-sheet';
 const selectVariants = tv({
   slots: {
     trigger:
-      'h-11 w-full flex-row items-center justify-between rounded-lg border border-input bg-background px-3 dark:bg-white/4',
-    triggerLabel: 'text-base text-foreground',
-    placeholder: 'text-base text-muted-foreground',
-    item: 'flex-row items-center justify-between rounded-lg px-3 py-3.5',
-    itemLabel: 'text-base text-foreground',
+      'w-full flex-row items-center justify-between gap-3 rounded-2xl border border-input bg-background px-4 py-3.5',
+    triggerLabel: 'flex-1 text-base font-medium text-foreground',
+    placeholder: 'flex-1 text-base text-muted-foreground',
+    item: 'flex-row items-center gap-2 rounded-xl px-3 py-3',
+    itemLabel: 'flex-1 text-base font-medium text-foreground',
+    itemIndicator: 'h-5 w-5 items-center justify-center',
   },
   variants: {
     selected: {
-      true: { item: 'bg-black/5 dark:bg-white/8', itemLabel: 'font-medium' },
+      true: { item: 'bg-accent' },
     },
     disabled: {
       true: { trigger: 'opacity-50' },
@@ -54,7 +55,7 @@ function SelectItem({ value, label }: SelectItemProps) {
   }
 
   const selected = context.value === value;
-  const { item, itemLabel } = selectVariants({ selected });
+  const { item, itemLabel, itemIndicator } = selectVariants({ selected });
   const checkColor = useCSSVariable('--color-muted-foreground');
 
   return (
@@ -65,12 +66,14 @@ function SelectItem({ value, label }: SelectItemProps) {
       className={item()}
     >
       <Text className={itemLabel()}>{label}</Text>
-      {selected ? (
-        <CheckIcon
-          size={16}
-          color={typeof checkColor === 'string' ? checkColor : '#737373'}
-        />
-      ) : null}
+      <View className={itemIndicator()}>
+        {selected ? (
+          <CheckIcon
+            size={16}
+            color={typeof checkColor === 'string' ? checkColor : '#737373'}
+          />
+        ) : null}
+      </View>
     </Pressable>
   );
 }

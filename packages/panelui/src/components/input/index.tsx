@@ -8,7 +8,7 @@ const inputVariants = tv({
   slots: {
     container: 'w-full gap-1.5',
     field:
-      'h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground dark:bg-white/4',
+      'h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground',
     label: 'text-sm font-medium text-foreground',
     description: 'text-sm text-muted-foreground',
     error: 'text-sm text-destructive',

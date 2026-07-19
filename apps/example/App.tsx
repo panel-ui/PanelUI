@@ -173,11 +173,8 @@ function Gallery() {
       <Section title="Frame">
         <Frame>
           <Frame.Header>
-            <View className="flex-1">
-              <Frame.Title>Team members</Frame.Title>
-              <Frame.Description>People with access to this project.</Frame.Description>
-            </View>
-            <Badge variant="secondary">3</Badge>
+            <Frame.Title>Section header</Frame.Title>
+            <Frame.Description>Brief description about the section</Frame.Description>
           </Frame.Header>
           <Frame.Panel>
             <Frame.Row>
@@ -188,7 +185,7 @@ function Gallery() {
               </View>
               <Badge variant="outline">Owner</Badge>
             </Frame.Row>
-            <Frame.Row>
+            <Frame.Row divided>
               <Avatar size="sm" fallback="JD" />
               <View className="flex-1">
                 <Text size="sm" weight="medium">Jamie Doe</Text>
@@ -196,7 +193,7 @@ function Gallery() {
               </View>
               <Badge variant="outline">Editor</Badge>
             </Frame.Row>
-            <Frame.Row>
+            <Frame.Row divided>
               <Avatar size="sm" fallback="SM" />
               <View className="flex-1">
                 <Text size="sm" weight="medium">Sam Miller</Text>
@@ -206,7 +203,7 @@ function Gallery() {
             </Frame.Row>
           </Frame.Panel>
           <Frame.Footer>
-            <Button size="sm" variant="outline">Invite member</Button>
+            <Text size="sm" muted>3 members with access</Text>
           </Frame.Footer>
         </Frame>
       </Section>

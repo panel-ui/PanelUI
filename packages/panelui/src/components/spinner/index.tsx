@@ -10,7 +10,7 @@ import Animated, {
 import { tv, type VariantProps } from 'tailwind-variants';
 
 const spinnerVariants = tv({
-  base: 'rounded-full border-2 border-foreground/15 border-t-primary',
+  base: 'rounded-full border-2 border-muted border-t-primary',
   variants: {
     size: {
       sm: 'h-4 w-4',

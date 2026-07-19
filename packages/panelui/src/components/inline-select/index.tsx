@@ -24,16 +24,17 @@ import { Text } from '../../primitives/text';
 const inlineSelectVariants = tv({
   slots: {
     trigger:
-      'h-11 w-full flex-row items-center justify-between rounded-lg border border-input bg-background px-3 dark:bg-white/4',
-    triggerLabel: 'text-base text-foreground',
-    placeholder: 'text-base text-muted-foreground',
-    list: 'mt-1.5 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-sm',
-    item: 'flex-row items-center justify-between rounded-md px-3 py-2.5',
-    itemLabel: 'text-base text-foreground',
+      'w-full flex-row items-center justify-between gap-3 rounded-2xl border border-input bg-background px-4 py-3.5',
+    triggerLabel: 'flex-1 text-base font-medium text-foreground',
+    placeholder: 'flex-1 text-base text-muted-foreground',
+    list: 'mt-2 overflow-hidden rounded-2xl border border-border bg-popover p-2 shadow-sm',
+    item: 'flex-row items-center gap-2 rounded-xl px-3 py-3',
+    itemLabel: 'flex-1 text-base font-medium text-foreground',
+    itemIndicator: 'h-5 w-5 items-center justify-center',
   },
   variants: {
     selected: {
-      true: { item: 'bg-black/5 dark:bg-white/8', itemLabel: 'font-medium' },
+      true: { item: 'bg-accent' },
     },
     disabled: {
       true: { trigger: 'opacity-[0.64]' },
@@ -61,7 +62,7 @@ function InlineSelectItem({ value, label }: InlineSelectItemProps) {
   }
 
   const selected = context.value === value;
-  const { item, itemLabel } = inlineSelectVariants({ selected });
+  const { item, itemLabel, itemIndicator } = inlineSelectVariants({ selected });
   const checkColor = useCSSVariable('--color-muted-foreground');
 
   return (
@@ -72,12 +73,14 @@ function InlineSelectItem({ value, label }: InlineSelectItemProps) {
       className={item()}
     >
       <Text className={itemLabel()}>{label}</Text>
-      {selected ? (
-        <CheckIcon
-          size={16}
-          color={typeof checkColor === 'string' ? checkColor : '#737373'}
-        />
-      ) : null}
+      <View className={itemIndicator()}>
+        {selected ? (
+          <CheckIcon
+            size={16}
+            color={typeof checkColor === 'string' ? checkColor : '#737373'}
+          />
+        ) : null}
+      </View>
     </Pressable>
   );
 }

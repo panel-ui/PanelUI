@@ -7,25 +7,25 @@ import { Text, type TextProps } from '../../primitives/text';
 const alertVariants = tv({
   slots: {
     root: 'w-full gap-0.5 rounded-xl border px-3.5 py-3',
-    title: 'text-sm font-medium text-foreground',
-    description: 'text-sm text-foreground/70',
+    title: 'text-sm font-medium text-card-foreground',
+    description: 'text-sm text-muted-foreground',
   },
   variants: {
     variant: {
       default: {
-        root: 'border-border bg-black/2 dark:bg-white/4',
+        root: 'border-border bg-surface',
       },
       info: {
-        root: 'border-info/32 bg-info/4',
+        root: 'border-info/32 bg-info/10 dark:bg-info/[0.06]',
       },
       success: {
-        root: 'border-success/32 bg-success/4',
+        root: 'border-success/32 bg-success/10 dark:bg-success/[0.06]',
       },
       warning: {
-        root: 'border-warning/32 bg-warning/4',
+        root: 'border-warning/32 bg-warning/10 dark:bg-warning/[0.06]',
       },
       destructive: {
-        root: 'border-destructive/32 bg-destructive/4',
+        root: 'border-destructive/32 bg-destructive/10 dark:bg-destructive/[0.06]',
       },
     },
   },

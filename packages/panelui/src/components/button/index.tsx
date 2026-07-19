@@ -19,8 +19,8 @@ const buttonVariants = tv({
         label: 'text-primary-foreground',
       },
       secondary: {
-        root: 'bg-black/6 dark:bg-white/10',
-        label: 'text-foreground',
+        root: 'bg-secondary',
+        label: 'text-secondary-foreground',
       },
       outline: {
         root: 'border-input bg-popover shadow-sm',

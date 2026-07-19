@@ -8,7 +8,7 @@ const inputVariants = tv({
   slots: {
     container: 'w-full gap-1.5',
     field:
-      'h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground',
+      'h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground dark:bg-white/4',
     label: 'text-sm font-medium text-foreground',
     description: 'text-sm text-muted-foreground',
     error: 'text-sm text-destructive',
@@ -52,7 +52,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     ref
   ) => {
     const [focused, setFocused] = useState(false);
-    const placeholderColor = useCSSVariable('--muted-foreground');
+    const placeholderColor = useCSSVariable('--color-muted-foreground');
     const slots = inputVariants({
       focused,
       invalid: !!errorMessage,

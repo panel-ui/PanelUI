@@ -18,7 +18,7 @@ import { BottomSheet } from '../bottom-sheet';
 const selectVariants = tv({
   slots: {
     trigger:
-      'h-11 w-full flex-row items-center justify-between rounded-lg border border-input bg-background px-3',
+      'h-11 w-full flex-row items-center justify-between rounded-lg border border-input bg-background px-3 dark:bg-white/4',
     triggerLabel: 'text-base text-foreground',
     placeholder: 'text-base text-muted-foreground',
     item: 'flex-row items-center justify-between rounded-lg px-3 py-3.5',
@@ -55,7 +55,7 @@ function SelectItem({ value, label }: SelectItemProps) {
 
   const selected = context.value === value;
   const { item, itemLabel } = selectVariants({ selected });
-  const checkColor = useCSSVariable('--muted-foreground');
+  const checkColor = useCSSVariable('--color-muted-foreground');
 
   return (
     <Pressable
@@ -124,7 +124,7 @@ function SelectRoot({
   const { trigger, triggerLabel, placeholder: placeholderSlot } = selectVariants({
     disabled: !!disabled,
   });
-  const chevronColor = useCSSVariable('--muted-foreground');
+  const chevronColor = useCSSVariable('--color-muted-foreground');
 
   return (
     <SelectContext.Provider value={context}>
@@ -146,14 +146,18 @@ function SelectRoot({
       </Pressable>
       <BottomSheet open={open} onOpenChange={setOpen}>
         <BottomSheet.Content>
-          {title ? (
-            <Text size="lg" weight="semibold" className="mb-2 px-3">
-              {title}
-            </Text>
-          ) : null}
-          <ScrollView bounces={false} className="max-h-96">
-            <View className="gap-1 pb-2">{children}</View>
-          </ScrollView>
+          {/* BottomSheet.Content portals its children out of this subtree —
+              re-provide the select context so Select.Item keeps working. */}
+          <SelectContext.Provider value={context}>
+            {title ? (
+              <Text size="lg" weight="semibold" className="mb-2 px-3">
+                {title}
+              </Text>
+            ) : null}
+            <ScrollView bounces={false} className="max-h-96">
+              <View className="gap-1 pb-2">{children}</View>
+            </ScrollView>
+          </SelectContext.Provider>
         </BottomSheet.Content>
       </BottomSheet>
     </SelectContext.Provider>

@@ -6,36 +6,26 @@ import { Text, type TextProps } from '../../primitives/text';
 
 const alertVariants = tv({
   slots: {
-    root: 'w-full gap-1 rounded-xl border p-4',
-    title: 'font-semibold',
-    description: 'text-sm',
+    root: 'w-full gap-0.5 rounded-xl border px-3.5 py-3',
+    title: 'text-sm font-medium text-card-foreground',
+    description: 'text-sm text-muted-foreground',
   },
   variants: {
     variant: {
       default: {
-        root: 'border-border bg-card',
-        title: 'text-foreground',
-        description: 'text-muted-foreground',
+        root: 'border-border bg-transparent dark:bg-white/4',
       },
       info: {
         root: 'border-info/32 bg-info/4',
-        title: 'text-foreground',
-        description: 'text-muted-foreground',
       },
       success: {
         root: 'border-success/32 bg-success/4',
-        title: 'text-foreground',
-        description: 'text-muted-foreground',
       },
       warning: {
         root: 'border-warning/32 bg-warning/4',
-        title: 'text-foreground',
-        description: 'text-muted-foreground',
       },
       destructive: {
         root: 'border-destructive/32 bg-destructive/4',
-        title: 'text-foreground',
-        description: 'text-muted-foreground',
       },
     },
   },

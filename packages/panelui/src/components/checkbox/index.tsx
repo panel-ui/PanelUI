@@ -38,7 +38,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
   ({ className, checked, onCheckedChange, disabled, label }, ref) => {
     const progress = useSharedValue(checked ? 1 : 0);
     const slots = checkboxVariants({ disabled: !!disabled });
-    const checkColor = useCSSVariable('--primary-foreground');
+    const checkColor = useCSSVariable('--color-primary-foreground');
 
     useEffect(() => {
       progress.value = checked

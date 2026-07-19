@@ -10,14 +10,14 @@ export interface CardProps extends ViewProps {
 const CardRoot = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    className={cn('rounded-xl border border-border bg-card shadow-sm', className)}
+    className={cn('rounded-2xl border border-border bg-card shadow-sm', className)}
     {...props}
   />
 ));
 CardRoot.displayName = 'Card';
 
 const CardHeader = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn('gap-1.5 p-4', className)} {...props} />
+  <View ref={ref} className={cn('gap-1.5 p-6', className)} {...props} />
 ));
 CardHeader.displayName = 'Card.Header';
 
@@ -27,7 +27,7 @@ const CardTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
       ref={ref}
       size="lg"
       weight="semibold"
-      className={cn('text-card-foreground', className)}
+      className={cn('leading-none text-card-foreground', className)}
       {...props}
     />
   )
@@ -42,14 +42,14 @@ const CardDescription = forwardRef<React.ElementRef<typeof Text>, TextProps>(
 CardDescription.displayName = 'Card.Description';
 
 const CardContent = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn('p-4 pt-0', className)} {...props} />
+  <View ref={ref} className={cn('p-6 pt-0', className)} {...props} />
 ));
 CardContent.displayName = 'Card.Content';
 
 const CardFooter = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    className={cn('flex-row items-center gap-2 p-4 pt-0', className)}
+    className={cn('flex-row items-center gap-2 p-6 pt-0', className)}
     {...props}
   />
 ));

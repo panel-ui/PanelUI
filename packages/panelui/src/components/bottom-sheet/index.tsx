@@ -111,7 +111,8 @@ function BottomSheetContent({
   children,
   ...props
 }: BottomSheetContentProps) {
-  const { open, setOpen } = useBottomSheet('BottomSheet.Content');
+  const context = useBottomSheet('BottomSheet.Content');
+  const { open, setOpen } = context;
   const { height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
@@ -145,7 +146,10 @@ function BottomSheetContent({
 
   return (
     <Portal>
-      <View className="absolute inset-0 justify-end">
+      {/* Portal content mounts under PortalHost, outside this provider's
+          subtree — re-provide the context so nested consumers keep working. */}
+      <BottomSheetContext.Provider value={context}>
+        <View className="absolute inset-0 justify-end">
         <Animated.View
           entering={FadeIn.duration(180)}
           exiting={FadeOut.duration(180)}
@@ -175,7 +179,8 @@ function BottomSheetContent({
             {children}
           </Animated.View>
         </GestureDetector>
-      </View>
+        </View>
+      </BottomSheetContext.Provider>
     </Portal>
   );
 }

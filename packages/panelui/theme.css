@@ -1,137 +1,71 @@
 /*
  * PanelUI theme — Coss UI design tokens, translated for React Native.
  * Source of truth: cosscom/coss packages/ui/src/styles/globals.css
- * (color-mix()/--alpha() expressions are precomputed to static values,
- * since they must resolve at runtime on native.)
+ *
+ * Colors are declared with light-dark() — Uniwind's first-class themed-value
+ * syntax — so every utility referencing them updates natively when the theme
+ * changes. color-mix()/--alpha() expressions from the web original are
+ * precomputed to static values.
  *
  * Usage (in your app's global.css):
  *   @import 'tailwindcss';
  *   @import 'uniwind';
  *   @import 'panelui-native/theme.css';
- *   @source '../node_modules/panelui-native/src';
+ *   @source './node_modules/panelui-native/src';
+ *
+ * Override any token by redefining it in an @theme block after the import.
  */
 
-:root {
-  /* --background: white */
-  --background: #ffffff;
-  /* --foreground: neutral-800 */
-  --foreground: #262626;
+@theme {
+  /* white / color-mix(neutral-950 96%, white) */
+  --color-background: light-dark(#ffffff, #141414);
+  /* neutral-800 / neutral-100 */
+  --color-foreground: light-dark(#262626, #f5f5f5);
 
-  --card: #ffffff;
-  --card-foreground: #262626;
+  /* white / color-mix(background 98%, white) */
+  --color-card: light-dark(#ffffff, #191919);
+  --color-card-foreground: light-dark(#262626, #f5f5f5);
 
-  --popover: #ffffff;
-  --popover-foreground: #262626;
+  /* white / color-mix(background 96%, white) */
+  --color-popover: light-dark(#ffffff, #1d1d1d);
+  --color-popover-foreground: light-dark(#262626, #f5f5f5);
 
-  /* --primary: neutral-800 / neutral-50 */
-  --primary: #262626;
-  --primary-foreground: #fafafa;
+  --color-primary: light-dark(#262626, #f5f5f5);
+  --color-primary-foreground: light-dark(#fafafa, #262626);
 
-  /* --secondary/muted/accent: black at 4% */
-  --secondary: rgba(0, 0, 0, 0.04);
-  --secondary-foreground: #262626;
+  /* black 4% / white 4% */
+  --color-secondary: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
+  --color-secondary-foreground: light-dark(#262626, #f5f5f5);
 
-  --muted: rgba(0, 0, 0, 0.04);
-  /* color-mix(neutral-500 90%, black) */
-  --muted-foreground: #686868;
+  --color-muted: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
+  /* color-mix(neutral-500 90%, black) / color-mix(neutral-500 90%, white) */
+  --color-muted-foreground: light-dark(#686868, #818181);
 
-  --accent: rgba(0, 0, 0, 0.04);
-  --accent-foreground: #262626;
+  --color-accent: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
+  --color-accent-foreground: light-dark(#262626, #f5f5f5);
 
-  /* status: {hue}-500 with {hue}-700 foreground (for text on tints) */
-  --destructive: #ef4444;
-  --destructive-foreground: #b91c1c;
+  /* red-500 / color-mix(red-500 90%, white); foreground: red-700 / red-400 */
+  --color-destructive: light-dark(#ef4444, #f15757);
+  --color-destructive-foreground: light-dark(#b91c1c, #f87171);
 
-  --info: #3b82f6;
-  --info-foreground: #1d4ed8;
+  /* blue-500; foreground: blue-700 / blue-400 */
+  --color-info: light-dark(#3b82f6, #3b82f6);
+  --color-info-foreground: light-dark(#1d4ed8, #60a5fa);
 
-  --success: #10b981;
-  --success-foreground: #047857;
+  /* emerald-500; foreground: emerald-700 / emerald-400 */
+  --color-success: light-dark(#10b981, #10b981);
+  --color-success-foreground: light-dark(#047857, #34d399);
 
-  --warning: #f59e0b;
-  --warning-foreground: #b45309;
+  /* amber-500; foreground: amber-700 / amber-400 */
+  --color-warning: light-dark(#f59e0b, #f59e0b);
+  --color-warning-foreground: light-dark(#b45309, #fbbf24);
 
-  /* --border: black 8%, --input: black 10% */
-  --border: rgba(0, 0, 0, 0.08);
-  --input: rgba(0, 0, 0, 0.1);
-  /* --ring: neutral-400 */
-  --ring: #a3a3a3;
-}
-
-.dark {
-  /* color-mix(neutral-950 96%, white) */
-  --background: #141414;
-  /* neutral-100 */
-  --foreground: #f5f5f5;
-
-  /* color-mix(background 98%, white) */
-  --card: #191919;
-  --card-foreground: #f5f5f5;
-
-  /* color-mix(background 96%, white) */
-  --popover: #1d1d1d;
-  --popover-foreground: #f5f5f5;
-
-  --primary: #f5f5f5;
-  --primary-foreground: #262626;
-
-  /* --secondary/muted/accent: white at 4% */
-  --secondary: rgba(255, 255, 255, 0.04);
-  --secondary-foreground: #f5f5f5;
-
-  --muted: rgba(255, 255, 255, 0.04);
-  /* color-mix(neutral-500 90%, white) */
-  --muted-foreground: #818181;
-
-  --accent: rgba(255, 255, 255, 0.04);
-  --accent-foreground: #f5f5f5;
-
-  /* destructive: color-mix(red-500 90%, white); foreground: {hue}-400 */
-  --destructive: #f15757;
-  --destructive-foreground: #f87171;
-
-  --info: #3b82f6;
-  --info-foreground: #60a5fa;
-
-  --success: #10b981;
-  --success-foreground: #34d399;
-
-  --warning: #f59e0b;
-  --warning-foreground: #fbbf24;
-
-  /* --border: white 6%, --input: white 8% */
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.08);
-  /* --ring: neutral-500 */
-  --ring: #737373;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  /* black 8% / white 6% */
+  --color-border: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.06));
+  /* black 10% / white 8% */
+  --color-input: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.08));
+  /* neutral-400 / neutral-500 */
+  --color-ring: light-dark(#a3a3a3, #737373);
 
   /* Coss radius scale: --radius: 0.625rem (10px) */
   --radius-xs: 4px;
@@ -139,5 +73,5 @@
   --radius-md: 8px;
   --radius-lg: 10px;
   --radius-xl: 14px;
-  --radius-2xl: 20px;
+  --radius-2xl: 16px;
 }

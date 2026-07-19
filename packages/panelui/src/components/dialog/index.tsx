@@ -91,13 +91,17 @@ function DialogContent({
   children,
   ...props
 }: DialogContentProps) {
-  const { open, setOpen } = useDialog('Dialog.Content');
+  const context = useDialog('Dialog.Content');
+  const { open, setOpen } = context;
 
   if (!open) return null;
 
   return (
     <Portal>
-      <Animated.View
+      {/* Portal content mounts under PortalHost, outside this provider's
+          subtree — re-provide the context so Dialog.Close etc. keep working. */}
+      <DialogContext.Provider value={context}>
+        <Animated.View
         entering={FadeIn.duration(150)}
         exiting={FadeOut.duration(150)}
         className="absolute inset-0 items-center justify-center p-6"
@@ -116,10 +120,11 @@ function DialogContent({
             className
           )}
           {...props}
-        >
-          {children}
+          >
+            {children}
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
+      </DialogContext.Provider>
     </Portal>
   );
 }

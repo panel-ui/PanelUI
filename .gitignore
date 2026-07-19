@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# build output
+lib/
+*.tgz
+
+# misc
+.DS_Store
+*.pem
+*.log
+.env*.local
+
+# typescript
+*.tsbuildinfo

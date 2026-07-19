@@ -1,0 +1,73 @@
+{
+  "name": "panelui-native",
+  "version": "0.1.0",
+  "description": "High-performance React Native UI components for Expo. Coss UI design language, powered by Uniwind (Tailwind v4) and Reanimated.",
+  "main": "./lib/module/index.js",
+  "module": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/src/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./theme.css": "./theme.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "theme.css",
+    "!**/__tests__",
+    "!**/*.tsbuildinfo"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "bob build",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf lib"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "ui",
+    "components",
+    "tailwind",
+    "uniwind",
+    "design-system",
+    "shadcn"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Khalidabdi1/PanelUI.git"
+  },
+  "author": "Khalid Abdi",
+  "license": "MIT",
+  "homepage": "https://github.com/Khalidabdi1/PanelUI#readme",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-gesture-handler": ">=2.0.0",
+    "react-native-reanimated": ">=3.0.0",
+    "react-native-safe-area-context": ">=4.0.0",
+    "tailwindcss": ">=4.0.0",
+    "uniwind": ">=1.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwind-variants": "^3.2.2"
+  },
+  "devDependencies": {
+    "react-native-builder-bob": "^0.43.0"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      ["module", { "esm": true }],
+      "typescript"
+    ]
+  }
+}

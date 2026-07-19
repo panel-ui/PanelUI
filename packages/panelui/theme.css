@@ -1,0 +1,126 @@
+/*
+ * PanelUI theme — Coss UI-inspired design tokens for React Native.
+ *
+ * Usage (in your app's global.css):
+ *   @import 'tailwindcss';
+ *   @import 'uniwind';
+ *   @import 'panelui-native/theme.css';
+ *   @source '../node_modules/panelui-native/src';
+ */
+
+:root {
+  --background: #ffffff;
+  --foreground: #262626;
+
+  --card: #ffffff;
+  --card-foreground: #262626;
+
+  --popover: #ffffff;
+  --popover-foreground: #262626;
+
+  --primary: #262626;
+  --primary-foreground: #fafafa;
+
+  --secondary: #f5f5f5;
+  --secondary-foreground: #262626;
+
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+
+  --accent: #f5f5f5;
+  --accent-foreground: #262626;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #431407;
+
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.15);
+  --ring: #a3a3a3;
+
+  --surface-shadow: rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+
+  --card: #171717;
+  --card-foreground: #f5f5f5;
+
+  --popover: #171717;
+  --popover-foreground: #f5f5f5;
+
+  --primary: #f5f5f5;
+  --primary-foreground: #171717;
+
+  --secondary: #262626;
+  --secondary-foreground: #f5f5f5;
+
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+
+  --accent: #262626;
+  --accent-foreground: #f5f5f5;
+
+  --destructive: #f15757;
+  --destructive-foreground: #ffffff;
+
+  --info: #4f8ff7;
+  --info-foreground: #ffffff;
+
+  --success: #38cb6e;
+  --success-foreground: #052e16;
+
+  --warning: #fbbf24;
+  --warning-foreground: #431407;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #737373;
+
+  --surface-shadow: rgba(0, 0, 0, 0.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+}

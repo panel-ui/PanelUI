@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import 'uniwind';
+@import '../../packages/panelui/theme.css';
+
+@source '../../packages/panelui/src';

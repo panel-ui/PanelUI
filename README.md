@@ -31,12 +31,16 @@
 
 | | | |
 | --- | --- | --- |
-| Alert | Checkbox | Skeleton |
-| Avatar | Dialog | Spinner |
-| Badge | Input | Switch |
-| BottomSheet | RadioGroup | Tabs |
-| Button | Select | Text |
-| Card | | |
+| Alert | Checkbox | RadioGroup |
+| Avatar | Dialog | Select |
+| Badge | Frame | Skeleton |
+| BottomSheet | InlineSelect | Spinner |
+| Button | Input | Switch |
+| Card | | Tabs |
+
+`Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
+`Frame` is a tinted grouping container (Coss's CardFrame) with `Frame.Header`,
+`Frame.Panel`, `Frame.Row`, and `Frame.Footer` for grouped list sections.
 
 Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`, `cn`.
 

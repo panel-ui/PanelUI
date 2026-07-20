@@ -123,6 +123,33 @@ function CheckboxDemo() {
   );
 }
 
+function CheckboxCardDemo() {
+  const [picked, setPicked] = useState<string[]>(['pro']);
+  const toggle = (id: string) =>
+    setPicked((current) =>
+      current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]
+    );
+
+  return (
+    <View className="w-full gap-3">
+      {[
+        ['starter', 'Starter', 'Everything you need to begin.'],
+        ['pro', 'Pro', 'Advanced analytics and priority support.'],
+        ['team', 'Team', 'Shared workspaces and audit logs.'],
+      ].map(([id, label, description]) => (
+        <Checkbox
+          key={id}
+          variant="card"
+          checked={picked.includes(id!)}
+          onCheckedChange={() => toggle(id!)}
+          label={label}
+          description={description}
+        />
+      ))}
+    </View>
+  );
+}
+
 function RadioGroupDemo() {
   const [plan, setPlan] = useState('pro');
 
@@ -577,6 +604,28 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
+        label: 'With notification badge',
+        render: () => (
+          <View className="flex-row items-center gap-6">
+            <Avatar size="lg" source={{ uri: AVATARS[0] }} fallback="AB">
+              <Avatar.Badge>
+                <Badge variant="destructive" count={5} />
+              </Avatar.Badge>
+            </Avatar>
+            <Avatar size="lg" source={{ uri: AVATARS[1] }} fallback="CD">
+              <Avatar.Badge>
+                <Badge variant="destructive" count={128} />
+              </Avatar.Badge>
+            </Avatar>
+            <Avatar size="lg" fallback="EF">
+              <Avatar.Badge>
+                <Badge variant="success" shape="dot" />
+              </Avatar.Badge>
+            </Avatar>
+          </View>
+        ),
+      },
+      {
         label: 'Stacked group',
         render: () => (
           <View className="flex-row">
@@ -869,6 +918,7 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Multi-select control with label',
     demos: [
       { label: 'With descriptions', render: () => <CheckboxDemo /> },
+      { label: 'Card', render: () => <CheckboxCardDemo /> },
       {
         label: 'States',
         render: () => (

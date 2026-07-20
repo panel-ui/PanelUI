@@ -21,9 +21,33 @@ const checkboxVariants = tv({
     description: 'text-sm text-muted-foreground',
   },
   variants: {
+    variant: {
+      default: {},
+      /**
+       * The whole surface is the target — for pickable options where the
+       * checkbox is a confirmation rather than the affordance itself.
+       */
+      card: {
+        row: 'w-full items-start gap-3 rounded-xl border border-border bg-card p-4',
+        label: 'text-base font-medium',
+      },
+    },
+    checked: {
+      true: {},
+    },
     disabled: {
       true: { row: 'opacity-50' },
     },
+  },
+  compoundVariants: [
+    {
+      variant: 'card',
+      checked: true,
+      class: { row: 'border-primary bg-accent' },
+    },
+  ],
+  defaultVariants: {
+    variant: 'default',
   },
 });
 
@@ -39,9 +63,12 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
 }
 
 export const Checkbox = forwardRef<View, CheckboxProps>(
-  ({ className, checked, onCheckedChange, disabled, label, description }, ref) => {
+  (
+    { className, checked, onCheckedChange, disabled, label, description, variant },
+    ref
+  ) => {
     const progress = useSharedValue(checked ? 1 : 0);
-    const slots = checkboxVariants({ disabled: !!disabled });
+    const slots = checkboxVariants({ variant, checked, disabled: !!disabled });
     const checkColor = useCSSVariable('--color-primary-foreground');
 
     useEffect(() => {
@@ -55,6 +82,17 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       transform: [{ scale: 0.6 + progress.value * 0.4 }],
     }));
 
+    const box = (
+      <View className={slots.box()}>
+        <Animated.View style={fillStyle} className={slots.fill()}>
+          <CheckIcon
+            size={12}
+            color={typeof checkColor === 'string' ? checkColor : '#fff'}
+          />
+        </Animated.View>
+      </View>
+    );
+
     return (
       <Pressable
         ref={ref}
@@ -67,16 +105,15 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
         hitSlop={8}
         // A description makes the row two lines tall — align the box to the
         // label rather than centring it against the whole block.
-        className={slots.row({ className: description ? `items-start ${className ?? ''}` : className })}
+        className={slots.row({
+          className:
+            description && variant !== 'card'
+              ? `items-start ${className ?? ''}`
+              : className,
+        })}
       >
-        <View className={slots.box()}>
-          <Animated.View style={fillStyle} className={slots.fill()}>
-            <CheckIcon
-              size={12}
-              color={typeof checkColor === 'string' ? checkColor : '#fff'}
-            />
-          </Animated.View>
-        </View>
+        {/* The card lays out content first so the box sits top-right. */}
+        {variant === 'card' ? null : box}
         {label || description ? (
           <View className={slots.content()}>
             {label ? <Text className={slots.label()}>{label}</Text> : null}
@@ -85,6 +122,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
             ) : null}
           </View>
         ) : null}
+        {variant === 'card' ? box : null}
       </Pressable>
     );
   }

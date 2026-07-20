@@ -38,7 +38,11 @@ export {
   type AlertProps,
   type AlertIndicatorProps,
 } from './components/alert';
-export { Avatar, type AvatarProps } from './components/avatar';
+export {
+  Avatar,
+  type AvatarProps,
+  type AvatarBadgeProps,
+} from './components/avatar';
 export { Badge, type BadgeProps } from './components/badge';
 export {
   BottomSheet,

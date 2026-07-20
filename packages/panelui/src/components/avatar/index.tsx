@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, type ReactNode } from 'react';
 import {
   Image,
   View,
@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Text } from '../../primitives/text';
+import { cn } from '../../utils/cn';
 
 const avatarVariants = tv({
   slots: {
@@ -37,32 +38,79 @@ export interface AvatarProps extends ViewProps, VariantProps<typeof avatarVarian
   imageProps?: Omit<ImageProps, 'source'>;
 }
 
-export const Avatar = forwardRef<View, AvatarProps>(
-  ({ className, size, source, fallback, imageProps, ...props }, ref) => {
+const AvatarRoot = forwardRef<View, AvatarProps>(
+  ({ className, size, source, fallback, imageProps, children, ...props }, ref) => {
     const [errored, setErrored] = useState(false);
     const { root, image, fallback: fallbackSlot } = avatarVariants({ size });
     const showImage = !!source && !errored;
 
+    const face = showImage ? (
+      <Image
+        source={source}
+        onError={() => setErrored(true)}
+        className={image()}
+        {...imageProps}
+      />
+    ) : (
+      <Text className={fallbackSlot()}>{fallback ?? '?'}</Text>
+    );
+
+    // The plain avatar is a single clipped node.
+    if (!children) {
+      return (
+        <View
+          ref={ref}
+          accessibilityRole="image"
+          className={root({ className })}
+          {...props}
+        >
+          {face}
+        </View>
+      );
+    }
+
+    // With an overlay it needs two: the face keeps overflow-hidden to round
+    // the image, which would otherwise cut a corner badge in half, so the
+    // overlay hangs off an unclipped wrapper around it.
     return (
-      <View
-        ref={ref}
-        accessibilityRole="image"
-        className={root({ className })}
-        {...props}
-      >
-        {showImage ? (
-          <Image
-            source={source}
-            onError={() => setErrored(true)}
-            className={image()}
-            {...imageProps}
-          />
-        ) : (
-          <Text className={fallbackSlot()}>{fallback ?? '?'}</Text>
-        )}
+      <View ref={ref} className={cn('self-start', className)} {...props}>
+        <View accessibilityRole="image" className={root()}>
+          {face}
+        </View>
+        {children}
       </View>
     );
   }
 );
+AvatarRoot.displayName = 'Avatar';
 
-Avatar.displayName = 'Avatar';
+export interface AvatarBadgeProps extends ViewProps {
+  className?: string;
+  children?: ReactNode;
+}
+
+/**
+ * Overlay pinned to the avatar's top-right — an unread count, a presence dot.
+ *
+ * The ring is `border-background` so the badge separates from the image
+ * whatever surface the avatar sits on.
+ */
+const AvatarBadge = forwardRef<View, AvatarBadgeProps>(
+  ({ className, children, ...props }, ref) => (
+    <View
+      ref={ref}
+      className={cn(
+        'absolute -right-1 -top-1 rounded-full border-2 border-background',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </View>
+  )
+);
+AvatarBadge.displayName = 'Avatar.Badge';
+
+export const Avatar = Object.assign(AvatarRoot, {
+  Badge: AvatarBadge,
+});

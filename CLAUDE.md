@@ -30,11 +30,44 @@ How to read them:
 Record what you learned: put a short `Adapted from: <repo> <path>` note in the header comment of
 every component file you create or substantially rework.
 
+## Use the skills
+
+Two skills carry rules and CLI flows you are expected to follow rather than reconstruct:
+
+- **`coss`** — invoke it before touching anything built on Coss primitives or Coss tokens: the
+  landing page, the docs theming, or any change to `packages/panelui/theme.css`. It covers the
+  composition invariants per primitive, the `--font-sans` / `--font-mono` / `--font-heading`
+  contract, and rules such as *never rewrite `--alpha()` to `rgba()`* — that is a valid Tailwind v4
+  build-time function, not broken CSS.
+- **`shadcn`** — invoke it for shadcn registry work (`npx shadcn@latest add …`, presets,
+  `components.json`) and for shadcn's composition rules when shaping a component API.
+
+Never hand-write Coss markup without first checking a particle
+(`https://coss.com/ui/r/p-<name>-N.json`) for the real composition. The skills exist so the code
+matches upstream conventions instead of approximating them.
+
+## Documentation is part of the change
+
+`apps/docs` is the published documentation site. **A component change is not complete until its
+docs page is updated in the same commit.**
+
+- Adding a component → add `apps/docs/content/docs/components/<name>.mdx` and register it in the
+  sibling `meta.json`.
+- Changing a component → update that page's props table, anatomy, variant list and examples. New
+  props, renamed variants and changed defaults all count.
+- Removing or renaming anything → fix every page that references it.
+
+Props tables are read from the component's actual TypeScript interfaces and their JSDoc in
+`packages/panelui/src/components/<name>/index.tsx` — never written from memory. Docs that drift
+from the source are worse than no docs, because they are trusted.
+
 ## Architecture
 
 - npm-workspaces monorepo:
   - `packages/panelui` — the library (npm: `panelui-native`). Pure TypeScript, no native code.
-  - `apps/example` — Expo SDK 57 showcase app (gallery + 1,000-row perf screen).
+  - `apps/example` — Expo SDK 57 showcase app (expo-router gallery of every component).
+  - `apps/docs` — Fumadocs documentation site + landing page (Next.js, private, deploys to
+    panelui.dev). Themed with Coss tokens; landing page built from Coss primitives.
 - Styling: **Uniwind** (Tailwind v4 for RN) + `tailwind-variants` for variant APIs.
 - Design tokens: **exact Coss UI values** from `cosscom/coss` `packages/ui/src/styles/globals.css`,
   precomputed to static rgba/hex in `packages/panelui/theme.css` (native can't evaluate
@@ -47,6 +80,7 @@ every component file you create or substantially rework.
 - `npm run example` — start the example app (Metro/Expo dev server)
 - `npm run typecheck` — typecheck all workspaces
 - `npm run build` — build the library with react-native-builder-bob (output: `lib/`)
+- `npm run docs` — start the docs site; `npm run build --workspace=docs` for a production build
 - Publish: bump version in `packages/panelui`, `npm run build`, `npm publish` (from that dir), tag `vX.Y.Z`
 
 ## Git & release

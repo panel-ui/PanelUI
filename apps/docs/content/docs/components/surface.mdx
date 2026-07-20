@@ -1,0 +1,57 @@
+---
+title: Surface
+description: Elevated container with a variant ladder.
+---
+
+An elevated container. Nest the variants to build hierarchy — each level sits one step further from the page background than the one around it.
+
+Both the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.
+
+## Installation
+
+Surface ships with the library — no separate install.
+
+```tsx
+import { Surface, Text } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Surface>
+  <Text weight="medium">Account</Text>
+
+  <Surface variant="secondary" className="mt-3">
+    <Text size="sm" muted>Signed in as khalid@example.com</Text>
+
+    <Surface variant="tertiary" className="mt-3">
+      <Text size="xs" muted>Session expires in 12 days</Text>
+    </Surface>
+  </Surface>
+</Surface>
+```
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `secondary`
+- `tertiary`
+- `transparent`
+
+## API Reference
+
+### Surface
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.
+
+Use `variant="transparent"` when you want the padding and radius without a fill.

@@ -1,0 +1,49 @@
+---
+title: cn
+description: Merge Tailwind classes with conflicts resolved.
+---
+
+Combines class names and resolves Tailwind conflicts, so a `className` passed
+from outside wins over a component's own defaults instead of fighting it.
+
+Every PanelUI component uses this internally; it is exported because your own
+components need the same behaviour.
+
+## Usage
+
+```tsx
+import { cn } from 'panelui-native';
+
+<View className={cn('rounded-lg bg-card p-4', className)} />
+```
+
+### Conditional classes
+
+```tsx
+cn('p-4', isActive && 'bg-accent', isDisabled && 'opacity-50')
+```
+
+Falsy values are dropped, so `&&` is safe.
+
+### Why not template literals
+
+```tsx
+// The later class does not necessarily win — both end up in the string,
+// and which applies is down to stylesheet order.
+`rounded-lg ${className}`
+
+// cn resolves the conflict: a rounded-full in className replaces rounded-lg.
+cn('rounded-lg', className)
+```
+
+That is what `cn` adds over string concatenation, and why passing
+`className="rounded-full"` to a component actually works.
+
+## API Reference
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `...inputs` | `ClassValue[]` | Strings, arrays, objects, or falsy values. |
+
+Returns a `string`. Built on [`clsx`](https://github.com/lukeed/clsx) and
+[`tailwind-merge`](https://github.com/dcastil/tailwind-merge).

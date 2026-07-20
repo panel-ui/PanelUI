@@ -1,0 +1,53 @@
+---
+title: useTheme and useThemeMode
+description: Read and change the active theme.
+---
+
+Two hooks for the theme, covered in depth in [Theming](/docs/theming).
+
+## useTheme
+
+Reads the active theme by name and sets it.
+
+```tsx
+import { useTheme } from 'panelui-native';
+
+const { theme, setTheme } = useTheme();
+setTheme('moon-dark');
+setTheme('system'); // follow the device
+```
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `theme` | `PanelTheme` | Active theme name, e.g. `'dark'` or `'grass'`. |
+| `setTheme` | `(name: ThemeName) => void` | Switch theme, or `'system'`. |
+
+## useThemeMode
+
+Treats family and light/dark as separate axes, which is what a theme picker
+needs — a sun toggle has to stay inside the current family rather than jumping
+back to the default.
+
+```tsx
+import { useThemeMode, PANEL_THEMES } from 'panelui-native';
+
+const { family, mode, setFamily, setMode, toggleMode } = useThemeMode();
+
+toggleMode();          // dark ↔ light, same family
+setFamily('grass');    // switch family, same mode
+```
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `family` | `PanelThemeFamily` | Active family, with `id`, `name` and swatch colours. |
+| `mode` | `'light' \| 'dark'` | Mode within that family. |
+| `setFamily` | `(id: string) => void` | Switch family, keeping the mode. |
+| `setMode` | `(mode) => void` | Set the mode, keeping the family. |
+| `toggleMode` | `() => void` | Flip the mode. |
+
+`PANEL_THEMES` lists every family with a display name and swatch, so a picker
+needs nothing hardcoded.
+
+## useToast
+
+Covered on the [Toast](/docs/components/toast) page.

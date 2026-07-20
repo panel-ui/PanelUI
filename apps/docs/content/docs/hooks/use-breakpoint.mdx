@@ -1,0 +1,55 @@
+---
+title: useBreakpoint
+description: Responsive state derived from the window size.
+---
+
+The React Native answer to a media query. Reports the largest Tailwind
+breakpoint the window satisfies, plus its dimensions and orientation.
+
+<Callout>
+  For **styling**, prefer Uniwind's responsive prefixes — `md:flex-row` costs
+  nothing at runtime. Reach for this hook when the *behaviour* changes, not
+  just the look: rendering a sheet on a phone and a dialog on a tablet.
+</Callout>
+
+## Usage
+
+```tsx
+import { useBreakpoint, BottomSheet, Dialog } from 'panelui-native';
+
+function Picker(props) {
+  const { isAtLeast } = useBreakpoint();
+
+  return isAtLeast('md') ? <Dialog {...props} /> : <BottomSheet {...props} />;
+}
+```
+
+### Reading the current breakpoint
+
+```tsx
+const { current, width, isLandscape } = useBreakpoint();
+// current: 'base' | 'sm' | 'md' | 'lg' | 'xl'
+```
+
+## API Reference
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `current` | `'base' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | Largest breakpoint the window satisfies. |
+| `isAtLeast` | `(bp: Breakpoint) => boolean` | Whether the window is at least that wide. |
+| `width` | `number` | Window width in px. |
+| `height` | `number` | Window height in px. |
+| `isLandscape` | `boolean` | Whether width exceeds height. |
+
+### Breakpoints
+
+Exported as `BREAKPOINTS`, matching Tailwind's:
+
+| Name | Min width |
+| --- | --- |
+| `sm` | 640 |
+| `md` | 768 |
+| `lg` | 1024 |
+| `xl` | 1280 |

@@ -1,0 +1,43 @@
+---
+title: useKeyboard
+description: Keyboard height and visibility.
+---
+
+Reports the on-screen keyboard's height and whether it is showing.
+
+<Callout type="warn">
+  Use this when the value drives **rendering**. For *animating* against the
+  keyboard, use Reanimated's `useAnimatedKeyboard` instead — it runs on the UI
+  thread and tracks the keyboard frame-for-frame, where this fires once per
+  show and hide.
+</Callout>
+
+## Usage
+
+```tsx
+import { useKeyboard } from 'panelui-native';
+
+function Screen() {
+  const { isVisible, height } = useKeyboard();
+
+  return (
+    <View className="flex-1">
+      <Content />
+      {isVisible ? null : <Footer />}
+    </View>
+  );
+}
+```
+
+## API Reference
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `height` | `number` | Keyboard height in px, or `0` when hidden. |
+| `isVisible` | `boolean` | Whether the keyboard is showing. |
+
+On iOS this listens to `keyboardWillShow` / `keyboardWillHide`, which fire
+before the animation; on Android to the `Did` variants, which are the only ones
+it emits.

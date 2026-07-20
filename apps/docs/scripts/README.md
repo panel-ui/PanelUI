@@ -18,3 +18,13 @@ S=./scripts node scripts/gen.mjs       # api.json + usage.json -> MDX
 - `gen.mjs` merges the two and writes the MDX.
 
 Run both after any component change, per the docs rule in the repo's `CLAUDE.md`.
+
+## What is *not* generated
+
+Only `content/docs/components/*.mdx`. The pages under `content/docs/hooks/` and
+`content/docs/utilities/` are hand-written, and `docs:generate` will not touch
+them — `extract.mjs` parses component prop *interfaces*, and a hook's contract
+is a function signature with no equivalent to parse. Edit those MDX files
+directly.
+
+`index.mdx`, `installation.mdx` and `theming.mdx` are hand-written too.

@@ -1,0 +1,65 @@
+---
+title: useDisclosure
+description: Open and closed state for an overlay.
+---
+
+The controlled-or-uncontrolled pattern `Dialog`, `BottomSheet` and `Select`
+implement internally, lifted out for when the overlay has to be driven from
+somewhere else — closing a sheet once a request settles, or opening one from
+another screen.
+
+## Usage
+
+```tsx
+import { useDisclosure, BottomSheet, Button, Input } from 'panelui-native';
+
+function ShareSheet() {
+  const sheet = useDisclosure();
+
+  return (
+    <>
+      <Button onPress={sheet.open}>Share</Button>
+
+      <BottomSheet {...sheet.props}>
+        <BottomSheet.Content>
+          <Input placeholder="https://panelui.dev/p/xK2f9" />
+          <Button onPress={sheet.close}>Done</Button>
+        </BottomSheet.Content>
+      </BottomSheet>
+    </>
+  );
+}
+```
+
+`props` spreads straight onto any PanelUI overlay — it is `{ open, onOpenChange }`.
+
+### Controlled
+
+Pass `open` to drive it from state you already own:
+
+```tsx
+const sheet = useDisclosure({
+  open: step === 'share',
+  onOpenChange: handleChange,
+});
+```
+
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultOpen` | `boolean` | `false` | Initial state when uncontrolled. |
+| `open` | `boolean` | — | Controlled state. Providing it makes the hook controlled. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called on every change, controlled or not. |
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `isOpen` | `boolean` | Current state. |
+| `open` | `() => void` | Opens. |
+| `close` | `() => void` | Closes. |
+| `toggle` | `() => void` | Flips. |
+| `props` | `{ open, onOpenChange }` | Spread onto an overlay component. |

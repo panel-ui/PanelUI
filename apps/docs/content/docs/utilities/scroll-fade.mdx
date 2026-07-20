@@ -1,0 +1,68 @@
+---
+title: ScrollFade
+description: Fade the edges of a scroll container.
+---
+
+Fades the edges of a scrollable so content looks like it passes under the
+boundary rather than being cut off at it.
+
+This is the React Native equivalent of shadcn/ui's
+[scroll-fade utility](https://ui.shadcn.com/docs/utils/scroll-fade). That one is
+CSS `mask-image` driven by a scroll timeline; React Native has neither, so the
+fades here are gradient overlays whose opacity follows the scroll position.
+
+## Usage
+
+```tsx
+import { ScrollFade, Badge } from 'panelui-native';
+import { ScrollView } from 'react-native';
+
+<ScrollFade>
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {tags.map((tag) => (
+      <Badge key={tag}>{tag}</Badge>
+    ))}
+  </ScrollView>
+</ScrollFade>
+```
+
+Orientation comes from the child's `horizontal` prop — a horizontal list fades
+left and right, a vertical one top and bottom.
+
+### On a surface
+
+The fade resolves to the page background by default. When the scrollable sits
+on a card, tell it which colour to blend into or the fade will show as a band:
+
+```tsx
+<Card>
+  <ScrollFade color="var(--color-card)">
+    <ScrollView>…</ScrollView>
+  </ScrollFade>
+</Card>
+```
+
+### One edge only
+
+```tsx
+<ScrollFade edges="end" size={64}>
+  <ScrollView>…</ScrollView>
+</ScrollFade>
+```
+
+## API Reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `number` | `48` | Depth of the fade in px. |
+| `edges` | `'both' \| 'start' \| 'end'` | `'both'` | Which edges fade. |
+| `color` | `string` | theme background | Colour the fade resolves to. |
+| `className` | `string` | — | Classes for the wrapper. |
+
+Also accepts every `ViewProps`.
+
+## Notes
+
+Each edge only fades once there is content past it, so a list scrolled to the
+top shows nothing at the top. The scroll position is read via `onScroll` at
+`scrollEventThrottle={16}`; your own `onScroll` on the child still fires.

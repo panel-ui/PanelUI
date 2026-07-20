@@ -1,0 +1,71 @@
+---
+title: useCopyToClipboard
+description: Copy text to the clipboard with a temporary copied state.
+---
+
+Copies text and flips a `copied` flag for a moment afterwards, so a button can
+confirm itself without you tracking the timer.
+
+## Installation
+
+React Native removed `Clipboard` from core, so this hook needs `expo-clipboard`.
+It is an **optional** peer dependency — apps that never copy are not asked to
+install it.
+
+```bash
+npx expo install expo-clipboard
+```
+
+## Usage
+
+```tsx
+import { useCopyToClipboard, Button } from 'panelui-native';
+
+function CopyLink({ url }: { url: string }) {
+  const { copy, copied } = useCopyToClipboard();
+
+  return (
+    <Button onPress={() => copy(url)}>
+      {copied ? 'Copied' : 'Copy link'}
+    </Button>
+  );
+}
+```
+
+### Custom timeout
+
+```tsx
+const { copy, copied } = useCopyToClipboard({ timeout: 5000 });
+```
+
+Pass `0` to keep `copied` set until the next copy.
+
+### Callback
+
+```tsx
+const { copy } = useCopyToClipboard({
+  onCopy: () => toast.show('Link copied'),
+});
+```
+
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `timeout` | `number` | `2000` | Milliseconds before `copied` flips back. `0` keeps it set. |
+| `onCopy` | `() => void` | — | Called after a successful copy. |
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `copy` | `(value: string) => Promise<void>` | Writes to the clipboard and sets `copied`. |
+| `copied` | `boolean` | Whether a copy happened within the timeout. |
+
+<Callout type="warn">
+  `copy` rejects with an install message if `expo-clipboard` is missing. The
+  module is imported lazily, so that surfaces on first use rather than at
+  import time.
+</Callout>

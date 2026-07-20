@@ -1,0 +1,50 @@
+---
+title: Shimmer
+description: Animated highlight sweeping across content.
+---
+
+An animated highlight sweeping across its children, for loading and streaming states.
+
+This is the React Native equivalent of shadcn/ui's [shimmer utility](https://ui.shadcn.com/docs/utils/shimmer), which is CSS `background-clip: text` with a `color-mix()` highlight. React Native has neither, so the highlight is an SVG gradient band swept by Reanimated on the UI thread.
+
+## Installation
+
+Shimmer ships with the library — no separate install.
+
+```tsx
+import { Shimmer, Text } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Shimmer>
+  <Text muted>Generating response…</Text>
+</Shimmer>
+
+<Shimmer duration={1200} intensity={0.6}>
+  <Text size="lg" weight="medium">Thinking…</Text>
+</Shimmer>
+```
+
+## API Reference
+
+### Shimmer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `duration` | `number` | — | Milliseconds for one sweep. |
+| `once` | `boolean` | — | Sweep once instead of looping. |
+| `reverse` | `boolean` | — | Sweep right-to-left. |
+| `spread` | `number` | — | Width of the highlight band, as a fraction of the content width. |
+| `color` | `string` | — | Highlight colour. Defaults to the theme's foreground. |
+| `intensity` | `number` | — | Peak opacity of the highlight. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+**The band passes over the content rather than being clipped to glyph shapes.** `background-clip: text` has no React Native equivalent. At body sizes the two read the same; on very large text the web version is crisper.
+
+The sweep stops entirely when the OS reduce-motion setting is on, matching the web utility. The highlight defaults to the theme's foreground colour, so it works on any surface without configuration.

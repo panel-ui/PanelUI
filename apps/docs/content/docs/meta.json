@@ -5,6 +5,10 @@
     "installation",
     "theming",
     "---Components---",
-    "...components"
+    "...components",
+    "---Hooks---",
+    "...hooks",
+    "---Utilities---",
+    "...utilities"
   ]
 }

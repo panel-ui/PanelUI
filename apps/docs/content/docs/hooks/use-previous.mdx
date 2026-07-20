@@ -1,0 +1,30 @@
+---
+title: usePrevious
+description: The value from the previous render.
+---
+
+Returns whatever the value was last render, or `undefined` on the first — for
+reacting to a *transition* rather than a state.
+
+## Usage
+
+```tsx
+import { usePrevious } from 'panelui-native';
+
+function Sheet({ isOpen }: { isOpen: boolean }) {
+  const wasOpen = usePrevious(isOpen);
+
+  useEffect(() => {
+    // Fires on the open, not on every render while open.
+    if (isOpen && !wasOpen) track('sheet_opened');
+  }, [isOpen, wasOpen]);
+}
+```
+
+## API Reference
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `value` | `T` | The value to remember. |
+
+Returns `T | undefined` — the previous render's value.

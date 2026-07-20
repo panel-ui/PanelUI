@@ -1,0 +1,37 @@
+---
+title: useDebouncedValue
+description: A copy of a value that settles after changes stop.
+---
+
+Mirrors a value, updating only once it has stopped changing for `delay`
+milliseconds — so a search field can render every keystroke while firing one
+query.
+
+## Usage
+
+```tsx
+import { useDebouncedValue, Input } from 'panelui-native';
+
+function Search() {
+  const [query, setQuery] = useState('');
+  const debounced = useDebouncedValue(query, 300);
+
+  useEffect(() => {
+    if (debounced) search(debounced);
+  }, [debounced]);
+
+  return <Input value={query} onChangeText={setQuery} placeholder="Search" />;
+}
+```
+
+The input stays fully responsive because it reads `query`; only the effect
+waits on `debounced`.
+
+## API Reference
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to mirror. |
+| `delay` | `number` | `300` | Milliseconds of quiet before updating. |
+
+Returns the debounced `T`.

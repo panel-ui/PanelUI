@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "use-copy-to-clipboard",
+    "use-disclosure",
+    "use-breakpoint",
+    "use-keyboard",
+    "use-debounced-value",
+    "use-previous",
+    "use-theme"
+  ]
+}

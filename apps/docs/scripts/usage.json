@@ -284,5 +284,29 @@
       "Code": "Inline code on a muted surface."
     },
     "anatomy": "<Typography type=\"h1\">\u2026</Typography>\n\n<Typography.Heading type=\"h2\">\u2026</Typography.Heading>\n<Typography.Paragraph>\u2026</Typography.Paragraph>\n<Typography.Code>\u2026</Typography.Code>"
+  },
+  "surface": {
+    "intro": "An elevated container. Nest the variants to build hierarchy \u2014 each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
+    "usage": "<Surface>\n  <Text weight=\"medium\">Account</Text>\n\n  <Surface variant=\"secondary\" className=\"mt-3\">\n    <Text size=\"sm\" muted>Signed in as khalid@example.com</Text>\n\n    <Surface variant=\"tertiary\" className=\"mt-3\">\n      <Text size=\"xs\" muted>Session expires in 12 days</Text>\n    </Surface>\n  </Surface>\n</Surface>",
+    "extraImports": [
+      "Text"
+    ],
+    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc \u2014 visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill."
+  },
+  "shimmer": {
+    "intro": "An animated highlight sweeping across its children, for loading and streaming states.\n\nThis is the React Native equivalent of shadcn/ui's [shimmer utility](https://ui.shadcn.com/docs/utils/shimmer), which is CSS `background-clip: text` with a `color-mix()` highlight. React Native has neither, so the highlight is an SVG gradient band swept by Reanimated on the UI thread.",
+    "usage": "<Shimmer>\n  <Text muted>Generating response\u2026</Text>\n</Shimmer>\n\n<Shimmer duration={1200} intensity={0.6}>\n  <Text size=\"lg\" weight=\"medium\">Thinking\u2026</Text>\n</Shimmer>",
+    "extraImports": [
+      "Text"
+    ],
+    "notes": "**The band passes over the content rather than being clipped to glyph shapes.** `background-clip: text` has no React Native equivalent. At body sizes the two read the same; on very large text the web version is crisper.\n\nThe sweep stops entirely when the OS reduce-motion setting is on, matching the web utility. The highlight defaults to the theme's foreground colour, so it works on any surface without configuration."
+  },
+  "scroll-fade": {
+    "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nThe React Native equivalent of shadcn/ui's [scroll-fade utility](https://ui.shadcn.com/docs/utils/scroll-fade), which uses CSS `mask-image` on a scroll timeline. React Native has neither masks nor scroll timelines, so the fades are gradient overlays whose opacity follows the scroll position.",
+    "usage": "<ScrollFade>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag}>{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>",
+    "extraImports": [
+      "Badge"
+    ],
+    "notes": "Orientation is read from the child's `horizontal` prop, so a horizontal list fades left and right and a vertical one fades top and bottom.\n\nEach edge only fades once there is content past it \u2014 scrolled to the top, the top edge shows nothing.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend."
   }
 }

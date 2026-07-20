@@ -4,7 +4,9 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -16,6 +18,12 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "lib"]
+  "include": [
+    "src",
+    "types"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib"
+  ]
 }

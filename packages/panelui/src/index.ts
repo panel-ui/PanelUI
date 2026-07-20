@@ -90,6 +90,11 @@ export {
   type RadioGroupProps,
   type RadioGroupItemProps,
 } from './components/radio-group';
+export {
+  ScrollFade,
+  type ScrollFadeProps,
+} from './components/scroll-fade';
+export { Shimmer, type ShimmerProps } from './components/shimmer';
 export { Skeleton, type SkeletonProps } from './components/skeleton';
 export { Spinner, type SpinnerProps } from './components/spinner';
 export {
@@ -102,6 +107,7 @@ export {
   type StepState,
   type StepsOrientation,
 } from './components/steps';
+export { Surface, type SurfaceProps } from './components/surface';
 export { Switch, type SwitchProps } from './components/switch';
 export {
   Timeline,
@@ -165,6 +171,9 @@ export {
   useIconColor,
   type IconProps,
 } from './icons';
+
+// Hooks
+export * from './hooks';
 
 // Utils
 export { cn } from './utils/cn';

@@ -16,8 +16,8 @@ Zero native code, so it runs in Expo Go.
   roughly 2.4–3× faster styling than NativeWind.
 - 🧵 **60fps animations on the UI thread** with Reanimated 4. Press feedback, switches, sheets,
   dialogs and tabs never touch the JS thread.
-- 🎨 **Six built-in themes** — light, dark, and Vercel- and Supabase-flavoured palettes, each in
-  light and dark.
+- 🎨 **Six built-in themes** — Panel, Moon and Grass, each in light and dark. A theme sets radius
+  as well as colour, so switching one restyles the shape of the UI too.
 - 🌗 **Native dark mode.** Theme switching is applied natively by Uniwind, without re-rendering
   your component tree.
 - ♿ **Accessible by default** — every interactive component wires up `accessibilityRole`,
@@ -44,8 +44,8 @@ const config = getDefaultConfig(__dirname);
 module.exports = withUniwindConfig(config, {
   cssEntryFile: './global.css',
   dtsFile: './uniwind-types.d.ts',
-  // Only needed if you use the Vercel or Supabase themes.
-  extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
+  // Only needed if you use the Moon or Grass themes.
+  extraThemes: ['moon', 'moon-dark', 'grass', 'grass-dark'],
 });
 ```
 
@@ -147,21 +147,23 @@ non-component code.
 
 ## Theming and dark mode
 
-PanelUI ships six themes: `light`, `dark`, `vercel`, `vercel-dark`, `supabase` and
-`supabase-dark`.
+PanelUI ships three theme families, each in light and dark: **Panel** (`light` / `dark`),
+**Moon** (`moon` / `moon-dark`) and **Grass** (`grass` / `grass-dark`). A family sets its own
+radius scale as well as its own palette — Panel is the Coss default, Moon is sharp and
+monochrome, Grass is soft and green.
 
 ```tsx
 import { useTheme, useThemeMode, PANEL_THEMES } from 'panelui-native';
 
 // Switch to a specific theme
 const { theme, setTheme } = useTheme();
-setTheme('vercel-dark');
+setTheme('moon-dark');
 setTheme('system'); // follow the device
 
 // Or treat brand and light/dark as separate axes
 const { family, mode, setFamily, toggleMode } = useThemeMode();
 toggleMode();            // dark ↔ light, staying in the current brand
-setFamily('supabase');   // switch brand, staying in the current mode
+setFamily('grass');      // switch family, staying in the current mode
 ```
 
 Tokens are plain CSS variables, so you can override any of them in your own `global.css`:
@@ -177,6 +179,38 @@ Tokens are plain CSS variables, so you can override any of them in your own `glo
   }
 }
 ```
+
+### Using Expo Router? Read this
+
+React Navigation paints its own theme background over every screen, and it defaults to an opaque
+light grey — which sits on top of `PanelUIProvider`'s background and makes theme switching look
+like it does nothing. Feed it the live PanelUI tokens:
+
+```tsx
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { useCSSVariable } from 'uniwind';
+import { useThemeMode } from 'panelui-native';
+
+function ThemedNavigation() {
+  const { mode } = useThemeMode();
+  const [background, card, text, border] = useCSSVariable([
+    '--color-background', '--color-card', '--color-foreground', '--color-border',
+  ]) as (string | undefined)[];
+
+  const base = mode === 'dark' ? DarkTheme : DefaultTheme;
+
+  return (
+    <ThemeProvider value={{ ...base, dark: mode === 'dark',
+                            colors: { ...base.colors, background, card, text, border } }}>
+      <Stack />
+    </ThemeProvider>
+  );
+}
+```
+
+`useCSSVariable` subscribes to Uniwind's theme changes, so this re-runs on every switch — including
+the named themes, which the OS `Appearance` API knows nothing about. For the same reason, drive
+`<StatusBar>` from `mode` rather than `style="auto"`.
 
 ## FAQ
 
@@ -201,7 +235,7 @@ Every interactive component sets an `accessibilityRole`, mirrors its state throu
 Yes, as long as Uniwind, Reanimated and Gesture Handler are configured. Expo is the tested
 path.
 
-### Why do my Vercel or Supabase themes throw "it was not registered"?
+### Why do my Moon or Grass themes throw "it was not registered"?
 
 Named themes must be listed in `extraThemes` in your Metro config — see [Quick start](#quick-start).
 

@@ -4,19 +4,19 @@ import { Uniwind, useUniwind } from 'uniwind';
 export type PanelTheme =
   | 'light'
   | 'dark'
-  | 'vercel'
-  | 'vercel-dark'
-  | 'supabase'
-  | 'supabase-dark';
+  | 'moon'
+  | 'moon-dark'
+  | 'grass'
+  | 'grass-dark';
 
 export type ThemeName = PanelTheme | 'system';
 
 /** Light/dark mode within a theme family. */
 export type ThemeMode = 'light' | 'dark';
 
-/** A theme family — one brand, in its light and dark form. */
+/** A theme family — one look, in its light and dark form. */
 export interface PanelThemeFamily {
-  /** Stable id, e.g. `'vercel'`. */
+  /** Stable id, e.g. `'moon'`. */
   id: string;
   /** Short display name, for a theme picker. */
   name: string;
@@ -27,38 +27,41 @@ export interface PanelThemeFamily {
 }
 
 /**
- * The theme families PanelUI ships.
+ * The theme families PanelUI ships. Each sets its own palette *and* its own
+ * radius scale, so switching family changes the shape of the UI as well as
+ * its colour — Panel is the Coss default, Moon is sharp and monochrome,
+ * Grass is soft and green.
  *
- * Everything beyond `default` must be registered in your metro config, or
+ * Everything beyond `panel` must be registered in your metro config, or
  * `setTheme` throws "it was not registered":
  *
  * ```js
  * withUniwindConfig(config, {
  *   cssEntryFile: './global.css',
- *   extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
+ *   extraThemes: ['moon', 'moon-dark', 'grass', 'grass-dark'],
  * });
  * ```
  */
 export const PANEL_THEMES: readonly PanelThemeFamily[] = [
   {
-    id: 'default',
-    name: 'Default',
+    id: 'panel',
+    name: 'Panel',
     light: 'light',
     dark: 'dark',
     swatch: ['#262626', '#f5f5f5'],
   },
   {
-    id: 'vercel',
-    name: 'Vercel',
-    light: 'vercel',
-    dark: 'vercel-dark',
+    id: 'moon',
+    name: 'Moon',
+    light: 'moon',
+    dark: 'moon-dark',
     swatch: ['#0070f3', '#0070f3'],
   },
   {
-    id: 'supabase',
-    name: 'Supabase',
-    light: 'supabase',
-    dark: 'supabase-dark',
+    id: 'grass',
+    name: 'Grass',
+    light: 'grass',
+    dark: 'grass-dark',
     swatch: ['#24b47e', '#3ecf8e'],
   },
 ];
@@ -88,7 +91,7 @@ export function useTheme() {
   const { theme } = useUniwind();
 
   return {
-    /** The active theme name, e.g. `'dark'` or `'vercel-dark'`. */
+    /** The active theme name, e.g. `'dark'` or `'moon-dark'`. */
     theme: theme as PanelTheme,
     /** Switch theme by name, or `'system'` to follow the device. */
     setTheme: (name: ThemeName) => Uniwind.setTheme(name),
@@ -101,7 +104,7 @@ export function useTheme() {
  *
  * Named themes are not adaptive in Uniwind, so each brand ships as a
  * light/dark pair. Toggling the mode keeps the current family, so a user in
- * Vercel dark lands in Vercel light rather than the default theme.
+ * Moon dark lands in Moon light rather than the default theme.
  *
  * ```tsx
  * const { family, mode, setFamily, toggleMode } = useThemeMode();

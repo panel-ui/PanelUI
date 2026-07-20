@@ -67,8 +67,8 @@ const config = getDefaultConfig(__dirname);
 module.exports = withUniwindConfig(config, {
   cssEntryFile: './global.css',
   dtsFile: './uniwind-types.d.ts',
-  // Only needed if you use the Vercel or Supabase themes.
-  extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
+  // Only needed if you use the Moon or Grass themes.
+  extraThemes: ['moon', 'moon-dark', 'grass', 'grass-dark'],
 });
 ```
 
@@ -191,7 +191,8 @@ toast.show({
 ## Theming
 
 Six themes ship in [`theme.css`](packages/panelui/theme.css): `light`, `dark`,
-`vercel`, `vercel-dark`, `supabase` and `supabase-dark`.
+`moon`, `moon-dark`, `grass` and `grass-dark`. Each family sets its own radius scale as
+well as its own palette, so switching one changes the shape of the UI too.
 
 Uniwind only gives `light` and `dark` `prefers-color-scheme` handling — any other
 theme compiles to a plain class selector and cannot adapt on its own. So each brand
@@ -200,12 +201,12 @@ axes:
 
 ```tsx
 const { theme, setTheme } = useTheme();
-setTheme('vercel-dark');
+setTheme('moon-dark');
 setTheme('system'); // follow the device
 
 const { family, mode, setFamily, toggleMode } = useThemeMode();
 toggleMode();          // dark ↔ light, staying in the current brand
-setFamily('supabase'); // switch brand, staying in the current mode
+setFamily('grass');    // switch family, staying in the current mode
 ```
 
 Named themes must be registered in `extraThemes` in your Metro config, or

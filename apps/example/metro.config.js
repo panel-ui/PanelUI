@@ -19,5 +19,5 @@ module.exports = withUniwindConfig(config, {
   dtsFile: './uniwind-types.d.ts',
   // Named themes must be registered here or setTheme() throws. Keep in sync
   // with PANEL_EXTRA_THEMES in panelui-native.
-  extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
+  extraThemes: ['moon', 'moon-dark', 'grass', 'grass-dark'],
 });

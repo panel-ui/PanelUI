@@ -86,8 +86,35 @@ export default function ThemesScreen() {
         </View>
 
         <Text size="sm" muted className="text-center">
-          {family.name} · {mode}. Every surface below repaints when you switch.
+          {family.name} · {mode}. A theme sets radius as well as colour — watch the
+          corners change, not just the palette.
         </Text>
+
+        {/* Radius ramp, so the shape difference between families is obvious. */}
+        <View className="flex-row items-end justify-between gap-2">
+          {(['sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const).map((step) => (
+            <View key={step} className="flex-1 items-center gap-1.5">
+              <View
+                className={
+                  step === 'sm'
+                    ? 'h-12 w-full border border-border bg-surface rounded-sm'
+                    : step === 'md'
+                      ? 'h-12 w-full border border-border bg-surface rounded-md'
+                      : step === 'lg'
+                        ? 'h-12 w-full border border-border bg-surface rounded-lg'
+                        : step === 'xl'
+                          ? 'h-12 w-full border border-border bg-surface rounded-xl'
+                          : step === '2xl'
+                            ? 'h-12 w-full border border-border bg-surface rounded-2xl'
+                            : 'h-12 w-full border border-border bg-surface rounded-3xl'
+                }
+              />
+              <Text size="xs" muted>
+                {step}
+              </Text>
+            </View>
+          ))}
+        </View>
 
         {/* Live preview — a slice of real UI, so a theme can be judged in use. */}
         <View className="flex-row gap-3">

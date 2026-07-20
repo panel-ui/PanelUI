@@ -1,9 +1,13 @@
 {
   "name": "example",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
     "expo": "~57.0.7",
+    "expo-constants": "^57.0.6",
+    "expo-linear-gradient": "^57.0.1",
+    "expo-linking": "^57.0.3",
+    "expo-router": "^57.0.7",
     "expo-status-bar": "~57.0.1",
     "panelui-native": "*",
     "react": "19.2.3",
@@ -11,6 +15,7 @@
     "react-native-gesture-handler": "~2.32.0",
     "react-native-reanimated": "4.5.0",
     "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "^4.25.2",
     "react-native-svg": "15.15.4",
     "react-native-worklets": "0.10.0",
     "tailwindcss": "^4.3.3",

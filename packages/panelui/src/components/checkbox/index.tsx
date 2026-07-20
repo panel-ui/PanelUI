@@ -16,7 +16,9 @@ const checkboxVariants = tv({
     row: 'flex-row items-center gap-2.5',
     box: 'h-5 w-5 items-center justify-center rounded-md border border-input bg-background',
     fill: 'absolute inset-0 items-center justify-center rounded-md bg-primary',
+    content: 'flex-1 gap-0.5',
     label: 'text-sm text-foreground',
+    description: 'text-sm text-muted-foreground',
   },
   variants: {
     disabled: {
@@ -32,10 +34,12 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
   disabled?: boolean;
   /** Optional label rendered next to the box; pressing it also toggles. */
   label?: string;
+  /** Secondary line under the label, for extra context. */
+  description?: string;
 }
 
 export const Checkbox = forwardRef<View, CheckboxProps>(
-  ({ className, checked, onCheckedChange, disabled, label }, ref) => {
+  ({ className, checked, onCheckedChange, disabled, label, description }, ref) => {
     const progress = useSharedValue(checked ? 1 : 0);
     const slots = checkboxVariants({ disabled: !!disabled });
     const checkColor = useCSSVariable('--color-primary-foreground');
@@ -57,10 +61,13 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
         accessibilityRole="checkbox"
         accessibilityState={{ checked, disabled: !!disabled }}
         accessibilityLabel={label}
+        accessibilityHint={description}
         disabled={disabled}
         onPress={() => onCheckedChange?.(!checked)}
         hitSlop={8}
-        className={slots.row({ className })}
+        // A description makes the row two lines tall — align the box to the
+        // label rather than centring it against the whole block.
+        className={slots.row({ className: description ? `items-start ${className ?? ''}` : className })}
       >
         <View className={slots.box()}>
           <Animated.View style={fillStyle} className={slots.fill()}>
@@ -70,7 +77,14 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
             />
           </Animated.View>
         </View>
-        {label ? <Text className={slots.label()}>{label}</Text> : null}
+        {label || description ? (
+          <View className={slots.content()}>
+            {label ? <Text className={slots.label()}>{label}</Text> : null}
+            {description ? (
+              <Text className={slots.description()}>{description}</Text>
+            ) : null}
+          </View>
+        ) : null}
       </Pressable>
     );
   }

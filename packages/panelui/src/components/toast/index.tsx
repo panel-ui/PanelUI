@@ -67,6 +67,8 @@ const MAX_VISIBLE = 3;
 const STACK_OFFSET = 10;
 /** Scale of the toast one step back in the deck. */
 const STACK_SCALE_STEP = 0.97;
+/** Gap between the deck and the screen edges, on top of the safe-area inset. */
+const EDGE_INSET = 16;
 
 /*
  * Entering/exiting animations, from heroui-inc/heroui-native
@@ -436,9 +438,16 @@ function ToastSlot({
       exiting={placement === 'top' ? exitingTop : exitingBottom}
       pointerEvents="box-none"
       // Every toast is pinned to the same edge, so they overlap as a deck.
-      // Newest on top.
-      className={cn('absolute left-0 right-0', placement === 'top' ? 'top-0' : 'bottom-0')}
-      style={{ zIndex: index }}
+      // Newest on top. Horizontal inset lives here rather than as padding on
+      // the anchor: Yoga positions absolute children against the border box,
+      // so padding on the parent would not move them.
+      className="absolute"
+      style={{
+        left: EDGE_INSET,
+        right: EDGE_INSET,
+        [placement === 'top' ? 'top' : 'bottom']: 0,
+        zIndex: index,
+      }}
     >
       <GestureDetector gesture={pan}>
         <Animated.View style={stackStyle}>{content}</Animated.View>
@@ -496,17 +505,17 @@ function ToastStack({
   const frontId = visible[visible.length - 1]!.id;
 
   return (
+    // A zero-height anchor sitting at the safe-area edge. The toasts hang off
+    // it — upward for bottom placement, downward for top — so the inset is
+    // part of the anchor's position rather than padding, which Yoga would
+    // ignore for absolutely positioned children.
     <View
       pointerEvents="box-none"
-      className={cn(
-        'absolute left-0 right-0 px-4',
-        placement === 'top' ? 'top-0' : 'bottom-0'
-      )}
+      className="absolute left-0 right-0"
       style={{
-        paddingTop: placement === 'top' ? insets.top + 8 : 0,
-        paddingBottom: placement === 'bottom' ? insets.bottom + 8 : 0,
-        // The container has no flow content, so give it the front toast's room.
-        minHeight: 1,
+        [placement === 'top' ? 'top' : 'bottom']:
+          (placement === 'top' ? insets.top : insets.bottom) + EDGE_INSET,
+        height: 0,
       }}
     >
       {visible.map((item, index) => (

@@ -58,7 +58,9 @@ const timelineVariants = tv({
     item: 'w-full flex-row gap-3',
     aside: 'w-20 items-end gap-0.5 pt-0.5',
     rail: 'items-center',
-    indicator: 'items-center justify-center rounded-full border-2',
+    // Flat discs, no ring — the same restraint Steps uses. Rings on every node
+    // were most of what made the timeline read as noisy.
+    indicator: 'items-center justify-center rounded-full',
     indicatorLabel: 'text-xs font-medium',
     separator: 'w-0.5 flex-1 rounded-full',
     body: 'flex-1 pb-6',
@@ -112,22 +114,33 @@ const timelineVariants = tv({
   },
 });
 
-/** Node fill and border per tone, split by whether the node is solid. */
-const TONE_NODE: Record<TimelineTone, { solid: string; outline: string }> = {
-  default: { solid: 'border-primary bg-primary', outline: 'border-primary' },
-  info: { solid: 'border-info bg-info', outline: 'border-info' },
-  success: { solid: 'border-success bg-success', outline: 'border-success' },
-  warning: { solid: 'border-warning bg-warning', outline: 'border-warning' },
-  danger: { solid: 'border-destructive bg-destructive', outline: 'border-destructive' },
+/*
+ * Colour rule, matching the Steps component: progress is solid, event kind is
+ * tinted.
+ *
+ * - untoned pending   → bg-muted        (Steps' inactive)
+ * - untoned completed → bg-primary      (Steps' completed)
+ * - toned             → bg-{tone}-soft, content in the tone's foreground
+ *
+ * The `-soft` fills are the same tinted tokens Alert uses, so a toned node sits
+ * in the same family as the rest of the library instead of shouting in raw
+ * brand colour.
+ */
+const TONE_NODE: Record<TimelineTone, { solid: string; tinted: string }> = {
+  default: { solid: 'bg-primary', tinted: 'bg-muted' },
+  info: { solid: 'bg-info', tinted: 'bg-info-soft' },
+  success: { solid: 'bg-success', tinted: 'bg-success-soft' },
+  warning: { solid: 'bg-warning', tinted: 'bg-warning-soft' },
+  danger: { solid: 'bg-destructive', tinted: 'bg-destructive-soft' },
 };
 
 /** The node an incomplete, untoned step gets. */
-const PENDING_NODE = 'border-muted bg-background';
+const PENDING_NODE = 'bg-muted';
 
 /**
- * CSS variable an outlined node's icon takes its colour from. The
- * `-foreground` tokens are the ones tuned to read against the page in both
- * light and dark, which is what an outlined node's contents sit on.
+ * CSS variable a tinted node's contents take their colour from. The
+ * `-foreground` tokens are the ones tuned to read in both light and dark,
+ * which is what sits on a soft tint.
  */
 const TONE_ICON_VAR: Record<TimelineTone, string> = {
   default: '--color-primary',
@@ -264,33 +277,30 @@ const TimelineIndicator = forwardRef<View, TimelineIndicatorProps>(
       completed,
     });
 
-    const isSolid = SOLID_VARIANTS.includes(variant);
+    // dot/card nodes are small discs with nothing inside, so they keep full
+    // saturation — a soft tint at 16px would disappear. Nodes that hold an
+    // icon or a number take the tinted fill instead.
+    const isDisc = SOLID_VARIANTS.includes(variant);
     const toned = tone !== 'default';
-    // An untoned, unfinished step stays neutral; everything else takes its
-    // tone (or primary, once complete).
-    const nodeClass =
-      toned || completed
-        ? TONE_NODE[tone][isSolid ? 'solid' : 'outline']
+
+    const nodeClass = toned
+      ? TONE_NODE[tone][isDisc ? 'solid' : 'tinted']
+      : completed
+        ? TONE_NODE.default.solid
         : PENDING_NODE;
 
-    const themedIcon = useCSSVariable(
-      completed || toned ? TONE_ICON_VAR[tone] : '--color-muted-foreground'
+    // Contents sit on the tint (or on primary once complete), so they take the
+    // colour tuned to read against it.
+    const tintedContent = useCSSVariable(
+      toned ? TONE_ICON_VAR[tone] : '--color-muted-foreground'
     );
-    const outlineColor = typeof themedIcon === 'string' ? themedIcon : undefined;
+    const solidContent = useCSSVariable('--color-primary-foreground');
 
-    // On a solid node the contents sit on the fill, so they need the colour
-    // that reads against it: the theme's own foreground for `default`, and
-    // white for the saturated status fills, which stay saturated in both
-    // themes.
-    const primaryForeground = useCSSVariable('--color-primary-foreground');
-    const solidColor =
-      tone === 'default'
-        ? typeof primaryForeground === 'string'
-          ? primaryForeground
-          : undefined
-        : '#ffffff';
+    const resolved = (value: unknown) =>
+      typeof value === 'string' ? value : undefined;
 
-    const contentColor = isSolid && (completed || toned) ? solidColor : outlineColor;
+    const contentColor =
+      !toned && completed ? resolved(solidContent) : resolved(tintedContent);
 
     return (
       <View className={rail()}>

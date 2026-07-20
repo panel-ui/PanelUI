@@ -12,7 +12,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "example:clear": "npm run start --workspace=example -- --clear",
-    "reset": "rm -rf apps/example/.expo apps/example/node_modules/.cache node_modules/.cache $TMPDIR/metro-* $TMPDIR/haste-map-* 2>/dev/null; echo \"caches cleared\""
+    "reset": "rm -rf apps/example/.expo apps/example/node_modules/.cache node_modules/.cache $TMPDIR/metro-* $TMPDIR/haste-map-* 2>/dev/null; echo \"caches cleared\"",
+    "docs": "npm run dev --workspace=docs"
   },
   "engines": {
     "node": ">=20"

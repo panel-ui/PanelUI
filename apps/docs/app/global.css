@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../app';
+@source '../content';
+@source '../components';
+
+/*
+ * Coss UI design tokens, copied from cosscom/coss
+ * packages/ui/src/styles/globals.css.
+ *
+ * Fumadocs' preset reads the same shadcn-shaped variable names Coss defines,
+ * so redefining them here retints the entire site — sidebar, code blocks,
+ * search — without overriding a single component.
+ *
+ * `--alpha()` and `color-mix()` are kept exactly as upstream writes them.
+ * `--alpha()` is a Tailwind v4 build-time function, not broken CSS; the native
+ * theme in packages/panelui/theme.css only precomputes these because React
+ * Native cannot evaluate them at runtime. On the web they stay symbolic.
+ */
+:root {
+  --radius: 0.625rem;
+
+  --background: var(--color-white);
+  --foreground: var(--color-neutral-800);
+
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-800);
+
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-800);
+
+  --primary: var(--color-neutral-800);
+  --primary-foreground: var(--color-neutral-50);
+
+  --secondary: --alpha(var(--color-black) / 4%);
+  --secondary-foreground: var(--color-neutral-800);
+
+  --muted: --alpha(var(--color-black) / 4%);
+  --muted-foreground: color-mix(
+    in srgb,
+    var(--color-neutral-500) 90%,
+    var(--color-black)
+  );
+
+  --accent: --alpha(var(--color-black) / 4%);
+  --accent-foreground: var(--color-neutral-800);
+
+  --destructive: var(--color-red-500);
+  --destructive-foreground: var(--color-red-700);
+
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-700);
+
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-700);
+
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-700);
+
+  --border: --alpha(var(--color-black) / 8%);
+  --input: --alpha(var(--color-black) / 10%);
+  --ring: var(--color-neutral-400);
+
+  --code: var(--color-white);
+  --code-foreground: var(--foreground);
+  --code-highlight: --alpha(var(--color-black) / 4%);
+}
+
+.dark {
+  --background: color-mix(
+    in srgb,
+    var(--color-neutral-950) 96%,
+    var(--color-white)
+  );
+  --foreground: var(--color-neutral-100);
+
+  --card: color-mix(in srgb, var(--background) 98%, var(--color-white));
+  --card-foreground: var(--color-neutral-100);
+
+  --popover: color-mix(in srgb, var(--background) 96%, var(--color-white));
+  --popover-foreground: var(--color-neutral-100);
+
+  --primary: var(--color-neutral-100);
+  --primary-foreground: var(--color-neutral-800);
+
+  --secondary: --alpha(var(--color-white) / 4%);
+  --secondary-foreground: var(--color-neutral-100);
+
+  --muted: --alpha(var(--color-white) / 4%);
+  --muted-foreground: color-mix(
+    in srgb,
+    var(--color-neutral-500) 90%,
+    var(--color-white)
+  );
+
+  --accent: --alpha(var(--color-white) / 4%);
+  --accent-foreground: var(--color-neutral-100);
+
+  --destructive: color-mix(
+    in srgb,
+    var(--color-red-500) 90%,
+    var(--color-white)
+  );
+  --destructive-foreground: var(--color-red-400);
+
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-400);
+
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-400);
+
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-400);
+
+  --border: --alpha(var(--color-white) / 6%);
+  --input: --alpha(var(--color-white) / 8%);
+  --ring: var(--color-neutral-500);
+
+  --code: color-mix(in srgb, var(--background) 98%, var(--color-white));
+  --code-foreground: var(--foreground);
+  --code-highlight: --alpha(var(--color-white) / 4%);
+}
+
+/*
+ * Map the Coss variables onto Tailwind's colour namespace, so `bg-card`,
+ * `text-muted-foreground` and friends resolve. `--font-heading` aliases to
+ * `--font-sans` per the Coss font contract.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-heading: var(--font-sans);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Base UI portals layer against an isolated root; iOS Safari needs the
+   positioned body for portaled backdrops. */
+body {
+  position: relative;
+}

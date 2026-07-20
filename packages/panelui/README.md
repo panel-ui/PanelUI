@@ -99,7 +99,7 @@ overlays, and the toast viewport.
 | `Checkbox` | Animated checkbox with label and description |
 | `Dialog` | Modal dialog with backdrop, title, description and footer actions |
 | `EmptyState` | Placeholder for an empty list or screen, with a stacked-icon media slot |
-| `Frame` | Grouped list section with `Header`, `Panel`, `Row` and `Footer` |
+| `Frame` | Widget shell — header row with action, inset panel of rows, caption footer |
 | `InlineSelect` | Picker that expands its options in place |
 | `Input` | Text field with label, description and error message |
 | `InputGroup` | Input with leading and trailing decorators, auto-measured |

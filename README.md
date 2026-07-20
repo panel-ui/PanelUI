@@ -42,8 +42,8 @@
 | EmptyState | | |
 
 `Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
-`Frame` is a tinted grouping container (Coss's CardFrame) with `Frame.Header`,
-`Frame.Panel`, `Frame.Row`, and `Frame.Footer` for grouped list sections.
+`Frame` is a widget shell: a titled header row with an action on the right, an
+inset `Frame.Panel` of rows with its own radius, and a caption footer.
 `InputGroup` measures its prefix/suffix and pads the input to match.
 
 Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`,

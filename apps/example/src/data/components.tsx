@@ -224,6 +224,18 @@ function PasswordInputDemo() {
   );
 }
 
+/** The small progress ring shown beside each row in the Frame demo. */
+function Meter({ percent }: { percent: number }) {
+  return (
+    <View className="h-6 w-6 items-center justify-center rounded-full border-2 border-muted">
+      <View
+        className="absolute h-6 w-6 rounded-full border-2 border-transparent border-t-info"
+        style={{ transform: [{ rotate: `${(percent / 100) * 360}deg` }] }}
+      />
+    </View>
+  );
+}
+
 const STEP_DATA = [
   { title: 'Account', description: 'Create your login' },
   { title: 'Profile', description: 'Tell us about you' },
@@ -849,15 +861,43 @@ export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'frame',
     name: 'Frame',
-    summary: 'Grouped list section with header and rows',
+    summary: 'Widget shell with a titled header and an inset panel',
     demos: [
+      {
+        label: 'Usage summary',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Usage Type</Frame.Title>
+              <Frame.Action>Amount</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['Total API Requests', '33.1K', 25],
+                ['Input Tokens', '98.2M', 70],
+                ['Output Tokens', '59M', 45],
+                ['Total Spend', '$149.61', 85],
+              ].map(([label, value, pct], index) => (
+                <Frame.Row key={label as string} divided={index > 0}>
+                  <Meter percent={pct as number} />
+                  <Text className="flex-1">{label}</Text>
+                  <Text weight="medium">{value}</Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+            <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
+          </Frame>
+        ),
+      },
       {
         label: 'Member list',
         render: () => (
           <Frame className="w-full">
             <Frame.Header>
               <Frame.Title>Team members</Frame.Title>
-              <Frame.Description>People with access to this project</Frame.Description>
+              <Frame.Action>
+                <Badge variant="secondary">3</Badge>
+              </Frame.Action>
             </Frame.Header>
             <Frame.Panel>
               {[
@@ -879,11 +919,7 @@ export const COMPONENTS: ComponentEntry[] = [
                 </Frame.Row>
               ))}
             </Frame.Panel>
-            <Frame.Footer>
-              <Text size="sm" muted>
-                3 members with access
-              </Text>
-            </Frame.Footer>
+            <Frame.Footer>3 members with access</Frame.Footer>
           </Frame>
         ),
       },
@@ -893,6 +929,7 @@ export const COMPONENTS: ComponentEntry[] = [
           <Frame className="w-full">
             <Frame.Header>
               <Frame.Title>Preferences</Frame.Title>
+              <Frame.Action>Edit</Frame.Action>
             </Frame.Header>
             <Frame.Panel>
               {[

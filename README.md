@@ -37,7 +37,7 @@
 | BottomSheet | InputGroup | Tabs |
 | Button | Label | Toast |
 | Card | Progress | Typography |
-| Checkbox | RadioGroup | |
+| Checkbox | RadioGroup | Steps |
 | Dialog | Select | |
 | EmptyState | | |
 

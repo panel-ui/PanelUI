@@ -63,7 +63,7 @@ ${u.usage ?? `<${name} />`}
 \`\`\``);
 
   if (parts.length) {
-    sections.push(`## Anatomy
+    sections.push(`## Composition
 
 \`\`\`tsx
 ${u.anatomy ?? `<${name}>\n  ${parts.map((p) => `<${p}>…</${p}>`).join('\n  ')}\n</${name}>`}
@@ -86,7 +86,7 @@ ${variantKeys.map(([k, opts]) => {
     .map((i) => ({ i, t: propsTable(i, c.defaults) }))
     .filter((x) => x.t);
   if (tables.length) {
-    sections.push(`## Props
+    sections.push(`## API Reference
 
 ${tables.map(({ i, t }) => {
   const label = i.name.replace(/Props$/, '');

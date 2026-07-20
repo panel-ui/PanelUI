@@ -18,7 +18,10 @@ android/
 *.mobileprovision
 
 # build output
-lib/
+# Anchored to the library: an unanchored `lib/` also matched apps/docs/lib,
+# so the docs app's source was silently never committed and CI could not
+# resolve @/lib/utils.
+/packages/panelui/lib/
 *.tgz
 
 # misc

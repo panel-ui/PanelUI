@@ -5,7 +5,9 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from 'fumadocs-ui/layouts/notebook/page';
 import { getMDXComponents } from '@/mdx-components';
 import { absoluteUrl, site } from '@/lib/site';
 import { source } from '@/lib/source';
@@ -21,11 +23,24 @@ export default async function Page({ params }: PageProps) {
 
   const MDX = page.data.body;
   const url = absoluteUrl(page.url);
+  // Served by app/llms.mdx/[[...slug]] — the page's raw Markdown. Built from
+  // `slugs`, not `url`: the route resolves against the content root, which has
+  // no /docs prefix.
+  const markdownUrl = `/llms.mdx/${page.slugs.join('/')}`;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
+
+      {/* Copy the page as Markdown, for pasting into an LLM. */}
+      <div className="flex flex-row items-center gap-2 border-b pb-4">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={`${site.repo}/blob/main/apps/docs/content/docs/${page.path}`}
+        />
+      </div>
       <DocsBody>
         <MDX components={getMDXComponents()} />
       </DocsBody>

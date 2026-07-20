@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/panelui-native"><img src="https://img.shields.io/npm/v/panelui-native?style=flat-square" alt="npm version" /></a>
-  <a href="https://github.com/Khalidabdi1/PanelUI/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT license" /></a>
+  <a href="https://github.com/panel-ui/PanelUI/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT license" /></a>
   <img src="https://img.shields.io/badge/platforms-iOS%20%7C%20Android-black?style=flat-square" alt="Platforms" />
   <img src="https://img.shields.io/badge/Expo-SDK%2057%2B-000?style=flat-square&logo=expo" alt="Expo SDK 57+" />
 </p>
@@ -204,7 +204,7 @@ The [example app](apps/example) includes a 1,000-row perf screen used to smoke-t
 ## Example app
 
 ```sh
-git clone https://github.com/Khalidabdi1/PanelUI.git
+git clone https://github.com/panel-ui/PanelUI.git
 cd PanelUI
 npm install
 npm run example

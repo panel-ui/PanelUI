@@ -24,6 +24,16 @@ export {
 
 // Components
 export {
+  Accordion,
+  type AccordionProps,
+  type AccordionItemProps,
+  type AccordionTriggerProps,
+  type AccordionIndicatorProps,
+  type AccordionContentProps,
+  type AccordionVariant,
+  type AccordionSelectionMode,
+} from './components/accordion';
+export {
   Alert,
   type AlertProps,
   type AlertIndicatorProps,
@@ -89,6 +99,13 @@ export {
   type StepsOrientation,
 } from './components/steps';
 export { Switch, type SwitchProps } from './components/switch';
+export {
+  Timeline,
+  type TimelineProps,
+  type TimelineItemProps,
+  type TimelineIndicatorProps,
+  type TimelineVariant,
+} from './components/timeline';
 export {
   Toast,
   ToastViewport,

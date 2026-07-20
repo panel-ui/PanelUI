@@ -8,6 +8,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Image, View } from 'react-native';
 import {
+  Accordion,
   Alert,
   AppleIcon,
   Avatar,
@@ -15,6 +16,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  CheckIcon,
   Checkbox,
   ChevronRightIcon,
   Dialog,
@@ -36,6 +38,7 @@ import {
   Switch,
   Tabs,
   Text,
+  Timeline,
   Toast,
   Typography,
   useToast,
@@ -239,6 +242,91 @@ function Meter({ percent }: { percent: number }) {
   );
 }
 
+const TIMELINE_DATA = [
+  { date: 'Mar 12', title: 'Order placed', body: 'We received your order.' },
+  { date: 'Mar 13', title: 'Packed', body: 'Your items left the warehouse.' },
+  { date: 'Mar 15', title: 'In transit', body: 'Out with the courier.' },
+  { date: 'Mar 17', title: 'Delivered', body: 'Left at the front door.' },
+];
+
+/** Renders the shared timeline data in whichever variant is asked for. */
+function TimelineDemo({
+  variant,
+  value = 2,
+}: {
+  variant: 'dot' | 'icon' | 'numbered' | 'card';
+  value?: number;
+}) {
+  return (
+    <Timeline variant={variant} value={value} className="w-full">
+      {TIMELINE_DATA.map((entry, index) => (
+        <Timeline.Item
+          key={entry.title}
+          step={index}
+          last={index === TIMELINE_DATA.length - 1}
+        >
+          <Timeline.Indicator>
+            <CheckIcon size={14} />
+          </Timeline.Indicator>
+          <Timeline.Content>
+            <Timeline.Header>
+              <Timeline.Date>{entry.date}</Timeline.Date>
+              <Timeline.Title>{entry.title}</Timeline.Title>
+            </Timeline.Header>
+            <Timeline.Description>{entry.body}</Timeline.Description>
+          </Timeline.Content>
+        </Timeline.Item>
+      ))}
+    </Timeline>
+  );
+}
+
+const FAQ_DATA = [
+  {
+    value: 'shipping',
+    question: 'How long does shipping take?',
+    answer: 'Standard delivery arrives in three to five working days.',
+  },
+  {
+    value: 'returns',
+    question: 'What is your returns policy?',
+    answer: 'Send anything back within 30 days for a full refund.',
+  },
+  {
+    value: 'support',
+    question: 'How do I contact support?',
+    answer: 'Reply to your order email and a person will answer.',
+  },
+];
+
+/** Renders the shared FAQ data in whichever accordion variant is asked for. */
+function AccordionDemo({
+  variant,
+  selectionMode = 'single',
+}: {
+  variant: 'default' | 'surface' | 'separated' | 'bordered' | 'ghost';
+  selectionMode?: 'single' | 'multiple';
+}) {
+  return (
+    <Accordion
+      variant={variant}
+      selectionMode={selectionMode}
+      defaultValue={selectionMode === 'multiple' ? ['shipping', 'returns'] : 'shipping'}
+      className="w-full"
+    >
+      {FAQ_DATA.map((entry) => (
+        <Accordion.Item key={entry.value} value={entry.value}>
+          <Accordion.Trigger>
+            <Accordion.Title>{entry.question}</Accordion.Title>
+            <Accordion.Indicator />
+          </Accordion.Trigger>
+          <Accordion.Content>{entry.answer}</Accordion.Content>
+        </Accordion.Item>
+      ))}
+    </Accordion>
+  );
+}
+
 const STEP_DATA = [
   { title: 'Account', description: 'Create your login' },
   { title: 'Profile', description: 'Tell us about you' },
@@ -383,6 +471,22 @@ function ToastDemo() {
 /* -------------------------------------------------------------------------- */
 
 export const COMPONENTS: ComponentEntry[] = [
+  {
+    slug: 'accordion',
+    name: 'Accordion',
+    summary: 'Collapsible sections, single or multiple',
+    demos: [
+      { label: 'Default', render: () => <AccordionDemo variant="default" /> },
+      { label: 'Surface', render: () => <AccordionDemo variant="surface" /> },
+      { label: 'Separated', render: () => <AccordionDemo variant="separated" /> },
+      { label: 'Bordered', render: () => <AccordionDemo variant="bordered" /> },
+      { label: 'Ghost', render: () => <AccordionDemo variant="ghost" /> },
+      {
+        label: 'Multiple open',
+        render: () => <AccordionDemo variant="surface" selectionMode="multiple" />,
+      },
+    ],
+  },
   {
     slug: 'alert',
     name: 'Alert',
@@ -1386,6 +1490,17 @@ export const COMPONENTS: ComponentEntry[] = [
           </Tabs>
         ),
       },
+    ],
+  },
+  {
+    slug: 'timeline',
+    name: 'Timeline',
+    summary: 'Vertical sequence of events',
+    demos: [
+      { label: 'Dot', render: () => <TimelineDemo variant="dot" /> },
+      { label: 'Icon', render: () => <TimelineDemo variant="icon" /> },
+      { label: 'Numbered', render: () => <TimelineDemo variant="numbered" /> },
+      { label: 'Card', render: () => <TimelineDemo variant="card" /> },
     ],
   },
   {

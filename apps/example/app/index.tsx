@@ -6,6 +6,9 @@ import { ScreenHeader } from '../src/components/screen-header';
 import { BLOCKS } from '../src/data/blocks';
 import { COMPONENTS } from '../src/data/components';
 
+/** Documented hooks, plus ScrollFade and Shimmer shown on the same screen. */
+const HOOK_COUNT = 8;
+
 export default function HomeScreen() {
   return (
     <View className="flex-1">
@@ -25,6 +28,12 @@ export default function HomeScreen() {
           subtitle="Try different themes"
           count={PANEL_THEMES.length}
           onPress={() => router.push('/themes')}
+        />
+        <HomeCard
+          title="Hooks"
+          subtitle="Utilities and state helpers"
+          count={HOOK_COUNT}
+          onPress={() => router.push('/hooks')}
         />
         <HomeCard
           title="Blocks"

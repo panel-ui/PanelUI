@@ -44,9 +44,12 @@ import {
   ShieldAlertIcon,
   ShieldCheckIcon,
   Select,
+  ScrollFade,
+  Shimmer,
   Skeleton,
   Spinner,
   Steps,
+  Surface,
   Switch,
   Tabs,
   Text,
@@ -1723,6 +1726,123 @@ export const COMPONENTS: ComponentEntry[] = [
               <SelectDemo />
             </Card.Content>
           </Card>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'surface',
+    name: 'Surface',
+    summary: 'Elevated container with a variant ladder',
+    demos: [
+      {
+        label: 'Nested hierarchy',
+        render: () => (
+          <Surface className="w-full">
+            <Text weight="medium">Account</Text>
+            <Surface variant="secondary" className="mt-3">
+              <Text size="sm" muted>
+                Signed in as khalid@example.com
+              </Text>
+              <Surface variant="tertiary" className="mt-3">
+                <Text size="xs" muted>
+                  Session expires in 12 days
+                </Text>
+              </Surface>
+            </Surface>
+          </Surface>
+        ),
+      },
+      {
+        label: 'Variants',
+        render: () => (
+          <View className="w-full gap-3">
+            {(['default', 'secondary', 'tertiary', 'transparent'] as const).map(
+              (variant) => (
+                <Surface key={variant} variant={variant}>
+                  <Text size="sm">{variant}</Text>
+                </Surface>
+              )
+            )}
+          </View>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'shimmer',
+    name: 'Shimmer',
+    summary: 'Animated highlight sweeping across content',
+    demos: [
+      {
+        label: 'Loading text',
+        render: () => (
+          <View className="w-full gap-4">
+            <Shimmer>
+              <Text muted>Generating response…</Text>
+            </Shimmer>
+            <Shimmer duration={1200} intensity={0.6}>
+              <Text size="lg" weight="medium">
+                Thinking…
+              </Text>
+            </Shimmer>
+          </View>
+        ),
+      },
+      {
+        label: 'Over a skeleton',
+        render: () => (
+          <Shimmer className="w-full rounded-xl">
+            <View className="gap-3">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-1/2" />
+            </View>
+          </Shimmer>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'scroll-fade',
+    name: 'ScrollFade',
+    summary: 'Fades the edges of a scroll container',
+    demos: [
+      {
+        label: 'Horizontal list',
+        render: () => (
+          <ScrollFade size={40} className="w-full">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-2"
+            >
+              {[
+                'Overlays', 'Forms', 'Feedback', 'Layout', 'Navigation',
+                'Typography', 'Data', 'Media', 'Motion', 'Theming',
+              ].map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </ScrollView>
+          </ScrollFade>
+        ),
+      },
+      {
+        label: 'One edge',
+        render: () => (
+          <ScrollFade size={56} edges="end" className="w-full">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-2"
+            >
+              {['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'].map((n) => (
+                <Badge key={n}>{n}</Badge>
+              ))}
+            </ScrollView>
+          </ScrollFade>
         ),
       },
     ],

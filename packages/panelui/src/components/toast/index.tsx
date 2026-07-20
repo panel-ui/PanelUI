@@ -20,12 +20,16 @@ import {
 import { View, type ViewProps } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  FadeOut,
-  SlideInDown,
-  SlideInUp,
+  Easing,
+  Extrapolation,
+  FadeInDown,
+  FadeInUp,
+  Keyframe,
+  interpolate,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDecay,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -47,8 +51,46 @@ import {
 } from './toast-store';
 
 const SPRING = { damping: 20, stiffness: 260, mass: 0.6 } as const;
-const DISMISS_DISTANCE = 80;
-const DISMISS_VELOCITY = 700;
+/** Drag distance past which a release dismisses. */
+const DISMISS_DISTANCE = 50;
+/** Fling speed past which a release dismisses regardless of distance. */
+const DISMISS_VELOCITY = 500;
+/** How far a toast can be dragged away from its edge before it stops moving. */
+const RUBBER_BAND_LIMIT = 40;
+/** How far a toast travels on entry. Short, so the spring has little to settle. */
+const ENTER_OFFSET = 100;
+/** Newest toasts only; older ones are dropped rather than stacking off-screen. */
+const MAX_VISIBLE = 3;
+
+/*
+ * Entering/exiting animations, from heroui-inc/heroui-native
+ * src/components/toast/toast.animation.ts.
+ *
+ * `mass(3)` is doing the important work: a heavy spring settles without the
+ * visible overshoot a default-mass one gives. `withInitialValues` keeps
+ * opacity at 1 so the toast slides rather than fades, and starts it
+ * ENTER_OFFSET px away instead of off-screen.
+ */
+const enteringTop = FadeInUp.springify()
+  .withInitialValues({ opacity: 1, transform: [{ translateY: -ENTER_OFFSET }] })
+  .mass(3);
+
+const enteringBottom = FadeInDown.springify()
+  .withInitialValues({ opacity: 1, transform: [{ translateY: ENTER_OFFSET }] })
+  .mass(3);
+
+const exitKeyframe = (offset: number) =>
+  new Keyframe({
+    0: { opacity: 1, transform: [{ translateY: 0 }, { scale: 1 }] },
+    100: {
+      opacity: 0.5,
+      transform: [{ translateY: offset }, { scale: 0.97 }],
+      easing: Easing.bezier(0.4, 0, 1, 1),
+    },
+  }).duration(150);
+
+const exitingTop = exitKeyframe(-ENTER_OFFSET);
+const exitingBottom = exitKeyframe(ENTER_OFFSET);
 
 const toastVariants = tv({
   slots: {
@@ -225,70 +267,112 @@ export const Toast = Object.assign(ToastRoot, {
 /* Viewport                                                                   */
 /* -------------------------------------------------------------------------- */
 
-/** One queued toast: swipe-dismissable, animated in from its placement edge. */
-function ToastSlot({ item }: { item: ToastItem }) {
+/**
+ * One queued toast.
+ *
+ * The entering spring is deliberately heavy (`mass(3)`) and travels only
+ * ENTER_OFFSET px rather than the full screen height. A default-mass spring
+ * across that distance overshoots visibly — it reads as a bounce, and arrives
+ * too fast to follow.
+ *
+ * Swiping is vertical and direction-aware: dragging toward the screen edge the
+ * toast came from dismisses it, dragging the other way rubber-bands against a
+ * hard limit. Matches heroui-native's toast.animation.ts.
+ */
+function ToastSlot({ item, depth }: { item: ToastItem; depth: number }) {
   const placement = item.placement ?? 'bottom';
-  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
   const hide = useCallback(() => toastStore.hide(item.id), [item.id]);
 
-  const pan = Gesture.Pan()
-    .activeOffsetX([-12, 12])
-    .onChange((event) => {
-      translateX.value += event.changeX;
-    })
-    .onEnd((event) => {
-      const flung =
-        Math.abs(translateX.value) > DISMISS_DISTANCE ||
-        Math.abs(event.velocityX) > DISMISS_VELOCITY;
+  /** +1 when a downward drag dismisses (bottom), -1 when an upward one does. */
+  const dismissSign = placement === 'top' ? -1 : 1;
 
-      if (flung) {
-        const direction = translateX.value > 0 ? 1 : -1;
-        translateX.value = withTiming(direction * 500, { duration: 180 }, () => {
-          runOnJS(hide)();
+  const pan = Gesture.Pan()
+    .activeOffsetY([-12, 12])
+    .onBegin(() => {
+      scale.value = withTiming(0.995, { duration: 120 });
+    })
+    .onChange((event) => {
+      const next = translateY.value + event.changeY;
+      // Toward the edge: follow the finger. Away from it: rubber-band, so the
+      // toast never detaches from where it belongs.
+      translateY.value =
+        next * dismissSign > 0
+          ? next
+          : interpolate(
+              Math.abs(next),
+              [0, 400],
+              [0, RUBBER_BAND_LIMIT],
+              Extrapolation.CLAMP
+            ) * -dismissSign;
+    })
+    .onFinalize((event) => {
+      scale.value = withTiming(1, { duration: 120 });
+
+      const towardEdge = translateY.value * dismissSign > 0;
+      const shouldDismiss =
+        towardEdge &&
+        (Math.abs(translateY.value) > DISMISS_DISTANCE ||
+          Math.abs(event.velocityY) > DISMISS_VELOCITY);
+
+      if (shouldDismiss) {
+        // Carry the flick's momentum instead of stopping dead, clamped so it
+        // can only continue toward the edge.
+        translateY.value = withDecay({
+          velocity: event.velocityY * 1.5,
+          clamp:
+            dismissSign > 0
+              ? [0, Number.POSITIVE_INFINITY]
+              : [Number.NEGATIVE_INFINITY, 0],
         });
+        runOnJS(hide)();
       } else {
-        translateX.value = withSpring(0, SPRING);
+        translateY.value = withSpring(0, SPRING);
       }
     });
 
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-    // Fade out as it is dragged, so the dismiss reads as intentional.
-    opacity: 1 - Math.min(Math.abs(translateX.value) / 240, 0.6),
+  // Gesture transform only — the layout animations below own opacity and
+  // their own translate, and Reanimated cannot drive a property from both.
+  const gestureStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
   }));
 
   const handle: ToastHandle = { id: item.id, hide };
 
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View
-        entering={placement === 'top' ? SlideInUp.springify().damping(20) : SlideInDown.springify().damping(20)}
-        exiting={FadeOut.duration(150)}
-        style={style}
-      >
-        {item.component ? (
-          item.component(handle)
-        ) : (
-          <Toast variant={item.variant ?? 'default'} onHide={hide}>
-            {item.icon === null ? null : (
-              <Toast.Indicator>{item.icon ?? undefined}</Toast.Indicator>
-            )}
-            <Toast.Content>
-              {item.label ? <Toast.Title>{item.label}</Toast.Title> : null}
-              {item.description ? (
-                <Toast.Description>{item.description}</Toast.Description>
+    <Animated.View
+      entering={placement === 'top' ? enteringTop : enteringBottom}
+      exiting={placement === 'top' ? exitingTop : exitingBottom}
+      // Toasts further down the stack sit back a little.
+      style={{ opacity: 1 - depth * 0.15, transform: [{ scale: 1 - depth * 0.03 }] }}
+    >
+      <GestureDetector gesture={pan}>
+        <Animated.View style={gestureStyle}>
+          {item.component ? (
+            item.component(handle)
+          ) : (
+            <Toast variant={item.variant ?? 'default'} onHide={hide}>
+              {item.icon === null ? null : (
+                <Toast.Indicator>{item.icon ?? undefined}</Toast.Indicator>
+              )}
+              <Toast.Content>
+                {item.label ? <Toast.Title>{item.label}</Toast.Title> : null}
+                {item.description ? (
+                  <Toast.Description>{item.description}</Toast.Description>
+                ) : null}
+              </Toast.Content>
+              {item.actionLabel ? (
+                <Toast.Action onPress={() => item.onActionPress?.(handle)}>
+                  {item.actionLabel}
+                </Toast.Action>
               ) : null}
-            </Toast.Content>
-            {item.actionLabel ? (
-              <Toast.Action onPress={() => item.onActionPress?.(handle)}>
-                {item.actionLabel}
-              </Toast.Action>
-            ) : null}
-            {(item.closable ?? !item.actionLabel) ? <Toast.Close /> : null}
-          </Toast>
-        )}
-      </Animated.View>
-    </GestureDetector>
+              {(item.closable ?? !item.actionLabel) ? <Toast.Close /> : null}
+            </Toast>
+          )}
+        </Animated.View>
+      </GestureDetector>
+    </Animated.View>
   );
 }
 
@@ -303,6 +387,11 @@ function ToastStack({
   const insets = useSafeAreaInsets();
   if (items.length === 0) return null;
 
+  // Only the newest few are shown; older ones are dropped rather than piling
+  // up off-screen. Newest sits closest to the edge it entered from.
+  const visible = items.slice(-MAX_VISIBLE);
+  const ordered = placement === 'top' ? visible : [...visible].reverse();
+
   return (
     <View
       pointerEvents="box-none"
@@ -315,8 +404,8 @@ function ToastStack({
         paddingBottom: placement === 'bottom' ? insets.bottom + 8 : 0,
       }}
     >
-      {items.map((item) => (
-        <ToastSlot key={item.id} item={item} />
+      {ordered.map((item, index) => (
+        <ToastSlot key={item.id} item={item} depth={index} />
       ))}
     </View>
   );

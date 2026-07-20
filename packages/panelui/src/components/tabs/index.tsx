@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -100,8 +101,15 @@ function TabsIndicator() {
   const initialized = useSharedValue(0);
 
   const layout = layouts[value];
-  if (layout) {
+
+  // In an effect, not the render body: touching a shared value during render
+  // is a Reanimated strict-mode violation, and the write can be lost or
+  // duplicated when React re-renders.
+  useEffect(() => {
+    if (!layout) return;
+
     if (initialized.value === 0) {
+      // First measurement snaps into place; there is nothing to animate from.
       x.value = layout.x;
       width.value = layout.width;
       initialized.value = 1;
@@ -109,7 +117,7 @@ function TabsIndicator() {
       x.value = withSpring(layout.x, SPRING);
       width.value = withSpring(layout.width, SPRING);
     }
-  }
+  }, [layout?.x, layout?.width, x, width, initialized, layout]);
 
   const style = useAnimatedStyle(() => ({
     opacity: initialized.value,

@@ -125,17 +125,32 @@ const timelineVariants = tv({
  * The `-soft` fills are the same tinted tokens Alert uses, so a toned node sits
  * in the same family as the rest of the library instead of shouting in raw
  * brand colour.
+ *
+ * Nodes that hold something — an icon or a number — get a hairline so they read
+ * as a container. The `dot` and `card` discs stay bare: at 16px an outline is
+ * most of what made the original look busy. The border therefore lives on the
+ * tone class rather than the shared `indicator` slot, so a solid disc cannot
+ * pick one up by accident.
  */
 const TONE_NODE: Record<TimelineTone, { solid: string; tinted: string }> = {
-  default: { solid: 'bg-primary', tinted: 'bg-muted' },
-  info: { solid: 'bg-info', tinted: 'bg-info-soft' },
-  success: { solid: 'bg-success', tinted: 'bg-success-soft' },
-  warning: { solid: 'bg-warning', tinted: 'bg-warning-soft' },
-  danger: { solid: 'bg-destructive', tinted: 'bg-destructive-soft' },
+  default: { solid: 'bg-primary', tinted: 'border border-border bg-muted' },
+  info: { solid: 'bg-info', tinted: 'border border-info/32 bg-info-soft' },
+  success: { solid: 'bg-success', tinted: 'border border-success/32 bg-success-soft' },
+  warning: { solid: 'bg-warning', tinted: 'border border-warning/32 bg-warning-soft' },
+  danger: {
+    solid: 'bg-destructive',
+    tinted: 'border border-destructive/32 bg-destructive-soft',
+  },
 };
 
-/** The node an incomplete, untoned step gets. */
-const PENDING_NODE = 'bg-muted';
+/**
+ * The node an incomplete, untoned step gets — bordered when it holds an icon
+ * or a number, bare when it is a status disc.
+ */
+const PENDING_NODE = {
+  solid: 'bg-muted',
+  tinted: 'border border-border bg-muted',
+} as const;
 
 /**
  * CSS variable a tinted node's contents take their colour from. The
@@ -283,11 +298,12 @@ const TimelineIndicator = forwardRef<View, TimelineIndicatorProps>(
     const isDisc = SOLID_VARIANTS.includes(variant);
     const toned = tone !== 'default';
 
+    const fill = isDisc ? 'solid' : 'tinted';
     const nodeClass = toned
-      ? TONE_NODE[tone][isDisc ? 'solid' : 'tinted']
+      ? TONE_NODE[tone][fill]
       : completed
         ? TONE_NODE.default.solid
-        : PENDING_NODE;
+        : PENDING_NODE[fill];
 
     // Contents sit on the tint (or on primary once complete), so they take the
     // colour tuned to read against it.

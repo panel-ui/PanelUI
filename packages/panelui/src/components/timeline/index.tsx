@@ -12,6 +12,25 @@
  *
  * Vertical only — a horizontal timeline gives each item roughly a fifth of a
  * phone's width, which is not enough for a date and a title.
+ *
+ * ```tsx
+ * <Timeline variant="icon" value={2}>
+ *   <Timeline.Item step={0} tone="info">
+ *     <Timeline.Aside>
+ *       <Timeline.Date>09:12</Timeline.Date>
+ *       <Timeline.Label>Design</Timeline.Label>
+ *     </Timeline.Aside>
+ *     <Timeline.Indicator><SendIcon /></Timeline.Indicator>
+ *     <Timeline.Content>
+ *       <Timeline.Header>
+ *         <Timeline.Title>Checkout language approved</Timeline.Title>
+ *         <Timeline.Trailing>10:18</Timeline.Trailing>
+ *       </Timeline.Header>
+ *       <Timeline.Description>…</Timeline.Description>
+ *     </Timeline.Content>
+ *   </Timeline.Item>
+ * </Timeline>
+ * ```
  */
 import {
   createContext,
@@ -21,24 +40,40 @@ import {
   type ReactNode,
 } from 'react';
 import { View, type Text as RNText, type ViewProps } from 'react-native';
-import { tv, type VariantProps } from 'tailwind-variants';
+import { tv } from 'tailwind-variants';
+import { useCSSVariable } from 'uniwind';
+import { IconColorProvider } from '../../icons';
 import { Text, type TextProps } from '../../primitives/text';
 
-export type TimelineVariant = 'dot' | 'icon' | 'numbered' | 'card';
+export type TimelineVariant = 'dot' | 'icon' | 'numbered' | 'card' | 'compact';
+/** Semantic colour for a single event, independent of progress. */
+export type TimelineTone = 'default' | 'info' | 'success' | 'warning' | 'danger';
+
+/** Variants whose node is a filled disc rather than an outlined ring. */
+const SOLID_VARIANTS: TimelineVariant[] = ['dot', 'card'];
 
 const timelineVariants = tv({
   slots: {
     root: 'w-full flex-col',
     item: 'w-full flex-row gap-3',
+    aside: 'w-20 items-end gap-0.5 pt-0.5',
     rail: 'items-center',
     indicator: 'items-center justify-center rounded-full border-2',
     indicatorLabel: 'text-xs font-medium',
     separator: 'w-0.5 flex-1 rounded-full',
     body: 'flex-1 pb-6',
-    header: 'gap-0.5',
+    panel: '',
+    header: 'flex-row items-center gap-2',
+    heading: 'flex-1 gap-0.5',
     date: 'text-xs font-medium text-muted-foreground',
+    label: 'text-xs font-medium',
+    meta: 'text-xs text-muted-foreground',
     title: 'text-sm font-medium text-foreground',
-    content: 'text-sm text-muted-foreground',
+    trailing: 'text-xs text-muted-foreground',
+    content: 'pt-1 text-sm text-muted-foreground',
+    stats: 'mt-2 flex-row gap-6 rounded-xl border border-border px-3.5 py-2.5',
+    statLabel: 'text-xs text-muted-foreground',
+    statValue: 'text-sm font-medium text-foreground',
   },
   variants: {
     variant: {
@@ -47,27 +82,60 @@ const timelineVariants = tv({
       numbered: { indicator: 'h-7 w-7' },
       card: {
         indicator: 'h-4 w-4',
-        body: 'rounded-xl border border-border bg-card p-3.5',
+        // The gap stays on `body` so the connector runs through it; the card
+        // chrome lives on an inner panel. Putting the border on `body` made
+        // consecutive cards sit flush against each other.
+        panel: 'rounded-xl border border-border bg-card p-3.5',
+      },
+      compact: {
+        indicator: 'h-6 w-6',
+        body: 'flex-1 pb-3',
+        title: 'text-base',
       },
     },
+    tone: {
+      default: {},
+      info: { label: 'text-info-foreground' },
+      success: { label: 'text-success-foreground' },
+      warning: { label: 'text-warning-foreground' },
+      danger: { label: 'text-destructive-foreground' },
+    },
     completed: {
-      true: {
-        indicator: 'border-primary bg-primary',
-        indicatorLabel: 'text-primary-foreground',
-        separator: 'bg-primary',
-      },
-      false: {
-        indicator: 'border-muted bg-background',
-        indicatorLabel: 'text-muted-foreground',
-        separator: 'bg-muted',
-      },
+      true: { separator: 'bg-primary' },
+      false: { separator: 'bg-muted' },
     },
   },
   defaultVariants: {
     variant: 'dot',
+    tone: 'default',
     completed: false,
   },
 });
+
+/** Node fill and border per tone, split by whether the node is solid. */
+const TONE_NODE: Record<TimelineTone, { solid: string; outline: string }> = {
+  default: { solid: 'border-primary bg-primary', outline: 'border-primary' },
+  info: { solid: 'border-info bg-info', outline: 'border-info' },
+  success: { solid: 'border-success bg-success', outline: 'border-success' },
+  warning: { solid: 'border-warning bg-warning', outline: 'border-warning' },
+  danger: { solid: 'border-destructive bg-destructive', outline: 'border-destructive' },
+};
+
+/** The node an incomplete, untoned step gets. */
+const PENDING_NODE = 'border-muted bg-background';
+
+/**
+ * CSS variable an outlined node's icon takes its colour from. The
+ * `-foreground` tokens are the ones tuned to read against the page in both
+ * light and dark, which is what an outlined node's contents sit on.
+ */
+const TONE_ICON_VAR: Record<TimelineTone, string> = {
+  default: '--color-primary',
+  info: '--color-info-foreground',
+  success: '--color-success-foreground',
+  warning: '--color-warning-foreground',
+  danger: '--color-destructive-foreground',
+};
 
 interface TimelineContextValue {
   activeStep: number;
@@ -77,6 +145,7 @@ interface TimelineContextValue {
 interface TimelineItemContextValue {
   step: number;
   completed: boolean;
+  tone: TimelineTone;
   /** False on the last item, so its rail does not trail into nothing. */
   showSeparator: boolean;
 }
@@ -126,20 +195,25 @@ export interface TimelineItemProps extends ViewProps {
   step: number;
   /** Force the completed state regardless of the timeline's value. */
   completed?: boolean;
+  /** Colours the node and label — for event kind rather than progress. */
+  tone?: TimelineTone;
   /** Set on the final item so its rail stops at the indicator. */
   last?: boolean;
   children?: ReactNode;
 }
 
 const TimelineItem = forwardRef<View, TimelineItemProps>(
-  ({ className, step, completed, last = false, children, ...props }, ref) => {
+  (
+    { className, step, completed, tone = 'default', last = false, children, ...props },
+    ref
+  ) => {
     const { activeStep, variant } = useTimeline('Timeline.Item');
     const isCompleted = completed ?? step <= activeStep;
-    const { item } = timelineVariants({ variant, completed: isCompleted });
+    const { item } = timelineVariants({ variant, tone, completed: isCompleted });
 
     const context = useMemo(
-      () => ({ step, completed: isCompleted, showSeparator: !last }),
-      [step, isCompleted, last]
+      () => ({ step, completed: isCompleted, tone, showSeparator: !last }),
+      [step, isCompleted, tone, last]
     );
 
     return (
@@ -153,6 +227,19 @@ const TimelineItem = forwardRef<View, TimelineItemProps>(
 );
 TimelineItem.displayName = 'Timeline.Item';
 
+/**
+ * Right-aligned meta column to the left of the rail — a time, a category, a
+ * person. Place it before `Timeline.Indicator`.
+ */
+const TimelineAside = forwardRef<View, ViewProps & { className?: string }>(
+  ({ className, ...props }, ref) => {
+    const { variant } = useTimeline('Timeline.Aside');
+    const { aside } = timelineVariants({ variant });
+    return <View ref={ref} className={aside({ className })} {...props} />;
+  }
+);
+TimelineAside.displayName = 'Timeline.Aside';
+
 export interface TimelineIndicatorProps extends ViewProps {
   className?: string;
   /** Replaces the default node contents — an icon, say. */
@@ -160,28 +247,64 @@ export interface TimelineIndicatorProps extends ViewProps {
 }
 
 /**
- * The node on the rail, with the connector running below it. Renders the step
- * number under `variant="numbered"`, its children under `variant="icon"`, and
- * a bare dot otherwise.
+ * The node on the rail, with the connector running below it.
+ *
+ * Children are wrapped in an `IconColorProvider` carrying the colour that
+ * reads against this node, so an icon inside follows the theme instead of
+ * disappearing when the fill inverts.
  */
 const TimelineIndicator = forwardRef<View, TimelineIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { variant } = useTimeline('Timeline.Indicator');
-    const { step, completed, showSeparator } = useTimelineItem('Timeline.Indicator');
+    const { step, completed, tone, showSeparator } =
+      useTimelineItem('Timeline.Indicator');
     const { rail, indicator, indicatorLabel, separator } = timelineVariants({
       variant,
+      tone,
       completed,
     });
 
+    const isSolid = SOLID_VARIANTS.includes(variant);
+    const toned = tone !== 'default';
+    // An untoned, unfinished step stays neutral; everything else takes its
+    // tone (or primary, once complete).
+    const nodeClass =
+      toned || completed
+        ? TONE_NODE[tone][isSolid ? 'solid' : 'outline']
+        : PENDING_NODE;
+
+    const themedIcon = useCSSVariable(
+      completed || toned ? TONE_ICON_VAR[tone] : '--color-muted-foreground'
+    );
+    const outlineColor = typeof themedIcon === 'string' ? themedIcon : undefined;
+
+    // On a solid node the contents sit on the fill, so they need the colour
+    // that reads against it: the theme's own foreground for `default`, and
+    // white for the saturated status fills, which stay saturated in both
+    // themes.
+    const primaryForeground = useCSSVariable('--color-primary-foreground');
+    const solidColor =
+      tone === 'default'
+        ? typeof primaryForeground === 'string'
+          ? primaryForeground
+          : undefined
+        : '#ffffff';
+
+    const contentColor = isSolid && (completed || toned) ? solidColor : outlineColor;
+
     return (
       <View className={rail()}>
-        <View ref={ref} className={indicator({ className })} {...props}>
-          {variant === 'numbered' ? (
-            <Text className={indicatorLabel()}>{step + 1}</Text>
-          ) : variant === 'icon' ? (
-            children
-          ) : null}
-        </View>
+        <IconColorProvider color={contentColor}>
+          <View ref={ref} className={indicator({ className: `${nodeClass} ${className ?? ''}` })} {...props}>
+            {variant === 'numbered' ? (
+              <Text className={indicatorLabel()} style={{ color: contentColor }}>
+                {step + 1}
+              </Text>
+            ) : variant === 'icon' || variant === 'compact' ? (
+              children
+            ) : null}
+          </View>
+        </IconColorProvider>
         {showSeparator ? (
           <View
             accessibilityElementsHidden
@@ -195,17 +318,27 @@ const TimelineIndicator = forwardRef<View, TimelineIndicatorProps>(
 );
 TimelineIndicator.displayName = 'Timeline.Indicator';
 
-/** Everything to the right of the rail. */
+/**
+ * Everything to the right of the rail. Under `variant="card"` the children are
+ * wrapped in the card panel, while the spacing between items stays outside it
+ * so the connector runs unbroken.
+ */
 const TimelineContent = forwardRef<View, ViewProps & { className?: string }>(
-  ({ className, ...props }, ref) => {
+  ({ className, children, ...props }, ref) => {
     const { variant } = useTimeline('Timeline.Content');
-    const { completed } = useTimelineItem('Timeline.Content');
-    const { body } = timelineVariants({ variant, completed });
-    return <View ref={ref} className={body({ className })} {...props} />;
+    const { completed, tone } = useTimelineItem('Timeline.Content');
+    const { body, panel } = timelineVariants({ variant, tone, completed });
+
+    return (
+      <View ref={ref} className={body({ className })} {...props}>
+        {variant === 'card' ? <View className={panel()}>{children}</View> : children}
+      </View>
+    );
   }
 );
 TimelineContent.displayName = 'Timeline.Content';
 
+/** Title row: heading on the left, `Timeline.Trailing` on the right. */
 const TimelineHeader = forwardRef<View, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const { variant } = useTimeline('Timeline.Header');
@@ -215,6 +348,16 @@ const TimelineHeader = forwardRef<View, ViewProps & { className?: string }>(
 );
 TimelineHeader.displayName = 'Timeline.Header';
 
+/** Wraps a title and anything stacked under it inside the header row. */
+const TimelineHeading = forwardRef<View, ViewProps & { className?: string }>(
+  ({ className, ...props }, ref) => {
+    const { variant } = useTimeline('Timeline.Heading');
+    const { heading } = timelineVariants({ variant });
+    return <View ref={ref} className={heading({ className })} {...props} />;
+  }
+);
+TimelineHeading.displayName = 'Timeline.Heading';
+
 const TimelineDate = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
   const { variant } = useTimeline('Timeline.Date');
   const { date } = timelineVariants({ variant });
@@ -222,12 +365,39 @@ const TimelineDate = forwardRef<RNText, TextProps>(({ className, ...props }, ref
 });
 TimelineDate.displayName = 'Timeline.Date';
 
+/** Category line in the aside, coloured by the item's tone. */
+const TimelineLabel = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+  const { variant } = useTimeline('Timeline.Label');
+  const { tone } = useTimelineItem('Timeline.Label');
+  const { label } = timelineVariants({ variant, tone });
+  return <Text ref={ref} className={label({ className })} {...props} />;
+});
+TimelineLabel.displayName = 'Timeline.Label';
+
+/** Muted supporting line — a person's name, a source. */
+const TimelineMeta = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+  const { variant } = useTimeline('Timeline.Meta');
+  const { meta } = timelineVariants({ variant });
+  return <Text ref={ref} className={meta({ className })} {...props} />;
+});
+TimelineMeta.displayName = 'Timeline.Meta';
+
 const TimelineTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
   const { variant } = useTimeline('Timeline.Title');
   const { title } = timelineVariants({ variant });
   return <Text ref={ref} className={title({ className })} {...props} />;
 });
 TimelineTitle.displayName = 'Timeline.Title';
+
+/** Right-hand slot in the header row — a timestamp, usually. */
+const TimelineTrailing = forwardRef<RNText, TextProps>(
+  ({ className, ...props }, ref) => {
+    const { variant } = useTimeline('Timeline.Trailing');
+    const { trailing } = timelineVariants({ variant });
+    return <Text ref={ref} className={trailing({ className })} {...props} />;
+  }
+);
+TimelineTrailing.displayName = 'Timeline.Trailing';
 
 const TimelineDescription = forwardRef<RNText, TextProps>(
   ({ className, ...props }, ref) => {
@@ -238,14 +408,49 @@ const TimelineDescription = forwardRef<RNText, TextProps>(
 );
 TimelineDescription.displayName = 'Timeline.Description';
 
+/** Bordered strip of label/value pairs under a title. */
+const TimelineStats = forwardRef<View, ViewProps & { className?: string }>(
+  ({ className, ...props }, ref) => {
+    const { variant } = useTimeline('Timeline.Stats');
+    const { stats } = timelineVariants({ variant });
+    return <View ref={ref} className={stats({ className })} {...props} />;
+  }
+);
+TimelineStats.displayName = 'Timeline.Stats';
+
+export interface TimelineStatProps extends ViewProps {
+  className?: string;
+  label: string;
+  value: string;
+}
+
+const TimelineStat = forwardRef<View, TimelineStatProps>(
+  ({ className, label, value, ...props }, ref) => {
+    const { variant } = useTimeline('Timeline.Stat');
+    const { statLabel, statValue } = timelineVariants({ variant });
+    return (
+      <View ref={ref} className={className} {...props}>
+        <Text className={statLabel()}>{label}</Text>
+        <Text className={statValue()}>{value}</Text>
+      </View>
+    );
+  }
+);
+TimelineStat.displayName = 'Timeline.Stat';
+
 export const Timeline = Object.assign(TimelineRoot, {
   Item: TimelineItem,
+  Aside: TimelineAside,
   Indicator: TimelineIndicator,
   Content: TimelineContent,
   Header: TimelineHeader,
+  Heading: TimelineHeading,
   Date: TimelineDate,
+  Label: TimelineLabel,
+  Meta: TimelineMeta,
   Title: TimelineTitle,
+  Trailing: TimelineTrailing,
   Description: TimelineDescription,
+  Stats: TimelineStats,
+  Stat: TimelineStat,
 });
-
-export type TimelineVariantProps = VariantProps<typeof timelineVariants>;

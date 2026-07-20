@@ -17,9 +17,11 @@ import {
   AppleIcon,
   Avatar,
   Badge,
+  BellIcon,
   BottomSheet,
   Button,
   Card,
+  CardIcon,
   CheckIcon,
   Checkbox,
   ChevronRightIcon,
@@ -32,9 +34,15 @@ import {
   Input,
   InputGroup,
   Label,
+  PlusSquareIcon,
   Progress,
   RadioGroup,
+  ReceiptIcon,
   SearchIcon,
+  SendIcon,
+  ShareNodesIcon,
+  ShieldAlertIcon,
+  ShieldCheckIcon,
   Select,
   Skeleton,
   Spinner,
@@ -394,6 +402,261 @@ function Meter({ percent }: { percent: number }) {
         className="absolute h-6 w-6 rounded-full border-2 border-transparent border-t-info"
         style={{ transform: [{ rotate: `${(percent / 100) * 360}deg` }] }}
       />
+    </View>
+  );
+}
+
+const DEPLOY_LOG = [
+  {
+    time: '09:12',
+    title: 'Migration drafted',
+    badge: 'Assigned',
+    tone: 'default' as const,
+    Icon: PlusSquareIcon,
+    body: 'Schema change written for the reporting cluster.',
+  },
+  {
+    time: '09:34',
+    title: 'Shadow traffic enabled',
+    badge: 'Shadow',
+    tone: 'info' as const,
+    Icon: ShareNodesIcon,
+    body: 'Mirroring 5% of reads with query timing captured.',
+  },
+  {
+    time: '09:51',
+    title: 'Replica lag alarm',
+    badge: 'Holding',
+    tone: 'warning' as const,
+    Icon: ShieldAlertIcon,
+    body: 'Lag passed 400ms in eu-west-2; the cutover is paused.',
+  },
+  {
+    time: '10:05',
+    title: 'Runbook circulated',
+    badge: 'Docs',
+    tone: 'default' as const,
+    Icon: BellIcon,
+    body: 'On-call has the rollback steps and the owner list.',
+  },
+  {
+    time: '10:42',
+    title: 'Cutover approved',
+    badge: 'Ready',
+    tone: 'success' as const,
+    Icon: ShieldCheckIcon,
+    body: 'Lag recovered and every pre-flight check is green.',
+  },
+];
+
+/** Leading time column, outlined icon nodes, a chip beside each title. */
+function DeployLogDemo() {
+  return (
+    <View className="w-full gap-4">
+      <View>
+        <Text size="sm" muted>
+          Migration audit
+        </Text>
+        <Text size="xl" weight="semibold">
+          Reporting cluster
+        </Text>
+      </View>
+      <Timeline variant="icon" value={DEPLOY_LOG.length - 1} className="w-full">
+        {DEPLOY_LOG.map((entry, index) => (
+          <Timeline.Item
+            key={entry.title}
+            step={index}
+            tone={entry.tone}
+            last={index === DEPLOY_LOG.length - 1}
+          >
+            <Timeline.Aside className="w-12">
+              <Timeline.Date>{entry.time}</Timeline.Date>
+            </Timeline.Aside>
+            <Timeline.Indicator>
+              <entry.Icon size={15} />
+            </Timeline.Indicator>
+            <Timeline.Content>
+              <Timeline.Header>
+                <Timeline.Title>{entry.title}</Timeline.Title>
+                <Badge variant="secondary">{entry.badge}</Badge>
+              </Timeline.Header>
+              <Timeline.Description>{entry.body}</Timeline.Description>
+            </Timeline.Content>
+          </Timeline.Item>
+        ))}
+      </Timeline>
+    </View>
+  );
+}
+
+/** Solid dots, timestamps trailing the title, one entry carrying media. */
+function StudioFeedDemo() {
+  return (
+    <Timeline variant="dot" value={3} className="w-full">
+      <Timeline.Item step={0} tone="info">
+        <Timeline.Indicator />
+        <Timeline.Content>
+          <Timeline.Header>
+            <Timeline.Title>Cover art uploaded</Timeline.Title>
+            <Badge variant="info">Review</Badge>
+            <Timeline.Trailing>10:18</Timeline.Trailing>
+          </Timeline.Header>
+          <View className="mt-2 overflow-hidden rounded-xl border border-border">
+            <Image
+              source={{ uri: PHOTO }}
+              style={{ width: '100%', height: 140 }}
+              resizeMode="cover"
+            />
+            <View className="gap-2 p-3">
+              <Text size="sm" muted>
+                Final crop is ready for retouch, with the detail shot and the
+                thumbnail queued behind it.
+              </Text>
+              <View className="flex-row gap-2">
+                <Badge variant="secondary">Hero</Badge>
+                <Badge variant="secondary">4 crops</Badge>
+              </View>
+            </View>
+          </View>
+        </Timeline.Content>
+      </Timeline.Item>
+      <Timeline.Item step={1} tone="warning">
+        <Timeline.Indicator />
+        <Timeline.Content>
+          <Timeline.Header>
+            <Timeline.Title>Lighting pass reviewed</Timeline.Title>
+            <Timeline.Trailing>10:27</Timeline.Trailing>
+          </Timeline.Header>
+          <Timeline.Description>
+            The side profile reads clearly; keep the shadow soft.
+          </Timeline.Description>
+        </Timeline.Content>
+      </Timeline.Item>
+      <Timeline.Item step={2} tone="success">
+        <Timeline.Indicator />
+        <Timeline.Content>
+          <Timeline.Header>
+            <Timeline.Title>Copy note resolved</Timeline.Title>
+            <Timeline.Trailing>10:43</Timeline.Trailing>
+          </Timeline.Header>
+          <Timeline.Description>
+            Launch tile copy now matches the campaign language.
+          </Timeline.Description>
+        </Timeline.Content>
+      </Timeline.Item>
+      <Timeline.Item step={3} tone="info" last>
+        <Timeline.Indicator />
+        <Timeline.Content>
+          <Timeline.Header>
+            <Timeline.Title>Package exported</Timeline.Title>
+            <Timeline.Trailing>11:06</Timeline.Trailing>
+          </Timeline.Header>
+          <Timeline.Description>
+            Square crop, product view and thumbnail are out.
+          </Timeline.Description>
+        </Timeline.Content>
+      </Timeline.Item>
+    </Timeline>
+  );
+}
+
+const LEDGER = [
+  { title: 'Dispute opened', time: 'Mar 6, 10:34', tone: 'warning' as const, Icon: ShieldAlertIcon, body: 'The customer disputed a renewal; finance has seven days.' },
+  { title: 'Payment captured', time: 'Mar 6, 10:21', tone: 'success' as const, Icon: CardIcon },
+  { title: 'Payment authorised', time: 'Mar 6, 10:21', tone: 'default' as const, Icon: ShieldCheckIcon },
+  { title: 'Invoice generated', time: 'Mar 6, 10:20', tone: 'default' as const, Icon: ReceiptIcon },
+];
+
+/** Dense rows for an audit trail — small nodes, timestamps trailing. */
+function LedgerDemo() {
+  return (
+    <Timeline variant="compact" value={0} className="w-full">
+      {LEDGER.map((entry, index) => (
+        <Timeline.Item
+          key={entry.title}
+          step={index}
+          tone={entry.tone}
+          last={index === LEDGER.length - 1}
+        >
+          <Timeline.Indicator>
+            <entry.Icon size={13} />
+          </Timeline.Indicator>
+          <Timeline.Content>
+            <Timeline.Header>
+              <Timeline.Title>{entry.title}</Timeline.Title>
+              <Timeline.Trailing>{entry.time}</Timeline.Trailing>
+            </Timeline.Header>
+            {entry.body ? (
+              <Timeline.Description>{entry.body}</Timeline.Description>
+            ) : null}
+          </Timeline.Content>
+        </Timeline.Item>
+      ))}
+    </Timeline>
+  );
+}
+
+const HANDOFF = [
+  {
+    time: '09:15', team: 'Design', person: 'Nina Park', tone: 'default' as const,
+    Icon: SendIcon, title: 'Checkout copy approved',
+    stats: [['Screens', '18'], ['Open notes', '2']],
+    body: 'Invoice copy, empty states and seat-change messages passed.',
+  },
+  {
+    time: '12:05', team: 'Data', person: 'Maya Hart', tone: 'info' as const,
+    Icon: ShareNodesIcon, title: 'Metrics pipeline connected',
+    stats: [['Events', '12'], ['Lag', '42 s']],
+    body: 'Billing telemetry is flowing into the release dashboard.',
+  },
+  {
+    time: '15:00', team: 'Launch', person: 'Eli Wong', tone: 'success' as const,
+    Icon: ShieldCheckIcon, title: 'Checklist signed off',
+    stats: [['Checks', '9/9'], ['Window', '15 min']],
+    body: 'Rollback owner, dashboard links and launch channel are pinned.',
+  },
+];
+
+/** Meta column on the left, a stats strip under each title. */
+function HandoffDemo() {
+  return (
+    <View className="w-full gap-4">
+      <View className="items-center">
+        <Text size="sm" muted>
+          Launch review
+        </Text>
+        <Text size="xl" weight="semibold">
+          Billing rollout
+        </Text>
+      </View>
+      <Timeline variant="icon" value={HANDOFF.length - 1} className="w-full">
+        {HANDOFF.map((entry, index) => (
+          <Timeline.Item
+            key={entry.title}
+            step={index}
+            tone={entry.tone}
+            last={index === HANDOFF.length - 1}
+          >
+            <Timeline.Aside>
+              <Timeline.Date>{entry.time}</Timeline.Date>
+              <Timeline.Label>{entry.team}</Timeline.Label>
+              <Timeline.Meta>{entry.person}</Timeline.Meta>
+            </Timeline.Aside>
+            <Timeline.Indicator>
+              <entry.Icon size={15} />
+            </Timeline.Indicator>
+            <Timeline.Content>
+              <Timeline.Title>{entry.title}</Timeline.Title>
+              <Timeline.Stats>
+                {entry.stats.map(([label, value]) => (
+                  <Timeline.Stat key={label} label={label!} value={value!} />
+                ))}
+              </Timeline.Stats>
+              <Timeline.Description>{entry.body}</Timeline.Description>
+            </Timeline.Content>
+          </Timeline.Item>
+        ))}
+      </Timeline>
     </View>
   );
 }
@@ -1684,6 +1947,10 @@ export const COMPONENTS: ComponentEntry[] = [
       { label: 'Icon', render: () => <TimelineDemo variant="icon" /> },
       { label: 'Numbered', render: () => <TimelineDemo variant="numbered" /> },
       { label: 'Card', render: () => <TimelineDemo variant="card" /> },
+      { label: 'Deploy log', render: () => <DeployLogDemo /> },
+      { label: 'Studio feed', render: () => <StudioFeedDemo /> },
+      { label: 'Ledger', render: () => <LedgerDemo /> },
+      { label: 'Handoff', render: () => <HandoffDemo /> },
     ],
   },
   {

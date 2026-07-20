@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { GithubStars } from '@/components/github-stars';
 import { site } from '@/lib/site';
@@ -6,8 +7,29 @@ import { site } from '@/lib/site';
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
-      <span className="font-heading text-base font-semibold tracking-tight">
-        {site.name}
+      <span className="inline-flex items-center gap-2">
+        {/* Two marks, one per surface. Both render; CSS picks the one that
+            reads against the current background, so the swap survives
+            hydration and needs no JS. */}
+        <Image
+          src="/logo-light.png"
+          alt=""
+          width={26}
+          height={26}
+          className="dark:hidden"
+          priority
+        />
+        <Image
+          src="/logo-dark.png"
+          alt=""
+          width={26}
+          height={26}
+          className="hidden dark:block"
+          priority
+        />
+        <span className="font-heading text-base font-semibold tracking-tight">
+          {site.name}
+        </span>
       </span>
     ),
     url: '/',

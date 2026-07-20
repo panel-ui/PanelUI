@@ -2,7 +2,7 @@
  * Screen chrome: an optional circular back button, a centered title, and the
  * light/dark toggle. Matches the header in every screen of the design.
  */
-import { Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -82,9 +82,18 @@ export function ScreenHeader({ title, showBack = false }: ScreenHeaderProps) {
           {title}
         </Text>
       ) : (
-        <Text weight="bold" size="xl">
-          PanelUI
-        </Text>
+        <Image
+          // The mark is drawn for the surface behind it: the dark mark on
+          // light backgrounds, the light one on dark.
+          source={
+            mode === 'dark'
+              ? require('../../assets/logo-dark.png')
+              : require('../../assets/logo-light.png')
+          }
+          style={{ width: 30, height: 30 }}
+          resizeMode="contain"
+          accessibilityLabel="PanelUI"
+        />
       )}
 
       <ThemeToggle />

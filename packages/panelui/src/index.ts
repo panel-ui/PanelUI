@@ -115,17 +115,22 @@ export {
 // Icons
 export {
   AlertTriangleIcon,
+  AppleIcon,
   ArrowUpRightIcon,
   CheckCircleIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  FacebookIcon,
+  GoogleIcon,
+  IconColorProvider,
   InfoIcon,
   MoonIcon,
   SearchIcon,
   SunIcon,
   XIcon,
+  useIconColor,
   type IconProps,
 } from './icons';
 

@@ -9,6 +9,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Image, View } from 'react-native';
 import {
   Alert,
+  AppleIcon,
   Avatar,
   Badge,
   BottomSheet,
@@ -18,7 +19,9 @@ import {
   ChevronRightIcon,
   Dialog,
   EmptyState,
+  FacebookIcon,
   Frame,
+  GoogleIcon,
   InlineSelect,
   Input,
   InputGroup,
@@ -623,10 +626,26 @@ export const COMPONENTS: ComponentEntry[] = [
       },
       { label: 'Loading', render: () => <LoadingButtonDemo /> },
       {
+        label: 'Social login',
+        render: () => (
+          <View className="w-full gap-3">
+            <Button variant="social" fullWidth startContent={<GoogleIcon size={18} />}>
+              Continue with Google
+            </Button>
+            <Button variant="social" fullWidth startContent={<FacebookIcon size={18} />}>
+              Continue with Facebook
+            </Button>
+            <Button variant="social" fullWidth startContent={<AppleIcon size={18} />}>
+              Continue with Apple
+            </Button>
+          </View>
+        ),
+      },
+      {
         label: 'With icons',
         render: () => (
           <View className="w-full gap-2">
-            <Button fullWidth startContent={<SearchIcon size={16} color="#fafafa" />}>
+            <Button fullWidth startContent={<SearchIcon size={16} />}>
               Search
             </Button>
             <Button

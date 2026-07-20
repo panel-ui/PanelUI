@@ -1,6 +1,6 @@
 {
   "name": "panelui-native",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "High-performance React Native UI components for Expo. Coss UI design language, powered by Uniwind (Tailwind v4) and Reanimated.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
@@ -19,6 +19,7 @@
     "src",
     "lib",
     "theme.css",
+    "README.md",
     "!**/__tests__",
     "!**/*.tsbuildinfo"
   ],
@@ -32,19 +33,36 @@
     "react-native",
     "expo",
     "ui",
+    "ui-library",
+    "ui-components",
     "components",
+    "component-library",
     "tailwind",
+    "tailwindcss",
     "uniwind",
+    "nativewind",
+    "reanimated",
     "design-system",
-    "shadcn"
+    "shadcn",
+    "dark-mode",
+    "theming",
+    "accessibility",
+    "typescript",
+    "ios",
+    "android",
+    "mobile"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Khalidabdi1/PanelUI.git"
+    "url": "git+https://github.com/panel-ui/PanelUI.git",
+    "directory": "packages/panelui"
+  },
+  "bugs": {
+    "url": "https://github.com/panel-ui/PanelUI/issues"
   },
   "author": "Khalid Abdi",
   "license": "MIT",
-  "homepage": "https://github.com/Khalidabdi1/PanelUI#readme",
+  "homepage": "https://github.com/panel-ui/PanelUI#readme",
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
@@ -66,7 +84,12 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      ["module", { "esm": true }],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
       "typescript"
     ]
   }

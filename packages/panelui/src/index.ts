@@ -13,7 +13,11 @@ export {
 } from './primitives/animated-pressable';
 
 // Components
-export { Alert, type AlertProps } from './components/alert';
+export {
+  Alert,
+  type AlertProps,
+  type AlertIndicatorProps,
+} from './components/alert';
 export { Avatar, type AvatarProps } from './components/avatar';
 export { Badge, type BadgeProps } from './components/badge';
 export {
@@ -55,7 +59,21 @@ export { Spinner, type SpinnerProps } from './components/spinner';
 export { Switch, type SwitchProps } from './components/switch';
 
 // Icons
-export { CheckIcon, ChevronDownIcon, XIcon, type IconProps } from './icons';
+export {
+  AlertTriangleIcon,
+  ArrowUpRightIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  InfoIcon,
+  MoonIcon,
+  SearchIcon,
+  SunIcon,
+  XIcon,
+  type IconProps,
+} from './icons';
 
 // Utils
 export { cn } from './utils/cn';

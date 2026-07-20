@@ -14,9 +14,9 @@ const badgeVariants = tv({
       secondary: { root: 'bg-secondary', label: 'text-secondary-foreground' },
       outline: { root: 'border-border bg-transparent', label: 'text-foreground' },
       destructive: { root: 'bg-destructive', label: 'text-white' },
-      success: { root: 'bg-success/8 dark:bg-success/16', label: 'text-success-foreground' },
-      warning: { root: 'bg-warning/8 dark:bg-warning/16', label: 'text-warning-foreground' },
-      info: { root: 'bg-info/8 dark:bg-info/16', label: 'text-info-foreground' },
+      success: { root: 'bg-success-subtle', label: 'text-success-foreground' },
+      warning: { root: 'bg-warning-subtle', label: 'text-warning-foreground' },
+      info: { root: 'bg-info-subtle', label: 'text-info-foreground' },
     },
   },
   defaultVariants: {

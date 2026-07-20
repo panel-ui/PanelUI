@@ -43,6 +43,22 @@
   --color-surface: unset;
   --color-skeleton: unset;
 
+  /*
+   * Tinted status fills. These exist as real tokens rather than `bg-info/10
+   * dark:bg-info/[0.06]` because `dark:` only resolves in the light/dark
+   * themes — inside a named theme (vercel, supabase) Uniwind compiles it to a
+   * plain class selector that never matches, so the tint would vanish.
+   * `-soft` is the Alert fill, `-subtle` the lighter Badge fill.
+   */
+  --color-info-soft: unset;
+  --color-info-subtle: unset;
+  --color-success-soft: unset;
+  --color-success-subtle: unset;
+  --color-warning-soft: unset;
+  --color-warning-subtle: unset;
+  --color-destructive-soft: unset;
+  --color-destructive-subtle: unset;
+
   /* Coss radius scale: --radius: 0.625rem (10px) */
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -101,6 +117,16 @@
       /* grouping surface (Frame) and skeleton fill */
       --color-surface: #f7f7f7;
       --color-skeleton: rgba(0, 0, 0, 0.1);
+
+      /* status fills: -soft = Alert (10%), -subtle = Badge (8%) */
+      --color-info-soft: rgba(59, 130, 246, 0.1);
+      --color-info-subtle: rgba(59, 130, 246, 0.08);
+      --color-success-soft: rgba(16, 185, 129, 0.1);
+      --color-success-subtle: rgba(16, 185, 129, 0.08);
+      --color-warning-soft: rgba(245, 158, 11, 0.1);
+      --color-warning-subtle: rgba(245, 158, 11, 0.08);
+      --color-destructive-soft: rgba(239, 68, 68, 0.1);
+      --color-destructive-subtle: rgba(239, 68, 68, 0.08);
     }
 
     @variant dark {
@@ -153,6 +179,16 @@
       /* grouping surface (Frame) and skeleton fill */
       --color-surface: #1c1c1c;
       --color-skeleton: rgba(255, 255, 255, 0.13);
+
+      /* status fills: -soft = Alert (6%), -subtle = Badge (16%) */
+      --color-info-soft: rgba(59, 130, 246, 0.06);
+      --color-info-subtle: rgba(59, 130, 246, 0.16);
+      --color-success-soft: rgba(16, 185, 129, 0.06);
+      --color-success-subtle: rgba(16, 185, 129, 0.16);
+      --color-warning-soft: rgba(245, 158, 11, 0.06);
+      --color-warning-subtle: rgba(245, 158, 11, 0.16);
+      --color-destructive-soft: rgba(241, 87, 87, 0.06);
+      --color-destructive-subtle: rgba(241, 87, 87, 0.16);
     }
   }
 }

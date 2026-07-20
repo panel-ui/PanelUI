@@ -1,0 +1,79 @@
+---
+title: Frame
+description: Widget shell with a titled header, an inset panel and a caption.
+---
+
+A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel's radius is derived from the shell's, so the nesting stays proportional as the theme changes it.
+
+## Installation
+
+Frame ships with the library — no separate install.
+
+```tsx
+import { Frame, Text } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Usage Type</Frame.Title>
+    <Frame.Action>Amount</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <Frame.Row>
+      <Text className="flex-1">Total API Requests</Text>
+      <Text weight="medium">33.1K</Text>
+    </Frame.Row>
+    <Frame.Row divided>
+      <Text className="flex-1">Input Tokens</Text>
+      <Text weight="medium">98.2M</Text>
+    </Frame.Row>
+  </Frame.Panel>
+  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
+</Frame>
+```
+
+## Anatomy
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>…</Frame.Title>
+    <Frame.Action>…</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <Frame.Row>…</Frame.Row>
+  </Frame.Panel>
+  <Frame.Footer>…</Frame.Footer>
+</Frame>
+```
+
+- **`Frame.Header`** — Row holding the title and the action.
+- **`Frame.Title`** — Frame heading.
+- **`Frame.Action`** — Trailing slot — a label, a button, a badge. Strings render muted.
+- **`Frame.Description`** — Secondary line, inside a column-wrapped header.
+- **`Frame.Panel`** — The inset card holding the rows.
+- **`Frame.Row`** — A row inside the panel. Pass `divided` on every row after the first.
+- **`Frame.Footer`** — Muted caption under the panel. Strings are wrapped for you.
+
+## Props
+
+### Frame
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Frame.Row
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `divided` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+React Native has no `:first-child`, so `divided` is set explicitly on each row after the first rather than inferred.

@@ -1,0 +1,75 @@
+---
+title: EmptyState
+description: Placeholder for a list or screen with no content.
+---
+
+The placeholder for a list or screen with nothing in it. `Media variant="icon"` frames the icon in a small card with two rotated ghost cards fanned behind it.
+
+## Installation
+
+EmptyState ships with the library — no separate install.
+
+```tsx
+import { EmptyState, Button, SearchIcon } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<EmptyState>
+  <EmptyState.Header>
+    <EmptyState.Media variant="icon">
+      <SearchIcon size={18} />
+    </EmptyState.Media>
+    <EmptyState.Title>No results found</EmptyState.Title>
+    <EmptyState.Description>
+      Try adjusting your search or filters.
+    </EmptyState.Description>
+  </EmptyState.Header>
+  <EmptyState.Content>
+    <Button variant="outline" fullWidth>Clear filters</Button>
+  </EmptyState.Content>
+</EmptyState>
+```
+
+## Anatomy
+
+```tsx
+<EmptyState>
+  <EmptyState.Header>
+    <EmptyState.Media>…</EmptyState.Media>
+    <EmptyState.Title>…</EmptyState.Title>
+    <EmptyState.Description>…</EmptyState.Description>
+  </EmptyState.Header>
+  <EmptyState.Content>…</EmptyState.Content>
+</EmptyState>
+```
+
+- **`EmptyState.Header`** — Groups media, title and description into one centred column.
+- **`EmptyState.Media`** — Visual anchor above the title.
+- **`EmptyState.Title`** — Heading.
+- **`EmptyState.Description`** — Supporting text.
+- **`EmptyState.Content`** — Slot below the header, for actions.
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `icon`
+
+## Props
+
+### EmptyState
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### EmptyState.Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

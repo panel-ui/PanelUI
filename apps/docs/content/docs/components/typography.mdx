@@ -1,0 +1,86 @@
+---
+title: Typography
+description: Semantic text presets.
+---
+
+Semantic text presets, built on the `Text` primitive.
+
+## Installation
+
+Typography ships with the library — no separate install.
+
+```tsx
+import { Typography } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Typography type="h1">Heading 1</Typography>
+<Typography type="body-sm" muted>Small body text</Typography>
+
+<Typography.Heading type="h2">Section title</Typography.Heading>
+<Typography.Paragraph>Body copy.</Typography.Paragraph>
+<Typography.Code>npm i panelui-native</Typography.Code>
+```
+
+## Anatomy
+
+```tsx
+<Typography type="h1">…</Typography>
+
+<Typography.Heading type="h2">…</Typography.Heading>
+<Typography.Paragraph>…</Typography.Paragraph>
+<Typography.Code>…</Typography.Code>
+```
+
+- **`Typography.Heading`** — Heading text, wired up with the matching accessibility heading level.
+- **`Typography.Paragraph`** — Body copy.
+- **`Typography.Code`** — Inline code on a muted surface.
+
+## Variants
+
+### `type`
+
+- `h1`
+- `h2`
+- `h3`
+- `h4`
+- `h5`
+- `h6`
+- `body` *(default)*
+- `body-sm`
+- `body-xs`
+- `code`
+
+### `muted`
+
+- `true`
+
+## Props
+
+### Typography
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Typography.Heading
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | `HeadingType` | `body` |  |
+
+### Typography.Paragraph
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | `ParagraphType` | `body` |  |
+
+### Typography.Code
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `containerClassName` | `string` | — | Classes for the surface behind the code text. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

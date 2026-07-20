@@ -1,0 +1,112 @@
+---
+title: Steps
+description: Stepper for multi-step flows.
+---
+
+A stepper for multi-step flows. Steps does not own your flow — it reflects whatever step your app says is active.
+
+## Installation
+
+Steps ships with the library — no separate install.
+
+```tsx
+import { Steps } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Steps value={step} onValueChange={setStep}>
+  {items.map((item, index) => (
+    <Steps.Item key={item.title} step={index} className="flex-1">
+      <Steps.Trigger>
+        <Steps.Indicator />
+        <Steps.Title>{item.title}</Steps.Title>
+      </Steps.Trigger>
+      {index < items.length - 1 ? <Steps.Separator /> : null}
+    </Steps.Item>
+  ))}
+</Steps>
+```
+
+## Anatomy
+
+```tsx
+<Steps>
+  <Steps.Item step={0}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>…</Steps.Title>
+      <Steps.Description>…</Steps.Description>
+    </Steps.Trigger>
+    <Steps.Separator />
+  </Steps.Item>
+</Steps>
+```
+
+- **`Steps.Item`** — One step. `step` is its zero-based position.
+- **`Steps.Trigger`** — Makes the item selectable. Omit it for a read-only stepper.
+- **`Steps.Indicator`** — The circle — step number, a check once complete, a spinner while loading.
+- **`Steps.Title`** — Step heading.
+- **`Steps.Description`** — Supporting line.
+- **`Steps.Separator`** — Connector to the next step. Place it inside the item so it can read that item's state.
+
+## Variants
+
+### `orientation`
+
+- `horizontal` *(default)*
+- `vertical`
+
+### `state`
+
+- `inactive` *(default)*
+- `active`
+- `completed`
+- `loading`
+
+## Props
+
+### Steps
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `defaultValue` | `number` | — | Active step when uncontrolled. |
+| `value` | `number` | — | Active step, controlled. |
+| `onValueChange` | `(value: number) => void` | — |  |
+| `orientation` | `StepsOrientation` | `horizontal` |  |
+
+### Steps.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `step` | `number` | — | This item's position in the flow, zero-based by convention. |
+| `completed` | `boolean` | — | Force the completed state, regardless of the active step. |
+| `disabled` | `boolean` | — |  |
+| `loading` | `boolean` | — | Shows a spinner in place of the number while this step is active. |
+
+### Steps.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Steps.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Steps.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Steps are zero-based internally but the indicator renders them as 1, 2, 3.

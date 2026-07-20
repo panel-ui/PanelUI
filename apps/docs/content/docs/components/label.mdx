@@ -1,0 +1,55 @@
+---
+title: Label
+description: Form field label with required, invalid and disabled states.
+---
+
+A form field label. String children are wrapped in `Label.Text` for you.
+
+## Installation
+
+Label ships with the library — no separate install.
+
+```tsx
+import { Label, Input } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Label isRequired>Password</Label>
+<Input placeholder="Create a password" secureTextEntry />
+
+<Label>
+  <Label.Text className="text-base font-semibold">API key</Label.Text>
+</Label>
+```
+
+## Anatomy
+
+```tsx
+<Label>
+  <Label.Text>…</Label.Text>
+</Label>
+```
+
+- **`Label.Text`** — The label text. Renders the required asterisk when the label is required.
+
+## Props
+
+### Label
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `isRequired` | `boolean` | — | Appends an asterisk marking the field as required. |
+| `isInvalid` | `boolean` | — | Recolours the label to signal a validation error. |
+| `isDisabled` | `boolean` | — |  |
+
+### Label.Text
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `asteriskClassName` | `string` | — | Classes for the required asterisk. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

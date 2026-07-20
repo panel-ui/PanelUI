@@ -1,0 +1,75 @@
+---
+title: Tabs
+description: Segmented navigation with an animated indicator.
+---
+
+Segmented navigation with an indicator that springs to the active trigger.
+
+## Installation
+
+Tabs ships with the library — no separate install.
+
+```tsx
+import { Tabs } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Tabs defaultValue="account">
+  <Tabs.List>
+    <Tabs.Trigger value="account">Account</Tabs.Trigger>
+    <Tabs.Trigger value="password">Password</Tabs.Trigger>
+  </Tabs.List>
+  <Tabs.Content value="account">…</Tabs.Content>
+  <Tabs.Content value="password">…</Tabs.Content>
+</Tabs>
+```
+
+## Anatomy
+
+```tsx
+<Tabs>
+  <Tabs.List>
+    <Tabs.Trigger value="…">…</Tabs.Trigger>
+  </Tabs.List>
+  <Tabs.Content value="…">…</Tabs.Content>
+</Tabs>
+```
+
+- **`Tabs.List`** — Holds the triggers and the animated indicator.
+- **`Tabs.Trigger`** — One tab. Must be inside `Tabs.List`.
+- **`Tabs.Content`** — Panel for a tab. Renders only while its tab is active.
+
+## Props
+
+### Tabs
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+| `onValueChange` | `(value: string) => void` | — |  |
+| `defaultValue` | `string` | — |  |
+
+### Tabs.List
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Tabs.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+
+### Tabs.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

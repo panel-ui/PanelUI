@@ -1,0 +1,57 @@
+---
+title: Badge
+description: Compact status label, dot, or notification count.
+---
+
+A compact label. Set `count` for a notification bubble, or `shape="dot"` for a bare status dot.
+
+## Installation
+
+Badge ships with the library — no separate install.
+
+```tsx
+import { Badge } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Badge>Default</Badge>
+<Badge variant="success">Active</Badge>
+<Badge variant="destructive" count={128} />
+<Badge variant="success" shape="dot" />
+```
+
+## Variants
+
+### `shape`
+
+- `default` *(default)*
+- `dot`
+- `count`
+
+### `variant`
+
+- `default` *(default)*
+- `secondary`
+- `outline`
+- `destructive`
+- `success`
+- `warning`
+- `info`
+
+## Props
+
+### Badge
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `labelClassName` | `string` | — |  |
+| `count` | `number` | — | Renders a number instead of children, clamped to "99+". Implies the `count` shape unless you set one. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+`count` clamps at `99+` so the pill keeps its shape, and sets an "N unread" accessibility label. Passing `count` implies `shape="count"` unless you set a shape yourself.

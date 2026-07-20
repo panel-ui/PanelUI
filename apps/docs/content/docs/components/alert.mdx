@@ -1,0 +1,75 @@
+---
+title: Alert
+description: Status message with a built-in icon.
+---
+
+A status message. `Alert.Indicator` resolves both the icon and its colour from the alert's variant, so it follows the active theme without you passing either.
+
+## Installation
+
+Alert ships with the library — no separate install.
+
+```tsx
+import { Alert } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Alert variant="success">
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>Payment received</Alert.Title>
+    <Alert.Description>Your invoice has been paid.</Alert.Description>
+  </Alert.Content>
+</Alert>
+```
+
+## Anatomy
+
+```tsx
+<Alert>
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>…</Alert.Title>
+    <Alert.Description>…</Alert.Description>
+  </Alert.Content>
+</Alert>
+```
+
+- **`Alert.Indicator`** — Leading status icon, picked from the variant. Pass children to override it.
+- **`Alert.Content`** — Flex-1 wrapper for the title and description.
+- **`Alert.Title`** — Heading, coloured by the variant.
+- **`Alert.Description`** — Body text, always muted.
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `info`
+- `success`
+- `warning`
+- `destructive`
+
+## Props
+
+### Alert
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `icon` | `ReactNode` | — | Leading element rendered before the content. **Deprecated.** Prefer `<Alert.Indicator>`, which picks a status icon for you. Still honoured so v0.2 call sites keep rendering. |
+
+### Alert.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `iconProps` | `{ size?: number; color?: string }` | — | Overrides the size/colour of the default status icon. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Omit `Alert.Indicator` for a text-only alert. The legacy `icon` prop still renders, but prefer the indicator.

@@ -1,0 +1,64 @@
+---
+title: Select
+description: Picker that opens in a bottom sheet.
+---
+
+A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.
+
+## Installation
+
+Select ships with the library — no separate install.
+
+```tsx
+import { Select } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Select
+  value={fruit}
+  onValueChange={setFruit}
+  placeholder="Select a fruit"
+  title="Favorite fruit"
+>
+  <Select.Item value="apple" label="Apple" />
+  <Select.Item value="banana" label="Banana" />
+</Select>
+```
+
+## Anatomy
+
+```tsx
+<Select>
+  <Select.Item value="…" label="…" />
+</Select>
+```
+
+- **`Select.Item`** — One option. `value` identifies it, `label` is what is shown.
+
+## Props
+
+### Select.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — |  |
+| `label` | `string` | — |  |
+
+### Select
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+| `onValueChange` | `(value: string) => void` | — |  |
+| `placeholder` | `string` | — |  |
+| `title` | `string` | — | Sheet title shown above the options. |
+| `disabled` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Use `InlineSelect` instead when the option list is short enough to expand in place.

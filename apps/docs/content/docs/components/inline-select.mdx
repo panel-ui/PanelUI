@@ -1,0 +1,55 @@
+---
+title: InlineSelect
+description: Picker that expands its options in place.
+---
+
+A picker that expands its options in place, without an overlay. Use it when the option list is short and the surrounding layout can absorb the height.
+
+## Installation
+
+InlineSelect ships with the library — no separate install.
+
+```tsx
+import { InlineSelect } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<InlineSelect value={region} onValueChange={setRegion} placeholder="Select a region">
+  <InlineSelect.Item value="us" label="United States" />
+  <InlineSelect.Item value="eu" label="Europe" />
+  <InlineSelect.Item value="apac" label="Asia Pacific" />
+</InlineSelect>
+```
+
+## Anatomy
+
+```tsx
+<InlineSelect>
+  <InlineSelect.Item value="…" label="…" />
+</InlineSelect>
+```
+
+- **`InlineSelect.Item`** — One option. `value` identifies it, `label` is what is shown.
+
+## Props
+
+### InlineSelect.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — |  |
+| `label` | `string` | — |  |
+
+### InlineSelect
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+| `onValueChange` | `(value: string) => void` | — |  |
+| `placeholder` | `string` | — |  |
+| `disabled` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

@@ -1,0 +1,79 @@
+---
+title: Dialog
+description: Modal dialog with a backdrop and footer actions.
+---
+
+A modal dialog. Mounts through a portal and unmounts after its exit animation.
+
+## Installation
+
+Dialog ships with the library — no separate install.
+
+```tsx
+import { Dialog, Button } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Dialog>
+  <Dialog.Trigger>
+    <Button variant="outline">Delete</Button>
+  </Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Title>Delete project?</Dialog.Title>
+    <Dialog.Description>
+      This action cannot be undone.
+    </Dialog.Description>
+    <Dialog.Footer>
+      <Dialog.Close>
+        <Button size="sm" variant="ghost">Cancel</Button>
+      </Dialog.Close>
+      <Dialog.Close>
+        <Button size="sm" variant="destructive">Delete</Button>
+      </Dialog.Close>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+## Anatomy
+
+```tsx
+<Dialog>
+  <Dialog.Trigger>…</Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Title>…</Dialog.Title>
+    <Dialog.Description>…</Dialog.Description>
+    <Dialog.Footer>
+      <Dialog.Close>…</Dialog.Close>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+- **`Dialog.Trigger`** — Clones its child and opens the dialog on press.
+- **`Dialog.Content`** — The dialog surface, rendered in a portal.
+- **`Dialog.Title`** — Required for accessibility.
+- **`Dialog.Description`** — Supporting text.
+- **`Dialog.Footer`** — Row of actions.
+- **`Dialog.Close`** — Clones its child and closes the dialog on press.
+
+## Props
+
+### Dialog
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Controlled open state. |
+| `onOpenChange` | `(open: boolean) => void` | — |  |
+| `defaultOpen` | `boolean` | — | Initial state when uncontrolled. |
+
+### Dialog.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `dismissible` | `boolean` | — | Tap on the backdrop closes the dialog. Default true. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

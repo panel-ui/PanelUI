@@ -1,0 +1,44 @@
+---
+title: Input
+description: Text field with label, description and error message.
+---
+
+A text field with an optional label, description and error message. Passing `errorMessage` puts the field in its invalid state and replaces the description.
+
+## Installation
+
+Input ships with the library — no separate install.
+
+```tsx
+import { Input } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Input
+  label="Email"
+  placeholder="you@example.com"
+  keyboardType="email-address"
+  errorMessage={error}
+/>
+```
+
+## Props
+
+### Input
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `containerClassName` | `string` | — |  |
+| `label` | `string` | — |  |
+| `description` | `string` | — |  |
+| `errorMessage` | `string` | — | Error message. When set, the field renders in its invalid state. |
+| `disabled` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.

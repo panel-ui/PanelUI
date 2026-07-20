@@ -1,0 +1,106 @@
+---
+title: Accordion
+description: Collapsible sections with single or multiple selection.
+---
+
+Collapsible sections for FAQs, settings groups and anything that would otherwise need a long scroll. Expansion animates with a Reanimated layout transition, and the content unmounts when collapsed.
+
+## Installation
+
+Accordion ships with the library — no separate install.
+
+```tsx
+import { Accordion } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Accordion selectionMode="single" defaultValue="shipping">
+  <Accordion.Item value="shipping">
+    <Accordion.Trigger>
+      <Accordion.Title>How long does shipping take?</Accordion.Title>
+      <Accordion.Indicator />
+    </Accordion.Trigger>
+    <Accordion.Content>
+      Standard delivery arrives in three to five working days.
+    </Accordion.Content>
+  </Accordion.Item>
+</Accordion>
+```
+
+## Anatomy
+
+```tsx
+<Accordion>
+  <Accordion.Item value="…">
+    <Accordion.Trigger>
+      <Accordion.Title>…</Accordion.Title>
+      <Accordion.Indicator />
+    </Accordion.Trigger>
+    <Accordion.Content>…</Accordion.Content>
+  </Accordion.Item>
+</Accordion>
+```
+
+- **`Accordion.Item`** — One collapsible section. Its `value` identifies it in the accordion's state.
+- **`Accordion.Trigger`** — The pressable header row. A bare string child is wrapped in the title style.
+- **`Accordion.Title`** — Heading text inside the trigger.
+- **`Accordion.Indicator`** — Chevron that rotates 180° while the item is open.
+- **`Accordion.Content`** — The collapsible body. Unmounts when closed.
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `surface`
+- `separated`
+- `bordered`
+- `ghost`
+
+## Props
+
+### Accordion
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `variant` | `AccordionVariant` | `default` |  |
+| `selectionMode` | `AccordionSelectionMode` | — | `single` collapses the open item when another opens. |
+| `value` | `string \| string[]` | — | Expanded item value(s), controlled. |
+| `defaultValue` | `string \| string[]` | — |  |
+| `onValueChange` | `(value: string \| string[]) => void` | — |  |
+| `hideSeparator` | `boolean` | — | Hide the hairlines drawn between items. |
+
+### Accordion.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — | Identifies this item in the accordion's value. |
+| `isDisabled` | `boolean` | — |  |
+
+### Accordion.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Accordion.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Accordion.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Pass an array to `value` / `defaultValue` with `selectionMode="multiple"`. `onValueChange` hands back whatever shape you gave it — a string in single mode, an array in multiple.

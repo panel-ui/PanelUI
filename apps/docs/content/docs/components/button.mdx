@@ -1,0 +1,72 @@
+---
+title: Button
+description: Pressable action with variants, sizes, loading state and icon slots.
+---
+
+The primary action component. Icons in `startContent` and `endContent` inherit a colour that reads against the button's background, so they follow the theme without a hardcoded hex.
+
+## Installation
+
+Button ships with the library — no separate install.
+
+```tsx
+import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Button onPress={save}>Save changes</Button>
+
+<Button variant="outline" startContent={<SearchIcon size={16} />}>
+  Search
+</Button>
+
+<Button variant="social" fullWidth startContent={<GoogleIcon size={18} />}>
+  Continue with Google
+</Button>
+
+<Button loading={saving} fullWidth>
+  {saving ? 'Saving…' : 'Save'}
+</Button>
+```
+
+## Variants
+
+### `variant`
+
+- `primary` *(default)*
+- `secondary`
+- `outline`
+- `ghost`
+- `destructive`
+- `social`
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+- `lg`
+- `icon`
+
+### `fullWidth`
+
+- `true`
+
+## Props
+
+### Button
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `disabled` | `boolean` | — |  |
+| `loading` | `boolean` | — | Show a spinner and block presses while an action is in flight. |
+| `startContent` | `ReactNode` | — | Content rendered before the label (replaced by the spinner while loading). |
+| `endContent` | `ReactNode` | — | Content rendered after the label. |
+| `labelClassName` | `string` | — | Extra classes for the label when children is a string. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+`loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`.

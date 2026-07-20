@@ -1,0 +1,108 @@
+---
+title: Toast
+description: Transient notification queue with swipe to dismiss.
+---
+
+A transient notification. The queue lives outside React, so `toast.show()` works from anywhere — API clients, event handlers, code with no component around it.
+
+`PanelUIProvider` mounts the viewport for you.
+
+## Installation
+
+Toast ships with the library — no separate install.
+
+```tsx
+import { Toast, useToast } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+const { toast } = useToast();
+
+// A bare string
+toast.show('Link copied');
+
+// A config object
+toast.show({
+  variant: 'success',
+  label: 'Deployment complete',
+  description: 'panelui.dev is live on production.',
+  actionLabel: 'View',
+  onActionPress: ({ hide }) => hide(),
+});
+
+// A custom component
+toast.show({
+  component: ({ hide }) => (
+    <Toast variant="info" onHide={hide}>
+      <Toast.Indicator />
+      <Toast.Content>
+        <Toast.Title>Custom</Toast.Title>
+      </Toast.Content>
+      <Toast.Close />
+    </Toast>
+  ),
+});
+```
+
+## Anatomy
+
+```tsx
+<Toast>
+  <Toast.Indicator />
+  <Toast.Content>
+    <Toast.Title>…</Toast.Title>
+    <Toast.Description>…</Toast.Description>
+  </Toast.Content>
+  <Toast.Action>…</Toast.Action>
+  <Toast.Close />
+</Toast>
+```
+
+- **`Toast.Indicator`** — Status icon, picked from the variant.
+- **`Toast.Content`** — Flex-1 wrapper for title and description.
+- **`Toast.Title`** — Heading, coloured by the variant.
+- **`Toast.Description`** — Body text.
+- **`Toast.Action`** — Trailing action button. Dismisses the toast after its own `onPress`.
+- **`Toast.Close`** — Icon-only dismiss button.
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `info`
+- `success`
+- `warning`
+- `destructive`
+
+## Props
+
+### Toast
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `onHide` | `() => void` | — | Called when the close button is pressed or the toast is swiped away. |
+
+### Toast.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `iconProps` | `{ size?: number; color?: string }` | — |  |
+
+### Toast.Close
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Toasts stack as an overlapping deck: the newest is fully visible and the ones behind peek out, with anything past the third fading rather than accumulating. Swiping toward the edge the toast entered from dismisses it; dragging the other way rubber-bands.
+
+`toast.hide(id)` dismisses one, `toast.hideAll()` clears the queue. A `duration` of `0` keeps a toast up until it is dismissed.

@@ -1,0 +1,68 @@
+---
+title: Avatar
+description: User image with an initials fallback and an optional badge overlay.
+---
+
+A user image that falls back to initials when the source is missing or fails to load.
+
+## Installation
+
+Avatar ships with the library — no separate install.
+
+```tsx
+import { Avatar, Badge } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Avatar size="lg" source={{ uri: user.avatarUrl }} fallback="KA" />
+
+<Avatar source={{ uri: user.avatarUrl }} fallback="KA">
+  <Avatar.Badge>
+    <Badge variant="destructive" count={5} />
+  </Avatar.Badge>
+</Avatar>
+```
+
+## Anatomy
+
+```tsx
+<Avatar>
+  <Avatar.Badge>…</Avatar.Badge>
+</Avatar>
+```
+
+- **`Avatar.Badge`** — Overlay pinned to the top-right — an unread count or a presence dot.
+
+## Variants
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+- `lg`
+- `xl`
+
+## Props
+
+### Avatar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `source` | `ImageSourcePropType` | — | Image source; falls back to initials when missing or on load error. |
+| `fallback` | `string` | — | Fallback text, e.g. initials ("KA"). |
+| `imageProps` | `Omit<ImageProps, 'source'>` | — |  |
+
+### Avatar.Badge
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+A plain avatar renders as one clipped node. Adding children wraps it in an unclipped container so a corner badge is not cut in half by the circular mask.

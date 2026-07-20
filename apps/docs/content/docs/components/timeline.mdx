@@ -1,0 +1,146 @@
+---
+title: Timeline
+description: Vertical sequence of events.
+---
+
+A vertical sequence of events. `value` marks how far along the sequence is; `tone` colours an individual event by kind, independently of that progress.
+
+Vertical only — a horizontal timeline gives each item roughly a fifth of a phone's width, which will not hold a date and a title.
+
+## Installation
+
+Timeline ships with the library — no separate install.
+
+```tsx
+import { Timeline, ShieldCheckIcon } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Timeline variant="icon" value={2}>
+  {events.map((event, index) => (
+    <Timeline.Item
+      key={event.title}
+      step={index}
+      tone={event.tone}
+      last={index === events.length - 1}
+    >
+      <Timeline.Aside>
+        <Timeline.Date>{event.time}</Timeline.Date>
+        <Timeline.Label>{event.team}</Timeline.Label>
+      </Timeline.Aside>
+      <Timeline.Indicator>
+        <ShieldCheckIcon size={15} />
+      </Timeline.Indicator>
+      <Timeline.Content>
+        <Timeline.Header>
+          <Timeline.Title>{event.title}</Timeline.Title>
+          <Timeline.Trailing>{event.at}</Timeline.Trailing>
+        </Timeline.Header>
+        <Timeline.Description>{event.body}</Timeline.Description>
+      </Timeline.Content>
+    </Timeline.Item>
+  ))}
+</Timeline>
+```
+
+## Anatomy
+
+```tsx
+<Timeline>
+  <Timeline.Item step={0}>
+    <Timeline.Aside>
+      <Timeline.Date>…</Timeline.Date>
+      <Timeline.Label>…</Timeline.Label>
+      <Timeline.Meta>…</Timeline.Meta>
+    </Timeline.Aside>
+    <Timeline.Indicator>…</Timeline.Indicator>
+    <Timeline.Content>
+      <Timeline.Header>
+        <Timeline.Title>…</Timeline.Title>
+        <Timeline.Trailing>…</Timeline.Trailing>
+      </Timeline.Header>
+      <Timeline.Stats>
+        <Timeline.Stat label="…" value="…" />
+      </Timeline.Stats>
+      <Timeline.Description>…</Timeline.Description>
+    </Timeline.Content>
+  </Timeline.Item>
+</Timeline>
+```
+
+- **`Timeline.Item`** — One event. `step` is its position, `last` stops the connector.
+- **`Timeline.Aside`** — Right-aligned meta column left of the rail. Place it before the indicator.
+- **`Timeline.Indicator`** — The node on the rail, with the connector below it.
+- **`Timeline.Content`** — Everything right of the rail.
+- **`Timeline.Header`** — Title row: heading left, trailing slot right.
+- **`Timeline.Heading`** — Wraps a title and anything stacked under it inside the header row.
+- **`Timeline.Date`** — Timestamp, usually in the aside.
+- **`Timeline.Label`** — Category line, coloured by the item's tone.
+- **`Timeline.Meta`** — Muted supporting line — a person, a source.
+- **`Timeline.Title`** — Event heading.
+- **`Timeline.Trailing`** — Right-hand slot in the header row.
+- **`Timeline.Description`** — Body text.
+- **`Timeline.Stats`** — Bordered strip of label/value pairs.
+- **`Timeline.Stat`** — One label/value pair inside `Stats`.
+
+## Variants
+
+### `variant`
+
+- `dot` *(default)*
+- `icon`
+- `numbered`
+- `card`
+- `compact`
+
+### `tone`
+
+- `default` *(default)*
+- `info`
+- `success`
+- `warning`
+- `danger`
+
+## Props
+
+### Timeline
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `number` | — | Steps at or below this index render as completed. |
+| `variant` | `TimelineVariant` | `dot` |  |
+
+### Timeline.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `step` | `number` | — | Position in the sequence, zero-based. |
+| `completed` | `boolean` | `false` | Force the completed state regardless of the timeline's value. |
+| `tone` | `TimelineTone` | `default` | Colours the node and label — for event kind rather than progress. |
+| `last` | `boolean` | — | Set on the final item so its rail stops at the indicator. |
+
+### Timeline.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Timeline.Stat
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `label` | `string` | — |  |
+| `value` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Colour follows one rule: **progress is solid, event kind is tinted**. An untoned step runs from `muted` to `primary` as the timeline advances, exactly as `Steps` does; a toned step takes that tone's soft fill with its contents in the matching foreground. The `dot` and `card` variants keep full saturation — they are 16px discs with nothing inside, and a soft tint at that size disappears.
+
+Icons inside `Timeline.Indicator` inherit a colour that reads against the node, so they stay legible in every theme without a hardcoded value.

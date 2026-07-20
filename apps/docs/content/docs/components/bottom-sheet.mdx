@@ -1,0 +1,64 @@
+---
+title: BottomSheet
+description: Draggable sheet anchored to the bottom of the screen.
+---
+
+A sheet anchored to the bottom of the screen, draggable and dismissable by swipe. Mounts through a portal and unmounts after its exit animation.
+
+## Installation
+
+BottomSheet ships with the library — no separate install.
+
+```tsx
+import { BottomSheet, Button, Input, Text } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<BottomSheet>
+  <BottomSheet.Trigger>
+    <Button variant="outline">Share</Button>
+  </BottomSheet.Trigger>
+  <BottomSheet.Content>
+    <Text size="lg" weight="semibold">Share project</Text>
+    <Input placeholder="https://panelui.dev/p/xK2f9" />
+    <Button>Copy link</Button>
+  </BottomSheet.Content>
+</BottomSheet>
+```
+
+## Anatomy
+
+```tsx
+<BottomSheet>
+  <BottomSheet.Trigger>…</BottomSheet.Trigger>
+  <BottomSheet.Content>…</BottomSheet.Content>
+</BottomSheet>
+```
+
+- **`BottomSheet.Trigger`** — Clones its child and opens the sheet on press.
+- **`BottomSheet.Content`** — The sheet surface. Renders through a portal above everything else.
+
+## Props
+
+### BottomSheet
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — |  |
+| `onOpenChange` | `(open: boolean) => void` | — |  |
+| `defaultOpen` | `boolean` | — |  |
+
+### BottomSheet.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `dismissible` | `boolean` | — | Tap on the backdrop closes the sheet. Default true. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.

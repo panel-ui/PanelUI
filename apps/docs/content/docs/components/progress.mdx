@@ -1,0 +1,55 @@
+---
+title: Progress
+description: Determinate and indeterminate progress bar.
+---
+
+A progress bar, determinate or indeterminate, animated on the UI thread.
+
+## Installation
+
+Progress ships with the library — no separate install.
+
+```tsx
+import { Progress } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Progress value={uploaded} />
+<Progress value={70} color="success" size="lg" />
+<Progress indeterminate color="info" />
+```
+
+## Variants
+
+### `color`
+
+- `primary` *(default)*
+- `success`
+- `warning`
+- `destructive`
+- `info`
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+- `lg`
+
+## Props
+
+### Progress
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `number` | — | Progress value, 0–100. Ignored when `indeterminate` is set. |
+| `indeterminate` | `boolean` | — | Show a looping animation for unknown-duration work. |
+| `indicatorClassName` | `string` | — | Extra classes for the moving indicator. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops.

@@ -1,6 +1,57 @@
 ---
 title: Introduction
-description: Placeholder
+description: PanelUI is an accessible, high-performance React Native component library for Expo, styled with Tailwind CSS and animated on the UI thread.
 ---
 
-Placeholder.
+**PanelUI** is a React Native component library for Expo apps. 26 typed components — bottom
+sheets, dialogs, selects, toasts, forms — styled with Tailwind CSS v4 and animated on the UI
+thread with Reanimated. It ships no native code, so it runs in Expo Go with no prebuild.
+
+```tsx
+import { PanelUIProvider, Button, Card } from 'panelui-native';
+
+export default function App() {
+  return (
+    <PanelUIProvider>
+      <Card>
+        <Card.Header>
+          <Card.Title>Create project</Card.Title>
+          <Card.Description>Deploy your new project in one click.</Card.Description>
+        </Card.Header>
+        <Card.Footer>
+          <Button>Deploy</Button>
+        </Card.Footer>
+      </Card>
+    </PanelUIProvider>
+  );
+}
+```
+
+## Why PanelUI
+
+- **Tailwind CSS for React Native**, via [Uniwind](https://uniwind.dev) — no Babel transform, and
+  roughly 2.4–3× faster styling than NativeWind.
+- **60fps animations on the UI thread** with Reanimated 4. Press feedback, switches, sheets,
+  dialogs and tabs never touch the JS thread.
+- **Six built-in themes** across three families. A theme sets radius as well as colour, so
+  switching one restyles the shape of the UI too.
+- **Native dark mode** — theme changes are applied natively by Uniwind, without re-rendering your
+  component tree.
+- **Accessible by default** — every interactive component wires up `accessibilityRole`, mirrors
+  its state through `accessibilityState`, and hides decorative icons from screen readers.
+- **TypeScript, tree-shakeable, zero native modules.**
+
+## Design language
+
+The token set comes from [Coss UI](https://coss.com/ui) — the same semantic names
+(`background`, `primary`, `muted`, `destructive`, …), translated for native. The component APIs
+follow the compound-component shape [shadcn/ui](https://ui.shadcn.com) popularised, so
+`Card.Header` and `Dialog.Content` behave the way you would expect.
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" />
+  <Card title="Theming" href="/docs/theming" />
+  <Card title="Components" href="/docs/components/button" />
+</Cards>

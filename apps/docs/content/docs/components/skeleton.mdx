@@ -1,0 +1,36 @@
+---
+title: Skeleton
+description: Shimmer placeholder for loading content.
+---
+
+A shimmer placeholder for content that has not loaded. Size it with Tailwind utilities.
+
+## Installation
+
+Skeleton ships with the library — no separate install.
+
+```tsx
+import { Skeleton } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<View className="flex-row items-center gap-3">
+  <Skeleton className="h-12 w-12 rounded-full" />
+  <View className="flex-1 gap-2">
+    <Skeleton className="h-4 w-3/4" />
+    <Skeleton className="h-4 w-1/2" />
+  </View>
+</View>
+```
+
+## Props
+
+### Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

@@ -1,0 +1,60 @@
+---
+title: Card
+description: Content surface with header, body and footer.
+---
+
+A content surface. Use the full composition rather than dropping everything into the content slot.
+
+## Installation
+
+Card ships with the library — no separate install.
+
+```tsx
+import { Card, Button, Input } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Card>
+  <Card.Header>
+    <Card.Title>Create project</Card.Title>
+    <Card.Description>Deploy your new project in one click.</Card.Description>
+  </Card.Header>
+  <Card.Content className="gap-4">
+    <Input label="Name" placeholder="My project" />
+  </Card.Content>
+  <Card.Footer>
+    <Button size="sm">Deploy</Button>
+  </Card.Footer>
+</Card>
+```
+
+## Anatomy
+
+```tsx
+<Card>
+  <Card.Header>
+    <Card.Title>…</Card.Title>
+    <Card.Description>…</Card.Description>
+  </Card.Header>
+  <Card.Content>…</Card.Content>
+  <Card.Footer>…</Card.Footer>
+</Card>
+```
+
+- **`Card.Header`** — Title and description block.
+- **`Card.Title`** — Card heading.
+- **`Card.Description`** — Muted supporting line.
+- **`Card.Content`** — Main body.
+- **`Card.Footer`** — Row of actions.
+
+## Props
+
+### Card
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

@@ -1,0 +1,115 @@
+---
+title: Theming
+description: Six built-in themes across three families, the token set, how to switch at runtime, and how to override tokens.
+---
+
+PanelUI ships three theme families, each in a light and a dark form. A family sets its own
+**radius scale** as well as its own palette, so switching one restyles the shape of the UI, not
+just its colour.
+
+| Family | Light | Dark | Character |
+| --- | --- | --- | --- |
+| **Panel** | `light` | `dark` | The Coss default — neutral greys, moderate corners |
+| **Moon** | `moon` | `moon-dark` | Monochrome and high-contrast, electric blue accent, tight corners |
+| **Grass** | `grass` | `grass-dark` | Green accent on warm neutrals, soft generous corners |
+
+## Switching themes
+
+```tsx
+import { useTheme, useThemeMode, PANEL_THEMES } from 'panelui-native';
+
+// By name
+const { theme, setTheme } = useTheme();
+setTheme('moon-dark');
+setTheme('system'); // follow the device
+
+// Or as two independent axes
+const { family, mode, setFamily, setMode, toggleMode } = useThemeMode();
+toggleMode();          // dark ↔ light, staying in the current family
+setFamily('grass');    // switch family, staying in the current mode
+```
+
+`useThemeMode` exists because Uniwind only gives `light` and `dark` `prefers-color-scheme`
+handling — any other theme compiles to a plain class selector and cannot adapt on its own. Each
+family therefore ships as a light/dark pair, and treating family and mode separately is what
+lets a sun toggle keep working inside a brand theme.
+
+`PANEL_THEMES` is the list of families, with a display name and a representative swatch colour
+for each — enough to build a theme picker without hardcoding anything.
+
+<Callout type="warn">
+  Named themes must be listed in `extraThemes` in your Metro config, or `setTheme('moon')` throws
+  *"it was not registered"*. See [Installation](/docs/installation#configure-metro).
+</Callout>
+
+## Tokens
+
+Every colour is a semantic token, taken from [Coss UI](https://coss.com/ui). Use these rather
+than raw palette values, so components follow whichever theme is active.
+
+| Token | Used for |
+| --- | --- |
+| `background` / `foreground` | The page and its text |
+| `card` / `card-foreground` | Raised surfaces |
+| `popover` / `popover-foreground` | Overlays — dialogs, sheets, toasts |
+| `primary` / `primary-foreground` | The main action colour |
+| `secondary` / `secondary-foreground` | Secondary fills |
+| `muted` / `muted-foreground` | Quiet fills and supporting text |
+| `accent` / `accent-foreground` | Hover and selected states |
+| `destructive`, `info`, `success`, `warning` | Status colours, each with a `-foreground` |
+| `*-soft`, `*-subtle` | Tinted status fills — Alert backgrounds and Badge fills |
+| `border`, `input`, `ring` | Hairlines, field borders, focus rings |
+| `surface` | The grouping surface behind `Frame` |
+| `skeleton` | The shimmer fill |
+
+The `-soft` and `-subtle` tokens exist as real tokens rather than opacity modifiers because
+`dark:` only resolves inside the `light` and `dark` themes. Within a named theme it compiles to a
+class selector that never matches, so a `dark:bg-info/[0.06]` tint would silently vanish.
+
+### Radius
+
+`--radius-xs` through `--radius-3xl` are themed too, which is what gives each family its shape.
+Use `rounded-md`, `rounded-xl` and friends as normal — the values change with the theme.
+
+## Overriding tokens
+
+Redefine any token in your own `global.css`, using the same `@variant` shape the library uses:
+
+```css title="global.css"
+@import 'panelui-native/theme.css';
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-primary: #4f46e5;
+    }
+    @variant dark {
+      --color-primary: #818cf8;
+    }
+  }
+}
+```
+
+<Callout type="warn" title="Two rules Uniwind enforces">
+  **Every theme must define the same variables.** Adding a token to one theme without adding it to
+  all of them fails the build with *"All themes must have the same variables"*.
+
+  **The shadcn-style `:root { --x }` / `.dark { --x }` pattern does not work.** Uniwind resolves
+  themed tokens only from `@variant` blocks; `light-dark()` inside `@theme` breaks colour parsing
+  outright.
+</Callout>
+
+## Reading a token in code
+
+When you need a resolved colour in JavaScript — for an SVG fill, or a third-party component —
+use Uniwind's hook rather than hardcoding:
+
+```tsx
+import { useCSSVariable } from 'uniwind';
+
+const color = useCSSVariable('--color-muted-foreground');
+```
+
+It subscribes to theme changes, so the value updates on every switch. Icons inside PanelUI's own
+coloured surfaces already do this for you — see
+[Button](/docs/components/button) for how `startContent` icons inherit a readable colour.

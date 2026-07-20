@@ -1,0 +1,40 @@
+---
+title: Switch
+description: Animated on/off toggle.
+---
+
+An on/off toggle, animated on the UI thread.
+
+## Installation
+
+Switch ships with the library — no separate install.
+
+```tsx
+import { Switch } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Switch value={enabled} onValueChange={setEnabled} />
+```
+
+## Variants
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+
+## Props
+
+### Switch
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `boolean` | — |  |
+| `onValueChange` | `(value: boolean) => void` | — |  |
+| `disabled` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

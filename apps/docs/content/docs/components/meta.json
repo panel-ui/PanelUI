@@ -1,0 +1,31 @@
+{
+  "title": "Components",
+  "pages": [
+    "accordion",
+    "alert",
+    "avatar",
+    "badge",
+    "bottom-sheet",
+    "button",
+    "card",
+    "checkbox",
+    "dialog",
+    "empty-state",
+    "frame",
+    "inline-select",
+    "input",
+    "input-group",
+    "label",
+    "progress",
+    "radio-group",
+    "select",
+    "skeleton",
+    "spinner",
+    "steps",
+    "switch",
+    "tabs",
+    "timeline",
+    "toast",
+    "typography"
+  ]
+}

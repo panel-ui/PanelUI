@@ -1,0 +1,39 @@
+---
+title: Spinner
+description: Indeterminate loading indicator.
+---
+
+An indeterminate loading indicator. `Button` renders one for you when `loading` is set.
+
+## Installation
+
+Spinner ships with the library — no separate install.
+
+```tsx
+import { Spinner } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Spinner />
+<Spinner size="lg" />
+```
+
+## Variants
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+- `lg`
+
+## Props
+
+### Spinner
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

@@ -1,0 +1,56 @@
+---
+title: RadioGroup
+description: Single-select list of options.
+---
+
+A single-select list of options.
+
+## Installation
+
+RadioGroup ships with the library — no separate install.
+
+```tsx
+import { RadioGroup } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<RadioGroup value={plan} onValueChange={setPlan}>
+  <RadioGroup.Item value="free" label="Free — $0/month" />
+  <RadioGroup.Item value="pro" label="Pro — $12/month" />
+  <RadioGroup.Item value="team" label="Team — $36/month" />
+</RadioGroup>
+```
+
+## Anatomy
+
+```tsx
+<RadioGroup>
+  <RadioGroup.Item value="…" label="…" />
+</RadioGroup>
+```
+
+- **`RadioGroup.Item`** — One option. `value` identifies it, `label` is what is shown.
+
+## Props
+
+### RadioGroup
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+| `onValueChange` | `(value: string) => void` | — |  |
+| `disabled` | `boolean` | — |  |
+
+### RadioGroup.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — |  |
+| `label` | `string` | — |  |
+| `disabled` | `boolean` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

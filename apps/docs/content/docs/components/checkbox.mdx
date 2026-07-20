@@ -1,0 +1,59 @@
+---
+title: Checkbox
+description: Animated checkbox, as a row or a selectable card.
+---
+
+A checkbox with an animated check. `variant="card"` turns the whole surface into the target, for pickable options where the box confirms a choice rather than being the affordance.
+
+## Installation
+
+Checkbox ships with the library — no separate install.
+
+```tsx
+import { Checkbox } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Checkbox
+  checked={accepted}
+  onCheckedChange={setAccepted}
+  label="Marketing & promotions"
+  description="Special offers and exclusive deals"
+/>
+
+<Checkbox
+  variant="card"
+  checked={plan === 'pro'}
+  onCheckedChange={() => setPlan('pro')}
+  label="Pro"
+  description="Advanced analytics and priority support."
+/>
+```
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `card`
+
+## Props
+
+### Checkbox
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `checked` | `boolean` | — |  |
+| `onCheckedChange` | `(checked: boolean) => void` | — |  |
+| `disabled` | `boolean` | — |  |
+| `label` | `string` | — | Optional label rendered next to the box; pressing it also toggles. |
+| `description` | `string` | — | Secondary line under the label, for extra context. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+With a `description` the row aligns the box to the label rather than centring it against the whole block. The card variant moves the box after the content so it sits top-right, and takes the primary border when checked.

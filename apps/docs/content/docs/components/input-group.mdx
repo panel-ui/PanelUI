@@ -1,0 +1,70 @@
+---
+title: InputGroup
+description: Input with leading and trailing decorators.
+---
+
+An input with leading or trailing decorators. The prefix and suffix are measured and their widths applied as padding on the input, so text never runs underneath them however wide they turn out to be.
+
+## Installation
+
+InputGroup ships with the library — no separate install.
+
+```tsx
+import { InputGroup, Button, SearchIcon } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<InputGroup>
+  <InputGroup.Prefix isDecorative>
+    <SearchIcon size={16} />
+  </InputGroup.Prefix>
+  <InputGroup.Input placeholder="Search products…" />
+</InputGroup>
+
+<InputGroup>
+  <InputGroup.Input placeholder="Password" secureTextEntry={!visible} />
+  <InputGroup.Suffix>
+    <Button variant="ghost" size="sm" onPress={toggle}>
+      {visible ? 'Hide' : 'Show'}
+    </Button>
+  </InputGroup.Suffix>
+</InputGroup>
+```
+
+## Anatomy
+
+```tsx
+<InputGroup>
+  <InputGroup.Prefix>…</InputGroup.Prefix>
+  <InputGroup.Input />
+  <InputGroup.Suffix>…</InputGroup.Suffix>
+</InputGroup>
+```
+
+- **`InputGroup.Prefix`** — Leading decorator, absolutely positioned.
+- **`InputGroup.Input`** — The field itself. Accepts all `Input` props.
+- **`InputGroup.Suffix`** — Trailing decorator, absolutely positioned.
+
+## Props
+
+### InputGroup
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `isDisabled` | `boolean` | — | Disables the input and dims both decorators. |
+
+### InputGroup.Decorator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `isDecorative` | `boolean` | — | Marks the decorator as presentation-only: touches fall through to the Input and screen readers skip it. Leave it off when the decorator holds something interactive, such as a show-password toggle. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Set `isDecorative` when the decorator is presentation-only: touches fall through to the input and screen readers skip it. Leave it off when it holds something interactive, like a show-password toggle.

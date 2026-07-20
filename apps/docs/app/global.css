@@ -1,5 +1,12 @@
 @import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
+/*
+ * `shadcn.css`, not `neutral.css`: the neutral preset hardcodes its own greys
+ * into the --color-fd-* namespace, so the sidebar, nav and TOC would ignore
+ * the Coss tokens below entirely. The shadcn preset maps every fd- variable
+ * onto --background / --primary / --sidebar-* — exactly the names Coss uses —
+ * so defining those once themes the whole site.
+ */
+@import 'fumadocs-ui/css/shadcn.css';
 @import 'fumadocs-ui/css/preset.css';
 /*
  ---break---
@@ -283,6 +290,42 @@
 body {
   position: relative;
 }
+
+/*
+ * Sidebar, styled to the reference: two quiet group headings over flat lists,
+ * with the active item a filled rounded rectangle rather than a tinted accent
+ * bar. Fumadocs ships the structure; these override only its colour choices.
+ */
+#nd-sidebar {
+  /* Group headings — "Sections", "Components". */
+  & p {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    margin-top: 1.75rem;
+    margin-bottom: 0.375rem;
+  }
+
+  /* Items. Legible at rest, not washed out to muted. */
+  & a[data-active] {
+    color: color-mix(in srgb, var(--foreground) 78%, transparent);
+    font-weight: 400;
+  }
+
+  & a[data-active]:hover {
+    color: var(--foreground);
+    background-color: var(--accent);
+  }
+
+  /* Active: a solid fill, matching the reference rather than Fumadocs'
+     primary tint. */
+  & a[data-active='true'],
+  & a[data-active='true']:hover {
+    background-color: var(--secondary);
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
 /*
  ---break---
  */
@@ -296,7 +339,10 @@ body {
   code, kbd, samp, pre {
     font-family: var(--font-mono);
   }
+  /* The coss init emitted `font-sans font-mono` here; the two conflict and
+     mono won. Body copy is sans, and the rule above already scopes mono to
+     code. */
   html {
-    @apply font-sans font-mono;
+    @apply font-sans;
   }
 }

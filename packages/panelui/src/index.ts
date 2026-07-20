@@ -78,6 +78,16 @@ export {
 } from './components/radio-group';
 export { Skeleton, type SkeletonProps } from './components/skeleton';
 export { Spinner, type SpinnerProps } from './components/spinner';
+export {
+  Steps,
+  type StepsProps,
+  type StepsItemProps,
+  type StepsTriggerProps,
+  type StepsIndicatorProps,
+  type StepsSeparatorProps,
+  type StepState,
+  type StepsOrientation,
+} from './components/steps';
 export { Switch, type SwitchProps } from './components/switch';
 export {
   Toast,

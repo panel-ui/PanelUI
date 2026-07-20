@@ -303,7 +303,7 @@
   },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nThe React Native equivalent of shadcn/ui's [scroll-fade utility](https://ui.shadcn.com/docs/utils/scroll-fade), which uses CSS `mask-image` on a scroll timeline. React Native has neither masks nor scroll timelines, so the fades are gradient overlays whose opacity follows the scroll position.",
-    "usage": "<ScrollFade>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag}>{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>",
+    "usage": "<ScrollFade>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag}>{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>\n\n// Vertical: no `horizontal` on the child, so the fades move to\n// the top and bottom edges.\n<ScrollFade className=\"h-56\">\n  <ScrollView>\n    {events.map((event) => (\n      <Row key={event.id} {...event} />\n    ))}\n  </ScrollView>\n</ScrollFade>",
     "extraImports": [
       "Badge"
     ],

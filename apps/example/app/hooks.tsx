@@ -215,6 +215,23 @@ export default function HooksScreen() {
         </HookCard>
 
         <HookCard
+          name="ScrollFade — vertical"
+          summary="No horizontal prop on the child, so the fades move to the top and bottom."
+        >
+          <ScrollFade size={36} color="var(--color-card)" className="h-40">
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View className="gap-3">
+                {TAGS.map((tag) => (
+                  <Text key={tag} size="sm">
+                    {tag}
+                  </Text>
+                ))}
+              </View>
+            </ScrollView>
+          </ScrollFade>
+        </HookCard>
+
+        <HookCard
           name="Shimmer"
           summary="A highlight sweeping across content, for loading states."
         >

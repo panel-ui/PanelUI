@@ -25,6 +25,16 @@ import { ScrollFade, Badge } from 'panelui-native';
     ))}
   </ScrollView>
 </ScrollFade>
+
+// Vertical: no `horizontal` on the child, so the fades move to
+// the top and bottom edges.
+<ScrollFade className="h-56">
+  <ScrollView>
+    {events.map((event) => (
+      <Row key={event.id} {...event} />
+    ))}
+  </ScrollView>
+</ScrollFade>
 ```
 
 ## API Reference

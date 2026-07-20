@@ -1,7 +1,7 @@
 # PanelUI — React Native UI components for Expo, styled with Tailwind CSS
 
 **PanelUI** (`panelui-native`) is an accessible, high-performance React Native component
-library for Expo apps. 26 typed components — buttons, bottom sheets, dialogs, selects,
+library for Expo apps. 29 typed components — buttons, bottom sheets, dialogs, selects,
 toasts, forms — styled with Tailwind CSS v4 and animated on the UI thread with Reanimated.
 Zero native code, so it runs in Expo Go.
 
@@ -107,7 +107,9 @@ overlays, and the toast viewport.
 | `Label` | Form field label with required, invalid and disabled states |
 | `Progress` | Determinate and indeterminate progress bar |
 | `RadioGroup` | Single-select list of options |
+| `ScrollFade` | Fades the edges of a scroll container |
 | `Select` | Picker that opens in a bottom sheet |
+| `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |
 | `Spinner` | Indeterminate loading indicator |
 | `Steps` | Stepper for multi-step flows, horizontal or vertical |
@@ -117,9 +119,11 @@ overlays, and the toast viewport.
 | `Toast` | Transient notification queue with swipe-to-dismiss |
 | `Typography` | Semantic text presets — `h1`–`h6`, body sizes, inline code |
 
-Plus `PanelUIProvider`, `Portal`, `AnimatedPressable`, `Text`, `useTheme`, `useThemeMode`,
-`useToast`, a set of SVG icons (with brand marks for Google, Facebook and Apple), and the `cn`
-class-merging helper.
+Plus `PanelUIProvider`, `Portal`, `AnimatedPressable`, `Text`, a set of SVG icons (with brand
+marks for Google, Facebook and Apple), and the `cn` class-merging helper.
+
+**Hooks:** `useTheme`, `useThemeMode`, `useToast`, `useCopyToClipboard`, `useDisclosure`,
+`useBreakpoint`, `useKeyboard`, `useDebouncedValue`, `usePrevious`.
 
 Icons inside a coloured surface inherit a readable colour automatically — `Button` provides the
 foreground its variant reads against, so an icon in `startContent` follows the theme without a

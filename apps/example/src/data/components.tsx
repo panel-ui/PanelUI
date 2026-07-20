@@ -1830,6 +1830,38 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
+        label: 'Vertical list',
+        render: () => (
+          // Orientation is read from the child: no `horizontal` prop, so the
+          // fades land on the top and bottom edges instead.
+          <ScrollFade size={44} className="h-56 w-full">
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View className="gap-3 py-2">
+                {[
+                  ['Deployed to production', '2 minutes ago'],
+                  ['Migration applied', '18 minutes ago'],
+                  ['Build passed', '24 minutes ago'],
+                  ['Pull request merged', '1 hour ago'],
+                  ['Review requested', '2 hours ago'],
+                  ['Branch pushed', '3 hours ago'],
+                  ['Issue closed', '5 hours ago'],
+                  ['Release tagged', 'Yesterday'],
+                ].map(([title, when]) => (
+                  <View key={title} className="gap-0.5">
+                    <Text size="sm" weight="medium">
+                      {title}
+                    </Text>
+                    <Text size="xs" muted>
+                      {when}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </ScrollFade>
+        ),
+      },
+      {
         label: 'One edge',
         render: () => (
           <ScrollFade size={56} edges="end" className="w-full">

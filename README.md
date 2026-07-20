@@ -36,7 +36,7 @@
 | Badge | Frame | Skeleton |
 | BottomSheet | InlineSelect | Spinner |
 | Button | Input | Switch |
-| Card | | Tabs |
+| Card | Progress | Tabs |
 
 `Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
 `Frame` is a tinted grouping container (Coss's CardFrame) with `Frame.Header`,
@@ -139,6 +139,29 @@ Every component accepts `className`, so you can restyle anything with Tailwind c
   Continue
 </Button>
 ```
+
+### Buttons
+
+`Button` supports icon slots, a `loading` state (renders a variant-matched
+spinner and blocks presses), and `fullWidth`:
+
+```tsx
+<Button loading={saving} startContent={<SaveIcon />} fullWidth>
+  {saving ? 'Saving…' : 'Save changes'}
+</Button>
+```
+
+### Progress
+
+Determinate or indeterminate, animated on the UI thread. `value` is `0–100`:
+
+```tsx
+<Progress value={uploaded} color="success" />
+<Progress indeterminate color="info" />
+```
+
+`color` is `primary | success | warning | destructive | info` and `size` is
+`sm | md | lg`.
 
 ### Dark mode
 

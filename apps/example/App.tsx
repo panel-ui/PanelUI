@@ -1,6 +1,6 @@
 import './global.css';
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { FlatList, ScrollView, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import {
   InlineSelect,
   Input,
   PanelUIProvider,
+  Progress,
   RadioGroup,
   Select,
   Skeleton,
@@ -102,6 +103,15 @@ function Gallery() {
   const [plan, setPlan] = useState('pro');
   const [fruit, setFruit] = useState<string | undefined>();
   const [region, setRegion] = useState<string | undefined>();
+  const [saving, setSaving] = useState(false);
+  const [uploaded, setUploaded] = useState(30);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setUploaded((current) => (current >= 100 ? 0 : current + 20));
+    }, 1200);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <ScrollView
@@ -127,6 +137,16 @@ function Gallery() {
           <Button size="lg">Large</Button>
           <Button disabled>Disabled</Button>
         </View>
+        <Button
+          fullWidth
+          loading={saving}
+          onPress={() => {
+            setSaving(true);
+            setTimeout(() => setSaving(false), 1800);
+          }}
+        >
+          {saving ? 'Saving…' : 'Save changes'}
+        </Button>
       </Section>
 
       <Section title="Badges">
@@ -376,6 +396,15 @@ function Gallery() {
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
           </View>
+        </View>
+      </Section>
+
+      <Section title="Progress">
+        <View className="gap-4">
+          <Progress value={uploaded} />
+          <Progress value={uploaded} color="success" size="sm" />
+          <Progress value={70} color="warning" size="lg" />
+          <Progress indeterminate color="info" />
         </View>
       </Section>
 

@@ -44,6 +44,7 @@ export {
 export { Card, type CardProps } from './components/card';
 export { Checkbox, type CheckboxProps } from './components/checkbox';
 export { Input, type InputProps } from './components/input';
+export { Progress, type ProgressProps } from './components/progress';
 export {
   RadioGroup,
   type RadioGroupProps,

@@ -31,18 +31,23 @@
 
 | | | |
 | --- | --- | --- |
-| Alert | Checkbox | RadioGroup |
-| Avatar | Dialog | Select |
-| Badge | Frame | Skeleton |
-| BottomSheet | InlineSelect | Spinner |
-| Button | Input | Switch |
-| Card | Progress | Tabs |
+| Alert | Frame | Skeleton |
+| Avatar | InlineSelect | Spinner |
+| Badge | Input | Switch |
+| BottomSheet | InputGroup | Tabs |
+| Button | Label | Toast |
+| Card | Progress | Typography |
+| Checkbox | RadioGroup | |
+| Dialog | Select | |
+| EmptyState | | |
 
 `Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
 `Frame` is a tinted grouping container (Coss's CardFrame) with `Frame.Header`,
 `Frame.Panel`, `Frame.Row`, and `Frame.Footer` for grouped list sections.
+`InputGroup` measures its prefix/suffix and pads the input to match.
 
-Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`, `cn`.
+Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`,
+`useThemeMode`, `useToast`, `cn`.
 
 ## Installation
 
@@ -62,6 +67,8 @@ const config = getDefaultConfig(__dirname);
 module.exports = withUniwindConfig(config, {
   cssEntryFile: './global.css',
   dtsFile: './uniwind-types.d.ts',
+  // Only needed if you use the Vercel or Supabase themes.
+  extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
 });
 ```
 
@@ -163,32 +170,68 @@ Determinate or indeterminate, animated on the UI thread. `value` is `0–100`:
 `color` is `primary | success | warning | destructive | info` and `size` is
 `sm | md | lg`.
 
-### Dark mode
+### Toasts
+
+The toast queue lives outside React, so `toast.show()` works from anywhere —
+including API clients and other non-component code:
 
 ```tsx
-const { theme, setTheme } = useTheme();
+const { toast } = useToast();
 
-setTheme('dark');   // force dark
-setTheme('light');  // force light
-setTheme('system'); // follow the device
+toast.show('Link copied');
+toast.show({
+  variant: 'success',
+  label: 'Deployment complete',
+  description: 'panelui.dev is live on production.',
+  actionLabel: 'View',
+  onActionPress: ({ hide }) => hide(),
+});
 ```
 
 ## Theming
 
-PanelUI ships the Coss UI token set as CSS variables in [`theme.css`](packages/panelui/theme.css). Override any token in your own `global.css` after the import:
+Six themes ship in [`theme.css`](packages/panelui/theme.css): `light`, `dark`,
+`vercel`, `vercel-dark`, `supabase` and `supabase-dark`.
+
+Uniwind only gives `light` and `dark` `prefers-color-scheme` handling — any other
+theme compiles to a plain class selector and cannot adapt on its own. So each brand
+ships as a light/dark pair, and `useThemeMode()` treats brand and mode as separate
+axes:
+
+```tsx
+const { theme, setTheme } = useTheme();
+setTheme('vercel-dark');
+setTheme('system'); // follow the device
+
+const { family, mode, setFamily, toggleMode } = useThemeMode();
+toggleMode();          // dark ↔ light, staying in the current brand
+setFamily('supabase'); // switch brand, staying in the current mode
+```
+
+Named themes must be registered in `extraThemes` in your Metro config, or
+`setTheme` throws "it was not registered".
+
+Tokens are CSS variables. Override them in your own `global.css` using the same
+`@variant` shape the library uses — Uniwind does not support the shadcn-style
+`:root` / `.dark` pattern:
 
 ```css
 @import 'panelui-native/theme.css';
 
-:root {
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-}
-
-.dark {
-  --primary: #818cf8;
+@layer theme {
+  :root {
+    @variant light {
+      --color-primary: #4f46e5;
+    }
+    @variant dark {
+      --color-primary: #818cf8;
+    }
+  }
 }
 ```
+
+Every theme must define the same set of variables — Uniwind fails the build with
+"All themes must have the same variables" otherwise.
 
 ## Performance principles
 
@@ -199,7 +242,9 @@ Every component follows the same rules:
 3. Overlays mount lazily and unmount after their exit animation.
 4. Theme switches are applied natively by Uniwind without a tree re-render.
 
-The [example app](apps/example) includes a 1,000-row perf screen used to smoke-test render cost on every release.
+The [example app](apps/example) is an Expo Router showcase — a browsable component
+gallery with a live demo per component and a theme picker, used to smoke-test every
+component in all six themes before a release.
 
 ## Example app
 

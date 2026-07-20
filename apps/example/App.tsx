@@ -3,7 +3,7 @@ import './global.css';
 import { useCallback, useState, type ReactNode } from 'react';
 import { FlatList, ScrollView, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Alert,
   Avatar,
@@ -441,9 +441,15 @@ function PerfScreen() {
 function Showcase() {
   const { theme, setTheme } = useTheme();
   const [screen, setScreen] = useState('gallery');
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
+    // A plain View, not SafeAreaView: native wrappers ignore className, so
+    // insets are applied as style and the theming stays on a real View.
+    <View
+      className="flex-1"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <View className="gap-4 px-5 pt-2">
         <View className="flex-row items-center justify-between">
           <View>
@@ -472,7 +478,7 @@ function Showcase() {
         </Tabs>
       </View>
       {screen === 'gallery' ? <Gallery /> : <PerfScreen />}
-    </SafeAreaView>
+    </View>
   );
 }
 

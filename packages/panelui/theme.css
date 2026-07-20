@@ -40,7 +40,13 @@
   --color-border: unset;
   --color-input: unset;
   --color-ring: unset;
+  /*
+   * Elevation ladder. Each step sits one notch further from the page
+   * background than the last, so nesting Surfaces reads as hierarchy.
+   */
   --color-surface: unset;
+  --color-surface-secondary: unset;
+  --color-surface-tertiary: unset;
   --color-skeleton: unset;
 
   /*
@@ -122,6 +128,8 @@
 
       /* grouping surface (Frame) and skeleton fill */
       --color-surface: #f7f7f7;
+      --color-surface-secondary: #f1f1f1;
+      --color-surface-tertiary: #eaeaea;
       --color-skeleton: rgba(0, 0, 0, 0.1);
 
       /* status fills: -soft = Alert (10%), -subtle = Badge (8%) */
@@ -193,6 +201,8 @@
 
       /* grouping surface (Frame) and skeleton fill */
       --color-surface: #1c1c1c;
+      --color-surface-secondary: #222222;
+      --color-surface-tertiary: #282828;
       --color-skeleton: rgba(255, 255, 255, 0.13);
 
       /* status fills: -soft = Alert (6%), -subtle = Badge (16%) */
@@ -274,6 +284,8 @@
       --color-ring: #171717;
 
       --color-surface: #fafafa;
+      --color-surface-secondary: #f4f4f4;
+      --color-surface-tertiary: #ededed;
       --color-skeleton: rgba(0, 0, 0, 0.08);
 
       --color-info-soft: rgba(0, 112, 243, 0.08);
@@ -334,6 +346,8 @@
       --color-ring: #ededed;
 
       --color-surface: #0f0f0f;
+      --color-surface-secondary: #161616;
+      --color-surface-tertiary: #1d1d1d;
       --color-skeleton: rgba(255, 255, 255, 0.11);
 
       --color-info-soft: rgba(0, 112, 243, 0.12);
@@ -397,6 +411,8 @@
       --color-ring: #3ecf8e;
 
       --color-surface: #f8f9fa;
+      --color-surface-secondary: #f1f3f5;
+      --color-surface-tertiary: #e9ecef;
       --color-skeleton: rgba(0, 0, 0, 0.08);
 
       --color-info-soft: rgba(59, 130, 246, 0.1);
@@ -457,6 +473,8 @@
       --color-ring: #3ecf8e;
 
       --color-surface: #242424;
+      --color-surface-secondary: #2a2a2a;
+      --color-surface-tertiary: #303030;
       --color-skeleton: rgba(255, 255, 255, 0.11);
 
       --color-info-soft: rgba(59, 130, 246, 0.08);

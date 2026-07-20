@@ -6,7 +6,11 @@
  * entry and nothing else.
  */
 import { useEffect, useState, type ReactNode } from 'react';
-import { Image, View } from 'react-native';
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
+import { Image, ScrollView, useWindowDimensions, View } from 'react-native';
 import {
   Accordion,
   Alert,
@@ -122,6 +126,131 @@ function CheckboxDemo() {
     </View>
   );
 }
+
+/** Floating sheet inset from every edge, rather than docked to the bottom. */
+function DetachedSheetDemo() {
+  return (
+    <BottomSheet>
+      <BottomSheet.Trigger>
+        <Button variant="outline">Open detached</Button>
+      </BottomSheet.Trigger>
+      <BottomSheet.Content className="mx-4 mb-6 rounded-3xl border-b">
+        <Text size="lg" weight="semibold" className="mb-1">
+          Rate your order
+        </Text>
+        <Text size="sm" muted className="mb-4">
+          How was the delivery?
+        </Text>
+        <View className="flex-row gap-2 pb-2">
+          <Button variant="outline" className="flex-1">
+            Bad
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Fine
+          </Button>
+          <Button className="flex-1">Great</Button>
+        </View>
+      </BottomSheet.Content>
+    </BottomSheet>
+  );
+}
+
+/** Near-full-screen sheet, for content that needs the room. */
+function FullHeightSheetDemo() {
+  const { height } = useWindowDimensions();
+
+  return (
+    <BottomSheet>
+      <BottomSheet.Trigger>
+        <Button variant="outline">Open full height</Button>
+      </BottomSheet.Trigger>
+      <BottomSheet.Content style={{ height: height * 0.9 }}>
+        <Text size="lg" weight="semibold" className="mb-1">
+          Terms of service
+        </Text>
+        <ScrollView showsVerticalScrollIndicator={false} className="mt-2">
+          <View className="gap-4 pb-8">
+            {Array.from({ length: 12 }, (_, index) => (
+              <Text key={index} size="sm" muted>
+                {index + 1}. This paragraph exists so the sheet has enough
+                content to scroll, which is the point of a full-height sheet.
+              </Text>
+            ))}
+          </View>
+        </ScrollView>
+      </BottomSheet.Content>
+    </BottomSheet>
+  );
+}
+
+/** Inputs inside a sheet, lifted clear of the keyboard. */
+function FormSheetDemo() {
+  const keyboard = useAnimatedKeyboard();
+  const style = useAnimatedStyle(() => ({
+    paddingBottom: keyboard.height.value,
+  }));
+
+  return (
+    <BottomSheet>
+      <BottomSheet.Trigger>
+        <Button variant="outline">Open form</Button>
+      </BottomSheet.Trigger>
+      <BottomSheet.Content>
+        <Animated.View style={style}>
+          <Text size="lg" weight="semibold" className="mb-1">
+            Invite a teammate
+          </Text>
+          <Text size="sm" muted className="mb-4">
+            They will get an email with a join link.
+          </Text>
+          <View className="gap-3 pb-2">
+            <Input label="Email" placeholder="teammate@example.com" />
+            <Input label="Message" placeholder="Optional note" />
+            <Button fullWidth>Send invite</Button>
+          </View>
+        </Animated.View>
+      </BottomSheet.Content>
+    </BottomSheet>
+  );
+}
+
+/** A long list inside a sheet, scrolling independently of the drag gesture. */
+function ScrollableSheetDemo() {
+  return (
+    <BottomSheet>
+      <BottomSheet.Trigger>
+        <Button variant="outline">Open list</Button>
+      </BottomSheet.Trigger>
+      <BottomSheet.Content style={{ maxHeight: 420 }}>
+        <Text size="lg" weight="semibold" className="mb-3">
+          Choose a country
+        </Text>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View className="pb-4">
+            {COUNTRIES.map((country, index) => (
+              <View
+                key={country}
+                className={
+                  index > 0
+                    ? 'flex-row items-center border-t border-border py-3.5'
+                    : 'flex-row items-center py-3.5'
+                }
+              >
+                <Text className="flex-1">{country}</Text>
+                <ChevronRightIcon size={16} />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </BottomSheet.Content>
+    </BottomSheet>
+  );
+}
+
+const COUNTRIES = [
+  'Somalia', 'Kenya', 'Ethiopia', 'Djibouti', 'Uganda', 'Tanzania',
+  'Rwanda', 'Egypt', 'Morocco', 'Nigeria', 'Ghana', 'South Africa',
+];
 
 function CheckboxCardDemo() {
   const [picked, setPicked] = useState<string[]>(['pro']);
@@ -716,6 +845,10 @@ export const COMPONENTS: ComponentEntry[] = [
           </BottomSheet>
         ),
       },
+      { label: 'Detached', render: () => <DetachedSheetDemo /> },
+      { label: 'Full height', render: () => <FullHeightSheetDemo /> },
+      { label: 'Form', render: () => <FormSheetDemo /> },
+      { label: 'Scrollable list', render: () => <ScrollableSheetDemo /> },
       {
         label: 'Action list',
         render: () => (

@@ -249,7 +249,8 @@ Named themes must be listed in `extraThemes` in your Metro config — see [Quick
 
 ## Links
 
-- **Documentation and source:** [github.com/panel-ui/PanelUI](https://github.com/panel-ui/PanelUI)
+- **Documentation:** [panelui.dev](https://panelui.dev) — a page per component, with anatomy, props and examples
+- **Source:** [github.com/panel-ui/PanelUI](https://github.com/panel-ui/PanelUI)
 - **Report an issue:** [github.com/panel-ui/PanelUI/issues](https://github.com/panel-ui/PanelUI/issues)
 - **Changelog:** [releases](https://github.com/panel-ui/PanelUI/releases)
 

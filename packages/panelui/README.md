@@ -1,7 +1,7 @@
 # PanelUI — React Native UI components for Expo, styled with Tailwind CSS
 
 **PanelUI** (`panelui-native`) is an accessible, high-performance React Native component
-library for Expo apps. 24 typed components — buttons, bottom sheets, dialogs, selects,
+library for Expo apps. 26 typed components — buttons, bottom sheets, dialogs, selects,
 toasts, forms — styled with Tailwind CSS v4 and animated on the UI thread with Reanimated.
 Zero native code, so it runs in Expo Go.
 
@@ -90,13 +90,14 @@ overlays, and the toast viewport.
 
 | Component | What it does |
 | --- | --- |
+| `Accordion` | Collapsible sections — five variants, single or multiple selection |
 | `Alert` | Status message with a built-in icon — info, success, warning, destructive |
-| `Avatar` | User image with initials fallback, four sizes |
-| `Badge` | Compact status label with semantic colour variants |
+| `Avatar` | User image with initials fallback, four sizes, `Avatar.Badge` overlay |
+| `Badge` | Status label, dot, or a count clamped at 99+ |
 | `BottomSheet` | Draggable bottom sheet with swipe-to-dismiss |
-| `Button` | Pressable action with variants, sizes, loading state and icon slots |
+| `Button` | Variants (including social sign-in), sizes, loading, theme-aware icon slots |
 | `Card` | Content surface with `Header`, `Content` and `Footer` |
-| `Checkbox` | Animated checkbox with label and description |
+| `Checkbox` | Animated checkbox with label, description, and a checkable card variant |
 | `Dialog` | Modal dialog with backdrop, title, description and footer actions |
 | `EmptyState` | Placeholder for an empty list or screen, with a stacked-icon media slot |
 | `Frame` | Widget shell — header row with action, inset panel of rows, caption footer |
@@ -112,11 +113,17 @@ overlays, and the toast viewport.
 | `Steps` | Stepper for multi-step flows, horizontal or vertical |
 | `Switch` | Animated on/off toggle |
 | `Tabs` | Segmented navigation with animated indicator |
+| `Timeline` | Vertical sequence of events — dot, icon, numbered or card |
 | `Toast` | Transient notification queue with swipe-to-dismiss |
 | `Typography` | Semantic text presets — `h1`–`h6`, body sizes, inline code |
 
 Plus `PanelUIProvider`, `Portal`, `AnimatedPressable`, `Text`, `useTheme`, `useThemeMode`,
-`useToast`, a set of SVG icons, and the `cn` class-merging helper.
+`useToast`, a set of SVG icons (with brand marks for Google, Facebook and Apple), and the `cn`
+class-merging helper.
+
+Icons inside a coloured surface inherit a readable colour automatically — `Button` provides the
+foreground its variant reads against, so an icon in `startContent` follows the theme without a
+hardcoded hex. Wrap your own surfaces in `IconColorProvider` to do the same.
 
 Every component takes a `className`, so anything can be restyled with Tailwind utilities:
 

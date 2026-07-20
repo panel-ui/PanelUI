@@ -31,15 +31,15 @@
 
 | | | |
 | --- | --- | --- |
+| Accordion | EmptyState | Select |
 | Alert | Frame | Skeleton |
 | Avatar | InlineSelect | Spinner |
-| Badge | Input | Switch |
-| BottomSheet | InputGroup | Tabs |
-| Button | Label | Toast |
-| Card | Progress | Typography |
-| Checkbox | RadioGroup | Steps |
-| Dialog | Select | |
-| EmptyState | | |
+| Badge | Input | Steps |
+| BottomSheet | InputGroup | Switch |
+| Button | Label | Tabs |
+| Card | Progress | Timeline |
+| Checkbox | RadioGroup | Toast |
+| Dialog | | Typography |
 
 `Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
 `Frame` is a widget shell: a titled header row with an action on the right, an

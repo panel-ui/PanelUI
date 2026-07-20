@@ -2,7 +2,17 @@
 export { PanelUIProvider, type PanelUIProviderProps } from './providers/panel-ui-provider';
 
 // Theme
-export { useTheme, type ThemeName } from './theme/use-theme';
+export {
+  useTheme,
+  useThemeMode,
+  PANEL_THEMES,
+  PANEL_THEME_NAMES,
+  PANEL_EXTRA_THEMES,
+  type ThemeName,
+  type ThemeMode,
+  type PanelTheme,
+  type PanelThemeFamily,
+} from './theme/use-theme';
 
 // Primitives
 export { Portal, PortalHost, PortalProvider } from './primitives/portal';

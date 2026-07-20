@@ -190,5 +190,231 @@
       --color-destructive-soft: rgba(241, 87, 87, 0.06);
       --color-destructive-subtle: rgba(241, 87, 87, 0.16);
     }
+
+    /*
+     * Named themes.
+     *
+     * Uniwind only gives `light` and `dark` prefers-color-scheme handling;
+     * every other theme compiles to a plain class selector. That means a
+     * named theme cannot adapt on its own, so each brand ships as a
+     * light/dark pair and the app switches between them explicitly (see
+     * `useThemeMode()`).
+     *
+     * Register them in your metro config or setTheme() will throw:
+     *   withUniwindConfig(config, {
+     *     extraThemes: ['vercel', 'vercel-dark', 'supabase', 'supabase-dark'],
+     *   })
+     *
+     * Every theme must define every token — Uniwind fails the build with
+     * "All themes must have the same variables" otherwise.
+     */
+
+    /* Vercel — Geist. Pure black/white, #0070f3 blue, hairline borders. */
+    @variant vercel {
+      --color-background: #ffffff;
+      --color-foreground: #171717;
+
+      --color-card: #ffffff;
+      --color-card-foreground: #171717;
+
+      --color-popover: #ffffff;
+      --color-popover-foreground: #171717;
+
+      --color-primary: #171717;
+      --color-primary-foreground: #ffffff;
+
+      --color-secondary: rgba(0, 0, 0, 0.05);
+      --color-secondary-foreground: #171717;
+
+      --color-muted: rgba(0, 0, 0, 0.05);
+      --color-muted-foreground: #666666;
+
+      --color-accent: rgba(0, 0, 0, 0.05);
+      --color-accent-foreground: #171717;
+
+      --color-destructive: #e5484d;
+      --color-destructive-foreground: #c62b30;
+
+      --color-info: #0070f3;
+      --color-info-foreground: #0060d1;
+
+      --color-success: #45a557;
+      --color-success-foreground: #297c3b;
+
+      --color-warning: #f5a623;
+      --color-warning-foreground: #a35200;
+
+      --color-border: rgba(0, 0, 0, 0.09);
+      --color-input: rgba(0, 0, 0, 0.12);
+      --color-ring: #171717;
+
+      --color-surface: #fafafa;
+      --color-skeleton: rgba(0, 0, 0, 0.08);
+
+      --color-info-soft: rgba(0, 112, 243, 0.08);
+      --color-info-subtle: rgba(0, 112, 243, 0.06);
+      --color-success-soft: rgba(69, 165, 87, 0.1);
+      --color-success-subtle: rgba(69, 165, 87, 0.08);
+      --color-warning-soft: rgba(245, 166, 35, 0.1);
+      --color-warning-subtle: rgba(245, 166, 35, 0.08);
+      --color-destructive-soft: rgba(229, 72, 77, 0.1);
+      --color-destructive-subtle: rgba(229, 72, 77, 0.08);
+    }
+
+    @variant vercel-dark {
+      --color-background: #000000;
+      --color-foreground: #ededed;
+
+      --color-card: #0a0a0a;
+      --color-card-foreground: #ededed;
+
+      --color-popover: #101010;
+      --color-popover-foreground: #ededed;
+
+      --color-primary: #ededed;
+      --color-primary-foreground: #0a0a0a;
+
+      --color-secondary: rgba(255, 255, 255, 0.09);
+      --color-secondary-foreground: #ededed;
+
+      --color-muted: rgba(255, 255, 255, 0.09);
+      --color-muted-foreground: #a1a1a1;
+
+      --color-accent: rgba(255, 255, 255, 0.09);
+      --color-accent-foreground: #ededed;
+
+      --color-destructive: #e5484d;
+      --color-destructive-foreground: #ff6369;
+
+      --color-info: #0070f3;
+      --color-info-foreground: #52a8ff;
+
+      --color-success: #45a557;
+      --color-success-foreground: #62c073;
+
+      --color-warning: #f5a623;
+      --color-warning-foreground: #f1a10d;
+
+      --color-border: rgba(255, 255, 255, 0.09);
+      --color-input: rgba(255, 255, 255, 0.14);
+      --color-ring: #ededed;
+
+      --color-surface: #0f0f0f;
+      --color-skeleton: rgba(255, 255, 255, 0.11);
+
+      --color-info-soft: rgba(0, 112, 243, 0.12);
+      --color-info-subtle: rgba(0, 112, 243, 0.18);
+      --color-success-soft: rgba(69, 165, 87, 0.1);
+      --color-success-subtle: rgba(69, 165, 87, 0.16);
+      --color-warning-soft: rgba(245, 166, 35, 0.1);
+      --color-warning-subtle: rgba(245, 166, 35, 0.16);
+      --color-destructive-soft: rgba(229, 72, 77, 0.1);
+      --color-destructive-subtle: rgba(229, 72, 77, 0.16);
+    }
+
+    /* Supabase — #3ecf8e brand green on warm-neutral greys. */
+    @variant supabase {
+      --color-background: #ffffff;
+      --color-foreground: #171717;
+
+      --color-card: #ffffff;
+      --color-card-foreground: #171717;
+
+      --color-popover: #ffffff;
+      --color-popover-foreground: #171717;
+
+      /* Brand green is too light for white text; light mode uses the
+         darker ramp step so the contrast ratio holds. */
+      --color-primary: #24b47e;
+      --color-primary-foreground: #ffffff;
+
+      --color-secondary: rgba(0, 0, 0, 0.05);
+      --color-secondary-foreground: #171717;
+
+      --color-muted: rgba(0, 0, 0, 0.05);
+      --color-muted-foreground: #707070;
+
+      --color-accent: rgba(62, 207, 142, 0.1);
+      --color-accent-foreground: #16794c;
+
+      --color-destructive: #ef4444;
+      --color-destructive-foreground: #b91c1c;
+
+      --color-info: #3b82f6;
+      --color-info-foreground: #1d4ed8;
+
+      --color-success: #24b47e;
+      --color-success-foreground: #16794c;
+
+      --color-warning: #f59e0b;
+      --color-warning-foreground: #b45309;
+
+      --color-border: rgba(0, 0, 0, 0.08);
+      --color-input: rgba(0, 0, 0, 0.1);
+      --color-ring: #3ecf8e;
+
+      --color-surface: #f8f9fa;
+      --color-skeleton: rgba(0, 0, 0, 0.08);
+
+      --color-info-soft: rgba(59, 130, 246, 0.1);
+      --color-info-subtle: rgba(59, 130, 246, 0.08);
+      --color-success-soft: rgba(36, 180, 126, 0.1);
+      --color-success-subtle: rgba(36, 180, 126, 0.08);
+      --color-warning-soft: rgba(245, 158, 11, 0.1);
+      --color-warning-subtle: rgba(245, 158, 11, 0.08);
+      --color-destructive-soft: rgba(239, 68, 68, 0.1);
+      --color-destructive-subtle: rgba(239, 68, 68, 0.08);
+    }
+
+    @variant supabase-dark {
+      --color-background: #1c1c1c;
+      --color-foreground: #ededed;
+
+      --color-card: #1f1f1f;
+      --color-card-foreground: #ededed;
+
+      --color-popover: #232323;
+      --color-popover-foreground: #ededed;
+
+      --color-primary: #3ecf8e;
+      --color-primary-foreground: #052e1b;
+
+      --color-secondary: rgba(255, 255, 255, 0.07);
+      --color-secondary-foreground: #ededed;
+
+      --color-muted: rgba(255, 255, 255, 0.07);
+      --color-muted-foreground: #8f8f8f;
+
+      --color-accent: rgba(62, 207, 142, 0.12);
+      --color-accent-foreground: #3ecf8e;
+
+      --color-destructive: #f15757;
+      --color-destructive-foreground: #f87171;
+
+      --color-info: #3b82f6;
+      --color-info-foreground: #60a5fa;
+
+      --color-success: #3ecf8e;
+      --color-success-foreground: #4ade80;
+
+      --color-warning: #f59e0b;
+      --color-warning-foreground: #fbbf24;
+
+      --color-border: rgba(255, 255, 255, 0.07);
+      --color-input: rgba(255, 255, 255, 0.1);
+      --color-ring: #3ecf8e;
+
+      --color-surface: #242424;
+      --color-skeleton: rgba(255, 255, 255, 0.11);
+
+      --color-info-soft: rgba(59, 130, 246, 0.08);
+      --color-info-subtle: rgba(59, 130, 246, 0.16);
+      --color-success-soft: rgba(62, 207, 142, 0.08);
+      --color-success-subtle: rgba(62, 207, 142, 0.16);
+      --color-warning-soft: rgba(245, 158, 11, 0.08);
+      --color-warning-subtle: rgba(245, 158, 11, 0.16);
+      --color-destructive-soft: rgba(241, 87, 87, 0.08);
+      --color-destructive-subtle: rgba(241, 87, 87, 0.16);
+    }
   }
 }

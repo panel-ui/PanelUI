@@ -47,7 +47,19 @@ export {
 } from './components/tabs';
 export { Card, type CardProps } from './components/card';
 export { Checkbox, type CheckboxProps } from './components/checkbox';
+export {
+  EmptyState,
+  type EmptyStateProps,
+  type EmptyStateMediaProps,
+} from './components/empty-state';
 export { Input, type InputProps } from './components/input';
+export {
+  InputGroup,
+  type InputGroupProps,
+  type InputGroupInputProps,
+  type InputGroupDecoratorProps,
+} from './components/input-group';
+export { Label, type LabelProps, type LabelTextProps } from './components/label';
 export { Progress, type ProgressProps } from './components/progress';
 export {
   RadioGroup,
@@ -57,6 +69,14 @@ export {
 export { Skeleton, type SkeletonProps } from './components/skeleton';
 export { Spinner, type SpinnerProps } from './components/spinner';
 export { Switch, type SwitchProps } from './components/switch';
+export {
+  Typography,
+  type TypographyProps,
+  type TypographyType,
+  type TypographyHeadingProps,
+  type TypographyParagraphProps,
+  type TypographyCodeProps,
+} from './components/typography';
 
 // Icons
 export {

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PortalHost, PortalProvider } from '../primitives/portal';
+import { ToastViewport } from '../components/toast';
 import { cn } from '../utils/cn';
 
 export interface PanelUIProviderProps {
@@ -40,6 +41,8 @@ export function PanelUIProvider({
       <View className={cn('flex-1', background && 'bg-background', className)}>
         <PortalProvider>
           {children}
+          {/* Sits before PortalHost so it can portal into it. */}
+          <ToastViewport />
           <PortalHost />
         </PortalProvider>
       </View>

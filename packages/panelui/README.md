@@ -113,7 +113,7 @@ overlays, and the toast viewport.
 | `Steps` | Stepper for multi-step flows, horizontal or vertical |
 | `Switch` | Animated on/off toggle |
 | `Tabs` | Segmented navigation with animated indicator |
-| `Timeline` | Vertical sequence of events — dot, icon, numbered or card |
+| `Timeline` | Vertical sequence of events — dot, icon, numbered, card or compact, with per-item tones |
 | `Toast` | Transient notification queue with swipe-to-dismiss |
 | `Typography` | Semantic text presets — `h1`–`h6`, body sizes, inline code |
 

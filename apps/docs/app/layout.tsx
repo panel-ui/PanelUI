@@ -4,6 +4,10 @@ import type { Metadata } from 'next';
 import { Geist_Mono, Inter } from 'next/font/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import { absoluteUrl, site } from '@/lib/site';
+import { cn } from "@/lib/utils";
+
+const interHeading = Inter({subsets:['latin'],variable:'--font-heading'});
+
 
 /*
  * The `variable` names must be exactly --font-sans and --font-mono: Coss
@@ -11,8 +15,8 @@ import { absoluteUrl, site } from '@/lib/site';
  * silently falls back to system UI. --font-heading is aliased to --font-sans
  * in global.css.
  */
-const inter = Inter({ variable: '--font-sans', subsets: ['latin'] });
-const geistMono = Geist_Mono({ variable: '--font-mono', subsets: ['latin'] });
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -64,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable}`}
+      className={cn(inter.variable, interHeading.variable, geistMono.variable)}
       suppressHydrationWarning
     >
       {/* `isolate` keeps Base UI portals layering against this root. */}

@@ -68,6 +68,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = absoluteUrl(page.url);
   const title = page.data.title;
   const description = page.data.description ?? site.description;
+  const ogImage = absoluteUrl(
+    `/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
+  );
 
   return {
     title,
@@ -79,11 +82,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${title} — ${site.name}`,
       description,
       siteName: site.name,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} — ${site.name}`,
       description,
+      images: [ogImage],
     },
   };
 }

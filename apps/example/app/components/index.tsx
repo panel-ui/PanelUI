@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
+import Animated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronRightIcon,
@@ -37,6 +41,15 @@ export default function ComponentListScreen() {
   const insets = useSafeAreaInsets();
   const { mode } = useThemeMode();
   const tint = mode === 'dark' ? '#818181' : '#686868';
+
+  // Ride above the keyboard instead of hiding under it. On the UI thread, so
+  // the bar tracks the keyboard frame-for-frame as it opens.
+  const keyboard = useAnimatedKeyboard();
+  const searchBarStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: -Math.max(keyboard.height.value - insets.bottom, 0) },
+    ],
+  }));
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -76,10 +89,10 @@ export default function ComponentListScreen() {
         }
       />
 
-      <View
+      <Animated.View
         pointerEvents="box-none"
         className="absolute left-0 right-0 px-5"
-        style={{ bottom: insets.bottom + 16 }}
+        style={[{ bottom: insets.bottom + 16 }, searchBarStyle]}
       >
         <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 shadow-lg">
           <SearchIcon size={18} color={tint} />
@@ -94,7 +107,7 @@ export default function ComponentListScreen() {
             autoCapitalize="none"
           />
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }

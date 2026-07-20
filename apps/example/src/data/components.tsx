@@ -6,7 +6,7 @@
  * entry and nothing else.
  */
 import { useEffect, useState, type ReactNode } from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import {
   Alert,
   Avatar,
@@ -15,6 +15,7 @@ import {
   Button,
   Card,
   Checkbox,
+  ChevronRightIcon,
   Dialog,
   EmptyState,
   Frame,
@@ -28,6 +29,7 @@ import {
   Select,
   Skeleton,
   Spinner,
+  Steps,
   Switch,
   Tabs,
   Text,
@@ -35,6 +37,15 @@ import {
   Typography,
   useToast,
 } from 'panelui-native';
+
+const PHOTO = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=60';
+
+/** Stable remote portraits for the Avatar demos. */
+const AVATARS = [
+  'https://i.pravatar.cc/150?img=12',
+  'https://i.pravatar.cc/150?img=32',
+  'https://i.pravatar.cc/150?img=47',
+];
 
 export interface Demo {
   /** Label shown in the variant picker. */
@@ -213,6 +224,60 @@ function PasswordInputDemo() {
   );
 }
 
+const STEP_DATA = [
+  { title: 'Account', description: 'Create your login' },
+  { title: 'Profile', description: 'Tell us about you' },
+  { title: 'Billing', description: 'Add a payment method' },
+];
+
+function StepsDemo() {
+  const [step, setStep] = useState(1);
+
+  return (
+    <View className="w-full gap-6">
+      <Steps value={step} onValueChange={setStep}>
+        {STEP_DATA.map((item, index) => (
+          <Steps.Item
+            key={item.title}
+            step={index}
+            className={index < STEP_DATA.length - 1 ? 'flex-1' : undefined}
+          >
+            <Steps.Trigger>
+              <Steps.Indicator />
+            </Steps.Trigger>
+            {index < STEP_DATA.length - 1 ? <Steps.Separator /> : null}
+          </Steps.Item>
+        ))}
+      </Steps>
+      <View className="items-center gap-1">
+        <Text weight="medium">{STEP_DATA[step]?.title}</Text>
+        <Text size="sm" muted>
+          {STEP_DATA[step]?.description}
+        </Text>
+      </View>
+      <View className="flex-row gap-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          disabled={step === 0}
+          onPress={() => setStep((current) => Math.max(0, current - 1))}
+        >
+          Back
+        </Button>
+        <Button
+          className="flex-1"
+          disabled={step === STEP_DATA.length - 1}
+          onPress={() =>
+            setStep((current) => Math.min(STEP_DATA.length - 1, current + 1))
+          }
+        >
+          Next
+        </Button>
+      </View>
+    </View>
+  );
+}
+
 function ToastDemo() {
   const { toast } = useToast();
 
@@ -357,6 +422,35 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'With image',
+        render: () => (
+          <View className="flex-row items-end gap-3">
+            <Avatar size="sm" source={{ uri: AVATARS[0] }} fallback="AB" />
+            <Avatar source={{ uri: AVATARS[1] }} fallback="CD" />
+            <Avatar size="lg" source={{ uri: AVATARS[2] }} fallback="EF" />
+          </View>
+        ),
+      },
+      {
+        label: 'Stacked group',
+        render: () => (
+          <View className="flex-row">
+            {AVATARS.map((uri, index) => (
+              <View key={uri} style={{ marginLeft: index === 0 ? 0 : -14 }}>
+                <Avatar
+                  source={{ uri }}
+                  fallback={String.fromCharCode(65 + index)}
+                  className="border-2 border-background"
+                />
+              </View>
+            ))}
+            <View style={{ marginLeft: -14 }}>
+              <Avatar fallback="+5" className="border-2 border-background" />
+            </View>
+          </View>
+        ),
+      },
     ],
   },
   {
@@ -375,6 +469,28 @@ export const COMPONENTS: ComponentEntry[] = [
             <Badge variant="warning">Warning</Badge>
             <Badge variant="destructive">Error</Badge>
             <Badge variant="info">Info</Badge>
+          </View>
+        ),
+      },
+      {
+        label: 'With status dot',
+        render: () => (
+          <View className="gap-2">
+            {([
+              ['success', '#10b981', 'Operational'],
+              ['warning', '#f59e0b', 'Degraded'],
+              ['destructive', '#ef4444', 'Outage'],
+            ] as const).map(([variant, dot, text]) => (
+              <Badge key={variant} variant={variant}>
+                <View
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: dot }}
+                />
+                <Text size="xs" weight="medium">
+                  {text}
+                </Text>
+              </Badge>
+            ))}
           </View>
         ),
       },
@@ -402,6 +518,27 @@ export const COMPONENTS: ComponentEntry[] = [
               <View className="gap-3 pb-2">
                 <Input placeholder="https://panelui.dev/p/xK2f9" />
                 <Button>Copy link</Button>
+              </View>
+            </BottomSheet.Content>
+          </BottomSheet>
+        ),
+      },
+      {
+        label: 'Action list',
+        render: () => (
+          <BottomSheet>
+            <BottomSheet.Trigger>
+              <Button variant="outline">Open actions</Button>
+            </BottomSheet.Trigger>
+            <BottomSheet.Content>
+              <Text size="lg" weight="semibold" className="mb-3">
+                Project
+              </Text>
+              <View className="gap-2 pb-2">
+                <Button variant="ghost" fullWidth>Rename</Button>
+                <Button variant="ghost" fullWidth>Duplicate</Button>
+                <Button variant="ghost" fullWidth>Archive</Button>
+                <Button variant="destructive" fullWidth>Delete</Button>
               </View>
             </BottomSheet.Content>
           </BottomSheet>
@@ -448,6 +585,26 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       { label: 'Loading', render: () => <LoadingButtonDemo /> },
+      {
+        label: 'With icons',
+        render: () => (
+          <View className="w-full gap-2">
+            <Button fullWidth startContent={<SearchIcon size={16} color="#fafafa" />}>
+              Search
+            </Button>
+            <Button
+              fullWidth
+              variant="outline"
+              endContent={<ChevronRightIcon size={16} />}
+            >
+              Continue
+            </Button>
+            <Button size="icon" variant="outline">
+              <SearchIcon size={18} />
+            </Button>
+          </View>
+        ),
+      },
     ],
   },
   {
@@ -499,13 +656,70 @@ export const COMPONENTS: ComponentEntry[] = [
           </Card>
         ),
       },
+      {
+        label: 'With image',
+        render: () => (
+          <Card className="w-full overflow-hidden">
+            <Image
+              source={{ uri: PHOTO }}
+              style={{ width: '100%', height: 180 }}
+              resizeMode="cover"
+            />
+            <Card.Header>
+              <Text size="sm" weight="medium" className="text-info-foreground">
+                $450
+              </Text>
+              <Card.Title>Living room Sofa</Card.Title>
+              <Card.Description>
+                Perfect for modern tropical spaces and baroque inspired rooms.
+              </Card.Description>
+            </Card.Header>
+            <Card.Footer>
+              <Button fullWidth>Buy now</Button>
+            </Card.Footer>
+          </Card>
+        ),
+      },
+      {
+        label: 'Horizontal',
+        render: () => (
+          <Card className="w-full overflow-hidden">
+            <Card.Content className="flex-row items-center gap-4 p-3">
+              <Image
+                source={{ uri: PHOTO }}
+                style={{ width: 72, height: 72, borderRadius: 12 }}
+                resizeMode="cover"
+              />
+              <View className="flex-1 gap-0.5">
+                <Text weight="semibold">Accent chair</Text>
+                <Text size="sm" muted>
+                  Walnut and boucle
+                </Text>
+                <Badge variant="success">In stock</Badge>
+              </View>
+            </Card.Content>
+          </Card>
+        ),
+      },
     ],
   },
   {
     slug: 'checkbox',
     name: 'Checkbox',
     summary: 'Multi-select control with label',
-    demos: [{ label: 'Basic', render: () => <CheckboxDemo /> }],
+    demos: [
+      { label: 'With descriptions', render: () => <CheckboxDemo /> },
+      {
+        label: 'States',
+        render: () => (
+          <View className="gap-4">
+            <Checkbox checked onCheckedChange={() => {}} label="Checked" />
+            <Checkbox checked={false} onCheckedChange={() => {}} label="Unchecked" />
+            <Checkbox checked disabled onCheckedChange={() => {}} label="Disabled" />
+          </View>
+        ),
+      },
+    ],
   },
   {
     slug: 'dialog',
@@ -535,6 +749,28 @@ export const COMPONENTS: ComponentEntry[] = [
                   <Button size="sm" variant="destructive">
                     Delete
                   </Button>
+                </Dialog.Close>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog>
+        ),
+      },
+      {
+        label: 'Informational',
+        render: () => (
+          <Dialog>
+            <Dialog.Trigger>
+              <Button variant="outline">What's new</Button>
+            </Dialog.Trigger>
+            <Dialog.Content>
+              <Dialog.Title>PanelUI 0.4</Dialog.Title>
+              <Dialog.Description>
+                Themes now change corner radius as well as colour, and there is
+                a new Steps component for multi-step flows.
+              </Dialog.Description>
+              <Dialog.Footer>
+                <Dialog.Close>
+                  <Button size="sm">Got it</Button>
                 </Dialog.Close>
               </Dialog.Footer>
             </Dialog.Content>
@@ -626,13 +862,52 @@ export const COMPONENTS: ComponentEntry[] = [
           </Frame>
         ),
       },
+      {
+        label: 'Settings group',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Preferences</Frame.Title>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['Language', 'English'],
+                ['Region', 'United States'],
+                ['Time zone', 'GMT+3'],
+              ].map(([label, value], index) => (
+                <Frame.Row key={label} divided={index > 0}>
+                  <Text size="sm" className="flex-1">
+                    {label}
+                  </Text>
+                  <Text size="sm" muted>
+                    {value}
+                  </Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
     ],
   },
   {
     slug: 'inline-select',
     name: 'InlineSelect',
     summary: 'Picker that expands in place',
-    demos: [{ label: 'Basic', render: () => <InlineSelectDemo /> }],
+    demos: [
+      { label: 'Basic', render: () => <InlineSelectDemo /> },
+      {
+        label: 'In a form',
+        render: () => (
+          <Card className="w-full">
+            <Card.Content className="gap-4 p-4">
+              <Input label="Company" placeholder="Acme Inc." />
+              <InlineSelectDemo />
+            </Card.Content>
+          </Card>
+        ),
+      },
+    ],
   },
   {
     slug: 'input',
@@ -656,6 +931,24 @@ export const COMPONENTS: ComponentEntry[] = [
             />
             <Input label="Plan" value="Premium" disabled />
           </View>
+        ),
+      },
+      {
+        label: 'In a form',
+        render: () => (
+          <Card className="w-full">
+            <Card.Header>
+              <Card.Title>Sign in</Card.Title>
+              <Card.Description>Welcome back.</Card.Description>
+            </Card.Header>
+            <Card.Content className="gap-4">
+              <Input label="Email" placeholder="you@example.com" />
+              <Input label="Password" secureTextEntry placeholder="••••••••" />
+            </Card.Content>
+            <Card.Footer>
+              <Button fullWidth>Continue</Button>
+            </Card.Footer>
+          </Card>
         ),
       },
     ],
@@ -718,25 +1011,90 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'Custom layout',
+        render: () => (
+          <View className="w-full gap-1.5">
+            <Label isRequired>
+              <Label.Text className="text-base font-semibold">
+                API key
+              </Label.Text>
+            </Label>
+            <Input placeholder="sk-…" />
+          </View>
+        ),
+      },
     ],
   },
   {
     slug: 'progress',
     name: 'Progress',
     summary: 'Determinate and indeterminate progress bar',
-    demos: [{ label: 'Animated', render: () => <ProgressDemo /> }],
+    demos: [
+      { label: 'Animated', render: () => <ProgressDemo /> },
+      {
+        label: 'Colors',
+        render: () => (
+          <View className="w-full gap-4">
+            <Progress value={35} />
+            <Progress value={55} color="success" />
+            <Progress value={75} color="warning" />
+            <Progress value={90} color="destructive" />
+          </View>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-4">
+            <Progress value={60} size="sm" />
+            <Progress value={60} />
+            <Progress value={60} size="lg" />
+          </View>
+        ),
+      },
+    ],
   },
   {
     slug: 'radio-group',
     name: 'RadioGroup',
     summary: 'Single-select list of options',
-    demos: [{ label: 'Basic', render: () => <RadioGroupDemo /> }],
+    demos: [
+      { label: 'Plans', render: () => <RadioGroupDemo /> },
+      {
+        label: 'In a card',
+        render: () => (
+          <Card className="w-full">
+            <Card.Header>
+              <Card.Title>Delivery speed</Card.Title>
+              <Card.Description>Choose how fast you need it.</Card.Description>
+            </Card.Header>
+            <Card.Content>
+              <RadioGroupDemo />
+            </Card.Content>
+          </Card>
+        ),
+      },
+    ],
   },
   {
     slug: 'select',
     name: 'Select',
     summary: 'Picker that opens in a bottom sheet',
-    demos: [{ label: 'Basic', render: () => <SelectDemo /> }],
+    demos: [
+      { label: 'Basic', render: () => <SelectDemo /> },
+      {
+        label: 'In a form',
+        render: () => (
+          <Card className="w-full">
+            <Card.Content className="gap-4 p-4">
+              <Input label="Full name" placeholder="Khalid Abdi" />
+              <SelectDemo />
+            </Card.Content>
+          </Card>
+        ),
+      },
+    ],
   },
   {
     slug: 'skeleton',
@@ -758,6 +1116,19 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'Card placeholder',
+        render: () => (
+          <Card className="w-full">
+            <Card.Content className="gap-3 p-4">
+              <Skeleton className="h-40 w-full rounded-xl" />
+              <Skeleton className="h-5 w-2/3" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+            </Card.Content>
+          </Card>
+        ),
+      },
     ],
   },
   {
@@ -775,13 +1146,92 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'In context',
+        render: () => (
+          <Card className="w-full">
+            <Card.Content className="items-center gap-3 p-8">
+              <Spinner size="lg" />
+              <Text size="sm" muted>
+                Loading your projects…
+              </Text>
+            </Card.Content>
+          </Card>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'steps',
+    name: 'Steps',
+    summary: 'Stepper for multi-step flows',
+    demos: [
+      { label: 'Horizontal', render: () => <StepsDemo /> },
+      {
+        label: 'Vertical',
+        render: () => (
+          <Steps defaultValue={1} orientation="vertical" className="w-full">
+            {STEP_DATA.map((step, index) => (
+              <Steps.Item key={step.title} step={index}>
+                <Steps.Trigger>
+                  <Steps.Indicator />
+                  <View className="flex-1">
+                    <Steps.Title>{step.title}</Steps.Title>
+                    <Steps.Description>{step.description}</Steps.Description>
+                  </View>
+                </Steps.Trigger>
+                {index < STEP_DATA.length - 1 ? <Steps.Separator /> : null}
+              </Steps.Item>
+            ))}
+          </Steps>
+        ),
+      },
+      {
+        label: 'Loading',
+        render: () => (
+          <Steps value={1} orientation="vertical" className="w-full">
+            {STEP_DATA.map((step, index) => (
+              <Steps.Item key={step.title} step={index} loading={index === 1}>
+                <Steps.Trigger>
+                  <Steps.Indicator />
+                  <View className="flex-1">
+                    <Steps.Title>{step.title}</Steps.Title>
+                  </View>
+                </Steps.Trigger>
+                {index < STEP_DATA.length - 1 ? <Steps.Separator /> : null}
+              </Steps.Item>
+            ))}
+          </Steps>
+        ),
+      },
     ],
   },
   {
     slug: 'switch',
     name: 'Switch',
     summary: 'On/off toggle',
-    demos: [{ label: 'Settings rows', render: () => <SwitchDemo /> }],
+    demos: [
+      { label: 'Settings rows', render: () => <SwitchDemo /> },
+      {
+        label: 'States',
+        render: () => (
+          <View className="gap-5">
+            <View className="flex-row items-center gap-3">
+              <Switch value onValueChange={() => {}} />
+              <Text size="sm" muted>On</Text>
+            </View>
+            <View className="flex-row items-center gap-3">
+              <Switch value={false} onValueChange={() => {}} />
+              <Text size="sm" muted>Off</Text>
+            </View>
+            <View className="flex-row items-center gap-3">
+              <Switch value disabled onValueChange={() => {}} />
+              <Text size="sm" muted>Disabled</Text>
+            </View>
+          </View>
+        ),
+      },
+    ],
   },
   {
     slug: 'tabs',
@@ -830,13 +1280,62 @@ export const COMPONENTS: ComponentEntry[] = [
           </Tabs>
         ),
       },
+      {
+        label: 'Two panels',
+        render: () => (
+          <Tabs defaultValue="preview" className="w-full">
+            <Tabs.List>
+              <Tabs.Trigger value="preview">Preview</Tabs.Trigger>
+              <Tabs.Trigger value="code">Code</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="preview">
+              <Card>
+                <Card.Content className="items-center p-8">
+                  <Button>Click me</Button>
+                </Card.Content>
+              </Card>
+            </Tabs.Content>
+            <Tabs.Content value="code">
+              <Card>
+                <Card.Content className="p-4">
+                  <Typography.Code>{'<Button>Click me</Button>'}</Typography.Code>
+                </Card.Content>
+              </Card>
+            </Tabs.Content>
+          </Tabs>
+        ),
+      },
     ],
   },
   {
     slug: 'toast',
     name: 'Toast',
     summary: 'Transient notification with swipe to dismiss',
-    demos: [{ label: 'Usage patterns', render: () => <ToastDemo /> }],
+    demos: [
+      { label: 'Usage patterns', render: () => <ToastDemo /> },
+      {
+        label: 'Anatomy',
+        render: () => (
+          <View className="w-full gap-3">
+            <Toast variant="success">
+              <Toast.Indicator />
+              <Toast.Content>
+                <Toast.Title>Changes saved</Toast.Title>
+                <Toast.Description>Your profile is up to date.</Toast.Description>
+              </Toast.Content>
+              <Toast.Close />
+            </Toast>
+            <Toast variant="warning">
+              <Toast.Indicator />
+              <Toast.Content>
+                <Toast.Title>Storage almost full</Toast.Title>
+              </Toast.Content>
+              <Toast.Action>Upgrade</Toast.Action>
+            </Toast>
+          </View>
+        ),
+      },
+    ],
   },
   {
     slug: 'typography',

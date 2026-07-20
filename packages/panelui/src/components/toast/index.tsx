@@ -13,6 +13,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
@@ -32,6 +33,7 @@ import Animated, {
   withDecay,
   withSpring,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tv, type VariantProps } from 'tailwind-variants';
@@ -59,8 +61,12 @@ const DISMISS_VELOCITY = 500;
 const RUBBER_BAND_LIMIT = 40;
 /** How far a toast travels on entry. Short, so the spring has little to settle. */
 const ENTER_OFFSET = 100;
-/** Newest toasts only; older ones are dropped rather than stacking off-screen. */
+/** Newest toasts only; older ones fade out rather than stacking off-screen. */
 const MAX_VISIBLE = 3;
+/** How far each toast behind the front one peeks out. */
+const STACK_OFFSET = 10;
+/** Scale of the toast one step back in the deck. */
+const STACK_SCALE_STEP = 0.97;
 
 /*
  * Entering/exiting animations, from heroui-inc/heroui-native
@@ -279,11 +285,40 @@ export const Toast = Object.assign(ToastRoot, {
  * toast came from dismisses it, dragging the other way rubber-bands against a
  * hard limit. Matches heroui-native's toast.animation.ts.
  */
-function ToastSlot({ item, depth }: { item: ToastItem; depth: number }) {
+function ToastSlot({
+  item,
+  index,
+  total,
+  frontId,
+  heights,
+}: {
+  item: ToastItem;
+  /** Position in the stack; the newest toast is `total - 1`. */
+  index: number;
+  total: number;
+  /** Id of the newest toast — its height sets the size of the whole deck. */
+  frontId: string;
+  /** Measured natural height per toast id, shared with the UI thread. */
+  heights: SharedValue<Record<string, number>>;
+}) {
   const placement = item.placement ?? 'bottom';
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
   const hide = useCallback(() => toastStore.hide(item.id), [item.id]);
+
+  // Drop this toast's measurement when it leaves, so the map cannot grow
+  // without bound over a long session.
+  useEffect(
+    () => () => {
+      heights.modify((value: Record<string, number>) => {
+        'worklet';
+        const next = { ...value };
+        delete next[item.id];
+        return next;
+      });
+    },
+    [heights, item.id]
+  );
 
   /** +1 when a downward drag dismisses (bottom), -1 when an upward one does. */
   const dismissSign = placement === 'top' ? -1 : 1;
@@ -332,51 +367,115 @@ function ToastSlot({ item, depth }: { item: ToastItem; depth: number }) {
       }
     });
 
-  // Gesture transform only — the layout animations below own opacity and
-  // their own translate, and Reanimated cannot drive a property from both.
-  const gestureStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
-  }));
+  /** Older toasts slide away from the edge the stack is pinned to. */
+  const stackSign = placement === 'top' ? 1 : -1;
+
+  /**
+   * Stack position plus the gesture transform.
+   *
+   * The whole deck takes the *newest* toast's height so the cards behind read
+   * as a uniform stack rather than a ragged pile — matching heroui-native.
+   */
+  const stackStyle = useAnimatedStyle(() => {
+    // Fall back to this toast's own height until the front one is measured.
+    const frontHeight = heights.value[frontId] ?? heights.value[item.id];
+
+    // Newest sits at 0; each one behind steps back by STACK_OFFSET and shrinks.
+    const inputRange = [total - 1, total - 2];
+    const offset = interpolate(index, inputRange, [0, STACK_OFFSET * stackSign], {
+      extrapolateLeft: Extrapolation.CLAMP,
+    });
+    const stackScale = interpolate(index, inputRange, [1, STACK_SCALE_STEP], {
+      extrapolateLeft: Extrapolation.CLAMP,
+    });
+    // Anything past MAX_VISIBLE fades out rather than piling up forever.
+    const opacity = interpolate(
+      index,
+      [total - MAX_VISIBLE, total - MAX_VISIBLE - 1],
+      [1, 0],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      opacity,
+      height: frontHeight,
+      transform: [
+        { translateY: offset + translateY.value },
+        { scale: stackScale * scale.value },
+      ],
+    };
+  });
 
   const handle: ToastHandle = { id: item.id, hide };
+
+  const content = item.component ? (
+    item.component(handle)
+  ) : (
+    <Toast variant={item.variant ?? 'default'} onHide={hide}>
+      {item.icon === null ? null : (
+        <Toast.Indicator>{item.icon ?? undefined}</Toast.Indicator>
+      )}
+      <Toast.Content>
+        {item.label ? <Toast.Title>{item.label}</Toast.Title> : null}
+        {item.description ? (
+          <Toast.Description>{item.description}</Toast.Description>
+        ) : null}
+      </Toast.Content>
+      {item.actionLabel ? (
+        <Toast.Action onPress={() => item.onActionPress?.(handle)}>
+          {item.actionLabel}
+        </Toast.Action>
+      ) : null}
+      {(item.closable ?? !item.actionLabel) ? <Toast.Close /> : null}
+    </Toast>
+  );
 
   return (
     <Animated.View
       entering={placement === 'top' ? enteringTop : enteringBottom}
       exiting={placement === 'top' ? exitingTop : exitingBottom}
-      // Toasts further down the stack sit back a little.
-      style={{ opacity: 1 - depth * 0.15, transform: [{ scale: 1 - depth * 0.03 }] }}
+      pointerEvents="box-none"
+      // Every toast is pinned to the same edge, so they overlap as a deck.
+      // Newest on top.
+      className={cn('absolute left-0 right-0', placement === 'top' ? 'top-0' : 'bottom-0')}
+      style={{ zIndex: index }}
     >
       <GestureDetector gesture={pan}>
-        <Animated.View style={gestureStyle}>
-          {item.component ? (
-            item.component(handle)
-          ) : (
-            <Toast variant={item.variant ?? 'default'} onHide={hide}>
-              {item.icon === null ? null : (
-                <Toast.Indicator>{item.icon ?? undefined}</Toast.Indicator>
-              )}
-              <Toast.Content>
-                {item.label ? <Toast.Title>{item.label}</Toast.Title> : null}
-                {item.description ? (
-                  <Toast.Description>{item.description}</Toast.Description>
-                ) : null}
-              </Toast.Content>
-              {item.actionLabel ? (
-                <Toast.Action onPress={() => item.onActionPress?.(handle)}>
-                  {item.actionLabel}
-                </Toast.Action>
-              ) : null}
-              {(item.closable ?? !item.actionLabel) ? <Toast.Close /> : null}
-            </Toast>
-          )}
-        </Animated.View>
+        <Animated.View style={stackStyle}>{content}</Animated.View>
       </GestureDetector>
+
+      {/*
+        A hidden copy, purely to measure. The visible one above has its height
+        forced by the animated style, so it can never report its natural size.
+      */}
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        className="absolute left-0 right-0 opacity-0"
+        onLayout={(event) => {
+          const measured = event.nativeEvent.layout.height;
+          heights.modify((value: Record<string, number>) => {
+            'worklet';
+            if (value[item.id] === measured) return value;
+            return { ...value, [item.id]: measured };
+          });
+        }}
+      >
+        {content}
+      </View>
     </Animated.View>
   );
 }
 
-/** Absolutely positioned stack for one edge of the screen. */
+
+/**
+ * The deck for one edge of the screen.
+ *
+ * Toasts are not laid out in flow — each one is absolutely pinned to the same
+ * edge and offset by its stack position, so they overlap like a deck of cards
+ * with only the newest fully visible.
+ */
 function ToastStack({
   items,
   placement,
@@ -385,27 +484,40 @@ function ToastStack({
   placement: ToastPlacement;
 }) {
   const insets = useSafeAreaInsets();
+  // Natural heights, keyed by toast id. Written from the UI thread by each
+  // slot's hidden measuring copy.
+  const heights = useSharedValue<Record<string, number>>({});
+
   if (items.length === 0) return null;
 
-  // Only the newest few are shown; older ones are dropped rather than piling
-  // up off-screen. Newest sits closest to the edge it entered from.
-  const visible = items.slice(-MAX_VISIBLE);
-  const ordered = placement === 'top' ? visible : [...visible].reverse();
+  // Keep a couple beyond MAX_VISIBLE mounted so the ones fading out still
+  // animate rather than popping.
+  const visible = items.slice(-(MAX_VISIBLE + 1));
+  const frontId = visible[visible.length - 1]!.id;
 
   return (
     <View
       pointerEvents="box-none"
       className={cn(
-        'absolute left-0 right-0 gap-2 px-4',
+        'absolute left-0 right-0 px-4',
         placement === 'top' ? 'top-0' : 'bottom-0'
       )}
       style={{
         paddingTop: placement === 'top' ? insets.top + 8 : 0,
         paddingBottom: placement === 'bottom' ? insets.bottom + 8 : 0,
+        // The container has no flow content, so give it the front toast's room.
+        minHeight: 1,
       }}
     >
-      {ordered.map((item, index) => (
-        <ToastSlot key={item.id} item={item} depth={index} />
+      {visible.map((item, index) => (
+        <ToastSlot
+          key={item.id}
+          item={item}
+          index={index}
+          total={visible.length}
+          frontId={frontId}
+          heights={heights}
+        />
       ))}
     </View>
   );

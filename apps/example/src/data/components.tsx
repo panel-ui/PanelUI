@@ -314,6 +314,31 @@ function ToastDemo() {
       </Button>
       <Button
         variant="outline"
+        onPress={() => {
+          // Fire several at once to show the deck: newest in front, the rest
+          // peeking out behind it.
+          (['default', 'info', 'success', 'warning'] as const).forEach(
+            (variant, index) =>
+              setTimeout(
+                () =>
+                  toast.show({
+                    variant,
+                    label: `Notification ${index + 1}`,
+                    description: 'Swipe down to dismiss the front one.',
+                    duration: 8000,
+                  }),
+                index * 220
+              )
+          );
+        }}
+      >
+        Stack four
+      </Button>
+      <Button variant="ghost" onPress={() => toast.hideAll()}>
+        Hide all
+      </Button>
+      <Button
+        variant="outline"
         onPress={() =>
           toast.show({
             duration: 6000,

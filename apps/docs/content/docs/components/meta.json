@@ -3,6 +3,7 @@
   "pages": [
     "accordion",
     "alert",
+    "attachment",
     "avatar",
     "badge",
     "bottom-sheet",

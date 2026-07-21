@@ -25,6 +25,18 @@
     "registryDependencies": []
   },
   {
+    "name": "attachment",
+    "type": "registry:ui",
+    "description": "File row with upload states, built on Item.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "item",
+      "shimmer",
+      "text"
+    ]
+  },
+  {
     "name": "avatar",
     "type": "registry:ui",
     "description": "User image with an initials fallback and an optional badge overlay.",

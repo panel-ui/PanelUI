@@ -76,6 +76,48 @@
       "ShieldCheckIcon"
     ]
   },
+  "attachment": {
+    "intro": "A file, with its upload life.\n\nA file in a chat composer or an upload list is the same row shape `Item` already draws — media, a name, a size, a remove button — so this is that row, not a second one. What it adds is the part `Item` has no opinion on: the file's *state*. A file is picked, then uploading, then processing, then done or failed, and each has to look different or the reader cannot tell a stuck upload from a finished one.",
+    "usage": "<Attachment state=\"uploading\">\n  <Attachment.Media>\n    <FileIcon />\n  </Attachment.Media>\n  <Attachment.Content>\n    <Attachment.Title>report.pdf</Attachment.Title>\n    <Attachment.Description>PDF · 2.4 MB</Attachment.Description>\n  </Attachment.Content>\n  <Attachment.Actions>\n    <Attachment.Action accessibilityLabel=\"Remove report.pdf\">\n      <XIcon size={16} />\n    </Attachment.Action>\n  </Attachment.Actions>\n</Attachment>",
+    "extraImports": [
+      "FileIcon",
+      "ImageIcon",
+      "XIcon",
+      "Button"
+    ],
+    "parts": {
+      "Group": "A row or column of attachments — the stack Item.Group provides.",
+      "Media": "Leading slot: a file-type icon tile, or an image thumbnail.",
+      "Content": "The name-and-description column.",
+      "Title": "The file name. Shimmers while uploading or processing.",
+      "Description": "File type, size or status. Tints destructive on error.",
+      "Actions": "Trailing slot for the action buttons.",
+      "Action": "One icon button — remove, retry, download. Its label is required."
+    },
+    "examples": [
+      {
+        "title": "A finished file",
+        "description": "The default state is `done`. It is an Item underneath, so the media, sizing and pressable behaviour are the ones you already know.",
+        "code": "<Attachment>\n  <Attachment.Media>\n    <FileIcon size={18} />\n  </Attachment.Media>\n  <Attachment.Content>\n    <Attachment.Title>sales-dashboard.pdf</Attachment.Title>\n    <Attachment.Description>PDF · 2.4 MB</Attachment.Description>\n  </Attachment.Content>\n  <Attachment.Actions>\n    <Attachment.Action accessibilityLabel=\"Remove sales-dashboard.pdf\">\n      <XIcon size={16} />\n    </Attachment.Action>\n  </Attachment.Actions>\n</Attachment>"
+      },
+      {
+        "title": "Upload states",
+        "description": "While `uploading` or `processing` the name shimmers — the same sweep the rest of the library uses for in-progress work. `error` tints the row destructive, which carries the failure without relying on an icon nobody reads.",
+        "code": "<Attachment state=\"uploading\">…</Attachment>\n<Attachment state=\"processing\">…</Attachment>\n<Attachment state=\"error\">\n  <Attachment.Content>\n    <Attachment.Title>report.pdf</Attachment.Title>\n    <Attachment.Description>Upload failed — tap to retry</Attachment.Description>\n  </Attachment.Content>\n</Attachment>"
+      },
+      {
+        "title": "A live upload",
+        "description": "Pass `progress` (0–1) while uploading and a thin bar rides the row's bottom edge, without shifting the layout.",
+        "code": "const [progress, setProgress] = useState(0);\n\n<Attachment state={running ? \"uploading\" : \"done\"} progress={progress}>\n  <Attachment.Media>\n    <ImageIcon size={18} />\n  </Attachment.Media>\n  <Attachment.Content>\n    <Attachment.Title>screenshot.png</Attachment.Title>\n    <Attachment.Description>Uploading — {Math.round(progress * 100)}%</Attachment.Description>\n  </Attachment.Content>\n</Attachment>"
+      },
+      {
+        "title": "A group of thumbnails",
+        "description": "Attachment.Group lays out a horizontal row; set each attachment to `orientation=\"vertical\"` so it stacks into a thumbnail card.",
+        "code": "<Attachment.Group orientation=\"horizontal\">\n  {files.map((file) => (\n    <Attachment key={file.name} orientation=\"vertical\" className=\"w-32\">\n      <Attachment.Media variant=\"icon\">\n        <ImageIcon size={18} />\n      </Attachment.Media>\n      <Attachment.Content>\n        <Attachment.Title className=\"text-sm\">{file.name}</Attachment.Title>\n        <Attachment.Description>Image</Attachment.Description>\n      </Attachment.Content>\n    </Attachment>\n  ))}\n</Attachment.Group>"
+      }
+    ],
+    "notes": "Attachment is a thin layer over **Item** — every part maps to an Item part, so `size`, `orientation` and the pressable behaviour are Item's, documented there. What Attachment owns is `state`: the shimmer on the title while busy, the destructive tint on error, and the progress bar.\n\n**An icon action needs a label.** `Attachment.Action` requires `accessibilityLabel` — an X on its own tells a screen reader nothing about what it removes."
+  },
   "avatar": {
     "intro": "A user image that falls back to initials when the source is missing or fails to load.",
     "usage": "<Avatar size=\"lg\" source={{ uri: user.avatarUrl }} fallback=\"KA\" />\n\n<Avatar source={{ uri: user.avatarUrl }} fallback=\"KA\">\n  <Avatar.Badge>\n    <Badge variant=\"destructive\" count={5} />\n  </Avatar.Badge>\n</Avatar>",

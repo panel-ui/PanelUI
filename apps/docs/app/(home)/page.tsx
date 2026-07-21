@@ -68,8 +68,8 @@ const FEATURES = [
 ];
 
 const COMPONENTS = [
-  ['Accordion', 'accordion'], ['Alert', 'alert'], ['Avatar', 'avatar'],
-  ['Badge', 'badge'], ['BottomSheet', 'bottom-sheet'], ['Button', 'button'],
+  ['Accordion', 'accordion'], ['Alert', 'alert'], ['Attachment', 'attachment'],
+  ['Avatar', 'avatar'], ['Badge', 'badge'], ['BottomSheet', 'bottom-sheet'], ['Button', 'button'],
   ['Card', 'card'], ['Checkbox', 'checkbox'], ['Dialog', 'dialog'],
   ['EmptyState', 'empty-state'], ['Frame', 'frame'], ['InlineSelect', 'inline-select'],
   ['Input', 'input'], ['InputGroup', 'input-group'], ['Item', 'item'],
@@ -108,7 +108,7 @@ const FAQ = [
   },
   {
     q: 'How many components are there?',
-    a: '36, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, timelines and toasts.',
+    a: '37, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, file attachments, timelines and toasts.',
   },
 ];
 

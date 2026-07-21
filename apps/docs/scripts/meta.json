@@ -9,6 +9,11 @@
     "Status message with a built-in icon.",
     "react native alert component"
   ],
+  "attachment": [
+    "Attachment",
+    "File row with upload states, built on Item.",
+    "react native file attachment"
+  ],
   "avatar": [
     "Avatar",
     "User image with an initials fallback and an optional badge overlay.",

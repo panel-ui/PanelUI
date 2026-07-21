@@ -50,6 +50,18 @@ export {
   type AvatarProps,
   type AvatarBadgeProps,
 } from './components/avatar';
+export {
+  Attachment,
+  type AttachmentProps,
+  type AttachmentGroupProps,
+  type AttachmentMediaProps,
+  type AttachmentContentProps,
+  type AttachmentTitleProps,
+  type AttachmentDescriptionProps,
+  type AttachmentActionsProps,
+  type AttachmentActionProps,
+  type AttachmentState,
+} from './components/attachment';
 export { Badge, type BadgeProps } from './components/badge';
 export {
   BottomSheet,
@@ -230,11 +242,14 @@ export {
   ChevronLeftIcon,
   ChevronRightIcon,
   FacebookIcon,
+  FileIcon,
   GoogleIcon,
   IconColorProvider,
   InfoIcon,
+  ImageIcon,
   MoonIcon,
   PackageIcon,
+  PaperclipIcon,
   PlusSquareIcon,
   ReceiptIcon,
   SearchIcon,

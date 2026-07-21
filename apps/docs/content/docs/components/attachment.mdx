@@ -1,0 +1,205 @@
+---
+title: Attachment
+description: File row with upload states, built on Item.
+---
+
+A file, with its upload life.
+
+A file in a chat composer or an upload list is the same row shape `Item` already draws — media, a name, a size, a remove button — so this is that row, not a second one. What it adds is the part `Item` has no opinion on: the file's *state*. A file is picked, then uploading, then processing, then done or failed, and each has to look different or the reader cannot tell a stuck upload from a finished one.
+
+## Installation
+
+Attachment ships with the library — no separate install.
+
+```tsx
+import { Attachment, FileIcon, ImageIcon, XIcon, Button } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add attachment
+```
+
+## Usage
+
+```tsx
+<Attachment state="uploading">
+  <Attachment.Media>
+    <FileIcon />
+  </Attachment.Media>
+  <Attachment.Content>
+    <Attachment.Title>report.pdf</Attachment.Title>
+    <Attachment.Description>PDF · 2.4 MB</Attachment.Description>
+  </Attachment.Content>
+  <Attachment.Actions>
+    <Attachment.Action accessibilityLabel="Remove report.pdf">
+      <XIcon size={16} />
+    </Attachment.Action>
+  </Attachment.Actions>
+</Attachment>
+```
+
+## Composition
+
+```tsx
+<Attachment>
+  <Attachment.Group>…</Attachment.Group>
+  <Attachment.Media>…</Attachment.Media>
+  <Attachment.Content>…</Attachment.Content>
+  <Attachment.Title>…</Attachment.Title>
+  <Attachment.Description>…</Attachment.Description>
+  <Attachment.Actions>…</Attachment.Actions>
+  <Attachment.Action>…</Attachment.Action>
+</Attachment>
+```
+
+- **`Attachment.Group`** — A row or column of attachments — the stack Item.Group provides.
+- **`Attachment.Media`** — Leading slot: a file-type icon tile, or an image thumbnail.
+- **`Attachment.Content`** — The name-and-description column.
+- **`Attachment.Title`** — The file name. Shimmers while uploading or processing.
+- **`Attachment.Description`** — File type, size or status. Tints destructive on error.
+- **`Attachment.Actions`** — Trailing slot for the action buttons.
+- **`Attachment.Action`** — One icon button — remove, retry, download. Its label is required.
+
+## Examples
+
+### A finished file
+
+The default state is `done`. It is an Item underneath, so the media, sizing and pressable behaviour are the ones you already know.
+
+```tsx
+<Attachment>
+  <Attachment.Media>
+    <FileIcon size={18} />
+  </Attachment.Media>
+  <Attachment.Content>
+    <Attachment.Title>sales-dashboard.pdf</Attachment.Title>
+    <Attachment.Description>PDF · 2.4 MB</Attachment.Description>
+  </Attachment.Content>
+  <Attachment.Actions>
+    <Attachment.Action accessibilityLabel="Remove sales-dashboard.pdf">
+      <XIcon size={16} />
+    </Attachment.Action>
+  </Attachment.Actions>
+</Attachment>
+```
+
+### Upload states
+
+While `uploading` or `processing` the name shimmers — the same sweep the rest of the library uses for in-progress work. `error` tints the row destructive, which carries the failure without relying on an icon nobody reads.
+
+```tsx
+<Attachment state="uploading">…</Attachment>
+<Attachment state="processing">…</Attachment>
+<Attachment state="error">
+  <Attachment.Content>
+    <Attachment.Title>report.pdf</Attachment.Title>
+    <Attachment.Description>Upload failed — tap to retry</Attachment.Description>
+  </Attachment.Content>
+</Attachment>
+```
+
+### A live upload
+
+Pass `progress` (0–1) while uploading and a thin bar rides the row's bottom edge, without shifting the layout.
+
+```tsx
+const [progress, setProgress] = useState(0);
+
+<Attachment state={running ? "uploading" : "done"} progress={progress}>
+  <Attachment.Media>
+    <ImageIcon size={18} />
+  </Attachment.Media>
+  <Attachment.Content>
+    <Attachment.Title>screenshot.png</Attachment.Title>
+    <Attachment.Description>Uploading — {Math.round(progress * 100)}%</Attachment.Description>
+  </Attachment.Content>
+</Attachment>
+```
+
+### A group of thumbnails
+
+Attachment.Group lays out a horizontal row; set each attachment to `orientation="vertical"` so it stacks into a thumbnail card.
+
+```tsx
+<Attachment.Group orientation="horizontal">
+  {files.map((file) => (
+    <Attachment key={file.name} orientation="vertical" className="w-32">
+      <Attachment.Media variant="icon">
+        <ImageIcon size={18} />
+      </Attachment.Media>
+      <Attachment.Content>
+        <Attachment.Title className="text-sm">{file.name}</Attachment.Title>
+        <Attachment.Description>Image</Attachment.Description>
+      </Attachment.Content>
+    </Attachment>
+  ))}
+</Attachment.Group>
+```
+
+## API Reference
+
+### Attachment
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `state` | `AttachmentState` | — | Where the file is in its life. `uploading`/`processing` shimmer the name; `error` tints the row destructive. Default `done`. |
+| `size` | `AttachmentSize` | — | Row density, passed through to the underlying Item. |
+| `orientation` | `'horizontal' \| 'vertical'` | — | Stack the row into a card — for a horizontal group of thumbnails. |
+| `progress` | `number` | — | Upload progress 0–1. Draws a thin bar along the bottom while busy. |
+| `disabled` | `boolean` | — |  |
+
+### Attachment.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `orientation` | `'horizontal' \| 'vertical'` | — |  |
+
+### Attachment.Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `variant` | `'default' \| 'icon' \| 'image'` | — | `icon` frames it in a tile; `image` clips it for a thumbnail. |
+
+### Attachment.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Attachment.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Attachment.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Attachment.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Attachment.Action
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `accessibilityLabel` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Attachment is a thin layer over **Item** — every part maps to an Item part, so `size`, `orientation` and the pressable behaviour are Item's, documented there. What Attachment owns is `state`: the shimmer on the title while busy, the destructive tint on error, and the progress bar.
+
+**An icon action needs a label.** `Attachment.Action` requires `accessibilityLabel` — an X on its own tells a screen reader nothing about what it removes.

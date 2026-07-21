@@ -4,7 +4,7 @@
   "description": "Add PanelUI components to an Expo project one at a time, source and all.",
   "type": "module",
   "bin": {
-    "panelui-cli": "./bin/panelui.mjs"
+    "panelui-cli": "bin/panelui.mjs"
   },
   "files": [
     "bin",

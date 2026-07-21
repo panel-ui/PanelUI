@@ -1,6 +1,6 @@
 {
   "name": "panelui-native",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "High-performance React Native UI components for Expo. Semantic design tokens, powered by Uniwind (Tailwind v4) and Reanimated.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",

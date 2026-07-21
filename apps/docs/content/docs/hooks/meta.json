@@ -4,6 +4,7 @@
     "use-disclosure",
     "use-breakpoint",
     "use-keyboard",
+    "use-keyboard-avoidance",
     "use-debounced-value",
     "use-previous",
     "use-theme"

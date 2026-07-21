@@ -1,0 +1,100 @@
+---
+title: useKeyboardAvoidance
+description: Lift an element just clear of the software keyboard.
+---
+
+Measures an element and translates it by exactly the amount the keyboard
+overlaps it — and not at all when there is no overlap.
+
+<Callout>
+  This is the difference from `KeyboardAvoidingView`, which shifts or pads an
+  entire subtree by the *full* keyboard height regardless of where the element
+  sits. A field near the top of the screen gets pushed off it; a field at the
+  bottom of a long form still ends up half covered.
+</Callout>
+
+The translation is driven by Reanimated's `useAnimatedKeyboard`, so the element
+tracks the keyboard's own interpolation frame for frame on the UI thread, and
+nothing re-renders while it moves.
+
+## Usage
+
+Most of the time you do not need this hook directly — `Input` takes an
+`avoidKeyboard` prop, and `KeyboardAvoider` wraps arbitrary content:
+
+```tsx
+import { Input, KeyboardAvoider } from 'panelui-native';
+
+<Input avoidKeyboard label="Comment" placeholder="Say something…" />;
+
+<KeyboardAvoider offset={24} className="gap-3 p-4">
+  <Input label="Message" />
+  <Button fullWidth>Send</Button>
+</KeyboardAvoider>;
+```
+
+Reach for the hook when you want to move something other than the element being
+measured, or when you are building your own component:
+
+```tsx
+import Animated from 'react-native-reanimated';
+import { useKeyboardAvoidance } from 'panelui-native';
+
+function Composer() {
+  const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({ offset: 12 });
+
+  return (
+    <Animated.View
+      ref={ref}
+      onLayout={onLayout}
+      style={animatedStyle}
+      className="flex-row items-end gap-2 border-t border-border p-3"
+    >
+      <Input containerClassName="flex-1" placeholder="Message" />
+      <Button size="icon" onPress={send}>
+        <SendIcon size={18} />
+      </Button>
+    </Animated.View>
+  );
+}
+```
+
+Disable it conditionally rather than calling the hook conditionally:
+
+```tsx
+const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({
+  enabled: !isModalOpen,
+});
+```
+
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Set false to leave the element where it is. |
+| `offset` | `number` | `16` | Gap kept between the element's bottom edge and the keyboard. |
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `ref` | `AnimatedRef<View>` | Attach to the element that should stay visible. |
+| `onLayout` | `(event) => void` | Attach to the same element — it is how the resting position is measured. |
+| `animatedStyle` | `AnimatedStyle` | Apply to the same element. |
+
+All three go on the same element. The `onLayout` handler is not optional: it is
+what records where the element sits with no translation applied, and the hook
+deliberately ignores layout events fired while the element is already lifted so
+the position cannot creep upwards.
+
+## Notes
+
+The element must be an `Animated` component — `Animated.View`, or anything from
+`Animated.createAnimatedComponent`. A plain `View` will not accept the animated
+style.
+
+Inside a `ScrollView`, prefer the scroll view's own
+`automaticallyAdjustKeyboardInsets` (iOS) or a keyboard-aware scroll container.
+This hook moves a single element and does not know about scroll offset.

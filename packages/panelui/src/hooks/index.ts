@@ -15,5 +15,10 @@ export {
   type UseBreakpointResult,
 } from './use-breakpoint';
 export { useKeyboard, type UseKeyboardResult } from './use-keyboard';
+export {
+  useKeyboardAvoidance,
+  type UseKeyboardAvoidanceOptions,
+  type UseKeyboardAvoidanceResult,
+} from './use-keyboard-avoidance';
 export { useDebouncedValue } from './use-debounced-value';
 export { usePrevious } from './use-previous';

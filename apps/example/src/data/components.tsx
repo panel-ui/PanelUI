@@ -1585,6 +1585,29 @@ export const COMPONENTS: ComponentEntry[] = [
           </Card>
         ),
       },
+      {
+        label: 'Avoiding the keyboard',
+        render: () => (
+          <View className="w-full gap-4">
+            <Text size="sm" muted>
+              Focus the field below. It sits low enough that the keyboard would
+              cover it, so it lifts by exactly the overlap — no more.
+            </Text>
+            <View className="h-72 justify-end">
+              <Input
+                avoidKeyboard
+                label="Comment"
+                placeholder="Say something…"
+                description="Lifts on focus, settles back on blur."
+              />
+            </View>
+            <Text size="sm" muted>
+              This one is already clear of the keyboard, so it never moves.
+            </Text>
+            <Input avoidKeyboard label="Subject" placeholder="Stays put" />
+          </View>
+        ),
+      },
     ],
   },
   {

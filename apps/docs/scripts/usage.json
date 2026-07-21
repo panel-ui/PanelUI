@@ -146,8 +146,8 @@
   },
   "input": {
     "intro": "A text field with an optional label, description and error message. Passing `errorMessage` puts the field in its invalid state and replaces the description.",
-    "usage": "<Input\n  label=\"Email\"\n  placeholder=\"you@example.com\"\n  keyboardType=\"email-address\"\n  errorMessage={error}\n/>",
-    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically."
+    "usage": "<Input label=\"Email\" placeholder=\"you@example.com\" />\n\n<Input\n  label=\"Description\"\n  placeholder=\"A short description\"\n  description=\"Shown on your public profile.\"\n/>\n\n<Input\n  label=\"Email\"\n  value={email}\n  onChangeText={setEmail}\n  errorMessage={error}\n/>\n\n// Lifts clear of the software keyboard when it would be covered.\n<Input avoidKeyboard label=\"Comment\" placeholder=\"Say something…\" />",
+    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.\n\n### Avoiding the keyboard\n\n`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.\n\nThe translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).\n\nFor anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly."
   },
   "input-group": {
     "intro": "An input with leading or trailing decorators. The prefix and suffix are measured and their widths applied as padding on the input, so text never runs underneath them however wide they turn out to be.",

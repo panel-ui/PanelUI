@@ -16,12 +16,23 @@ import { Input } from 'panelui-native';
 ## Usage
 
 ```tsx
+<Input label="Email" placeholder="you@example.com" />
+
+<Input
+  label="Description"
+  placeholder="A short description"
+  description="Shown on your public profile."
+/>
+
 <Input
   label="Email"
-  placeholder="you@example.com"
-  keyboardType="email-address"
+  value={email}
+  onChangeText={setEmail}
   errorMessage={error}
 />
+
+// Lifts clear of the software keyboard when it would be covered.
+<Input avoidKeyboard label="Comment" placeholder="Say something…" />
 ```
 
 ## API Reference
@@ -36,9 +47,19 @@ import { Input } from 'panelui-native';
 | `description` | `string` | — |  |
 | `errorMessage` | `string` | — | Error message. When set, the field renders in its invalid state. |
 | `disabled` | `boolean` | — |  |
+| `avoidKeyboard` | `boolean` | — | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. |
+| `keyboardOffset` | `number` | — | Gap kept between the field and the keyboard when `avoidKeyboard` is set. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
 Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.
+
+### Avoiding the keyboard
+
+`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.
+
+The translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).
+
+For anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly.

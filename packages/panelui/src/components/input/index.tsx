@@ -1,7 +1,9 @@
 import { forwardRef, useCallback, useState } from 'react';
-import { TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, type TextInputProps } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
+import { useKeyboardAvoidance } from '../../hooks/use-keyboard-avoidance';
 import { Text } from '../../primitives/text';
 
 const inputVariants = tv({
@@ -34,6 +36,14 @@ export interface InputProps extends TextInputProps {
   /** Error message. When set, the field renders in its invalid state. */
   errorMessage?: string;
   disabled?: boolean;
+  /**
+   * Lift the field above the software keyboard when it would otherwise be
+   * covered. Moves by exactly the overlap, and not at all when the field is
+   * already clear.
+   */
+  avoidKeyboard?: boolean;
+  /** Gap kept between the field and the keyboard when `avoidKeyboard` is set. */
+  keyboardOffset?: number;
 }
 
 export const Input = forwardRef<TextInput, InputProps>(
@@ -45,6 +55,8 @@ export const Input = forwardRef<TextInput, InputProps>(
       description,
       errorMessage,
       disabled,
+      avoidKeyboard = false,
+      keyboardOffset = 16,
       onFocus,
       onBlur,
       ...props
@@ -52,6 +64,10 @@ export const Input = forwardRef<TextInput, InputProps>(
     ref
   ) => {
     const [focused, setFocused] = useState(false);
+    const avoidance = useKeyboardAvoidance({
+      enabled: avoidKeyboard,
+      offset: keyboardOffset,
+    });
     const placeholderColor = useCSSVariable('--color-muted-foreground');
     const slots = inputVariants({
       focused,
@@ -76,7 +92,12 @@ export const Input = forwardRef<TextInput, InputProps>(
     );
 
     return (
-      <View className={slots.container({ className: containerClassName })}>
+      <Animated.View
+        ref={avoidance.ref}
+        onLayout={avoidance.onLayout}
+        style={avoidance.animatedStyle}
+        className={slots.container({ className: containerClassName })}
+      >
         {label ? <Text className={slots.label()}>{label}</Text> : null}
         <TextInput
           ref={ref}
@@ -96,7 +117,7 @@ export const Input = forwardRef<TextInput, InputProps>(
         ) : description ? (
           <Text className={slots.description()}>{description}</Text>
         ) : null}
-      </View>
+      </Animated.View>
     );
   }
 );

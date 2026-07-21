@@ -18,6 +18,10 @@ export {
 export { Portal, PortalHost, PortalProvider } from './primitives/portal';
 export { Text, type TextProps } from './primitives/text';
 export {
+  KeyboardAvoider,
+  type KeyboardAvoiderProps,
+} from './primitives/keyboard-avoider';
+export {
   AnimatedPressable,
   type AnimatedPressableProps,
 } from './primitives/animated-pressable';

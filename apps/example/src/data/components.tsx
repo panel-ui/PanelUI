@@ -59,6 +59,7 @@ import {
   Timeline,
   Toast,
   Typography,
+  hasNativeUI,
   useToast,
 } from 'panelui-native';
 
@@ -323,6 +324,93 @@ function SelectDemo() {
         <Select.Item value="mango" label="Mango" />
       </Select>
     </View>
+  );
+}
+
+/**
+ * Wraps a native-mode demo with a note about what is actually on screen —
+ * without @expo/ui installed the `native` prop is a silent no-op, which is
+ * otherwise indistinguishable from it not working.
+ */
+function NativeDemo({ children }: { children: ReactNode }) {
+  return (
+    <View className="w-full gap-3">
+      <Alert variant={hasNativeUI() ? 'info' : 'warning'}>
+        <Alert.Content>
+          <Alert.Title>
+            {hasNativeUI()
+              ? 'Rendering the platform control'
+              : '@expo/ui not available'}
+          </Alert.Title>
+          <Alert.Description>
+            {hasNativeUI()
+              ? 'Theme tokens do not apply here — the platform draws this.'
+              : 'The `native` prop is a no-op, so the styled component renders instead.'}
+          </Alert.Description>
+        </Alert.Content>
+      </Alert>
+      {children}
+    </View>
+  );
+}
+
+function NativeSwitchDemo() {
+  const [enabled, setEnabled] = useState(true);
+
+  return (
+    <NativeDemo>
+      <Switch
+        native
+        label="Notifications"
+        value={enabled}
+        onValueChange={setEnabled}
+      />
+    </NativeDemo>
+  );
+}
+
+function NativeSelectDemo() {
+  const [fruit, setFruit] = useState('apple');
+
+  return (
+    <NativeDemo>
+      <Select native value={fruit} onValueChange={setFruit}>
+        <Select.Item value="apple" label="Apple" />
+        <Select.Item value="banana" label="Banana" />
+        <Select.Item value="cherry" label="Cherry" />
+      </Select>
+      <Text size="sm" muted>
+        Selected: {fruit}
+      </Text>
+    </NativeDemo>
+  );
+}
+
+function NativeBottomSheetDemo() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <NativeDemo>
+      <BottomSheet native snapPoints={['half']} open={open} onOpenChange={setOpen}>
+        <BottomSheet.Trigger>
+          <Button variant="outline" fullWidth>
+            Open the platform sheet
+          </Button>
+        </BottomSheet.Trigger>
+        <BottomSheet.Content>
+          <View className="gap-3 p-5">
+            <Text size="lg" weight="semibold">
+              Platform chrome, your content
+            </Text>
+            <Text size="sm" muted>
+              The container, corner radius, grabber and dismiss gesture belong
+              to the platform. Everything in here is still themed.
+            </Text>
+            <Button onPress={() => setOpen(false)}>Close</Button>
+          </View>
+        </BottomSheet.Content>
+      </BottomSheet>
+    </NativeDemo>
   );
 }
 
@@ -1147,6 +1235,7 @@ export const COMPONENTS: ComponentEntry[] = [
           </BottomSheet>
         ),
       },
+      { label: 'Native', render: () => <NativeBottomSheetDemo /> },
     ],
   },
   {
@@ -1222,6 +1311,22 @@ export const COMPONENTS: ComponentEntry[] = [
               <SearchIcon size={18} />
             </Button>
           </View>
+        ),
+      },
+      {
+        label: 'Native',
+        render: () => (
+          <NativeDemo>
+            <Button native onPress={() => {}}>
+              Filled
+            </Button>
+            <Button native variant="outline" onPress={() => {}}>
+              Outlined
+            </Button>
+            <Button native variant="ghost" onPress={() => {}}>
+              Text
+            </Button>
+          </NativeDemo>
         ),
       },
     ],
@@ -2049,6 +2154,7 @@ export const COMPONENTS: ComponentEntry[] = [
           </Card>
         ),
       },
+      { label: 'Native', render: () => <NativeSelectDemo /> },
     ],
   },
   {
@@ -2421,6 +2527,7 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      { label: 'Native', render: () => <NativeSwitchDemo /> },
     ],
   },
   {

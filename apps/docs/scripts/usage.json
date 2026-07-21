@@ -53,7 +53,7 @@
       "Trigger": "Clones its child and opens the sheet on press.",
       "Content": "The sheet surface. Renders through a portal above everything else."
     },
-    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.",
+    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.\n\n### Native rendering\n\nPass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
     "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>…</BottomSheet.Trigger>\n  <BottomSheet.Content>…</BottomSheet.Content>\n</BottomSheet>"
   },
   "button": {
@@ -63,7 +63,7 @@
       "SearchIcon",
       "GoogleIcon"
     ],
-    "notes": "`loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`."
+    "notes": "`loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`.\n\n### Native rendering\n\nPass `native` to render the platform's own button instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. `variant` maps onto the nearest platform style; `size`, `fullWidth`, `loading`, `startContent` and `endContent` are dropped.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown."
   },
   "card": {
     "intro": "A content surface. Use the full composition rather than dropping everything into the content slot.",
@@ -195,7 +195,7 @@
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
-    "notes": "Use `InlineSelect` instead when the option list is short enough to expand in place.",
+    "notes": "Use `InlineSelect` instead when the option list is short enough to expand in place.\n\n### Native rendering\n\nPass `native` to render the platform's own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit \"None\" item.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
     "anatomy": "<Select>\n  <Select.Item value=\"…\" label=\"…\" />\n</Select>"
   },
   "skeleton": {
@@ -222,7 +222,8 @@
   },
   "switch": {
     "intro": "An on/off toggle, animated on the UI thread.",
-    "usage": "<Switch value={enabled} onValueChange={setEnabled} />"
+    "usage": "<Switch value={enabled} onValueChange={setEnabled} />",
+    "notes": "### Native rendering\n\nPass `native` to render the platform's own switch instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. The native switch gains a `label` prop the styled one does not have.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown."
   },
   "tabs": {
     "intro": "Segmented navigation with an indicator that springs to the active trigger.",

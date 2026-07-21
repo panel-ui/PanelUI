@@ -64,9 +64,18 @@ import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
 | `startContent` | `ReactNode` | — | Content rendered before the label (replaced by the spinner while loading). |
 | `endContent` | `ReactNode` | — | Content rendered after the label. |
 | `labelClassName` | `string` | — | Extra classes for the label when children is a string. |
+| `native` | `boolean` | — | Render the platform's own button instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the button, so `className`, `size`, `fullWidth`, `startContent`, `endContent` and `loading` are all ignored. `variant` maps onto the nearest platform style: `primary`/`destructive` → filled, `outline` → outlined, everything else → text. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
 `loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`.
+
+### Native rendering
+
+Pass `native` to render the platform's own button instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
+
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. `variant` maps onto the nearest platform style; `size`, `fullWidth`, `loading`, `startContent` and `endContent` are dropped.
+
+See [Native rendering](/docs/native) for the full prop-by-prop breakdown.

@@ -49,6 +49,8 @@ import { BottomSheet, Button, Input, Text } from 'panelui-native';
 | `open` | `boolean` | — |  |
 | `onOpenChange` | `(open: boolean) => void` | — |  |
 | `defaultOpen` | `boolean` | — |  |
+| `native` | `boolean` | — | Present the platform's own sheet instead of this one, so it gets the system's detents, scroll interaction and dismiss gesture. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply to the sheet chrome** — the platform draws the container, so `BottomSheet.Content`'s `className` and its drag handle are ignored. The content inside is still yours. |
+| `snapPoints` | `('half' \| 'full' \| { fraction: number } \| { height: number })[]` | — | Heights the native sheet can rest at. Omit to size to the content. `{ fraction }` and `{ height }` are iOS-only; Android snaps them to the nearest of `half` / `full`. |
 
 ### BottomSheet.Content
 
@@ -62,3 +64,11 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 ## Notes
 
 Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.
+
+### Native rendering
+
+Pass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
+
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.
+
+See [Native rendering](/docs/native) for the full prop-by-prop breakdown.

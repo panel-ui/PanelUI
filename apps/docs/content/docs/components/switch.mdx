@@ -36,5 +36,17 @@ import { Switch } from 'panelui-native';
 | `value` | `boolean` | — |  |
 | `onValueChange` | `(value: boolean) => void` | — |  |
 | `disabled` | `boolean` | — |  |
+| `native` | `boolean` | — | Render the platform's own switch instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the control, so `className` and `size` are ignored. |
+| `label` | `string` | — | Text label drawn beside the control. Native mode only. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Native rendering
+
+Pass `native` to render the platform's own switch instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
+
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. The native switch gains a `label` prop the styled one does not have.
+
+See [Native rendering](/docs/native) for the full prop-by-prop breakdown.

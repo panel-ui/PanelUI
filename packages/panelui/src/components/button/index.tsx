@@ -8,6 +8,7 @@ import {
 } from '../../primitives/animated-pressable';
 import { Text } from '../../primitives/text';
 import { IconColorProvider } from '../../icons';
+import { getNativeUI } from '../../native';
 import { Spinner } from '../spinner';
 
 const buttonVariants = tv({
@@ -104,7 +105,31 @@ export interface ButtonProps
   endContent?: ReactNode;
   /** Extra classes for the label when children is a string. */
   labelClassName?: string;
+  /**
+   * Render the platform's own button instead of this one. Requires the
+   * optional `@expo/ui` package; without it this prop does nothing.
+   *
+   * **Theme tokens do not apply** — the platform draws the button, so
+   * `className`, `size`, `fullWidth`, `startContent`, `endContent` and
+   * `loading` are all ignored. `variant` maps onto the nearest platform
+   * style: `primary`/`destructive` → filled, `outline` → outlined, everything
+   * else → text.
+   */
+  native?: boolean;
 }
+
+/** PanelUI variants mapped onto the platform button styles. */
+const NATIVE_VARIANT: Record<
+  NonNullable<ButtonVariantProps['variant']>,
+  'filled' | 'outlined' | 'text'
+> = {
+  primary: 'filled',
+  destructive: 'filled',
+  secondary: 'filled',
+  outline: 'outlined',
+  ghost: 'text',
+  social: 'outlined',
+};
 
 export const Button = forwardRef<View, ButtonProps>(
   (
@@ -119,11 +144,13 @@ export const Button = forwardRef<View, ButtonProps>(
       loading = false,
       startContent,
       endContent,
+      native,
       ...props
     },
     ref
   ) => {
     const isDisabled = disabled || loading;
+    const nativeUI = native ? getNativeUI() : null;
     const { root, label, spinner } = buttonVariants({
       variant,
       size,
@@ -145,6 +172,22 @@ export const Button = forwardRef<View, ButtonProps>(
         : typeof themedColor === 'string'
           ? themedColor
           : undefined;
+
+    if (nativeUI) {
+      const { Host, Button: NativeButton } = nativeUI;
+      return (
+        <Host matchContents>
+          <NativeButton
+            label={typeof children === 'string' ? children : undefined}
+            variant={NATIVE_VARIANT[variant ?? 'primary']}
+            disabled={isDisabled}
+            onPress={props.onPress}
+          >
+            {typeof children === 'string' ? undefined : children}
+          </NativeButton>
+        </Host>
+      );
+    }
 
     return (
       <IconColorProvider color={contentColor}>

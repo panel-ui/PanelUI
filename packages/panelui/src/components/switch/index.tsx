@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { getNativeUI } from '../../native';
 
 const SPRING = { damping: 18, stiffness: 250, mass: 0.5 } as const;
 
@@ -37,6 +38,16 @@ export interface SwitchProps extends VariantProps<typeof switchVariants> {
   value: boolean;
   onValueChange?: (value: boolean) => void;
   disabled?: boolean;
+  /**
+   * Render the platform's own switch instead of this one. Requires the
+   * optional `@expo/ui` package; without it this prop does nothing.
+   *
+   * **Theme tokens do not apply** — the platform draws the control, so
+   * `className` and `size` are ignored.
+   */
+  native?: boolean;
+  /** Text label drawn beside the control. Native mode only. */
+  label?: string;
 }
 
 /**
@@ -44,8 +55,9 @@ export interface SwitchProps extends VariantProps<typeof switchVariants> {
  * UI thread; toggling never re-renders beyond the value change itself.
  */
 export const Switch = forwardRef<View, SwitchProps>(
-  ({ className, value, onValueChange, disabled, size = 'md' }, ref) => {
+  ({ className, value, onValueChange, disabled, size = 'md', native, label }, ref) => {
     const progress = useSharedValue(value ? 1 : 0);
+    const nativeUI = native ? getNativeUI() : null;
     const slots = switchVariants({ size, disabled: !!disabled });
 
     useEffect(() => {
@@ -61,6 +73,20 @@ export const Switch = forwardRef<View, SwitchProps>(
     const activeTrackStyle = useAnimatedStyle(() => ({
       opacity: progress.value,
     }));
+
+    if (nativeUI) {
+      const { Host, Switch: NativeSwitch } = nativeUI;
+      return (
+        <Host matchContents>
+          <NativeSwitch
+            value={value}
+            onValueChange={(next: boolean) => onValueChange?.(next)}
+            label={label}
+            disabled={disabled}
+          />
+        </Host>
+      );
+    }
 
     return (
       <Pressable

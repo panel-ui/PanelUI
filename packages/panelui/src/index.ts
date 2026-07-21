@@ -26,6 +26,9 @@ export {
   type AnimatedPressableProps,
 } from './primitives/animated-pressable';
 
+// Native UI bridge
+export { hasNativeUI } from './native';
+
 // Components
 export {
   Accordion,

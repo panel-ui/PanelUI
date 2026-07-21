@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/ui": "~57.0.7",
     "@react-native-masked-view/masked-view": "0.3.2",
     "expo": "~57.0.7",
     "expo-clipboard": "^57.0.1",

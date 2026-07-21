@@ -12,6 +12,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { CheckIcon, ChevronDownIcon } from '../../icons';
+import { getNativeUI } from '../../native';
 import { Text } from '../../primitives/text';
 import { BottomSheet } from '../bottom-sheet';
 
@@ -86,6 +87,21 @@ export interface SelectProps {
   /** Sheet title shown above the options. */
   title?: string;
   disabled?: boolean;
+  /**
+   * Render the platform's own picker instead of the trigger-and-sheet pair.
+   * Requires the optional `@expo/ui` package; without it this prop does
+   * nothing.
+   *
+   * **Theme tokens do not apply** — the platform draws the picker, so
+   * `className` and `title` are ignored. `Select.Item` children still declare
+   * the options.
+   */
+  native?: boolean;
+  /**
+   * Native picker style. `menu` is a compact button opening a dropdown;
+   * `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere).
+   */
+  nativeAppearance?: 'menu' | 'wheel';
   children: ReactNode;
 }
 
@@ -96,22 +112,27 @@ function SelectRoot({
   placeholder = 'Select an option',
   title,
   disabled,
+  native,
+  nativeAppearance = 'menu',
   children,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
+  const nativeUI = native ? getNativeUI() : null;
 
-  const selectedLabel = useMemo(() => {
-    let label: string | undefined;
+  const options = useMemo(() => {
+    const collected: SelectItemProps[] = [];
     Children.forEach(children, (child) => {
-      if (
-        isValidElement<SelectItemProps>(child) &&
-        child.props.value === value
-      ) {
-        label = child.props.label;
+      if (isValidElement<SelectItemProps>(child)) {
+        collected.push({ value: child.props.value, label: child.props.label });
       }
     });
-    return label;
-  }, [children, value]);
+    return collected;
+  }, [children]);
+
+  const selectedLabel = useMemo(
+    () => options.find((option) => option.value === value)?.label,
+    [options, value]
+  );
 
   const context = useMemo<SelectContextValue>(
     () => ({
@@ -128,6 +149,30 @@ function SelectRoot({
     disabled: !!disabled,
   });
   const chevronColor = useCSSVariable('--color-muted-foreground');
+
+  if (nativeUI) {
+    const { Host, Picker } = nativeUI;
+    // The native picker has no empty state, so an unset value shows the first
+    // option rather than the placeholder.
+    return (
+      <Host matchContents>
+        <Picker
+          selectedValue={value ?? options[0]?.value ?? ''}
+          onValueChange={(next: string) => onValueChange(next)}
+          appearance={nativeAppearance}
+          enabled={!disabled}
+        >
+          {options.map((option) => (
+            <Picker.Item
+              key={option.value}
+              label={option.label}
+              value={option.value}
+            />
+          ))}
+        </Picker>
+      </Host>
+    );
+  }
 
   return (
     <SelectContext.Provider value={context}>

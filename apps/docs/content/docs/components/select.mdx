@@ -56,9 +56,19 @@ import { Select } from 'panelui-native';
 | `placeholder` | `string` | — |  |
 | `title` | `string` | — | Sheet title shown above the options. |
 | `disabled` | `boolean` | — |  |
+| `native` | `boolean` | — | Render the platform's own picker instead of the trigger-and-sheet pair. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the picker, so `className` and `title` are ignored. `Select.Item` children still declare the options. |
+| `nativeAppearance` | `'menu' \| 'wheel'` | — | Native picker style. `menu` is a compact button opening a dropdown; `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere). |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
 Use `InlineSelect` instead when the option list is short enough to expand in place.
+
+### Native rendering
+
+Pass `native` to render the platform's own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
+
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit "None" item.
+
+See [Native rendering](/docs/native) for the full prop-by-prop breakdown.

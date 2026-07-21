@@ -23,6 +23,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getNativeUI } from '../../native';
 import { Portal } from '../../primitives/portal';
 import { cn } from '../../utils/cn';
 
@@ -50,13 +51,40 @@ export interface BottomSheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   defaultOpen?: boolean;
+  /**
+   * Present the platform's own sheet instead of this one, so it gets the
+   * system's detents, scroll interaction and dismiss gesture. Requires the
+   * optional `@expo/ui` package; without it this prop does nothing.
+   *
+   * **Theme tokens do not apply to the sheet chrome** — the platform draws the
+   * container, so `BottomSheet.Content`'s `className` and its drag handle are
+   * ignored. The content inside is still yours.
+   */
+  native?: boolean;
+  /**
+   * Heights the native sheet can rest at. Omit to size to the content.
+   * `{ fraction }` and `{ height }` are iOS-only; Android snaps them to the
+   * nearest of `half` / `full`.
+   */
+  snapPoints?: ('half' | 'full' | { fraction: number } | { height: number })[];
 }
+
+/**
+ * Set by the root so Content knows the platform is drawing the sheet, and with
+ * which detents. Null means the styled sheet renders.
+ */
+const NativeSheetContext = createContext<{
+  nativeUI: NonNullable<ReturnType<typeof getNativeUI>>;
+  snapPoints: BottomSheetProps['snapPoints'];
+} | null>(null);
 
 function BottomSheetRoot({
   children,
   open,
   onOpenChange,
   defaultOpen = false,
+  native,
+  snapPoints,
 }: BottomSheetProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const isControlled = open !== undefined;
@@ -75,9 +103,17 @@ function BottomSheetRoot({
     [resolvedOpen, setOpen]
   );
 
+  const nativeUI = native ? getNativeUI() : null;
+  const nativeSheet = useMemo(
+    () => (nativeUI ? { nativeUI, snapPoints } : null),
+    [nativeUI, snapPoints]
+  );
+
   return (
     <BottomSheetContext.Provider value={context}>
-      {children}
+      <NativeSheetContext.Provider value={nativeSheet}>
+        {children}
+      </NativeSheetContext.Provider>
     </BottomSheetContext.Provider>
   );
 }
@@ -113,6 +149,7 @@ function BottomSheetContent({
 }: BottomSheetContentProps) {
   const context = useBottomSheet('BottomSheet.Content');
   const { open, setOpen } = context;
+  const nativeSheet = useContext(NativeSheetContext);
   const { height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
@@ -141,6 +178,27 @@ function BottomSheetContent({
   const sheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
+
+  if (nativeSheet) {
+    const { Host, BottomSheet: NativeBottomSheet } = nativeSheet.nativeUI;
+    // The platform owns presentation, so this stays mounted and toggles
+    // isPresented rather than unmounting on close.
+    return (
+      <Host style={{ position: 'absolute' }}>
+        <NativeBottomSheet
+          isPresented={open}
+          onDismiss={dismissible ? close : () => {}}
+          snapPoints={nativeSheet.snapPoints}
+        >
+          <BottomSheetContext.Provider value={context}>
+            <View {...props} className={className}>
+              {children}
+            </View>
+          </BottomSheetContext.Provider>
+        </NativeBottomSheet>
+      </Host>
+    );
+  }
 
   if (!open) return null;
 

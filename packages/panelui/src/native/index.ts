@@ -29,6 +29,16 @@ interface NativeUIModule {
     style?: unknown;
     [key: string]: unknown;
   }>;
+  /**
+   * Hosts React Native views inside the native tree. Anything of ours that
+   * goes inside a native container has to be wrapped in this or the native
+   * layout does not measure it — children spill outside their container.
+   */
+  RNHostView: ComponentType<{
+    children?: ReactNode;
+    matchContents?: boolean;
+    style?: unknown;
+  }>;
   Button: ComponentType<Record<string, unknown>>;
   Switch: ComponentType<Record<string, unknown>>;
   Picker: ComponentType<Record<string, unknown>> & {

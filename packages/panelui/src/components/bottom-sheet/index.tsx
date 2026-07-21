@@ -150,7 +150,7 @@ function BottomSheetContent({
   const context = useBottomSheet('BottomSheet.Content');
   const { open, setOpen } = context;
   const nativeSheet = useContext(NativeSheetContext);
-  const { height: screenHeight } = useWindowDimensions();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
 
@@ -180,21 +180,43 @@ function BottomSheetContent({
   }));
 
   if (nativeSheet) {
-    const { Host, BottomSheet: NativeBottomSheet } = nativeSheet.nativeUI;
+    const { Host, BottomSheet: NativeBottomSheet, RNHostView } = nativeSheet.nativeUI;
     // The platform owns presentation, so this stays mounted and toggles
     // isPresented rather than unmounting on close.
+    //
+    // RNHostView is not optional: our content is React Native, and the native
+    // sheet cannot measure RN views directly. Without it the sheet sizes to
+    // nothing and the content spills outside its container.
     return (
-      <Host style={{ position: 'absolute' }}>
+      <Host matchContents style={{ position: 'absolute' }}>
         <NativeBottomSheet
           isPresented={open}
           onDismiss={dismissible ? close : () => {}}
           snapPoints={nativeSheet.snapPoints}
         >
-          <BottomSheetContext.Provider value={context}>
-            <View {...props} className={className}>
-              {children}
-            </View>
-          </BottomSheetContext.Provider>
+          <RNHostView matchContents>
+            <BottomSheetContext.Provider value={context}>
+              <View
+                {...props}
+                className={cn(
+                  // The platform draws the container, but it hands us a bare
+                  // box — padding and safe-area are still ours.
+                  'gap-2 px-5 pb-2 pt-1',
+                  className
+                )}
+                style={{
+                  // An explicit width, not `w-full`. Inside the native host
+                  // there is no parent width for a percentage to resolve
+                  // against, so `100%` measures against nothing and the
+                  // content lays out wider than the sheet it sits in.
+                  width: screenWidth,
+                  paddingBottom: Math.max(insets.bottom, 16),
+                }}
+              >
+                {children}
+              </View>
+            </BottomSheetContext.Provider>
+          </RNHostView>
         </NativeBottomSheet>
       </Host>
     );

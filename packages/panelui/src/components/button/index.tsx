@@ -174,16 +174,25 @@ export const Button = forwardRef<View, ButtonProps>(
           : undefined;
 
     if (nativeUI) {
-      const { Host, Button: NativeButton } = nativeUI;
+      const { Host, Button: NativeButton, RNHostView } = nativeUI;
+      const isStringLabel = typeof children === 'string';
+
       return (
         <Host matchContents>
           <NativeButton
-            label={typeof children === 'string' ? children : undefined}
+            label={isStringLabel ? children : undefined}
             variant={NATIVE_VARIANT[variant ?? 'primary']}
             disabled={isDisabled}
             onPress={props.onPress}
           >
-            {typeof children === 'string' ? undefined : children}
+            {/* Non-string children are React Native views, and the native
+                button cannot measure those directly — they have to be hosted
+                or they render outside the button's bounds. */}
+            {isStringLabel ? undefined : (
+              <RNHostView matchContents>
+                <>{children}</>
+              </RNHostView>
+            )}
           </NativeButton>
         </Host>
       );

@@ -1,3 +1,5 @@
 {
-  "pages": ["cn", "scroll-fade"]
+  "pages": [
+    "cn"
+  ]
 }

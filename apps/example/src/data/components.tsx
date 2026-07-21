@@ -1908,6 +1908,61 @@ export const COMPONENTS: ComponentEntry[] = [
           </ScrollFade>
         ),
       },
+      {
+        label: 'Content that fits',
+        render: () => (
+          // Nothing scrolls past either edge, so neither fade ever shows.
+          <ScrollFade size={40} className="w-full">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-2"
+            >
+              {['One', 'Two'].map((n) => (
+                <Badge key={n} variant="secondary">
+                  {n}
+                </Badge>
+              ))}
+            </ScrollView>
+          </ScrollFade>
+        ),
+      },
+      {
+        label: 'Tuning the ramp',
+        render: () => (
+          <View className="w-full gap-4">
+            {/* A long ramp fades in gradually over the first 120px of travel. */}
+            <ScrollFade size={48} fadeInDistance={120} className="w-full">
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerClassName="gap-2"
+              >
+                {['Slow', 'Ramp', 'Over', 'A', 'Long', 'Distance', 'Of', 'Travel'].map(
+                  (n) => (
+                    <Badge key={n} variant="secondary">
+                      {n}
+                    </Badge>
+                  )
+                )}
+              </ScrollView>
+            </ScrollFade>
+
+            {/* Snaps to full opacity almost immediately. */}
+            <ScrollFade size={48} fadeInDistance={4} className="w-full">
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerClassName="gap-2"
+              >
+                {['Instant', 'Ramp', 'On', 'The', 'First', 'Few', 'Pixels'].map((n) => (
+                  <Badge key={n}>{n}</Badge>
+                ))}
+              </ScrollView>
+            </ScrollFade>
+          </View>
+        ),
+      },
     ],
   },
   {

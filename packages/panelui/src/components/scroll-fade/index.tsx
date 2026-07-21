@@ -1,14 +1,13 @@
 /**
  * ScrollFade — fades the edges of a scroll container.
  *
- * The React Native equivalent of shadcn-ui/ui's `scroll-fade` utility
- * (https://ui.shadcn.com/docs/utils/scroll-fade), which is CSS `mask-image`
- * driven by a scroll timeline. React Native has neither masks nor scroll
- * timelines, so the fades are SVG gradients overlaid on each edge, with their
- * opacity following the scroll position.
+ * Content that runs past a boundary reads better fading out than being cut
+ * off, and the fade doubles as an affordance: an edge that is fading is an
+ * edge with more content behind it.
  *
- * Composition follows heroui-native's ScrollShadow: wrap the scrollable and
- * let the orientation be inferred from its `horizontal` prop.
+ * Scroll position, content size and viewport size are all held in shared
+ * values and consumed by `useAnimatedStyle`, so the fades track the scroll on
+ * the UI thread without re-rendering React.
  *
  * ```tsx
  * <ScrollFade>
@@ -20,39 +19,63 @@ import {
   Children,
   cloneElement,
   isValidElement,
-  useState,
+  useMemo,
+  type ComponentType,
   type ReactElement,
   type ReactNode,
 } from 'react';
 import {
+  StyleSheet,
   View,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   type ViewProps,
 } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useComposedEventHandler,
+  useDerivedValue,
+  useSharedValue,
+  type AnimatedScrollViewProps,
+  type DerivedValue,
+} from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
 
 /** Past this many pixels from an edge, that edge's fade is fully shown. */
-const FADE_IN_DISTANCE = 24;
+const DEFAULT_FADE_IN_DISTANCE = 24;
 
 export interface ScrollFadeProps extends ViewProps {
   className?: string;
   /** Depth of the fade in pixels. */
   size?: number;
   /** Which edges fade. */
-  edges?: 'both' | 'start' | 'end';
+  edges?: 'both' | 'start' | 'end' | 'none';
+  /**
+   * Scroll axis. Inferred from the child's `horizontal` prop when omitted —
+   * pass it explicitly for children that scroll horizontally without that prop
+   * (a `FlatList` with `horizontal` set through `contentContainerStyle`, say).
+   */
+  orientation?: 'horizontal' | 'vertical';
   /**
    * Colour the fade resolves to — normally whatever sits behind the
    * scrollable. Defaults to the theme's background.
    */
   color?: string;
+  /** Distance in pixels over which an edge fades from clear to full. */
+  fadeInDistance?: number;
+  /** Set false to render the child with no fades at all. */
+  enabled?: boolean;
   children?: ReactNode;
 }
 
 interface ScrollableProps {
   horizontal?: boolean;
-  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onScroll?: AnimatedScrollViewProps['onScroll'];
+  onLayout?: (event: LayoutChangeEvent) => void;
+  onContentSizeChange?: (width: number, height: number) => void;
   scrollEventThrottle?: number;
 }
 
@@ -60,50 +83,106 @@ export function ScrollFade({
   className,
   size = 48,
   edges = 'both',
+  orientation,
   color,
+  fadeInDistance = DEFAULT_FADE_IN_DISTANCE,
+  enabled = true,
   children,
   ...props
 }: ScrollFadeProps) {
-  const [startOpacity, setStartOpacity] = useState(0);
-  const [endOpacity, setEndOpacity] = useState(0);
+  const offset = useSharedValue(0);
+  const contentLength = useSharedValue(0);
+  const viewportLength = useSharedValue(0);
 
   const themeBackground = useCSSVariable('--color-background');
   const fadeColor =
     color ?? (typeof themeBackground === 'string' ? themeBackground : '#000000');
 
   const child = Children.only(children) as ReactElement<ScrollableProps>;
-  const horizontal = isValidElement(child) ? !!child.props.horizontal : false;
+  const horizontal =
+    orientation !== undefined
+      ? orientation === 'horizontal'
+      : isValidElement(child) && !!child.props.horizontal;
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-    const offset = horizontal ? contentOffset.x : contentOffset.y;
-    const total = horizontal ? contentSize.width : contentSize.height;
-    const visible = horizontal ? layoutMeasurement.width : layoutMeasurement.height;
-    const remaining = total - visible - offset;
+  // Reanimated can only drive a scroll handler on an animated component, and
+  // `Animated.ScrollView` is not necessarily what was passed in — the child may
+  // be a FlatList, a SectionList or a custom scrollable. Keyed on the element
+  // *type*, not the element: rebuilding the wrapper would remount the list.
+  const childType = isValidElement(child)
+    ? (child.type as ComponentType<ScrollableProps>)
+    : null;
+  const AnimatedScrollable = useMemo(
+    () => (childType ? Animated.createAnimatedComponent(childType) : null),
+    [childType]
+  );
 
-    // Each edge fades in over the first FADE_IN_DISTANCE px of travel, so an
-    // edge with nothing past it shows nothing.
-    setStartOpacity(Math.min(offset / FADE_IN_DISTANCE, 1));
-    setEndOpacity(Math.min(Math.max(remaining, 0) / FADE_IN_DISTANCE, 1));
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const { contentOffset, contentSize, layoutMeasurement } = event;
+      offset.value = horizontal ? contentOffset.x : contentOffset.y;
+      contentLength.value = horizontal ? contentSize.width : contentSize.height;
+      viewportLength.value = horizontal
+        ? layoutMeasurement.width
+        : layoutMeasurement.height;
+    },
+  });
 
-    child.props.onScroll?.(event);
+  // A consumer `onScroll` is composed rather than dropped — but because the
+  // child is now an animated component it has to be an animated handler too.
+  const onScroll = useComposedEventHandler([
+    scrollHandler,
+    (child.props.onScroll as typeof scrollHandler | undefined) ?? null,
+  ]);
+
+  // Measured up front as well as on scroll, so an end edge with content behind
+  // it fades from the first frame rather than waiting for a scroll event.
+  const onLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    viewportLength.value = horizontal ? width : height;
+    child.props.onLayout?.(event);
   };
 
-  const scrollable = isValidElement(child)
-    ? cloneElement(child, {
-        onScroll: handleScroll,
-        scrollEventThrottle: child.props.scrollEventThrottle ?? 16,
-      })
-    : child;
+  const onContentSizeChange = (width: number, height: number) => {
+    contentLength.value = horizontal ? width : height;
+    child.props.onContentSizeChange?.(width, height);
+  };
 
-  const showStart = edges !== 'end';
-  const showEnd = edges !== 'start';
+  const startOpacity = useDerivedValue(() =>
+    Math.min(offset.value / fadeInDistance, 1)
+  );
+
+  const endOpacity = useDerivedValue(() => {
+    // Nothing to fade towards when the content fits inside the viewport.
+    const remaining = contentLength.value - viewportLength.value - offset.value;
+    return Math.min(Math.max(remaining, 0) / fadeInDistance, 1);
+  });
+
+  const scrollable =
+    AnimatedScrollable && isValidElement(child) ? (
+      <AnimatedScrollable
+        {...child.props}
+        onScroll={onScroll}
+        onLayout={onLayout}
+        onContentSizeChange={onContentSizeChange}
+        scrollEventThrottle={child.props.scrollEventThrottle ?? 16}
+      />
+    ) : (
+      child
+    );
+
+  if (!enabled || edges === 'none') {
+    return (
+      <View {...props} className={className}>
+        {scrollable}
+      </View>
+    );
+  }
 
   return (
     <View {...props} className={className}>
       {scrollable}
 
-      {showStart ? (
+      {edges !== 'end' ? (
         <Fade
           color={fadeColor}
           size={size}
@@ -112,7 +191,7 @@ export function ScrollFade({
           edge="start"
         />
       ) : null}
-      {showEnd ? (
+      {edges !== 'start' ? (
         <Fade
           color={fadeColor}
           size={size}
@@ -138,31 +217,64 @@ function Fade({
   color: string;
   size: number;
   horizontal: boolean;
-  opacity: number;
+  opacity: DerivedValue<number>;
   edge: 'start' | 'end';
 }) {
   const isStart = edge === 'start';
-  const id = `scroll-fade-${edge}-${horizontal ? 'x' : 'y'}`;
 
   const position = horizontal
     ? { top: 0, bottom: 0, width: size, ...(isStart ? { left: 0 } : { right: 0 }) }
     : { left: 0, right: 0, height: size, ...(isStart ? { top: 0 } : { bottom: 0 }) };
 
-  // The gradient runs from the screen edge inwards, so it is reversed on the
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  // The gradient runs from the edge inwards, so its stops are reversed on the
   // end edge.
-  const [x2, y2] = horizontal ? [1, 0] : [0, 1];
+  const colors: [string, string] = isStart
+    ? [withAlpha(color, 1), withAlpha(color, 0)]
+    : [withAlpha(color, 0), withAlpha(color, 1)];
 
   return (
-    <View pointerEvents="none" style={{ position: 'absolute', opacity, ...position }}>
-      <Svg width="100%" height="100%">
-        <Defs>
-          <LinearGradient id={id} x1="0" y1="0" x2={String(x2)} y2={String(y2)}>
-            <Stop offset="0" stopColor={color} stopOpacity={isStart ? 1 : 0} />
-            <Stop offset="1" stopColor={color} stopOpacity={isStart ? 0 : 1} />
-          </LinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
-      </Svg>
-    </View>
+    <Animated.View
+      pointerEvents="none"
+      style={[{ position: 'absolute' }, position, style]}
+    >
+      <LinearGradient
+        colors={colors}
+        start={{ x: 0, y: 0 }}
+        end={horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </Animated.View>
   );
+}
+
+/**
+ * Gradients need a transparent stop of the *same* colour — `transparent` is
+ * black at zero alpha on Android, which shows as a grey smear.
+ */
+function withAlpha(color: string, alpha: number): string {
+  if (color.startsWith('#')) {
+    const hex = color.slice(1);
+    const full =
+      hex.length === 3
+        ? hex
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        : hex.slice(0, 6);
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    if (Number.isNaN(r + g + b)) return color;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  const channels = color.match(/rgba?\(([^)]+)\)/)?.[1];
+  if (channels) {
+    const [r, g, b] = channels.split(',').map((part) => part.trim());
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  return color;
 }

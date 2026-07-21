@@ -5,7 +5,7 @@ description: Fades the edges of a scroll container.
 
 Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.
 
-The React Native equivalent of shadcn/ui's [scroll-fade utility](https://ui.shadcn.com/docs/utils/scroll-fade), which uses CSS `mask-image` on a scroll timeline. React Native has neither masks nor scroll timelines, so the fades are gradient overlays whose opacity follows the scroll position.
+A fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.
 
 ## Installation
 
@@ -35,6 +35,11 @@ import { ScrollFade, Badge } from 'panelui-native';
     ))}
   </ScrollView>
 </ScrollFade>
+
+// Fade only the trailing edge, on a card surface.
+<ScrollFade edges="end" size={56} color="var(--color-card)">
+  <FlatList horizontal data={items} renderItem={renderItem} />
+</ScrollFade>
 ```
 
 ## API Reference
@@ -45,15 +50,20 @@ import { ScrollFade, Badge } from 'panelui-native';
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `size` | `number` | — | Depth of the fade in pixels. |
-| `edges` | `'both' \| 'start' \| 'end'` | — | Which edges fade. |
+| `edges` | `'both' \| 'start' \| 'end' \| 'none'` | — | Which edges fade. |
+| `orientation` | `'horizontal' \| 'vertical'` | — | Scroll axis. Inferred from the child's `horizontal` prop when omitted — pass it explicitly for children that scroll horizontally without that prop (a `FlatList` with `horizontal` set through `contentContainerStyle`, say). |
 | `color` | `string` | — | Colour the fade resolves to — normally whatever sits behind the scrollable. Defaults to the theme's background. |
+| `fadeInDistance` | `number` | — | Distance in pixels over which an edge fades from clear to full. |
+| `enabled` | `boolean` | — | Set false to render the child with no fades at all. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
-Orientation is read from the child's `horizontal` prop, so a horizontal list fades left and right and a vertical one fades top and bottom.
+Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.
 
-Each edge only fades once there is content past it — scrolled to the top, the top edge shows nothing.
+An edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.
+
+**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.
 
 The fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend.

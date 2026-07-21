@@ -64,7 +64,10 @@
   "license": "MIT",
   "homepage": "https://github.com/panel-ui/PanelUI#readme",
   "peerDependencies": {
+    "@expo/ui": "*",
+    "@react-native-masked-view/masked-view": ">=0.3.0",
     "expo-clipboard": ">=7.0.0",
+    "expo-linear-gradient": ">=13.0.0",
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": ">=2.0.0",
@@ -96,6 +99,9 @@
     ]
   },
   "peerDependenciesMeta": {
+    "@expo/ui": {
+      "optional": true
+    },
     "expo-clipboard": {
       "optional": true
     }

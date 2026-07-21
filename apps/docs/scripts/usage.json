@@ -103,6 +103,13 @@
     ],
     "variantCode": {
       "size": "<Avatar size=\"sm\" fallback=\"KA\" />\n<Avatar size=\"md\" fallback=\"KA\" />\n<Avatar size=\"lg\" fallback=\"KA\" />\n<Avatar size=\"xl\" fallback=\"KA\" />"
+    },
+    "preview": {
+      "src": "/previews/avatar.jpg",
+      "alt": "Avatars on a dark screen: a row of four initials avatars growing from small to large, a row of three photo avatars, a row showing a red count badge reading 5, a red 99+ badge and a small green presence dot, and a stacked group of three overlapping photos ending in a +5 counter.",
+      "width": 1163,
+      "height": 1891,
+      "caption": "Sizes, images, badges and a stacked group, running in the example app."
     }
   },
   "badge": {
@@ -237,9 +244,23 @@
       {
         "title": "Media at the top",
         "description": "Clip the card so the image corners follow its radius, and put the image before the header.",
-        "code": "<Card className=\"overflow-hidden\">\n  <Image source={{ uri: post.cover }} className=\"h-40 w-full\" />\n  <Card.Header>\n    <Card.Title>{post.title}</Card.Title>\n    <Card.Description>{post.excerpt}</Card.Description>\n  </Card.Header>\n</Card>"
+        "code": "<Card className=\"overflow-hidden\">\n  <Image source={{ uri: post.cover }} className=\"h-40 w-full\" />\n  <Card.Header>\n    <Card.Title>{post.title}</Card.Title>\n    <Card.Description>{post.excerpt}</Card.Description>\n  </Card.Header>\n</Card>",
+        "preview": {
+          "src": "/previews/card-media.jpg",
+          "alt": "A card whose top half is a photograph of a green velvet sofa in a bright room, bleeding to the card edges. Underneath, a blue $450 price, the title Living room Sofa, the description Perfect for modern tropical spaces and baroque inspired rooms, and a full-width white Buy now button.",
+          "width": 1179,
+          "height": 1357,
+          "caption": "Media bleeds to the card edges; the padding starts at the content."
+        }
       }
-    ]
+    ],
+    "preview": {
+      "src": "/previews/card.jpg",
+      "alt": "A card on a dark screen titled Living room Sofa, with the description This sofa is perfect for modern tropical spaces, baroque inspired spaces, and a full-width white Buy now button.",
+      "width": 1179,
+      "height": 755,
+      "caption": "Header, content and footer, running in the example app."
+    }
   },
   "checkbox": {
     "intro": "A checkbox with an animated check. `variant=\"card\"` turns the whole surface into the target, for pickable options where the box confirms a choice rather than being the affordance.",
@@ -296,7 +317,14 @@
         "description": "`dismissible={false}` forces a deliberate choice — the backdrop no longer closes it.",
         "code": "const [open, setOpen] = useState(false);\n\n<Dialog open={open} onOpenChange={setOpen}>\n  <Dialog.Content dismissible={false}>\n    <Dialog.Title>Delete 12 files?</Dialog.Title>\n    <Dialog.Description>This cannot be undone.</Dialog.Description>\n    <Dialog.Footer>\n      <Button variant=\"ghost\" onPress={() => setOpen(false)}>Cancel</Button>\n      <Button variant=\"destructive\" onPress={confirm}>Delete</Button>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
       }
-    ]
+    ],
+    "preview": {
+      "src": "/previews/dialog.jpg",
+      "alt": "A dialog open over a dimmed screen. The panel reads Delete project? above the line This action cannot be undone. The project and all of its data will be permanently removed, with a plain Cancel button and a red Delete button in the footer.",
+      "width": 1179,
+      "height": 2192,
+      "caption": "A destructive confirmation, with the backdrop dimming the screen behind it."
+    }
   },
   "empty-state": {
     "intro": "The placeholder for a list or screen with nothing in it. `Media variant=\"icon\"` frames the icon in a small card with two rotated ghost cards fanned behind it.",
@@ -1019,6 +1047,13 @@
     ],
     "variantCode": {
       "align": "{/* Incoming — muted bubble, avatar on the left. */}\n<Message align=\"start\">…</Message>\n\n{/* Outgoing — primary bubble, row reversed. */}\n<Message align=\"end\">…</Message>\n\n{/* Or set it once for a whole group. */}\n<Message.Group align=\"end\">…</Message.Group>"
+    },
+    "preview": {
+      "src": "/previews/message.jpg",
+      "alt": "A chat transcript on a dark screen. An incoming bubble with a photo avatar reads How can I help you today?, answered by a white outgoing bubble reading Set a reminder for 9am tomorrow with a Read receipt under it. Below, a turn labelled Olivia carries a timestamp of Yesterday at 18:04, and three consecutive bubbles from one sender share a single avatar.",
+      "width": 1179,
+      "height": 1888,
+      "caption": "Both sides of a conversation, a named turn with a timestamp, and grouped turns."
     }
   }
 }

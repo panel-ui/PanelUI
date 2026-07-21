@@ -16,6 +16,13 @@ fs.mkdirSync(outDir, { recursive: true });
 const esc = (s) => String(s).replace(/\|/g, '\\|');
 const inlineCode = (s) => '`' + String(s).replace(/`/g, '') + '`';
 
+/**
+ * A framed screenshot. Used both for the page's own preview, under the intro,
+ * and for an example that is easier shown than described.
+ */
+const previewTag = (p) =>
+  `<Preview\n  src="${p.src}"\n  alt="${p.alt}"\n  width={${p.width}}\n  height={${p.height}}${p.caption ? `\n  caption="${p.caption}"` : ''}\n/>`;
+
 /** Props inherited from React Native, documented once rather than per row. */
 const INHERITED = /^(ViewProps|TextProps|ViewProps, VariantProps|.*VariantProps.*)$/;
 
@@ -46,9 +53,7 @@ for (const [slug, [name, summary, keyword]] of Object.entries(meta)) {
    * intro — the first thing on the page should be what the thing looks like,
    * not a paragraph about it.
    */
-  const preview = u.preview
-    ? `\n\n<Preview\n  src="${u.preview.src}"\n  alt="${u.preview.alt}"\n  width={${u.preview.width}}\n  height={${u.preview.height}}${u.preview.caption ? `\n  caption="${u.preview.caption}"` : ''}\n/>`
-    : '';
+  const preview = u.preview ? `\n\n${previewTag(u.preview)}` : '';
 
   sections.push(`---
 title: ${name}
@@ -96,6 +101,9 @@ ${u.partNotes ?? parts.map((p) => `- **\`${p}\`** — ${u.parts?.[p.split('.')[1
 ${u.examples.map((ex) => [
   `### ${ex.title}`,
   ex.description ? `\n\n${ex.description}` : '',
+  // A shot of the example itself, above its code — for the ones where the
+  // result is the point and the snippet is just how you get there.
+  ex.preview ? `\n\n${previewTag(ex.preview)}` : '',
   `\n\n\`\`\`tsx\n${ex.code}\n\`\`\``,
 ].join('')).join('\n\n')}`);
   }

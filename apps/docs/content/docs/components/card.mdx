@@ -5,6 +5,14 @@ description: Content surface with header, body and footer.
 
 A content surface. Use the full composition rather than dropping everything into the content slot.
 
+<Preview
+  src="/previews/card.jpg"
+  alt="A card on a dark screen titled Living room Sofa, with the description This sofa is perfect for modern tropical spaces, baroque inspired spaces, and a full-width white Buy now button."
+  width={1179}
+  height={755}
+  caption="Header, content and footer, running in the example app."
+/>
+
 ## Installation
 
 Card ships with the library — no separate install.
@@ -93,6 +101,14 @@ Skip the parts you do not need — nothing is required.
 ### Media at the top
 
 Clip the card so the image corners follow its radius, and put the image before the header.
+
+<Preview
+  src="/previews/card-media.jpg"
+  alt="A card whose top half is a photograph of a green velvet sofa in a bright room, bleeding to the card edges. Underneath, a blue $450 price, the title Living room Sofa, the description Perfect for modern tropical spaces and baroque inspired rooms, and a full-width white Buy now button."
+  width={1179}
+  height={1357}
+  caption="Media bleeds to the card edges; the padding starts at the content."
+/>
 
 ```tsx
 <Card className="overflow-hidden">

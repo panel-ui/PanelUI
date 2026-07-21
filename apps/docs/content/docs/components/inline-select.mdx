@@ -3,7 +3,7 @@ title: InlineSelect
 description: Picker that expands its options in place.
 ---
 
-A picker that expands its options in place, without an overlay. Use it when the option list is short and the surrounding layout can absorb the height.
+A select that reveals its options next to the trigger instead of taking over the screen with a sheet.
 
 ## Installation
 
@@ -16,9 +16,20 @@ import { InlineSelect } from 'panelui-native';
 ## Usage
 
 ```tsx
+// Inline: the list expands in layout flow and pushes content below it down.
 <InlineSelect value={region} onValueChange={setRegion} placeholder="Select a region">
   <InlineSelect.Item value="us" label="United States" />
   <InlineSelect.Item value="eu" label="Europe" />
+</InlineSelect>
+
+// Overlay: the list floats above the page. Nothing else moves.
+<InlineSelect overlay value={region} onValueChange={setRegion}>
+  <InlineSelect.Item value="us" label="United States" />
+  <InlineSelect.Item value="eu" label="Europe" />
+</InlineSelect>
+
+// Size the floating list to its longest option instead of the trigger.
+<InlineSelect overlay overlayWidth="content" value={region} onValueChange={setRegion}>
   <InlineSelect.Item value="apac" label="Asia Pacific" />
 </InlineSelect>
 ```
@@ -32,6 +43,17 @@ import { InlineSelect } from 'panelui-native';
 ```
 
 - **`InlineSelect.Item`** — One option. `value` identifies it, `label` is what is shown.
+
+## Variants
+
+### `selected`
+
+- `true`
+
+### `presentation`
+
+- `inline` *(default)*
+- `overlay`
 
 ## API Reference
 
@@ -51,5 +73,25 @@ import { InlineSelect } from 'panelui-native';
 | `onValueChange` | `(value: string) => void` | — |  |
 | `placeholder` | `string` | — |  |
 | `disabled` | `boolean` | — |  |
+| `overlay` | `boolean` | — | Float the list above the page instead of expanding it in layout flow, so opening the select does not push the content below it down. |
+| `overlayWidth` | `'trigger' \| 'content' \| number` | — | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. Ignored without `overlay`. |
+| `overlayOffset` | `number` | — | Gap between the trigger and the floating list. Ignored without `overlay`. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the list opens or closes. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Choosing a presentation
+
+By default the list expands **in layout flow**, so everything below the select moves down. That reads correctly inside a settings list, where it looks like the row itself growing — and badly anywhere the shift is jarring.
+
+Pass `overlay` to float the list above the page through a portal instead. It is anchored to the trigger, flips above it when there is not enough room below, scrolls when the options do not fit, and closes on a press anywhere outside. **Nothing on the screen moves.** This is what you want inside a form or a scroll view.
+
+### Anchoring
+
+The floating list is positioned from a window-space measurement of the trigger taken when it opens, so it is correct inside scroll views and transformed parents. `overlayWidth` matches the trigger by default; `"content"` sizes to the longest option (never narrower than the trigger) and a number sets a fixed width. `overlayOffset` is the gap between the two.
+
+### Compared to Select
+
+`Select` opens a bottom sheet, which suits long option lists and small screens. `InlineSelect` keeps the options next to what they belong to, which suits short lists inside a form.

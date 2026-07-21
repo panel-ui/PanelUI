@@ -323,7 +323,13 @@ function SelectDemo() {
   );
 }
 
-function InlineSelectDemo() {
+function InlineSelectDemo({
+  overlay,
+  overlayWidth,
+}: {
+  overlay?: boolean;
+  overlayWidth?: 'trigger' | 'content' | number;
+}) {
   const [region, setRegion] = useState<string>();
 
   return (
@@ -333,6 +339,8 @@ function InlineSelectDemo() {
         value={region}
         onValueChange={setRegion}
         placeholder="Select a region"
+        overlay={overlay}
+        overlayWidth={overlayWidth}
       >
         <InlineSelect.Item value="us" label="United States" />
         <InlineSelect.Item value="eu" label="Europe" />
@@ -1529,14 +1537,39 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'InlineSelect',
     summary: 'Picker that expands in place',
     demos: [
-      { label: 'Basic', render: () => <InlineSelectDemo /> },
+      { label: 'Inline (default)', render: () => <InlineSelectDemo /> },
+      {
+        label: 'Overlay — nothing below moves',
+        render: () => (
+          <View className="w-full gap-4">
+            <InlineSelectDemo overlay />
+            <Text size="sm" muted>
+              This paragraph stays exactly where it is when the list above
+              opens. Without `overlay` it would be pushed down by the height of
+              the list.
+            </Text>
+            <Button variant="outline" fullWidth>
+              And so does this button
+            </Button>
+          </View>
+        ),
+      },
+      {
+        label: 'Overlay width',
+        render: () => (
+          <View className="w-full gap-4">
+            <InlineSelectDemo overlay overlayWidth="content" />
+            <InlineSelectDemo overlay overlayWidth={220} />
+          </View>
+        ),
+      },
       {
         label: 'In a form',
         render: () => (
           <Card className="w-full">
             <Card.Content className="gap-4 p-4">
               <Input label="Company" placeholder="Acme Inc." />
-              <InlineSelectDemo />
+              <InlineSelectDemo overlay />
             </Card.Content>
           </Card>
         ),

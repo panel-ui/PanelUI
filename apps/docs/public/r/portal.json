@@ -1,7 +1,7 @@
 {
   "name": "portal",
   "type": "registry:ui",
-  "description": "Primitive: portal.",
+  "description": "Renders content above everything else. Required by every overlay.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

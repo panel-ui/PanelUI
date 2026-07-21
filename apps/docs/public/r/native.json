@@ -1,7 +1,7 @@
 {
   "name": "native",
   "type": "registry:lib",
-  "description": "Utility: native.",
+  "description": "Optional bridge to the platform UI toolkit, behind the `native` prop.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [

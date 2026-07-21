@@ -1,7 +1,7 @@
 {
   "name": "animated-pressable",
   "type": "registry:ui",
-  "description": "Primitive: animated-pressable.",
+  "description": "Pressable with UI-thread press feedback.",
   "registryDependencies": [],
   "dependencies": [
     "react-native-reanimated"

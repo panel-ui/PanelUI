@@ -1,7 +1,7 @@
 {
   "name": "use-debounced-value",
   "type": "registry:hook",
-  "description": "Hook: use-debounced-value.",
+  "description": "A copy of a value that settles after changes stop.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

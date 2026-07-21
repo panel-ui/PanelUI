@@ -1,7 +1,7 @@
 {
   "name": "use-disclosure",
   "type": "registry:hook",
-  "description": "Hook: use-disclosure.",
+  "description": "Open and closed state for an overlay.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

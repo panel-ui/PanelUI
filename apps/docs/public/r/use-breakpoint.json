@@ -1,7 +1,7 @@
 {
   "name": "use-breakpoint",
   "type": "registry:hook",
-  "description": "Hook: use-breakpoint.",
+  "description": "Responsive state derived from the window size.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

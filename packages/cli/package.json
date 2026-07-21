@@ -1,0 +1,36 @@
+{
+  "name": "panelui-cli",
+  "version": "0.1.0",
+  "description": "Add PanelUI components to an Expo project one at a time, source and all.",
+  "type": "module",
+  "bin": {
+    "panelui-cli": "./bin/panelui.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "ui",
+    "cli",
+    "registry",
+    "components"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panel-ui/PanelUI.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/panel-ui/PanelUI/issues"
+  },
+  "author": "Khalid Abdi",
+  "license": "MIT",
+  "homepage": "https://panelui.dev/docs/cli"
+}

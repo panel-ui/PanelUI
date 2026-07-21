@@ -21,7 +21,7 @@
   {
     "name": "animated-pressable",
     "type": "registry:ui",
-    "description": "Primitive: animated-pressable.",
+    "description": "Pressable with UI-thread press feedback.",
     "registryDependencies": []
   },
   {
@@ -84,7 +84,7 @@
   {
     "name": "cn",
     "type": "registry:lib",
-    "description": "Utility: cn.",
+    "description": "Merges Tailwind class names, with later classes winning conflicts.",
     "registryDependencies": []
   },
   {
@@ -117,7 +117,7 @@
   {
     "name": "icons",
     "type": "registry:ui",
-    "description": "Primitive: icons.",
+    "description": "The icon set, plus the colour context components use to tint them.",
     "registryDependencies": []
   },
   {
@@ -160,7 +160,7 @@
   {
     "name": "keyboard-avoider",
     "type": "registry:ui",
-    "description": "Primitive: keyboard-avoider.",
+    "description": "View that lifts itself clear of the software keyboard.",
     "registryDependencies": [
       "use-keyboard-avoidance"
     ]
@@ -185,13 +185,13 @@
   {
     "name": "native",
     "type": "registry:lib",
-    "description": "Utility: native.",
+    "description": "Optional bridge to the platform UI toolkit, behind the `native` prop.",
     "registryDependencies": []
   },
   {
     "name": "panel-ui-provider",
     "type": "registry:ui",
-    "description": "Primitive: panel-ui-provider.",
+    "description": "Root provider: gesture root, themed background, portal host, toasts.",
     "registryDependencies": [
       "cn",
       "portal",
@@ -201,7 +201,7 @@
   {
     "name": "portal",
     "type": "registry:ui",
-    "description": "Primitive: portal.",
+    "description": "Renders content above everything else. Required by every overlay.",
     "registryDependencies": []
   },
   {
@@ -295,7 +295,7 @@
   {
     "name": "text",
     "type": "registry:ui",
-    "description": "Primitive: text.",
+    "description": "Themed text with a size, weight and muted scale. Most components build on it.",
     "registryDependencies": []
   },
   {
@@ -336,49 +336,49 @@
   {
     "name": "use-breakpoint",
     "type": "registry:hook",
-    "description": "Hook: use-breakpoint.",
+    "description": "Responsive state derived from the window size.",
     "registryDependencies": []
   },
   {
     "name": "use-copy-to-clipboard",
     "type": "registry:hook",
-    "description": "Hook: use-copy-to-clipboard.",
+    "description": "Copy text, with a temporary copied state.",
     "registryDependencies": []
   },
   {
     "name": "use-debounced-value",
     "type": "registry:hook",
-    "description": "Hook: use-debounced-value.",
+    "description": "A copy of a value that settles after changes stop.",
     "registryDependencies": []
   },
   {
     "name": "use-disclosure",
     "type": "registry:hook",
-    "description": "Hook: use-disclosure.",
+    "description": "Open and closed state for an overlay.",
     "registryDependencies": []
   },
   {
     "name": "use-keyboard",
     "type": "registry:hook",
-    "description": "Hook: use-keyboard.",
+    "description": "Keyboard height and visibility.",
     "registryDependencies": []
   },
   {
     "name": "use-keyboard-avoidance",
     "type": "registry:hook",
-    "description": "Hook: use-keyboard-avoidance.",
+    "description": "Lift an element just clear of the software keyboard.",
     "registryDependencies": []
   },
   {
     "name": "use-previous",
     "type": "registry:hook",
-    "description": "Hook: use-previous.",
+    "description": "The value from the previous render.",
     "registryDependencies": []
   },
   {
     "name": "use-theme",
     "type": "registry:hook",
-    "description": "Hook: use-theme.",
+    "description": "Read and change the active theme.",
     "registryDependencies": []
   }
 ]

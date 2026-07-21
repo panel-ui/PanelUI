@@ -1,7 +1,7 @@
 {
   "name": "use-keyboard-avoidance",
   "type": "registry:hook",
-  "description": "Hook: use-keyboard-avoidance.",
+  "description": "Lift an element just clear of the software keyboard.",
   "registryDependencies": [],
   "dependencies": [
     "react-native-reanimated"

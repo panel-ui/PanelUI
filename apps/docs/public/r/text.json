@@ -1,7 +1,7 @@
 {
   "name": "text",
   "type": "registry:ui",
-  "description": "Primitive: text.",
+  "description": "Themed text with a size, weight and muted scale. Most components build on it.",
   "registryDependencies": [],
   "dependencies": [
     "tailwind-variants"

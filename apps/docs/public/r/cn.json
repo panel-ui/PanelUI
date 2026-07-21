@@ -1,7 +1,7 @@
 {
   "name": "cn",
   "type": "registry:lib",
-  "description": "Utility: cn.",
+  "description": "Merges Tailwind class names, with later classes winning conflicts.",
   "registryDependencies": [],
   "dependencies": [
     "clsx",

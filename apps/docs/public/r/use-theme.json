@@ -1,7 +1,7 @@
 {
   "name": "use-theme",
   "type": "registry:hook",
-  "description": "Hook: use-theme.",
+  "description": "Read and change the active theme.",
   "registryDependencies": [],
   "dependencies": [
     "uniwind"

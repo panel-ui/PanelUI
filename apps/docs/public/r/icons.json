@@ -1,7 +1,7 @@
 {
   "name": "icons",
   "type": "registry:ui",
-  "description": "Primitive: icons.",
+  "description": "The icon set, plus the colour context components use to tint them.",
   "registryDependencies": [],
   "dependencies": [
     "react-native-svg"

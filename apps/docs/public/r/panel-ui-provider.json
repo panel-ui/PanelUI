@@ -1,7 +1,7 @@
 {
   "name": "panel-ui-provider",
   "type": "registry:ui",
-  "description": "Primitive: panel-ui-provider.",
+  "description": "Root provider: gesture root, themed background, portal host, toasts.",
   "registryDependencies": [
     "cn",
     "portal",

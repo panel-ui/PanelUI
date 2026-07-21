@@ -1,7 +1,7 @@
 {
   "name": "use-keyboard",
   "type": "registry:hook",
-  "description": "Hook: use-keyboard.",
+  "description": "Keyboard height and visibility.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

@@ -1,7 +1,7 @@
 {
   "name": "use-previous",
   "type": "registry:hook",
-  "description": "Hook: use-previous.",
+  "description": "The value from the previous render.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [],

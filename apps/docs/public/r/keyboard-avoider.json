@@ -1,7 +1,7 @@
 {
   "name": "keyboard-avoider",
   "type": "registry:ui",
-  "description": "Primitive: keyboard-avoider.",
+  "description": "View that lifts itself clear of the software keyboard.",
   "registryDependencies": [
     "use-keyboard-avoidance"
   ],

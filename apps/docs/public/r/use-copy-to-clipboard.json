@@ -1,7 +1,7 @@
 {
   "name": "use-copy-to-clipboard",
   "type": "registry:hook",
-  "description": "Hook: use-copy-to-clipboard.",
+  "description": "Copy text, with a temporary copied state.",
   "registryDependencies": [],
   "dependencies": [],
   "optionalDependencies": [

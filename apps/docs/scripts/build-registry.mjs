@@ -40,6 +40,30 @@ const ALIAS = {
   hooks: '@/hooks',
 };
 
+/**
+ * The primitives, hooks and utilities are not in meta.json — that file only
+ * covers documented components. Written out rather than generated, because
+ * "Primitive: portal." helps nobody choose whether they want it.
+ */
+const SUPPORT_DESCRIPTIONS = {
+  text: 'Themed text with a size, weight and muted scale. Most components build on it.',
+  portal: 'Renders content above everything else. Required by every overlay.',
+  'animated-pressable': 'Pressable with UI-thread press feedback.',
+  'keyboard-avoider': 'View that lifts itself clear of the software keyboard.',
+  'panel-ui-provider': 'Root provider: gesture root, themed background, portal host, toasts.',
+  icons: 'The icon set, plus the colour context components use to tint them.',
+  cn: 'Merges Tailwind class names, with later classes winning conflicts.',
+  native: 'Optional bridge to the platform UI toolkit, behind the `native` prop.',
+  'use-theme': 'Read and change the active theme.',
+  'use-breakpoint': 'Responsive state derived from the window size.',
+  'use-copy-to-clipboard': 'Copy text, with a temporary copied state.',
+  'use-debounced-value': 'A copy of a value that settles after changes stop.',
+  'use-disclosure': 'Open and closed state for an overlay.',
+  'use-keyboard': 'Keyboard height and visibility.',
+  'use-keyboard-avoidance': 'Lift an element just clear of the software keyboard.',
+  'use-previous': 'The value from the previous render.',
+};
+
 /* ------------------------------------------------------------------ *
  * 1. Build the manifest: every source file, its item, and where it lands.
  * ------------------------------------------------------------------ */
@@ -230,7 +254,7 @@ for (const [name, item] of items) {
   built.push({
     name,
     type: item.type,
-    description: description ?? descriptionFor(name, item.type),
+    description: description ?? descriptionFor(name),
     registryDependencies: [...registryDependencies].sort(),
     dependencies: [...dependencies].sort(),
     optionalDependencies: [...optionalDependencies].sort(),
@@ -238,10 +262,8 @@ for (const [name, item] of items) {
   });
 }
 
-/** Fallback for the parts that are not components and so are not in meta.json. */
-function descriptionFor(name, type) {
-  const label = type === 'registry:hook' ? 'Hook' : type === 'registry:lib' ? 'Utility' : 'Primitive';
-  return `${label}: ${name}.`;
+function descriptionFor(name) {
+  return SUPPORT_DESCRIPTIONS[name] ?? `${name}.`;
 }
 
 /* ------------------------------------------------------------------ *

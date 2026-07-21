@@ -678,7 +678,8 @@
     "extraImports": [
       "Avatar",
       "Button",
-      "Shimmer"
+      "Shimmer",
+      "BottomSheet"
     ],
     "anatomy": "<Message.Group>\n  <Message align=\"start\">\n    <Message.Avatar>…</Message.Avatar>\n    <Message.Content>\n      <Message.Header>…</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>…</Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Actions>…</Message.Actions>\n      <Message.Footer>…</Message.Footer>\n    </Message.Content>\n  </Message>\n</Message.Group>",
     "parts": {
@@ -716,6 +717,11 @@
         "title": "In a transcript",
         "description": "An inverted `FlatList` keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
         "code": "<FlatList\n  data={[...messages].reverse()}\n  inverted\n  keyExtractor={(m) => m.id}\n  contentContainerClassName=\"gap-3 px-4 py-3\"\n  renderItem={({ item }) => (\n    <Message align={item.role === 'user' ? 'end' : 'start'}>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{item.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  )}\n/>"
+      },
+      {
+        "title": "Long-press for actions",
+        "description": "Give the turn an `onLongPress` and the whole row becomes a long-press target with the library's press feedback — the gesture a chat uses to surface per-message actions. The component only exposes the gesture; open a sheet or a popover from it.",
+        "code": "const [open, setOpen] = useState(false);\n\n<Message align=\"end\" onLongPress={() => setOpen(true)}>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Long-press me for actions.</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<BottomSheet open={open} onOpenChange={setOpen}>\n  <BottomSheet.Content>\n    {/* copy · reply · forward · delete */}\n  </BottomSheet.Content>\n</BottomSheet>"
       }
     ],
     "variantCode": {

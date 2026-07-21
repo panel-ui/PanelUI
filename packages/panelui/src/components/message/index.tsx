@@ -29,8 +29,9 @@ import {
   useContext,
   type ReactNode,
 } from 'react';
-import { View, type ViewProps } from 'react-native';
+import { View, type GestureResponderEvent, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 
@@ -107,20 +108,43 @@ export interface MessageProps
    * this for you.
    */
   stacked?: boolean;
+  /**
+   * Fires on a long press anywhere on the turn — the gesture a chat uses to
+   * surface per-message actions (copy, reply, react). Open a menu from it; the
+   * component only exposes the press. When set, the whole row gains press
+   * feedback. A plain tap should still do nothing, so there is no `onPress`.
+   */
+  onLongPress?: (event: GestureResponderEvent) => void;
   children?: ReactNode;
 }
 
 const MessageRoot = forwardRef<View, MessageProps>(
-  ({ className, align, stacked = false, children, ...props }, ref) => {
+  ({ className, align, stacked = false, onLongPress, children, ...props }, ref) => {
     const group = useContext(GroupContext);
     const resolvedAlign = align ?? group?.align ?? 'start';
     const { root } = messageVariants({ align: resolvedAlign });
 
+    const body = onLongPress ? (
+      // A long-press target, not a button — a tap does nothing, so no role is
+      // announced. The feedback matches every other pressable in the library.
+      <AnimatedPressable
+        ref={ref}
+        onLongPress={onLongPress}
+        delayLongPress={300}
+        className={root({ className })}
+        {...props}
+      >
+        {children}
+      </AnimatedPressable>
+    ) : (
+      <View ref={ref} className={root({ className })} {...props}>
+        {children}
+      </View>
+    );
+
     return (
       <MessageContext.Provider value={{ align: resolvedAlign, stacked }}>
-        <View ref={ref} className={root({ className })} {...props}>
-          {children}
-        </View>
+        {body}
       </MessageContext.Provider>
     );
   }

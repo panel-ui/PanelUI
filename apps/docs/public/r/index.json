@@ -202,6 +202,7 @@
     "type": "registry:ui",
     "description": "Chat turn with avatar, bubble, header and footer.",
     "registryDependencies": [
+      "animated-pressable",
       "cn",
       "text"
     ]

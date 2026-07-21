@@ -20,7 +20,7 @@ The pieces are separate because conversations differ in which ones they need. A 
 Message ships with the library — no separate install.
 
 ```tsx
-import { Message, Avatar, Button, Shimmer } from 'panelui-native';
+import { Message, Avatar, Button, Shimmer, BottomSheet } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -206,6 +206,28 @@ An inverted `FlatList` keeps the newest turn pinned to the bottom without measur
 />
 ```
 
+### Long-press for actions
+
+Give the turn an `onLongPress` and the whole row becomes a long-press target with the library's press feedback — the gesture a chat uses to surface per-message actions. The component only exposes the gesture; open a sheet or a popover from it.
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Message align="end" onLongPress={() => setOpen(true)}>
+  <Message.Content>
+    <Message.Bubble>
+      <Message.BubbleContent>Long-press me for actions.</Message.BubbleContent>
+    </Message.Bubble>
+  </Message.Content>
+</Message>
+
+<BottomSheet open={open} onOpenChange={setOpen}>
+  <BottomSheet.Content>
+    {/* copy · reply · forward · delete */}
+  </BottomSheet.Content>
+</BottomSheet>
+```
+
 ## Variants
 
 ### `align`
@@ -233,6 +255,7 @@ An inverted `FlatList` keeps the newest turn pinned to the bottom without measur
 | `className` | `string` | — |  |
 | `align` | `Align` | `start` | Which side of the conversation this turn belongs to. `end` is the outgoing side — the person holding the device. |
 | `stacked` | `boolean` | — | Continuation of the message above it: tighter spacing, and the avatar slot is reserved but left empty so bubbles stay aligned. `Message.Group` sets this for you. |
+| `onLongPress` | `(event: GestureResponderEvent) => void` | — | Fires on a long press anywhere on the turn — the gesture a chat uses to surface per-message actions (copy, reply, react). Open a menu from it; the component only exposes the press. When set, the whole row gains press feedback. A plain tap should still do nothing, so there is no `onPress`. |
 
 ### Message.Group
 

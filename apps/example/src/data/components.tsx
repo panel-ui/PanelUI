@@ -69,6 +69,7 @@ import {
   Switch,
   Tabs,
   Text,
+  XIcon,
   Timeline,
   Toast,
   Typography,
@@ -461,6 +462,62 @@ function SavedThreadDemo() {
       </MessageScroller.Viewport>
       <MessageScroller.Button target="start" />
     </MessageScroller>
+  );
+}
+
+function MessageLongPressDemo() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View className="w-full gap-3">
+      <Text size="sm" muted className="text-center">
+        Press and hold the bubble.
+      </Text>
+
+      <Message align="end" onLongPress={() => setOpen(true)}>
+        <Message.Content>
+          <Message.Bubble>
+            <Message.BubbleContent>
+              Ship it — long-press me for actions.
+            </Message.BubbleContent>
+          </Message.Bubble>
+        </Message.Content>
+      </Message>
+
+      {/* The component only exposes the gesture; the menu is wired here. */}
+      <BottomSheet open={open} onOpenChange={setOpen}>
+        <BottomSheet.Content>
+          <Text size="lg" weight="semibold" className="mb-3">
+            Message
+          </Text>
+          <View className="gap-1 pb-2">
+            {[
+              { label: 'Copy', icon: <PlusSquareIcon size={16} /> },
+              { label: 'Reply', icon: <SendIcon size={16} /> },
+              { label: 'Forward', icon: <ShareNodesIcon size={16} /> },
+            ].map((action) => (
+              <Pressable
+                key={action.label}
+                accessibilityRole="menuitem"
+                onPress={() => setOpen(false)}
+                className="flex-row items-center gap-3 rounded-xl px-3 py-3 active:bg-accent"
+              >
+                {action.icon}
+                <Text>{action.label}</Text>
+              </Pressable>
+            ))}
+            <Pressable
+              accessibilityRole="menuitem"
+              onPress={() => setOpen(false)}
+              className="flex-row items-center gap-3 rounded-xl px-3 py-3 active:bg-accent"
+            >
+              <XIcon size={16} />
+              <Text className="text-destructive">Delete</Text>
+            </Pressable>
+          </View>
+        </BottomSheet.Content>
+      </BottomSheet>
+    </View>
   );
 }
 
@@ -2827,6 +2884,7 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      { label: 'Long-press for actions', render: () => <MessageLongPressDemo /> },
     ],
   },
   {

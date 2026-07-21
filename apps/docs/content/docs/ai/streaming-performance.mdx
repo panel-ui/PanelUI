@@ -1,0 +1,153 @@
+---
+title: Streaming performance
+description: Why token-by-token rendering drops frames on native, and what to do.
+---
+
+A streaming response is a state update per token. At a typical generation rate
+that is 20–60 React renders a second, each one re-rendering the entire
+transcript unless you stop it. On the web that is mostly survivable. On a
+mid-range Android phone it is not.
+
+## Where the time goes
+
+Three separate costs, in the order worth fixing:
+
+1. **Re-rendering messages that did not change.** The default. Every token
+   re-renders every turn in the list.
+2. **The update rate itself.** Even a perfectly memoised list still re-renders
+   the streaming turn 40 times a second.
+3. **Re-measuring layout.** Anything that measures content on each update —
+   `scrollToEnd`, an auto-growing container, a `ScrollView` instead of a list.
+
+## Memoise the row
+
+The single highest-value change. Without it the cost of a stream grows with the
+length of the conversation; with it, it is constant.
+
+```tsx
+const Turn = memo(
+  function Turn({ message }: { message: UIMessage }) {
+    /* … */
+  },
+  (prev, next) =>
+    prev.message.id === next.message.id &&
+    prev.message.parts === next.message.parts
+);
+```
+
+The AI SDK replaces the `parts` array on each update rather than mutating it, so
+a reference check is enough — and it is far cheaper than comparing text.
+
+Keep `renderItem` and `keyExtractor` in `useCallback`, or the list re-renders
+every row anyway because the function identity changed:
+
+```tsx
+const renderItem = useCallback(
+  ({ item }: { item: UIMessage }) => <Turn message={item} />,
+  []
+);
+```
+
+## Throttle the updates
+
+`useChat` can coalesce updates rather than emitting one per token. 50ms is
+around 20 updates a second — still visibly a stream, at half the renders.
+
+```tsx
+const { messages } = useChat({
+  transport,
+  experimental_throttle: 50,
+});
+```
+
+Push it to 100ms on lower-end devices. Past that it starts to read as chunky
+rather than streaming.
+
+## Use a list, not a ScrollView
+
+A `ScrollView` renders every child, every time, and keeping it pinned means
+`scrollToEnd` on each token — which measures content on each token.
+
+An inverted `FlatList` avoids both: the newest turn sits at the bottom with no
+scrolling call at all, and off-screen rows are recycled.
+
+```tsx
+<FlatList
+  data={reversed}
+  inverted
+  keyExtractor={(m) => m.id}
+  renderItem={renderItem}
+  removeClippedSubviews
+  initialNumToRender={10}
+  maxToRenderPerBatch={5}
+  windowSize={7}
+/>
+```
+
+`removeClippedSubviews` detaches off-screen rows from the native view hierarchy.
+It is a real win on long transcripts and occasionally causes blank rows on
+Android — measure before keeping it.
+
+## Keep animation off the JavaScript thread
+
+While a stream is running, the JS thread is the busiest part of the app. Any
+animation driven from it will stutter — and that is precisely when the user is
+watching.
+
+Every animated component in this library runs on the UI thread through
+Reanimated, so `Shimmer`'s thinking sweep and `ScrollFade`'s edges keep their
+frame rate no matter what React is doing. If you add your own animation, use
+`useSharedValue` and `useAnimatedStyle`, not `setState` in a loop and never
+React Native's core `Animated`.
+
+<Callout type="warn">
+  **Measure in a release build.** Debug builds inflate Reanimated's per-frame
+  cost by roughly two to three times, so an animation that looks like it blows
+  the frame budget in development can be comfortably inside it in release.
+  Optimising against debug numbers means optimising something that is not
+  actually slow.
+</Callout>
+
+## Do not animate layout per token
+
+Growing a bubble with a layout animation on every token means a layout pass per
+token. Let the text reflow, and animate the turn's *entrance* only:
+
+```tsx
+<Animated.View entering={FadeIn.duration(160)}>
+  <Turn message={message} />
+</Animated.View>
+```
+
+## Rendering markdown
+
+Parsing markdown on every token is the most expensive thing most chat UIs do —
+the parse cost is proportional to the message length, and it runs once per
+token, so it grows quadratically over a long answer.
+
+Two workable approaches:
+
+- Render plain text while `status === 'streaming'`, and parse once when the turn
+  finishes. Simple, and correct.
+- Parse on a throttled copy of the text rather than the live one.
+
+```tsx
+const isStreaming = status === 'streaming' && message.id === messages.at(-1)?.id;
+
+{isStreaming ? (
+  <Message.BubbleContent>{text}</Message.BubbleContent>
+) : (
+  <Markdown>{text}</Markdown>
+)}
+```
+
+## A checklist
+
+| Change | Effort | Payoff |
+| --- | --- | --- |
+| `memo` the row component | Low | Highest — makes stream cost independent of transcript length |
+| `useCallback` on `renderItem` | Low | Required for the above to work at all |
+| `experimental_throttle: 50` | Low | Halves the render count |
+| Inverted `FlatList` | Low | Removes per-token scroll and layout measurement |
+| Defer markdown until the turn finishes | Medium | Large on long answers |
+| `removeClippedSubviews` | Low | Real on long transcripts; verify on Android |

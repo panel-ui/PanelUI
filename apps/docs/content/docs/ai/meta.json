@@ -1,0 +1,11 @@
+{
+  "title": "AI",
+  "pages": [
+    "index",
+    "setup",
+    "api-route",
+    "chat-ui",
+    "streaming-performance",
+    "tools"
+  ]
+}

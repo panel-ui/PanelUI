@@ -1,0 +1,253 @@
+---
+title: Chat UI
+description: A transcript and composer built from PanelUI components.
+---
+
+A chat screen is three problems: rendering a growing list without re-rendering
+all of it, keeping the newest turn visible, and keeping the composer above the
+keyboard. This page solves all three with components already in the library.
+
+## The whole screen
+
+```tsx title="app/chat.tsx"
+import { useCallback, useState } from 'react';
+import { FlatList, View } from 'react-native';
+import { fetch as expoFetch } from 'expo/fetch';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport, type UIMessage } from 'ai';
+import {
+  Alert,
+  Avatar,
+  Button,
+  Input,
+  Message,
+  SendIcon,
+  Shimmer,
+  Text,
+} from 'panelui-native';
+import { apiBaseUrl } from '../lib/api';
+
+export default function Chat() {
+  const [input, setInput] = useState('');
+
+  const { messages, sendMessage, status, error, stop } = useChat({
+    transport: new DefaultChatTransport({
+      fetch: expoFetch as unknown as typeof globalThis.fetch,
+      api: `${apiBaseUrl()}/api/chat`,
+    }),
+  });
+
+  const isBusy = status === 'submitted' || status === 'streaming';
+
+  const send = useCallback(() => {
+    const text = input.trim();
+    if (!text || isBusy) return;
+    setInput('');
+    sendMessage({ text });
+  }, [input, isBusy, sendMessage]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: UIMessage }) => <Turn message={item} />,
+    []
+  );
+
+  return (
+    <View className="flex-1 bg-background">
+      <FlatList
+        data={messages}
+        inverted
+        keyExtractor={(m) => m.id}
+        renderItem={renderItem}
+        contentContainerClassName="gap-3 px-4 py-3"
+        keyboardDismissMode="interactive"
+        removeClippedSubviews
+      />
+
+      {status === 'submitted' ? <Thinking /> : null}
+
+      {error ? (
+        <Alert variant="destructive" className="mx-4 mb-2">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Could not get a response</Alert.Title>
+            <Alert.Description>{error.message}</Alert.Description>
+          </Alert.Content>
+        </Alert>
+      ) : null}
+
+      <Composer
+        value={input}
+        onChangeText={setInput}
+        onSend={send}
+        onStop={stop}
+        isBusy={isBusy}
+      />
+    </View>
+  );
+}
+```
+
+## Why the list is inverted
+
+An inverted `FlatList` renders bottom-up, so the newest turn is pinned to the
+bottom for free. The alternative — a `ScrollView` with `scrollToEnd` on every
+token — measures content on every frame of a stream, which is exactly the work
+you are trying to avoid.
+
+<Callout>
+  `inverted` flips the list, so pass the messages **newest first**. `useChat`
+  gives them oldest first, so either reverse the array or render the data as-is
+  and drop `inverted` — but then you are back to scrolling manually.
+</Callout>
+
+```tsx
+<FlatList data={[...messages].reverse()} inverted />
+```
+
+Reversing allocates a new array each render. For long transcripts, keep the
+reversed copy in a `useMemo` keyed on `messages`.
+
+## One turn
+
+Each message's content lives in `parts`, an ordered array — the model may
+produce text, then a tool call, then more text, and the order is meaningful.
+
+```tsx
+import { memo } from 'react';
+
+const Turn = memo(function Turn({ message }: { message: UIMessage }) {
+  const isUser = message.role === 'user';
+
+  return (
+    <Message align={isUser ? 'end' : 'start'}>
+      {!isUser && (
+        <Message.Avatar>
+          <Avatar size="sm" fallback="AI" />
+        </Message.Avatar>
+      )}
+      <Message.Content>
+        <Message.Bubble>
+          {message.parts.map((part, index) => {
+            if (part.type === 'text') {
+              return (
+                <Message.BubbleContent key={index}>
+                  {part.text}
+                </Message.BubbleContent>
+              );
+            }
+            return null; // tool parts — see the Tools page
+          })}
+        </Message.Bubble>
+      </Message.Content>
+    </Message>
+  );
+});
+```
+
+`memo` matters here. Without it, every message in the transcript re-renders on
+every token of the one still streaming. With it, only the streaming turn does —
+see [Streaming performance](/docs/ai/streaming-performance).
+
+## The thinking state
+
+Between sending and the first token there is nothing to show. `Shimmer` masks
+the sweep into the text itself, which is the treatment this state has settled on
+across AI apps.
+
+```tsx
+function Thinking() {
+  return (
+    <Message className="px-4 pb-2">
+      <Message.Avatar>
+        <Avatar size="sm" fallback="AI" />
+      </Message.Avatar>
+      <Message.Content>
+        <Message.Bubble>
+          <Shimmer textClassName="text-base">Thinking…</Shimmer>
+        </Message.Bubble>
+      </Message.Content>
+    </Message>
+  );
+}
+```
+
+Drop it the moment `status` becomes `streaming` — once text is arriving, the
+text *is* the progress indicator.
+
+## The composer
+
+`avoidKeyboard` lifts the field by exactly the overlap with the keyboard, so a
+composer already above the fold does not jump.
+
+```tsx
+function Composer({ value, onChangeText, onSend, onStop, isBusy }) {
+  return (
+    <View className="flex-row items-end gap-2 border-t border-border px-4 py-3">
+      <Input
+        avoidKeyboard
+        containerClassName="flex-1"
+        value={value}
+        onChangeText={onChangeText}
+        placeholder="Message"
+        multiline
+        submitBehavior="submit"
+        onSubmitEditing={onSend}
+      />
+      {isBusy ? (
+        <Button size="icon" variant="outline" onPress={onStop} accessibilityLabel="Stop">
+          <Text>■</Text>
+        </Button>
+      ) : (
+        <Button
+          size="icon"
+          onPress={onSend}
+          disabled={!value.trim()}
+          accessibilityLabel="Send"
+        >
+          <SendIcon size={18} />
+        </Button>
+      )}
+    </View>
+  );
+}
+```
+
+Swapping send for stop while a response streams is worth the few lines. A user
+who asked the wrong question should not have to wait out the answer.
+
+## Softening the edges
+
+Optional, and cheap — the transcript no longer ends in a hard cut under the
+composer.
+
+```tsx
+<ScrollFade edges="start" size={32} className="flex-1">
+  <FlatList inverted data={reversed} renderItem={renderItem} />
+</ScrollFade>
+```
+
+On an inverted list `start` is the *bottom* of the screen, because the list's
+own axis is flipped.
+
+## Message actions
+
+`Message.Actions` reverses its row on the outgoing side, so the controls stay on
+the message's own edge.
+
+```tsx
+<Message.Content>
+  <Message.Bubble>{/* … */}</Message.Bubble>
+  {!isUser && status === 'ready' && (
+    <Message.Actions>
+      <Button size="sm" variant="ghost" onPress={() => copy(text)}>
+        Copy
+      </Button>
+      <Button size="sm" variant="ghost" onPress={() => regenerate()}>
+        Retry
+      </Button>
+    </Message.Actions>
+  )}
+</Message.Content>
+```
+
+`regenerate` comes from `useChat` and re-runs the last assistant turn.

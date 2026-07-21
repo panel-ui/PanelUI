@@ -1,0 +1,124 @@
+---
+title: API route
+description: The server handler that streams from the model.
+---
+
+The model provider's key must never reach the device, so the app talks to your
+own endpoint and that endpoint talks to the model. With Expo Router the
+endpoint is a file in the same project.
+
+## The handler
+
+```ts title="app/api/chat+api.ts"
+import { anthropic } from '@ai-sdk/anthropic';
+import { convertToModelMessages, streamText, type UIMessage } from 'ai';
+
+export async function POST(request: Request) {
+  const { messages }: { messages: UIMessage[] } = await request.json();
+
+  const result = streamText({
+    model: anthropic('claude-sonnet-5'),
+    system: 'You are a concise assistant. Prefer short answers.',
+    messages: convertToModelMessages(messages),
+  });
+
+  return result.toUIMessageStreamResponse();
+}
+```
+
+Three moving parts:
+
+- **`convertToModelMessages`** turns the UI's message shape — the one with
+  `parts` — into the flat role/content shape the model wants. The two are
+  deliberately different: the UI needs to know a message contained a tool call,
+  the model does not.
+- **`streamText`** starts generation and returns immediately with a stream.
+- **`toUIMessageStreamResponse`** wraps it in the protocol `useChat` speaks,
+  with the right headers.
+
+## Files ending in `+api.ts` run on the server
+
+Expo Router treats them as server routes, not screens. They are excluded from
+the native bundle entirely, so `process.env.ANTHROPIC_API_KEY` is safe there and
+nowhere else in the app.
+
+The route needs somewhere to run. In development `npx expo start` serves it. In
+production you deploy the web output — see
+[EAS Hosting](https://docs.expo.dev/eas/hosting/get-started/) or any Node host.
+
+## Passing extra data from the client
+
+`sendMessage` takes a second argument whose `body` is merged into the request,
+which is how the client picks a model or a persona without the server guessing.
+
+```tsx title="client"
+sendMessage(
+  { text: input },
+  { body: { model: selectedModel, temperature: 0.3 } }
+);
+```
+
+```ts title="app/api/chat+api.ts"
+export async function POST(request: Request) {
+  const { messages, model, temperature } = await request.json();
+
+  const result = streamText({
+    model: anthropic(model ?? 'claude-sonnet-5'),
+    temperature,
+    messages: convertToModelMessages(messages),
+  });
+
+  return result.toUIMessageStreamResponse();
+}
+```
+
+<Callout type="warn">
+  Anything the client sends is user input. Validate it — an unchecked `model`
+  string is a request to bill you for whatever the caller names, and an
+  unchecked `system` is a prompt injection with extra steps.
+</Callout>
+
+```ts
+import { z } from 'zod';
+
+const bodySchema = z.object({
+  messages: z.array(z.any()),
+  model: z.enum(['claude-sonnet-5', 'claude-haiku-4-5-20251001']).default('claude-sonnet-5'),
+  temperature: z.number().min(0).max(1).optional(),
+});
+
+const { messages, model, temperature } = bodySchema.parse(await request.json());
+```
+
+## Aborting
+
+When the user hits stop, `useChat`'s `stop()` aborts the request. Forward the
+signal so generation actually stops server-side instead of running to
+completion unwatched:
+
+```ts
+const result = streamText({
+  model: anthropic('claude-sonnet-5'),
+  messages: convertToModelMessages(messages),
+  abortSignal: request.signal,
+});
+```
+
+## Errors
+
+By default the stream sends a generic error message rather than leaking
+internals. Map it deliberately if you want something more useful on screen:
+
+```ts
+return result.toUIMessageStreamResponse({
+  onError: (error) => {
+    console.error(error);
+    return error instanceof RateLimitError
+      ? 'Too many requests — try again in a minute.'
+      : 'Something went wrong generating that response.';
+  },
+});
+```
+
+The client sees it as `error` from `useChat`; rendering it is covered in
+[Chat UI](/docs/ai/chat-ui).

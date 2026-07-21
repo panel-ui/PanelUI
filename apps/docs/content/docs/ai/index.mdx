@@ -1,0 +1,61 @@
+---
+title: AI
+description: Building AI chat interfaces in React Native with PanelUI.
+---
+
+<Callout type="warn">
+  **Beta.** These pages describe patterns rather than a stable API surface, and
+  they move with the AI SDK. Nothing here ships as a component yet — if a
+  pattern below earns its keep, it graduates into the library.
+</Callout>
+
+Most AI chat guides are written for the web, where a `div` re-rendering sixty
+times a second is free, `EventSource` exists, and the keyboard is not a thing.
+None of that holds on a phone. This section covers what is actually different.
+
+## What is different on native
+
+| The web assumption | What holds on native |
+| --- | --- |
+| `fetch` streams response bodies | React Native's `fetch` buffers the whole response. You need `expo/fetch`. |
+| `TextDecoderStream` exists | It does not. Neither does `structuredClone`. Both need polyfilling. |
+| A re-render per token is cheap | It is not. A long transcript re-rendering per token drops frames. |
+| The page just scrolls | The keyboard covers the composer, and the transcript has to stay pinned. |
+| Any relative URL reaches your API | `'/api/chat'` means nothing in a native bundle — there is no origin. |
+
+Each of those has a page here.
+
+## The pages
+
+<Cards>
+  <Card title="Setup" href="/docs/ai/setup">
+    Dependencies, polyfills, `expo/fetch`, and getting the API URL right in
+    development and production.
+  </Card>
+  <Card title="API route" href="/docs/ai/api-route">
+    The `+api.ts` handler that streams from the model.
+  </Card>
+  <Card title="Chat UI" href="/docs/ai/chat-ui">
+    A full transcript and composer built from PanelUI components.
+  </Card>
+  <Card title="Streaming performance" href="/docs/ai/streaming-performance">
+    Why token-by-token rendering drops frames, and what to do about it.
+  </Card>
+  <Card title="Tools" href="/docs/ai/tools">
+    Rendering tool calls as part of the conversation.
+  </Card>
+</Cards>
+
+## Which components you will use
+
+Nothing here is AI-specific — these are the same components documented
+everywhere else, in the arrangement a chat screen wants.
+
+| Component | Role |
+| --- | --- |
+| [`Message`](/docs/components/message) | Each turn: bubble, avatar, header, footer |
+| [`Message.Group`](/docs/components/message) | Consecutive turns from one sender |
+| [`Shimmer`](/docs/components/shimmer) | The thinking state before the first token |
+| [`Item`](/docs/components/item) | Tool calls and sources inside a turn |
+| [`Input`](/docs/components/input) with `avoidKeyboard` | The composer |
+| [`ScrollFade`](/docs/components/scroll-fade) | Softening the transcript edges |

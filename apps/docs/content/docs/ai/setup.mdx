@@ -1,0 +1,157 @@
+---
+title: Setup
+description: Dependencies, polyfills and getting the API URL right on a device.
+---
+
+Three things have to be true before a single token reaches the screen: the
+streaming primitives have to exist, `fetch` has to actually stream, and the app
+has to know where your API lives.
+
+## Install
+
+```bash
+npx expo install ai @ai-sdk/react zod
+```
+
+Plus a provider — this is the Anthropic one:
+
+```bash
+npx expo install @ai-sdk/anthropic
+```
+
+## Polyfills
+
+React Native's JavaScript runtime is missing pieces the AI SDK's streaming path
+depends on. Install them:
+
+```bash
+npx expo install structured-clone react-native-fetch-api web-streams-polyfill
+```
+
+Then create `polyfills.js` and import it **first** in your root layout, before
+anything that touches the SDK:
+
+```js title="polyfills.js"
+import { Platform } from 'react-native';
+import structuredClone from '@ungap/structured-clone';
+
+if (Platform.OS !== 'web') {
+  const setupPolyfills = async () => {
+    const { polyfillGlobal } = await import(
+      'react-native/Libraries/Utilities/PolyfillFunctions'
+    );
+
+    const { TextEncoderStream, TextDecoderStream } = await import(
+      '@stardazed/streams-text-encoding'
+    );
+
+    if (!('structuredClone' in global)) {
+      polyfillGlobal('structuredClone', () => structuredClone);
+    }
+
+    polyfillGlobal('TextEncoderStream', () => TextEncoderStream);
+    polyfillGlobal('TextDecoderStream', () => TextDecoderStream);
+  };
+
+  setupPolyfills();
+}
+
+export {};
+```
+
+```tsx title="app/_layout.tsx"
+import '../polyfills';
+import { PanelUIProvider } from 'panelui-native';
+// …
+```
+
+<Callout type="warn">
+  The import has to come before any module that pulls in the AI SDK. If you see
+  `TextDecoderStream is not defined` at the moment the first response arrives,
+  the polyfill loaded too late — move the import to the very top of the root
+  layout.
+</Callout>
+
+## `fetch` has to stream
+
+This is the one that catches everyone. React Native's built-in `fetch` reads
+the entire response before resolving, so a streaming endpoint works — it just
+arrives all at once, at the end. Expo ships a streaming implementation; you have
+to pass it to the transport explicitly.
+
+```tsx
+import { fetch as expoFetch } from 'expo/fetch';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+
+const { messages, sendMessage } = useChat({
+  transport: new DefaultChatTransport({
+    fetch: expoFetch as unknown as typeof globalThis.fetch,
+    api: `${API_BASE}/api/chat`,
+  }),
+});
+```
+
+The cast is unavoidable: `expo/fetch`'s signature is close to but not identical
+to the DOM one.
+
+## The API URL
+
+A native bundle has no origin, so the default `'/api/chat'` resolves to
+nothing. You need an absolute URL, and it differs between a simulator, a device
+on your LAN, and production.
+
+```ts title="lib/api.ts"
+import Constants from 'expo-constants';
+
+/**
+ * In development, point at the machine running Metro — its address is already
+ * in the Expo host URI, so there is nothing to hardcode. In production, the
+ * deployed API.
+ */
+export function apiBaseUrl(): string {
+  if (!__DEV__) {
+    const url = process.env.EXPO_PUBLIC_API_BASE_URL;
+    if (!url) throw new Error('EXPO_PUBLIC_API_BASE_URL is not set');
+    return url;
+  }
+
+  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  return host ? `http://${host}:8081` : 'http://localhost:8081';
+}
+```
+
+```bash title=".env"
+EXPO_PUBLIC_API_BASE_URL=https://your-app.example.com
+```
+
+<Callout>
+  `EXPO_PUBLIC_` variables are inlined into the bundle at build time and are
+  readable by anyone with the app. Put the API base URL there; never the model
+  provider's key. The key belongs on the server, which is the whole reason the
+  API route exists.
+</Callout>
+
+## The provider key
+
+```bash title=".env"
+ANTHROPIC_API_KEY=sk-ant-…
+```
+
+No `EXPO_PUBLIC_` prefix — that keeps it on the server side of the API route
+and out of the shipped bundle.
+
+## Checking it works
+
+Before building any UI, confirm the stream actually streams:
+
+```tsx
+const { messages, sendMessage, status } = useChat({ transport });
+
+useEffect(() => {
+  console.log(status, messages.at(-1)?.parts);
+}, [status, messages]);
+```
+
+You should see the last message's text part grow across many logs. If it
+appears once, fully formed, `expoFetch` is not wired into the transport.

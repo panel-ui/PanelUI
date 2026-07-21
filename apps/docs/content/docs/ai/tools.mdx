@@ -1,0 +1,205 @@
+---
+title: Tools
+description: Letting the model call your code, and showing it in the conversation.
+---
+
+A tool is a function the model can decide to call. On the server it is a
+description, a schema and an implementation; in the UI it is another kind of
+message part, sitting in the same ordered `parts` array as the text around it.
+
+## Defining one
+
+```ts title="app/api/chat+api.ts"
+import { anthropic } from '@ai-sdk/anthropic';
+import { convertToModelMessages, streamText, stepCountIs, tool } from 'ai';
+import { z } from 'zod';
+
+const tools = {
+  getWeather: tool({
+    description: 'Get the current weather for a city.',
+    inputSchema: z.object({
+      city: z.string().describe('City name, e.g. "Amsterdam"'),
+    }),
+    execute: async ({ city }) => {
+      const data = await weatherApi.current(city);
+      return { city, temperature: data.temp, conditions: data.summary };
+    },
+  }),
+};
+
+export async function POST(request: Request) {
+  const { messages } = await request.json();
+
+  const result = streamText({
+    model: anthropic('claude-sonnet-5'),
+    messages: convertToModelMessages(messages),
+    tools,
+    // Without this the model calls the tool and stops. This lets it call the
+    // tool, read the result, and answer — up to five steps.
+    stopWhen: stepCountIs(5),
+  });
+
+  return result.toUIMessageStreamResponse();
+}
+```
+
+The `description` and the schema's `.describe()` calls are the model's only
+information about when to use a tool. They are prompt, not documentation —
+write them for the model.
+
+## Rendering a tool call
+
+Tool parts arrive as `tool-<name>` with a `state` that moves through
+`input-streaming` → `input-available` → `output-available`, or lands on
+`output-error`. Rendering the intermediate states is what makes a slow tool feel
+like progress instead of a hang.
+
+`Item` is the right shape for this — media, title, description, in a row.
+
+```tsx
+import { Item, Shimmer, Spinner, SearchIcon, CheckCircleIcon, AlertTriangleIcon } from 'panelui-native';
+
+function ToolCall({ part }) {
+  switch (part.state) {
+    case 'input-streaming':
+    case 'input-available':
+      return (
+        <Item variant="muted" size="sm">
+          <Item.Media variant="icon">
+            <Spinner size="sm" />
+          </Item.Media>
+          <Item.Content>
+            <Item.Title>
+              <Shimmer textClassName="text-sm font-medium">
+                Checking the weather…
+              </Shimmer>
+            </Item.Title>
+          </Item.Content>
+        </Item>
+      );
+
+    case 'output-available':
+      return (
+        <Item variant="muted" size="sm">
+          <Item.Media variant="icon">
+            <CheckCircleIcon size={16} />
+          </Item.Media>
+          <Item.Content>
+            <Item.Title>{part.output.city}</Item.Title>
+            <Item.Description>
+              {part.output.temperature}° · {part.output.conditions}
+            </Item.Description>
+          </Item.Content>
+        </Item>
+      );
+
+    case 'output-error':
+      return (
+        <Item variant="outline" size="sm">
+          <Item.Media variant="icon">
+            <AlertTriangleIcon size={16} />
+          </Item.Media>
+          <Item.Content>
+            <Item.Title>Could not check the weather</Item.Title>
+            <Item.Description>{part.errorText}</Item.Description>
+          </Item.Content>
+        </Item>
+      );
+
+    default:
+      return null;
+  }
+}
+```
+
+## Placing it in the turn
+
+Because `parts` is ordered, walking it in order puts the tool call exactly where
+the model produced it — between the sentence that led to it and the sentence
+that followed.
+
+```tsx
+<Message.Content>
+  {message.parts.map((part, index) => {
+    if (part.type === 'text') {
+      return (
+        <Message.Bubble key={index}>
+          <Message.BubbleContent>{part.text}</Message.BubbleContent>
+        </Message.Bubble>
+      );
+    }
+
+    if (part.type === 'tool-getWeather') {
+      return <ToolCall key={index} part={part} />;
+    }
+
+    return null;
+  })}
+</Message.Content>
+```
+
+Note the tool call sits *outside* `Message.Bubble` — it is a step the assistant
+took, not something it said, and it reads better as its own row.
+
+## Tools that run on the device
+
+Some tools have to run client-side: reading location, taking a photo, writing to
+local storage. Leave `execute` off the server definition and handle the call in
+`onToolCall`, then hand the result back with `addToolOutput`.
+
+```tsx
+const { messages, addToolOutput } = useChat({
+  transport,
+  onToolCall: async ({ toolCall }) => {
+    if (toolCall.toolName === 'getLocation') {
+      const { coords } = await Location.getCurrentPositionAsync();
+      addToolOutput({
+        toolCallId: toolCall.toolCallId,
+        output: { latitude: coords.latitude, longitude: coords.longitude },
+      });
+    }
+  },
+});
+```
+
+<Callout type="warn">
+  A client tool that needs a permission can block for as long as the user takes
+  to answer the dialog. Handle the denial — return an output saying the location
+  is unavailable rather than never calling `addToolOutput`, or the turn hangs
+  forever.
+</Callout>
+
+## Confirming before acting
+
+For anything destructive or expensive, do not give the tool an `execute` at all.
+Render the pending call, and only submit the output once the user agrees.
+
+```tsx
+case 'input-available':
+  return (
+    <Item variant="outline" size="sm" className="flex-col items-start gap-2">
+      <Item.Content>
+        <Item.Title>Send this email?</Item.Title>
+        <Item.Description>To {part.input.to} — “{part.input.subject}”</Item.Description>
+      </Item.Content>
+      <Item.Footer>
+        <Button
+          size="sm"
+          variant="ghost"
+          onPress={() =>
+            addToolOutput({
+              toolCallId: part.toolCallId,
+              output: { sent: false, reason: 'declined by user' },
+            })
+          }
+        >
+          Cancel
+        </Button>
+        <Button size="sm" onPress={() => send(part.input)}>Send</Button>
+      </Item.Footer>
+    </Item>
+  );
+```
+
+Telling the model *why* something did not happen matters — `declined by user`
+lets it respond sensibly, where a bare failure invites it to try again.

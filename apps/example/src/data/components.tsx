@@ -707,6 +707,30 @@ function RadioGroupDemo() {
   );
 }
 
+function RadioGroupCardDemo() {
+  const [plan, setPlan] = useState('pro');
+
+  return (
+    <RadioGroup value={plan} onValueChange={setPlan} variant="card" className="w-full">
+      <RadioGroup.Item
+        value="starter"
+        label="Starter"
+        description="For a side project — one seat, community support."
+      />
+      <RadioGroup.Item
+        value="pro"
+        label="Pro"
+        description="For growing teams — five seats, priority support."
+      />
+      <RadioGroup.Item
+        value="max"
+        label="Max"
+        description="Everything, uncapped — unlimited seats and SSO."
+      />
+    </RadioGroup>
+  );
+}
+
 function SelectDemo() {
   const [fruit, setFruit] = useState<string>();
 
@@ -2940,6 +2964,7 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Single-select list of options',
     demos: [
       { label: 'Plans', render: () => <RadioGroupDemo /> },
+      { label: 'Cards', render: () => <RadioGroupCardDemo /> },
       {
         label: 'In a card',
         render: () => (

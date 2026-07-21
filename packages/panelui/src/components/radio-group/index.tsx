@@ -1,3 +1,23 @@
+/**
+ * RadioGroup — one choice from a set.
+ *
+ * The group owns the value and hands each item its selected state through
+ * context, so an item is a thin pressable that reports its own value up and
+ * reads selection back down.
+ *
+ * Two shapes, chosen on the group and inherited by every item: `dot` is the
+ * classic label-beside-a-disc row; `card` turns the whole surface into the
+ * target — for pickable options where the disc is a confirmation rather than
+ * the thing you aim at. The card is the same treatment `Checkbox` offers, so a
+ * form mixing single- and multi-select choices reads as one family.
+ *
+ * ```tsx
+ * <RadioGroup value={plan} onValueChange={setPlan} variant="card">
+ *   <RadioGroup.Item value="pro" label="Pro" description="For growing teams" />
+ *   <RadioGroup.Item value="max" label="Max" description="Everything, uncapped" />
+ * </RadioGroup>
+ * ```
+ */
 import {
   createContext,
   forwardRef,
@@ -13,13 +33,50 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '../../utils/cn';
 import { Text } from '../../primitives/text';
+
+type RadioVariant = 'dot' | 'card';
+
+const itemVariants = tv({
+  slots: {
+    row: 'flex-row items-center gap-2.5',
+    indicator:
+      'h-5 w-5 items-center justify-center rounded-full border border-input bg-background',
+    label: 'text-sm text-foreground',
+    description: 'text-xs text-muted-foreground',
+  },
+  variants: {
+    variant: {
+      dot: {},
+      card: {
+        // The whole surface is the target; the disc moves to the trailing edge
+        // as a confirmation of the row, not the affordance for it.
+        row: 'w-full items-start justify-between gap-3 rounded-xl border border-border bg-card p-4',
+        label: 'text-base font-medium',
+      },
+    },
+    selected: {
+      true: {},
+    },
+    disabled: {
+      true: { row: 'opacity-50' },
+    },
+  },
+  compoundVariants: [
+    { variant: 'card', selected: true, class: { row: 'border-primary bg-accent' } },
+  ],
+  defaultVariants: {
+    variant: 'dot',
+  },
+});
 
 interface RadioGroupContextValue {
   value: string | undefined;
   onValueChange: (value: string) => void;
   disabled?: boolean;
+  variant: RadioVariant;
 }
 
 const RadioGroupContext = createContext<RadioGroupContextValue | null>(null);
@@ -29,14 +86,20 @@ export interface RadioGroupProps extends ViewProps {
   value?: string;
   onValueChange: (value: string) => void;
   disabled?: boolean;
+  /**
+   * `dot` is the label-beside-a-disc row. `card` makes the whole surface the
+   * target and highlights the selected option — for a plan picker or a
+   * settings choice where each option carries a description.
+   */
+  variant?: RadioVariant;
   children: ReactNode;
 }
 
 const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
-  ({ className, value, onValueChange, disabled, children, ...props }, ref) => {
+  ({ className, value, onValueChange, disabled, variant = 'dot', children, ...props }, ref) => {
     const context = useMemo(
-      () => ({ value, onValueChange, disabled }),
-      [value, onValueChange, disabled]
+      () => ({ value, onValueChange, disabled, variant }),
+      [value, onValueChange, disabled, variant]
     );
 
     return (
@@ -59,12 +122,19 @@ export interface RadioGroupItemProps {
   className?: string;
   value: string;
   label?: string;
+  /** Secondary line under the label. Most at home in the `card` variant. */
+  description?: string;
   disabled?: boolean;
+  /** Hide the disc entirely — for a card whose selected fill is enough. */
+  hideIndicator?: boolean;
   children?: ReactNode;
 }
 
 const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
-  ({ className, value, label, disabled: itemDisabled, children }, ref) => {
+  (
+    { className, value, label, description, disabled: itemDisabled, hideIndicator, children },
+    ref
+  ) => {
     const context = useContext(RadioGroupContext);
     if (!context) {
       throw new Error('RadioGroup.Item must be used within a <RadioGroup>');
@@ -72,6 +142,7 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
 
     const selected = context.value === value;
     const disabled = itemDisabled || context.disabled;
+    const variant = context.variant;
     const progress = useSharedValue(selected ? 1 : 0);
 
     useEffect(() => {
@@ -85,6 +156,34 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
       transform: [{ scale: progress.value }],
     }));
 
+    const slots = itemVariants({ variant, selected, disabled: !!disabled });
+
+    const indicator = hideIndicator ? null : (
+      <View className={slots.indicator()}>
+        <Animated.View style={dotStyle} className="h-2.5 w-2.5 rounded-full bg-primary" />
+      </View>
+    );
+
+    // The card lays its text out first so the disc sits at the trailing edge;
+    // the dot row keeps the classic disc-then-label order.
+    const body =
+      variant === 'card' ? (
+        <>
+          <View className="flex-1 gap-1">
+            {label ? <Text className={slots.label()}>{label}</Text> : children}
+            {description ? (
+              <Text className={slots.description()}>{description}</Text>
+            ) : null}
+          </View>
+          {indicator}
+        </>
+      ) : (
+        <>
+          {indicator}
+          {label ? <Text className={slots.label()}>{label}</Text> : children}
+        </>
+      );
+
     return (
       <Pressable
         ref={ref}
@@ -93,20 +192,10 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
         accessibilityLabel={label}
         disabled={disabled}
         onPress={() => context.onValueChange(value)}
-        hitSlop={8}
-        className={cn(
-          'flex-row items-center gap-2.5',
-          disabled && 'opacity-50',
-          className
-        )}
+        hitSlop={variant === 'card' ? undefined : 8}
+        className={slots.row({ className })}
       >
-        <View className="h-5 w-5 items-center justify-center rounded-full border border-input bg-background">
-          <Animated.View
-            style={dotStyle}
-            className="h-2.5 w-2.5 rounded-full bg-primary"
-          />
-        </View>
-        {label ? <Text className="text-sm text-foreground">{label}</Text> : children}
+        {body}
       </Pressable>
     );
   }
@@ -116,3 +205,5 @@ RadioGroupItem.displayName = 'RadioGroup.Item';
 export const RadioGroup = Object.assign(RadioGroupRoot, {
   Item: RadioGroupItem,
 });
+
+export type { RadioVariant };

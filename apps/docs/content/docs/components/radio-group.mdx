@@ -41,47 +41,62 @@ npx panelui-cli@latest add radio-group
 
 ## Examples
 
-### Basic
+### A list of plans
 
-One value for the group, set by whichever item is pressed.
+The group owns the value; each item reports its own value up and reads selection back down.
 
 ```tsx
-const [plan, setPlan] = useState('pro');
+const [plan, setPlan] = useState("pro");
 
 <RadioGroup value={plan} onValueChange={setPlan}>
-  <RadioGroup.Item value="free" label="Free" />
-  <RadioGroup.Item value="pro" label="Pro" />
-  <RadioGroup.Item value="team" label="Team" />
+  <RadioGroup.Item value="free" label="Free — $0/month" />
+  <RadioGroup.Item value="pro" label="Pro — $12/month" />
+  <RadioGroup.Item value="team" label="Team — $36/month" />
 </RadioGroup>
 ```
 
-### Custom item content
+### Cards
 
-Give an item children instead of a `label` when the row needs more than one line.
+The `card` variant makes the whole surface the target and highlights the selected option — for a picker where each choice carries a description. The disc moves to the trailing edge as a confirmation of the row rather than the thing you aim at.
 
 ```tsx
-<RadioGroup value={plan} onValueChange={setPlan}>
-  {plans.map((p) => (
-    <RadioGroup.Item key={p.id} value={p.id}>
-      <View className="flex-1 gap-0.5">
-        <Text weight="medium">{p.name}</Text>
-        <Text size="sm" muted>{p.price} · {p.summary}</Text>
-      </View>
-    </RadioGroup.Item>
-  ))}
+<RadioGroup value={plan} onValueChange={setPlan} variant="card">
+  <RadioGroup.Item
+    value="starter"
+    label="Starter"
+    description="For a side project — one seat, community support."
+  />
+  <RadioGroup.Item
+    value="pro"
+    label="Pro"
+    description="For growing teams — five seats, priority support."
+  />
 </RadioGroup>
 ```
 
-### Disabling the group or one option
+## Variants
+
+### `variant`
+
+- `dot` *(default)*
+- `card`
 
 ```tsx
-{/* The whole group. */}
-<RadioGroup value={plan} onValueChange={setPlan} disabled={!canChangePlan}>
-  {/* …items… */}
+<RadioGroup variant="dot" value={value} onValueChange={setValue}>
+  <RadioGroup.Item value="a" label="Option A" />
 </RadioGroup>
 
-{/* One option. */}
-<RadioGroup.Item value="enterprise" label="Enterprise" disabled />
+<RadioGroup variant="card" value={value} onValueChange={setValue}>
+  <RadioGroup.Item value="a" label="Option A" description="With a supporting line" />
+</RadioGroup>
+```
+
+### `selected`
+
+- `true`
+
+```tsx
+<RadioGroup selected="true">…</RadioGroup>
 ```
 
 ## API Reference
@@ -94,6 +109,7 @@ Give an item children instead of a `label` when the row needs more than one line
 | `value` | `string` | — |  |
 | `onValueChange` | `(value: string) => void` | — |  |
 | `disabled` | `boolean` | — |  |
+| `variant` | `RadioVariant` | `dot` | `dot` is the label-beside-a-disc row. `card` makes the whole surface the target and highlights the selected option — for a plan picker or a settings choice where each option carries a description. |
 
 ### RadioGroup.Item
 
@@ -102,6 +118,8 @@ Give an item children instead of a `label` when the row needs more than one line
 | `className` | `string` | — |  |
 | `value` | `string` | — |  |
 | `label` | `string` | — |  |
+| `description` | `string` | — | Secondary line under the label. Most at home in the `card` variant. |
 | `disabled` | `boolean` | — |  |
+| `hideIndicator` | `boolean` | — | Hide the disc entirely — for a card whose selected fill is enough. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

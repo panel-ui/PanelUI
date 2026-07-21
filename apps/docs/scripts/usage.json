@@ -855,23 +855,22 @@
     "anatomy": "<RadioGroup>\n  <RadioGroup.Item value=\"…\" label=\"…\" />\n</RadioGroup>",
     "examples": [
       {
-        "title": "Basic",
-        "description": "One value for the group, set by whichever item is pressed.",
-        "code": "const [plan, setPlan] = useState('pro');\n\n<RadioGroup value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro\" />\n  <RadioGroup.Item value=\"team\" label=\"Team\" />\n</RadioGroup>"
+        "title": "A list of plans",
+        "description": "The group owns the value; each item reports its own value up and reads selection back down.",
+        "code": "const [plan, setPlan] = useState(\"pro\");\n\n<RadioGroup value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free — $0/month\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro — $12/month\" />\n  <RadioGroup.Item value=\"team\" label=\"Team — $36/month\" />\n</RadioGroup>"
       },
       {
-        "title": "Custom item content",
-        "description": "Give an item children instead of a `label` when the row needs more than one line.",
-        "code": "<RadioGroup value={plan} onValueChange={setPlan}>\n  {plans.map((p) => (\n    <RadioGroup.Item key={p.id} value={p.id}>\n      <View className=\"flex-1 gap-0.5\">\n        <Text weight=\"medium\">{p.name}</Text>\n        <Text size=\"sm\" muted>{p.price} · {p.summary}</Text>\n      </View>\n    </RadioGroup.Item>\n  ))}\n</RadioGroup>"
-      },
-      {
-        "title": "Disabling the group or one option",
-        "code": "{/* The whole group. */}\n<RadioGroup value={plan} onValueChange={setPlan} disabled={!canChangePlan}>\n  {/* …items… */}\n</RadioGroup>\n\n{/* One option. */}\n<RadioGroup.Item value=\"enterprise\" label=\"Enterprise\" disabled />"
+        "title": "Cards",
+        "description": "The `card` variant makes the whole surface the target and highlights the selected option — for a picker where each choice carries a description. The disc moves to the trailing edge as a confirmation of the row rather than the thing you aim at.",
+        "code": "<RadioGroup value={plan} onValueChange={setPlan} variant=\"card\">\n  <RadioGroup.Item\n    value=\"starter\"\n    label=\"Starter\"\n    description=\"For a side project — one seat, community support.\"\n  />\n  <RadioGroup.Item\n    value=\"pro\"\n    label=\"Pro\"\n    description=\"For growing teams — five seats, priority support.\"\n  />\n</RadioGroup>"
       }
     ],
     "extraImports": [
       "Text"
-    ]
+    ],
+    "variantCode": {
+      "variant": "<RadioGroup variant=\"dot\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" />\n</RadioGroup>\n\n<RadioGroup variant=\"card\" value={value} onValueChange={setValue}>\n  <RadioGroup.Item value=\"a\" label=\"Option A\" description=\"With a supporting line\" />\n</RadioGroup>"
+    }
   },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",

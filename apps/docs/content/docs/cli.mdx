@@ -1,0 +1,196 @@
+---
+title: CLI
+description: Copy a single component's source into your project instead of installing the package.
+---
+
+There are two ways to use PanelUI, and neither is more supported than the other.
+
+**Install the package** — `panelui-native` is a dependency, you import from it, and updates
+arrive with a version bump. This is the default and what [Installation](/docs/installation)
+covers.
+
+**Copy the source** — `panelui-cli` writes a component's actual source into your repo. It is
+yours: edit it, rename it, delete half of it. Nothing imports `panelui-native` afterwards.
+
+```bash
+npx panelui-cli@latest init
+npx panelui-cli@latest add item
+```
+
+| | Package | Copied source |
+| --- | --- | --- |
+| You get | A dependency | Files in your repo |
+| Updates | `npm update` | Re-run `add --overwrite`, or keep your edits |
+| Editing | Wrap it, or restyle with `className` | Change the file |
+| Bundle | Whole library, tree-shaken | Only what you added |
+| Best when | You want the component as designed | You expect to diverge from it |
+
+<Callout>
+  You can mix them. Install the package, and copy in the one component you need to fork.
+</Callout>
+
+## Setup
+
+Run this once, in the root of an Expo app:
+
+```bash
+npx panelui-cli@latest init
+```
+
+It writes `panelui.json`, copies the design tokens to `theme.css`, wires your CSS entry and
+Metro config, adds the TypeScript path alias and ambient types, and installs the base packages.
+
+Every write shows you what it would add and asks first. Pass `--yes` to accept everything, or
+`--dry-run` to see the whole plan without touching a file.
+
+```json title="panelui.json"
+{
+  "registry": "https://panelui.dev/r",
+  "aliases": {
+    "components": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "css": "global.css",
+  "theme": "theme.css"
+}
+```
+
+Change the aliases and imports are rewritten to match on the way in.
+
+## Adding components
+
+```bash
+npx panelui-cli@latest add item
+```
+
+Dependencies come with it. `item` needs `text`, `animated-pressable` and `cn`, so four files
+land rather than one — listed separately from what you asked for, so it is not a surprise
+afterwards:
+
+```
+› Adding item
+  plus animated-pressable, cn, text — required by the above
+
+  + components/ui/item.tsx
+  + components/ui/animated-pressable.tsx
+  + components/ui/text.tsx
+  + lib/cn.ts
+```
+
+Several at once, and npm packages are installed for you:
+
+```bash
+npx panelui-cli@latest add message item shimmer
+```
+
+### Your edits are safe
+
+A file that already exists is skipped, not replaced — the whole point is that these files
+become yours. Pass `--overwrite` when you do want the registry's version back.
+
+```bash
+npx panelui-cli@latest add button --overwrite
+```
+
+### Seeing what is available
+
+```bash
+npx panelui-cli@latest list
+```
+
+## The provider
+
+Overlays — `Dialog`, `BottomSheet`, `Select`, `Toast` — render into a portal host that
+`PanelUIProvider` owns. Add it once and wrap your app:
+
+```bash
+npx panelui-cli@latest add panel-ui-provider
+```
+
+```tsx title="app/_layout.tsx"
+import { PanelUIProvider } from '@/components/ui/panel-ui-provider';
+
+export default function Layout() {
+  return (
+    <PanelUIProvider>
+      <Slot />
+    </PanelUIProvider>
+  );
+}
+```
+
+## Options
+
+| Flag | Effect |
+| --- | --- |
+| `--yes`, `-y` | Accept every prompt |
+| `--overwrite` | Replace files that already exist |
+| `--dry-run` | Show what would happen, write nothing |
+| `--cwd <dir>` | Run against another directory |
+| `--registry <url>` | Use a different registry |
+
+## Troubleshooting
+
+**Components render but are unstyled.** The `@source` lines in your CSS entry are missing or
+point at the wrong directory. They are what tells Uniwind where to look for class names — every
+import resolves, everything type-checks, and nothing is styled.
+
+```css title="global.css"
+@import 'tailwindcss';
+@import 'uniwind';
+@import './theme.css';
+
+@source './components';
+@source './lib';
+```
+
+**`Cannot find module '@/components/ui/text'`.** The `@/*` path alias is missing from
+`tsconfig.json`. Not every Expo template includes it:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": { "@/*": ["./*"] }
+  }
+}
+```
+
+**`Property 'className' does not exist`.** `className` is not a React Native prop — Uniwind adds
+it. You need an ambient import somewhere in the project:
+
+```ts title="uniwind-env.d.ts"
+import 'uniwind/types';
+```
+
+**`Theme … is missing variable …`.** Metro read `extraThemes` at startup and is holding the old
+list. Restart it; `--clear` on a running server is not enough.
+
+## The registry
+
+Items are served as JSON and are readable directly, if you would rather script against them than
+use the CLI:
+
+```bash
+curl https://panelui.dev/r/index.json
+curl https://panelui.dev/r/item.json
+```
+
+Each item declares its direct dependencies, the npm packages it needs, and its files with
+imports already rewritten. It is generated from the library source on every build, so it cannot
+drift from the published package.
+
+```json
+{
+  "name": "item",
+  "type": "registry:ui",
+  "registryDependencies": ["animated-pressable", "cn", "text"],
+  "dependencies": ["tailwind-variants"],
+  "optionalDependencies": [],
+  "files": [{ "path": "ui/item.tsx", "content": "…" }]
+}
+```
+
+`optionalDependencies` are never installed for you. Each is reached through a lazy import inside
+a `try`/`catch`, so the component works without it — installing them uninvited would add native
+modules, and a rebuild, that nobody asked for.

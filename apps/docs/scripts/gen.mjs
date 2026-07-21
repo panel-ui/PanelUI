@@ -65,6 +65,12 @@ ${name} ships with the library — no separate install.
 import { ${imports.join(', ')} } from 'panelui-native';
 \`\`\`
 
+Or copy the source into your project, to own and edit it:
+
+\`\`\`bash
+npx panelui-cli@latest add ${slug}
+\`\`\`
+
 ## Usage
 
 \`\`\`tsx

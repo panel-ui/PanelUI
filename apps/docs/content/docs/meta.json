@@ -3,6 +3,7 @@
     "---Sections---",
     "index",
     "installation",
+    "cli",
     "theming",
     "native",
     "performance",

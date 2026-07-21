@@ -1,5 +1,8 @@
 {
   "title": "Components",
+  "root": true,
+  "description": "Every component, with worked examples.",
+  "icon": "Blocks",
   "pages": [
     "accordion",
     "alert",

@@ -43,6 +43,19 @@ export const metadata: Metadata = {
   authors: [{ name: 'Khalid Abdi', url: site.repo }],
   creator: 'Khalid Abdi',
   alternates: { canonical: absoluteUrl('/') },
+  /*
+   * app/icon.png and app/apple-icon.png are picked up by Next's file
+   * convention on their own; this adds the larger mark that search results and
+   * install prompts prefer. Google wants a square favicon that is a multiple
+   * of 48px to show one beside a result at all — icon.png is 192.
+   */
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   openGraph: {
     type: 'website',
     siteName: site.name,

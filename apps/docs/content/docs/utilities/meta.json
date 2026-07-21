@@ -1,4 +1,8 @@
 {
+  "root": true,
+  "title": "Utilities",
+  "description": "Small helpers.",
+  "icon": "Wrench",
   "pages": [
     "cn"
   ]

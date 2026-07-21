@@ -1,5 +1,8 @@
 {
   "title": "AI",
+  "root": true,
+  "description": "Chat interfaces that hold their frame rate.",
+  "icon": "Sparkles",
   "pages": [
     "index",
     "setup",

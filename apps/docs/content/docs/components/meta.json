@@ -19,6 +19,7 @@
     "label",
     "marker",
     "message",
+    "popover",
     "progress",
     "radio-group",
     "scroll-fade",

@@ -212,6 +212,16 @@
     ]
   },
   {
+    "name": "popover",
+    "type": "registry:ui",
+    "description": "Panel anchored to the element that opened it.",
+    "registryDependencies": [
+      "cn",
+      "portal",
+      "text"
+    ]
+  },
+  {
     "name": "portal",
     "type": "registry:ui",
     "description": "Renders content above everything else. Required by every overlay.",

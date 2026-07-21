@@ -122,6 +122,16 @@ export {
   type MessageFooterProps,
   type MessageActionsProps,
 } from './components/message';
+export {
+  Popover,
+  type PopoverProps,
+  type PopoverTriggerProps,
+  type PopoverContentProps,
+  type PopoverArrowProps,
+  type PopoverCloseProps,
+  type PopoverPlacement,
+  type PopoverAlign,
+} from './components/popover';
 export { Progress, type ProgressProps } from './components/progress';
 export {
   RadioGroup,

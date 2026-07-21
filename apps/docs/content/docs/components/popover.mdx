@@ -1,0 +1,189 @@
+---
+title: Popover
+description: Panel anchored to the element that opened it.
+---
+
+A panel anchored to the thing that opened it.
+
+A dialog takes the screen and asks to be dealt with; a popover stays next to its trigger and keeps the context around it visible. That difference is the whole reason both exist, and it is why this one is positioned rather than centred.
+
+Placement is a preference, not a promise. The trigger is measured in window coordinates when it is pressed, the panel measures itself on its first layout, and the two are reconciled against the safe area — so `placement="bottom"` means *below, if below fits*. A trigger near the bottom of the screen opens upwards instead of off the edge.
+
+## Installation
+
+Popover ships with the library — no separate install.
+
+```tsx
+import { Popover, Button, Input, Text, InfoIcon, ShareNodesIcon } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add popover
+```
+
+## Usage
+
+```tsx
+<Popover>
+  <Popover.Trigger>
+    <Button variant="outline">Options</Button>
+  </Popover.Trigger>
+  <Popover.Content placement="bottom" align="end">
+    <Popover.Title>Export</Popover.Title>
+    <Popover.Description>Choose a format.</Popover.Description>
+  </Popover.Content>
+</Popover>
+```
+
+## Composition
+
+```tsx
+<Popover>
+  <Popover.Trigger>…</Popover.Trigger>
+  <Popover.Content>
+    <Popover.Arrow />
+    <Popover.Title>…</Popover.Title>
+    <Popover.Description>…</Popover.Description>
+    <Popover.Close>…</Popover.Close>
+  </Popover.Content>
+</Popover>
+```
+
+- **`Popover.Trigger`** — Wraps a single child and toggles the popover on press. It is also what gets measured, so the panel knows where to sit.
+- **`Popover.Content`** — The panel. Portaled above everything else, positioned against the trigger, and flipped or slid to stay inside the safe area.
+- **`Popover.Arrow`** — Optional point towards the trigger. Follows the resolved side, so it stays correct after a flip.
+- **`Popover.Title`** — Panel heading.
+- **`Popover.Description`** — Muted supporting line.
+- **`Popover.Close`** — Wraps a child and closes the popover on press.
+
+## Examples
+
+### A menu of actions
+
+Wrap each row in `Popover.Close` and it dismisses the panel as well as running its own `onPress`. Drop the panel padding to `p-1.5` so the rows can carry their own.
+
+```tsx
+<Popover>
+  <Popover.Trigger>
+    <Button variant="outline">Options</Button>
+  </Popover.Trigger>
+  <Popover.Content align="start" className="w-52 gap-0 p-1.5">
+    {actions.map((action) => (
+      <Popover.Close key={action.label}>
+        <Pressable
+          accessibilityRole="menuitem"
+          onPress={action.run}
+          className="flex-row items-center gap-3 rounded-xl px-3 py-2.5 active:bg-accent"
+        >
+          {action.icon}
+          <Text size="sm">{action.label}</Text>
+        </Pressable>
+      </Popover.Close>
+    ))}
+  </Popover.Content>
+</Popover>
+```
+
+### With an arrow
+
+The arrow is a rotated square half-buried under the panel, so only the point shows. It needs the panel to keep its border for its own two visible edges to line up with.
+
+```tsx
+<Popover>
+  <Popover.Trigger>
+    <Button variant="ghost" size="icon" accessibilityLabel="What is this?">
+      <InfoIcon size={18} />
+    </Button>
+  </Popover.Trigger>
+  <Popover.Content placement="top" className="w-60">
+    <Popover.Arrow />
+    <Popover.Title>Monthly active users</Popover.Title>
+    <Popover.Description>
+      Anyone who opened the app at least once in the last 30 days.
+    </Popover.Description>
+  </Popover.Content>
+</Popover>
+```
+
+### A form, matching the trigger width
+
+`width="trigger"` locks the panel to the trigger, so the two read as one control rather than as a panel floating over a button. Controlled here, because the form needs to close itself on save.
+
+```tsx
+const [open, setOpen] = useState(false);
+const [name, setName] = useState("Untitled board");
+
+<Popover open={open} onOpenChange={setOpen}>
+  <Popover.Trigger>
+    <Button variant="outline">Rename board</Button>
+  </Popover.Trigger>
+  <Popover.Content width="trigger" align="start" className="gap-3">
+    <Popover.Title>Rename</Popover.Title>
+    <Input value={name} onChangeText={setName} accessibilityLabel="Board name" />
+    <View className="flex-row justify-end gap-2">
+      <Popover.Close>
+        <Button variant="ghost" size="sm">Cancel</Button>
+      </Popover.Close>
+      <Popover.Close>
+        <Button size="sm" onPress={save}>Save</Button>
+      </Popover.Close>
+    </View>
+  </Popover.Content>
+</Popover>
+```
+
+### Nudging the alignment
+
+`align` picks the edge to line up with; `alignOffset` moves the panel along that axis afterwards, and `offset` changes the gap to the trigger. Both take pixels and both accept negatives.
+
+```tsx
+{/* Lined up with the trigger's left edge, pulled 8px further left. */}
+<Popover.Content align="start" alignOffset={-8} />
+
+{/* Tucked right up against the trigger. */}
+<Popover.Content offset={2} />
+```
+
+## API Reference
+
+### Popover
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Controlled open state. |
+| `onOpenChange` | `(open: boolean) => void` | — |  |
+| `defaultOpen` | `boolean` | — | Initial state when uncontrolled. |
+
+### Popover.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `placement` | `PopoverPlacement` | `'bottom'` | Preferred side of the trigger. Flipped when that side does not fit. |
+| `align` | `PopoverAlign` | `'center'` | Where the panel sits along the trigger's other axis. |
+| `offset` | `number` | `DEFAULT_OFFSET` | Gap between the trigger and the panel, in pixels. |
+| `alignOffset` | `number` | `0` | Nudge along the alignment axis, in pixels. |
+| `width` | `number \| 'trigger' \| 'full' \| 'content-fit'` | `'content-fit'` | `content-fit` sizes to the content, `trigger` matches the trigger's width, `full` spans the safe area, and a number is that many pixels. |
+| `dismissible` | `boolean` | `true` | Tap outside the panel closes it. Default true. |
+
+### Popover.Arrow
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+**Placement is resolved, not obeyed.** The side is flipped only when the preferred one genuinely has less room than its opposite; after that the panel is slid along the other axis to stay inside the safe area. That order matters — sliding first would let a badly placed panel look like it fits.
+
+**The panel is measured before it is shown.** Its size is not known until it has laid out once, so the first frame is laid out off-screen and the entrance starts from the frame after. That entrance is driven by hand rather than by a preset, because it has to start from whichever side was resolved — a panel that opened upwards should not appear to come from above.
+
+**The trigger is measured on every open**, not once on layout. A trigger inside a scroll view has moved since it was laid out, and a stale rectangle anchors the panel to where it used to be.
+
+**`Popover.Trigger` wraps its child in a view.** The ref has to survive whatever the child is — a Button, a Pressable, an icon — and only a wrapper the component owns is guaranteed to be measurable.
+
+Use a **BottomSheet** instead when the content is long, needs its own scroll, or is the whole point of the interaction. A popover that fills the screen is a dialog wearing the wrong clothes.

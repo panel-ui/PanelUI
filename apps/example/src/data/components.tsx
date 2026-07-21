@@ -10,7 +10,13 @@ import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import { Image, ScrollView, useWindowDimensions, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import {
   Accordion,
   Alert,
@@ -40,6 +46,7 @@ import {
   Message,
   PackageIcon,
   PlusSquareIcon,
+  Popover,
   Progress,
   RadioGroup,
   ReceiptIcon,
@@ -120,6 +127,43 @@ function SwitchDemo() {
         </View>
       </Card.Content>
     </Card>
+  );
+}
+
+function PopoverFormDemo() {
+  const [name, setName] = useState('Untitled board');
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View className="w-full items-center py-4">
+      <Popover open={open} onOpenChange={setOpen}>
+        <Popover.Trigger>
+          <Button variant="outline">Rename board</Button>
+        </Popover.Trigger>
+        {/* `width="trigger"` locks the panel to the trigger's width, so the
+            two read as one control rather than as a panel over a button. */}
+        <Popover.Content width="trigger" align="start" className="gap-3">
+          <Popover.Title>Rename</Popover.Title>
+          <Input
+            value={name}
+            onChangeText={setName}
+            placeholder="Board name"
+            accessibilityLabel="Board name"
+            autoCorrect={false}
+          />
+          <View className="flex-row justify-end gap-2">
+            <Popover.Close>
+              <Button variant="ghost" size="sm">
+                Cancel
+              </Button>
+            </Popover.Close>
+            <Popover.Close>
+              <Button size="sm">Save</Button>
+            </Popover.Close>
+          </View>
+        </Popover.Content>
+      </Popover>
+    </View>
   );
 }
 
@@ -2244,6 +2288,88 @@ export const COMPONENTS: ComponentEntry[] = [
             </Message>
           </View>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'popover',
+    name: 'Popover',
+    summary: 'Panel anchored to the thing that opened it',
+    demos: [
+      {
+        label: 'Menu of actions',
+        render: () => (
+          <Popover>
+            <Popover.Trigger>
+              <Button variant="outline">Options</Button>
+            </Popover.Trigger>
+            <Popover.Content align="start" className="w-52 gap-0 p-1.5">
+              {[
+                { label: 'Share', icon: <ShareNodesIcon size={16} /> },
+                { label: 'Add to list', icon: <PlusSquareIcon size={16} /> },
+                { label: 'Download', icon: <PackageIcon size={16} /> },
+              ].map((action) => (
+                <Popover.Close key={action.label}>
+                  <Pressable
+                    accessibilityRole="menuitem"
+                    onPress={() => {}}
+                    className="flex-row items-center gap-3 rounded-xl px-3 py-2.5 active:bg-accent"
+                  >
+                    {action.icon}
+                    <Text size="sm">{action.label}</Text>
+                  </Pressable>
+                </Popover.Close>
+              ))}
+            </Popover.Content>
+          </Popover>
+        ),
+      },
+      {
+        label: 'Placement',
+        render: () => (
+          <View className="w-full items-center gap-3 py-6">
+            {(['top', 'bottom', 'left', 'right'] as const).map((placement) => (
+              <Popover key={placement}>
+                <Popover.Trigger>
+                  <Button variant="secondary" size="sm">
+                    {placement}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content placement={placement} className="w-48">
+                  <Popover.Title>Placed {placement}</Popover.Title>
+                  <Popover.Description>
+                    Flips to the opposite side when this one does not fit.
+                  </Popover.Description>
+                </Popover.Content>
+              </Popover>
+            ))}
+          </View>
+        ),
+      },
+      {
+        label: 'With an arrow',
+        render: () => (
+          <View className="w-full items-center py-4">
+            <Popover>
+              <Popover.Trigger>
+                <Button variant="ghost" size="icon" accessibilityLabel="What is this?">
+                  <InfoIcon size={18} />
+                </Button>
+              </Popover.Trigger>
+              <Popover.Content placement="top" className="w-60">
+                <Popover.Arrow />
+                <Popover.Title>Monthly active users</Popover.Title>
+                <Popover.Description>
+                  Anyone who opened the app at least once in the last 30 days.
+                </Popover.Description>
+              </Popover.Content>
+            </Popover>
+          </View>
+        ),
+      },
+      {
+        label: 'A form, matching the trigger width',
+        render: () => <PopoverFormDemo />,
       },
     ],
   },

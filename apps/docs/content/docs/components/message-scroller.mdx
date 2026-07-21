@@ -1,0 +1,212 @@
+---
+title: MessageScroller
+description: Scroll behaviour a chat transcript needs.
+---
+
+The scroll behaviour a chat transcript needs.
+
+A transcript is the one list where the interesting end is the bottom, the content grows while you are reading it, and history is added to the top. A plain scroll view gets all three wrong: it opens at the top, it stays put while a reply streams in below the fold, and it jumps a screen when older messages load.
+
+One rule sits behind all of it — **the reader's position is theirs**. New content follows the bottom only while they are already at the bottom, scrolling away hands control back to them until they ask for it, and content added above them never moves what they are looking at.
+
+## Installation
+
+MessageScroller ships with the library — no separate install.
+
+```tsx
+import { MessageScroller, Message, Avatar, Marker, Button, useMessageScroller, useMessageScrollerVisibility } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add message-scroller
+```
+
+## Usage
+
+```tsx
+<MessageScroller autoScroll className="flex-1">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {messages.map((message) => (
+        <MessageScroller.Item
+          key={message.id}
+          messageId={message.id}
+          scrollAnchor={message.role === "user"}
+        >
+          <Message>…</Message>
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+  <MessageScroller.Button />
+</MessageScroller>
+```
+
+## Composition
+
+```tsx
+<MessageScroller>
+  <MessageScroller.Viewport>…</MessageScroller.Viewport>
+  <MessageScroller.Content>…</MessageScroller.Content>
+  <MessageScroller.Item>…</MessageScroller.Item>
+  <MessageScroller.Button>…</MessageScroller.Button>
+</MessageScroller>
+```
+
+- **`MessageScroller.Viewport`** — The scrollable. Owns all three behaviours, because all three are reactions to scroll and content-size events.
+- **`MessageScroller.Content`** — The transcript column. Announces additions rather than the whole list.
+- **`MessageScroller.Item`** — One turn. It exists to be measured — without a boundary per turn there is nothing to scroll *to* and nothing to measure a prepend against.
+- **`MessageScroller.Button`** — The way back to the live edge, shown only when there is one to go back to.
+
+## Examples
+
+### Following a streamed reply
+
+`autoScroll` pins the viewport to the bottom as the reply grows — but only while the reader is already there. Scrolling up mid-stream disengages it, and `MessageScroller.Button` is how they opt back in.
+
+```tsx
+<MessageScroller autoScroll className="flex-1">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {turns.map((turn) => (
+        <MessageScroller.Item
+          key={turn.id}
+          messageId={turn.id}
+          scrollAnchor={turn.role === "user"}
+        >
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+
+      {streaming ? (
+        <Marker>
+          <Marker.Content shimmer>Generating…</Marker.Content>
+        </Marker>
+      ) : null}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+  <MessageScroller.Button />
+</MessageScroller>
+```
+
+### Loading history without jumping
+
+Prepend older turns and the reader stays on the message they were reading. The shift is measured on a message they can already see rather than taken from the height delta, so it stays correct when a message is prepended and another edits itself in the same commit.
+
+```tsx
+{/* On by default — pass preserveScrollOnPrepend={false} to opt out. */}
+<MessageScroller className="flex-1">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      <Button variant="ghost" size="sm" onPress={loadOlder}>
+        Load older messages
+      </Button>
+
+      {turns.map((turn) => (
+        <MessageScroller.Item key={turn.id} messageId={turn.id}>
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+</MessageScroller>
+```
+
+### Opening a saved thread
+
+`last-anchor` opens on the last turn that *started* something, rather than at the bottom of whatever the reply to it happened to be. Mark those turns with `scrollAnchor` — usually the user's.
+
+```tsx
+<MessageScroller className="flex-1" defaultScrollPosition="last-anchor">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {turns.map((turn) => (
+        <MessageScroller.Item
+          key={turn.id}
+          messageId={turn.id}
+          scrollAnchor={turn.role === "user"}
+        >
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+
+  {/* Points the other way — back to the top of the thread. */}
+  <MessageScroller.Button target="start" />
+</MessageScroller>
+```
+
+### Driving it from outside
+
+Two hooks, for anything rendered inside the scroller that needs to move it or read where the reader is. `useMessageScrollerVisibility` settles after a scroll rather than updating per frame — it is for a header that names the current turn, not for anything animated.
+
+```tsx
+function JumpToLatest() {
+  const { scrollToEnd, scrollToMessage } = useMessageScroller();
+  const { currentAnchorId, atEnd } = useMessageScrollerVisibility();
+
+  if (atEnd) return null;
+
+  return (
+    <Button size="sm" onPress={() => scrollToEnd()}>
+      Jump to latest
+    </Button>
+  );
+}
+```
+
+## API Reference
+
+### MessageScroller
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `autoScroll` | `boolean` | `false` | Follow new content down as it arrives — but only while the reader is already at the bottom. Scrolling up disengages it until they come back or press the button. |
+| `preserveScrollOnPrepend` | `boolean` | `true` | Keep the reader on the same message when older ones are added above. Without it, loading history throws them a screen backwards. |
+| `defaultScrollPosition` | `MessageScrollerPosition` | `'end'` | Where a freshly mounted transcript opens. `last-anchor` is the one to want for a saved thread: it lands on the last turn that started something, rather than at the very bottom of whatever the reply happened to be. |
+
+### MessageScroller.Viewport
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### MessageScroller.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### MessageScroller.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `messageId` | `string` | — | Stable id for this turn. `scrollToMessage` takes the same value. |
+| `scrollAnchor` | `boolean` | `false` | Marks this row as the start of a turn. `defaultScrollPosition="last-anchor"` opens on the last one, and it is what a saved thread should land on — the question, not the tail of the answer to it. |
+
+### MessageScroller.Button
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `target` | `'start' \| 'end'` | `'end'` | `end` jumps to the newest message, `start` to the beginning of the thread. |
+| `accessibilityLabel` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+**It needs a bounded height.** From `flex-1` in a column, or an explicit one. Given an unbounded parent it grows to fit its content and never scrolls at all.
+
+**Follow-output is conditional, not automatic.** `autoScroll` means *follow the bottom while the reader is at the bottom* — never *drag them to the bottom*. Being pulled away from a message you were half way through reading is the behaviour this exists to avoid.
+
+**The scroll position is not React state.** The at-end test runs per frame on the UI thread and only crosses into JS when the boolean flips, and the button fades from that same shared value. A transcript scrolls constantly; re-rendering on every frame of it would be the most expensive thing on the screen.
+
+**Every turn needs a stable `messageId`.** It is the key for the offset the component measures, so an id derived from the array index breaks scrolling the moment anything is prepended.
+
+**The four scroll events are owned.** `onScroll`, `onScrollEndDrag`, `onMomentumScrollEnd` and `onContentSizeChange` are taken off `MessageScroller.Viewport`'s props type. They are not decoration on a scroll view — they *are* the behaviour, and a call site that quietly replaced one would look like a bug in the scrolling.

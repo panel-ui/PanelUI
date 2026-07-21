@@ -111,6 +111,17 @@ export {
   type MarkerContentProps,
 } from './components/marker';
 export {
+  MessageScroller,
+  useMessageScroller,
+  useMessageScrollerVisibility,
+  type MessageScrollerProps,
+  type MessageScrollerViewportProps,
+  type MessageScrollerContentProps,
+  type MessageScrollerItemProps,
+  type MessageScrollerButtonProps,
+  type MessageScrollerPosition,
+} from './components/message-scroller';
+export {
   Message,
   type MessageProps,
   type MessageGroupProps,

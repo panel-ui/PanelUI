@@ -676,6 +676,47 @@
       "caption": "Both sides of a conversation, a named turn with a timestamp, and grouped turns."
     }
   },
+  "message-scroller": {
+    "intro": "The scroll behaviour a chat transcript needs.\n\nA transcript is the one list where the interesting end is the bottom, the content grows while you are reading it, and history is added to the top. A plain scroll view gets all three wrong: it opens at the top, it stays put while a reply streams in below the fold, and it jumps a screen when older messages load.\n\nOne rule sits behind all of it — **the reader's position is theirs**. New content follows the bottom only while they are already at the bottom, scrolling away hands control back to them until they ask for it, and content added above them never moves what they are looking at.",
+    "usage": "<MessageScroller autoScroll className=\"flex-1\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      {messages.map((message) => (\n        <MessageScroller.Item\n          key={message.id}\n          messageId={message.id}\n          scrollAnchor={message.role === \"user\"}\n        >\n          <Message>…</Message>\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button />\n</MessageScroller>",
+    "extraImports": [
+      "Message",
+      "Avatar",
+      "Marker",
+      "Button",
+      "useMessageScroller",
+      "useMessageScrollerVisibility"
+    ],
+    "parts": {
+      "Viewport": "The scrollable. Owns all three behaviours, because all three are reactions to scroll and content-size events.",
+      "Content": "The transcript column. Announces additions rather than the whole list.",
+      "Item": "One turn. It exists to be measured — without a boundary per turn there is nothing to scroll *to* and nothing to measure a prepend against.",
+      "Button": "The way back to the live edge, shown only when there is one to go back to."
+    },
+    "examples": [
+      {
+        "title": "Following a streamed reply",
+        "description": "`autoScroll` pins the viewport to the bottom as the reply grows — but only while the reader is already there. Scrolling up mid-stream disengages it, and `MessageScroller.Button` is how they opt back in.",
+        "code": "<MessageScroller autoScroll className=\"flex-1\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      {turns.map((turn) => (\n        <MessageScroller.Item\n          key={turn.id}\n          messageId={turn.id}\n          scrollAnchor={turn.role === \"user\"}\n        >\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n\n      {streaming ? (\n        <Marker>\n          <Marker.Content shimmer>Generating…</Marker.Content>\n        </Marker>\n      ) : null}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button />\n</MessageScroller>"
+      },
+      {
+        "title": "Loading history without jumping",
+        "description": "Prepend older turns and the reader stays on the message they were reading. The shift is measured on a message they can already see rather than taken from the height delta, so it stays correct when a message is prepended and another edits itself in the same commit.",
+        "code": "{/* On by default — pass preserveScrollOnPrepend={false} to opt out. */}\n<MessageScroller className=\"flex-1\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      <Button variant=\"ghost\" size=\"sm\" onPress={loadOlder}>\n        Load older messages\n      </Button>\n\n      {turns.map((turn) => (\n        <MessageScroller.Item key={turn.id} messageId={turn.id}>\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n</MessageScroller>"
+      },
+      {
+        "title": "Opening a saved thread",
+        "description": "`last-anchor` opens on the last turn that *started* something, rather than at the bottom of whatever the reply to it happened to be. Mark those turns with `scrollAnchor` — usually the user's.",
+        "code": "<MessageScroller className=\"flex-1\" defaultScrollPosition=\"last-anchor\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      {turns.map((turn) => (\n        <MessageScroller.Item\n          key={turn.id}\n          messageId={turn.id}\n          scrollAnchor={turn.role === \"user\"}\n        >\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n\n  {/* Points the other way — back to the top of the thread. */}\n  <MessageScroller.Button target=\"start\" />\n</MessageScroller>"
+      },
+      {
+        "title": "Driving it from outside",
+        "description": "Two hooks, for anything rendered inside the scroller that needs to move it or read where the reader is. `useMessageScrollerVisibility` settles after a scroll rather than updating per frame — it is for a header that names the current turn, not for anything animated.",
+        "code": "function JumpToLatest() {\n  const { scrollToEnd, scrollToMessage } = useMessageScroller();\n  const { currentAnchorId, atEnd } = useMessageScrollerVisibility();\n\n  if (atEnd) return null;\n\n  return (\n    <Button size=\"sm\" onPress={() => scrollToEnd()}>\n      Jump to latest\n    </Button>\n  );\n}"
+      }
+    ],
+    "notes": "**It needs a bounded height.** From `flex-1` in a column, or an explicit one. Given an unbounded parent it grows to fit its content and never scrolls at all.\n\n**Follow-output is conditional, not automatic.** `autoScroll` means *follow the bottom while the reader is at the bottom* — never *drag them to the bottom*. Being pulled away from a message you were half way through reading is the behaviour this exists to avoid.\n\n**The scroll position is not React state.** The at-end test runs per frame on the UI thread and only crosses into JS when the boolean flips, and the button fades from that same shared value. A transcript scrolls constantly; re-rendering on every frame of it would be the most expensive thing on the screen.\n\n**Every turn needs a stable `messageId`.** It is the key for the offset the component measures, so an id derived from the array index breaks scrolling the moment anything is prepended.\n\n**The four scroll events are owned.** `onScroll`, `onScrollEndDrag`, `onMomentumScrollEnd` and `onContentSizeChange` are taken off `MessageScroller.Viewport`'s props type. They are not decoration on a scroll view — they *are* the behaviour, and a call site that quietly replaced one would look like a bug in the scrolling."
+  },
   "popover": {
     "intro": "A panel anchored to the thing that opened it.\n\nA dialog takes the screen and asks to be dealt with; a popover stays next to its trigger and keeps the context around it visible. That difference is the whole reason both exist, and it is why this one is positioned rather than centred.\n\nPlacement is a preference, not a promise. The trigger is measured in window coordinates when it is pressed, the panel measures itself on its first layout, and the two are reconciled against the safe area — so `placement=\"bottom\"` means *below, if below fits*. A trigger near the bottom of the screen opens upwards instead of off the edge.",
     "usage": "<Popover>\n  <Popover.Trigger>\n    <Button variant=\"outline\">Options</Button>\n  </Popover.Trigger>\n  <Popover.Content placement=\"bottom\" align=\"end\">\n    <Popover.Title>Export</Popover.Title>\n    <Popover.Description>Choose a format.</Popover.Description>\n  </Popover.Content>\n</Popover>",

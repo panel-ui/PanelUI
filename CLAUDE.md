@@ -82,6 +82,24 @@ Props tables are read from the component's actual TypeScript interfaces and thei
 `packages/panelui/src/components/<name>/index.tsx` — never written from memory. Docs that drift
 from the source are worse than no docs, because they are trusted.
 
+**The component MDX is generated, never hand-edited.** `apps/docs/scripts/extract.mjs` reads
+the library source into `api.json`; `gen.mjs` merges it with the hand-written `usage.json` and
+`meta.json` and writes the MDX. Edit those two JSON files and run
+`npm run docs:generate --workspace=docs`, which also rebuilds the registry. See
+`apps/docs/scripts/README.md` for what each `usage.json` key becomes.
+
+### Full-screen demos go behind a version row
+
+A component whose demo needs the whole screen — a chat transcript, a scroller, an editor — is
+not rendered inline on the component's detail screen in `apps/example`. Squeezed into a section
+between two dividers it demonstrates nothing except that it does not fit.
+
+Mark the demo `fullPage: true` with an `id` and a `description` in
+`apps/example/src/data/components.tsx`. The detail screen lists those demos under a **Versions**
+heading as `Item` rows, and each pushes `/components/<slug>/<id>`, where
+`app/components/[slug]/[demo].tsx` renders it edge to edge with no padding and no scroll
+wrapper around it.
+
 ## Architecture
 
 - npm-workspaces monorepo:

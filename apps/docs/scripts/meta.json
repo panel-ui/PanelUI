@@ -89,6 +89,11 @@
     "Chat turn with avatar, bubble, header and footer.",
     "react native chat message component"
   ],
+  "message-scroller": [
+    "MessageScroller",
+    "Scroll behaviour a chat transcript needs.",
+    "react native chat scroll"
+  ],
   "popover": [
     "Popover",
     "Panel anchored to the element that opened it.",

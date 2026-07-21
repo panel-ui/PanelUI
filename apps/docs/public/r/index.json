@@ -196,6 +196,16 @@
     ]
   },
   {
+    "name": "message-scroller",
+    "type": "registry:ui",
+    "description": "Scroll behaviour a chat transcript needs.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "icons"
+    ]
+  },
+  {
     "name": "native",
     "type": "registry:lib",
     "description": "Optional bridge to the platform UI toolkit, behind the `native` prop.",

@@ -19,6 +19,7 @@
     "label",
     "marker",
     "message",
+    "message-scroller",
     "popover",
     "progress",
     "radio-group",

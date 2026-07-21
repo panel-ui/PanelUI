@@ -1099,14 +1099,24 @@
     "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill.",
     "examples": [
       {
-        "title": "The variant ladder",
-        "description": "Each step is one level further from the background — nest them to build depth without hardcoding colours.",
-        "code": "<Surface className=\"gap-3 p-4\">\n  <Text>Default</Text>\n  <Surface variant=\"secondary\" className=\"gap-3 p-4\">\n    <Text>Secondary</Text>\n    <Surface variant=\"tertiary\" className=\"p-4\">\n      <Text>Tertiary</Text>\n    </Surface>\n  </Surface>\n</Surface>"
+        "title": "Nested hierarchy",
+        "description": "The variants form a ladder, not a palette: each step sits one level further from the background, so nesting them builds depth without naming a colour.",
+        "code": "<Surface>\n  <Text weight=\"medium\">Account</Text>\n  <Surface variant=\"secondary\" className=\"mt-3\">\n    <Text size=\"sm\" muted>Signed in as khalid@example.com</Text>\n    <Surface variant=\"tertiary\" className=\"mt-3\">\n      <Text size=\"xs\" muted>Session expires in 12 days</Text>\n    </Surface>\n  </Surface>\n</Surface>"
       },
       {
-        "title": "Transparent",
-        "description": "Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.",
-        "code": "<Surface variant=\"transparent\" className=\"p-4\">\n  <Text>No background of its own.</Text>\n</Surface>"
+        "title": "Bordered and elevated",
+        "description": "A surface the same colour as the page needs a hairline to read as its own plane. `elevated` adds a soft shadow that lifts it off the page — off by default, because a nested surface takes its depth from its fill.",
+        "code": "<Surface bordered>…</Surface>\n<Surface elevated>…</Surface>\n<Surface bordered elevated>…</Surface>"
+      },
+      {
+        "title": "Padding scale",
+        "description": "`padding` scales the inner spacing. `none` is for a surface wrapping a bled image or a chart, where the content reaches the edge.",
+        "code": "<Surface padding=\"none\">…</Surface>\n<Surface padding=\"sm\">…</Surface>\n<Surface padding=\"default\">…</Surface>\n<Surface padding=\"lg\">…</Surface>"
+      },
+      {
+        "title": "As a stat card",
+        "description": "A bordered surface with generous padding is the whole card for a metric.",
+        "code": "<Surface bordered padding=\"lg\" className=\"flex-1\">\n  <Text size=\"xs\" muted className=\"uppercase tracking-wider\">Revenue</Text>\n  <Text size=\"xl\" weight=\"semibold\" className=\"mt-1\">$24.8k</Text>\n</Surface>"
       }
     ],
     "variantCode": {

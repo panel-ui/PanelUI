@@ -39,29 +39,51 @@ npx panelui-cli@latest add surface
 
 ## Examples
 
-### The variant ladder
+### Nested hierarchy
 
-Each step is one level further from the background — nest them to build depth without hardcoding colours.
+The variants form a ladder, not a palette: each step sits one level further from the background, so nesting them builds depth without naming a colour.
 
 ```tsx
-<Surface className="gap-3 p-4">
-  <Text>Default</Text>
-  <Surface variant="secondary" className="gap-3 p-4">
-    <Text>Secondary</Text>
-    <Surface variant="tertiary" className="p-4">
-      <Text>Tertiary</Text>
+<Surface>
+  <Text weight="medium">Account</Text>
+  <Surface variant="secondary" className="mt-3">
+    <Text size="sm" muted>Signed in as khalid@example.com</Text>
+    <Surface variant="tertiary" className="mt-3">
+      <Text size="xs" muted>Session expires in 12 days</Text>
     </Surface>
   </Surface>
 </Surface>
 ```
 
-### Transparent
+### Bordered and elevated
 
-Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.
+A surface the same colour as the page needs a hairline to read as its own plane. `elevated` adds a soft shadow that lifts it off the page — off by default, because a nested surface takes its depth from its fill.
 
 ```tsx
-<Surface variant="transparent" className="p-4">
-  <Text>No background of its own.</Text>
+<Surface bordered>…</Surface>
+<Surface elevated>…</Surface>
+<Surface bordered elevated>…</Surface>
+```
+
+### Padding scale
+
+`padding` scales the inner spacing. `none` is for a surface wrapping a bled image or a chart, where the content reaches the edge.
+
+```tsx
+<Surface padding="none">…</Surface>
+<Surface padding="sm">…</Surface>
+<Surface padding="default">…</Surface>
+<Surface padding="lg">…</Surface>
+```
+
+### As a stat card
+
+A bordered surface with generous padding is the whole card for a metric.
+
+```tsx
+<Surface bordered padding="lg" className="flex-1">
+  <Text size="xs" muted className="uppercase tracking-wider">Revenue</Text>
+  <Text size="xl" weight="semibold" className="mt-1">$24.8k</Text>
 </Surface>
 ```
 
@@ -81,6 +103,36 @@ Keeps the padding and radius but paints no background — for a slot that should
 <Surface variant="transparent" className="p-4">Transparent</Surface>
 ```
 
+### `padding`
+
+- `none`
+- `sm`
+- `default` *(default)*
+- `lg`
+
+```tsx
+<Surface padding="none">…</Surface>
+<Surface padding="sm">…</Surface>
+<Surface padding="default">…</Surface>
+<Surface padding="lg">…</Surface>
+```
+
+### `bordered`
+
+- `true`
+
+```tsx
+<Surface bordered="true">…</Surface>
+```
+
+### `elevated`
+
+- `true`
+
+```tsx
+<Surface elevated="true">…</Surface>
+```
+
 ## API Reference
 
 ### Surface
@@ -88,6 +140,9 @@ Keeps the padding and radius but paints no background — for a slot that should
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `bordered` | `boolean` | — | A hairline border. A surface the same colour as what it sits on needs one to read as a distinct plane rather than dissolving into the background. |
+| `elevated` | `boolean` | — | A soft shadow lifting the surface off the page. Off by default because a nested surface reads its depth from its fill, not from a shadow it would only cast onto its parent. |
+| `padding` | `'none' \| 'sm' \| 'default' \| 'lg'` | `default` | Inner spacing. `none` is for a surface wrapping a bled image or a chart. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

@@ -3013,6 +3013,60 @@ export const COMPONENTS: ComponentEntry[] = [
           </View>
         ),
       },
+      {
+        label: 'Bordered and elevated',
+        render: () => (
+          <View className="w-full gap-3">
+            {/* A hairline for a surface the same colour as the page. */}
+            <Surface bordered>
+              <Text size="sm">bordered — reads against a same-colour page</Text>
+            </Surface>
+            {/* A soft shadow lifts it off the page. */}
+            <Surface elevated>
+              <Text size="sm">elevated — a soft shadow</Text>
+            </Surface>
+            <Surface bordered elevated>
+              <Text size="sm">both</Text>
+            </Surface>
+          </View>
+        ),
+      },
+      {
+        label: 'Padding scale',
+        render: () => (
+          <View className="w-full gap-3">
+            {(['none', 'sm', 'default', 'lg'] as const).map((padding) => (
+              <Surface key={padding} variant="secondary" padding={padding} bordered>
+                <View className="rounded-lg bg-primary/10 px-2 py-1">
+                  <Text size="xs" muted>
+                    padding={padding}
+                  </Text>
+                </View>
+              </Surface>
+            ))}
+          </View>
+        ),
+      },
+      {
+        label: 'As a stat card',
+        render: () => (
+          <View className="w-full flex-row gap-3">
+            {[
+              { label: 'Revenue', value: '$24.8k' },
+              { label: 'Active', value: '1,204' },
+            ].map((stat) => (
+              <Surface key={stat.label} bordered padding="lg" className="flex-1">
+                <Text size="xs" muted className="uppercase tracking-wider">
+                  {stat.label}
+                </Text>
+                <Text size="xl" weight="semibold" className="mt-1">
+                  {stat.value}
+                </Text>
+              </Surface>
+            ))}
+          </View>
+        ),
+      },
     ],
   },
   {

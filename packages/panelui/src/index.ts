@@ -105,6 +105,12 @@ export {
 } from './components/item';
 export { Label, type LabelProps, type LabelTextProps } from './components/label';
 export {
+  Marker,
+  type MarkerProps,
+  type MarkerIconProps,
+  type MarkerContentProps,
+} from './components/marker';
+export {
   Message,
   type MessageProps,
   type MessageGroupProps,

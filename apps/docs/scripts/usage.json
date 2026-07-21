@@ -578,6 +578,47 @@
       }
     ]
   },
+  "marker": {
+    "intro": "An inline note in a conversation.\n\nTranscripts are not only messages. Between the turns sit things the conversation *did* rather than said: a tool that ran, a file that was read, the point where yesterday ended. None of those have a speaker, so none of them should look like a bubble. A marker is the quieter row that carries them — small, muted, and aligned to the transcript rather than to a side of it.",
+    "usage": "<Marker>\n  <Marker.Icon>\n    <CheckIcon size={14} />\n  </Marker.Icon>\n  <Marker.Content>Explored 4 files</Marker.Content>\n</Marker>",
+    "extraImports": [
+      "CheckIcon",
+      "SearchIcon",
+      "InfoIcon",
+      "Message",
+      "Avatar"
+    ],
+    "parts": {
+      "Icon": "Decorative leading slot. Hidden from screen readers, and tinted to the muted foreground.",
+      "Content": "The line of text. Takes `shimmer` while the step is still running."
+    },
+    "examples": [
+      {
+        "title": "Status rows",
+        "description": "The common case: a short line of what just happened, one row per step.",
+        "code": "<Marker>\n  <Marker.Icon><SearchIcon size={14} /></Marker.Icon>\n  <Marker.Content>Explored 4 files</Marker.Content>\n</Marker>\n\n<Marker>\n  <Marker.Icon><CheckIcon size={14} /></Marker.Icon>\n  <Marker.Content>Applied 2 edits to invoice.ts</Marker.Content>\n</Marker>"
+      },
+      {
+        "title": "A step still running",
+        "description": "Add `shimmer` to the content while the step is in flight. The sweep is masked to the glyphs, so the text itself catches the light. Drop it the moment the step finishes — a marker that shimmers forever reads as a stuck one.",
+        "code": "<Marker>\n  <Marker.Icon><CheckIcon size={14} /></Marker.Icon>\n  <Marker.Content>Read 12 files</Marker.Content>\n</Marker>\n\n<Marker>\n  <Marker.Icon><SearchIcon size={14} /></Marker.Icon>\n  <Marker.Content shimmer>Searching the codebase…</Marker.Content>\n</Marker>"
+      },
+      {
+        "title": "A day divider",
+        "description": "The `separator` variant centres the content between two rules, for the break between one day of a thread and the next. It takes no icon.",
+        "code": "<Marker variant=\"separator\">\n  <Marker.Content>Yesterday</Marker.Content>\n</Marker>"
+      },
+      {
+        "title": "In a transcript",
+        "description": "Markers sit between messages at the same width, so the eye reads them as the same column. Give one an `onPress` and it becomes a button — for expanding the step it summarises.",
+        "code": "<Marker variant=\"separator\">\n  <Marker.Content>Today</Marker.Content>\n</Marker>\n\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Where is the invoice total calculated?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<Marker onPress={() => expand(step)}>\n  <Marker.Icon><SearchIcon size={14} /></Marker.Icon>\n  <Marker.Content>Searched 128 files</Marker.Content>\n</Marker>\n\n<Message>\n  <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>In billing/total.ts — it sums the line items, then applies tax.</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>"
+      }
+    ],
+    "variantCode": {
+      "variant": "{/* The plain status row. */}\n<Marker>\n  <Marker.Icon><InfoIcon size={14} /></Marker.Icon>\n  <Marker.Content>Model set to Opus</Marker.Content>\n</Marker>\n\n{/* Closed by a hairline, for a step that ends a section. */}\n<Marker variant=\"border\">\n  <Marker.Icon><CheckIcon size={14} /></Marker.Icon>\n  <Marker.Content>Finished 3 tool calls</Marker.Content>\n</Marker>\n\n{/* Centred label with a rule out to each edge. */}\n<Marker variant=\"separator\">\n  <Marker.Content>Yesterday</Marker.Content>\n</Marker>"
+    },
+    "notes": "A marker with no `onPress` renders as a plain view and is not announced as a button — the same rule `Item` follows. Give it an `onPress` and it becomes a pressable with the press feedback every other pressable in the library has.\n\n`Marker.Icon` is hidden from screen readers. It repeats what the content already says, and announcing both is noise. It also picks up the muted foreground automatically, so an icon dropped inside needs no `color`.\n\nThe `separator` variant draws its rules with `Separator`, so they follow the same token and thickness as every other rule in the app."
+  },
   "message": {
     "intro": "A chat turn: avatar, bubble, and the metadata around it.\n\nThe pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.",
     "usage": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" fallback=\"KA\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n// The outgoing side.\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>\n\n// Consecutive turns from one sender.\n<Message.Group align=\"start\">\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Header>Assistant</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>Looking that up…</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Bubble>\n        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n</Message.Group>",

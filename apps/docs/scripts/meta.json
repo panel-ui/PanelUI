@@ -79,6 +79,11 @@
     "Form field label with required, invalid and disabled states.",
     "react native form label"
   ],
+  "marker": [
+    "Marker",
+    "Inline note between conversation turns.",
+    "react native chat status row"
+  ],
   "message": [
     "Message",
     "Chat turn with avatar, bubble, header and footer.",

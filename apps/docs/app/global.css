@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 /*
- * `shadcn.css`, not `neutral.css`: the neutral preset hardcodes its own greys
- * into the --color-fd-* namespace, so the sidebar, nav and TOC would ignore
- * the Coss tokens below entirely. The shadcn preset maps every fd- variable
- * onto --background / --primary / --sidebar-* — exactly the names Coss uses —
+ * This preset, not `neutral.css`: the neutral one hardcodes its own greys into
+ * the --color-fd-* namespace, so the sidebar, nav and TOC would ignore the
+ * tokens below entirely. This one maps every fd- variable onto
+ * --background / --primary / --sidebar-* — exactly the names the tokens use —
  * so defining those once themes the whole site.
  */
 @import 'fumadocs-ui/css/shadcn.css';
@@ -18,12 +18,11 @@
 @source '../components';
 
 /*
- * Coss UI design tokens, copied from cosscom/coss
- * packages/ui/src/styles/globals.css.
+ * The design tokens, in their web form.
  *
- * Fumadocs' preset reads the same shadcn-shaped variable names Coss defines,
- * so redefining them here retints the entire site — sidebar, code blocks,
- * search — without overriding a single component.
+ * Fumadocs' preset reads the same variable names these define, so redefining
+ * them here retints the entire site — sidebar, code blocks, search — without
+ * overriding a single component.
  *
  * `--alpha()` and `color-mix()` are kept exactly as upstream writes them.
  * `--alpha()` is a Tailwind v4 build-time function, not broken CSS; the native
@@ -144,9 +143,9 @@
 }
 
 /*
- * Map the Coss variables onto Tailwind's colour namespace, so `bg-card`,
+ * Map the variables onto Tailwind's colour namespace, so `bg-card`,
  * `text-muted-foreground` and friends resolve. `--font-heading` aliases to
- * `--font-sans` per the Coss font contract.
+ * `--font-sans` per the font contract.
  */
 @theme inline {
   --color-background: var(--background);
@@ -339,7 +338,7 @@ body {
   code, kbd, samp, pre {
     font-family: var(--font-mono);
   }
-  /* The coss init emitted `font-sans font-mono` here; the two conflict and
+  /* A CLI scaffold emitted `font-sans font-mono` here; the two conflict and
      mono won. Body copy is sans, and the rule above already scopes mono to
      code. */
   html {

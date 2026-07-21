@@ -10,9 +10,9 @@ const interHeading = Inter({subsets:['latin'],variable:'--font-heading'});
 
 
 /*
- * The `variable` names must be exactly --font-sans and --font-mono: Coss
- * components read those, and Next starters default to --font-geist-sans, which
- * silently falls back to system UI. --font-heading is aliased to --font-sans
+ * The `variable` names must be exactly --font-sans and --font-mono: the
+ * design tokens read those, and Next starters default to --font-geist-sans,
+ * which silently falls back to system UI. --font-heading is aliased to --font-sans
  * in global.css.
  */
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});

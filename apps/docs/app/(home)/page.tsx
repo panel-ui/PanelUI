@@ -80,7 +80,7 @@ const COMPONENTS = [
 ] as const;
 
 const THEMES = [
-  { name: 'Panel', body: 'The Coss default — neutral greys, moderate corners.', swatch: '#262626' },
+  { name: 'Panel', body: 'The default — neutral greys, moderate corners.', swatch: '#262626' },
   { name: 'Moon', body: 'Monochrome and high-contrast, with tight corners.', swatch: '#0070f3' },
   { name: 'Grass', body: 'Green accent on warm neutrals, soft generous corners.', swatch: '#24b47e' },
 ];
@@ -234,7 +234,7 @@ export default function HomePage() {
               Three theme families, light and dark
             </h2>
             <p className="max-w-2xl text-muted-foreground">
-              Tokens come from Coss UI. A family sets its own radius scale as well as its
+              A family sets its own radius scale as well as its
               palette, so switching one changes the shape of the UI, not just the colour.
             </p>
           </div>

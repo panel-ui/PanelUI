@@ -1,8 +1,9 @@
 /**
  * Surface — an elevated container.
  *
- * Adapted from: heroui-inc/heroui-native src/components/surface/
- * (the variant ladder and the nesting model for building hierarchy).
+ * The variants form a ladder rather than a palette: each step is one level
+ * further from the background, and nesting them is how you build depth without
+ * hardcoding a colour anywhere.
  *
  * Both the fill and the corner radius follow the active theme: the variants
  * resolve to themed `--color-surface-*` tokens, and `rounded-3xl` resolves

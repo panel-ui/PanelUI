@@ -1,9 +1,9 @@
 /**
  * Typography — semantic text presets.
  *
- * Adapted from: heroui-inc/heroui-native (Typography `type` scale and the
- * Heading / Paragraph / Code compound parts), built on PanelUI's Text
- * primitive so every preset keeps `className` passthrough and theme colours.
+ * The type scale in one place, so headings stay consistent instead of being
+ * rebuilt out of size and weight classes at each call site. Built on the Text
+ * primitive, so every preset keeps `className` passthrough and theme colours.
  */
 import { forwardRef } from 'react';
 import { View, type Text as RNText, type ViewProps } from 'react-native';

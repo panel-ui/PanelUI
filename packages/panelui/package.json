@@ -1,7 +1,7 @@
 {
   "name": "panelui-native",
   "version": "0.6.0",
-  "description": "High-performance React Native UI components for Expo. Coss UI design language, powered by Uniwind (Tailwind v4) and Reanimated.",
+  "description": "High-performance React Native UI components for Expo. Semantic design tokens, powered by Uniwind (Tailwind v4) and Reanimated.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -43,7 +43,6 @@
     "nativewind",
     "reanimated",
     "design-system",
-    "shadcn",
     "dark-mode",
     "theming",
     "accessibility",

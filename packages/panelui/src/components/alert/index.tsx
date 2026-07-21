@@ -1,12 +1,9 @@
 /**
  * Alert — a status message with an optional leading status icon.
  *
- * Adapted from: heroui-inc/heroui-native src/components/alert/alert.tsx
- * (Indicator / Content / Title / Description anatomy, status-driven icon and
- * title colour), restyled with Coss UI tokens.
- *
- * The `variant` prop name is kept from PanelUI v0.2 rather than renamed to
- * HeroUI's `status`, so existing code keeps working.
+ * The indicator derives its icon and colour from the variant, so a success
+ * alert cannot end up with a warning icon. Pass `icon` on the root to override
+ * it everywhere, or give `Alert.Indicator` children to override one.
  */
 import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import { View, type Text as RNText, type ViewProps } from 'react-native';

@@ -1,7 +1,6 @@
 /**
  * InputGroup — an Input with leading and/or trailing decorators.
  *
- * Adapted from: heroui-inc/heroui-native src/components/input-group/
  * Prefix and Suffix are absolutely positioned and their measured widths become
  * padding on the Input, so text never runs underneath a decorator regardless
  * of how wide that decorator turns out to be.

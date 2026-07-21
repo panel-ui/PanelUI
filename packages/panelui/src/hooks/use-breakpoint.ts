@@ -16,8 +16,8 @@ export interface UseBreakpointResult {
 }
 
 /**
- * Responsive state from the window size — the React Native answer to
- * coss.com/ui's `useMediaQuery`, which has no equivalent here.
+ * Responsive state from the window size — the React Native answer to a media
+ * query, which has no equivalent here.
  *
  * For styling, prefer Uniwind's responsive class prefixes (`md:flex-row`).
  * Reach for this when the *behaviour* changes, not just the look — rendering

@@ -1,11 +1,10 @@
 /**
  * EmptyState — the placeholder shown when a list or view has no content.
  *
- * Adapted from: cosscom/coss packages/ui/src/components/empty.tsx
- * (centered Header / Media / Title / Description / Content anatomy, and the
- * `icon` media variant that stacks two rotated ghost cards behind the icon).
- * Coss does that with CSS pseudo-elements; on native it is two absolutely
- * positioned siblings with static rotate transforms.
+ * Centred Header / Media / Title / Description / Content, with an `icon` media
+ * variant that stacks two rotated ghost cards behind the icon. On the web that
+ * is a pair of CSS pseudo-elements; React Native has none, so it is two
+ * absolutely positioned siblings with static rotate transforms.
  */
 import { forwardRef, type ReactNode } from 'react';
 import { View, type Text as RNText, type ViewProps } from 'react-native';

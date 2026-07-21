@@ -7,44 +7,48 @@ GitHub: https://github.com/panel-ui/PanelUI
 ## Research before you build
 
 **Never design a component, variant, animation, or token from scratch.** Before writing any
-component code, read how the problem is already solved upstream, then adapt it to PanelUI's
-tokens and conventions. This is not optional.
+component code, read how the problem is already solved by mature libraries, then adapt it to
+PanelUI's tokens and conventions. This is not optional.
 
-Reference implementations, in order of relevance:
+Where to look, in order:
 
-1. `heroui-inc/heroui-native` — React Native structure, Reanimated usage, gesture handling,
-   accessibility props, compound anatomy. Closest to our target; check here first.
-2. `shadcn-ui/ui` — compound-component API shape, prop naming, variant taxonomy.
-3. `cosscom/coss` — token usage and visual language (our design tokens come from here).
+1. The React Native / Expo component libraries — for native structure, Reanimated usage, gesture
+   handling, accessibility props and compound anatomy. Closest to our target; check here first.
+2. The web component libraries — for compound-component API shape, prop naming and variant
+   taxonomy. Their structure ports; their CSS does not.
+3. The design-system references — for token usage and visual language.
 
-If none of the three has the component, search the web for other React Native / Tailwind
+The `.claude/skills/` directory holds the pinned references for 2 and 3; invoke them by name
+before touching design tokens, `packages/panelui/theme.css`, the docs theming or the landing
+page. They carry rules worth not reconstructing — for instance, *never rewrite `--alpha()` to
+`rgba()` in the web CSS*: it is a valid Tailwind v4 build-time function, not broken CSS.
+
+If none of them has the component, search the web for other React Native / Tailwind
 implementations before inventing an approach.
 
-How to read them:
+How to read a repository:
 
 - Use `gh api "repos/<owner>/<repo>/git/trees/main?recursive=1" --jq '.tree[].path'` to locate
   files, then `gh api "repos/<owner>/<repo>/contents/<path>" --jq '.content' | base64 -d` to read
-  them. **Prefer `gh` over WebFetch** — `raw.githubusercontent.com` returns 404 for these repos.
-- HeroUI Native ships a `<name>.md` next to each component with the full documented API. Read it.
+  them. **Prefer `gh` over WebFetch** — `raw.githubusercontent.com` returns 404 for many repos.
+- Some libraries ship a `<name>.md` next to each component with the full documented API. Read it
+  before the implementation; it is faster and more accurate.
 
-Record what you learned: put a short `Adapted from: <repo> <path>` note in the header comment of
-every component file you create or substantially rework.
+### Never name a reference library in anything we ship or author
 
-## Use the skills
+This is a hard rule, and it applies to **source comments, JSDoc, README files, docs pages, npm
+metadata and commit messages** alike:
 
-Two skills carry rules and CLI flows you are expected to follow rather than reconstruct:
+- No `Adapted from: <repo>` headers. Write a header comment that explains what the component
+  does and *why it is shaped that way* — that is the part worth keeping, and it stays true when
+  the upstream changes.
+- No "the React Native equivalent of X's Y utility", no "matches Z's animation constants", no
+  third-party product names in prose anywhere.
+- Docs describe PanelUI's behaviour on its own terms. A reader should never have to know another
+  library to understand a page.
 
-- **`coss`** — invoke it before touching anything built on Coss primitives or Coss tokens: the
-  landing page, the docs theming, or any change to `packages/panelui/theme.css`. It covers the
-  composition invariants per primitive, the `--font-sans` / `--font-mono` / `--font-heading`
-  contract, and rules such as *never rewrite `--alpha()` to `rgba()`* — that is a valid Tailwind v4
-  build-time function, not broken CSS.
-- **`shadcn`** — invoke it for shadcn registry work (`npx shadcn@latest add …`, presets,
-  `components.json`) and for shadcn's composition rules when shaping a component API.
-
-Never hand-write Coss markup without first checking a particle
-(`https://coss.com/ui/r/p-<name>-N.json`) for the real composition. The skills exist so the code
-matches upstream conventions instead of approximating them.
+Research from them; do not credit them in the artifact. If a reference genuinely needs recording
+for future maintainers, it belongs in this file or a commit body — never in shipped code.
 
 ## Documentation is part of the change
 
@@ -67,11 +71,11 @@ from the source are worse than no docs, because they are trusted.
   - `packages/panelui` — the library (npm: `panelui-native`). Pure TypeScript, no native code.
   - `apps/example` — Expo SDK 57 showcase app (expo-router gallery of every component).
   - `apps/docs` — Fumadocs documentation site + landing page (Next.js, private, deploys to
-    panelui.dev). Themed with Coss tokens; landing page built from Coss primitives.
+    panelui.dev). Themed with the same tokens in their web form.
 - Styling: **Uniwind** (Tailwind v4 for RN) + `tailwind-variants` for variant APIs.
-- Design tokens: **exact Coss UI values** from `cosscom/coss` `packages/ui/src/styles/globals.css`,
-  precomputed to static rgba/hex in `packages/panelui/theme.css` (native can't evaluate
-  `color-mix()`/`--alpha()` at runtime). Keep this file in sync with Coss if tokens change.
+- Design tokens: semantic values precomputed to static rgba/hex in `packages/panelui/theme.css`
+  (native can't evaluate `color-mix()`/`--alpha()` at runtime). The web copy in
+  `apps/docs/app/global.css` keeps those expressions intact; keep the two in sync.
 - Animations: Reanimated 4, UI thread only. Never use RN core `Animated`.
 
 ## Commands (run from repo root)

@@ -161,7 +161,7 @@ non-component code.
 
 PanelUI ships three theme families, each in light and dark: **Panel** (`light` / `dark`),
 **Moon** (`moon` / `moon-dark`) and **Grass** (`grass` / `grass-dark`). A family sets its own
-radius scale as well as its own palette — Panel is the Coss default, Moon is sharp and
+radius scale as well as its own palette — Panel is the default, Moon is sharp and
 monochrome, Grass is soft and green.
 
 ```tsx

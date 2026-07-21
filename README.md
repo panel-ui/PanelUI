@@ -6,7 +6,7 @@
 
 <p align="center">
   High-performance React Native components for Expo.<br />
-  Coss UI design language · Tailwind v4 via Uniwind · Reanimated on the UI thread.
+  Semantic design tokens · Tailwind v4 via Uniwind · Reanimated on the UI thread.
 </p>
 
 <p align="center">
@@ -18,11 +18,11 @@
 
 ---
 
-**PanelUI** brings the component quality of [shadcn/ui](https://ui.shadcn.com) and the visual language of [Coss UI](https://coss.com/ui) to React Native — built for Expo from day one and engineered for performance:
+**PanelUI** brings compound-component APIs and a coherent visual language to React Native — built for Expo from day one and engineered for performance:
 
 - ⚡ **Uniwind (Tailwind v4)** — the fastest Tailwind bindings for React Native. No Babel transform, ~2.4–3× faster styling than NativeWind.
 - 🧵 **UI-thread animations** — every animation (press feedback, switches, sheets, dialogs, tabs) runs on the UI thread with Reanimated 4. No JS-thread jank.
-- 🎨 **Coss UI design tokens** — the exact same semantic color system (`background`, `primary`, `muted`, `destructive`, …) in light and dark, translated 1:1 for native.
+- 🎨 **Semantic design tokens** — one colour system (`background`, `primary`, `muted`, `destructive`, …) in light and dark, resolved to static values for native.
 - 🌗 **Native dark mode** — theme switching handled by Uniwind at the native level, without re-rendering your tree.
 - ♿ **Accessible** — proper `accessibilityRole` and state wiring on every interactive component.
 - 📦 **Tree-shakeable, typed, zero native code** — pure TypeScript, works in Expo Go.
@@ -213,7 +213,7 @@ Named themes must be registered in `extraThemes` in your Metro config, or
 `setTheme` throws "it was not registered".
 
 Tokens are CSS variables. Override them in your own `global.css` using the same
-`@variant` shape the library uses — Uniwind does not support the shadcn-style
+`@variant` shape the library uses — Uniwind does not support the web's
 `:root` / `.dark` pattern:
 
 ```css

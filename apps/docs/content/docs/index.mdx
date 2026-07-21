@@ -43,10 +43,10 @@ export default function App() {
 
 ## Design language
 
-The token set comes from [Coss UI](https://coss.com/ui) — the same semantic names
-(`background`, `primary`, `muted`, `destructive`, …), translated for native. The component APIs
-follow the compound-component shape [shadcn/ui](https://ui.shadcn.com) popularised, so
-`Card.Header` and `Dialog.Content` behave the way you would expect.
+The token set is semantic rather than literal — `background`, `primary`, `muted`,
+`destructive` — so a component never names a colour and switching theme changes everything at
+once. The component APIs are compound: `Card.Header` and `Dialog.Content` compose the way the
+markup reads.
 
 ## Next steps
 

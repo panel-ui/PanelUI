@@ -2,10 +2,10 @@
  * Icon set.
  *
  * Two families live here:
- * - Stroked 24×24 icons (Lucide geometry, as used by shadcn-ui/ui) for chrome
- *   such as chevrons and the close button.
- * - Filled 16×16 status icons for Alert and Toast indicators.
- *   Adapted from: heroui-inc/heroui-native src/components/alert/{default,success,warning}-icon.tsx
+ * - Stroked 24×24 icons on Lucide geometry, for chrome such as chevrons and
+ *   the close button.
+ * - Filled 16×16 status icons for Alert and Toast indicators, which read
+ *   better small than a stroked equivalent would.
  *
  * Every icon resolves its colour in the same order: an explicit `color` prop,
  * then the colour inherited from an enclosing `IconColorProvider`, then its

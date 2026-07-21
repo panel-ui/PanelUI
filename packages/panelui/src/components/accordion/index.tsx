@@ -1,12 +1,14 @@
 /**
  * Accordion — collapsible sections.
  *
- * Adapted from: heroui-inc/heroui-native src/components/accordion/
- * (the Item / Trigger / Indicator / Content anatomy, single vs multiple
- * selection, the rotating chevron indicator, and layout-transition expand).
+ * Split into Item / Trigger / Indicator / Content so a section header can hold
+ * anything — a badge, a price, a second line — instead of only a string. The
+ * chevron rotates rather than swapping glyphs, and the panel expands through a
+ * layout transition, both on the UI thread.
  *
- * Upstream ships `default` and `surface`; the extra variants here follow the
- * same slot structure.
+ * `selectionMode` decides whether opening one section closes the others, which
+ * also changes the shape of `value`: a string when single, an array when
+ * multiple.
  */
 import {
   Children,

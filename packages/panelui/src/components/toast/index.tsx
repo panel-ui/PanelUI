@@ -1,10 +1,10 @@
 /**
  * Toast — transient notification.
  *
- * Adapted from: heroui-inc/heroui-native src/components/toast/
- * (the three usage patterns — string, config object, custom component — the
- * Title / Description / Action / Close anatomy, placement, and swipe-to-
- * dismiss). Styled with Coss UI tokens and PanelUI's Alert status palette.
+ * Three ways to raise one, because the right amount of ceremony differs: a
+ * bare string, a config object with a title, description and action, or a
+ * custom component when none of that fits. The anatomy underneath is the same
+ * in all three.
  *
  * The viewport is mounted for you by PanelUIProvider; `useToast()` works
  * anywhere below it.
@@ -71,8 +71,7 @@ const STACK_SCALE_STEP = 0.97;
 const EDGE_INSET = 16;
 
 /*
- * Entering/exiting animations, from heroui-inc/heroui-native
- * src/components/toast/toast.animation.ts.
+ * Entering and exiting animations.
  *
  * `mass(3)` is doing the important work: a heavy spring settles without the
  * visible overshoot a default-mass one gives. `withInitialValues` keeps
@@ -285,7 +284,7 @@ export const Toast = Object.assign(ToastRoot, {
  *
  * Swiping is vertical and direction-aware: dragging toward the screen edge the
  * toast came from dismisses it, dragging the other way rubber-bands against a
- * hard limit. Matches heroui-native's toast.animation.ts.
+ * hard limit.
  */
 function ToastSlot({
   item,
@@ -376,7 +375,7 @@ function ToastSlot({
    * Stack position plus the gesture transform.
    *
    * The whole deck takes the *newest* toast's height so the cards behind read
-   * as a uniform stack rather than a ragged pile — matching heroui-native.
+   * as a uniform stack rather than a ragged pile.
    */
   const stackStyle = useAnimatedStyle(() => {
     // Fall back to this toast's own height until the front one is measured.

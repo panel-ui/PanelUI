@@ -1,9 +1,11 @@
 /**
  * Label — text that names a form field.
  *
- * Adapted from: heroui-inc/heroui-native src/components/label/ (root +
- * Label.Text anatomy, string children auto-wrapping, the required asterisk,
- * and the isInvalid / isDisabled recolouring).
+ * A string child is wrapped in `Label.Text` automatically, so the common case
+ * stays one line; pass the parts explicitly when the label needs more than
+ * text. `isRequired`, `isInvalid` and `isDisabled` are visual *and* semantic —
+ * they recolour and they set the accessibility state, so the two cannot drift
+ * apart.
  */
 import {
   createContext,

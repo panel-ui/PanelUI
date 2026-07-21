@@ -29,7 +29,7 @@ export interface PanelThemeFamily {
 /**
  * The theme families PanelUI ships. Each sets its own palette *and* its own
  * radius scale, so switching family changes the shape of the UI as well as
- * its colour — Panel is the Coss default, Moon is sharp and monochrome,
+ * its colour — Panel is the default, Moon is sharp and monochrome,
  * Grass is soft and green.
  *
  * Everything beyond `panel` must be registered in your metro config, or

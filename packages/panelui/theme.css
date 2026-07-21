@@ -1,7 +1,9 @@
 /*
- * PanelUI theme — Coss UI design tokens, translated for React Native.
- * Source of truth: cosscom/coss packages/ui/src/styles/globals.css
- * (color-mix()/--alpha() expressions precomputed to static values.)
+ * PanelUI theme — the semantic design tokens, translated for React Native.
+ *
+ * Every colour is a static rgba/hex value: native cannot evaluate
+ * color-mix() or --alpha() at runtime, so those expressions are precomputed
+ * here rather than shipped as-is.
  *
  * Structured the way Uniwind expects themed tokens (see uniwind's own
  * test.css / expo-example): utility names declared in @theme, per-theme

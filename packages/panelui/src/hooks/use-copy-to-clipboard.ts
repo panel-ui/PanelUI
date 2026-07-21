@@ -15,8 +15,6 @@ export interface UseCopyToClipboardResult {
 /**
  * Copy text to the clipboard, with a temporary "copied" state.
  *
- * Mirrors coss.com/ui's `useCopyToClipboard`.
- *
  * Requires `expo-clipboard`, which is an optional peer dependency — React
  * Native removed `Clipboard` from core, and pulling in a required native
  * module for one hook would cost every consumer who never calls it:

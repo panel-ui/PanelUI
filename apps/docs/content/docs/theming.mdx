@@ -9,7 +9,7 @@ just its colour.
 
 | Family | Light | Dark | Character |
 | --- | --- | --- | --- |
-| **Panel** | `light` | `dark` | The Coss default — neutral greys, moderate corners |
+| **Panel** | `light` | `dark` | The default — neutral greys, moderate corners |
 | **Moon** | `moon` | `moon-dark` | Monochrome and high-contrast, electric blue accent, tight corners |
 | **Grass** | `grass` | `grass-dark` | Green accent on warm neutrals, soft generous corners |
 
@@ -44,7 +44,7 @@ for each — enough to build a theme picker without hardcoding anything.
 
 ## Tokens
 
-Every colour is a semantic token, taken from [Coss UI](https://coss.com/ui). Use these rather
+Every colour is a semantic token. Use these rather
 than raw palette values, so components follow whichever theme is active.
 
 | Token | Used for |
@@ -94,7 +94,7 @@ Redefine any token in your own `global.css`, using the same `@variant` shape the
   **Every theme must define the same variables.** Adding a token to one theme without adding it to
   all of them fails the build with *"All themes must have the same variables"*.
 
-  **The shadcn-style `:root { --x }` / `.dark { --x }` pattern does not work.** Uniwind resolves
+  **The web's `:root { --x }` / `.dark { --x }` pattern does not work.** Uniwind resolves
   themed tokens only from `@variant` blocks; `light-dark()` inside `@theme` breaks colour parsing
   outright.
 </Callout>

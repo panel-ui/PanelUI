@@ -440,7 +440,9 @@ function MessageScrollerContent({
   return (
     <View
       accessibilityLiveRegion="polite"
-      className={cn('gap-3 p-4', className)}
+      // Extra room at the foot so the last turn clears the floating jump
+      // button instead of scrolling under it.
+      className={cn('gap-3 p-4 pb-16', className)}
       {...props}
     >
       {children}
@@ -539,7 +541,7 @@ function MessageScrollerButton({
       accessibilityElementsHidden={!interactive}
       importantForAccessibility={interactive ? 'auto' : 'no-hide-descendants'}
       style={style}
-      className={cn('absolute bottom-4 self-center', className)}
+      className={cn('absolute bottom-6 self-center', className)}
       {...props}
     >
       <AnimatedPressable

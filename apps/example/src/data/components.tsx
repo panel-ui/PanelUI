@@ -10,6 +10,7 @@ import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Image,
   Pressable,
@@ -321,6 +322,7 @@ const REPLY =
 function StreamingTranscriptDemo() {
   const [turns, setTurns] = useState<Turn[]>(THREAD.slice(0, 4));
   const [streaming, setStreaming] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const send = () => {
     if (streaming) return;
@@ -373,7 +375,12 @@ function StreamingTranscriptDemo() {
         <MessageScroller.Button />
       </MessageScroller>
 
-      <View className="border-t border-border px-5 py-3">
+      {/* The full-page host reaches the screen edge, so the composer lifts
+          itself clear of the home indicator. */}
+      <View
+        className="border-t border-border px-5 pt-3"
+        style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+      >
         <Button onPress={send} loading={streaming} fullWidth>
           {streaming ? 'Streaming' : 'Send a message'}
         </Button>

@@ -79,6 +79,11 @@
     "Form field label with required, invalid and disabled states.",
     "react native form label"
   ],
+  "line-chart": [
+    "LineChart",
+    "Animated time series, drawn on the UI thread.",
+    "react native line chart"
+  ],
   "marker": [
     "Marker",
     "Inline note between conversation turns.",

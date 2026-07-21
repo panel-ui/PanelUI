@@ -1,0 +1,278 @@
+---
+title: LineChart
+description: Animated time series, drawn on the UI thread.
+---
+
+A time series, drawn and animated on the UI thread.
+
+The chart is composed rather than configured: the grid, each series, the axis and the crosshair are separate children, so a chart that wants no grid simply does not have one. A single component with twenty booleans is how charts end up unreadable at the call site.
+
+Colours come from the `--color-chart-1` … `--color-chart-5` tokens, so a chart follows the active theme out of the box and is put on brand by overriding those five. Nothing in it hardcodes a colour.
+
+## Installation
+
+LineChart ships with the library — no separate install.
+
+```tsx
+import { LineChart, Frame, Text, Button } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add line-chart
+```
+
+## Usage
+
+```tsx
+<LineChart data={visits} xDataKey="month">
+  <LineChart.Grid />
+  <LineChart.Area dataKey="visits" />
+  <LineChart.Line dataKey="visits" />
+  <LineChart.XAxis />
+  <LineChart.Tooltip />
+</LineChart>
+```
+
+## Composition
+
+```tsx
+<LineChart>
+  <LineChart.Grid>…</LineChart.Grid>
+  <LineChart.Area>…</LineChart.Area>
+  <LineChart.Line>…</LineChart.Line>
+  <LineChart.Skeleton>…</LineChart.Skeleton>
+  <LineChart.XAxis>…</LineChart.XAxis>
+  <LineChart.Tooltip>…</LineChart.Tooltip>
+  <LineChart.Legend>…</LineChart.Legend>
+</LineChart>
+```
+
+- **`LineChart.Grid`** — Horizontal reference lines, under everything and outside the reveal.
+- **`LineChart.Area`** — The gradient fill under a series. Separate from the line, because a two-series chart usually wants it on only one of them.
+- **`LineChart.Line`** — One series. Takes its colour from a `--color-chart-*` token unless given one.
+- **`LineChart.Skeleton`** — The flat rule with a sweep along it, shown while `status="loading"`.
+- **`LineChart.XAxis`** — The x labels, as real text under the plot.
+- **`LineChart.Tooltip`** — The crosshair and the drag that drives it.
+- **`LineChart.Legend`** — A swatch and a name per registered series.
+
+## Examples
+
+### A chart card
+
+Pair it with `Frame`: the title and the readout go in the header, and the chart bleeds to the panel's edges. The readout belongs there rather than floating over the plot, where it would cover the line it is describing — and since the header is outside the chart, the active point comes up through `onActiveIndexChange` rather than through a hook.
+
+```tsx
+const [active, setActive] = useState(null);
+
+<Frame>
+  <Frame.Header className="flex-col items-start gap-0.5">
+    <Frame.Title>Visits</Frame.Title>
+    <Text size="sm" muted>
+      {active ? `${active.month} · ${active.visits.toLocaleString()} visits` : "Drag across the chart"}
+    </Text>
+  </Frame.Header>
+
+  <Frame.Panel className="p-0">
+    <LineChart
+      data={visits}
+      xDataKey="month"
+      aspectRatio={1.9}
+      onActiveIndexChange={(index) => setActive(index >= 0 ? visits[index] : null)}
+    >
+      <LineChart.Grid />
+      <LineChart.Area dataKey="visits" />
+      <LineChart.Line dataKey="visits" showMarkers />
+      <LineChart.XAxis />
+      <LineChart.Tooltip />
+    </LineChart>
+  </Frame.Panel>
+
+  <Frame.Footer>Last nine months</Frame.Footer>
+</Frame>
+```
+
+### Two series
+
+Both series share one y-axis, so they stay comparable. Give the second one the next colour token *and* a dash pattern — colour alone fails for anyone who cannot tell those two hues apart.
+
+```tsx
+<LineChart data={data} xDataKey="month">
+  <LineChart.Grid />
+
+  {/* The fill goes on one series only. Two translucent fills over each
+      other make a third colour that means nothing. */}
+  <LineChart.Area dataKey="visits" />
+  <LineChart.Line dataKey="visits" />
+  <LineChart.Line dataKey="signups" colorIndex={2} dashArray="6,4" />
+
+  <LineChart.XAxis />
+  <LineChart.Legend labels={{ visits: "Visits", signups: "Signups" }} />
+  <LineChart.Tooltip />
+</LineChart>
+```
+
+### Loading, and then data
+
+Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits where the series will be with a highlight travelling along it; on `ready` that same line grows into the data. It is one component the whole way through — a spinner swapped for a chart has nothing to transition from.
+
+```tsx
+const [status, setStatus] = useState<"loading" | "ready">("loading");
+
+useEffect(() => {
+  fetchVisits().then((rows) => {
+    setData(rows);
+    setStatus("ready");
+  });
+}, []);
+
+<LineChart data={data} status={status} xDataKey="month">
+  <LineChart.Grid />
+  <LineChart.Skeleton />
+  <LineChart.Area dataKey="visits" />
+  <LineChart.Line dataKey="visits" />
+  <LineChart.XAxis />
+  <LineChart.Tooltip />
+</LineChart>
+```
+
+### Putting it on brand
+
+Override the chart tokens in your app's global.css, after the theme import. Every chart in the app follows, and each theme can carry its own ramp.
+
+```tsx
+/* global.css */
+@import "tailwindcss";
+@import "uniwind";
+@import "panelui-native/theme.css";
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-chart-1: #6d28d9;
+      --color-chart-2: #db2777;
+    }
+    @variant dark {
+      --color-chart-1: #a78bfa;
+      --color-chart-2: #f472b6;
+    }
+  }
+}
+```
+
+### Gaps in the data
+
+A `null` breaks the series rather than being crossed. A month with no reading is a month with no reading, and joining the points either side of it draws a number that was never measured.
+
+```tsx
+const data = [
+  { month: "Jan", visits: 1840 },
+  { month: "Feb", visits: null },  // the meter was down
+  { month: "Mar", visits: 2050 },
+];
+```
+
+## API Reference
+
+### LineChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `data` | `LineChartDatum[]` | — | The rows. Each one is a point along the x-axis. |
+| `xDataKey` | `string` | `'date'` | Key holding the x label. Used by the axis and the crosshair readout. |
+| `status` | `LineChartStatus` | `'ready'` | `loading` draws a flat skeleton with a sweep running along it, and morphs into the real series when it turns `ready`. One component throughout, rather than a spinner swapped for a chart — swapping loses the transition. |
+| `aspectRatio` | `number` | `2` | Width ÷ height. `2` is the wide card shape; `1.6` suits a narrow column. |
+| `animationDuration` | `number` | `1100` | Milliseconds for the reveal on mount. |
+| `domainDuration` | `number` | `500` | Milliseconds for the y-axis to settle after the data changes. |
+| `yDomain` | `[number, number]` | — | Fix the y-axis instead of deriving it from the data. |
+| `curve` | `LineChartCurve` | `'monotone'` | `monotone` never overshoots between points; `linear` joins them straight. |
+| `onActiveIndexChange` | `(index: number, datum: LineChartDatum \| null) => void` | — | The point under the crosshair as it moves, and `-1`/`null` when the finger lifts. This is how a readout in the card's header gets its value — that header is outside the chart, so it cannot use `useLineChart`. Fires when the index changes, not per frame. |
+
+### LineChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | — | Horizontal rules across the plot. |
+| `color` | `string` | — |  |
+| `dashArray` | `string` | — | Dash pattern, e.g. `"4,6"`. Omit for a solid rule. |
+| `opacity` | `number` | — |  |
+
+### LineChart.Line
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — | Key holding this series' y values. |
+| `color` | `string` | — | Stroke colour. Defaults to the `--color-chart-*` token at `colorIndex`, so a series follows the theme without the call site naming a colour. |
+| `colorIndex` | `1 \| 2 \| 3 \| 4 \| 5` | `1` | Which `--color-chart-*` token to take when `color` is not given. |
+| `strokeWidth` | `number` | `2.5` |  |
+| `dashArray` | `string` | — | Dash pattern, e.g. `"6,4"` — for a projection or a secondary series. |
+| `showMarkers` | `boolean` | `false` | A dot at every point. Best kept for short series. |
+
+### LineChart.Area
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — |  |
+| `color` | `string` | — |  |
+| `colorIndex` | `1 \| 2 \| 3 \| 4 \| 5` | `1` |  |
+| `opacity` | `number` | — | Opacity at the line. Fades to nothing at the baseline. |
+
+### LineChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
+| `color` | `string` | — |  |
+
+### LineChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | — | How many labels to show. The rest are dropped, evenly. |
+| `format` | `(datum: LineChartDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
+| `className` | `string` | — |  |
+
+### LineChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `string` | — |  |
+
+### LineChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `labels` | `Record<string, string>` | — | Label per series key. A key with no label falls back to the key itself. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### The two layers
+
+The geometry is SVG and anything with text or a gesture on it is a React Native view laid over the top. The parts sort themselves into the right layer, so composition stays a flat list of children — but it is why `LineChart.XAxis` renders real text rather than SVG text. SVG text ignores the platform's text scaling and the theme's font, and a gesture handler cannot be attached to an SVG node at all.
+
+### Three animations, three reasons
+
+**The reveal** uncovers the plot left to right on mount, with everything inside sharing one clip — so the line, its fill and its markers arrive together rather than as three separate effects.
+
+**The y-domain** is tweened when the data changes, rather than the path being swapped. A series that grows is redrawn against a moving axis instead of jumping to a new shape. The reveal deliberately does not replay: it happened once, and repeating it on every refresh turns a data update into an animation.
+
+**The crosshair** resolves the nearest index on the UI thread. Only that index crosses back into JS, and only when it changes, so a drag across a hundred points costs a hundred re-renders at most rather than one per frame.
+
+All three respect the system's reduce-motion setting: the chart renders at its final state instead.
+
+### Reading out the active point
+
+`onActiveIndexChange` fires as the crosshair moves between points, and with `-1`/`null` when the finger lifts. That is the one to use for a readout in the card header, because the header is outside the chart and a hook cannot reach up out of the subtree it is called in. `useLineChart` is for something rendered *inside* the chart, which is the rarer case.
+
+### The curve
+
+`monotone` is the default and is the right one for a time series. A plain cubic spline overshoots between points, so a series that never goes below zero draws a dip under the axis between two low values — a shape that is not in the data. Use `curve="linear"` when the points are exact readings and the eye should not be given anything between them.
+
+### Sizing
+
+The chart fills its parent's width and takes its height from `aspectRatio`. Give it a wider ratio for a card and a squarer one for a narrow column; do not set a height directly, as the aspect ratio is what keeps the plot geometry stable while the layout settles.

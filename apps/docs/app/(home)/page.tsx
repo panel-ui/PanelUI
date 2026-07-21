@@ -72,11 +72,14 @@ const COMPONENTS = [
   ['Badge', 'badge'], ['BottomSheet', 'bottom-sheet'], ['Button', 'button'],
   ['Card', 'card'], ['Checkbox', 'checkbox'], ['Dialog', 'dialog'],
   ['EmptyState', 'empty-state'], ['Frame', 'frame'], ['InlineSelect', 'inline-select'],
-  ['Input', 'input'], ['InputGroup', 'input-group'], ['Label', 'label'],
-  ['Progress', 'progress'], ['RadioGroup', 'radio-group'], ['Select', 'select'],
+  ['Input', 'input'], ['InputGroup', 'input-group'], ['Item', 'item'],
+  ['Label', 'label'], ['LineChart', 'line-chart'], ['Marker', 'marker'],
+  ['Message', 'message'], ['MessageScroller', 'message-scroller'], ['Popover', 'popover'],
+  ['Progress', 'progress'], ['RadioGroup', 'radio-group'], ['ScrollFade', 'scroll-fade'],
+  ['Select', 'select'], ['Separator', 'separator'], ['Shimmer', 'shimmer'],
   ['Skeleton', 'skeleton'], ['Spinner', 'spinner'], ['Steps', 'steps'],
-  ['Switch', 'switch'], ['Tabs', 'tabs'], ['Timeline', 'timeline'],
-  ['Toast', 'toast'], ['Typography', 'typography'],
+  ['Surface', 'surface'], ['Switch', 'switch'], ['Tabs', 'tabs'],
+  ['Timeline', 'timeline'], ['Toast', 'toast'], ['Typography', 'typography'],
 ] as const;
 
 const THEMES = [
@@ -105,7 +108,7 @@ const FAQ = [
   },
   {
     q: 'How many components are there?',
-    a: '26, covering overlays, forms, feedback and layout — from bottom sheets and dialogs to timelines, steppers and toasts.',
+    a: '36, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, timelines and toasts.',
   },
 ];
 

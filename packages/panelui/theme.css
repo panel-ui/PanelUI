@@ -68,6 +68,22 @@
   --color-destructive-subtle: unset;
 
   /*
+   * Chart series. A separate ramp from the status colours because they answer
+   * a different question: a status colour means something (this failed, this
+   * is fine), a series colour only has to be told apart from the other four.
+   * Ordered by prominence — chart-1 is the series the chart is about, and each
+   * theme starts it on that family's own accent.
+   *
+   * These are the tokens to override in your app's global.css, after the
+   * `panelui-native/theme.css` import, to put a chart on brand.
+   */
+  --color-chart-1: unset;
+  --color-chart-2: unset;
+  --color-chart-3: unset;
+  --color-chart-4: unset;
+  --color-chart-5: unset;
+
+  /*
    * Radius scale. Themed rather than static: a theme is a shape as well as a
    * palette, so each family sets its own corner rounding. --radius-3xl is
    * declared here because rounded-3xl / rounded-t-3xl are both in use and
@@ -143,6 +159,13 @@
       --color-warning-subtle: rgba(245, 158, 11, 0.08);
       --color-destructive-soft: rgba(239, 68, 68, 0.1);
       --color-destructive-subtle: rgba(239, 68, 68, 0.08);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #262626;
+      --color-chart-2: #3b82f6;
+      --color-chart-3: #10b981;
+      --color-chart-4: #f59e0b;
+      --color-chart-5: #8b5cf6;
     
       /* Panel shape scale */
       --radius-xs: 4px;
@@ -216,6 +239,13 @@
       --color-warning-subtle: rgba(245, 158, 11, 0.16);
       --color-destructive-soft: rgba(241, 87, 87, 0.06);
       --color-destructive-subtle: rgba(241, 87, 87, 0.16);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #fafafa;
+      --color-chart-2: #60a5fa;
+      --color-chart-3: #34d399;
+      --color-chart-4: #fbbf24;
+      --color-chart-5: #a78bfa;
     
       /* Panel shape scale */
       --radius-xs: 4px;
@@ -298,6 +328,13 @@
       --color-warning-subtle: rgba(245, 166, 35, 0.08);
       --color-destructive-soft: rgba(229, 72, 77, 0.1);
       --color-destructive-subtle: rgba(229, 72, 77, 0.08);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #0070f3;
+      --color-chart-2: #171717;
+      --color-chart-3: #7928ca;
+      --color-chart-4: #f5a623;
+      --color-chart-5: #0a9396;
     
       /* Moon shape scale */
       --radius-xs: 2px;
@@ -360,6 +397,13 @@
       --color-warning-subtle: rgba(245, 166, 35, 0.16);
       --color-destructive-soft: rgba(229, 72, 77, 0.1);
       --color-destructive-subtle: rgba(229, 72, 77, 0.16);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #3291ff;
+      --color-chart-2: #ededed;
+      --color-chart-3: #a855f7;
+      --color-chart-4: #fbbf24;
+      --color-chart-5: #2dd4bf;
     
       /* Moon shape scale */
       --radius-xs: 2px;
@@ -425,6 +469,13 @@
       --color-warning-subtle: rgba(245, 158, 11, 0.08);
       --color-destructive-soft: rgba(239, 68, 68, 0.1);
       --color-destructive-subtle: rgba(239, 68, 68, 0.08);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #24b47e;
+      --color-chart-2: #1f2937;
+      --color-chart-3: #2563eb;
+      --color-chart-4: #f59e0b;
+      --color-chart-5: #db2777;
     
       /* Grass shape scale */
       --radius-xs: 6px;
@@ -487,6 +538,13 @@
       --color-warning-subtle: rgba(245, 158, 11, 0.16);
       --color-destructive-soft: rgba(241, 87, 87, 0.08);
       --color-destructive-subtle: rgba(241, 87, 87, 0.16);
+
+      /* chart series, in order of prominence */
+      --color-chart-1: #3ecf8e;
+      --color-chart-2: #ededed;
+      --color-chart-3: #60a5fa;
+      --color-chart-4: #fbbf24;
+      --color-chart-5: #f472b6;
     
       /* Grass shape scale */
       --radius-xs: 6px;

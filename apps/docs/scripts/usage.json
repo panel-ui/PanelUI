@@ -578,6 +578,52 @@
       }
     ]
   },
+  "line-chart": {
+    "intro": "A time series, drawn and animated on the UI thread.\n\nThe chart is composed rather than configured: the grid, each series, the axis and the crosshair are separate children, so a chart that wants no grid simply does not have one. A single component with twenty booleans is how charts end up unreadable at the call site.\n\nColours come from the `--color-chart-1` … `--color-chart-5` tokens, so a chart follows the active theme out of the box and is put on brand by overriding those five. Nothing in it hardcodes a colour.",
+    "usage": "<LineChart data={visits} xDataKey=\"month\">\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"visits\" />\n  <LineChart.Line dataKey=\"visits\" />\n  <LineChart.XAxis />\n  <LineChart.Tooltip />\n</LineChart>",
+    "extraImports": [
+      "Frame",
+      "Text",
+      "Button"
+    ],
+    "parts": {
+      "Grid": "Horizontal reference lines, under everything and outside the reveal.",
+      "Area": "The gradient fill under a series. Separate from the line, because a two-series chart usually wants it on only one of them.",
+      "Line": "One series. Takes its colour from a `--color-chart-*` token unless given one.",
+      "Skeleton": "The flat rule with a sweep along it, shown while `status=\"loading\"`.",
+      "XAxis": "The x labels, as real text under the plot.",
+      "Tooltip": "The crosshair and the drag that drives it.",
+      "Legend": "A swatch and a name per registered series."
+    },
+    "examples": [
+      {
+        "title": "A chart card",
+        "description": "Pair it with `Frame`: the title and the readout go in the header, and the chart bleeds to the panel's edges. The readout belongs there rather than floating over the plot, where it would cover the line it is describing — and since the header is outside the chart, the active point comes up through `onActiveIndexChange` rather than through a hook.",
+        "code": "const [active, setActive] = useState(null);\n\n<Frame>\n  <Frame.Header className=\"flex-col items-start gap-0.5\">\n    <Frame.Title>Visits</Frame.Title>\n    <Text size=\"sm\" muted>\n      {active ? `${active.month} · ${active.visits.toLocaleString()} visits` : \"Drag across the chart\"}\n    </Text>\n  </Frame.Header>\n\n  <Frame.Panel className=\"p-0\">\n    <LineChart\n      data={visits}\n      xDataKey=\"month\"\n      aspectRatio={1.9}\n      onActiveIndexChange={(index) => setActive(index >= 0 ? visits[index] : null)}\n    >\n      <LineChart.Grid />\n      <LineChart.Area dataKey=\"visits\" />\n      <LineChart.Line dataKey=\"visits\" showMarkers />\n      <LineChart.XAxis />\n      <LineChart.Tooltip />\n    </LineChart>\n  </Frame.Panel>\n\n  <Frame.Footer>Last nine months</Frame.Footer>\n</Frame>"
+      },
+      {
+        "title": "Two series",
+        "description": "Both series share one y-axis, so they stay comparable. Give the second one the next colour token *and* a dash pattern — colour alone fails for anyone who cannot tell those two hues apart.",
+        "code": "<LineChart data={data} xDataKey=\"month\">\n  <LineChart.Grid />\n\n  {/* The fill goes on one series only. Two translucent fills over each\n      other make a third colour that means nothing. */}\n  <LineChart.Area dataKey=\"visits\" />\n  <LineChart.Line dataKey=\"visits\" />\n  <LineChart.Line dataKey=\"signups\" colorIndex={2} dashArray=\"6,4\" />\n\n  <LineChart.XAxis />\n  <LineChart.Legend labels={{ visits: \"Visits\", signups: \"Signups\" }} />\n  <LineChart.Tooltip />\n</LineChart>"
+      },
+      {
+        "title": "Loading, and then data",
+        "description": "Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits where the series will be with a highlight travelling along it; on `ready` that same line grows into the data. It is one component the whole way through — a spinner swapped for a chart has nothing to transition from.",
+        "code": "const [status, setStatus] = useState<\"loading\" | \"ready\">(\"loading\");\n\nuseEffect(() => {\n  fetchVisits().then((rows) => {\n    setData(rows);\n    setStatus(\"ready\");\n  });\n}, []);\n\n<LineChart data={data} status={status} xDataKey=\"month\">\n  <LineChart.Grid />\n  <LineChart.Skeleton />\n  <LineChart.Area dataKey=\"visits\" />\n  <LineChart.Line dataKey=\"visits\" />\n  <LineChart.XAxis />\n  <LineChart.Tooltip />\n</LineChart>"
+      },
+      {
+        "title": "Putting it on brand",
+        "description": "Override the chart tokens in your app's global.css, after the theme import. Every chart in the app follows, and each theme can carry its own ramp.",
+        "code": "/* global.css */\n@import \"tailwindcss\";\n@import \"uniwind\";\n@import \"panelui-native/theme.css\";\n\n@layer theme {\n  :root {\n    @variant light {\n      --color-chart-1: #6d28d9;\n      --color-chart-2: #db2777;\n    }\n    @variant dark {\n      --color-chart-1: #a78bfa;\n      --color-chart-2: #f472b6;\n    }\n  }\n}"
+      },
+      {
+        "title": "Gaps in the data",
+        "description": "A `null` breaks the series rather than being crossed. A month with no reading is a month with no reading, and joining the points either side of it draws a number that was never measured.",
+        "code": "const data = [\n  { month: \"Jan\", visits: 1840 },\n  { month: \"Feb\", visits: null },  // the meter was down\n  { month: \"Mar\", visits: 2050 },\n];"
+      }
+    ],
+    "notes": "### The two layers\n\nThe geometry is SVG and anything with text or a gesture on it is a React Native view laid over the top. The parts sort themselves into the right layer, so composition stays a flat list of children — but it is why `LineChart.XAxis` renders real text rather than SVG text. SVG text ignores the platform's text scaling and the theme's font, and a gesture handler cannot be attached to an SVG node at all.\n\n### Three animations, three reasons\n\n**The reveal** uncovers the plot left to right on mount, with everything inside sharing one clip — so the line, its fill and its markers arrive together rather than as three separate effects.\n\n**The y-domain** is tweened when the data changes, rather than the path being swapped. A series that grows is redrawn against a moving axis instead of jumping to a new shape. The reveal deliberately does not replay: it happened once, and repeating it on every refresh turns a data update into an animation.\n\n**The crosshair** resolves the nearest index on the UI thread. Only that index crosses back into JS, and only when it changes, so a drag across a hundred points costs a hundred re-renders at most rather than one per frame.\n\nAll three respect the system's reduce-motion setting: the chart renders at its final state instead.\n\n### Reading out the active point\n\n`onActiveIndexChange` fires as the crosshair moves between points, and with `-1`/`null` when the finger lifts. That is the one to use for a readout in the card header, because the header is outside the chart and a hook cannot reach up out of the subtree it is called in. `useLineChart` is for something rendered *inside* the chart, which is the rarer case.\n\n### The curve\n\n`monotone` is the default and is the right one for a time series. A plain cubic spline overshoots between points, so a series that never goes below zero draws a dip under the axis between two low values — a shape that is not in the data. Use `curve=\"linear\"` when the points are exact readings and the eye should not be given anything between them.\n\n### Sizing\n\nThe chart fills its parent's width and takes its height from `aspectRatio`. Give it a wider ratio for a card and a squarer one for a narrow column; do not set a height directly, as the aspect ratio is what keeps the plot geometry stable while the layout settles."
+  },
   "marker": {
     "intro": "An inline note in a conversation.\n\nTranscripts are not only messages. Between the turns sit things the conversation *did* rather than said: a tool that ran, a file that was read, the point where yesterday ended. None of those have a speaker, so none of them should look like a bubble. A marker is the quieter row that carries them — small, muted, and aligned to the transcript rather than to a side of it.",
     "usage": "<Marker>\n  <Marker.Icon>\n    <CheckIcon size={14} />\n  </Marker.Icon>\n  <Marker.Content>Explored 4 files</Marker.Content>\n</Marker>",

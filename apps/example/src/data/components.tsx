@@ -42,6 +42,7 @@ import {
   InputGroup,
   Item,
   Label,
+  LineChart,
   Marker,
   Message,
   MessageScroller,
@@ -138,6 +139,129 @@ function SwitchDemo() {
         </View>
       </Card.Content>
     </Card>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* LineChart                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
+
+const VISITS = MONTHS.map((month, index) => ({
+  month,
+  visits: [1840, 2210, 2050, 2640, 3120, 2980, 3640, 4120, 4480][index]!,
+  signups: [210, 260, 240, 330, 380, 350, 470, 520, 610][index]!,
+}));
+
+const QUIET = MONTHS.map((month, index) => ({
+  month,
+  visits: [2400, 2380, 2450, 2410, 2500, 2470, 2520, 2490, 2560][index]!,
+  signups: [300, 295, 310, 305, 320, 315, 325, 318, 330][index]!,
+}));
+
+/**
+ * The chart card: a Frame carrying the title and the readout, with the chart
+ * bled to the panel's edges.
+ *
+ * The readout lives in the header because that is where a number is actually
+ * readable — a floating label over the plot covers the line it is describing.
+ * The header is outside the chart, so the active point comes up through
+ * `onActiveIndexChange` rather than through a hook.
+ */
+function ChartCard({
+  title,
+  data,
+  status,
+  children,
+  footer,
+}: {
+  title: string;
+  data: typeof VISITS;
+  status?: 'loading' | 'ready';
+  children: ReactNode;
+  footer?: string;
+}) {
+  const [active, setActive] = useState<(typeof VISITS)[number] | null>(null);
+
+  return (
+    <Frame className="w-full">
+      <Frame.Header className="flex-col items-start gap-0.5">
+        <Frame.Title>{title}</Frame.Title>
+        <Text size="sm" muted>
+          {active
+            ? `${active.month} · ${active.visits.toLocaleString()} visits`
+            : 'Drag across the chart'}
+        </Text>
+      </Frame.Header>
+      <Frame.Panel className="p-0">
+        <LineChart
+          data={data}
+          xDataKey="month"
+          status={status}
+          aspectRatio={1.9}
+          onActiveIndexChange={(index) => setActive(index >= 0 ? (data[index] ?? null) : null)}
+        >
+          {children}
+        </LineChart>
+      </Frame.Panel>
+      {footer ? <Frame.Footer>{footer}</Frame.Footer> : null}
+    </Frame>
+  );
+}
+
+/** Toggles the data so the y-domain tween is visible without a refresh. */
+function LineChartDataDemo() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <View className="w-full gap-4">
+      <ChartCard
+        title="Visits"
+        data={busy ? VISITS : QUIET}
+        footer="Switching the data tweens the axis — the reveal does not replay."
+      >
+        <LineChart.Grid />
+        <LineChart.Area dataKey="visits" />
+        <LineChart.Line dataKey="visits" />
+        <LineChart.XAxis />
+        <LineChart.Tooltip />
+      </ChartCard>
+
+      <Button variant="outline" onPress={() => setBusy((current) => !current)}>
+        {busy ? 'Show a flat quarter' : 'Show a growing quarter'}
+      </Button>
+    </View>
+  );
+}
+
+/** Loading → ready, so the skeleton morphing into the series is visible. */
+function LineChartLoadingDemo() {
+  const [status, setStatus] = useState<'loading' | 'ready'>('loading');
+
+  return (
+    <View className="w-full gap-4">
+      <ChartCard
+        title="Visits"
+        data={VISITS}
+        status={status}
+        footer="One component throughout — no spinner swapped for a chart."
+      >
+        <LineChart.Grid />
+        <LineChart.Skeleton />
+        <LineChart.Area dataKey="visits" />
+        <LineChart.Line dataKey="visits" />
+        <LineChart.XAxis />
+        <LineChart.Tooltip />
+      </ChartCard>
+
+      <Button
+        variant="outline"
+        onPress={() => setStatus((current) => (current === 'loading' ? 'ready' : 'loading'))}
+      >
+        {status === 'loading' ? 'Resolve the data' : 'Back to loading'}
+      </Button>
+    </View>
   );
 }
 
@@ -2255,6 +2379,49 @@ export const COMPONENTS: ComponentEntry[] = [
             <Input placeholder="sk-…" />
           </View>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'line-chart',
+    name: 'LineChart',
+    summary: 'Animated time series, drawn on the UI thread',
+    demos: [
+      {
+        label: 'A chart card',
+        render: () => (
+          <ChartCard title="Visits" data={VISITS} footer="Last nine months">
+            <LineChart.Grid />
+            <LineChart.Area dataKey="visits" />
+            <LineChart.Line dataKey="visits" showMarkers />
+            <LineChart.XAxis />
+            <LineChart.Tooltip />
+          </ChartCard>
+        ),
+      },
+      {
+        label: 'Two series',
+        render: () => (
+          <ChartCard title="Visits and signups" data={VISITS}>
+            <LineChart.Grid />
+            <LineChart.Area dataKey="visits" />
+            <LineChart.Line dataKey="visits" />
+            {/* The second series takes the next token and a dash, so the two
+                are told apart by shape as well as by colour. */}
+            <LineChart.Line dataKey="signups" colorIndex={2} dashArray="6,4" />
+            <LineChart.XAxis />
+            <LineChart.Legend labels={{ visits: 'Visits', signups: 'Signups' }} />
+            <LineChart.Tooltip />
+          </ChartCard>
+        ),
+      },
+      {
+        label: 'Changing data',
+        render: () => <LineChartDataDemo />,
+      },
+      {
+        label: 'Loading',
+        render: () => <LineChartLoadingDemo />,
       },
     ],
   },

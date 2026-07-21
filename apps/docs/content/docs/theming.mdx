@@ -61,10 +61,22 @@ than raw palette values, so components follow whichever theme is active.
 | `border`, `input`, `ring` | Hairlines, field borders, focus rings |
 | `surface` | The grouping surface behind `Frame` |
 | `skeleton` | The shimmer fill |
+| `chart-1` … `chart-5` | Chart series, in order of prominence |
 
 The `-soft` and `-subtle` tokens exist as real tokens rather than opacity modifiers because
 `dark:` only resolves inside the `light` and `dark` themes. Within a named theme it compiles to a
 class selector that never matches, so a `dark:bg-info/[0.06]` tint would silently vanish.
+
+### Chart series
+
+`--color-chart-1` through `--color-chart-5` are a separate ramp from the status colours, because
+they answer a different question. A status colour *means* something — this failed, this is fine.
+A series colour only has to be told apart from the other four.
+
+They are ordered by prominence: `chart-1` is the series the chart is about, and each theme starts
+it on that family's own accent. `LineChart` takes `chart-1` by default and each further series
+takes the next one, so putting every chart in an app on brand is five lines in your `global.css`
+and nothing else.
 
 ### Radius
 

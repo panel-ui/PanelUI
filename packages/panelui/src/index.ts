@@ -105,6 +105,21 @@ export {
 } from './components/item';
 export { Label, type LabelProps, type LabelTextProps } from './components/label';
 export {
+  LineChart,
+  useLineChart,
+  type LineChartProps,
+  type LineChartGridProps,
+  type LineChartLineProps,
+  type LineChartAreaProps,
+  type LineChartSkeletonProps,
+  type LineChartXAxisProps,
+  type LineChartTooltipProps,
+  type LineChartLegendProps,
+  type LineChartDatum,
+  type LineChartStatus,
+  type LineChartCurve,
+} from './components/line-chart';
+export {
   Marker,
   type MarkerProps,
   type MarkerIconProps,

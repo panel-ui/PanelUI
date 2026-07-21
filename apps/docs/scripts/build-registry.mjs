@@ -29,6 +29,7 @@ const PROVIDED = new Set(['react', 'react-native']);
  */
 const OPTIONAL = new Set([
   '@expo/ui',
+  'expo-blur',
   'expo-clipboard',
   'react-native-keyboard-controller',
 ]);
@@ -50,6 +51,7 @@ const SUPPORT_DESCRIPTIONS = {
   portal: 'Renders content above everything else. Required by every overlay.',
   'animated-pressable': 'Pressable with UI-thread press feedback.',
   'keyboard-avoider': 'View that lifts itself clear of the software keyboard.',
+  scrim: 'The backdrop behind an overlay — a dim, or a blur when expo-blur is installed.',
   'panel-ui-provider': 'Root provider: gesture root, themed background, portal host, toasts.',
   icons: 'The icon set, plus the colour context components use to tint them.',
   cn: 'Merges Tailwind class names, with later classes winning conflicts.',

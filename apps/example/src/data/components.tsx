@@ -464,6 +464,26 @@ function SavedThreadDemo() {
   );
 }
 
+function PlacementPopover({
+  placement,
+}: {
+  placement: 'top' | 'bottom' | 'left' | 'right';
+}) {
+  return (
+    <Popover>
+      <Popover.Trigger>
+        <Button variant="secondary" size="sm">
+          {placement}
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content placement={placement} className="w-40">
+        <Popover.Arrow />
+        <Popover.Description>Opens {placement} of the trigger.</Popover.Description>
+      </Popover.Content>
+    </Popover>
+  );
+}
+
 function PopoverFormDemo() {
   const [name, setName] = useState('Untitled board');
   const [open, setOpen] = useState(false);
@@ -1591,6 +1611,26 @@ export const COMPONENTS: ComponentEntry[] = [
           </BottomSheet>
         ),
       },
+      {
+        label: 'Without the close button',
+        render: () => (
+          // The corner X is on by default; drop it with showClose={false} when
+          // the sheet is dismissible by drag or backdrop alone.
+          <BottomSheet>
+            <BottomSheet.Trigger>
+              <Button variant="outline">Open, no X</Button>
+            </BottomSheet.Trigger>
+            <BottomSheet.Content showClose={false}>
+              <Text size="lg" weight="semibold" className="mb-1">
+                Drag to dismiss
+              </Text>
+              <Text size="sm" muted className="mb-4 pb-2">
+                Pull the sheet down, or tap the backdrop.
+              </Text>
+            </BottomSheet.Content>
+          </BottomSheet>
+        ),
+      },
       { label: 'Detached', render: () => <DetachedSheetDemo /> },
       { label: 'Full height', render: () => <FullHeightSheetDemo /> },
       { label: 'Form', render: () => <FormSheetDemo /> },
@@ -1877,6 +1917,37 @@ export const COMPONENTS: ComponentEntry[] = [
               <Dialog.Footer>
                 <Dialog.Close>
                   <Button size="sm">Got it</Button>
+                </Dialog.Close>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog>
+        ),
+      },
+      {
+        label: 'Blurred background',
+        render: () => (
+          <Dialog>
+            <Dialog.Trigger>
+              <Button variant="outline">Open, blurred</Button>
+            </Dialog.Trigger>
+            {/* `blur` frosts the screen instead of dimming it — and falls back
+                to the dim when expo-blur is not installed. */}
+            <Dialog.Content blur>
+              <Dialog.Title>Leave without saving?</Dialog.Title>
+              <Dialog.Description>
+                Your changes will be lost. The screen behind is blurred so the
+                choice is the only thing in focus.
+              </Dialog.Description>
+              <Dialog.Footer>
+                <Dialog.Close>
+                  <Button size="sm" variant="ghost">
+                    Keep editing
+                  </Button>
+                </Dialog.Close>
+                <Dialog.Close>
+                  <Button size="sm" variant="destructive">
+                    Discard
+                  </Button>
                 </Dialog.Close>
               </Dialog.Footer>
             </Dialog.Content>
@@ -2735,22 +2806,20 @@ export const COMPONENTS: ComponentEntry[] = [
       {
         label: 'Placement',
         render: () => (
-          <View className="w-full items-center gap-3 py-6">
-            {(['top', 'bottom', 'left', 'right'] as const).map((placement) => (
-              <Popover key={placement}>
-                <Popover.Trigger>
-                  <Button variant="secondary" size="sm">
-                    {placement}
-                  </Button>
-                </Popover.Trigger>
-                <Popover.Content placement={placement} className="w-48">
-                  <Popover.Title>Placed {placement}</Popover.Title>
-                  <Popover.Description>
-                    Flips to the opposite side when this one does not fit.
-                  </Popover.Description>
-                </Popover.Content>
-              </Popover>
-            ))}
+          // Each trigger is pinned to the side that leaves room for the panel
+          // to open the way its label says — so left and right are actually
+          // distinct rather than both flipping inward.
+          <View className="h-72 w-full justify-between py-4">
+            <View className="flex-row justify-center">
+              <PlacementPopover placement="bottom" />
+            </View>
+            <View className="flex-row items-center justify-between">
+              <PlacementPopover placement="right" />
+              <PlacementPopover placement="left" />
+            </View>
+            <View className="flex-row justify-center">
+              <PlacementPopover placement="top" />
+            </View>
           </View>
         ),
       },
@@ -2764,7 +2833,9 @@ export const COMPONENTS: ComponentEntry[] = [
                   <InfoIcon size={18} />
                 </Button>
               </Popover.Trigger>
-              <Popover.Content placement="top" className="w-60">
+              {/* Default bottom placement: the arrow sits centred on the
+                  panel's top edge, pointing up at the trigger. */}
+              <Popover.Content className="w-60">
                 <Popover.Arrow />
                 <Popover.Title>Monthly active users</Popover.Title>
                 <Popover.Description>
@@ -2778,6 +2849,59 @@ export const COMPONENTS: ComponentEntry[] = [
       {
         label: 'A form, matching the trigger width',
         render: () => <PopoverFormDemo />,
+      },
+      {
+        label: 'Blurred background',
+        render: () => (
+          <View className="w-full items-center py-4">
+            <Popover>
+              <Popover.Trigger>
+                <Button variant="outline">Frost the screen</Button>
+              </Popover.Trigger>
+              {/* `blur` frosts what is behind, falling back to a dim when
+                  expo-blur is not installed. */}
+              <Popover.Content blur align="start" className="w-64">
+                <Popover.Arrow />
+                <Popover.Title>Focus here</Popover.Title>
+                <Popover.Description>
+                  The list behind is blurred so this panel reads as the only
+                  thing to deal with.
+                </Popover.Description>
+              </Popover.Content>
+            </Popover>
+          </View>
+        ),
+      },
+      {
+        label: 'As a bottom sheet',
+        render: () => (
+          <View className="w-full items-center py-4">
+            {/* Same API, presented as a draggable sheet — better for a form on
+                a small screen than a panel floating over the trigger. */}
+            <Popover presentation="bottom-sheet">
+              <Popover.Trigger>
+                <Button variant="outline">Open as a sheet</Button>
+              </Popover.Trigger>
+              <Popover.Content>
+                <Popover.Title>Sort by</Popover.Title>
+                <Popover.Description className="mb-2">
+                  The same content, presented from the bottom.
+                </Popover.Description>
+                {['Newest', 'Oldest', 'Most active'].map((option) => (
+                  <Popover.Close key={option}>
+                    <Pressable
+                      accessibilityRole="menuitem"
+                      onPress={() => {}}
+                      className="rounded-xl px-3 py-3 active:bg-accent"
+                    >
+                      <Text>{option}</Text>
+                    </Pressable>
+                  </Popover.Close>
+                ))}
+              </Popover.Content>
+            </Popover>
+          </View>
+        ),
       },
     ],
   },

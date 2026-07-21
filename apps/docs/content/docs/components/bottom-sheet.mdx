@@ -128,6 +128,7 @@ Cap the height on the scrollable, not the sheet — the sheet should still size 
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `dismissible` | `boolean` | `true` | Tap on the backdrop closes the sheet. Default true. |
+| `showClose` | `boolean` | `true` | Show a close button in the top-right corner. On by default for the styled sheet; ignored by the native sheet, which has its own dismiss affordances. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
@@ -142,3 +143,5 @@ Pass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jet
 **Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.
 
 See [Native rendering](/docs/native) for the full prop-by-prop breakdown.
+
+**A close button sits in the top-right by default.** Drop it with `showClose={false}` when the sheet is already dismissible by drag or backdrop and the corner X would be clutter. The native sheet ignores it — the platform provides its own affordances.

@@ -13,6 +13,7 @@ import {
 import { Pressable, View, type ViewProps } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
 import { Portal } from '../../primitives/portal';
+import { Scrim } from '../../primitives/scrim';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 
@@ -82,12 +83,19 @@ export interface DialogContentProps extends ViewProps {
   className?: string;
   /** Tap on the backdrop closes the dialog. Default true. */
   dismissible?: boolean;
+  /**
+   * Frost the screen behind the dialog instead of dimming it. Uses `expo-blur`
+   * when installed and falls back to the dim when it is not, so it is safe to
+   * pass either way.
+   */
+  blur?: boolean;
   children?: ReactNode;
 }
 
 function DialogContent({
   className,
   dismissible = true,
+  blur = false,
   children,
   ...props
 }: DialogContentProps) {
@@ -106,9 +114,10 @@ function DialogContent({
         exiting={FadeOut.duration(150)}
         className="absolute inset-0 items-center justify-center p-6"
       >
+        <Scrim blur={blur} />
         <Pressable
           accessibilityLabel="Close dialog"
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0"
           onPress={dismissible ? () => setOpen(false) : undefined}
         />
         <Animated.View

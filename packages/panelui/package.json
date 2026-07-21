@@ -65,6 +65,7 @@
   "peerDependencies": {
     "@expo/ui": "*",
     "@react-native-masked-view/masked-view": ">=0.3.0",
+    "expo-blur": ">=13.0.0",
     "expo-clipboard": ">=7.0.0",
     "expo-linear-gradient": ">=13.0.0",
     "react": "*",
@@ -100,6 +101,9 @@
   },
   "peerDependenciesMeta": {
     "@expo/ui": {
+      "optional": true
+    },
+    "expo-blur": {
       "optional": true
     },
     "expo-clipboard": {

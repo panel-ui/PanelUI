@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Pressable, useWindowDimensions, View, type ViewProps } from 'react-native';
+import { useCSSVariable } from 'uniwind';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   FadeIn,
@@ -24,6 +25,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getNativeUI } from '../../native';
+import { XIcon } from '../../icons';
 import { Portal } from '../../primitives/portal';
 import { cn } from '../../utils/cn';
 
@@ -138,12 +140,18 @@ export interface BottomSheetContentProps extends ViewProps {
   className?: string;
   /** Tap on the backdrop closes the sheet. Default true. */
   dismissible?: boolean;
+  /**
+   * Show a close button in the top-right corner. On by default for the styled
+   * sheet; ignored by the native sheet, which has its own dismiss affordances.
+   */
+  showClose?: boolean;
   children?: ReactNode;
 }
 
 function BottomSheetContent({
   className,
   dismissible = true,
+  showClose = true,
   children,
   ...props
 }: BottomSheetContentProps) {
@@ -153,6 +161,7 @@ function BottomSheetContent({
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
+  const closeTint = useCSSVariable('--color-muted-foreground');
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
@@ -256,6 +265,17 @@ function BottomSheetContent({
             <View className="mb-3 self-center">
               <View className="h-1 w-10 rounded-full bg-muted-foreground/30" />
             </View>
+            {showClose ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                onPress={close}
+                hitSlop={8}
+                className="absolute right-4 top-3 h-8 w-8 items-center justify-center rounded-full bg-muted active:opacity-70"
+              >
+                <XIcon size={16} color={typeof closeTint === 'string' ? closeTint : undefined} />
+              </Pressable>
+            ) : null}
             {children}
           </Animated.View>
         </GestureDetector>

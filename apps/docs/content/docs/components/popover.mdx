@@ -146,6 +146,45 @@ const [name, setName] = useState("Untitled board");
 <Popover.Content offset={2} />
 ```
 
+### A blurred background
+
+A popover does not dim the screen by default. Pass `blur` to frost what is behind it instead — it uses `expo-blur` when installed and falls back to a dim when it is not, so it is safe to pass either way.
+
+```tsx
+<Popover>
+  <Popover.Trigger>
+    <Button variant="outline">Frost the screen</Button>
+  </Popover.Trigger>
+  <Popover.Content blur align="start" className="w-64">
+    <Popover.Arrow />
+    <Popover.Title>Focus here</Popover.Title>
+    <Popover.Description>The list behind is blurred.</Popover.Description>
+  </Popover.Content>
+</Popover>
+```
+
+### Presented as a bottom sheet
+
+Set `presentation="bottom-sheet"` on the root and the same content opens in a draggable sheet instead of an anchored panel — better for a form on a small screen. Placement, align and the arrow do not apply.
+
+```tsx
+<Popover presentation="bottom-sheet">
+  <Popover.Trigger>
+    <Button variant="outline">Sort by</Button>
+  </Popover.Trigger>
+  <Popover.Content>
+    <Popover.Title>Sort by</Popover.Title>
+    {options.map((option) => (
+      <Popover.Close key={option}>
+        <Pressable onPress={() => sort(option)} className="rounded-xl px-3 py-3 active:bg-accent">
+          <Text>{option}</Text>
+        </Pressable>
+      </Popover.Close>
+    ))}
+  </Popover.Content>
+</Popover>
+```
+
 ## API Reference
 
 ### Popover
@@ -154,7 +193,8 @@ const [name, setName] = useState("Untitled board");
 | --- | --- | --- | --- |
 | `open` | `boolean` | — | Controlled open state. |
 | `onOpenChange` | `(open: boolean) => void` | — |  |
-| `defaultOpen` | `boolean` | — | Initial state when uncontrolled. |
+| `defaultOpen` | `boolean` | `false` | Initial state when uncontrolled. |
+| `presentation` | `PopoverPresentation` | `'popover'` | `popover` is the anchored panel. `bottom-sheet` presents the content in a draggable sheet instead — better on a small screen, or when the content is a form rather than a menu. Placement, align and the arrow do not apply to a sheet. |
 
 ### Popover.Content
 
@@ -167,6 +207,7 @@ const [name, setName] = useState("Untitled board");
 | `alignOffset` | `number` | `0` | Nudge along the alignment axis, in pixels. |
 | `width` | `number \| 'trigger' \| 'full' \| 'content-fit'` | `'content-fit'` | `content-fit` sizes to the content, `trigger` matches the trigger's width, `full` spans the safe area, and a number is that many pixels. |
 | `dismissible` | `boolean` | `true` | Tap outside the panel closes it. Default true. |
+| `blur` | `boolean` | `false` | Frost the background behind the panel instead of dimming it. Uses `expo-blur` when installed and falls back to the dimmed scrim when it is not, so it is safe to pass either way. |
 
 ### Popover.Arrow
 
@@ -181,6 +222,8 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 **Placement is resolved, not obeyed.** The side is flipped only when the preferred one genuinely has less room than its opposite; after that the panel is slid along the other axis to stay inside the safe area. That order matters — sliding first would let a badly placed panel look like it fits.
 
 **The panel is measured before it is shown.** Its size is not known until it has laid out once, so the first frame is laid out off-screen and the entrance starts from the frame after. That entrance is driven by hand rather than by a preset, because it has to start from whichever side was resolved — a panel that opened upwards should not appear to come from above.
+
+**The arrow points at the trigger, not the panel.** When `align` shifts the panel off-centre or a clamp slides it back on screen, the arrow tracks the trigger's centre rather than the panel's middle.
 
 **The trigger is measured on every open**, not once on layout. A trigger inside a scroll view has moved since it was laid out, and a stale rectangle anchors the panel to where it used to be.
 

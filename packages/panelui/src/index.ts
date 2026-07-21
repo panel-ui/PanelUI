@@ -157,6 +157,7 @@ export {
   type PopoverCloseProps,
   type PopoverPlacement,
   type PopoverAlign,
+  type PopoverPresentation,
 } from './components/popover';
 export { Progress, type ProgressProps } from './components/progress';
 export {

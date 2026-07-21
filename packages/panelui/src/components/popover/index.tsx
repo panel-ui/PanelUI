@@ -59,6 +59,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Portal } from '../../primitives/portal';
+import { Scrim } from '../../primitives/scrim';
+import { BottomSheet } from '../bottom-sheet';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 
@@ -87,7 +89,14 @@ interface PopoverContextValue {
   /** Resolved placement, published by Content so Arrow knows which way to point. */
   placement: PopoverPlacement;
   setPlacement: (placement: PopoverPlacement) => void;
+  /** Trigger centre along the cross axis, relative to the panel origin. */
+  arrowOffset: number;
+  setArrowOffset: (offset: number) => void;
+  /** Whether Content is presenting as a bottom sheet — Arrow is null then. */
+  presentation: PopoverPresentation;
 }
+
+export type PopoverPresentation = 'popover' | 'bottom-sheet';
 
 const PopoverContext = createContext<PopoverContextValue | null>(null);
 
@@ -106,12 +115,26 @@ export interface PopoverProps {
   onOpenChange?: (open: boolean) => void;
   /** Initial state when uncontrolled. */
   defaultOpen?: boolean;
+  /**
+   * `popover` is the anchored panel. `bottom-sheet` presents the content in a
+   * draggable sheet instead — better on a small screen, or when the content is
+   * a form rather than a menu. Placement, align and the arrow do not apply to a
+   * sheet.
+   */
+  presentation?: PopoverPresentation;
 }
 
-function PopoverRoot({ children, open, onOpenChange, defaultOpen = false }: PopoverProps) {
+function PopoverRoot({
+  children,
+  open,
+  onOpenChange,
+  defaultOpen = false,
+  presentation = 'popover',
+}: PopoverProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const [trigger, setTrigger] = useState<TriggerRect | null>(null);
   const [placement, setPlacement] = useState<PopoverPlacement>('bottom');
+  const [arrowOffset, setArrowOffset] = useState(0);
 
   const isControlled = open !== undefined;
   const resolvedOpen = isControlled ? open : internalOpen;
@@ -125,8 +148,18 @@ function PopoverRoot({ children, open, onOpenChange, defaultOpen = false }: Popo
   );
 
   const context = useMemo(
-    () => ({ open: resolvedOpen, setOpen, trigger, setTrigger, placement, setPlacement }),
-    [resolvedOpen, setOpen, trigger, placement]
+    () => ({
+      open: resolvedOpen,
+      setOpen,
+      trigger,
+      setTrigger,
+      placement,
+      setPlacement,
+      arrowOffset,
+      setArrowOffset,
+      presentation,
+    }),
+    [resolvedOpen, setOpen, trigger, placement, arrowOffset, presentation]
   );
 
   return <PopoverContext.Provider value={context}>{children}</PopoverContext.Provider>;
@@ -190,6 +223,12 @@ export interface PopoverContentProps extends ViewProps {
   width?: number | 'trigger' | 'full' | 'content-fit';
   /** Tap outside the panel closes it. Default true. */
   dismissible?: boolean;
+  /**
+   * Frost the background behind the panel instead of dimming it. Uses
+   * `expo-blur` when installed and falls back to the dimmed scrim when it is
+   * not, so it is safe to pass either way.
+   */
+  blur?: boolean;
   children?: ReactNode;
 }
 
@@ -201,11 +240,12 @@ function PopoverContent({
   alignOffset = 0,
   width = 'content-fit',
   dismissible = true,
+  blur = false,
   children,
   ...props
 }: PopoverContentProps) {
   const context = usePopover('Popover.Content');
-  const { open, setOpen, trigger, setPlacement } = context;
+  const { open, setOpen, trigger, setPlacement, setArrowOffset, presentation } = context;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
@@ -243,12 +283,14 @@ function PopoverContent({
       ? place({ trigger, size, placement, align, offset, alignOffset, bounds })
       : null;
 
-  // Publish the side actually used, so the arrow points at the trigger even
-  // when the preferred placement was flipped away from.
+  // Publish the side actually used and where the trigger centre landed, so the
+  // arrow points at the trigger even after a flip or a clamp.
   const resolvedPlacement = position?.placement;
+  const resolvedArrow = position?.arrowOffset;
   useEffect(() => {
     if (resolvedPlacement) setPlacement(resolvedPlacement);
-  }, [resolvedPlacement, setPlacement]);
+    if (resolvedArrow !== undefined) setArrowOffset(resolvedArrow);
+  }, [resolvedPlacement, resolvedArrow, setPlacement, setArrowOffset]);
 
   /*
    * The entrance is driven by hand rather than by an `entering` preset, and the
@@ -290,6 +332,19 @@ function PopoverContent({
     ],
   }));
 
+  // The sheet presentation hands off entirely to BottomSheet — it owns its own
+  // portal, backdrop and dismiss gesture, so there is nothing to anchor here.
+  // The context is re-provided inside so Popover.Close keeps closing it.
+  if (presentation === 'bottom-sheet') {
+    return (
+      <BottomSheet open={open} onOpenChange={setOpen}>
+        <BottomSheet.Content dismissible={dismissible} className={className}>
+          <PopoverContext.Provider value={context}>{children}</PopoverContext.Provider>
+        </BottomSheet.Content>
+      </BottomSheet>
+    );
+  }
+
   if (!open || !trigger) return null;
 
   return (
@@ -299,6 +354,9 @@ function PopoverContent({
           keep working. */}
       <PopoverContext.Provider value={context}>
         <View className="absolute inset-0">
+          {/* A popover does not dim the screen by default — the backdrop is
+              there only to catch the outside tap. `blur` opts into a frost. */}
+          {blur ? <Scrim blur intensity={20} dimClassName="bg-black/30" /> : null}
           <Pressable
             accessibilityLabel="Close"
             className="absolute inset-0"
@@ -344,10 +402,15 @@ export interface PopoverArrowProps extends ViewProps {
  * A small square rotated into a diamond, half-buried under the panel so only
  * the point shows. It needs the panel to have a border for its own two visible
  * edges to line up with — without one it reads as a floating lozenge.
+ *
+ * It points at the trigger's centre, which the panel resolves and publishes:
+ * when `align` shifts the panel off-centre, or a clamp slides it back on
+ * screen, the arrow stays over the trigger rather than over the panel's middle.
  */
 function PopoverArrow({ className, style, ...props }: PopoverArrowProps) {
-  const { trigger, placement } = usePopover('Popover.Arrow');
-  if (!trigger) return null;
+  const { trigger, placement, arrowOffset, presentation } = usePopover('Popover.Arrow');
+  // A sheet has no trigger edge to point at.
+  if (!trigger || presentation === 'bottom-sheet') return null;
 
   const vertical = placement === 'top' || placement === 'bottom';
   // The arrow sits on the edge facing the trigger, which is the opposite edge
@@ -366,9 +429,11 @@ function PopoverArrow({ className, style, ...props }: PopoverArrowProps) {
           width: ARROW_SIZE,
           height: ARROW_SIZE,
           transform: [{ rotate: '45deg' }],
+          // Centred on the trigger along the cross axis. `marginLeft/Top` backs
+          // it off by half its own size so `arrowOffset` lands on its centre.
           ...(vertical
-            ? { left: '50%', marginLeft: -ARROW_SIZE / 2 }
-            : { top: '50%', marginTop: -ARROW_SIZE / 2 }),
+            ? { left: arrowOffset, marginLeft: -ARROW_SIZE / 2 }
+            : { top: arrowOffset, marginTop: -ARROW_SIZE / 2 }),
         },
         style,
       ]}
@@ -463,6 +528,10 @@ function place({ trigger, size, placement, align, offset, alignOffset, bounds }:
     // start edge at least keeps its beginning readable.
     Math.max(min, Math.min(value, Math.max(min, max)));
 
+  // The arrow points at the trigger's centre, not the panel's — those differ
+  // whenever `align` is not center, or the panel was clamped inside the screen.
+  // It is expressed relative to the panel origin and clamped so it can never
+  // slide off the panel edge.
   if (resolved === 'top' || resolved === 'bottom') {
     const top =
       resolved === 'bottom'
@@ -476,10 +545,14 @@ function place({ trigger, size, placement, align, offset, alignOffset, bounds }:
           ? trigger.x + trigger.width - size.width + alignOffset
           : trigger.x + trigger.width / 2 - size.width / 2 + alignOffset;
 
+    const clampedLeft = clamp(left, bounds.left, bounds.right - size.width);
+    const triggerCentreX = trigger.x + trigger.width / 2;
+
     return {
       placement: resolved,
       top: clamp(top, bounds.top, bounds.bottom - size.height),
-      left: clamp(left, bounds.left, bounds.right - size.width),
+      left: clampedLeft,
+      arrowOffset: clamp(triggerCentreX - clampedLeft, ARROW_SIZE, size.width - ARROW_SIZE),
     };
   }
 
@@ -493,10 +566,14 @@ function place({ trigger, size, placement, align, offset, alignOffset, bounds }:
         ? trigger.y + trigger.height - size.height + alignOffset
         : trigger.y + trigger.height / 2 - size.height / 2 + alignOffset;
 
+  const clampedTop = clamp(top, bounds.top, bounds.bottom - size.height);
+  const triggerCentreY = trigger.y + trigger.height / 2;
+
   return {
     placement: resolved,
-    top: clamp(top, bounds.top, bounds.bottom - size.height),
+    top: clampedTop,
     left: clamp(left, bounds.left, bounds.right - size.width),
+    arrowOffset: clamp(triggerCentreY - clampedTop, ARROW_SIZE, size.height - ARROW_SIZE),
   };
 }
 

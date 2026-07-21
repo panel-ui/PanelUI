@@ -1,0 +1,19 @@
+{
+  "name": "scrim",
+  "type": "registry:ui",
+  "description": "The backdrop behind an overlay — a dim, or a blur when expo-blur is installed.",
+  "registryDependencies": [],
+  "dependencies": [
+    "react-native-reanimated"
+  ],
+  "optionalDependencies": [
+    "expo-blur"
+  ],
+  "files": [
+    {
+      "path": "ui/scrim.tsx",
+      "type": "registry:ui",
+      "content": "/**\n * Scrim — the layer behind an overlay.\n *\n * An overlay needs the screen behind it to recede. There are two honest ways to\n * do that: dim it, or blur it. Dimming is free and always works; blurring reads\n * as more physical — the content behind stays legible as shape and colour while\n * losing its detail — but it needs a native view to do it.\n *\n * `expo-blur` is resolved lazily and only when `blur` is asked for, so a project\n * that never blurs anything installs nothing. When it is asked for and the\n * package is missing, this falls back to a dim rather than failing: a blur you\n * cannot draw is better shown as a darkened screen than as a crash.\n *\n * It fills its parent and does not intercept touches itself — the overlay layers\n * its own dismiss `Pressable` over it — so it is purely the visual backdrop.\n */\nimport { type ComponentType } from 'react';\nimport { StyleSheet, View, type ViewProps } from 'react-native';\nimport Animated, { FadeIn, FadeOut } from 'react-native-reanimated';\n\ninterface BlurViewProps {\n  intensity?: number;\n  tint?: 'light' | 'dark' | 'default' | 'systemMaterial';\n  style?: unknown;\n  children?: React.ReactNode;\n}\n\n/**\n * `expo-blur`'s BlurView, or null when it is not installed. Resolved once at\n * module load — the require is cheap and caching it avoids a try/catch on every\n * render.\n */\nconst BlurView: ComponentType<BlurViewProps> | null = (() => {\n  try {\n    // eslint-disable-next-line @typescript-eslint/no-require-imports\n    const mod = require('expo-blur');\n    return (mod?.BlurView as ComponentType<BlurViewProps>) ?? null;\n  } catch {\n    return null;\n  }\n})();\n\n/** True when a real blur can be drawn — for a caller that wants to know. */\nexport const hasBlur = BlurView !== null;\n\nexport interface ScrimProps extends Omit<ViewProps, 'children'> {\n  /** Frost the backdrop instead of dimming it. Falls back to a dim if it can't. */\n  blur?: boolean;\n  /** Blur strength, 0–100. */\n  intensity?: number;\n  /** Which way the blur tints. */\n  tint?: 'light' | 'dark' | 'default' | 'systemMaterial';\n  /**\n   * The dim used when not blurring — and when blurring is asked for but\n   * unavailable. A popover passes a lighter one than a dialog.\n   */\n  dimClassName?: string;\n}\n\nexport function Scrim({\n  blur = false,\n  intensity = 24,\n  tint = 'default',\n  dimClassName = 'bg-black/50',\n  style,\n  ...props\n}: ScrimProps) {\n  if (blur && BlurView) {\n    return (\n      <Animated.View\n        entering={FadeIn.duration(180)}\n        exiting={FadeOut.duration(150)}\n        style={[StyleSheet.absoluteFill, style]}\n        {...props}\n      >\n        {/* A faint dim under the blur so the frost has something to sit on —\n            a pure blur over a dark scene is nearly invisible. */}\n        <BlurView intensity={intensity} tint={tint} style={StyleSheet.absoluteFill} />\n        <View className=\"absolute inset-0 bg-black/10\" />\n      </Animated.View>\n    );\n  }\n\n  return (\n    <Animated.View\n      entering={FadeIn.duration(150)}\n      exiting={FadeOut.duration(150)}\n      style={[StyleSheet.absoluteFill, style]}\n      className={dimClassName}\n      {...props}\n    />\n  );\n}\n\nScrim.displayName = 'Scrim';\n"
+    }
+  ]
+}

@@ -47,6 +47,7 @@
     "description": "Draggable sheet anchored to the bottom of the screen.",
     "registryDependencies": [
       "cn",
+      "icons",
       "native",
       "portal"
     ]
@@ -94,6 +95,7 @@
     "registryDependencies": [
       "cn",
       "portal",
+      "scrim",
       "text"
     ]
   },
@@ -235,8 +237,10 @@
     "type": "registry:ui",
     "description": "Panel anchored to the element that opened it.",
     "registryDependencies": [
+      "bottom-sheet",
       "cn",
       "portal",
+      "scrim",
       "text"
     ]
   },
@@ -260,6 +264,12 @@
       "cn",
       "text"
     ]
+  },
+  {
+    "name": "scrim",
+    "type": "registry:ui",
+    "description": "The backdrop behind an overlay — a dim, or a blur when expo-blur is installed.",
+    "registryDependencies": []
   },
   {
     "name": "scroll-fade",

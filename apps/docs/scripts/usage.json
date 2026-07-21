@@ -336,8 +336,8 @@
     "usage": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media variant=\"icon\">\n      <SearchIcon size={18} />\n    </EmptyState.Media>\n    <EmptyState.Title>No results found</EmptyState.Title>\n    <EmptyState.Description>\n      Try adjusting your search or filters.\n    </EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"outline\" fullWidth>Clear filters</Button>\n  </EmptyState.Content>\n</EmptyState>",
     "extraImports": [
       "Button",
-      "PackageIcon",
-      "SearchIcon"
+      "SearchIcon",
+      "BellIcon"
     ],
     "parts": {
       "Header": "Groups media, title and description into one centred column.",
@@ -350,20 +350,22 @@
     "examples": [
       {
         "title": "With an icon and an action",
-        "code": "<EmptyState variant=\"icon\">\n  <EmptyState.Header>\n    <EmptyState.Media>\n      <PackageIcon size={22} />\n    </EmptyState.Media>\n    <EmptyState.Title>No orders yet</EmptyState.Title>\n    <EmptyState.Description>\n      Orders appear here as soon as your first customer checks out.\n    </EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button>Share your store</Button>\n  </EmptyState.Content>\n</EmptyState>"
+        "description": "The icon media fans two ghost cards behind the icon; the content slot below the header holds a primary action.",
+        "code": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media variant=\"icon\">\n      <SearchIcon size={18} />\n    </EmptyState.Media>\n    <EmptyState.Title>No results found</EmptyState.Title>\n    <EmptyState.Description>Try adjusting your search or filters.</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"outline\" fullWidth>Clear filters</Button>\n  </EmptyState.Content>\n</EmptyState>"
       },
       {
-        "title": "A no-results state",
-        "description": "Distinguish \"nothing exists yet\" from \"nothing matched\" — they need different words and different actions.",
-        "code": "<EmptyState variant=\"icon\">\n  <EmptyState.Header>\n    <EmptyState.Media><SearchIcon size={20} /></EmptyState.Media>\n    <EmptyState.Title>No matches for “{query}”</EmptyState.Title>\n    <EmptyState.Description>Try a shorter or different term.</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"ghost\" onPress={() => setQuery('')}>Clear search</Button>\n  </EmptyState.Content>\n</EmptyState>"
+        "title": "Inside a card",
+        "description": "The `card` variant is a self-contained bordered block sized to its contents — for an empty section inside a screen rather than a whole empty screen. Pair it with a smaller `size`.",
+        "code": "<EmptyState variant=\"card\" size=\"sm\">\n  <EmptyState.Header>\n    <EmptyState.Media variant=\"icon\">\n      <BellIcon size={16} />\n    </EmptyState.Media>\n    <EmptyState.Title>No notifications</EmptyState.Title>\n    <EmptyState.Description>You are all caught up.</EmptyState.Description>\n  </EmptyState.Header>\n</EmptyState>"
       },
       {
-        "title": "As a list fallback",
-        "code": "<FlatList\n  data={results}\n  keyExtractor={(item) => item.id}\n  renderItem={renderItem}\n  ListEmptyComponent={\n    <EmptyState variant=\"icon\">\n      <EmptyState.Header>\n        <EmptyState.Title>Nothing here</EmptyState.Title>\n      </EmptyState.Header>\n    </EmptyState>\n  }\n/>"
+        "title": "Sizes",
+        "description": "One `size` scales the padding, media, title and description together.",
+        "code": "<EmptyState size=\"sm\">…</EmptyState>\n<EmptyState size=\"default\">…</EmptyState>\n<EmptyState size=\"lg\">…</EmptyState>"
       }
     ],
     "variantCode": {
-      "variant": "<EmptyState variant=\"default\">…</EmptyState>\n\n{/* Adds the framed media slot. */}\n<EmptyState variant=\"icon\">…</EmptyState>"
+      "variant": "{/* Fills its parent — a whole screen or a flex slot. */}\n<EmptyState variant=\"default\">…</EmptyState>\n\n{/* A bordered block that sits inside content. */}\n<EmptyState variant=\"card\">…</EmptyState>"
     }
   },
   "frame": {

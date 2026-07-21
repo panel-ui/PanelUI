@@ -2020,6 +2020,41 @@ export const COMPONENTS: ComponentEntry[] = [
           </EmptyState>
         ),
       },
+      {
+        label: 'In a card',
+        render: () => (
+          // The card variant is a self-contained block, for an empty state
+          // that sits inside content rather than owning the screen.
+          <EmptyState variant="card" size="sm" className="w-full">
+            <EmptyState.Header>
+              <EmptyState.Media variant="icon">
+                <BellIcon size={16} />
+              </EmptyState.Media>
+              <EmptyState.Title>No notifications</EmptyState.Title>
+              <EmptyState.Description>
+                You're all caught up.
+              </EmptyState.Description>
+            </EmptyState.Header>
+          </EmptyState>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-3">
+            {(['sm', 'default', 'lg'] as const).map((size) => (
+              <EmptyState key={size} variant="card" size={size} className="w-full">
+                <EmptyState.Header>
+                  <EmptyState.Title>Size {size}</EmptyState.Title>
+                  <EmptyState.Description>
+                    Padding and type scale together.
+                  </EmptyState.Description>
+                </EmptyState.Header>
+              </EmptyState>
+            ))}
+          </View>
+        ),
+      },
     ],
   },
   {

@@ -10,7 +10,7 @@ The placeholder for a list or screen with nothing in it. `Media variant="icon"` 
 EmptyState ships with the library — no separate install.
 
 ```tsx
-import { EmptyState, Button, PackageIcon, SearchIcon } from 'panelui-native';
+import { EmptyState, Button, SearchIcon, BellIcon } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -61,55 +61,47 @@ npx panelui-cli@latest add empty-state
 
 ### With an icon and an action
 
+The icon media fans two ghost cards behind the icon; the content slot below the header holds a primary action.
+
 ```tsx
-<EmptyState variant="icon">
+<EmptyState>
   <EmptyState.Header>
-    <EmptyState.Media>
-      <PackageIcon size={22} />
+    <EmptyState.Media variant="icon">
+      <SearchIcon size={18} />
     </EmptyState.Media>
-    <EmptyState.Title>No orders yet</EmptyState.Title>
-    <EmptyState.Description>
-      Orders appear here as soon as your first customer checks out.
-    </EmptyState.Description>
+    <EmptyState.Title>No results found</EmptyState.Title>
+    <EmptyState.Description>Try adjusting your search or filters.</EmptyState.Description>
   </EmptyState.Header>
   <EmptyState.Content>
-    <Button>Share your store</Button>
+    <Button variant="outline" fullWidth>Clear filters</Button>
   </EmptyState.Content>
 </EmptyState>
 ```
 
-### A no-results state
+### Inside a card
 
-Distinguish "nothing exists yet" from "nothing matched" — they need different words and different actions.
+The `card` variant is a self-contained bordered block sized to its contents — for an empty section inside a screen rather than a whole empty screen. Pair it with a smaller `size`.
 
 ```tsx
-<EmptyState variant="icon">
+<EmptyState variant="card" size="sm">
   <EmptyState.Header>
-    <EmptyState.Media><SearchIcon size={20} /></EmptyState.Media>
-    <EmptyState.Title>No matches for “{query}”</EmptyState.Title>
-    <EmptyState.Description>Try a shorter or different term.</EmptyState.Description>
+    <EmptyState.Media variant="icon">
+      <BellIcon size={16} />
+    </EmptyState.Media>
+    <EmptyState.Title>No notifications</EmptyState.Title>
+    <EmptyState.Description>You are all caught up.</EmptyState.Description>
   </EmptyState.Header>
-  <EmptyState.Content>
-    <Button variant="ghost" onPress={() => setQuery('')}>Clear search</Button>
-  </EmptyState.Content>
 </EmptyState>
 ```
 
-### As a list fallback
+### Sizes
+
+One `size` scales the padding, media, title and description together.
 
 ```tsx
-<FlatList
-  data={results}
-  keyExtractor={(item) => item.id}
-  renderItem={renderItem}
-  ListEmptyComponent={
-    <EmptyState variant="icon">
-      <EmptyState.Header>
-        <EmptyState.Title>Nothing here</EmptyState.Title>
-      </EmptyState.Header>
-    </EmptyState>
-  }
-/>
+<EmptyState size="sm">…</EmptyState>
+<EmptyState size="default">…</EmptyState>
+<EmptyState size="lg">…</EmptyState>
 ```
 
 ## Variants
@@ -117,13 +109,26 @@ Distinguish "nothing exists yet" from "nothing matched" — they need different 
 ### `variant`
 
 - `default` *(default)*
-- `icon`
+- `card`
 
 ```tsx
+{/* Fills its parent — a whole screen or a flex slot. */}
 <EmptyState variant="default">…</EmptyState>
 
-{/* Adds the framed media slot. */}
-<EmptyState variant="icon">…</EmptyState>
+{/* A bordered block that sits inside content. */}
+<EmptyState variant="card">…</EmptyState>
+```
+
+### `size`
+
+- `sm`
+- `default` *(default)*
+- `lg`
+
+```tsx
+<EmptyState size="sm">…</EmptyState>
+<EmptyState size="default">…</EmptyState>
+<EmptyState size="lg">…</EmptyState>
 ```
 
 ## API Reference
@@ -133,6 +138,8 @@ Distinguish "nothing exists yet" from "nothing matched" — they need different 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `variant` | `'default' \| 'card'` | `default` | `default` fills its parent — a whole screen, or a flex slot. `card` is a self-contained bordered block for an empty state that sits inside content rather than owning the screen. |
+| `size` | `EmptyStateSize` | `default` | Scales the padding, media, title and description together. |
 
 ### EmptyState.Media
 

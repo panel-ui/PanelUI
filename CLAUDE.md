@@ -50,6 +50,23 @@ metadata and commit messages** alike:
 Research from them; do not credit them in the artifact. If a reference genuinely needs recording
 for future maintainers, it belongs in this file or a commit body — never in shipped code.
 
+## Two ways to consume the library
+
+- **`panelui-native`** — the npm package. The default.
+- **`panelui-cli`** — copies a component's source into a project. Backed by the registry at
+  `apps/docs/public/r`, generated from `packages/panelui/src` by
+  `apps/docs/scripts/build-registry.mjs` and served from panelui.dev.
+
+The registry is generated, never hand-written, so it cannot drift. Two consequences when
+changing the library:
+
+- A **new relative import** must be resolvable by the builder, or it throws. Import from
+  `../../primitives`, `../../utils/cn`, `../../icons`, `../../native`, `../<component>` or
+  `../hooks/<name>` — anything else needs a mapping added to the builder first.
+- A **new npm dependency** lands in the registry item automatically, but decide whether it is
+  required or optional. Optional means reached through a lazy `require`/`import` inside a
+  `try`/`catch`, and it must be listed in `OPTIONAL` in the builder.
+
 ## Documentation is part of the change
 
 `apps/docs` is the published documentation site. **A component change is not complete until its

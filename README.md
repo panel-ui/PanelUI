@@ -27,6 +27,21 @@
 - ♿ **Accessible** — proper `accessibilityRole` and state wiring on every interactive component.
 - 📦 **Tree-shakeable, typed, zero native code** — pure TypeScript, works in Expo Go.
 
+## Install
+
+```bash
+npx expo install panelui-native
+```
+
+Or copy a single component's source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest init
+npx panelui-cli@latest add button
+```
+
+Both are supported, and you can mix them. See [the docs](https://panelui.dev/docs/cli).
+
 ## Components
 
 | | | |

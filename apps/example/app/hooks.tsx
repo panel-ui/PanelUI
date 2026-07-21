@@ -233,15 +233,11 @@ export default function HooksScreen() {
 
         <HookCard
           name="Shimmer"
-          summary="A highlight sweeping across content, for loading states."
+          summary="A highlight sweeping through text, for loading states."
         >
-          <Shimmer>
-            <Text muted>Generating response…</Text>
-          </Shimmer>
-          <Shimmer duration={1200} intensity={0.6}>
-            <Text size="lg" weight="medium">
-              Thinking…
-            </Text>
+          <Shimmer>Generating response…</Shimmer>
+          <Shimmer duration={1400} textClassName="text-lg font-medium">
+            Thinking…
           </Shimmer>
         </HookCard>
       </ScrollView>

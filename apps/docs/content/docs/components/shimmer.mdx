@@ -3,27 +3,31 @@ title: Shimmer
 description: Animated highlight sweeping across content.
 ---
 
-An animated highlight sweeping across its children, for loading and streaming states.
+A highlight that sweeps through text and content, for loading, thinking and streaming states.
 
-This is the React Native equivalent of shadcn/ui's [shimmer utility](https://ui.shadcn.com/docs/utils/shimmer), which is CSS `background-clip: text` with a `color-mix()` highlight. React Native has neither, so the highlight is an SVG gradient band swept by Reanimated on the UI thread.
+The content is used as a mask and a gradient band is swept behind it on the UI thread, so the highlight is clipped to the glyph shapes — the letters themselves catch the light rather than sitting under a passing overlay.
 
 ## Installation
 
 Shimmer ships with the library — no separate install.
 
 ```tsx
-import { Shimmer, Text } from 'panelui-native';
+import { Shimmer, Skeleton } from 'panelui-native';
 ```
 
 ## Usage
 
 ```tsx
-<Shimmer>
-  <Text muted>Generating response…</Text>
+<Shimmer>Thinking…</Shimmer>
+
+<Shimmer duration={1400} textClassName="text-lg font-medium">
+  Generating response…
 </Shimmer>
 
-<Shimmer duration={1200} intensity={0.6}>
-  <Text size="lg" weight="medium">Thinking…</Text>
+// Mask arbitrary content instead of a string.
+<Shimmer as="view" className="w-full gap-2">
+  <Skeleton className="h-4 w-3/4" />
+  <Skeleton className="h-4 w-full" />
 </Shimmer>
 ```
 
@@ -34,17 +38,26 @@ import { Shimmer, Text } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `as` | `'text' \| 'view'` | — | `text` renders `children` as a single styled string and masks the sweep to the glyphs. `view` masks the sweep to whatever subtree you pass. |
 | `duration` | `number` | — | Milliseconds for one sweep. |
-| `once` | `boolean` | — | Sweep once instead of looping. |
+| `spread` | `number` | — | Width of the highlight band, as a multiple of the content width. |
+| `baseColor` | `string` | — | Colour of the content at rest. Defaults to the theme's muted foreground. |
+| `shimmerColor` | `string` | — | Colour at the centre of the sweep. Defaults to the theme's foreground. |
+| `mode` | `'loop' \| 'ping-pong'` | — | `loop` restarts from the left; `ping-pong` reverses on each pass. |
+| `once` | `boolean` | — | Sweep once instead of repeating. |
 | `reverse` | `boolean` | — | Sweep right-to-left. |
-| `spread` | `number` | — | Width of the highlight band, as a fraction of the content width. |
-| `color` | `string` | — | Highlight colour. Defaults to the theme's foreground. |
-| `intensity` | `number` | — | Peak opacity of the highlight. |
+| `enabled` | `boolean` | — | Set false to render the content statically without animating. |
+| `textClassName` | `string` | — | Extra classes for the text when `as="text"`. |
+| `textStyle` | `StyleProp<TextStyle>` | — | Extra styles for the text when `as="text"`. |
+| `color` | `string` | — | **Deprecated.** Use `shimmerColor`. |
+| `intensity` | `number` | — | Peak opacity of the highlight. **Deprecated.** Set `shimmerColor` to a colour with the alpha you want. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
-**The band passes over the content rather than being clipped to glyph shapes.** `background-clip: text` has no React Native equivalent. At body sizes the two read the same; on very large text the web version is crisper.
+The sweep runs entirely on the UI thread and never re-renders React while animating.
 
-The sweep stops entirely when the OS reduce-motion setting is on, matching the web utility. The highlight defaults to the theme's foreground colour, so it works on any surface without configuration.
+It stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.
+
+`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props.

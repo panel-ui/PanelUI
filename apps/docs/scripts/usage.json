@@ -6,11 +6,11 @@
       "Item": "One collapsible section. Its `value` identifies it in the accordion's state.",
       "Trigger": "The pressable header row. A bare string child is wrapped in the title style.",
       "Title": "Heading text inside the trigger.",
-      "Indicator": "Chevron that rotates 180\u00b0 while the item is open.",
+      "Indicator": "Chevron that rotates 180° while the item is open.",
       "Content": "The collapsible body. Unmounts when closed."
     },
-    "notes": "Pass an array to `value` / `defaultValue` with `selectionMode=\"multiple\"`. `onValueChange` hands back whatever shape you gave it \u2014 a string in single mode, an array in multiple.",
-    "anatomy": "<Accordion>\n  <Accordion.Item value=\"\u2026\">\n    <Accordion.Trigger>\n      <Accordion.Title>\u2026</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>\u2026</Accordion.Content>\n  </Accordion.Item>\n</Accordion>"
+    "notes": "Pass an array to `value` / `defaultValue` with `selectionMode=\"multiple\"`. `onValueChange` hands back whatever shape you gave it — a string in single mode, an array in multiple.",
+    "anatomy": "<Accordion>\n  <Accordion.Item value=\"…\">\n    <Accordion.Trigger>\n      <Accordion.Title>…</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>…</Accordion.Content>\n  </Accordion.Item>\n</Accordion>"
   },
   "alert": {
     "intro": "A status message. `Alert.Indicator` resolves both the icon and its colour from the alert's variant, so it follows the active theme without you passing either.",
@@ -22,7 +22,7 @@
       "Description": "Body text, always muted."
     },
     "notes": "Omit `Alert.Indicator` for a text-only alert. The legacy `icon` prop still renders, but prefer the indicator.",
-    "anatomy": "<Alert>\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>\u2026</Alert.Title>\n    <Alert.Description>\u2026</Alert.Description>\n  </Alert.Content>\n</Alert>"
+    "anatomy": "<Alert>\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>…</Alert.Title>\n    <Alert.Description>…</Alert.Description>\n  </Alert.Content>\n</Alert>"
   },
   "avatar": {
     "intro": "A user image that falls back to initials when the source is missing or fails to load.",
@@ -31,10 +31,10 @@
       "Badge"
     ],
     "parts": {
-      "Badge": "Overlay pinned to the top-right \u2014 an unread count or a presence dot."
+      "Badge": "Overlay pinned to the top-right — an unread count or a presence dot."
     },
     "notes": "A plain avatar renders as one clipped node. Adding children wraps it in an unclipped container so a corner badge is not cut in half by the circular mask.",
-    "anatomy": "<Avatar>\n  <Avatar.Badge>\u2026</Avatar.Badge>\n</Avatar>"
+    "anatomy": "<Avatar>\n  <Avatar.Badge>…</Avatar.Badge>\n</Avatar>"
   },
   "badge": {
     "intro": "A compact label. Set `count` for a notification bubble, or `shape=\"dot\"` for a bare status dot.",
@@ -53,12 +53,12 @@
       "Trigger": "Clones its child and opens the sheet on press.",
       "Content": "The sheet surface. Renders through a portal above everything else."
     },
-    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` \u2014 `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.",
-    "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>\u2026</BottomSheet.Trigger>\n  <BottomSheet.Content>\u2026</BottomSheet.Content>\n</BottomSheet>"
+    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.",
+    "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>…</BottomSheet.Trigger>\n  <BottomSheet.Content>…</BottomSheet.Content>\n</BottomSheet>"
   },
   "button": {
     "intro": "The primary action component. Icons in `startContent` and `endContent` inherit a colour that reads against the button's background, so they follow the theme without a hardcoded hex.",
-    "usage": "<Button onPress={save}>Save changes</Button>\n\n<Button variant=\"outline\" startContent={<SearchIcon size={16} />}>\n  Search\n</Button>\n\n<Button variant=\"social\" fullWidth startContent={<GoogleIcon size={18} />}>\n  Continue with Google\n</Button>\n\n<Button loading={saving} fullWidth>\n  {saving ? 'Saving\u2026' : 'Save'}\n</Button>",
+    "usage": "<Button onPress={save}>Save changes</Button>\n\n<Button variant=\"outline\" startContent={<SearchIcon size={16} />}>\n  Search\n</Button>\n\n<Button variant=\"social\" fullWidth startContent={<GoogleIcon size={18} />}>\n  Continue with Google\n</Button>\n\n<Button loading={saving} fullWidth>\n  {saving ? 'Saving…' : 'Save'}\n</Button>",
     "extraImports": [
       "SearchIcon",
       "GoogleIcon"
@@ -79,7 +79,7 @@
       "Content": "Main body.",
       "Footer": "Row of actions."
     },
-    "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title>\u2026</Card.Title>\n    <Card.Description>\u2026</Card.Description>\n  </Card.Header>\n  <Card.Content>\u2026</Card.Content>\n  <Card.Footer>\u2026</Card.Footer>\n</Card>"
+    "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title>…</Card.Title>\n    <Card.Description>…</Card.Description>\n  </Card.Header>\n  <Card.Content>…</Card.Content>\n  <Card.Footer>…</Card.Footer>\n</Card>"
   },
   "checkbox": {
     "intro": "A checkbox with an animated check. `variant=\"card\"` turns the whole surface into the target, for pickable options where the box confirms a choice rather than being the affordance.",
@@ -100,7 +100,7 @@
       "Footer": "Row of actions.",
       "Close": "Clones its child and closes the dialog on press."
     },
-    "anatomy": "<Dialog>\n  <Dialog.Trigger>\u2026</Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>\u2026</Dialog.Title>\n    <Dialog.Description>\u2026</Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>\u2026</Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
+    "anatomy": "<Dialog>\n  <Dialog.Trigger>…</Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>…</Dialog.Title>\n    <Dialog.Description>…</Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>…</Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
   },
   "empty-state": {
     "intro": "The placeholder for a list or screen with nothing in it. `Media variant=\"icon\"` frames the icon in a small card with two rotated ghost cards fanned behind it.",
@@ -116,7 +116,7 @@
       "Description": "Supporting text.",
       "Content": "Slot below the header, for actions."
     },
-    "anatomy": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media>\u2026</EmptyState.Media>\n    <EmptyState.Title>\u2026</EmptyState.Title>\n    <EmptyState.Description>\u2026</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\u2026</EmptyState.Content>\n</EmptyState>"
+    "anatomy": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media>…</EmptyState.Media>\n    <EmptyState.Title>…</EmptyState.Title>\n    <EmptyState.Description>…</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>…</EmptyState.Content>\n</EmptyState>"
   },
   "frame": {
     "intro": "A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel's radius is derived from the shell's, so the nesting stays proportional as the theme changes it.",
@@ -127,14 +127,14 @@
     "parts": {
       "Header": "Row holding the title and the action.",
       "Title": "Frame heading.",
-      "Action": "Trailing slot \u2014 a label, a button, a badge. Strings render muted.",
+      "Action": "Trailing slot — a label, a button, a badge. Strings render muted.",
       "Description": "Secondary line, inside a column-wrapped header.",
       "Panel": "The inset card holding the rows.",
       "Row": "A row inside the panel. Pass `divided` on every row after the first.",
       "Footer": "Muted caption under the panel. Strings are wrapped for you."
     },
     "notes": "React Native has no `:first-child`, so `divided` is set explicitly on each row after the first rather than inferred.",
-    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>\u2026</Frame.Title>\n    <Frame.Action>\u2026</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\u2026</Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>\u2026</Frame.Footer>\n</Frame>"
+    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>"
   },
   "inline-select": {
     "intro": "A picker that expands its options in place, without an overlay. Use it when the option list is short and the surrounding layout can absorb the height.",
@@ -142,7 +142,7 @@
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
-    "anatomy": "<InlineSelect>\n  <InlineSelect.Item value=\"\u2026\" label=\"\u2026\" />\n</InlineSelect>"
+    "anatomy": "<InlineSelect>\n  <InlineSelect.Item value=\"…\" label=\"…\" />\n</InlineSelect>"
   },
   "input": {
     "intro": "A text field with an optional label, description and error message. Passing `errorMessage` puts the field in its invalid state and replaces the description.",
@@ -151,7 +151,7 @@
   },
   "input-group": {
     "intro": "An input with leading or trailing decorators. The prefix and suffix are measured and their widths applied as padding on the input, so text never runs underneath them however wide they turn out to be.",
-    "usage": "<InputGroup>\n  <InputGroup.Prefix isDecorative>\n    <SearchIcon size={16} />\n  </InputGroup.Prefix>\n  <InputGroup.Input placeholder=\"Search products\u2026\" />\n</InputGroup>\n\n<InputGroup>\n  <InputGroup.Input placeholder=\"Password\" secureTextEntry={!visible} />\n  <InputGroup.Suffix>\n    <Button variant=\"ghost\" size=\"sm\" onPress={toggle}>\n      {visible ? 'Hide' : 'Show'}\n    </Button>\n  </InputGroup.Suffix>\n</InputGroup>",
+    "usage": "<InputGroup>\n  <InputGroup.Prefix isDecorative>\n    <SearchIcon size={16} />\n  </InputGroup.Prefix>\n  <InputGroup.Input placeholder=\"Search products…\" />\n</InputGroup>\n\n<InputGroup>\n  <InputGroup.Input placeholder=\"Password\" secureTextEntry={!visible} />\n  <InputGroup.Suffix>\n    <Button variant=\"ghost\" size=\"sm\" onPress={toggle}>\n      {visible ? 'Hide' : 'Show'}\n    </Button>\n  </InputGroup.Suffix>\n</InputGroup>",
     "extraImports": [
       "Button",
       "SearchIcon"
@@ -162,7 +162,7 @@
       "Suffix": "Trailing decorator, absolutely positioned."
     },
     "notes": "Set `isDecorative` when the decorator is presentation-only: touches fall through to the input and screen readers skip it. Leave it off when it holds something interactive, like a show-password toggle.",
-    "anatomy": "<InputGroup>\n  <InputGroup.Prefix>\u2026</InputGroup.Prefix>\n  <InputGroup.Input />\n  <InputGroup.Suffix>\u2026</InputGroup.Suffix>\n</InputGroup>"
+    "anatomy": "<InputGroup>\n  <InputGroup.Prefix>…</InputGroup.Prefix>\n  <InputGroup.Input />\n  <InputGroup.Suffix>…</InputGroup.Suffix>\n</InputGroup>"
   },
   "label": {
     "intro": "A form field label. String children are wrapped in `Label.Text` for you.",
@@ -173,29 +173,29 @@
     "parts": {
       "Text": "The label text. Renders the required asterisk when the label is required."
     },
-    "anatomy": "<Label>\n  <Label.Text>\u2026</Label.Text>\n</Label>"
+    "anatomy": "<Label>\n  <Label.Text>…</Label.Text>\n</Label>"
   },
   "progress": {
     "intro": "A progress bar, determinate or indeterminate, animated on the UI thread.",
     "usage": "<Progress value={uploaded} />\n<Progress value={70} color=\"success\" size=\"lg\" />\n<Progress indeterminate color=\"info\" />",
-    "notes": "`value` is `0\u2013100`. With `indeterminate` the value is ignored and the bar loops."
+    "notes": "`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops."
   },
   "radio-group": {
     "intro": "A single-select list of options.",
-    "usage": "<RadioGroup value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free \u2014 $0/month\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro \u2014 $12/month\" />\n  <RadioGroup.Item value=\"team\" label=\"Team \u2014 $36/month\" />\n</RadioGroup>",
+    "usage": "<RadioGroup value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free — $0/month\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro — $12/month\" />\n  <RadioGroup.Item value=\"team\" label=\"Team — $36/month\" />\n</RadioGroup>",
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
-    "anatomy": "<RadioGroup>\n  <RadioGroup.Item value=\"\u2026\" label=\"\u2026\" />\n</RadioGroup>"
+    "anatomy": "<RadioGroup>\n  <RadioGroup.Item value=\"…\" label=\"…\" />\n</RadioGroup>"
   },
   "select": {
-    "intro": "A picker that opens its options in a bottom sheet \u2014 the right choice when the list is long or the surrounding layout cannot grow.",
+    "intro": "A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.",
     "usage": "<Select\n  value={fruit}\n  onValueChange={setFruit}\n  placeholder=\"Select a fruit\"\n  title=\"Favorite fruit\"\n>\n  <Select.Item value=\"apple\" label=\"Apple\" />\n  <Select.Item value=\"banana\" label=\"Banana\" />\n</Select>",
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
     "notes": "Use `InlineSelect` instead when the option list is short enough to expand in place.",
-    "anatomy": "<Select>\n  <Select.Item value=\"\u2026\" label=\"\u2026\" />\n</Select>"
+    "anatomy": "<Select>\n  <Select.Item value=\"…\" label=\"…\" />\n</Select>"
   },
   "skeleton": {
     "intro": "A shimmer placeholder for content that has not loaded. Size it with Tailwind utilities.",
@@ -206,18 +206,18 @@
     "usage": "<Spinner />\n<Spinner size=\"lg\" />"
   },
   "steps": {
-    "intro": "A stepper for multi-step flows. Steps does not own your flow \u2014 it reflects whatever step your app says is active.",
+    "intro": "A stepper for multi-step flows. Steps does not own your flow — it reflects whatever step your app says is active.",
     "usage": "<Steps value={step} onValueChange={setStep}>\n  {items.map((item, index) => (\n    <Steps.Item key={item.title} step={index} className=\"flex-1\">\n      <Steps.Trigger>\n        <Steps.Indicator />\n        <Steps.Title>{item.title}</Steps.Title>\n      </Steps.Trigger>\n      {index < items.length - 1 ? <Steps.Separator /> : null}\n    </Steps.Item>\n  ))}\n</Steps>",
     "parts": {
       "Item": "One step. `step` is its zero-based position.",
       "Trigger": "Makes the item selectable. Omit it for a read-only stepper.",
-      "Indicator": "The circle \u2014 step number, a check once complete, a spinner while loading.",
+      "Indicator": "The circle — step number, a check once complete, a spinner while loading.",
       "Title": "Step heading.",
       "Description": "Supporting line.",
       "Separator": "Connector to the next step. Place it inside the item so it can read that item's state."
     },
     "notes": "Steps are zero-based internally but the indicator renders them as 1, 2, 3.",
-    "anatomy": "<Steps>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>\u2026</Steps.Title>\n      <Steps.Description>\u2026</Steps.Description>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n</Steps>"
+    "anatomy": "<Steps>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>…</Steps.Title>\n      <Steps.Description>…</Steps.Description>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n</Steps>"
   },
   "switch": {
     "intro": "An on/off toggle, animated on the UI thread.",
@@ -225,16 +225,16 @@
   },
   "tabs": {
     "intro": "Segmented navigation with an indicator that springs to the active trigger.",
-    "usage": "<Tabs defaultValue=\"account\">\n  <Tabs.List>\n    <Tabs.Trigger value=\"account\">Account</Tabs.Trigger>\n    <Tabs.Trigger value=\"password\">Password</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"account\">\u2026</Tabs.Content>\n  <Tabs.Content value=\"password\">\u2026</Tabs.Content>\n</Tabs>",
+    "usage": "<Tabs defaultValue=\"account\">\n  <Tabs.List>\n    <Tabs.Trigger value=\"account\">Account</Tabs.Trigger>\n    <Tabs.Trigger value=\"password\">Password</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"account\">…</Tabs.Content>\n  <Tabs.Content value=\"password\">…</Tabs.Content>\n</Tabs>",
     "parts": {
       "List": "Holds the triggers and the animated indicator.",
       "Trigger": "One tab. Must be inside `Tabs.List`.",
       "Content": "Panel for a tab. Renders only while its tab is active."
     },
-    "anatomy": "<Tabs>\n  <Tabs.List>\n    <Tabs.Trigger value=\"\u2026\">\u2026</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"\u2026\">\u2026</Tabs.Content>\n</Tabs>"
+    "anatomy": "<Tabs>\n  <Tabs.List>\n    <Tabs.Trigger value=\"…\">…</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"…\">…</Tabs.Content>\n</Tabs>"
   },
   "timeline": {
-    "intro": "A vertical sequence of events. `value` marks how far along the sequence is; `tone` colours an individual event by kind, independently of that progress.\n\nVertical only \u2014 a horizontal timeline gives each item roughly a fifth of a phone's width, which will not hold a date and a title.",
+    "intro": "A vertical sequence of events. `value` marks how far along the sequence is; `tone` colours an individual event by kind, independently of that progress.\n\nVertical only — a horizontal timeline gives each item roughly a fifth of a phone's width, which will not hold a date and a title.",
     "usage": "<Timeline variant=\"icon\" value={2}>\n  {events.map((event, index) => (\n    <Timeline.Item\n      key={event.title}\n      step={index}\n      tone={event.tone}\n      last={index === events.length - 1}\n    >\n      <Timeline.Aside>\n        <Timeline.Date>{event.time}</Timeline.Date>\n        <Timeline.Label>{event.team}</Timeline.Label>\n      </Timeline.Aside>\n      <Timeline.Indicator>\n        <ShieldCheckIcon size={15} />\n      </Timeline.Indicator>\n      <Timeline.Content>\n        <Timeline.Header>\n          <Timeline.Title>{event.title}</Timeline.Title>\n          <Timeline.Trailing>{event.at}</Timeline.Trailing>\n        </Timeline.Header>\n        <Timeline.Description>{event.body}</Timeline.Description>\n      </Timeline.Content>\n    </Timeline.Item>\n  ))}\n</Timeline>",
     "extraImports": [
       "ShieldCheckIcon"
@@ -248,18 +248,18 @@
       "Heading": "Wraps a title and anything stacked under it inside the header row.",
       "Date": "Timestamp, usually in the aside.",
       "Label": "Category line, coloured by the item's tone.",
-      "Meta": "Muted supporting line \u2014 a person, a source.",
+      "Meta": "Muted supporting line — a person, a source.",
       "Title": "Event heading.",
       "Trailing": "Right-hand slot in the header row.",
       "Description": "Body text.",
       "Stats": "Bordered strip of label/value pairs.",
       "Stat": "One label/value pair inside `Stats`."
     },
-    "notes": "Colour follows one rule: **progress is solid, event kind is tinted**. An untoned step runs from `muted` to `primary` as the timeline advances, exactly as `Steps` does; a toned step takes that tone's soft fill with its contents in the matching foreground. The `dot` and `card` variants keep full saturation \u2014 they are 16px discs with nothing inside, and a soft tint at that size disappears.\n\nIcons inside `Timeline.Indicator` inherit a colour that reads against the node, so they stay legible in every theme without a hardcoded value.",
-    "anatomy": "<Timeline>\n  <Timeline.Item step={0}>\n    <Timeline.Aside>\n      <Timeline.Date>\u2026</Timeline.Date>\n      <Timeline.Label>\u2026</Timeline.Label>\n      <Timeline.Meta>\u2026</Timeline.Meta>\n    </Timeline.Aside>\n    <Timeline.Indicator>\u2026</Timeline.Indicator>\n    <Timeline.Content>\n      <Timeline.Header>\n        <Timeline.Title>\u2026</Timeline.Title>\n        <Timeline.Trailing>\u2026</Timeline.Trailing>\n      </Timeline.Header>\n      <Timeline.Stats>\n        <Timeline.Stat label=\"\u2026\" value=\"\u2026\" />\n      </Timeline.Stats>\n      <Timeline.Description>\u2026</Timeline.Description>\n    </Timeline.Content>\n  </Timeline.Item>\n</Timeline>"
+    "notes": "Colour follows one rule: **progress is solid, event kind is tinted**. An untoned step runs from `muted` to `primary` as the timeline advances, exactly as `Steps` does; a toned step takes that tone's soft fill with its contents in the matching foreground. The `dot` and `card` variants keep full saturation — they are 16px discs with nothing inside, and a soft tint at that size disappears.\n\nIcons inside `Timeline.Indicator` inherit a colour that reads against the node, so they stay legible in every theme without a hardcoded value.",
+    "anatomy": "<Timeline>\n  <Timeline.Item step={0}>\n    <Timeline.Aside>\n      <Timeline.Date>…</Timeline.Date>\n      <Timeline.Label>…</Timeline.Label>\n      <Timeline.Meta>…</Timeline.Meta>\n    </Timeline.Aside>\n    <Timeline.Indicator>…</Timeline.Indicator>\n    <Timeline.Content>\n      <Timeline.Header>\n        <Timeline.Title>…</Timeline.Title>\n        <Timeline.Trailing>…</Timeline.Trailing>\n      </Timeline.Header>\n      <Timeline.Stats>\n        <Timeline.Stat label=\"…\" value=\"…\" />\n      </Timeline.Stats>\n      <Timeline.Description>…</Timeline.Description>\n    </Timeline.Content>\n  </Timeline.Item>\n</Timeline>"
   },
   "toast": {
-    "intro": "A transient notification. The queue lives outside React, so `toast.show()` works from anywhere \u2014 API clients, event handlers, code with no component around it.\n\n`PanelUIProvider` mounts the viewport for you.",
+    "intro": "A transient notification. The queue lives outside React, so `toast.show()` works from anywhere — API clients, event handlers, code with no component around it.\n\n`PanelUIProvider` mounts the viewport for you.",
     "usage": "const { toast } = useToast();\n\n// A bare string\ntoast.show('Link copied');\n\n// A config object\ntoast.show({\n  variant: 'success',\n  label: 'Deployment complete',\n  description: 'panelui.dev is live on production.',\n  actionLabel: 'View',\n  onActionPress: ({ hide }) => hide(),\n});\n\n// A custom component\ntoast.show({\n  component: ({ hide }) => (\n    <Toast variant=\"info\" onHide={hide}>\n      <Toast.Indicator />\n      <Toast.Content>\n        <Toast.Title>Custom</Toast.Title>\n      </Toast.Content>\n      <Toast.Close />\n    </Toast>\n  ),\n});",
     "extraImports": [
       "useToast"
@@ -273,7 +273,7 @@
       "Close": "Icon-only dismiss button."
     },
     "notes": "Toasts stack as an overlapping deck: the newest is fully visible and the ones behind peek out, with anything past the third fading rather than accumulating. Swiping toward the edge the toast entered from dismisses it; dragging the other way rubber-bands.\n\n`toast.hide(id)` dismisses one, `toast.hideAll()` clears the queue. A `duration` of `0` keeps a toast up until it is dismissed.",
-    "anatomy": "<Toast>\n  <Toast.Indicator />\n  <Toast.Content>\n    <Toast.Title>\u2026</Toast.Title>\n    <Toast.Description>\u2026</Toast.Description>\n  </Toast.Content>\n  <Toast.Action>\u2026</Toast.Action>\n  <Toast.Close />\n</Toast>"
+    "anatomy": "<Toast>\n  <Toast.Indicator />\n  <Toast.Content>\n    <Toast.Title>…</Toast.Title>\n    <Toast.Description>…</Toast.Description>\n  </Toast.Content>\n  <Toast.Action>…</Toast.Action>\n  <Toast.Close />\n</Toast>"
   },
   "typography": {
     "intro": "Semantic text presets, built on the `Text` primitive.",
@@ -283,23 +283,23 @@
       "Paragraph": "Body copy.",
       "Code": "Inline code on a muted surface."
     },
-    "anatomy": "<Typography type=\"h1\">\u2026</Typography>\n\n<Typography.Heading type=\"h2\">\u2026</Typography.Heading>\n<Typography.Paragraph>\u2026</Typography.Paragraph>\n<Typography.Code>\u2026</Typography.Code>"
+    "anatomy": "<Typography type=\"h1\">…</Typography>\n\n<Typography.Heading type=\"h2\">…</Typography.Heading>\n<Typography.Paragraph>…</Typography.Paragraph>\n<Typography.Code>…</Typography.Code>"
   },
   "surface": {
-    "intro": "An elevated container. Nest the variants to build hierarchy \u2014 each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
+    "intro": "An elevated container. Nest the variants to build hierarchy — each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
     "usage": "<Surface>\n  <Text weight=\"medium\">Account</Text>\n\n  <Surface variant=\"secondary\" className=\"mt-3\">\n    <Text size=\"sm\" muted>Signed in as khalid@example.com</Text>\n\n    <Surface variant=\"tertiary\" className=\"mt-3\">\n      <Text size=\"xs\" muted>Session expires in 12 days</Text>\n    </Surface>\n  </Surface>\n</Surface>",
     "extraImports": [
       "Text"
     ],
-    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc \u2014 visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill."
+    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill."
   },
   "shimmer": {
-    "intro": "An animated highlight sweeping across its children, for loading and streaming states.\n\nThis is the React Native equivalent of shadcn/ui's [shimmer utility](https://ui.shadcn.com/docs/utils/shimmer), which is CSS `background-clip: text` with a `color-mix()` highlight. React Native has neither, so the highlight is an SVG gradient band swept by Reanimated on the UI thread.",
-    "usage": "<Shimmer>\n  <Text muted>Generating response\u2026</Text>\n</Shimmer>\n\n<Shimmer duration={1200} intensity={0.6}>\n  <Text size=\"lg\" weight=\"medium\">Thinking\u2026</Text>\n</Shimmer>",
+    "intro": "A highlight that sweeps through text and content, for loading, thinking and streaming states.\n\nThe content is used as a mask and a gradient band is swept behind it on the UI thread, so the highlight is clipped to the glyph shapes — the letters themselves catch the light rather than sitting under a passing overlay.",
+    "usage": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>\n\n// Mask arbitrary content instead of a string.\n<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n</Shimmer>",
     "extraImports": [
-      "Text"
+      "Skeleton"
     ],
-    "notes": "**The band passes over the content rather than being clipped to glyph shapes.** `background-clip: text` has no React Native equivalent. At body sizes the two read the same; on very large text the web version is crisper.\n\nThe sweep stops entirely when the OS reduce-motion setting is on, matching the web utility. The highlight defaults to the theme's foreground colour, so it works on any surface without configuration."
+    "notes": "The sweep runs entirely on the UI thread and never re-renders React while animating.\n\nIt stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.\n\n`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props."
   },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nThe React Native equivalent of shadcn/ui's [scroll-fade utility](https://ui.shadcn.com/docs/utils/scroll-fade), which uses CSS `mask-image` on a scroll timeline. React Native has neither masks nor scroll timelines, so the fades are gradient overlays whose opacity follows the scroll position.",
@@ -307,6 +307,6 @@
     "extraImports": [
       "Badge"
     ],
-    "notes": "Orientation is read from the child's `horizontal` prop, so a horizontal list fades left and right and a vertical one fades top and bottom.\n\nEach edge only fades once there is content past it \u2014 scrolled to the top, the top edge shows nothing.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend."
+    "notes": "Orientation is read from the child's `horizontal` prop, so a horizontal list fades left and right and a vertical one fades top and bottom.\n\nEach edge only fades once there is content past it — scrolled to the top, the top edge shows nothing.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend."
   }
 }

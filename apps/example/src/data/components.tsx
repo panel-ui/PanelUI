@@ -1775,24 +1775,55 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Animated highlight sweeping across content',
     demos: [
       {
-        label: 'Loading text',
+        label: 'Thinking text',
         render: () => (
           <View className="w-full gap-4">
-            <Shimmer>
-              <Text muted>Generating response…</Text>
+            <Shimmer>Generating response…</Shimmer>
+            <Shimmer duration={1400} textClassName="text-lg font-medium">
+              Thinking…
             </Shimmer>
-            <Shimmer duration={1200} intensity={0.6}>
-              <Text size="lg" weight="medium">
-                Thinking…
-              </Text>
+            <Shimmer duration={2400} textClassName="text-2xl font-semibold">
+              Searching the web
             </Shimmer>
           </View>
         ),
       },
       {
-        label: 'Over a skeleton',
+        label: 'Modes',
         render: () => (
-          <Shimmer className="w-full rounded-xl">
+          <View className="w-full gap-4">
+            <Shimmer mode="ping-pong" duration={1600}>
+              Ping-pong sweep
+            </Shimmer>
+            <Shimmer reverse>Right to left</Shimmer>
+            <Shimmer spread={4} duration={2600}>
+              A wider, slower band
+            </Shimmer>
+            <Shimmer enabled={false}>Disabled — renders statically</Shimmer>
+          </View>
+        ),
+      },
+      {
+        label: 'Custom colours',
+        render: () => (
+          <View className="w-full gap-4">
+            <Shimmer baseColor="#3f3f46" shimmerColor="#fafafa">
+              Neutral on dark
+            </Shimmer>
+            <Shimmer
+              baseColor="#1e3a8a"
+              shimmerColor="#93c5fd"
+              textClassName="text-lg font-semibold"
+            >
+              Tinted blue
+            </Shimmer>
+          </View>
+        ),
+      },
+      {
+        label: 'Masking a subtree',
+        render: () => (
+          <Shimmer as="view" className="w-full rounded-xl">
             <View className="gap-3">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-full" />

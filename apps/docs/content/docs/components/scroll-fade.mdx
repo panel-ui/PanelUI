@@ -12,48 +12,49 @@ A fading edge is also an affordance: it means there is more content behind it. S
 ScrollFade ships with the library — no separate install.
 
 ```tsx
-import { ScrollFade, Badge, Card } from 'panelui-native';
+import { ScrollFade, Item, PackageIcon, CheckIcon } from 'panelui-native';
 ```
 
 ## Usage
 
 ```tsx
-<ScrollFade>
+<ScrollFade size={40}>
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    {tags.map((tag) => (
-      <Badge key={tag}>{tag}</Badge>
-    ))}
+    <Item.Group orientation="horizontal">
+      {categories.map((category) => (
+        <Item key={category.id} orientation="vertical" variant="outline" size="sm" className="w-44">
+          <Item.Media variant="icon"><PackageIcon size={16} /></Item.Media>
+          <Item.Content>
+            <Item.Title>{category.name}</Item.Title>
+            <Item.Description>{category.summary}</Item.Description>
+          </Item.Content>
+        </Item>
+      ))}
+    </Item.Group>
   </ScrollView>
-</ScrollFade>
-
-// Vertical: no `horizontal` on the child, so the fades move to
-// the top and bottom edges.
-<ScrollFade className="h-56">
-  <ScrollView>
-    {events.map((event) => (
-      <Row key={event.id} {...event} />
-    ))}
-  </ScrollView>
-</ScrollFade>
-
-// Fade only the trailing edge, on a card surface.
-<ScrollFade edges="end" size={56} color="var(--color-card)">
-  <FlatList horizontal data={items} renderItem={renderItem} />
 </ScrollFade>
 ```
 
 ## Examples
 
-### A horizontal row
+### A horizontal row of cards
 
-Orientation is read from the child’s `horizontal` prop, so this fades left and right.
+A horizontal group of vertical items: each entry is a card, and the fade is what tells you there are more of them past the edge.
 
 ```tsx
 <ScrollFade size={40}>
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    {tags.map((tag) => (
-      <Badge key={tag} variant="secondary">{tag}</Badge>
-    ))}
+    <Item.Group orientation="horizontal">
+      {categories.map((category) => (
+        <Item key={category.id} orientation="vertical" variant="outline" size="sm" className="w-44">
+          <Item.Media variant="icon"><PackageIcon size={16} /></Item.Media>
+          <Item.Content>
+            <Item.Title>{category.name}</Item.Title>
+            <Item.Description>{category.summary}</Item.Description>
+          </Item.Content>
+        </Item>
+      ))}
+    </Item.Group>
   </ScrollView>
 </ScrollFade>
 ```
@@ -63,11 +64,22 @@ Orientation is read from the child’s `horizontal` prop, so this fades left and
 No `horizontal` on the child, so the fades move to the top and bottom edges.
 
 ```tsx
-<ScrollFade className="h-56">
+<ScrollFade size={44} className="h-72">
   <ScrollView showsVerticalScrollIndicator={false}>
-    {events.map((event) => (
-      <Row key={event.id} {...event} />
-    ))}
+    <Item.Group>
+      {events.map((event, index) => (
+        <Fragment key={event.id}>
+          {index > 0 && <Item.Separator />}
+          <Item size="sm">
+            <Item.Media variant="icon"><CheckIcon size={14} /></Item.Media>
+            <Item.Content>
+              <Item.Title>{event.title}</Item.Title>
+              <Item.Description>{event.when}</Item.Description>
+            </Item.Content>
+          </Item>
+        </Fragment>
+      ))}
+    </Item.Group>
   </ScrollView>
 </ScrollFade>
 ```
@@ -80,7 +92,9 @@ The fade resolves to the theme background by default — pass `color` when the s
 <Card>
   <Card.Content>
     <ScrollFade edges="end" size={56} color="var(--color-card)">
-      <FlatList horizontal data={items} renderItem={renderItem} />
+      <ScrollView horizontal>
+        <Item.Group orientation="horizontal">{/* … */}</Item.Group>
+      </ScrollView>
     </ScrollFade>
   </Card.Content>
 </Card>

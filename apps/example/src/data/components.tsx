@@ -1895,10 +1895,53 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
-        label: 'Header and footer',
+        label: 'Horizontal group of cards',
         render: () => (
-          // Both are full-width strips, so the item has to be a column.
-          <Item variant="outline" className="flex-col items-start gap-2">
+          <View className="w-full gap-4">
+            <Text size="sm" muted>
+              Two independent axes. `orientation` on the group runs the items
+              across instead of down; `orientation` on each item stacks its own
+              parts into a card. A carousel wants both.
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <Item.Group orientation="horizontal">
+                {[
+                  ['Starter', '$0', 'One project'],
+                  ['Pro', '$12', 'Unlimited projects'],
+                  ['Team', '$40', 'Shared workspaces'],
+                ].map(([name, price, summary]) => (
+                  <Item
+                    key={name}
+                    orientation="vertical"
+                    variant="outline"
+                    className="w-48"
+                  >
+                    <Item.Media variant="icon">
+                      <PackageIcon size={18} />
+                    </Item.Media>
+                    <Item.Content>
+                      <Item.Title>{name}</Item.Title>
+                      <Item.Description>{summary}</Item.Description>
+                    </Item.Content>
+                    <Item.Footer>
+                      <Text weight="semibold">{price}</Text>
+                      <Text size="xs" muted>
+                        per month
+                      </Text>
+                    </Item.Footer>
+                  </Item>
+                ))}
+              </Item.Group>
+            </ScrollView>
+          </View>
+        ),
+      },
+      {
+        label: 'A vertical item',
+        render: () => (
+          // orientation="vertical" is also what Header and Footer need — both
+          // are full-width strips, so they only make sense once it stacks.
+          <Item orientation="vertical" variant="outline">
             <Item.Header>
               <Badge variant="secondary">Draft</Badge>
               <Text size="xs" muted>
@@ -2267,22 +2310,38 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Fades the edges of a scroll container',
     demos: [
       {
-        label: 'Horizontal list',
+        label: 'Horizontal cards',
         render: () => (
+          // A horizontal group of vertical Items: each entry is a card, and
+          // the fade shows there is more of them past the edge.
           <ScrollFade size={40} className="w-full">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {[
-                'Overlays', 'Forms', 'Feedback', 'Layout', 'Navigation',
-                'Typography', 'Data', 'Media', 'Motion', 'Theming',
-              ].map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <Item.Group orientation="horizontal">
+                {[
+                  ['Overlays', 'Dialog, sheet, toast'],
+                  ['Forms', 'Input, select, switch'],
+                  ['Feedback', 'Alert, progress, spinner'],
+                  ['Layout', 'Card, frame, surface'],
+                  ['Motion', 'Shimmer, scroll fade'],
+                  ['Theming', 'Six themes, three families'],
+                ].map(([title, description]) => (
+                  <Item
+                    key={title}
+                    orientation="vertical"
+                    variant="outline"
+                    size="sm"
+                    className="w-44"
+                  >
+                    <Item.Media variant="icon">
+                      <PackageIcon size={16} />
+                    </Item.Media>
+                    <Item.Content>
+                      <Item.Title>{title}</Item.Title>
+                      <Item.Description>{description}</Item.Description>
+                    </Item.Content>
+                  </Item>
+                ))}
+              </Item.Group>
             </ScrollView>
           </ScrollFade>
         ),
@@ -2292,9 +2351,9 @@ export const COMPONENTS: ComponentEntry[] = [
         render: () => (
           // Orientation is read from the child: no `horizontal` prop, so the
           // fades land on the top and bottom edges instead.
-          <ScrollFade size={44} className="h-56 w-full">
+          <ScrollFade size={44} className="h-72 w-full">
             <ScrollView showsVerticalScrollIndicator={false}>
-              <View className="gap-3 py-2">
+              <Item.Group>
                 {[
                   ['Deployed to production', '2 minutes ago'],
                   ['Migration applied', '18 minutes ago'],
@@ -2304,17 +2363,21 @@ export const COMPONENTS: ComponentEntry[] = [
                   ['Branch pushed', '3 hours ago'],
                   ['Issue closed', '5 hours ago'],
                   ['Release tagged', 'Yesterday'],
-                ].map(([title, when]) => (
-                  <View key={title} className="gap-0.5">
-                    <Text size="sm" weight="medium">
-                      {title}
-                    </Text>
-                    <Text size="xs" muted>
-                      {when}
-                    </Text>
+                ].map(([title, when], index) => (
+                  <View key={title}>
+                    {index > 0 ? <Item.Separator /> : null}
+                    <Item size="sm">
+                      <Item.Media variant="icon">
+                        <CheckIcon size={14} />
+                      </Item.Media>
+                      <Item.Content>
+                        <Item.Title>{title}</Item.Title>
+                        <Item.Description>{when}</Item.Description>
+                      </Item.Content>
+                    </Item>
                   </View>
                 ))}
-              </View>
+              </Item.Group>
             </ScrollView>
           </ScrollFade>
         ),
@@ -2323,14 +2386,16 @@ export const COMPONENTS: ComponentEntry[] = [
         label: 'One edge',
         render: () => (
           <ScrollFade size={56} edges="end" className="w-full">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'].map((n) => (
-                <Badge key={n}>{n}</Badge>
-              ))}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <Item.Group orientation="horizontal">
+                {['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'].map((n) => (
+                  <Item key={n} variant="muted" size="sm" className="w-32">
+                    <Item.Content>
+                      <Item.Title>{n}</Item.Title>
+                    </Item.Content>
+                  </Item>
+                ))}
+              </Item.Group>
             </ScrollView>
           </ScrollFade>
         ),
@@ -2340,16 +2405,16 @@ export const COMPONENTS: ComponentEntry[] = [
         render: () => (
           // Nothing scrolls past either edge, so neither fade ever shows.
           <ScrollFade size={40} className="w-full">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {['One', 'Two'].map((n) => (
-                <Badge key={n} variant="secondary">
-                  {n}
-                </Badge>
-              ))}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <Item.Group orientation="horizontal">
+                {['One', 'Two'].map((n) => (
+                  <Item key={n} variant="outline" size="sm" className="w-32">
+                    <Item.Content>
+                      <Item.Title>{n}</Item.Title>
+                    </Item.Content>
+                  </Item>
+                ))}
+              </Item.Group>
             </ScrollView>
           </ScrollFade>
         ),

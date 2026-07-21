@@ -12,7 +12,7 @@ It is the shape almost every list in an app already has — a settings row, a fi
 Item ships with the library — no separate install.
 
 ```tsx
-import { Item, Avatar, Badge, Button, Switch, Text, ReceiptIcon, BellIcon, ChevronRightIcon } from 'panelui-native';
+import { Item, Avatar, Badge, Button, Switch, Text, ReceiptIcon, BellIcon, ChevronRightIcon, PackageIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -138,27 +138,6 @@ Give a row `onPress` and it becomes a pressable with a press animation and a but
 </Item.Media>
 ```
 
-### A header and footer
-
-Both are full-width strips, so the item has to be laid out as a column.
-
-```tsx
-<Item variant="outline" className="flex-col items-start gap-2">
-  <Item.Header>
-    <Badge variant="secondary">Draft</Badge>
-    <Text size="xs" muted>Updated 2h ago</Text>
-  </Item.Header>
-  <Item.Content>
-    <Item.Title>Quarterly report</Item.Title>
-    <Item.Description>Revenue, retention and headcount.</Item.Description>
-  </Item.Content>
-  <Item.Footer>
-    <Button size="sm" variant="outline">Preview</Button>
-    <Button size="sm">Publish</Button>
-  </Item.Footer>
-</Item>
-```
-
 ### With a switch
 
 Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.
@@ -172,6 +151,57 @@ Keep the row non-pressable when the control is the only target — two overlappi
   <Item.Actions>
     <Switch value={push} onValueChange={setPush} />
   </Item.Actions>
+</Item>
+```
+
+### A horizontal group of cards
+
+Two independent axes. `orientation` on the group runs the items across the screen instead of down it; `orientation` on each item stacks its own parts into a card. A carousel wants both.
+
+```tsx
+<ScrollView horizontal showsHorizontalScrollIndicator={false}>
+  <Item.Group orientation="horizontal">
+    {plans.map((plan) => (
+      <Item
+        key={plan.id}
+        orientation="vertical"
+        variant="outline"
+        className="w-48"
+      >
+        <Item.Media variant="icon">
+          <PackageIcon size={18} />
+        </Item.Media>
+        <Item.Content>
+          <Item.Title>{plan.name}</Item.Title>
+          <Item.Description>{plan.summary}</Item.Description>
+        </Item.Content>
+        <Item.Footer>
+          <Text weight="semibold">{plan.price}</Text>
+        </Item.Footer>
+      </Item>
+    ))}
+  </Item.Group>
+</ScrollView>
+```
+
+### A vertical item
+
+`orientation="vertical"` is also what `Item.Header` and `Item.Footer` need — both are full-width strips, so they only make sense once the item stacks.
+
+```tsx
+<Item orientation="vertical" variant="outline">
+  <Item.Header>
+    <Badge variant="secondary">Draft</Badge>
+    <Text size="xs" muted>Updated 2h ago</Text>
+  </Item.Header>
+  <Item.Content>
+    <Item.Title>Quarterly report</Item.Title>
+    <Item.Description>Revenue, retention and headcount.</Item.Description>
+  </Item.Content>
+  <Item.Footer>
+    <Button size="sm" variant="outline">Preview</Button>
+    <Button size="sm">Publish</Button>
+  </Item.Footer>
 </Item>
 ```
 
@@ -202,6 +232,22 @@ Keep the row non-pressable when the control is the only target — two overlappi
 <Item size="xs">…</Item>
 ```
 
+### `orientation`
+
+- `horizontal` *(default)*
+- `vertical`
+
+```tsx
+{/* The list row — media, text and actions side by side. */}
+<Item orientation="horizontal">…</Item>
+
+{/* Stacked into a card, for a carousel or for Header/Footer. */}
+<Item orientation="vertical">…</Item>
+
+{/* The group has its own axis, independent of the items' own. */}
+<Item.Group orientation="horizontal">…</Item.Group>
+```
+
 ## API Reference
 
 ### Item
@@ -211,18 +257,21 @@ Keep the row non-pressable when the control is the only target — two overlappi
 | `className` | `string` | — |  |
 | `disabled` | `boolean` | — |  |
 | `size` | `ItemSize` | `default` | Row density. `Item.Media`, `Item.Title` and `Item.Description` follow it, so it only needs setting here. |
+| `orientation` | `ItemOrientation` | `horizontal` | `horizontal` is the list row: media, text and actions side by side. `vertical` stacks them into a card, which is what a horizontal carousel wants — and it is also what `Item.Header` and `Item.Footer` need, since both are full-width strips. |
 
 ### Item.Group
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `orientation` | `ItemOrientation` | `horizontal` | `vertical` stacks the items — the settings-list shape. `horizontal` runs them across instead, for a carousel; pair it with a scrollable and `orientation="vertical"` on each item so every entry reads as a card. |
 
 ### Item.Separator
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `orientation` | `ItemOrientation` | `horizontal` | Match the group's axis: a horizontal group needs vertical hairlines. |
 
 ### Item.Media
 
@@ -278,6 +327,11 @@ Give the item an `onPress` and it renders as an `AnimatedPressable` with `access
 
 `size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.
 
-### Header and footer
+### The two axes
 
-Both are full-width strips, which means they only make sense once the item itself is a column: `<Item className="flex-col items-start">`. In the default row layout they will sit inline with everything else.
+`orientation` means something different on the item and on the group, and they are independent:
+
+- On **`Item`** it decides whether the item's own parts sit side by side (`horizontal`, the default list row) or stack (`vertical`, a card).
+- On **`Item.Group`** it decides whether the items run down the screen (`vertical`, the default) or across it (`horizontal`, a carousel).
+
+`Item.Header` and `Item.Footer` are full-width strips, so they need `orientation="vertical"` on the item. `Item.Separator` takes the prop too — a horizontal group needs vertical hairlines.

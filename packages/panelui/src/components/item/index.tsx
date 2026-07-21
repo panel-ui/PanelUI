@@ -9,7 +9,7 @@
  *
  * ```tsx
  * <Item variant="outline">
- *   <Item.Media variant="icon"><FileIcon /></Item.Media>
+ *   <Item.Media variant="icon"><ReceiptIcon /></Item.Media>
  *   <Item.Content>
  *     <Item.Title>Invoice.pdf</Item.Title>
  *     <Item.Description>2.4 MB · Updated yesterday</Item.Description>
@@ -17,6 +17,12 @@
  *   <Item.Actions><Button size="sm">Open</Button></Item.Actions>
  * </Item>
  * ```
+ *
+ * Two axes, and they are independent. `orientation` on the item decides
+ * whether its own parts sit side by side or stack into a card; `orientation`
+ * on `Item.Group` decides whether the items themselves run down the screen or
+ * across it. A carousel wants both set to the non-default: a horizontal group
+ * of vertical items.
  */
 import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import { View, type ViewProps } from 'react-native';
@@ -26,10 +32,11 @@ import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 
 type ItemSize = 'default' | 'sm' | 'xs';
+type ItemOrientation = 'horizontal' | 'vertical';
 
 const itemVariants = tv({
   slots: {
-    root: 'w-full flex-row items-center gap-3 rounded-xl',
+    root: 'gap-3 rounded-xl',
     title: 'font-medium text-foreground',
     description: 'text-muted-foreground',
   },
@@ -44,6 +51,12 @@ const itemVariants = tv({
       sm: { root: 'p-3', title: 'text-sm', description: 'text-xs' },
       xs: { root: 'gap-2 p-2', title: 'text-sm', description: 'text-xs' },
     },
+    orientation: {
+      /** Media, text and actions side by side — the list-row shape. */
+      horizontal: { root: 'w-full flex-row items-center' },
+      /** Stacked into a card — the shape a horizontal carousel wants. */
+      vertical: { root: 'flex-col items-start' },
+    },
     disabled: {
       true: { root: 'opacity-[0.64]' },
     },
@@ -51,11 +64,15 @@ const itemVariants = tv({
   defaultVariants: {
     variant: 'default',
     size: 'default',
+    orientation: 'horizontal',
   },
 });
 
-/** Sub-components inherit the row's density rather than repeating it. */
-const ItemContext = createContext<{ size: ItemSize }>({ size: 'default' });
+/** Sub-components inherit the row's density and axis rather than repeating them. */
+const ItemContext = createContext<{ size: ItemSize; orientation: ItemOrientation }>({
+  size: 'default',
+  orientation: 'horizontal',
+});
 
 const mediaVariants = tv({
   base: 'shrink-0 items-center justify-center',
@@ -98,6 +115,13 @@ export interface ItemProps
    * so it only needs setting here.
    */
   size?: ItemSize;
+  /**
+   * `horizontal` is the list row: media, text and actions side by side.
+   * `vertical` stacks them into a card, which is what a horizontal carousel
+   * wants — and it is also what `Item.Header` and `Item.Footer` need, since
+   * both are full-width strips.
+   */
+  orientation?: ItemOrientation;
   children?: ReactNode;
 }
 
@@ -106,8 +130,20 @@ export interface ItemProps
  * so a static row does not announce itself as a button.
  */
 const ItemRoot = forwardRef<View, ItemProps>(
-  ({ className, variant, size = 'default', disabled, children, onPress, ...props }, ref) => {
-    const { root } = itemVariants({ variant, size, disabled: !!disabled });
+  (
+    {
+      className,
+      variant,
+      size = 'default',
+      orientation = 'horizontal',
+      disabled,
+      children,
+      onPress,
+      ...props
+    },
+    ref
+  ) => {
+    const { root } = itemVariants({ variant, size, orientation, disabled: !!disabled });
 
     const body = !onPress ? (
       <View
@@ -133,7 +169,7 @@ const ItemRoot = forwardRef<View, ItemProps>(
     );
 
     return (
-      <ItemContext.Provider value={{ size }}>{body}</ItemContext.Provider>
+      <ItemContext.Provider value={{ size, orientation }}>{body}</ItemContext.Provider>
     );
   }
 );
@@ -141,16 +177,27 @@ ItemRoot.displayName = 'Item';
 
 export interface ItemGroupProps extends ViewProps {
   className?: string;
+  /**
+   * `vertical` stacks the items — the settings-list shape. `horizontal` runs
+   * them across instead, for a carousel; pair it with a scrollable and
+   * `orientation="vertical"` on each item so every entry reads as a card.
+   */
+  orientation?: ItemOrientation;
   children?: ReactNode;
 }
 
-/** Stack of items. Pair with `Item.Separator` between rows. */
+/** Stack of items. Pair with `Item.Separator` between them. */
 const ItemGroup = forwardRef<View, ItemGroupProps>(
-  ({ className, children, ...props }, ref) => (
+  ({ className, orientation = 'vertical', children, ...props }, ref) => (
     <View
       ref={ref}
       accessibilityRole="list"
-      className={cn('w-full', className)}
+      className={cn(
+        orientation === 'horizontal'
+          ? 'flex-row items-stretch gap-3'
+          : 'w-full',
+        className
+      )}
       {...props}
     >
       {children}
@@ -161,12 +208,22 @@ ItemGroup.displayName = 'Item.Group';
 
 export interface ItemSeparatorProps extends ViewProps {
   className?: string;
+  /** Match the group's axis: a horizontal group needs vertical hairlines. */
+  orientation?: ItemOrientation;
 }
 
 /** Hairline between rows in a group. */
 const ItemSeparator = forwardRef<View, ItemSeparatorProps>(
-  ({ className, ...props }, ref) => (
-    <View ref={ref} className={cn('h-px w-full bg-border', className)} {...props} />
+  ({ className, orientation = 'vertical', ...props }, ref) => (
+    <View
+      ref={ref}
+      className={cn(
+        orientation === 'horizontal' ? 'h-full w-px' : 'h-px w-full',
+        'bg-border',
+        className
+      )}
+      {...props}
+    />
   )
 );
 ItemSeparator.displayName = 'Item.Separator';
@@ -201,13 +258,29 @@ export interface ItemContentProps extends ViewProps {
   children?: ReactNode;
 }
 
-/** The text column. Takes the remaining width so actions stay pinned right. */
+/**
+ * The text column. In a horizontal item it takes the remaining width so the
+ * actions stay pinned to the trailing edge; in a vertical one it just fills
+ * the width, because there is nothing beside it to push against.
+ */
 const ItemContent = forwardRef<View, ItemContentProps>(
-  ({ className, children, ...props }, ref) => (
-    <View ref={ref} className={cn('flex-1 gap-0.5', className)} {...props}>
-      {children}
-    </View>
-  )
+  ({ className, children, ...props }, ref) => {
+    const { orientation } = useContext(ItemContext);
+
+    return (
+      <View
+        ref={ref}
+        className={cn(
+          orientation === 'horizontal' ? 'flex-1' : 'w-full',
+          'gap-0.5',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </View>
+    );
+  }
 );
 ItemContent.displayName = 'Item.Content';
 
@@ -265,8 +338,9 @@ export interface ItemHeaderProps extends ViewProps {
 }
 
 /**
- * Full-width strip above the row's main content — an eyebrow label, a badge
- * row. Requires the item to be laid out as a column (`className="flex-col"`).
+ * Full-width strip above the item's main content — an eyebrow label, a badge
+ * row. Needs `orientation="vertical"` on the item, since a strip only makes
+ * sense once the item stacks.
  */
 const ItemHeader = forwardRef<View, ItemHeaderProps>(
   ({ className, children, ...props }, ref) => (

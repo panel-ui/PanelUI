@@ -116,7 +116,7 @@ Anything `TextInput` accepts works here.
 | `description` | `string` | — |  |
 | `errorMessage` | `string` | — | Error message. When set, the field renders in its invalid state. |
 | `disabled` | `boolean` | — |  |
-| `avoidKeyboard` | `boolean` | `false` | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. |
+| `avoidKeyboard` | `boolean` | `false` | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. Install `react-native-keyboard-controller` for this to behave on Android. Do not toggle this at runtime — it changes which component renders the container, which would remount the field and drop focus. |
 | `keyboardOffset` | `number` | `16` | Gap kept between the field and the keyboard when `avoidKeyboard` is set. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
@@ -129,6 +129,14 @@ Accepts every `TextInputProps`. The placeholder colour is resolved from the them
 
 `avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.
 
-The translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).
+Install `react-native-keyboard-controller` for this to behave on Android:
+
+```sh
+npx expo install react-native-keyboard-controller
+```
+
+It is an optional peer, and `PanelUIProvider` mounts its `KeyboardProvider` for you when it is present. Without it the hook falls back to Reanimated's `useAnimatedKeyboard`, which is deprecated in Reanimated 4 and — merely by being called — switches Android out of `adjustResize` for the whole app.
+
+Use `keyboardOffset` to change the gap it keeps (16px by default). Do not toggle `avoidKeyboard` at runtime: it changes which component renders the container, which would remount the field and drop focus.
 
 For anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly.

@@ -400,7 +400,7 @@
   "input": {
     "intro": "A text field with an optional label, description and error message. Passing `errorMessage` puts the field in its invalid state and replaces the description.",
     "usage": "<Input label=\"Email\" placeholder=\"you@example.com\" />\n\n<Input\n  label=\"Description\"\n  placeholder=\"A short description\"\n  description=\"Shown on your public profile.\"\n/>\n\n<Input\n  label=\"Email\"\n  value={email}\n  onChangeText={setEmail}\n  errorMessage={error}\n/>\n\n// Lifts clear of the software keyboard when it would be covered.\n<Input avoidKeyboard label=\"Comment\" placeholder=\"Say something…\" />",
-    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.\n\n### Avoiding the keyboard\n\n`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.\n\nThe translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).\n\nFor anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly.",
+    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.\n\n### Avoiding the keyboard\n\n`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.\n\nInstall `react-native-keyboard-controller` for this to behave on Android:\n\n```sh\nnpx expo install react-native-keyboard-controller\n```\n\nIt is an optional peer, and `PanelUIProvider` mounts its `KeyboardProvider` for you when it is present. Without it the hook falls back to Reanimated's `useAnimatedKeyboard`, which is deprecated in Reanimated 4 and — merely by being called — switches Android out of `adjustResize` for the whole app.\n\nUse `keyboardOffset` to change the gap it keeps (16px by default). Do not toggle `avoidKeyboard` at runtime: it changes which component renders the container, which would remount the field and drop focus.\n\nFor anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly.",
     "examples": [
       {
         "title": "Label, description and error",
@@ -866,27 +866,28 @@
   },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",
-    "usage": "<ScrollFade>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag}>{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>\n\n// Vertical: no `horizontal` on the child, so the fades move to\n// the top and bottom edges.\n<ScrollFade className=\"h-56\">\n  <ScrollView>\n    {events.map((event) => (\n      <Row key={event.id} {...event} />\n    ))}\n  </ScrollView>\n</ScrollFade>\n\n// Fade only the trailing edge, on a card surface.\n<ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n  <FlatList horizontal data={items} renderItem={renderItem} />\n</ScrollFade>",
+    "usage": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>",
     "extraImports": [
-      "Badge",
-      "Card"
+      "Item",
+      "PackageIcon",
+      "CheckIcon"
     ],
     "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend.",
     "examples": [
       {
-        "title": "A horizontal row",
-        "description": "Orientation is read from the child’s `horizontal` prop, so this fades left and right.",
-        "code": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag} variant=\"secondary\">{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>"
+        "title": "A horizontal row of cards",
+        "description": "A horizontal group of vertical items: each entry is a card, and the fade is what tells you there are more of them past the edge.",
+        "code": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
       },
       {
         "title": "A vertical list",
         "description": "No `horizontal` on the child, so the fades move to the top and bottom edges.",
-        "code": "<ScrollFade className=\"h-56\">\n  <ScrollView showsVerticalScrollIndicator={false}>\n    {events.map((event) => (\n      <Row key={event.id} {...event} />\n    ))}\n  </ScrollView>\n</ScrollFade>"
+        "code": "<ScrollFade size={44} className=\"h-72\">\n  <ScrollView showsVerticalScrollIndicator={false}>\n    <Item.Group>\n      {events.map((event, index) => (\n        <Fragment key={event.id}>\n          {index > 0 && <Item.Separator />}\n          <Item size=\"sm\">\n            <Item.Media variant=\"icon\"><CheckIcon size={14} /></Item.Media>\n            <Item.Content>\n              <Item.Title>{event.title}</Item.Title>\n              <Item.Description>{event.when}</Item.Description>\n            </Item.Content>\n          </Item>\n        </Fragment>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
       },
       {
         "title": "One edge, on a card",
         "description": "The fade resolves to the theme background by default — pass `color` when the scrollable sits on another surface, or it will not blend.",
-        "code": "<Card>\n  <Card.Content>\n    <ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n      <FlatList horizontal data={items} renderItem={renderItem} />\n    </ScrollFade>\n  </Card.Content>\n</Card>"
+        "code": "<Card>\n  <Card.Content>\n    <ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n      <ScrollView horizontal>\n        <Item.Group orientation=\"horizontal\">{/* … */}</Item.Group>\n      </ScrollView>\n    </ScrollFade>\n  </Card.Content>\n</Card>"
       },
       {
         "title": "With your own scroll handler",
@@ -910,7 +911,8 @@
       "Text",
       "ReceiptIcon",
       "BellIcon",
-      "ChevronRightIcon"
+      "ChevronRightIcon",
+      "PackageIcon"
     ],
     "anatomy": "<Item.Group>\n  <Item>\n    <Item.Header>…</Item.Header>\n    <Item.Media>…</Item.Media>\n    <Item.Content>\n      <Item.Title>…</Item.Title>\n      <Item.Description>…</Item.Description>\n    </Item.Content>\n    <Item.Actions>…</Item.Actions>\n    <Item.Footer>…</Item.Footer>\n  </Item>\n  <Item.Separator />\n</Item.Group>",
     "parts": {
@@ -924,7 +926,7 @@
       "Header": "Full-width strip above the row content. Needs the item laid out as a column.",
       "Footer": "Full-width strip below the row content."
     },
-    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### Header and footer\n\nBoth are full-width strips, which means they only make sense once the item itself is a column: `<Item className=\"flex-col items-start\">`. In the default row layout they will sit inline with everything else.",
+    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### The two axes\n\n`orientation` means something different on the item and on the group, and they are independent:\n\n- On **`Item`** it decides whether the item's own parts sit side by side (`horizontal`, the default list row) or stack (`vertical`, a card).\n- On **`Item.Group`** it decides whether the items run down the screen (`vertical`, the default) or across it (`horizontal`, a carousel).\n\n`Item.Header` and `Item.Footer` are full-width strips, so they need `orientation=\"vertical\"` on the item. `Item.Separator` takes the prop too — a horizontal group needs vertical hairlines.",
     "examples": [
       {
         "title": "A file row",
@@ -941,19 +943,25 @@
         "code": "<Item.Media variant=\"icon\"><BellIcon size={18} /></Item.Media>\n\n<Item.Media variant=\"image\">\n  <Image source={{ uri: product.image }} className=\"h-full w-full\" />\n</Item.Media>\n\n<Item.Media>\n  <Avatar size=\"md\" source={{ uri: user.avatar }} fallback=\"KA\" />\n</Item.Media>"
       },
       {
-        "title": "A header and footer",
-        "description": "Both are full-width strips, so the item has to be laid out as a column.",
-        "code": "<Item variant=\"outline\" className=\"flex-col items-start gap-2\">\n  <Item.Header>\n    <Badge variant=\"secondary\">Draft</Badge>\n    <Text size=\"xs\" muted>Updated 2h ago</Text>\n  </Item.Header>\n  <Item.Content>\n    <Item.Title>Quarterly report</Item.Title>\n    <Item.Description>Revenue, retention and headcount.</Item.Description>\n  </Item.Content>\n  <Item.Footer>\n    <Button size=\"sm\" variant=\"outline\">Preview</Button>\n    <Button size=\"sm\">Publish</Button>\n  </Item.Footer>\n</Item>"
-      },
-      {
         "title": "With a switch",
         "description": "Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.",
         "code": "<Item size=\"sm\">\n  <Item.Content>\n    <Item.Title>Push notifications</Item.Title>\n    <Item.Description>Alerts on this device.</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Switch value={push} onValueChange={setPush} />\n  </Item.Actions>\n</Item>"
+      },
+      {
+        "title": "A horizontal group of cards",
+        "description": "Two independent axes. `orientation` on the group runs the items across the screen instead of down it; `orientation` on each item stacks its own parts into a card. A carousel wants both.",
+        "code": "<ScrollView horizontal showsHorizontalScrollIndicator={false}>\n  <Item.Group orientation=\"horizontal\">\n    {plans.map((plan) => (\n      <Item\n        key={plan.id}\n        orientation=\"vertical\"\n        variant=\"outline\"\n        className=\"w-48\"\n      >\n        <Item.Media variant=\"icon\">\n          <PackageIcon size={18} />\n        </Item.Media>\n        <Item.Content>\n          <Item.Title>{plan.name}</Item.Title>\n          <Item.Description>{plan.summary}</Item.Description>\n        </Item.Content>\n        <Item.Footer>\n          <Text weight=\"semibold\">{plan.price}</Text>\n        </Item.Footer>\n      </Item>\n    ))}\n  </Item.Group>\n</ScrollView>"
+      },
+      {
+        "title": "A vertical item",
+        "description": "`orientation=\"vertical\"` is also what `Item.Header` and `Item.Footer` need — both are full-width strips, so they only make sense once the item stacks.",
+        "code": "<Item orientation=\"vertical\" variant=\"outline\">\n  <Item.Header>\n    <Badge variant=\"secondary\">Draft</Badge>\n    <Text size=\"xs\" muted>Updated 2h ago</Text>\n  </Item.Header>\n  <Item.Content>\n    <Item.Title>Quarterly report</Item.Title>\n    <Item.Description>Revenue, retention and headcount.</Item.Description>\n  </Item.Content>\n  <Item.Footer>\n    <Button size=\"sm\" variant=\"outline\">Preview</Button>\n    <Button size=\"sm\">Publish</Button>\n  </Item.Footer>\n</Item>"
       }
     ],
     "variantCode": {
       "variant": "<Item variant=\"default\">…</Item>\n<Item variant=\"outline\">…</Item>\n<Item variant=\"muted\">…</Item>",
-      "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>"
+      "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>",
+      "orientation": "{/* The list row — media, text and actions side by side. */}\n<Item orientation=\"horizontal\">…</Item>\n\n{/* Stacked into a card, for a carousel or for Header/Footer. */}\n<Item orientation=\"vertical\">…</Item>\n\n{/* The group has its own axis, independent of the items' own. */}\n<Item.Group orientation=\"horizontal\">…</Item.Group>"
     }
   },
   "message": {

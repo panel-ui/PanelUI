@@ -1,0 +1,175 @@
+---
+title: Item
+description: Row of media, text and actions for lists and settings.
+---
+
+A row of content: media on one side, a title and description in the middle, actions on the other.
+
+It is the shape almost every list in an app already has — a settings row, a file in a picker, a member in a team list, a tool call in a transcript — so it exists as one composable primitive instead of being rebuilt per screen with slightly different padding each time.
+
+## Installation
+
+Item ships with the library — no separate install.
+
+```tsx
+import { Item, Button, FileIcon, ChevronRightIcon } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Item variant="outline">
+  <Item.Media variant="icon">
+    <FileIcon size={18} />
+  </Item.Media>
+  <Item.Content>
+    <Item.Title>Invoice.pdf</Item.Title>
+    <Item.Description>2.4 MB · Updated yesterday</Item.Description>
+  </Item.Content>
+  <Item.Actions>
+    <Button size="sm" variant="outline">Open</Button>
+  </Item.Actions>
+</Item>
+
+// Pressable rows. Without onPress it renders as a plain view and does not
+// announce itself as a button.
+<Item.Group>
+  <Item size="sm" onPress={() => open(file)}>
+    <Item.Content>
+      <Item.Title>Notifications</Item.Title>
+      <Item.Description>Push, email and in-app</Item.Description>
+    </Item.Content>
+    <Item.Actions>
+      <ChevronRightIcon size={16} />
+    </Item.Actions>
+  </Item>
+  <Item.Separator />
+  <Item size="sm" onPress={() => open(privacy)}>
+    <Item.Content>
+      <Item.Title>Privacy</Item.Title>
+    </Item.Content>
+  </Item>
+</Item.Group>
+```
+
+## Composition
+
+```tsx
+<Item.Group>
+  <Item>
+    <Item.Header>…</Item.Header>
+    <Item.Media>…</Item.Media>
+    <Item.Content>
+      <Item.Title>…</Item.Title>
+      <Item.Description>…</Item.Description>
+    </Item.Content>
+    <Item.Actions>…</Item.Actions>
+    <Item.Footer>…</Item.Footer>
+  </Item>
+  <Item.Separator />
+</Item.Group>
+```
+
+- **`Item.Group`** — Stack of rows. Announces itself as a list.
+- **`Item.Separator`** — Hairline between rows in a group.
+- **`Item.Media`** — Leading slot — an icon tile, a thumbnail, or an avatar passed straight through.
+- **`Item.Content`** — The text column. Takes the remaining width so actions stay pinned to the trailing edge.
+- **`Item.Title`** — Primary line. Its size follows the item.
+- **`Item.Description`** — Secondary line, muted. Its size follows the item.
+- **`Item.Actions`** — Trailing slot — buttons, a chevron, a switch.
+- **`Item.Header`** — Full-width strip above the row content. Needs the item laid out as a column.
+- **`Item.Footer`** — Full-width strip below the row content.
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `outline`
+- `muted`
+
+### `size`
+
+- `default` *(default)*
+- `sm`
+- `xs`
+
+## API Reference
+
+### Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `disabled` | `boolean` | — |  |
+| `size` | `ItemSize` | `default` | Row density. `Item.Media`, `Item.Title` and `Item.Description` follow it, so it only needs setting here. |
+
+### Item.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Item.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Pressable or not
+
+Give the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole="button"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.
+
+### Density
+
+`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.
+
+### Header and footer
+
+Both are full-width strips, which means they only make sense once the item itself is a column: `<Item className="flex-col items-start">`. In the default row layout they will sit inline with everything else.

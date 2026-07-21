@@ -1,0 +1,173 @@
+---
+title: Message
+description: Chat turn with avatar, bubble, header and footer.
+---
+
+A chat turn: avatar, bubble, and the metadata around it.
+
+The pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.
+
+## Installation
+
+Message ships with the library — no separate install.
+
+```tsx
+import { Message, Avatar } from 'panelui-native';
+```
+
+## Usage
+
+```tsx
+<Message>
+  <Message.Avatar>
+    <Avatar size="sm" fallback="KA" />
+  </Message.Avatar>
+  <Message.Content>
+    <Message.Bubble>
+      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>
+    </Message.Bubble>
+  </Message.Content>
+</Message>
+
+// The outgoing side.
+<Message align="end">
+  <Message.Content>
+    <Message.Bubble>
+      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>
+    </Message.Bubble>
+    <Message.Footer>Read</Message.Footer>
+  </Message.Content>
+</Message>
+
+// Consecutive turns from one sender.
+<Message.Group align="start">
+  <Message>
+    <Message.Avatar><Avatar size="sm" fallback="AI" /></Message.Avatar>
+    <Message.Content>
+      <Message.Header>Assistant</Message.Header>
+      <Message.Bubble>
+        <Message.BubbleContent>Looking that up…</Message.BubbleContent>
+      </Message.Bubble>
+    </Message.Content>
+  </Message>
+  <Message>
+    <Message.Avatar><Avatar size="sm" fallback="AI" /></Message.Avatar>
+    <Message.Content>
+      <Message.Bubble>
+        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>
+      </Message.Bubble>
+    </Message.Content>
+  </Message>
+</Message.Group>
+```
+
+## Composition
+
+```tsx
+<Message.Group>
+  <Message align="start">
+    <Message.Avatar>…</Message.Avatar>
+    <Message.Content>
+      <Message.Header>…</Message.Header>
+      <Message.Bubble>
+        <Message.BubbleContent>…</Message.BubbleContent>
+      </Message.Bubble>
+      <Message.Actions>…</Message.Actions>
+      <Message.Footer>…</Message.Footer>
+    </Message.Content>
+  </Message>
+</Message.Group>
+```
+
+- **`Message.Group`** — Consecutive turns from one sender. Tightens spacing and stacks them.
+- **`Message.Avatar`** — Slot for the sender avatar. Reserved but emptied on a stacked message.
+- **`Message.Content`** — Column holding the header, bubble, actions and footer.
+- **`Message.Header`** — Sender name or timestamp above the bubble.
+- **`Message.Bubble`** — The speech bubble. Takes its colour and squared corner from align.
+- **`Message.BubbleContent`** — Text inside the bubble, in whichever colour reads against it.
+- **`Message.Footer`** — Delivery state or timestamp below the bubble.
+- **`Message.Actions`** — Row of controls under the bubble — copy, retry, feedback.
+
+## Variants
+
+### `align`
+
+- `start` *(default)*
+- `end`
+
+## API Reference
+
+### Message
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `align` | `Align` | `start` | Which side of the conversation this turn belongs to. `end` is the outgoing side — the person holding the device. |
+| `stacked` | `boolean` | — | Continuation of the message above it: tighter spacing, and the avatar slot is reserved but left empty so bubbles stay aligned. `Message.Group` sets this for you. |
+
+### Message.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `align` | `Align` | `start` | Alignment applied to every Message inside that does not set its own. |
+
+### Message.Avatar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.Bubble
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.BubbleContent
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Message.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Alignment
+
+`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).
+
+Set it on `Message.Group` instead and every message inside inherits it.
+
+### Grouping
+
+`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.
+
+### In a list
+
+Render a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.

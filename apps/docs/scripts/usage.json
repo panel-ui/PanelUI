@@ -309,5 +309,46 @@
       "Badge"
     ],
     "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend."
+  },
+  "item": {
+    "intro": "A row of content: media on one side, a title and description in the middle, actions on the other.\n\nIt is the shape almost every list in an app already has — a settings row, a file in a picker, a member in a team list, a tool call in a transcript — so it exists as one composable primitive instead of being rebuilt per screen with slightly different padding each time.",
+    "usage": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <FileIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>\n\n// Pressable rows. Without onPress it renders as a plain view and does not\n// announce itself as a button.\n<Item.Group>\n  <Item size=\"sm\" onPress={() => open(file)}>\n    <Item.Content>\n      <Item.Title>Notifications</Item.Title>\n      <Item.Description>Push, email and in-app</Item.Description>\n    </Item.Content>\n    <Item.Actions>\n      <ChevronRightIcon size={16} />\n    </Item.Actions>\n  </Item>\n  <Item.Separator />\n  <Item size=\"sm\" onPress={() => open(privacy)}>\n    <Item.Content>\n      <Item.Title>Privacy</Item.Title>\n    </Item.Content>\n  </Item>\n</Item.Group>",
+    "extraImports": [
+      "Button",
+      "FileIcon",
+      "ChevronRightIcon"
+    ],
+    "anatomy": "<Item.Group>\n  <Item>\n    <Item.Header>…</Item.Header>\n    <Item.Media>…</Item.Media>\n    <Item.Content>\n      <Item.Title>…</Item.Title>\n      <Item.Description>…</Item.Description>\n    </Item.Content>\n    <Item.Actions>…</Item.Actions>\n    <Item.Footer>…</Item.Footer>\n  </Item>\n  <Item.Separator />\n</Item.Group>",
+    "parts": {
+      "Group": "Stack of rows. Announces itself as a list.",
+      "Separator": "Hairline between rows in a group.",
+      "Media": "Leading slot — an icon tile, a thumbnail, or an avatar passed straight through.",
+      "Content": "The text column. Takes the remaining width so actions stay pinned to the trailing edge.",
+      "Title": "Primary line. Its size follows the item.",
+      "Description": "Secondary line, muted. Its size follows the item.",
+      "Actions": "Trailing slot — buttons, a chevron, a switch.",
+      "Header": "Full-width strip above the row content. Needs the item laid out as a column.",
+      "Footer": "Full-width strip below the row content."
+    },
+    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### Header and footer\n\nBoth are full-width strips, which means they only make sense once the item itself is a column: `<Item className=\"flex-col items-start\">`. In the default row layout they will sit inline with everything else."
+  },
+  "message": {
+    "intro": "A chat turn: avatar, bubble, and the metadata around it.\n\nThe pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.",
+    "usage": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" fallback=\"KA\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n// The outgoing side.\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>\n\n// Consecutive turns from one sender.\n<Message.Group align=\"start\">\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Header>Assistant</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>Looking that up…</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Bubble>\n        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n</Message.Group>",
+    "extraImports": [
+      "Avatar"
+    ],
+    "anatomy": "<Message.Group>\n  <Message align=\"start\">\n    <Message.Avatar>…</Message.Avatar>\n    <Message.Content>\n      <Message.Header>…</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>…</Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Actions>…</Message.Actions>\n      <Message.Footer>…</Message.Footer>\n    </Message.Content>\n  </Message>\n</Message.Group>",
+    "parts": {
+      "Group": "Consecutive turns from one sender. Tightens spacing and stacks them.",
+      "Avatar": "Slot for the sender avatar. Reserved but emptied on a stacked message.",
+      "Content": "Column holding the header, bubble, actions and footer.",
+      "Header": "Sender name or timestamp above the bubble.",
+      "Bubble": "The speech bubble. Takes its colour and squared corner from align.",
+      "BubbleContent": "Text inside the bubble, in whichever colour reads against it.",
+      "Actions": "Row of controls under the bubble — copy, retry, feedback.",
+      "Footer": "Delivery state or timestamp below the bubble."
+    },
+    "notes": "### Alignment\n\n`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).\n\nSet it on `Message.Group` instead and every message inside inherits it.\n\n### Grouping\n\n`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.\n\n### In a list\n\nRender a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows."
   }
 }

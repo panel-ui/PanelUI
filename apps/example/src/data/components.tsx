@@ -33,7 +33,10 @@ import {
   InlineSelect,
   Input,
   InputGroup,
+  Item,
   Label,
+  Message,
+  PackageIcon,
   PlusSquareIcon,
   Progress,
   RadioGroup,
@@ -1674,6 +1677,147 @@ export const COMPONENTS: ComponentEntry[] = [
     ],
   },
   {
+    slug: 'item',
+    name: 'Item',
+    summary: 'Row of media, text and actions',
+    demos: [
+      {
+        label: 'Variants',
+        render: () => (
+          <View className="w-full gap-3">
+            {(['default', 'outline', 'muted'] as const).map((variant) => (
+              <Item key={variant} variant={variant}>
+                <Item.Media variant="icon">
+                  <PackageIcon size={18} />
+                </Item.Media>
+                <Item.Content>
+                  <Item.Title>{variant}</Item.Title>
+                  <Item.Description>
+                    The {variant} surface treatment.
+                  </Item.Description>
+                </Item.Content>
+                <Item.Actions>
+                  <Badge variant="secondary">New</Badge>
+                </Item.Actions>
+              </Item>
+            ))}
+          </View>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-3">
+            {(['default', 'sm', 'xs'] as const).map((size) => (
+              <Item key={size} variant="outline" size={size}>
+                <Item.Media variant="icon">
+                  <ReceiptIcon size={size === 'xs' ? 12 : 16} />
+                </Item.Media>
+                <Item.Content>
+                  <Item.Title>Size {size}</Item.Title>
+                  <Item.Description>
+                    Media, title and description all follow it.
+                  </Item.Description>
+                </Item.Content>
+              </Item>
+            ))}
+          </View>
+        ),
+      },
+      {
+        label: 'Media types',
+        render: () => (
+          <View className="w-full gap-3">
+            <Item variant="outline">
+              <Item.Media variant="icon">
+                <BellIcon size={18} />
+              </Item.Media>
+              <Item.Content>
+                <Item.Title>Icon tile</Item.Title>
+                <Item.Description>variant=&quot;icon&quot;</Item.Description>
+              </Item.Content>
+            </Item>
+
+            <Item variant="outline">
+              <Item.Media variant="image">
+                <Image source={{ uri: PHOTO }} className="h-full w-full" />
+              </Item.Media>
+              <Item.Content>
+                <Item.Title>Thumbnail</Item.Title>
+                <Item.Description>variant=&quot;image&quot;</Item.Description>
+              </Item.Content>
+            </Item>
+
+            <Item variant="outline">
+              <Item.Media>
+                <Avatar size="md" source={{ uri: AVATARS[0] }} fallback="KA" />
+              </Item.Media>
+              <Item.Content>
+                <Item.Title>Avatar passed through</Item.Title>
+                <Item.Description>
+                  The default media variant adds no box.
+                </Item.Description>
+              </Item.Content>
+            </Item>
+          </View>
+        ),
+      },
+      {
+        label: 'A settings group',
+        render: () => (
+          <Card className="w-full overflow-hidden">
+            <Item.Group>
+              {[
+                ['Notifications', 'Push, email and in-app'],
+                ['Privacy', 'Who can see your activity'],
+                ['Appearance', 'Theme and text size'],
+              ].map(([title, description], index) => (
+                <View key={title}>
+                  {index > 0 ? <Item.Separator /> : null}
+                  <Item size="sm" onPress={() => {}}>
+                    <Item.Content>
+                      <Item.Title>{title}</Item.Title>
+                      <Item.Description>{description}</Item.Description>
+                    </Item.Content>
+                    <Item.Actions>
+                      <ChevronRightIcon size={16} />
+                    </Item.Actions>
+                  </Item>
+                </View>
+              ))}
+            </Item.Group>
+          </Card>
+        ),
+      },
+      {
+        label: 'Header and footer',
+        render: () => (
+          // Both are full-width strips, so the item has to be a column.
+          <Item variant="outline" className="flex-col items-start gap-2">
+            <Item.Header>
+              <Badge variant="secondary">Draft</Badge>
+              <Text size="xs" muted>
+                Updated 2h ago
+              </Text>
+            </Item.Header>
+            <Item.Content>
+              <Item.Title>Quarterly report</Item.Title>
+              <Item.Description>
+                Revenue, retention and headcount for Q3.
+              </Item.Description>
+            </Item.Content>
+            <Item.Footer>
+              <Button size="sm" variant="outline">
+                Preview
+              </Button>
+              <Button size="sm">Publish</Button>
+            </Item.Footer>
+          </Item>
+        ),
+      },
+    ],
+  },
+  {
     slug: 'label',
     name: 'Label',
     summary: 'Form field label with required and invalid states',
@@ -1711,6 +1855,127 @@ export const COMPONENTS: ComponentEntry[] = [
               </Label.Text>
             </Label>
             <Input placeholder="sk-…" />
+          </View>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'message',
+    name: 'Message',
+    summary: 'Chat turn with avatar, bubble and metadata',
+    demos: [
+      {
+        label: 'Both sides',
+        render: () => (
+          <View className="w-full gap-3">
+            <Message>
+              <Message.Avatar>
+                <Avatar size="sm" source={{ uri: AVATARS[1] }} fallback="OL" />
+              </Message.Avatar>
+              <Message.Content>
+                <Message.Bubble>
+                  <Message.BubbleContent>
+                    How can I help you today?
+                  </Message.BubbleContent>
+                </Message.Bubble>
+              </Message.Content>
+            </Message>
+
+            <Message align="end">
+              <Message.Content>
+                <Message.Bubble>
+                  <Message.BubbleContent>
+                    Set a reminder for 9am tomorrow.
+                  </Message.BubbleContent>
+                </Message.Bubble>
+                <Message.Footer>Read</Message.Footer>
+              </Message.Content>
+            </Message>
+          </View>
+        ),
+      },
+      {
+        label: 'Header and footer',
+        render: () => (
+          <View className="w-full gap-3">
+            <Message>
+              <Message.Avatar>
+                <Avatar size="sm" source={{ uri: AVATARS[2] }} fallback="OL" />
+              </Message.Avatar>
+              <Message.Content>
+                <Message.Header>Olivia</Message.Header>
+                <Message.Bubble>
+                  <Message.BubbleContent>
+                    I pushed the fix — can you take another look?
+                  </Message.BubbleContent>
+                </Message.Bubble>
+                <Message.Footer>Yesterday at 18:04</Message.Footer>
+              </Message.Content>
+            </Message>
+          </View>
+        ),
+      },
+      {
+        label: 'Grouped turns',
+        render: () => (
+          // Only the first message keeps its avatar; the rest reserve the slot
+          // so the bubbles stay in one column.
+          <Message.Group align="start" className="w-full">
+            {[
+              'Looking that up…',
+              'Found three matching invoices.',
+              'Want me to export them?',
+            ].map((body) => (
+              <Message key={body}>
+                <Message.Avatar>
+                  <Avatar size="sm" fallback="AI" />
+                </Message.Avatar>
+                <Message.Content>
+                  <Message.Bubble>
+                    <Message.BubbleContent>{body}</Message.BubbleContent>
+                  </Message.Bubble>
+                </Message.Content>
+              </Message>
+            ))}
+          </Message.Group>
+        ),
+      },
+      {
+        label: 'Streaming and actions',
+        render: () => (
+          <View className="w-full gap-3">
+            <Message>
+              <Message.Avatar>
+                <Avatar size="sm" fallback="AI" />
+              </Message.Avatar>
+              <Message.Content>
+                <Message.Bubble>
+                  <Shimmer textClassName="text-base">Thinking…</Shimmer>
+                </Message.Bubble>
+              </Message.Content>
+            </Message>
+
+            <Message>
+              <Message.Avatar>
+                <Avatar size="sm" fallback="AI" />
+              </Message.Avatar>
+              <Message.Content>
+                <Message.Bubble>
+                  <Message.BubbleContent>
+                    Your reminder is set for 9:00 tomorrow.
+                  </Message.BubbleContent>
+                </Message.Bubble>
+                <Message.Actions>
+                  <Button size="sm" variant="ghost">
+                    Copy
+                  </Button>
+                  <Button size="sm" variant="ghost">
+                    Retry
+                  </Button>
+                </Message.Actions>
+              </Message.Content>
+            </Message>
           </View>
         ),
       },

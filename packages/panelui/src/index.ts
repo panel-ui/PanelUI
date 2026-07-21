@@ -87,7 +87,32 @@ export {
   type InputGroupInputProps,
   type InputGroupDecoratorProps,
 } from './components/input-group';
+export {
+  Item,
+  type ItemProps,
+  type ItemGroupProps,
+  type ItemSeparatorProps,
+  type ItemMediaProps,
+  type ItemContentProps,
+  type ItemTitleProps,
+  type ItemDescriptionProps,
+  type ItemActionsProps,
+  type ItemHeaderProps,
+  type ItemFooterProps,
+} from './components/item';
 export { Label, type LabelProps, type LabelTextProps } from './components/label';
+export {
+  Message,
+  type MessageProps,
+  type MessageGroupProps,
+  type MessageAvatarProps,
+  type MessageContentProps,
+  type MessageHeaderProps,
+  type MessageBubbleProps,
+  type MessageBubbleContentProps,
+  type MessageFooterProps,
+  type MessageActionsProps,
+} from './components/message';
 export { Progress, type ProgressProps } from './components/progress';
 export {
   RadioGroup,

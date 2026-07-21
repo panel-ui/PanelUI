@@ -69,10 +69,20 @@
     "Input with leading and trailing decorators.",
     "react native input group"
   ],
+  "item": [
+    "Item",
+    "Row of media, text and actions for lists and settings.",
+    "react native list item component"
+  ],
   "label": [
     "Label",
     "Form field label with required, invalid and disabled states.",
     "react native form label"
+  ],
+  "message": [
+    "Message",
+    "Chat turn with avatar, bubble, header and footer.",
+    "react native chat message component"
   ],
   "progress": [
     "Progress",

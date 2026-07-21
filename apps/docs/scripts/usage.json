@@ -10,7 +10,36 @@
       "Content": "The collapsible body. Unmounts when closed."
     },
     "notes": "Pass an array to `value` / `defaultValue` with `selectionMode=\"multiple\"`. `onValueChange` hands back whatever shape you gave it — a string in single mode, an array in multiple.",
-    "anatomy": "<Accordion>\n  <Accordion.Item value=\"…\">\n    <Accordion.Trigger>\n      <Accordion.Title>…</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>…</Accordion.Content>\n  </Accordion.Item>\n</Accordion>"
+    "anatomy": "<Accordion>\n  <Accordion.Item value=\"…\">\n    <Accordion.Trigger>\n      <Accordion.Title>…</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>…</Accordion.Content>\n  </Accordion.Item>\n</Accordion>",
+    "examples": [
+      {
+        "title": "Single open section",
+        "description": "The default. Opening one section closes the others — use it when the panels are alternatives rather than a checklist.",
+        "code": "<Accordion defaultValue=\"shipping\">\n  <Accordion.Item value=\"shipping\">\n    <Accordion.Trigger>\n      <Accordion.Title>Shipping</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>\n      <Text size=\"sm\" muted>Free over $50. Arrives in 2–4 days.</Text>\n    </Accordion.Content>\n  </Accordion.Item>\n\n  <Accordion.Item value=\"returns\">\n    <Accordion.Trigger>\n      <Accordion.Title>Returns</Accordion.Title>\n      <Accordion.Indicator />\n    </Accordion.Trigger>\n    <Accordion.Content>\n      <Text size=\"sm\" muted>30 days, unopened, receipt required.</Text>\n    </Accordion.Content>\n  </Accordion.Item>\n</Accordion>"
+      },
+      {
+        "title": "Several open at once",
+        "description": "`selectionMode=\"multiple\"` switches `value` from a string to an array.",
+        "code": "<Accordion selectionMode=\"multiple\" defaultValue={['shipping', 'returns']}>\n  {/* …items… */}\n</Accordion>"
+      },
+      {
+        "title": "Controlled",
+        "description": "Drive it from state when something outside the accordion needs to open a section.",
+        "code": "const [open, setOpen] = useState<string>('shipping');\n\n<>\n  <Button onPress={() => setOpen('returns')}>Jump to returns</Button>\n\n  <Accordion value={open} onValueChange={(v) => setOpen(v as string)}>\n    {/* …items… */}\n  </Accordion>\n</>"
+      },
+      {
+        "title": "Disabled section",
+        "description": "A section that exists but cannot be opened yet — an upsell, or a step not reached.",
+        "code": "<Accordion.Item value=\"enterprise\" isDisabled>\n  <Accordion.Trigger>\n    <Accordion.Title>Enterprise billing</Accordion.Title>\n    <Accordion.Indicator />\n  </Accordion.Trigger>\n  <Accordion.Content>\n    <Text size=\"sm\" muted>Contact sales.</Text>\n  </Accordion.Content>\n</Accordion.Item>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Accordion variant=\"default\">…</Accordion>\n<Accordion variant=\"surface\">…</Accordion>\n<Accordion variant=\"separated\">…</Accordion>\n<Accordion variant=\"bordered\">…</Accordion>\n<Accordion variant=\"ghost\">…</Accordion>"
+    },
+    "extraImports": [
+      "Text",
+      "Button"
+    ]
   },
   "alert": {
     "intro": "A status message. `Alert.Indicator` resolves both the icon and its colour from the alert's variant, so it follows the active theme without you passing either.",
@@ -22,24 +51,88 @@
       "Description": "Body text, always muted."
     },
     "notes": "Omit `Alert.Indicator` for a text-only alert. The legacy `icon` prop still renders, but prefer the indicator.",
-    "anatomy": "<Alert>\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>…</Alert.Title>\n    <Alert.Description>…</Alert.Description>\n  </Alert.Content>\n</Alert>"
+    "anatomy": "<Alert>\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>…</Alert.Title>\n    <Alert.Description>…</Alert.Description>\n  </Alert.Content>\n</Alert>",
+    "examples": [
+      {
+        "title": "With a title and description",
+        "description": "The indicator picks its icon from the variant, so most alerts need no `icon` prop.",
+        "code": "<Alert variant=\"warning\">\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>Card expiring</Alert.Title>\n    <Alert.Description>\n      Your card ending 4242 expires next month.\n    </Alert.Description>\n  </Alert.Content>\n</Alert>"
+      },
+      {
+        "title": "Title only",
+        "description": "Drop the description when the title says everything.",
+        "code": "<Alert variant=\"success\">\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>Changes saved</Alert.Title>\n  </Alert.Content>\n</Alert>"
+      },
+      {
+        "title": "A custom icon",
+        "description": "Pass `icon` on the root to replace the variant icon everywhere, or give `Alert.Indicator` children to replace it for one alert.",
+        "code": "<Alert variant=\"info\" icon={<ShieldCheckIcon size={18} />}>\n  <Alert.Indicator />\n  <Alert.Content>\n    <Alert.Title>Two-factor authentication is on</Alert.Title>\n  </Alert.Content>\n</Alert>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Alert variant=\"default\">…</Alert>\n<Alert variant=\"info\">…</Alert>\n<Alert variant=\"success\">…</Alert>\n<Alert variant=\"warning\">…</Alert>\n<Alert variant=\"destructive\">…</Alert>"
+    },
+    "extraImports": [
+      "ShieldCheckIcon"
+    ]
   },
   "avatar": {
     "intro": "A user image that falls back to initials when the source is missing or fails to load.",
     "usage": "<Avatar size=\"lg\" source={{ uri: user.avatarUrl }} fallback=\"KA\" />\n\n<Avatar source={{ uri: user.avatarUrl }} fallback=\"KA\">\n  <Avatar.Badge>\n    <Badge variant=\"destructive\" count={5} />\n  </Avatar.Badge>\n</Avatar>",
-    "extraImports": [
-      "Badge"
-    ],
     "parts": {
       "Badge": "Overlay pinned to the top-right — an unread count or a presence dot."
     },
     "notes": "A plain avatar renders as one clipped node. Adding children wraps it in an unclipped container so a corner badge is not cut in half by the circular mask.",
-    "anatomy": "<Avatar>\n  <Avatar.Badge>…</Avatar.Badge>\n</Avatar>"
+    "anatomy": "<Avatar>\n  <Avatar.Badge>…</Avatar.Badge>\n</Avatar>",
+    "examples": [
+      {
+        "title": "Image with an initials fallback",
+        "description": "The fallback shows while the image is missing **and** if it fails to load, so a dead URL never leaves an empty circle.",
+        "code": "<Avatar source={{ uri: user.avatarUrl }} fallback=\"KA\" />\n\n{/* No source at all — straight to initials. */}\n<Avatar fallback=\"OL\" />"
+      },
+      {
+        "title": "A presence dot",
+        "description": "`Avatar.Badge` hangs off an unclipped wrapper, so it is not cut in half by the avatar’s rounding.",
+        "code": "<Avatar size=\"lg\" source={{ uri: user.avatarUrl }} fallback=\"KA\">\n  <Avatar.Badge>\n    <View className=\"h-3 w-3 rounded-full bg-green-500\" />\n  </Avatar.Badge>\n</Avatar>"
+      },
+      {
+        "title": "A stack",
+        "description": "Negative margins overlap them; reverse the row so the first is on top.",
+        "code": "<View className=\"flex-row-reverse justify-end\">\n  {members.map((member) => (\n    <Avatar\n      key={member.id}\n      size=\"sm\"\n      source={{ uri: member.avatarUrl }}\n      fallback={member.initials}\n      className=\"-ml-2 border-2 border-background\"\n    />\n  ))}\n</View>"
+      }
+    ],
+    "variantCode": {
+      "size": "<Avatar size=\"sm\" fallback=\"KA\" />\n<Avatar size=\"md\" fallback=\"KA\" />\n<Avatar size=\"lg\" fallback=\"KA\" />\n<Avatar size=\"xl\" fallback=\"KA\" />"
+    }
   },
   "badge": {
     "intro": "A compact label. Set `count` for a notification bubble, or `shape=\"dot\"` for a bare status dot.",
     "usage": "<Badge>Default</Badge>\n<Badge variant=\"success\">Active</Badge>\n<Badge variant=\"destructive\" count={128} />\n<Badge variant=\"success\" shape=\"dot\" />",
-    "notes": "`count` clamps at `99+` so the pill keeps its shape, and sets an \"N unread\" accessibility label. Passing `count` implies `shape=\"count\"` unless you set a shape yourself."
+    "notes": "`count` clamps at `99+` so the pill keeps its shape, and sets an \"N unread\" accessibility label. Passing `count` implies `shape=\"count\"` unless you set a shape yourself.",
+    "examples": [
+      {
+        "title": "Status labels",
+        "description": "The default shape — a pill with a text label.",
+        "code": "<Badge>Default</Badge>\n<Badge variant=\"success\">Paid</Badge>\n<Badge variant=\"warning\">Pending</Badge>\n<Badge variant=\"destructive\">Failed</Badge>\n<Badge variant=\"outline\">Draft</Badge>"
+      },
+      {
+        "title": "A count",
+        "description": "`shape=\"count\"` sizes to a number. Pass `count` and it renders the digits for you.",
+        "code": "<Badge shape=\"count\" count={3} variant=\"destructive\" />\n\n{/* Clamp it yourself for large numbers. */}\n<Badge shape=\"count\" count={Math.min(unread, 99)} />"
+      },
+      {
+        "title": "A bare dot",
+        "description": "No label at all — an unread marker beside a title.",
+        "code": "<View className=\"flex-row items-center gap-2\">\n  <Text weight=\"medium\">Inbox</Text>\n  <Badge shape=\"dot\" variant=\"info\" />\n</View>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Badge>Default</Badge>\n<Badge variant=\"secondary\">Secondary</Badge>\n<Badge variant=\"outline\">Outline</Badge>\n<Badge variant=\"destructive\">Failed</Badge>\n<Badge variant=\"success\">Paid</Badge>\n<Badge variant=\"warning\">Pending</Badge>\n<Badge variant=\"info\">Info</Badge>",
+      "shape": "<Badge shape=\"default\">Label</Badge>\n<Badge shape=\"dot\" variant=\"success\" />\n<Badge shape=\"count\" count={12} />"
+    },
+    "extraImports": [
+      "Text"
+    ]
   },
   "bottom-sheet": {
     "intro": "A sheet anchored to the bottom of the screen, draggable and dismissable by swipe. Mounts through a portal and unmounts after its exit animation.",
@@ -54,23 +147,73 @@
       "Content": "The sheet surface. Renders through a portal above everything else."
     },
     "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.\n\n### Native rendering\n\nPass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
-    "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>…</BottomSheet.Trigger>\n  <BottomSheet.Content>…</BottomSheet.Content>\n</BottomSheet>"
+    "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>…</BottomSheet.Trigger>\n  <BottomSheet.Content>…</BottomSheet.Content>\n</BottomSheet>",
+    "examples": [
+      {
+        "title": "Uncontrolled, with a trigger",
+        "description": "`BottomSheet.Trigger` clones its child and adds the press handler, so any pressable works as the trigger.",
+        "code": "<BottomSheet>\n  <BottomSheet.Trigger>\n    <Button variant=\"outline\">Share</Button>\n  </BottomSheet.Trigger>\n  <BottomSheet.Content>\n    <Text size=\"lg\" weight=\"semibold\" className=\"mb-3\">Share this page</Text>\n    <Input placeholder=\"https://panelui.dev/p/xK2f9\" />\n    <Button className=\"mt-3\">Copy link</Button>\n  </BottomSheet.Content>\n</BottomSheet>"
+      },
+      {
+        "title": "Controlled",
+        "description": "Needed whenever something other than the trigger opens or closes it — a deep link, a failed request, a confirmation.",
+        "code": "const [open, setOpen] = useState(false);\n\n<BottomSheet open={open} onOpenChange={setOpen}>\n  <BottomSheet.Content>\n    <Text size=\"lg\" weight=\"semibold\">Delete project?</Text>\n    <View className=\"mt-4 gap-2\">\n      <Button variant=\"destructive\" onPress={confirmDelete}>Delete</Button>\n      <Button variant=\"ghost\" onPress={() => setOpen(false)}>Cancel</Button>\n    </View>\n  </BottomSheet.Content>\n</BottomSheet>"
+      },
+      {
+        "title": "A sheet you cannot dismiss by tapping out",
+        "description": "`dismissible={false}` removes the backdrop press. The drag-to-dismiss gesture still works, so use it for \"are you sure\", not for anything you must not escape.",
+        "code": "<BottomSheet.Content dismissible={false}>\n  <Text size=\"lg\" weight=\"semibold\">Finish setting up</Text>\n  <Button className=\"mt-4\" onPress={complete}>Continue</Button>\n</BottomSheet.Content>"
+      },
+      {
+        "title": "A scrollable sheet",
+        "description": "Cap the height on the scrollable, not the sheet — the sheet should still size to its content when the list is short.",
+        "code": "<BottomSheet.Content>\n  <ScrollView className=\"max-h-96\" bounces={false}>\n    {options.map((option) => (\n      <Button key={option.id} variant=\"ghost\" fullWidth>\n        {option.label}\n      </Button>\n    ))}\n  </ScrollView>\n</BottomSheet.Content>"
+      }
+    ]
   },
   "button": {
     "intro": "The primary action component. Icons in `startContent` and `endContent` inherit a colour that reads against the button's background, so they follow the theme without a hardcoded hex.",
     "usage": "<Button onPress={save}>Save changes</Button>\n\n<Button variant=\"outline\" startContent={<SearchIcon size={16} />}>\n  Search\n</Button>\n\n<Button variant=\"social\" fullWidth startContent={<GoogleIcon size={18} />}>\n  Continue with Google\n</Button>\n\n<Button loading={saving} fullWidth>\n  {saving ? 'Saving…' : 'Save'}\n</Button>",
     "extraImports": [
       "SearchIcon",
-      "GoogleIcon"
+      "ChevronRightIcon",
+      "GoogleIcon",
+      "AppleIcon"
     ],
-    "notes": "`loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`.\n\n### Native rendering\n\nPass `native` to render the platform's own button instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. `variant` maps onto the nearest platform style; `size`, `fullWidth`, `loading`, `startContent` and `endContent` are dropped.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown."
+    "notes": "`loading` swaps the start content for a variant-matched spinner and blocks presses. The `social` variant is a neutral surface sized for a full-width sign-in stack; pair it with `GoogleIcon`, `FacebookIcon` or `AppleIcon`.\n\n### Native rendering\n\nPass `native` to render the platform's own button instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. `variant` maps onto the nearest platform style; `size`, `fullWidth`, `loading`, `startContent` and `endContent` are dropped.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
+    "examples": [
+      {
+        "title": "With icons",
+        "description": "Icons in `startContent` and `endContent` inherit a colour that reads against the button’s background, so they follow the theme without a hardcoded hex.",
+        "code": "<Button startContent={<SearchIcon size={16} />}>Search</Button>\n\n<Button variant=\"outline\" endContent={<ChevronRightIcon size={16} />}>\n  Continue\n</Button>\n\n{/* Icon-only buttons get size=\"icon\" and an accessibility label. */}\n<Button size=\"icon\" variant=\"ghost\" accessibilityLabel=\"Search\">\n  <SearchIcon size={18} />\n</Button>"
+      },
+      {
+        "title": "Loading",
+        "description": "`loading` swaps the start content for a variant-matched spinner and blocks presses, so you do not need a separate `disabled`.",
+        "code": "const [saving, setSaving] = useState(false);\n\nasync function save() {\n  setSaving(true);\n  try {\n    await api.save(draft);\n  } finally {\n    setSaving(false);\n  }\n}\n\n<Button loading={saving} fullWidth onPress={save}>\n  {saving ? 'Saving…' : 'Save changes'}\n</Button>"
+      },
+      {
+        "title": "A sign-in stack",
+        "description": "The `social` variant is a neutral surface sized for a full-width column of providers.",
+        "code": "<View className=\"gap-2\">\n  <Button variant=\"social\" fullWidth startContent={<GoogleIcon size={18} />}>\n    Continue with Google\n  </Button>\n  <Button variant=\"social\" fullWidth startContent={<AppleIcon size={18} />}>\n    Continue with Apple\n  </Button>\n</View>"
+      },
+      {
+        "title": "Destructive confirmation",
+        "code": "<View className=\"flex-row gap-2\">\n  <Button variant=\"ghost\" onPress={cancel}>Cancel</Button>\n  <Button variant=\"destructive\" onPress={deleteAccount}>\n    Delete account\n  </Button>\n</View>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Button>Primary</Button>\n<Button variant=\"secondary\">Secondary</Button>\n<Button variant=\"outline\">Outline</Button>\n<Button variant=\"ghost\">Ghost</Button>\n<Button variant=\"destructive\">Delete</Button>\n<Button variant=\"social\" startContent={<GoogleIcon size={18} />}>\n  Continue with Google\n</Button>",
+      "size": "<Button size=\"sm\">Small</Button>\n<Button size=\"md\">Medium</Button>\n<Button size=\"lg\">Large</Button>\n<Button size=\"icon\" accessibilityLabel=\"Search\">\n  <SearchIcon size={18} />\n</Button>",
+      "fullWidth": "<Button fullWidth>Spans its container</Button>"
+    }
   },
   "card": {
     "intro": "A content surface. Use the full composition rather than dropping everything into the content slot.",
     "usage": "<Card>\n  <Card.Header>\n    <Card.Title>Create project</Card.Title>\n    <Card.Description>Deploy your new project in one click.</Card.Description>\n  </Card.Header>\n  <Card.Content className=\"gap-4\">\n    <Input label=\"Name\" placeholder=\"My project\" />\n  </Card.Content>\n  <Card.Footer>\n    <Button size=\"sm\">Deploy</Button>\n  </Card.Footer>\n</Card>",
     "extraImports": [
       "Button",
-      "Input"
+      "Text"
     ],
     "parts": {
       "Header": "Title and description block.",
@@ -79,18 +222,60 @@
       "Content": "Main body.",
       "Footer": "Row of actions."
     },
-    "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title>…</Card.Title>\n    <Card.Description>…</Card.Description>\n  </Card.Header>\n  <Card.Content>…</Card.Content>\n  <Card.Footer>…</Card.Footer>\n</Card>"
+    "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title>…</Card.Title>\n    <Card.Description>…</Card.Description>\n  </Card.Header>\n  <Card.Content>…</Card.Content>\n  <Card.Footer>…</Card.Footer>\n</Card>",
+    "examples": [
+      {
+        "title": "Full anatomy",
+        "description": "Header, content and footer carry the padding, so the card itself never needs a padding class.",
+        "code": "<Card>\n  <Card.Header>\n    <Card.Title>Monthly report</Card.Title>\n    <Card.Description>Revenue and retention for October.</Card.Description>\n  </Card.Header>\n  <Card.Content>\n    <Text size=\"3xl\" weight=\"bold\">$48,120</Text>\n    <Text size=\"sm\" muted>+12% on September</Text>\n  </Card.Content>\n  <Card.Footer>\n    <Button variant=\"outline\" size=\"sm\">Export</Button>\n    <Button size=\"sm\">Open</Button>\n  </Card.Footer>\n</Card>"
+      },
+      {
+        "title": "Content only",
+        "description": "Skip the parts you do not need — nothing is required.",
+        "code": "<Card>\n  <Card.Content className=\"p-4\">\n    <Text>A plain surface with a border and a shadow.</Text>\n  </Card.Content>\n</Card>"
+      },
+      {
+        "title": "Media at the top",
+        "description": "Clip the card so the image corners follow its radius, and put the image before the header.",
+        "code": "<Card className=\"overflow-hidden\">\n  <Image source={{ uri: post.cover }} className=\"h-40 w-full\" />\n  <Card.Header>\n    <Card.Title>{post.title}</Card.Title>\n    <Card.Description>{post.excerpt}</Card.Description>\n  </Card.Header>\n</Card>"
+      }
+    ]
   },
   "checkbox": {
     "intro": "A checkbox with an animated check. `variant=\"card\"` turns the whole surface into the target, for pickable options where the box confirms a choice rather than being the affordance.",
     "usage": "<Checkbox\n  checked={accepted}\n  onCheckedChange={setAccepted}\n  label=\"Marketing & promotions\"\n  description=\"Special offers and exclusive deals\"\n/>\n\n<Checkbox\n  variant=\"card\"\n  checked={plan === 'pro'}\n  onCheckedChange={() => setPlan('pro')}\n  label=\"Pro\"\n  description=\"Advanced analytics and priority support.\"\n/>",
-    "notes": "With a `description` the row aligns the box to the label rather than centring it against the whole block. The card variant moves the box after the content so it sits top-right, and takes the primary border when checked."
+    "notes": "With a `description` the row aligns the box to the label rather than centring it against the whole block. The card variant moves the box after the content so it sits top-right, and takes the primary border when checked.",
+    "examples": [
+      {
+        "title": "Controlled",
+        "description": "`checked` is required — the checkbox holds no state of its own.",
+        "code": "const [accepted, setAccepted] = useState(false);\n\n<Checkbox\n  checked={accepted}\n  onCheckedChange={setAccepted}\n  label=\"I accept the terms\"\n/>"
+      },
+      {
+        "title": "With a description",
+        "description": "The description sits under the label and stays part of the press target.",
+        "code": "<Checkbox\n  checked={marketing}\n  onCheckedChange={setMarketing}\n  label=\"Product updates\"\n  description=\"Occasional email about new releases. No more than once a month.\"\n/>"
+      },
+      {
+        "title": "Card variant",
+        "description": "A bordered surface that fills its width — for a list of options where each is a real choice rather than a small toggle.",
+        "code": "<View className=\"gap-2\">\n  {plans.map((plan) => (\n    <Checkbox\n      key={plan.id}\n      variant=\"card\"\n      checked={selected.includes(plan.id)}\n      onCheckedChange={() => toggle(plan.id)}\n      label={plan.name}\n      description={plan.summary}\n    />\n  ))}\n</View>"
+      },
+      {
+        "title": "A select-all row",
+        "code": "const allChecked = selected.length === items.length;\n\n<Checkbox\n  checked={allChecked}\n  onCheckedChange={(next) => setSelected(next ? items.map((i) => i.id) : [])}\n  label={allChecked ? 'Deselect all' : 'Select all'}\n/>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Checkbox variant=\"default\" checked={a} onCheckedChange={setA} label=\"Default\" />\n\n{/* A bordered surface that fills its width. */}\n<Checkbox\n  variant=\"card\"\n  checked={b}\n  onCheckedChange={setB}\n  label=\"Card\"\n  description=\"For options that are real choices, not small toggles.\"\n/>"
+    }
   },
   "dialog": {
     "intro": "A modal dialog. Mounts through a portal and unmounts after its exit animation.",
     "usage": "<Dialog>\n  <Dialog.Trigger>\n    <Button variant=\"outline\">Delete</Button>\n  </Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>Delete project?</Dialog.Title>\n    <Dialog.Description>\n      This action cannot be undone.\n    </Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>\n        <Button size=\"sm\" variant=\"ghost\">Cancel</Button>\n      </Dialog.Close>\n      <Dialog.Close>\n        <Button size=\"sm\" variant=\"destructive\">Delete</Button>\n      </Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>",
     "extraImports": [
-      "Button"
+      "Button",
+      "Input"
     ],
     "parts": {
       "Trigger": "Clones its child and opens the dialog on press.",
@@ -100,13 +285,25 @@
       "Footer": "Row of actions.",
       "Close": "Clones its child and closes the dialog on press."
     },
-    "anatomy": "<Dialog>\n  <Dialog.Trigger>…</Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>…</Dialog.Title>\n    <Dialog.Description>…</Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>…</Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
+    "anatomy": "<Dialog>\n  <Dialog.Trigger>…</Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>…</Dialog.Title>\n    <Dialog.Description>…</Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>…</Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>",
+    "examples": [
+      {
+        "title": "Uncontrolled, with a trigger",
+        "code": "<Dialog>\n  <Dialog.Trigger>\n    <Button variant=\"outline\">Rename</Button>\n  </Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>Rename project</Dialog.Title>\n    <Dialog.Description>This is visible to everyone on the team.</Dialog.Description>\n    <Input className=\"mt-4\" defaultValue={project.name} />\n    <Dialog.Footer>\n      <Dialog.Close>\n        <Button variant=\"ghost\">Cancel</Button>\n      </Dialog.Close>\n      <Button onPress={save}>Save</Button>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
+      },
+      {
+        "title": "Controlled confirmation",
+        "description": "`dismissible={false}` forces a deliberate choice — the backdrop no longer closes it.",
+        "code": "const [open, setOpen] = useState(false);\n\n<Dialog open={open} onOpenChange={setOpen}>\n  <Dialog.Content dismissible={false}>\n    <Dialog.Title>Delete 12 files?</Dialog.Title>\n    <Dialog.Description>This cannot be undone.</Dialog.Description>\n    <Dialog.Footer>\n      <Button variant=\"ghost\" onPress={() => setOpen(false)}>Cancel</Button>\n      <Button variant=\"destructive\" onPress={confirm}>Delete</Button>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>"
+      }
+    ]
   },
   "empty-state": {
     "intro": "The placeholder for a list or screen with nothing in it. `Media variant=\"icon\"` frames the icon in a small card with two rotated ghost cards fanned behind it.",
     "usage": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media variant=\"icon\">\n      <SearchIcon size={18} />\n    </EmptyState.Media>\n    <EmptyState.Title>No results found</EmptyState.Title>\n    <EmptyState.Description>\n      Try adjusting your search or filters.\n    </EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"outline\" fullWidth>Clear filters</Button>\n  </EmptyState.Content>\n</EmptyState>",
     "extraImports": [
       "Button",
+      "PackageIcon",
       "SearchIcon"
     ],
     "parts": {
@@ -116,13 +313,34 @@
       "Description": "Supporting text.",
       "Content": "Slot below the header, for actions."
     },
-    "anatomy": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media>…</EmptyState.Media>\n    <EmptyState.Title>…</EmptyState.Title>\n    <EmptyState.Description>…</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>…</EmptyState.Content>\n</EmptyState>"
+    "anatomy": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media>…</EmptyState.Media>\n    <EmptyState.Title>…</EmptyState.Title>\n    <EmptyState.Description>…</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>…</EmptyState.Content>\n</EmptyState>",
+    "examples": [
+      {
+        "title": "With an icon and an action",
+        "code": "<EmptyState variant=\"icon\">\n  <EmptyState.Header>\n    <EmptyState.Media>\n      <PackageIcon size={22} />\n    </EmptyState.Media>\n    <EmptyState.Title>No orders yet</EmptyState.Title>\n    <EmptyState.Description>\n      Orders appear here as soon as your first customer checks out.\n    </EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button>Share your store</Button>\n  </EmptyState.Content>\n</EmptyState>"
+      },
+      {
+        "title": "A no-results state",
+        "description": "Distinguish \"nothing exists yet\" from \"nothing matched\" — they need different words and different actions.",
+        "code": "<EmptyState variant=\"icon\">\n  <EmptyState.Header>\n    <EmptyState.Media><SearchIcon size={20} /></EmptyState.Media>\n    <EmptyState.Title>No matches for “{query}”</EmptyState.Title>\n    <EmptyState.Description>Try a shorter or different term.</EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"ghost\" onPress={() => setQuery('')}>Clear search</Button>\n  </EmptyState.Content>\n</EmptyState>"
+      },
+      {
+        "title": "As a list fallback",
+        "code": "<FlatList\n  data={results}\n  keyExtractor={(item) => item.id}\n  renderItem={renderItem}\n  ListEmptyComponent={\n    <EmptyState variant=\"icon\">\n      <EmptyState.Header>\n        <EmptyState.Title>Nothing here</EmptyState.Title>\n      </EmptyState.Header>\n    </EmptyState>\n  }\n/>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<EmptyState variant=\"default\">…</EmptyState>\n\n{/* Adds the framed media slot. */}\n<EmptyState variant=\"icon\">…</EmptyState>"
+    }
   },
   "frame": {
     "intro": "A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel's radius is derived from the shell's, so the nesting stays proportional as the theme changes it.",
     "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Usage Type</Frame.Title>\n    <Frame.Action>Amount</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row divided>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>\n</Frame>",
     "extraImports": [
-      "Text"
+      "Button",
+      "Switch",
+      "Text",
+      "Badge"
     ],
     "parts": {
       "Header": "Row holding the title and the action.",
@@ -134,7 +352,18 @@
       "Footer": "Muted caption under the panel. Strings are wrapped for you."
     },
     "notes": "React Native has no `:first-child`, so `divided` is set explicitly on each row after the first rather than inferred.",
-    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>"
+    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>",
+    "examples": [
+      {
+        "title": "A settings panel",
+        "description": "`Frame.Row` with `divided` draws the hairline between rows for you.",
+        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Notifications</Frame.Title>\n    <Frame.Description>How we reach you.</Frame.Description>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row divided>\n      <Text>Push</Text>\n      <Switch value={push} onValueChange={setPush} />\n    </Frame.Row>\n    <Frame.Row divided>\n      <Text>Email</Text>\n      <Switch value={email} onValueChange={setEmail} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text>SMS</Text>\n      <Switch value={sms} onValueChange={setSms} />\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>"
+      },
+      {
+        "title": "With a header action and a footer",
+        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>API keys</Frame.Title>\n    <Frame.Action>\n      <Button size=\"sm\" variant=\"outline\">New key</Button>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {keys.map((key) => (\n      <Frame.Row key={key.id} divided>\n        <Text>{key.name}</Text>\n        <Badge variant=\"outline\">{key.lastUsed}</Badge>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Text size=\"sm\" muted>Keys are shown once at creation.</Text>\n  </Frame.Footer>\n</Frame>"
+      }
+    ]
   },
   "inline-select": {
     "intro": "A select that reveals its options next to the trigger instead of taking over the screen with a sheet.",
@@ -143,17 +372,63 @@
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
     "anatomy": "<InlineSelect>\n  <InlineSelect.Item value=\"…\" label=\"…\" />\n</InlineSelect>",
-    "notes": "### Choosing a presentation\n\nBy default the list expands **in layout flow**, so everything below the select moves down. That reads correctly inside a settings list, where it looks like the row itself growing — and badly anywhere the shift is jarring.\n\nPass `overlay` to float the list above the page through a portal instead. It is anchored to the trigger, flips above it when there is not enough room below, scrolls when the options do not fit, and closes on a press anywhere outside. **Nothing on the screen moves.** This is what you want inside a form or a scroll view.\n\n### Anchoring\n\nThe floating list is positioned from a window-space measurement of the trigger taken when it opens, so it is correct inside scroll views and transformed parents. `overlayWidth` matches the trigger by default; `\"content\"` sizes to the longest option (never narrower than the trigger) and a number sets a fixed width. `overlayOffset` is the gap between the two.\n\n### Compared to Select\n\n`Select` opens a bottom sheet, which suits long option lists and small screens. `InlineSelect` keeps the options next to what they belong to, which suits short lists inside a form."
+    "notes": "### Choosing a presentation\n\nBy default the list expands **in layout flow**, so everything below the select moves down. That reads correctly inside a settings list, where it looks like the row itself growing — and badly anywhere the shift is jarring.\n\nPass `overlay` to float the list above the page through a portal instead. It is anchored to the trigger, flips above it when there is not enough room below, scrolls when the options do not fit, and closes on a press anywhere outside. **Nothing on the screen moves.** This is what you want inside a form or a scroll view.\n\n### Anchoring\n\nThe floating list is positioned from a window-space measurement of the trigger taken when it opens, so it is correct inside scroll views and transformed parents. `overlayWidth` matches the trigger by default; `\"content\"` sizes to the longest option (never narrower than the trigger) and a number sets a fixed width. `overlayOffset` is the gap between the two.\n\n### Compared to Select\n\n`Select` opens a bottom sheet, which suits long option lists and small screens. `InlineSelect` keeps the options next to what they belong to, which suits short lists inside a form.",
+    "examples": [
+      {
+        "title": "Overlay presentation",
+        "description": "The list floats above the page, so opening it does not push the content below it down. This is what you want inside a form or a scroll view.",
+        "code": "const [region, setRegion] = useState<string>();\n\n<InlineSelect\n  overlay\n  value={region}\n  onValueChange={setRegion}\n  placeholder=\"Select a region\"\n>\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n  <InlineSelect.Item value=\"apac\" label=\"Asia Pacific\" />\n</InlineSelect>"
+      },
+      {
+        "title": "Inline presentation",
+        "description": "The default. The list expands in layout flow and everything below moves down — right inside a settings list, where it reads as the row growing.",
+        "code": "<InlineSelect value={region} onValueChange={setRegion}>\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n</InlineSelect>"
+      },
+      {
+        "title": "Sizing the floating list",
+        "code": "{/* Match the trigger — the default. */}\n<InlineSelect overlay overlayWidth=\"trigger\" {...props} />\n\n{/* Size to the longest option, never narrower than the trigger. */}\n<InlineSelect overlay overlayWidth=\"content\" {...props} />\n\n{/* Fixed width, and a wider gap from the trigger. */}\n<InlineSelect overlay overlayWidth={280} overlayOffset={12} {...props} />"
+      },
+      {
+        "title": "Reacting to open and close",
+        "code": "<InlineSelect\n  overlay\n  value={region}\n  onValueChange={setRegion}\n  onOpenChange={(open) => setScrollEnabled(!open)}\n>\n  {/* …items… */}\n</InlineSelect>"
+      }
+    ],
+    "variantCode": {
+      "presentation": "{/* Expands in layout flow — content below moves down. */}\n<InlineSelect>…</InlineSelect>\n\n{/* Floats above the page — nothing moves. */}\n<InlineSelect overlay>…</InlineSelect>"
+    }
   },
   "input": {
     "intro": "A text field with an optional label, description and error message. Passing `errorMessage` puts the field in its invalid state and replaces the description.",
     "usage": "<Input label=\"Email\" placeholder=\"you@example.com\" />\n\n<Input\n  label=\"Description\"\n  placeholder=\"A short description\"\n  description=\"Shown on your public profile.\"\n/>\n\n<Input\n  label=\"Email\"\n  value={email}\n  onChangeText={setEmail}\n  errorMessage={error}\n/>\n\n// Lifts clear of the software keyboard when it would be covered.\n<Input avoidKeyboard label=\"Comment\" placeholder=\"Say something…\" />",
-    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.\n\n### Avoiding the keyboard\n\n`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.\n\nThe translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).\n\nFor anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly."
+    "notes": "Accepts every `TextInputProps`. The placeholder colour is resolved from the theme, so it follows light and dark automatically.\n\n### Avoiding the keyboard\n\n`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.\n\nThe translation is driven by `useAnimatedKeyboard`, so the field tracks the keyboard frame for frame on the UI thread and nothing re-renders while it moves. Use `keyboardOffset` to change the gap it keeps (16px by default).\n\nFor anything that is not an Input — a toolbar, a composer, a whole card — use the `KeyboardAvoider` primitive or the `useKeyboardAvoidance` hook directly.",
+    "examples": [
+      {
+        "title": "Label, description and error",
+        "description": "Setting `errorMessage` also puts the field into its invalid state — you do not need a separate flag. The description is replaced by the error while one is present.",
+        "code": "<Input label=\"Name\" placeholder=\"Khalid Abdi\" />\n\n<Input\n  label=\"Description\"\n  placeholder=\"A short description\"\n  description=\"Shown on your public profile.\"\n/>\n\n<Input\n  label=\"Email\"\n  value={email}\n  onChangeText={setEmail}\n  errorMessage={emailError}\n/>"
+      },
+      {
+        "title": "Avoiding the keyboard",
+        "description": "The field lifts by exactly the amount the keyboard covers it, and not at all when it is already clear.",
+        "code": "<Input\n  avoidKeyboard\n  keyboardOffset={24}\n  label=\"Comment\"\n  placeholder=\"Say something…\"\n/>"
+      },
+      {
+        "title": "Passing through TextInput props",
+        "description": "Anything `TextInput` accepts works here.",
+        "code": "<Input\n  label=\"Password\"\n  secureTextEntry\n  autoCapitalize=\"none\"\n  autoComplete=\"current-password\"\n  returnKeyType=\"go\"\n  onSubmitEditing={signIn}\n/>\n\n<Input\n  label=\"Amount\"\n  keyboardType=\"decimal-pad\"\n  inputMode=\"decimal\"\n/>"
+      },
+      {
+        "title": "Styling the field and the container separately",
+        "description": "`className` goes on the text field; `containerClassName` goes on the wrapper that holds the label, field and message.",
+        "code": "<Input\n  containerClassName=\"flex-1\"\n  className=\"h-12 rounded-full px-4\"\n  placeholder=\"Search components\"\n/>"
+      }
+    ]
   },
   "input-group": {
     "intro": "An input with leading or trailing decorators. The prefix and suffix are measured and their widths applied as padding on the input, so text never runs underneath them however wide they turn out to be.",
     "usage": "<InputGroup>\n  <InputGroup.Prefix isDecorative>\n    <SearchIcon size={16} />\n  </InputGroup.Prefix>\n  <InputGroup.Input placeholder=\"Search products…\" />\n</InputGroup>\n\n<InputGroup>\n  <InputGroup.Input placeholder=\"Password\" secureTextEntry={!visible} />\n  <InputGroup.Suffix>\n    <Button variant=\"ghost\" size=\"sm\" onPress={toggle}>\n      {visible ? 'Hide' : 'Show'}\n    </Button>\n  </InputGroup.Suffix>\n</InputGroup>",
     "extraImports": [
+      "Text",
       "Button",
       "SearchIcon"
     ],
@@ -163,7 +438,23 @@
       "Suffix": "Trailing decorator, absolutely positioned."
     },
     "notes": "Set `isDecorative` when the decorator is presentation-only: touches fall through to the input and screen readers skip it. Leave it off when it holds something interactive, like a show-password toggle.",
-    "anatomy": "<InputGroup>\n  <InputGroup.Prefix>…</InputGroup.Prefix>\n  <InputGroup.Input />\n  <InputGroup.Suffix>…</InputGroup.Suffix>\n</InputGroup>"
+    "anatomy": "<InputGroup>\n  <InputGroup.Prefix>…</InputGroup.Prefix>\n  <InputGroup.Input />\n  <InputGroup.Suffix>…</InputGroup.Suffix>\n</InputGroup>",
+    "examples": [
+      {
+        "title": "A prefix and a suffix",
+        "description": "The decorators are measured, and the field is padded around them — so text never runs underneath.",
+        "code": "<InputGroup>\n  <InputGroup.Prefix>\n    <Text muted>https://</Text>\n  </InputGroup.Prefix>\n  <InputGroup.Input placeholder=\"yoursite.com\" />\n  <InputGroup.Suffix>\n    <Text muted>.dev</Text>\n  </InputGroup.Suffix>\n</InputGroup>"
+      },
+      {
+        "title": "A search field",
+        "code": "<InputGroup>\n  <InputGroup.Prefix isDecorative>\n    <SearchIcon size={16} />\n  </InputGroup.Prefix>\n  <InputGroup.Input\n    placeholder=\"Search\"\n    value={query}\n    onChangeText={setQuery}\n    autoCorrect={false}\n  />\n</InputGroup>"
+      },
+      {
+        "title": "An interactive suffix",
+        "description": "Leave `isDecorative` off when the decorator is pressable, so it stays in the touch path.",
+        "code": "<InputGroup>\n  <InputGroup.Input secureTextEntry={hidden} placeholder=\"Password\" />\n  <InputGroup.Suffix>\n    <Button size=\"icon\" variant=\"ghost\" onPress={() => setHidden(!hidden)}>\n      <Text size=\"sm\" muted>{hidden ? 'Show' : 'Hide'}</Text>\n    </Button>\n  </InputGroup.Suffix>\n</InputGroup>"
+      }
+    ]
   },
   "label": {
     "intro": "A form field label. String children are wrapped in `Label.Text` for you.",
@@ -174,12 +465,44 @@
     "parts": {
       "Text": "The label text. Renders the required asterisk when the label is required."
     },
-    "anatomy": "<Label>\n  <Label.Text>…</Label.Text>\n</Label>"
+    "anatomy": "<Label>\n  <Label.Text>…</Label.Text>\n</Label>",
+    "examples": [
+      {
+        "title": "Marking a field required",
+        "description": "`isRequired` adds the asterisk and the accessibility state.",
+        "code": "<View className=\"gap-1.5\">\n  <Label isRequired>Email</Label>\n  <Input keyboardType=\"email-address\" />\n</View>"
+      },
+      {
+        "title": "Invalid and disabled",
+        "description": "Both are visual and semantic — pair them with the matching state on the field itself.",
+        "code": "<Label isInvalid>Card number</Label>\n<Input errorMessage=\"Check the number and try again.\" />\n\n<Label isDisabled>Plan</Label>\n<Input value=\"Premium\" disabled />"
+      }
+    ]
   },
   "progress": {
     "intro": "A progress bar, determinate or indeterminate, animated on the UI thread.",
     "usage": "<Progress value={uploaded} />\n<Progress value={70} color=\"success\" size=\"lg\" />\n<Progress indeterminate color=\"info\" />",
-    "notes": "`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops."
+    "notes": "`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops.",
+    "examples": [
+      {
+        "title": "Determinate",
+        "description": "`value` is a percentage from 0 to 100.",
+        "code": "<Progress value={72} />\n\n<Progress value={uploaded / total * 100} color=\"success\" size=\"lg\" />"
+      },
+      {
+        "title": "Indeterminate",
+        "description": "For work with no measurable progress. The animation runs on the UI thread and stops when reduce-motion is on.",
+        "code": "<Progress indeterminate />"
+      },
+      {
+        "title": "Colour by state",
+        "code": "<Progress\n  value={usage}\n  color={usage > 90 ? 'destructive' : usage > 70 ? 'warning' : 'primary'}\n/>"
+      }
+    ],
+    "variantCode": {
+      "size": "<Progress size=\"sm\" value={40} />\n<Progress size=\"md\" value={40} />\n<Progress size=\"lg\" value={40} />",
+      "color": "<Progress color=\"primary\" value={40} />\n<Progress color=\"success\" value={40} />\n<Progress color=\"warning\" value={40} />\n<Progress color=\"destructive\" value={40} />\n<Progress color=\"info\" value={40} />"
+    }
   },
   "radio-group": {
     "intro": "A single-select list of options.",
@@ -187,7 +510,26 @@
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
-    "anatomy": "<RadioGroup>\n  <RadioGroup.Item value=\"…\" label=\"…\" />\n</RadioGroup>"
+    "anatomy": "<RadioGroup>\n  <RadioGroup.Item value=\"…\" label=\"…\" />\n</RadioGroup>",
+    "examples": [
+      {
+        "title": "Basic",
+        "description": "One value for the group, set by whichever item is pressed.",
+        "code": "const [plan, setPlan] = useState('pro');\n\n<RadioGroup value={plan} onValueChange={setPlan}>\n  <RadioGroup.Item value=\"free\" label=\"Free\" />\n  <RadioGroup.Item value=\"pro\" label=\"Pro\" />\n  <RadioGroup.Item value=\"team\" label=\"Team\" />\n</RadioGroup>"
+      },
+      {
+        "title": "Custom item content",
+        "description": "Give an item children instead of a `label` when the row needs more than one line.",
+        "code": "<RadioGroup value={plan} onValueChange={setPlan}>\n  {plans.map((p) => (\n    <RadioGroup.Item key={p.id} value={p.id}>\n      <View className=\"flex-1 gap-0.5\">\n        <Text weight=\"medium\">{p.name}</Text>\n        <Text size=\"sm\" muted>{p.price} · {p.summary}</Text>\n      </View>\n    </RadioGroup.Item>\n  ))}\n</RadioGroup>"
+      },
+      {
+        "title": "Disabling the group or one option",
+        "code": "{/* The whole group. */}\n<RadioGroup value={plan} onValueChange={setPlan} disabled={!canChangePlan}>\n  {/* …items… */}\n</RadioGroup>\n\n{/* One option. */}\n<RadioGroup.Item value=\"enterprise\" label=\"Enterprise\" disabled />"
+      }
+    ],
+    "extraImports": [
+      "Text"
+    ]
   },
   "select": {
     "intro": "A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.",
@@ -196,15 +538,75 @@
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
     "notes": "Use `InlineSelect` instead when the option list is short enough to expand in place.\n\n### Native rendering\n\nPass `native` to render the platform's own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit \"None\" item.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
-    "anatomy": "<Select>\n  <Select.Item value=\"…\" label=\"…\" />\n</Select>"
+    "anatomy": "<Select>\n  <Select.Item value=\"…\" label=\"…\" />\n</Select>",
+    "examples": [
+      {
+        "title": "Basic",
+        "description": "The trigger shows the selected option’s label, or the placeholder when nothing is chosen.",
+        "code": "const [fruit, setFruit] = useState<string>();\n\n<Select\n  value={fruit}\n  onValueChange={setFruit}\n  placeholder=\"Select a fruit\"\n  title=\"Favorite fruit\"\n>\n  <Select.Item value=\"apple\" label=\"Apple\" />\n  <Select.Item value=\"banana\" label=\"Banana\" />\n  <Select.Item value=\"cherry\" label=\"Cherry\" />\n</Select>"
+      },
+      {
+        "title": "From data",
+        "code": "<Select value={country} onValueChange={setCountry} title=\"Country\">\n  {countries.map((c) => (\n    <Select.Item key={c.code} value={c.code} label={c.name} />\n  ))}\n</Select>"
+      },
+      {
+        "title": "In a form",
+        "description": "The options open in a sheet, so nothing in the form moves.",
+        "code": "<View className=\"gap-4\">\n  <Input label=\"Full name\" />\n  <View className=\"gap-1.5\">\n    <Label isRequired>Country</Label>\n    <Select value={country} onValueChange={setCountry} title=\"Country\">\n      {/* …items… */}\n    </Select>\n  </View>\n</View>"
+      }
+    ],
+    "extraImports": [
+      "Input",
+      "Label"
+    ]
   },
   "skeleton": {
     "intro": "A shimmer placeholder for content that has not loaded. Size it with Tailwind utilities.",
-    "usage": "<View className=\"flex-row items-center gap-3\">\n  <Skeleton className=\"h-12 w-12 rounded-full\" />\n  <View className=\"flex-1 gap-2\">\n    <Skeleton className=\"h-4 w-3/4\" />\n    <Skeleton className=\"h-4 w-1/2\" />\n  </View>\n</View>"
+    "usage": "<View className=\"flex-row items-center gap-3\">\n  <Skeleton className=\"h-12 w-12 rounded-full\" />\n  <View className=\"flex-1 gap-2\">\n    <Skeleton className=\"h-4 w-3/4\" />\n    <Skeleton className=\"h-4 w-1/2\" />\n  </View>\n</View>",
+    "examples": [
+      {
+        "title": "A loading card",
+        "description": "Match the shape of the real content — a skeleton that is the wrong size is worse than none, because the layout jumps when the data lands.",
+        "code": "<Card>\n  <Card.Content className=\"gap-3 p-4\">\n    <Skeleton className=\"h-5 w-1/2\" />\n    <Skeleton className=\"h-4 w-full\" />\n    <Skeleton className=\"h-4 w-4/5\" />\n  </Card.Content>\n</Card>"
+      },
+      {
+        "title": "An avatar and two lines",
+        "code": "<View className=\"flex-row items-center gap-3\">\n  <Skeleton className=\"h-10 w-10 rounded-full\" />\n  <View className=\"flex-1 gap-2\">\n    <Skeleton className=\"h-4 w-1/3\" />\n    <Skeleton className=\"h-3 w-2/3\" />\n  </View>\n</View>"
+      },
+      {
+        "title": "Swapped for the real thing",
+        "code": "{loading ? (\n  <Skeleton className=\"h-6 w-32\" />\n) : (\n  <Text size=\"xl\" weight=\"semibold\">{user.name}</Text>\n)}"
+      }
+    ],
+    "extraImports": [
+      "Card",
+      "Text"
+    ]
   },
   "spinner": {
     "intro": "An indeterminate loading indicator. `Button` renders one for you when `loading` is set.",
-    "usage": "<Spinner />\n<Spinner size=\"lg\" />"
+    "usage": "<Spinner />\n<Spinner size=\"lg\" />",
+    "examples": [
+      {
+        "title": "Inline",
+        "code": "<Spinner size=\"sm\" />\n<Spinner />\n<Spinner size=\"lg\" />"
+      },
+      {
+        "title": "Centred in a screen",
+        "code": "<View className=\"flex-1 items-center justify-center\">\n  <Spinner size=\"lg\" />\n</View>"
+      },
+      {
+        "title": "Inside a button",
+        "description": "You rarely need this — `Button`’s own `loading` prop inserts a variant-matched spinner for you.",
+        "code": "<Button loading={saving}>Save</Button>"
+      }
+    ],
+    "variantCode": {
+      "size": "<Spinner size=\"sm\" />\n<Spinner size=\"md\" />\n<Spinner size=\"lg\" />"
+    },
+    "extraImports": [
+      "Button"
+    ]
   },
   "steps": {
     "intro": "A stepper for multi-step flows. Steps does not own your flow — it reflects whatever step your app says is active.",
@@ -218,12 +620,54 @@
       "Separator": "Connector to the next step. Place it inside the item so it can read that item's state."
     },
     "notes": "Steps are zero-based internally but the indicator renders them as 1, 2, 3.",
-    "anatomy": "<Steps>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>…</Steps.Title>\n      <Steps.Description>…</Steps.Description>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n</Steps>"
+    "anatomy": "<Steps>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>…</Steps.Title>\n      <Steps.Description>…</Steps.Description>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n</Steps>",
+    "examples": [
+      {
+        "title": "A horizontal wizard",
+        "description": "`value` is the index of the current step; anything before it is completed.",
+        "code": "const [step, setStep] = useState(1);\n\n<Steps value={step} onValueChange={setStep}>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Account</Steps.Title>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n  <Steps.Item step={1}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Payment</Steps.Title>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n  <Steps.Item step={2}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Confirm</Steps.Title>\n    </Steps.Trigger>\n  </Steps.Item>\n</Steps>"
+      },
+      {
+        "title": "Vertical, with descriptions",
+        "code": "<Steps orientation=\"vertical\" value={step}>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <View className=\"flex-1\">\n        <Steps.Title>Connect your repo</Steps.Title>\n        <Steps.Description>We only read metadata.</Steps.Description>\n      </View>\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n  {/* …more items… */}\n</Steps>"
+      },
+      {
+        "title": "A step that is loading or blocked",
+        "code": "<Steps.Item step={1} loading={isDeploying}>\n  {/* … */}\n</Steps.Item>\n\n<Steps.Item step={3} disabled={!hasPaid}>\n  {/* … */}\n</Steps.Item>"
+      }
+    ],
+    "variantCode": {
+      "orientation": "<Steps orientation=\"horizontal\" value={step}>…</Steps>\n<Steps orientation=\"vertical\" value={step}>…</Steps>"
+    },
+    "extraImports": [
+      "Text"
+    ]
   },
   "switch": {
     "intro": "An on/off toggle, animated on the UI thread.",
     "usage": "<Switch value={enabled} onValueChange={setEnabled} />",
-    "notes": "### Native rendering\n\nPass `native` to render the platform's own switch instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. The native switch gains a `label` prop the styled one does not have.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown."
+    "notes": "### Native rendering\n\nPass `native` to render the platform's own switch instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. The native switch gains a `label` prop the styled one does not have.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
+    "examples": [
+      {
+        "title": "In a settings row",
+        "code": "<View className=\"flex-row items-center justify-between py-3\">\n  <View className=\"flex-1 gap-0.5\">\n    <Text weight=\"medium\">Push notifications</Text>\n    <Text size=\"sm\" muted>Alerts on this device.</Text>\n  </View>\n  <Switch value={push} onValueChange={setPush} />\n</View>"
+      },
+      {
+        "title": "Sizes and disabled",
+        "code": "<Switch size=\"sm\" value={compact} onValueChange={setCompact} />\n<Switch value={enabled} onValueChange={setEnabled} />\n<Switch value disabled onValueChange={() => {}} />"
+      },
+      {
+        "title": "Native",
+        "description": "Renders the platform switch, which brings a `label` the styled one does not have. Theme tokens do not apply.",
+        "code": "<Switch native label=\"Wi-Fi\" value={wifi} onValueChange={setWifi} />"
+      }
+    ],
+    "variantCode": {
+      "size": "<Switch size=\"sm\" value={on} onValueChange={setOn} />\n<Switch size=\"md\" value={on} onValueChange={setOn} />"
+    },
+    "extraImports": [
+      "Text"
+    ]
   },
   "tabs": {
     "intro": "Segmented navigation with an indicator that springs to the active trigger.",
@@ -233,14 +677,33 @@
       "Trigger": "One tab. Must be inside `Tabs.List`.",
       "Content": "Panel for a tab. Renders only while its tab is active."
     },
-    "anatomy": "<Tabs>\n  <Tabs.List>\n    <Tabs.Trigger value=\"…\">…</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"…\">…</Tabs.Content>\n</Tabs>"
+    "anatomy": "<Tabs>\n  <Tabs.List>\n    <Tabs.Trigger value=\"…\">…</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"…\">…</Tabs.Content>\n</Tabs>",
+    "examples": [
+      {
+        "title": "Uncontrolled",
+        "description": "`defaultValue` is required — the tabs need a starting panel.",
+        "code": "<Tabs defaultValue=\"overview\">\n  <Tabs.List>\n    <Tabs.Trigger value=\"overview\">Overview</Tabs.Trigger>\n    <Tabs.Trigger value=\"activity\">Activity</Tabs.Trigger>\n    <Tabs.Trigger value=\"settings\">Settings</Tabs.Trigger>\n  </Tabs.List>\n\n  <Tabs.Content value=\"overview\">\n    <Text>Usage and billing at a glance.</Text>\n  </Tabs.Content>\n  <Tabs.Content value=\"activity\">\n    <Text>Everything that happened this week.</Text>\n  </Tabs.Content>\n  <Tabs.Content value=\"settings\">\n    <Text>Names, members and integrations.</Text>\n  </Tabs.Content>\n</Tabs>"
+      },
+      {
+        "title": "Controlled",
+        "description": "Needed when something outside the tab strip changes the panel — a deep link, or a button in one panel that jumps to another.",
+        "code": "const [tab, setTab] = useState('overview');\n\n<>\n  <Button onPress={() => setTab('settings')}>Go to settings</Button>\n\n  <Tabs value={tab} onValueChange={setTab} defaultValue=\"overview\">\n    {/* …list and content… */}\n  </Tabs>\n</>"
+      },
+      {
+        "title": "Tabs that scroll",
+        "description": "Wrap the list when there are more tabs than fit, and fade the edges so it reads as scrollable.",
+        "code": "<Tabs defaultValue=\"all\">\n  <ScrollFade size={32}>\n    <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n      <Tabs.List>\n        {categories.map((c) => (\n          <Tabs.Trigger key={c.id} value={c.id}>{c.name}</Tabs.Trigger>\n        ))}\n      </Tabs.List>\n    </ScrollView>\n  </ScrollFade>\n\n  {/* …content… */}\n</Tabs>"
+      }
+    ],
+    "extraImports": [
+      "Text",
+      "Button",
+      "ScrollFade"
+    ]
   },
   "timeline": {
     "intro": "A vertical sequence of events. `value` marks how far along the sequence is; `tone` colours an individual event by kind, independently of that progress.\n\nVertical only — a horizontal timeline gives each item roughly a fifth of a phone's width, which will not hold a date and a title.",
     "usage": "<Timeline variant=\"icon\" value={2}>\n  {events.map((event, index) => (\n    <Timeline.Item\n      key={event.title}\n      step={index}\n      tone={event.tone}\n      last={index === events.length - 1}\n    >\n      <Timeline.Aside>\n        <Timeline.Date>{event.time}</Timeline.Date>\n        <Timeline.Label>{event.team}</Timeline.Label>\n      </Timeline.Aside>\n      <Timeline.Indicator>\n        <ShieldCheckIcon size={15} />\n      </Timeline.Indicator>\n      <Timeline.Content>\n        <Timeline.Header>\n          <Timeline.Title>{event.title}</Timeline.Title>\n          <Timeline.Trailing>{event.at}</Timeline.Trailing>\n        </Timeline.Header>\n        <Timeline.Description>{event.body}</Timeline.Description>\n      </Timeline.Content>\n    </Timeline.Item>\n  ))}\n</Timeline>",
-    "extraImports": [
-      "ShieldCheckIcon"
-    ],
     "parts": {
       "Item": "One event. `step` is its position, `last` stops the connector.",
       "Aside": "Right-aligned meta column left of the rail. Place it before the indicator.",
@@ -258,12 +721,37 @@
       "Stat": "One label/value pair inside `Stats`."
     },
     "notes": "Colour follows one rule: **progress is solid, event kind is tinted**. An untoned step runs from `muted` to `primary` as the timeline advances, exactly as `Steps` does; a toned step takes that tone's soft fill with its contents in the matching foreground. The `dot` and `card` variants keep full saturation — they are 16px discs with nothing inside, and a soft tint at that size disappears.\n\nIcons inside `Timeline.Indicator` inherit a colour that reads against the node, so they stay legible in every theme without a hardcoded value.",
-    "anatomy": "<Timeline>\n  <Timeline.Item step={0}>\n    <Timeline.Aside>\n      <Timeline.Date>…</Timeline.Date>\n      <Timeline.Label>…</Timeline.Label>\n      <Timeline.Meta>…</Timeline.Meta>\n    </Timeline.Aside>\n    <Timeline.Indicator>…</Timeline.Indicator>\n    <Timeline.Content>\n      <Timeline.Header>\n        <Timeline.Title>…</Timeline.Title>\n        <Timeline.Trailing>…</Timeline.Trailing>\n      </Timeline.Header>\n      <Timeline.Stats>\n        <Timeline.Stat label=\"…\" value=\"…\" />\n      </Timeline.Stats>\n      <Timeline.Description>…</Timeline.Description>\n    </Timeline.Content>\n  </Timeline.Item>\n</Timeline>"
+    "anatomy": "<Timeline>\n  <Timeline.Item step={0}>\n    <Timeline.Aside>\n      <Timeline.Date>…</Timeline.Date>\n      <Timeline.Label>…</Timeline.Label>\n      <Timeline.Meta>…</Timeline.Meta>\n    </Timeline.Aside>\n    <Timeline.Indicator>…</Timeline.Indicator>\n    <Timeline.Content>\n      <Timeline.Header>\n        <Timeline.Title>…</Timeline.Title>\n        <Timeline.Trailing>…</Timeline.Trailing>\n      </Timeline.Header>\n      <Timeline.Stats>\n        <Timeline.Stat label=\"…\" value=\"…\" />\n      </Timeline.Stats>\n      <Timeline.Description>…</Timeline.Description>\n    </Timeline.Content>\n  </Timeline.Item>\n</Timeline>",
+    "examples": [
+      {
+        "title": "An activity feed",
+        "description": "`value` is the index of the current entry; earlier ones render as completed.",
+        "code": "<Timeline value={2}>\n  <Timeline.Item step={0}>\n    <Timeline.Aside><Timeline.Indicator /></Timeline.Aside>\n    <Timeline.Content>\n      <Timeline.Header>\n        <Timeline.Title>Order placed</Timeline.Title>\n        <Timeline.Date>Mon 09:14</Timeline.Date>\n      </Timeline.Header>\n      <Timeline.Description>Payment authorised.</Timeline.Description>\n    </Timeline.Content>\n  </Timeline.Item>\n\n  <Timeline.Item step={1}>\n    {/* … */}\n  </Timeline.Item>\n\n  <Timeline.Item step={2} last>\n    {/* `last` drops the connector below the final entry. */}\n  </Timeline.Item>\n</Timeline>"
+      },
+      {
+        "title": "Tone per entry",
+        "description": "Tone is set on the item, not the root, so one failed step can stand out in an otherwise ordinary run.",
+        "code": "<Timeline.Item step={3} tone=\"danger\">\n  <Timeline.Aside><Timeline.Indicator /></Timeline.Aside>\n  <Timeline.Content>\n    <Timeline.Title>Build failed</Timeline.Title>\n    <Timeline.Description>3 tests failed on node 20.</Timeline.Description>\n  </Timeline.Content>\n</Timeline.Item>"
+      },
+      {
+        "title": "Numbered and card variants",
+        "code": "{/* Numbers instead of dots — for ordered procedures. */}\n<Timeline variant=\"numbered\">{/* …items… */}</Timeline>\n\n{/* Each entry on its own surface. */}\n<Timeline variant=\"card\">{/* …items… */}</Timeline>\n\n{/* Tighter rows for long histories. */}\n<Timeline variant=\"compact\">{/* …items… */}</Timeline>"
+      },
+      {
+        "title": "With stats",
+        "code": "<Timeline.Content>\n  <Timeline.Title>Deployed</Timeline.Title>\n  <Timeline.Stats>\n    <Timeline.Stat label=\"Duration\" value=\"1m 42s\" />\n    <Timeline.Stat label=\"Region\" value=\"fra1\" />\n  </Timeline.Stats>\n</Timeline.Content>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Timeline variant=\"dot\">…</Timeline>\n<Timeline variant=\"icon\">…</Timeline>\n<Timeline variant=\"numbered\">…</Timeline>\n<Timeline variant=\"card\">…</Timeline>\n<Timeline variant=\"compact\">…</Timeline>",
+      "tone": "{/* Tone is per entry, not per timeline. */}\n<Timeline.Item step={0} tone=\"default\">…</Timeline.Item>\n<Timeline.Item step={1} tone=\"info\">…</Timeline.Item>\n<Timeline.Item step={2} tone=\"success\">…</Timeline.Item>\n<Timeline.Item step={3} tone=\"warning\">…</Timeline.Item>\n<Timeline.Item step={4} tone=\"danger\">…</Timeline.Item>"
+    }
   },
   "toast": {
     "intro": "A transient notification. The queue lives outside React, so `toast.show()` works from anywhere — API clients, event handlers, code with no component around it.\n\n`PanelUIProvider` mounts the viewport for you.",
     "usage": "const { toast } = useToast();\n\n// A bare string\ntoast.show('Link copied');\n\n// A config object\ntoast.show({\n  variant: 'success',\n  label: 'Deployment complete',\n  description: 'panelui.dev is live on production.',\n  actionLabel: 'View',\n  onActionPress: ({ hide }) => hide(),\n});\n\n// A custom component\ntoast.show({\n  component: ({ hide }) => (\n    <Toast variant=\"info\" onHide={hide}>\n      <Toast.Indicator />\n      <Toast.Content>\n        <Toast.Title>Custom</Toast.Title>\n      </Toast.Content>\n      <Toast.Close />\n    </Toast>\n  ),\n});",
     "extraImports": [
+      "Button",
       "useToast"
     ],
     "parts": {
@@ -275,7 +763,25 @@
       "Close": "Icon-only dismiss button."
     },
     "notes": "Toasts stack as an overlapping deck: the newest is fully visible and the ones behind peek out, with anything past the third fading rather than accumulating. Swiping toward the edge the toast entered from dismisses it; dragging the other way rubber-bands.\n\n`toast.hide(id)` dismisses one, `toast.hideAll()` clears the queue. A `duration` of `0` keeps a toast up until it is dismissed.",
-    "anatomy": "<Toast>\n  <Toast.Indicator />\n  <Toast.Content>\n    <Toast.Title>…</Toast.Title>\n    <Toast.Description>…</Toast.Description>\n  </Toast.Content>\n  <Toast.Action>…</Toast.Action>\n  <Toast.Close />\n</Toast>"
+    "anatomy": "<Toast>\n  <Toast.Indicator />\n  <Toast.Content>\n    <Toast.Title>…</Toast.Title>\n    <Toast.Description>…</Toast.Description>\n  </Toast.Content>\n  <Toast.Action>…</Toast.Action>\n  <Toast.Close />\n</Toast>",
+    "examples": [
+      {
+        "title": "Firing one",
+        "description": "Toasts are queued through `useToast`, so any component can raise one without rendering it.",
+        "code": "const { toast } = useToast();\n\n<Button\n  onPress={() =>\n    toast({\n      variant: 'success',\n      title: 'Saved',\n      description: 'Your changes are live.',\n    })\n  }\n>\n  Save\n</Button>"
+      },
+      {
+        "title": "With an action",
+        "code": "toast({\n  variant: 'default',\n  title: 'Message archived',\n  action: { label: 'Undo', onPress: restore },\n});"
+      },
+      {
+        "title": "An error you have to dismiss",
+        "code": "toast({\n  variant: 'destructive',\n  title: 'Upload failed',\n  description: 'The file is larger than 25 MB.',\n  duration: 0, // stays until dismissed\n});"
+      }
+    ],
+    "variantCode": {
+      "variant": "toast({ variant: 'default', title: 'Saved' });\ntoast({ variant: 'info', title: 'Syncing' });\ntoast({ variant: 'success', title: 'Deployed' });\ntoast({ variant: 'warning', title: 'Almost out of space' });\ntoast({ variant: 'destructive', title: 'Upload failed' });"
+    }
   },
   "typography": {
     "intro": "Semantic text presets, built on the `Text` primitive.",
@@ -285,7 +791,21 @@
       "Paragraph": "Body copy.",
       "Code": "Inline code on a muted surface."
     },
-    "anatomy": "<Typography type=\"h1\">…</Typography>\n\n<Typography.Heading type=\"h2\">…</Typography.Heading>\n<Typography.Paragraph>…</Typography.Paragraph>\n<Typography.Code>…</Typography.Code>"
+    "anatomy": "<Typography type=\"h1\">…</Typography>\n\n<Typography.Heading type=\"h2\">…</Typography.Heading>\n<Typography.Paragraph>…</Typography.Paragraph>\n<Typography.Code>…</Typography.Code>",
+    "examples": [
+      {
+        "title": "Headings and body",
+        "description": "The type scale in one place, so headings stay consistent instead of being rebuilt from size and weight classes.",
+        "code": "<Typography.Heading type=\"h1\">Ship it</Typography.Heading>\n<Typography.Heading type=\"h3\">Getting started</Typography.Heading>\n\n<Typography.Paragraph>\n  Body copy at the default size.\n</Typography.Paragraph>\n\n<Typography.Paragraph type=\"body-sm\" muted>\n  Secondary copy, one step down and muted.\n</Typography.Paragraph>"
+      },
+      {
+        "title": "Inline and block code",
+        "code": "<Typography.Paragraph>\n  Run <Typography.Code>npx expo install</Typography.Code> first.\n</Typography.Paragraph>"
+      }
+    ],
+    "variantCode": {
+      "type": "<Typography.Heading type=\"h1\">Heading 1</Typography.Heading>\n<Typography.Heading type=\"h4\">Heading 4</Typography.Heading>\n<Typography.Paragraph type=\"body\">Body</Typography.Paragraph>\n<Typography.Paragraph type=\"body-sm\">Body small</Typography.Paragraph>\n<Typography.Code>inline code</Typography.Code>"
+    }
   },
   "surface": {
     "intro": "An elevated container. Nest the variants to build hierarchy — each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
@@ -293,7 +813,22 @@
     "extraImports": [
       "Text"
     ],
-    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill."
+    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill.",
+    "examples": [
+      {
+        "title": "The variant ladder",
+        "description": "Each step is one level further from the background — nest them to build depth without hardcoding colours.",
+        "code": "<Surface className=\"gap-3 p-4\">\n  <Text>Default</Text>\n  <Surface variant=\"secondary\" className=\"gap-3 p-4\">\n    <Text>Secondary</Text>\n    <Surface variant=\"tertiary\" className=\"p-4\">\n      <Text>Tertiary</Text>\n    </Surface>\n  </Surface>\n</Surface>"
+      },
+      {
+        "title": "Transparent",
+        "description": "Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.",
+        "code": "<Surface variant=\"transparent\" className=\"p-4\">\n  <Text>No background of its own.</Text>\n</Surface>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Surface variant=\"default\" className=\"p-4\">Default</Surface>\n<Surface variant=\"secondary\" className=\"p-4\">Secondary</Surface>\n<Surface variant=\"tertiary\" className=\"p-4\">Tertiary</Surface>\n<Surface variant=\"transparent\" className=\"p-4\">Transparent</Surface>"
+    }
   },
   "shimmer": {
     "intro": "A highlight that sweeps through text and content, for loading, thinking and streaming states.\n\nThe content is used as a mask and a gradient band is swept behind it on the UI thread, so the highlight is clipped to the glyph shapes — the letters themselves catch the light rather than sitting under a passing overlay.",
@@ -301,22 +836,80 @@
     "extraImports": [
       "Skeleton"
     ],
-    "notes": "The sweep runs entirely on the UI thread and never re-renders React while animating.\n\nIt stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.\n\n`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props."
+    "notes": "The sweep runs entirely on the UI thread and never re-renders React while animating.\n\nIt stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.\n\n`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props.",
+    "examples": [
+      {
+        "title": "A thinking indicator",
+        "description": "The default. The sweep is clipped to the glyphs, so the letters catch the light instead of sitting under a passing band.",
+        "code": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>"
+      },
+      {
+        "title": "Masking a subtree",
+        "description": "`as=\"view\"` masks the sweep to whatever you pass instead of to a string.",
+        "code": "<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n  <Skeleton className=\"h-4 w-1/2\" />\n</Shimmer>"
+      },
+      {
+        "title": "Tuning the sweep",
+        "code": "{/* Reverses on each pass instead of restarting from the left. */}\n<Shimmer mode=\"ping-pong\" duration={1600}>Ping-pong</Shimmer>\n\n{/* Right to left. */}\n<Shimmer reverse>Reversed</Shimmer>\n\n{/* A wider, slower band. */}\n<Shimmer spread={4} duration={2600}>Slow and broad</Shimmer>\n\n{/* One pass, then stop. */}\n<Shimmer once>Sweeps once</Shimmer>"
+      },
+      {
+        "title": "Custom colours",
+        "description": "Both default to theme tokens, so you only need these on a surface the tokens do not suit.",
+        "code": "<Shimmer baseColor=\"#3f3f46\" shimmerColor=\"#fafafa\">\n  Neutral on dark\n</Shimmer>"
+      },
+      {
+        "title": "Turning it off",
+        "description": "Renders the content statically in `baseColor`. Useful for stopping the sweep the moment a stream finishes, without swapping components.",
+        "code": "<Shimmer enabled={isStreaming}>{status}</Shimmer>"
+      }
+    ]
   },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",
     "usage": "<ScrollFade>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag}>{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>\n\n// Vertical: no `horizontal` on the child, so the fades move to\n// the top and bottom edges.\n<ScrollFade className=\"h-56\">\n  <ScrollView>\n    {events.map((event) => (\n      <Row key={event.id} {...event} />\n    ))}\n  </ScrollView>\n</ScrollFade>\n\n// Fade only the trailing edge, on a card surface.\n<ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n  <FlatList horizontal data={items} renderItem={renderItem} />\n</ScrollFade>",
     "extraImports": [
-      "Badge"
+      "Badge",
+      "Card"
     ],
-    "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend."
+    "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend.",
+    "examples": [
+      {
+        "title": "A horizontal row",
+        "description": "Orientation is read from the child’s `horizontal` prop, so this fades left and right.",
+        "code": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    {tags.map((tag) => (\n      <Badge key={tag} variant=\"secondary\">{tag}</Badge>\n    ))}\n  </ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "A vertical list",
+        "description": "No `horizontal` on the child, so the fades move to the top and bottom edges.",
+        "code": "<ScrollFade className=\"h-56\">\n  <ScrollView showsVerticalScrollIndicator={false}>\n    {events.map((event) => (\n      <Row key={event.id} {...event} />\n    ))}\n  </ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "One edge, on a card",
+        "description": "The fade resolves to the theme background by default — pass `color` when the scrollable sits on another surface, or it will not blend.",
+        "code": "<Card>\n  <Card.Content>\n    <ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n      <FlatList horizontal data={items} renderItem={renderItem} />\n    </ScrollFade>\n  </Card.Content>\n</Card>"
+      },
+      {
+        "title": "With your own scroll handler",
+        "description": "The child becomes a Reanimated animated component, so an `onScroll` you pass has to be an animated handler — a plain function will not run.",
+        "code": "const onScroll = useAnimatedScrollHandler({\n  onScroll: (event) => {\n    offset.value = event.contentOffset.y;\n  },\n});\n\n<ScrollFade>\n  <Animated.ScrollView onScroll={onScroll}>\n    {/* … */}\n  </Animated.ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "Turning it off",
+        "code": "<ScrollFade enabled={!isRefreshing}>\n  <ScrollView>{/* … */}</ScrollView>\n</ScrollFade>"
+      }
+    ]
   },
   "item": {
     "intro": "A row of content: media on one side, a title and description in the middle, actions on the other.\n\nIt is the shape almost every list in an app already has — a settings row, a file in a picker, a member in a team list, a tool call in a transcript — so it exists as one composable primitive instead of being rebuilt per screen with slightly different padding each time.",
-    "usage": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <FileIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>\n\n// Pressable rows. Without onPress it renders as a plain view and does not\n// announce itself as a button.\n<Item.Group>\n  <Item size=\"sm\" onPress={() => open(file)}>\n    <Item.Content>\n      <Item.Title>Notifications</Item.Title>\n      <Item.Description>Push, email and in-app</Item.Description>\n    </Item.Content>\n    <Item.Actions>\n      <ChevronRightIcon size={16} />\n    </Item.Actions>\n  </Item>\n  <Item.Separator />\n  <Item size=\"sm\" onPress={() => open(privacy)}>\n    <Item.Content>\n      <Item.Title>Privacy</Item.Title>\n    </Item.Content>\n  </Item>\n</Item.Group>",
+    "usage": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>\n\n// Pressable rows. Without onPress it renders as a plain view and does not\n// announce itself as a button.\n<Item.Group>\n  <Item size=\"sm\" onPress={() => open(file)}>\n    <Item.Content>\n      <Item.Title>Notifications</Item.Title>\n      <Item.Description>Push, email and in-app</Item.Description>\n    </Item.Content>\n    <Item.Actions>\n      <ChevronRightIcon size={16} />\n    </Item.Actions>\n  </Item>\n  <Item.Separator />\n  <Item size=\"sm\" onPress={() => open(privacy)}>\n    <Item.Content>\n      <Item.Title>Privacy</Item.Title>\n    </Item.Content>\n  </Item>\n</Item.Group>",
     "extraImports": [
+      "Avatar",
+      "Badge",
       "Button",
-      "FileIcon",
+      "Switch",
+      "Text",
+      "ReceiptIcon",
+      "BellIcon",
       "ChevronRightIcon"
     ],
     "anatomy": "<Item.Group>\n  <Item>\n    <Item.Header>…</Item.Header>\n    <Item.Media>…</Item.Media>\n    <Item.Content>\n      <Item.Title>…</Item.Title>\n      <Item.Description>…</Item.Description>\n    </Item.Content>\n    <Item.Actions>…</Item.Actions>\n    <Item.Footer>…</Item.Footer>\n  </Item>\n  <Item.Separator />\n</Item.Group>",
@@ -331,13 +924,45 @@
       "Header": "Full-width strip above the row content. Needs the item laid out as a column.",
       "Footer": "Full-width strip below the row content."
     },
-    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### Header and footer\n\nBoth are full-width strips, which means they only make sense once the item itself is a column: `<Item className=\"flex-col items-start\">`. In the default row layout they will sit inline with everything else."
+    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### Header and footer\n\nBoth are full-width strips, which means they only make sense once the item itself is a column: `<Item className=\"flex-col items-start\">`. In the default row layout they will sit inline with everything else.",
+    "examples": [
+      {
+        "title": "A file row",
+        "code": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>"
+      },
+      {
+        "title": "A settings group",
+        "description": "Give a row `onPress` and it becomes a pressable with a press animation and a button role. Leave it off and it stays a plain view.",
+        "code": "<Item.Group>\n  {rows.map((row, index) => (\n    <Fragment key={row.id}>\n      {index > 0 && <Item.Separator />}\n      <Item size=\"sm\" onPress={() => router.push(row.href)}>\n        <Item.Content>\n          <Item.Title>{row.title}</Item.Title>\n          <Item.Description>{row.summary}</Item.Description>\n        </Item.Content>\n        <Item.Actions>\n          <ChevronRightIcon size={16} />\n        </Item.Actions>\n      </Item>\n    </Fragment>\n  ))}\n</Item.Group>"
+      },
+      {
+        "title": "Media types",
+        "description": "`icon` and `image` give the media slot a sized box; the default adds none, so an `Avatar` can style itself.",
+        "code": "<Item.Media variant=\"icon\"><BellIcon size={18} /></Item.Media>\n\n<Item.Media variant=\"image\">\n  <Image source={{ uri: product.image }} className=\"h-full w-full\" />\n</Item.Media>\n\n<Item.Media>\n  <Avatar size=\"md\" source={{ uri: user.avatar }} fallback=\"KA\" />\n</Item.Media>"
+      },
+      {
+        "title": "A header and footer",
+        "description": "Both are full-width strips, so the item has to be laid out as a column.",
+        "code": "<Item variant=\"outline\" className=\"flex-col items-start gap-2\">\n  <Item.Header>\n    <Badge variant=\"secondary\">Draft</Badge>\n    <Text size=\"xs\" muted>Updated 2h ago</Text>\n  </Item.Header>\n  <Item.Content>\n    <Item.Title>Quarterly report</Item.Title>\n    <Item.Description>Revenue, retention and headcount.</Item.Description>\n  </Item.Content>\n  <Item.Footer>\n    <Button size=\"sm\" variant=\"outline\">Preview</Button>\n    <Button size=\"sm\">Publish</Button>\n  </Item.Footer>\n</Item>"
+      },
+      {
+        "title": "With a switch",
+        "description": "Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.",
+        "code": "<Item size=\"sm\">\n  <Item.Content>\n    <Item.Title>Push notifications</Item.Title>\n    <Item.Description>Alerts on this device.</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Switch value={push} onValueChange={setPush} />\n  </Item.Actions>\n</Item>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Item variant=\"default\">…</Item>\n<Item variant=\"outline\">…</Item>\n<Item variant=\"muted\">…</Item>",
+      "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>"
+    }
   },
   "message": {
     "intro": "A chat turn: avatar, bubble, and the metadata around it.\n\nThe pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.",
     "usage": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" fallback=\"KA\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n// The outgoing side.\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>\n\n// Consecutive turns from one sender.\n<Message.Group align=\"start\">\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Header>Assistant</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>Looking that up…</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Bubble>\n        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n</Message.Group>",
     "extraImports": [
-      "Avatar"
+      "Avatar",
+      "Button",
+      "Shimmer"
     ],
     "anatomy": "<Message.Group>\n  <Message align=\"start\">\n    <Message.Avatar>…</Message.Avatar>\n    <Message.Content>\n      <Message.Header>…</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>…</Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Actions>…</Message.Actions>\n      <Message.Footer>…</Message.Footer>\n    </Message.Content>\n  </Message>\n</Message.Group>",
     "parts": {
@@ -350,6 +975,35 @@
       "Actions": "Row of controls under the bubble — copy, retry, feedback.",
       "Footer": "Delivery state or timestamp below the bubble."
     },
-    "notes": "### Alignment\n\n`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).\n\nSet it on `Message.Group` instead and every message inside inherits it.\n\n### Grouping\n\n`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.\n\n### In a list\n\nRender a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows."
+    "notes": "### Alignment\n\n`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).\n\nSet it on `Message.Group` instead and every message inside inherits it.\n\n### Grouping\n\n`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.\n\n### In a list\n\nRender a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
+    "examples": [
+      {
+        "title": "Both sides of a conversation",
+        "description": "`align` decides the row direction, the avatar side, which bubble corner is squared off, and the bubble colour — every part reads it from context.",
+        "code": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" source={{ uri: them.avatar }} fallback=\"OL\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>"
+      },
+      {
+        "title": "Grouped turns",
+        "description": "Every turn after the first is marked `stacked`: it keeps its avatar slot but empties it, so the bubbles stay in one column.",
+        "code": "<Message.Group align=\"start\">\n  {turns.map((turn) => (\n    <Message key={turn.id}>\n      <Message.Avatar>\n        <Avatar size=\"sm\" fallback=\"AI\" />\n      </Message.Avatar>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{turn.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  ))}\n</Message.Group>"
+      },
+      {
+        "title": "A streaming turn",
+        "code": "<Message>\n  <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      {text ? (\n        <Message.BubbleContent>{text}</Message.BubbleContent>\n      ) : (\n        <Shimmer textClassName=\"text-base\">Thinking…</Shimmer>\n      )}\n    </Message.Bubble>\n  </Message.Content>\n</Message>"
+      },
+      {
+        "title": "Actions under the bubble",
+        "description": "`Message.Actions` reverses its row on the outgoing side so the buttons stay on the message’s own edge.",
+        "code": "<Message.Content>\n  <Message.Bubble>\n    <Message.BubbleContent>{answer}</Message.BubbleContent>\n  </Message.Bubble>\n  <Message.Actions>\n    <Button size=\"sm\" variant=\"ghost\" onPress={() => copy(answer)}>Copy</Button>\n    <Button size=\"sm\" variant=\"ghost\" onPress={retry}>Retry</Button>\n  </Message.Actions>\n</Message.Content>"
+      },
+      {
+        "title": "In a transcript",
+        "description": "An inverted `FlatList` keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
+        "code": "<FlatList\n  data={[...messages].reverse()}\n  inverted\n  keyExtractor={(m) => m.id}\n  contentContainerClassName=\"gap-3 px-4 py-3\"\n  renderItem={({ item }) => (\n    <Message align={item.role === 'user' ? 'end' : 'start'}>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{item.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  )}\n/>"
+      }
+    ],
+    "variantCode": {
+      "align": "{/* Incoming — muted bubble, avatar on the left. */}\n<Message align=\"start\">…</Message>\n\n{/* Outgoing — primary bubble, row reversed. */}\n<Message align=\"end\">…</Message>\n\n{/* Or set it once for a whole group. */}\n<Message.Group align=\"end\">…</Message.Group>"
+    }
   }
 }

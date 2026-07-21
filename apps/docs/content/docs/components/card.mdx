@@ -10,7 +10,7 @@ A content surface. Use the full composition rather than dropping everything into
 Card ships with the library — no separate install.
 
 ```tsx
-import { Card, Button, Input } from 'panelui-native';
+import { Card, Button, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -48,6 +48,55 @@ import { Card, Button, Input } from 'panelui-native';
 - **`Card.Description`** — Muted supporting line.
 - **`Card.Content`** — Main body.
 - **`Card.Footer`** — Row of actions.
+
+## Examples
+
+### Full anatomy
+
+Header, content and footer carry the padding, so the card itself never needs a padding class.
+
+```tsx
+<Card>
+  <Card.Header>
+    <Card.Title>Monthly report</Card.Title>
+    <Card.Description>Revenue and retention for October.</Card.Description>
+  </Card.Header>
+  <Card.Content>
+    <Text size="3xl" weight="bold">$48,120</Text>
+    <Text size="sm" muted>+12% on September</Text>
+  </Card.Content>
+  <Card.Footer>
+    <Button variant="outline" size="sm">Export</Button>
+    <Button size="sm">Open</Button>
+  </Card.Footer>
+</Card>
+```
+
+### Content only
+
+Skip the parts you do not need — nothing is required.
+
+```tsx
+<Card>
+  <Card.Content className="p-4">
+    <Text>A plain surface with a border and a shadow.</Text>
+  </Card.Content>
+</Card>
+```
+
+### Media at the top
+
+Clip the card so the image corners follow its radius, and put the image before the header.
+
+```tsx
+<Card className="overflow-hidden">
+  <Image source={{ uri: post.cover }} className="h-40 w-full" />
+  <Card.Header>
+    <Card.Title>{post.title}</Card.Title>
+    <Card.Description>{post.excerpt}</Card.Description>
+  </Card.Header>
+</Card>
+```
 
 ## API Reference
 

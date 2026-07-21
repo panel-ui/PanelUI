@@ -12,7 +12,7 @@ It is the shape almost every list in an app already has — a settings row, a fi
 Item ships with the library — no separate install.
 
 ```tsx
-import { Item, Button, FileIcon, ChevronRightIcon } from 'panelui-native';
+import { Item, Avatar, Badge, Button, Switch, Text, ReceiptIcon, BellIcon, ChevronRightIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -20,7 +20,7 @@ import { Item, Button, FileIcon, ChevronRightIcon } from 'panelui-native';
 ```tsx
 <Item variant="outline">
   <Item.Media variant="icon">
-    <FileIcon size={18} />
+    <ReceiptIcon size={18} />
   </Item.Media>
   <Item.Content>
     <Item.Title>Invoice.pdf</Item.Title>
@@ -80,6 +80,101 @@ import { Item, Button, FileIcon, ChevronRightIcon } from 'panelui-native';
 - **`Item.Header`** — Full-width strip above the row content. Needs the item laid out as a column.
 - **`Item.Footer`** — Full-width strip below the row content.
 
+## Examples
+
+### A file row
+
+```tsx
+<Item variant="outline">
+  <Item.Media variant="icon">
+    <ReceiptIcon size={18} />
+  </Item.Media>
+  <Item.Content>
+    <Item.Title>Invoice.pdf</Item.Title>
+    <Item.Description>2.4 MB · Updated yesterday</Item.Description>
+  </Item.Content>
+  <Item.Actions>
+    <Button size="sm" variant="outline">Open</Button>
+  </Item.Actions>
+</Item>
+```
+
+### A settings group
+
+Give a row `onPress` and it becomes a pressable with a press animation and a button role. Leave it off and it stays a plain view.
+
+```tsx
+<Item.Group>
+  {rows.map((row, index) => (
+    <Fragment key={row.id}>
+      {index > 0 && <Item.Separator />}
+      <Item size="sm" onPress={() => router.push(row.href)}>
+        <Item.Content>
+          <Item.Title>{row.title}</Item.Title>
+          <Item.Description>{row.summary}</Item.Description>
+        </Item.Content>
+        <Item.Actions>
+          <ChevronRightIcon size={16} />
+        </Item.Actions>
+      </Item>
+    </Fragment>
+  ))}
+</Item.Group>
+```
+
+### Media types
+
+`icon` and `image` give the media slot a sized box; the default adds none, so an `Avatar` can style itself.
+
+```tsx
+<Item.Media variant="icon"><BellIcon size={18} /></Item.Media>
+
+<Item.Media variant="image">
+  <Image source={{ uri: product.image }} className="h-full w-full" />
+</Item.Media>
+
+<Item.Media>
+  <Avatar size="md" source={{ uri: user.avatar }} fallback="KA" />
+</Item.Media>
+```
+
+### A header and footer
+
+Both are full-width strips, so the item has to be laid out as a column.
+
+```tsx
+<Item variant="outline" className="flex-col items-start gap-2">
+  <Item.Header>
+    <Badge variant="secondary">Draft</Badge>
+    <Text size="xs" muted>Updated 2h ago</Text>
+  </Item.Header>
+  <Item.Content>
+    <Item.Title>Quarterly report</Item.Title>
+    <Item.Description>Revenue, retention and headcount.</Item.Description>
+  </Item.Content>
+  <Item.Footer>
+    <Button size="sm" variant="outline">Preview</Button>
+    <Button size="sm">Publish</Button>
+  </Item.Footer>
+</Item>
+```
+
+### With a switch
+
+Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.
+
+```tsx
+<Item size="sm">
+  <Item.Content>
+    <Item.Title>Push notifications</Item.Title>
+    <Item.Description>Alerts on this device.</Item.Description>
+  </Item.Content>
+  <Item.Actions>
+    <Switch value={push} onValueChange={setPush} />
+  </Item.Actions>
+</Item>
+```
+
 ## Variants
 
 ### `variant`
@@ -88,11 +183,24 @@ import { Item, Button, FileIcon, ChevronRightIcon } from 'panelui-native';
 - `outline`
 - `muted`
 
+```tsx
+<Item variant="default">…</Item>
+<Item variant="outline">…</Item>
+<Item variant="muted">…</Item>
+```
+
 ### `size`
 
 - `default` *(default)*
 - `sm`
 - `xs`
+
+```tsx
+{/* Sets the row padding, and the media, title and description sizes. */}
+<Item size="default">…</Item>
+<Item size="sm">…</Item>
+<Item size="xs">…</Item>
+```
 
 ## API Reference
 

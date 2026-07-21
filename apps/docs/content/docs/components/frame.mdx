@@ -10,7 +10,7 @@ A widget shell: a titled header row with an action on the right, an inset panel 
 Frame ships with the library — no separate install.
 
 ```tsx
-import { Frame, Text } from 'panelui-native';
+import { Frame, Button, Switch, Text, Badge } from 'panelui-native';
 ```
 
 ## Usage
@@ -57,6 +57,59 @@ import { Frame, Text } from 'panelui-native';
 - **`Frame.Panel`** — The inset card holding the rows.
 - **`Frame.Row`** — A row inside the panel. Pass `divided` on every row after the first.
 - **`Frame.Footer`** — Muted caption under the panel. Strings are wrapped for you.
+
+## Examples
+
+### A settings panel
+
+`Frame.Row` with `divided` draws the hairline between rows for you.
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Notifications</Frame.Title>
+    <Frame.Description>How we reach you.</Frame.Description>
+  </Frame.Header>
+  <Frame.Panel>
+    <Frame.Row divided>
+      <Text>Push</Text>
+      <Switch value={push} onValueChange={setPush} />
+    </Frame.Row>
+    <Frame.Row divided>
+      <Text>Email</Text>
+      <Switch value={email} onValueChange={setEmail} />
+    </Frame.Row>
+    <Frame.Row>
+      <Text>SMS</Text>
+      <Switch value={sms} onValueChange={setSms} />
+    </Frame.Row>
+  </Frame.Panel>
+</Frame>
+```
+
+### With a header action and a footer
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>API keys</Frame.Title>
+    <Frame.Action>
+      <Button size="sm" variant="outline">New key</Button>
+    </Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {keys.map((key) => (
+      <Frame.Row key={key.id} divided>
+        <Text>{key.name}</Text>
+        <Badge variant="outline">{key.lastUsed}</Badge>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+  <Frame.Footer>
+    <Text size="sm" muted>Keys are shown once at creation.</Text>
+  </Frame.Footer>
+</Frame>
+```
 
 ## API Reference
 

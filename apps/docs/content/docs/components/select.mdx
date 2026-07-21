@@ -10,7 +10,7 @@ A picker that opens its options in a bottom sheet — the right choice when the 
 Select ships with the library — no separate install.
 
 ```tsx
-import { Select } from 'panelui-native';
+import { Select, Input, Label } from 'panelui-native';
 ```
 
 ## Usage
@@ -37,6 +37,53 @@ import { Select } from 'panelui-native';
 
 - **`Select.Item`** — One option. `value` identifies it, `label` is what is shown.
 
+## Examples
+
+### Basic
+
+The trigger shows the selected option’s label, or the placeholder when nothing is chosen.
+
+```tsx
+const [fruit, setFruit] = useState<string>();
+
+<Select
+  value={fruit}
+  onValueChange={setFruit}
+  placeholder="Select a fruit"
+  title="Favorite fruit"
+>
+  <Select.Item value="apple" label="Apple" />
+  <Select.Item value="banana" label="Banana" />
+  <Select.Item value="cherry" label="Cherry" />
+</Select>
+```
+
+### From data
+
+```tsx
+<Select value={country} onValueChange={setCountry} title="Country">
+  {countries.map((c) => (
+    <Select.Item key={c.code} value={c.code} label={c.name} />
+  ))}
+</Select>
+```
+
+### In a form
+
+The options open in a sheet, so nothing in the form moves.
+
+```tsx
+<View className="gap-4">
+  <Input label="Full name" />
+  <View className="gap-1.5">
+    <Label isRequired>Country</Label>
+    <Select value={country} onValueChange={setCountry} title="Country">
+      {/* …items… */}
+    </Select>
+  </View>
+</View>
+```
+
 ## API Reference
 
 ### Select.Item
@@ -53,11 +100,11 @@ import { Select } from 'panelui-native';
 | `className` | `string` | — |  |
 | `value` | `string` | — |  |
 | `onValueChange` | `(value: string) => void` | — |  |
-| `placeholder` | `string` | — |  |
+| `placeholder` | `string` | `'Select an option'` |  |
 | `title` | `string` | — | Sheet title shown above the options. |
 | `disabled` | `boolean` | — |  |
 | `native` | `boolean` | — | Render the platform's own picker instead of the trigger-and-sheet pair. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the picker, so `className` and `title` are ignored. `Select.Item` children still declare the options. |
-| `nativeAppearance` | `'menu' \| 'wheel'` | — | Native picker style. `menu` is a compact button opening a dropdown; `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere). |
+| `nativeAppearance` | `'menu' \| 'wheel'` | `'menu'` | Native picker style. `menu` is a compact button opening a dropdown; `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere). |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

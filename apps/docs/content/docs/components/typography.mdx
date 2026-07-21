@@ -38,6 +38,33 @@ import { Typography } from 'panelui-native';
 - **`Typography.Paragraph`** — Body copy.
 - **`Typography.Code`** — Inline code on a muted surface.
 
+## Examples
+
+### Headings and body
+
+The type scale in one place, so headings stay consistent instead of being rebuilt from size and weight classes.
+
+```tsx
+<Typography.Heading type="h1">Ship it</Typography.Heading>
+<Typography.Heading type="h3">Getting started</Typography.Heading>
+
+<Typography.Paragraph>
+  Body copy at the default size.
+</Typography.Paragraph>
+
+<Typography.Paragraph type="body-sm" muted>
+  Secondary copy, one step down and muted.
+</Typography.Paragraph>
+```
+
+### Inline and block code
+
+```tsx
+<Typography.Paragraph>
+  Run <Typography.Code>npx expo install</Typography.Code> first.
+</Typography.Paragraph>
+```
+
 ## Variants
 
 ### `type`
@@ -53,9 +80,21 @@ import { Typography } from 'panelui-native';
 - `body-xs`
 - `code`
 
+```tsx
+<Typography.Heading type="h1">Heading 1</Typography.Heading>
+<Typography.Heading type="h4">Heading 4</Typography.Heading>
+<Typography.Paragraph type="body">Body</Typography.Paragraph>
+<Typography.Paragraph type="body-sm">Body small</Typography.Paragraph>
+<Typography.Code>inline code</Typography.Code>
+```
+
 ### `muted`
 
 - `true`
+
+```tsx
+<Typography muted="true">…</Typography>
+```
 
 ## API Reference
 

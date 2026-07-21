@@ -35,6 +35,75 @@ import { Input } from 'panelui-native';
 <Input avoidKeyboard label="Comment" placeholder="Say something…" />
 ```
 
+## Examples
+
+### Label, description and error
+
+Setting `errorMessage` also puts the field into its invalid state — you do not need a separate flag. The description is replaced by the error while one is present.
+
+```tsx
+<Input label="Name" placeholder="Khalid Abdi" />
+
+<Input
+  label="Description"
+  placeholder="A short description"
+  description="Shown on your public profile."
+/>
+
+<Input
+  label="Email"
+  value={email}
+  onChangeText={setEmail}
+  errorMessage={emailError}
+/>
+```
+
+### Avoiding the keyboard
+
+The field lifts by exactly the amount the keyboard covers it, and not at all when it is already clear.
+
+```tsx
+<Input
+  avoidKeyboard
+  keyboardOffset={24}
+  label="Comment"
+  placeholder="Say something…"
+/>
+```
+
+### Passing through TextInput props
+
+Anything `TextInput` accepts works here.
+
+```tsx
+<Input
+  label="Password"
+  secureTextEntry
+  autoCapitalize="none"
+  autoComplete="current-password"
+  returnKeyType="go"
+  onSubmitEditing={signIn}
+/>
+
+<Input
+  label="Amount"
+  keyboardType="decimal-pad"
+  inputMode="decimal"
+/>
+```
+
+### Styling the field and the container separately
+
+`className` goes on the text field; `containerClassName` goes on the wrapper that holds the label, field and message.
+
+```tsx
+<Input
+  containerClassName="flex-1"
+  className="h-12 rounded-full px-4"
+  placeholder="Search components"
+/>
+```
+
 ## API Reference
 
 ### Input
@@ -47,8 +116,8 @@ import { Input } from 'panelui-native';
 | `description` | `string` | — |  |
 | `errorMessage` | `string` | — | Error message. When set, the field renders in its invalid state. |
 | `disabled` | `boolean` | — |  |
-| `avoidKeyboard` | `boolean` | — | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. |
-| `keyboardOffset` | `number` | — | Gap kept between the field and the keyboard when `avoidKeyboard` is set. |
+| `avoidKeyboard` | `boolean` | `false` | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. |
+| `keyboardOffset` | `number` | `16` | Gap kept between the field and the keyboard when `avoidKeyboard` is set. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

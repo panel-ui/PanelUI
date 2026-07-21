@@ -10,7 +10,7 @@ A stepper for multi-step flows. Steps does not own your flow — it reflects wha
 Steps ships with the library — no separate install.
 
 ```tsx
-import { Steps } from 'panelui-native';
+import { Steps, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -51,12 +51,80 @@ import { Steps } from 'panelui-native';
 - **`Steps.Description`** — Supporting line.
 - **`Steps.Separator`** — Connector to the next step. Place it inside the item so it can read that item's state.
 
+## Examples
+
+### A horizontal wizard
+
+`value` is the index of the current step; anything before it is completed.
+
+```tsx
+const [step, setStep] = useState(1);
+
+<Steps value={step} onValueChange={setStep}>
+  <Steps.Item step={0}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Account</Steps.Title>
+    </Steps.Trigger>
+    <Steps.Separator />
+  </Steps.Item>
+  <Steps.Item step={1}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Payment</Steps.Title>
+    </Steps.Trigger>
+    <Steps.Separator />
+  </Steps.Item>
+  <Steps.Item step={2}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Confirm</Steps.Title>
+    </Steps.Trigger>
+  </Steps.Item>
+</Steps>
+```
+
+### Vertical, with descriptions
+
+```tsx
+<Steps orientation="vertical" value={step}>
+  <Steps.Item step={0}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <View className="flex-1">
+        <Steps.Title>Connect your repo</Steps.Title>
+        <Steps.Description>We only read metadata.</Steps.Description>
+      </View>
+    </Steps.Trigger>
+    <Steps.Separator />
+  </Steps.Item>
+  {/* …more items… */}
+</Steps>
+```
+
+### A step that is loading or blocked
+
+```tsx
+<Steps.Item step={1} loading={isDeploying}>
+  {/* … */}
+</Steps.Item>
+
+<Steps.Item step={3} disabled={!hasPaid}>
+  {/* … */}
+</Steps.Item>
+```
+
 ## Variants
 
 ### `orientation`
 
 - `horizontal` *(default)*
 - `vertical`
+
+```tsx
+<Steps orientation="horizontal" value={step}>…</Steps>
+<Steps orientation="vertical" value={step}>…</Steps>
+```
 
 ### `state`
 
@@ -65,6 +133,13 @@ import { Steps } from 'panelui-native';
 - `completed`
 - `loading`
 
+```tsx
+<Steps state="inactive">…</Steps>
+<Steps state="active">…</Steps>
+<Steps state="completed">…</Steps>
+<Steps state="loading">…</Steps>
+```
+
 ## API Reference
 
 ### Steps
@@ -72,7 +147,7 @@ import { Steps } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `defaultValue` | `number` | — | Active step when uncontrolled. |
+| `defaultValue` | `number` | `0` | Active step when uncontrolled. |
 | `value` | `number` | — | Active step, controlled. |
 | `onValueChange` | `(value: number) => void` | — |  |
 | `orientation` | `StepsOrientation` | `horizontal` |  |

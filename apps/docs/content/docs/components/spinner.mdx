@@ -10,7 +10,7 @@ An indeterminate loading indicator. `Button` renders one for you when `loading` 
 Spinner ships with the library — no separate install.
 
 ```tsx
-import { Spinner } from 'panelui-native';
+import { Spinner, Button } from 'panelui-native';
 ```
 
 ## Usage
@@ -20,6 +20,32 @@ import { Spinner } from 'panelui-native';
 <Spinner size="lg" />
 ```
 
+## Examples
+
+### Inline
+
+```tsx
+<Spinner size="sm" />
+<Spinner />
+<Spinner size="lg" />
+```
+
+### Centred in a screen
+
+```tsx
+<View className="flex-1 items-center justify-center">
+  <Spinner size="lg" />
+</View>
+```
+
+### Inside a button
+
+You rarely need this — `Button`’s own `loading` prop inserts a variant-matched spinner for you.
+
+```tsx
+<Button loading={saving}>Save</Button>
+```
+
 ## Variants
 
 ### `size`
@@ -27,6 +53,12 @@ import { Spinner } from 'panelui-native';
 - `sm`
 - `md` *(default)*
 - `lg`
+
+```tsx
+<Spinner size="sm" />
+<Spinner size="md" />
+<Spinner size="lg" />
+```
 
 ## API Reference
 

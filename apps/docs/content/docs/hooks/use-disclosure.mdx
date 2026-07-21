@@ -33,15 +33,78 @@ function ShareSheet() {
 
 `props` spreads straight onto any PanelUI overlay — it is `{ open, onOpenChange }`.
 
+## Examples
+
+### Closing once a request settles
+
+The reason to lift the state out at all — the overlay cannot close itself from
+inside an async handler.
+
+```tsx
+const dialog = useDisclosure();
+const [saving, setSaving] = useState(false);
+
+async function save() {
+  setSaving(true);
+  try {
+    await api.save(draft);
+    dialog.close();
+    toast({ variant: 'success', title: 'Saved' });
+  } finally {
+    setSaving(false);
+  }
+}
+
+<Dialog {...dialog.props}>
+  <Dialog.Content>
+    <Dialog.Title>Edit name</Dialog.Title>
+    <Input defaultValue={project.name} />
+    <Dialog.Footer>
+      <Button variant="ghost" onPress={dialog.close}>Cancel</Button>
+      <Button loading={saving} onPress={save}>Save</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>;
+```
+
 ### Controlled
 
-Pass `open` to drive it from state you already own:
+Pass `open` to drive it from state you already own — a router param, a wizard
+step, a query result.
 
 ```tsx
 const sheet = useDisclosure({
   open: step === 'share',
   onOpenChange: handleChange,
 });
+```
+
+### Reacting to the state elsewhere
+
+```tsx
+const menu = useDisclosure();
+
+<>
+  <Button onPress={menu.toggle}>
+    {menu.isOpen ? 'Hide filters' : 'Show filters'}
+  </Button>
+
+  <BottomSheet {...menu.props}>
+    <BottomSheet.Content>{/* … */}</BottomSheet.Content>
+  </BottomSheet>
+</>;
+```
+
+### Several overlays on one screen
+
+Each gets its own instance — there is no shared registry to collide over.
+
+```tsx
+const share = useDisclosure();
+const confirmDelete = useDisclosure();
+
+<BottomSheet {...share.props}>{/* … */}</BottomSheet>
+<Dialog {...confirmDelete.props}>{/* … */}</Dialog>
 ```
 
 ## API Reference

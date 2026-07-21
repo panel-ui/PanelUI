@@ -24,11 +24,52 @@ function Picker(props) {
 }
 ```
 
+## Examples
+
 ### Reading the current breakpoint
 
 ```tsx
 const { current, width, isLandscape } = useBreakpoint();
 // current: 'base' | 'sm' | 'md' | 'lg' | 'xl'
+```
+
+### Changing a list's column count
+
+```tsx
+const { isAtLeast } = useBreakpoint();
+const columns = isAtLeast('lg') ? 3 : isAtLeast('md') ? 2 : 1;
+
+<FlatList
+  key={columns} // numColumns cannot change on a mounted list
+  data={products}
+  numColumns={columns}
+  renderItem={renderItem}
+/>;
+```
+
+### Branching on orientation
+
+```tsx
+const { isLandscape } = useBreakpoint();
+
+<View className={isLandscape ? 'flex-row gap-6' : 'gap-4'}>
+  <Player />
+  <Playlist />
+</View>;
+```
+
+### When *not* to use it
+
+Styling that only changes appearance belongs in Uniwind's responsive prefixes —
+they cost nothing at runtime, where this hook re-renders on every dimension
+change.
+
+```tsx
+{/* Prefer this… */}
+<View className="flex-col gap-4 md:flex-row md:gap-6" />
+
+{/* …over this. */}
+<View className={isAtLeast('md') ? 'flex-row gap-6' : 'flex-col gap-4'} />
 ```
 
 ## API Reference

@@ -12,7 +12,7 @@ A fading edge is also an affordance: it means there is more content behind it. S
 ScrollFade ships with the library — no separate install.
 
 ```tsx
-import { ScrollFade, Badge } from 'panelui-native';
+import { ScrollFade, Badge, Card } from 'panelui-native';
 ```
 
 ## Usage
@@ -42,6 +42,76 @@ import { ScrollFade, Badge } from 'panelui-native';
 </ScrollFade>
 ```
 
+## Examples
+
+### A horizontal row
+
+Orientation is read from the child’s `horizontal` prop, so this fades left and right.
+
+```tsx
+<ScrollFade size={40}>
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {tags.map((tag) => (
+      <Badge key={tag} variant="secondary">{tag}</Badge>
+    ))}
+  </ScrollView>
+</ScrollFade>
+```
+
+### A vertical list
+
+No `horizontal` on the child, so the fades move to the top and bottom edges.
+
+```tsx
+<ScrollFade className="h-56">
+  <ScrollView showsVerticalScrollIndicator={false}>
+    {events.map((event) => (
+      <Row key={event.id} {...event} />
+    ))}
+  </ScrollView>
+</ScrollFade>
+```
+
+### One edge, on a card
+
+The fade resolves to the theme background by default — pass `color` when the scrollable sits on another surface, or it will not blend.
+
+```tsx
+<Card>
+  <Card.Content>
+    <ScrollFade edges="end" size={56} color="var(--color-card)">
+      <FlatList horizontal data={items} renderItem={renderItem} />
+    </ScrollFade>
+  </Card.Content>
+</Card>
+```
+
+### With your own scroll handler
+
+The child becomes a Reanimated animated component, so an `onScroll` you pass has to be an animated handler — a plain function will not run.
+
+```tsx
+const onScroll = useAnimatedScrollHandler({
+  onScroll: (event) => {
+    offset.value = event.contentOffset.y;
+  },
+});
+
+<ScrollFade>
+  <Animated.ScrollView onScroll={onScroll}>
+    {/* … */}
+  </Animated.ScrollView>
+</ScrollFade>
+```
+
+### Turning it off
+
+```tsx
+<ScrollFade enabled={!isRefreshing}>
+  <ScrollView>{/* … */}</ScrollView>
+</ScrollFade>
+```
+
 ## API Reference
 
 ### ScrollFade
@@ -49,12 +119,12 @@ import { ScrollFade, Badge } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `size` | `number` | — | Depth of the fade in pixels. |
-| `edges` | `'both' \| 'start' \| 'end' \| 'none'` | — | Which edges fade. |
+| `size` | `number` | `48` | Depth of the fade in pixels. |
+| `edges` | `'both' \| 'start' \| 'end' \| 'none'` | `'both'` | Which edges fade. |
 | `orientation` | `'horizontal' \| 'vertical'` | — | Scroll axis. Inferred from the child's `horizontal` prop when omitted — pass it explicitly for children that scroll horizontally without that prop (a `FlatList` with `horizontal` set through `contentContainerStyle`, say). |
 | `color` | `string` | — | Colour the fade resolves to — normally whatever sits behind the scrollable. Defaults to the theme's background. |
-| `fadeInDistance` | `number` | — | Distance in pixels over which an edge fades from clear to full. |
-| `enabled` | `boolean` | — | Set false to render the child with no fades at all. |
+| `fadeInDistance` | `number` | `DEFAULT_FADE_IN_DISTANCE` | Distance in pixels over which an edge fades from clear to full. |
+| `enabled` | `boolean` | `true` | Set false to render the child with no fades at all. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

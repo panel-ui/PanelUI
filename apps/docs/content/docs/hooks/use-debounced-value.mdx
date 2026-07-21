@@ -27,6 +27,64 @@ function Search() {
 The input stays fully responsive because it reads `query`; only the effect
 waits on `debounced`.
 
+## Examples
+
+### Filtering a list
+
+No network involved — this just keeps a long list from re-filtering on every
+keystroke.
+
+```tsx
+const [query, setQuery] = useState('');
+const debounced = useDebouncedValue(query, 200);
+
+const results = useMemo(
+  () => items.filter((item) => item.name.toLowerCase().includes(debounced.toLowerCase())),
+  [items, debounced]
+);
+
+<Input value={query} onChangeText={setQuery} placeholder="Filter" />;
+<FlatList data={results} renderItem={renderItem} />;
+```
+
+### Showing that a query is pending
+
+Compare the live value against the debounced one to tell the user something is
+about to happen.
+
+```tsx
+const [query, setQuery] = useState('');
+const debounced = useDebouncedValue(query, 400);
+const pending = query !== debounced;
+
+<InputGroup>
+  <InputGroup.Input value={query} onChangeText={setQuery} />
+  <InputGroup.Suffix isDecorative>
+    {pending ? <Spinner size="sm" /> : null}
+  </InputGroup.Suffix>
+</InputGroup>;
+```
+
+### Autosaving a draft
+
+```tsx
+const [draft, setDraft] = useState(note.body);
+const debounced = useDebouncedValue(draft, 1000);
+
+useEffect(() => {
+  if (debounced !== note.body) save(debounced);
+}, [debounced]);
+```
+
+### Debouncing something other than a string
+
+It is generic, so any value works — including objects, as long as their
+identity is stable.
+
+```tsx
+const debouncedFilters = useDebouncedValue(filters, 250);
+```
+
 ## API Reference
 
 | Parameter | Type | Default | Description |

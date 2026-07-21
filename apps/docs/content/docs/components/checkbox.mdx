@@ -32,12 +32,85 @@ import { Checkbox } from 'panelui-native';
 />
 ```
 
+## Examples
+
+### Controlled
+
+`checked` is required — the checkbox holds no state of its own.
+
+```tsx
+const [accepted, setAccepted] = useState(false);
+
+<Checkbox
+  checked={accepted}
+  onCheckedChange={setAccepted}
+  label="I accept the terms"
+/>
+```
+
+### With a description
+
+The description sits under the label and stays part of the press target.
+
+```tsx
+<Checkbox
+  checked={marketing}
+  onCheckedChange={setMarketing}
+  label="Product updates"
+  description="Occasional email about new releases. No more than once a month."
+/>
+```
+
+### Card variant
+
+A bordered surface that fills its width — for a list of options where each is a real choice rather than a small toggle.
+
+```tsx
+<View className="gap-2">
+  {plans.map((plan) => (
+    <Checkbox
+      key={plan.id}
+      variant="card"
+      checked={selected.includes(plan.id)}
+      onCheckedChange={() => toggle(plan.id)}
+      label={plan.name}
+      description={plan.summary}
+    />
+  ))}
+</View>
+```
+
+### A select-all row
+
+```tsx
+const allChecked = selected.length === items.length;
+
+<Checkbox
+  checked={allChecked}
+  onCheckedChange={(next) => setSelected(next ? items.map((i) => i.id) : [])}
+  label={allChecked ? 'Deselect all' : 'Select all'}
+/>
+```
+
 ## Variants
 
 ### `variant`
 
 - `default` *(default)*
 - `card`
+
+```tsx
+<Checkbox variant="default" checked={a} onCheckedChange={setA} label="Default" />
+
+{/* A bordered surface that fills its width. */}
+<Checkbox
+  variant="card"
+  checked={b}
+  onCheckedChange={setB}
+  label="Card"
+  description="For options that are real choices, not small toggles."
+/>
+```
 
 ## API Reference
 

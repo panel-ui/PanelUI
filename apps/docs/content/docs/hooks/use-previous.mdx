@@ -21,6 +21,52 @@ function Sheet({ isOpen }: { isOpen: boolean }) {
 }
 ```
 
+## Examples
+
+### Animating in the direction of travel
+
+The previous value is what tells you which way a number moved.
+
+```tsx
+const previous = usePrevious(score);
+const rising = previous !== undefined && score > previous;
+
+<Text className={rising ? 'text-green-600' : 'text-red-600'}>
+  {score}
+</Text>;
+```
+
+### Reacting to a value arriving
+
+Runs once, when the data first appears — not on every render afterwards.
+
+```tsx
+const previousUser = usePrevious(user);
+
+useEffect(() => {
+  if (user && !previousUser) {
+    toast({ variant: 'success', title: `Welcome back, ${user.name}` });
+  }
+}, [user, previousUser]);
+```
+
+### Detecting a specific transition
+
+```tsx
+const wasLoading = usePrevious(isLoading);
+
+useEffect(() => {
+  // Only when a request finishes, not when one never started.
+  if (wasLoading && !isLoading) scrollToTop();
+}, [isLoading, wasLoading]);
+```
+
+<Callout type="warn">
+  The value updates *after* render, so during the render that changes it you
+  still see the old one — which is the point. Do not use it to derive state you
+  could compute directly.
+</Callout>
+
 ## API Reference
 
 | Parameter | Type | Description |

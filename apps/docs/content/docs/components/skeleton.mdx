@@ -10,7 +10,7 @@ A shimmer placeholder for content that has not loaded. Size it with Tailwind uti
 Skeleton ships with the library — no separate install.
 
 ```tsx
-import { Skeleton } from 'panelui-native';
+import { Skeleton, Card, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -23,6 +23,44 @@ import { Skeleton } from 'panelui-native';
     <Skeleton className="h-4 w-1/2" />
   </View>
 </View>
+```
+
+## Examples
+
+### A loading card
+
+Match the shape of the real content — a skeleton that is the wrong size is worse than none, because the layout jumps when the data lands.
+
+```tsx
+<Card>
+  <Card.Content className="gap-3 p-4">
+    <Skeleton className="h-5 w-1/2" />
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-4/5" />
+  </Card.Content>
+</Card>
+```
+
+### An avatar and two lines
+
+```tsx
+<View className="flex-row items-center gap-3">
+  <Skeleton className="h-10 w-10 rounded-full" />
+  <View className="flex-1 gap-2">
+    <Skeleton className="h-4 w-1/3" />
+    <Skeleton className="h-3 w-2/3" />
+  </View>
+</View>
+```
+
+### Swapped for the real thing
+
+```tsx
+{loading ? (
+  <Skeleton className="h-6 w-32" />
+) : (
+  <Text size="xl" weight="semibold">{user.name}</Text>
+)}
 ```
 
 ## API Reference

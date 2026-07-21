@@ -10,7 +10,7 @@ The primary action component. Icons in `startContent` and `endContent` inherit a
 Button ships with the library — no separate install.
 
 ```tsx
-import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
+import { Button, SearchIcon, ChevronRightIcon, GoogleIcon, AppleIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -31,6 +31,72 @@ import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
 </Button>
 ```
 
+## Examples
+
+### With icons
+
+Icons in `startContent` and `endContent` inherit a colour that reads against the button’s background, so they follow the theme without a hardcoded hex.
+
+```tsx
+<Button startContent={<SearchIcon size={16} />}>Search</Button>
+
+<Button variant="outline" endContent={<ChevronRightIcon size={16} />}>
+  Continue
+</Button>
+
+{/* Icon-only buttons get size="icon" and an accessibility label. */}
+<Button size="icon" variant="ghost" accessibilityLabel="Search">
+  <SearchIcon size={18} />
+</Button>
+```
+
+### Loading
+
+`loading` swaps the start content for a variant-matched spinner and blocks presses, so you do not need a separate `disabled`.
+
+```tsx
+const [saving, setSaving] = useState(false);
+
+async function save() {
+  setSaving(true);
+  try {
+    await api.save(draft);
+  } finally {
+    setSaving(false);
+  }
+}
+
+<Button loading={saving} fullWidth onPress={save}>
+  {saving ? 'Saving…' : 'Save changes'}
+</Button>
+```
+
+### A sign-in stack
+
+The `social` variant is a neutral surface sized for a full-width column of providers.
+
+```tsx
+<View className="gap-2">
+  <Button variant="social" fullWidth startContent={<GoogleIcon size={18} />}>
+    Continue with Google
+  </Button>
+  <Button variant="social" fullWidth startContent={<AppleIcon size={18} />}>
+    Continue with Apple
+  </Button>
+</View>
+```
+
+### Destructive confirmation
+
+```tsx
+<View className="flex-row gap-2">
+  <Button variant="ghost" onPress={cancel}>Cancel</Button>
+  <Button variant="destructive" onPress={deleteAccount}>
+    Delete account
+  </Button>
+</View>
+```
+
 ## Variants
 
 ### `variant`
@@ -42,6 +108,17 @@ import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
 - `destructive`
 - `social`
 
+```tsx
+<Button>Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Delete</Button>
+<Button variant="social" startContent={<GoogleIcon size={18} />}>
+  Continue with Google
+</Button>
+```
+
 ### `size`
 
 - `sm`
@@ -49,9 +126,22 @@ import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
 - `lg`
 - `icon`
 
+```tsx
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+<Button size="icon" accessibilityLabel="Search">
+  <SearchIcon size={18} />
+</Button>
+```
+
 ### `fullWidth`
 
 - `true`
+
+```tsx
+<Button fullWidth>Spans its container</Button>
+```
 
 ## API Reference
 
@@ -60,7 +150,7 @@ import { Button, SearchIcon, GoogleIcon } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `disabled` | `boolean` | — |  |
-| `loading` | `boolean` | — | Show a spinner and block presses while an action is in flight. |
+| `loading` | `boolean` | `false` | Show a spinner and block presses while an action is in flight. |
 | `startContent` | `ReactNode` | — | Content rendered before the label (replaced by the spinner while loading). |
 | `endContent` | `ReactNode` | — | Content rendered after the label. |
 | `labelClassName` | `string` | — | Extra classes for the label when children is a string. |

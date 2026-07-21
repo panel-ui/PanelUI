@@ -10,7 +10,7 @@ A compact label. Set `count` for a notification bubble, or `shape="dot"` for a b
 Badge ships with the library — no separate install.
 
 ```tsx
-import { Badge } from 'panelui-native';
+import { Badge, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -22,6 +22,42 @@ import { Badge } from 'panelui-native';
 <Badge variant="success" shape="dot" />
 ```
 
+## Examples
+
+### Status labels
+
+The default shape — a pill with a text label.
+
+```tsx
+<Badge>Default</Badge>
+<Badge variant="success">Paid</Badge>
+<Badge variant="warning">Pending</Badge>
+<Badge variant="destructive">Failed</Badge>
+<Badge variant="outline">Draft</Badge>
+```
+
+### A count
+
+`shape="count"` sizes to a number. Pass `count` and it renders the digits for you.
+
+```tsx
+<Badge shape="count" count={3} variant="destructive" />
+
+{/* Clamp it yourself for large numbers. */}
+<Badge shape="count" count={Math.min(unread, 99)} />
+```
+
+### A bare dot
+
+No label at all — an unread marker beside a title.
+
+```tsx
+<View className="flex-row items-center gap-2">
+  <Text weight="medium">Inbox</Text>
+  <Badge shape="dot" variant="info" />
+</View>
+```
+
 ## Variants
 
 ### `shape`
@@ -29,6 +65,12 @@ import { Badge } from 'panelui-native';
 - `default` *(default)*
 - `dot`
 - `count`
+
+```tsx
+<Badge shape="default">Label</Badge>
+<Badge shape="dot" variant="success" />
+<Badge shape="count" count={12} />
+```
 
 ### `variant`
 
@@ -39,6 +81,16 @@ import { Badge } from 'panelui-native';
 - `success`
 - `warning`
 - `info`
+
+```tsx
+<Badge>Default</Badge>
+<Badge variant="secondary">Secondary</Badge>
+<Badge variant="outline">Outline</Badge>
+<Badge variant="destructive">Failed</Badge>
+<Badge variant="success">Paid</Badge>
+<Badge variant="warning">Pending</Badge>
+<Badge variant="info">Info</Badge>
+```
 
 ## API Reference
 

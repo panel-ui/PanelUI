@@ -10,7 +10,7 @@ Segmented navigation with an indicator that springs to the active trigger.
 Tabs ships with the library — no separate install.
 
 ```tsx
-import { Tabs } from 'panelui-native';
+import { Tabs, Text, Button, ScrollFade } from 'panelui-native';
 ```
 
 ## Usage
@@ -40,6 +40,68 @@ import { Tabs } from 'panelui-native';
 - **`Tabs.List`** — Holds the triggers and the animated indicator.
 - **`Tabs.Trigger`** — One tab. Must be inside `Tabs.List`.
 - **`Tabs.Content`** — Panel for a tab. Renders only while its tab is active.
+
+## Examples
+
+### Uncontrolled
+
+`defaultValue` is required — the tabs need a starting panel.
+
+```tsx
+<Tabs defaultValue="overview">
+  <Tabs.List>
+    <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
+    <Tabs.Trigger value="activity">Activity</Tabs.Trigger>
+    <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+  </Tabs.List>
+
+  <Tabs.Content value="overview">
+    <Text>Usage and billing at a glance.</Text>
+  </Tabs.Content>
+  <Tabs.Content value="activity">
+    <Text>Everything that happened this week.</Text>
+  </Tabs.Content>
+  <Tabs.Content value="settings">
+    <Text>Names, members and integrations.</Text>
+  </Tabs.Content>
+</Tabs>
+```
+
+### Controlled
+
+Needed when something outside the tab strip changes the panel — a deep link, or a button in one panel that jumps to another.
+
+```tsx
+const [tab, setTab] = useState('overview');
+
+<>
+  <Button onPress={() => setTab('settings')}>Go to settings</Button>
+
+  <Tabs value={tab} onValueChange={setTab} defaultValue="overview">
+    {/* …list and content… */}
+  </Tabs>
+</>
+```
+
+### Tabs that scroll
+
+Wrap the list when there are more tabs than fit, and fade the edges so it reads as scrollable.
+
+```tsx
+<Tabs defaultValue="all">
+  <ScrollFade size={32}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <Tabs.List>
+        {categories.map((c) => (
+          <Tabs.Trigger key={c.id} value={c.id}>{c.name}</Tabs.Trigger>
+        ))}
+      </Tabs.List>
+    </ScrollView>
+  </ScrollFade>
+
+  {/* …content… */}
+</Tabs>
+```
 
 ## API Reference
 

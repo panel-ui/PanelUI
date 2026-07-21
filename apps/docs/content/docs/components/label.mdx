@@ -34,6 +34,31 @@ import { Label, Input } from 'panelui-native';
 
 - **`Label.Text`** — The label text. Renders the required asterisk when the label is required.
 
+## Examples
+
+### Marking a field required
+
+`isRequired` adds the asterisk and the accessibility state.
+
+```tsx
+<View className="gap-1.5">
+  <Label isRequired>Email</Label>
+  <Input keyboardType="email-address" />
+</View>
+```
+
+### Invalid and disabled
+
+Both are visual and semantic — pair them with the matching state on the field itself.
+
+```tsx
+<Label isInvalid>Card number</Label>
+<Input errorMessage="Check the number and try again." />
+
+<Label isDisabled>Plan</Label>
+<Input value="Premium" disabled />
+```
+
 ## API Reference
 
 ### Label
@@ -41,9 +66,9 @@ import { Label, Input } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `isRequired` | `boolean` | — | Appends an asterisk marking the field as required. |
-| `isInvalid` | `boolean` | — | Recolours the label to signal a validation error. |
-| `isDisabled` | `boolean` | — |  |
+| `isRequired` | `boolean` | `false` | Appends an asterisk marking the field as required. |
+| `isInvalid` | `boolean` | `false` | Recolours the label to signal a validation error. |
+| `isDisabled` | `boolean` | `false` |  |
 
 ### Label.Text
 

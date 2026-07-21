@@ -12,7 +12,7 @@ The pieces are separate because conversations differ in which ones they need. A 
 Message ships with the library — no separate install.
 
 ```tsx
-import { Message, Avatar } from 'panelui-native';
+import { Message, Avatar, Button, Shimmer } from 'panelui-native';
 ```
 
 ## Usage
@@ -88,12 +88,127 @@ import { Message, Avatar } from 'panelui-native';
 - **`Message.Footer`** — Delivery state or timestamp below the bubble.
 - **`Message.Actions`** — Row of controls under the bubble — copy, retry, feedback.
 
+## Examples
+
+### Both sides of a conversation
+
+`align` decides the row direction, the avatar side, which bubble corner is squared off, and the bubble colour — every part reads it from context.
+
+```tsx
+<Message>
+  <Message.Avatar>
+    <Avatar size="sm" source={{ uri: them.avatar }} fallback="OL" />
+  </Message.Avatar>
+  <Message.Content>
+    <Message.Bubble>
+      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>
+    </Message.Bubble>
+  </Message.Content>
+</Message>
+
+<Message align="end">
+  <Message.Content>
+    <Message.Bubble>
+      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>
+    </Message.Bubble>
+    <Message.Footer>Read</Message.Footer>
+  </Message.Content>
+</Message>
+```
+
+### Grouped turns
+
+Every turn after the first is marked `stacked`: it keeps its avatar slot but empties it, so the bubbles stay in one column.
+
+```tsx
+<Message.Group align="start">
+  {turns.map((turn) => (
+    <Message key={turn.id}>
+      <Message.Avatar>
+        <Avatar size="sm" fallback="AI" />
+      </Message.Avatar>
+      <Message.Content>
+        <Message.Bubble>
+          <Message.BubbleContent>{turn.text}</Message.BubbleContent>
+        </Message.Bubble>
+      </Message.Content>
+    </Message>
+  ))}
+</Message.Group>
+```
+
+### A streaming turn
+
+```tsx
+<Message>
+  <Message.Avatar><Avatar size="sm" fallback="AI" /></Message.Avatar>
+  <Message.Content>
+    <Message.Bubble>
+      {text ? (
+        <Message.BubbleContent>{text}</Message.BubbleContent>
+      ) : (
+        <Shimmer textClassName="text-base">Thinking…</Shimmer>
+      )}
+    </Message.Bubble>
+  </Message.Content>
+</Message>
+```
+
+### Actions under the bubble
+
+`Message.Actions` reverses its row on the outgoing side so the buttons stay on the message’s own edge.
+
+```tsx
+<Message.Content>
+  <Message.Bubble>
+    <Message.BubbleContent>{answer}</Message.BubbleContent>
+  </Message.Bubble>
+  <Message.Actions>
+    <Button size="sm" variant="ghost" onPress={() => copy(answer)}>Copy</Button>
+    <Button size="sm" variant="ghost" onPress={retry}>Retry</Button>
+  </Message.Actions>
+</Message.Content>
+```
+
+### In a transcript
+
+An inverted `FlatList` keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.
+
+```tsx
+<FlatList
+  data={[...messages].reverse()}
+  inverted
+  keyExtractor={(m) => m.id}
+  contentContainerClassName="gap-3 px-4 py-3"
+  renderItem={({ item }) => (
+    <Message align={item.role === 'user' ? 'end' : 'start'}>
+      <Message.Content>
+        <Message.Bubble>
+          <Message.BubbleContent>{item.text}</Message.BubbleContent>
+        </Message.Bubble>
+      </Message.Content>
+    </Message>
+  )}
+/>
+```
+
 ## Variants
 
 ### `align`
 
 - `start` *(default)*
 - `end`
+
+```tsx
+{/* Incoming — muted bubble, avatar on the left. */}
+<Message align="start">…</Message>
+
+{/* Outgoing — primary bubble, row reversed. */}
+<Message align="end">…</Message>
+
+{/* Or set it once for a whole group. */}
+<Message.Group align="end">…</Message.Group>
+```
 
 ## API Reference
 

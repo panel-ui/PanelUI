@@ -10,7 +10,7 @@ A modal dialog. Mounts through a portal and unmounts after its exit animation.
 Dialog ships with the library — no separate install.
 
 ```tsx
-import { Dialog, Button } from 'panelui-native';
+import { Dialog, Button, Input } from 'panelui-native';
 ```
 
 ## Usage
@@ -59,6 +59,48 @@ import { Dialog, Button } from 'panelui-native';
 - **`Dialog.Footer`** — Row of actions.
 - **`Dialog.Close`** — Clones its child and closes the dialog on press.
 
+## Examples
+
+### Uncontrolled, with a trigger
+
+```tsx
+<Dialog>
+  <Dialog.Trigger>
+    <Button variant="outline">Rename</Button>
+  </Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Title>Rename project</Dialog.Title>
+    <Dialog.Description>This is visible to everyone on the team.</Dialog.Description>
+    <Input className="mt-4" defaultValue={project.name} />
+    <Dialog.Footer>
+      <Dialog.Close>
+        <Button variant="ghost">Cancel</Button>
+      </Dialog.Close>
+      <Button onPress={save}>Save</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+### Controlled confirmation
+
+`dismissible={false}` forces a deliberate choice — the backdrop no longer closes it.
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Dialog open={open} onOpenChange={setOpen}>
+  <Dialog.Content dismissible={false}>
+    <Dialog.Title>Delete 12 files?</Dialog.Title>
+    <Dialog.Description>This cannot be undone.</Dialog.Description>
+    <Dialog.Footer>
+      <Button variant="ghost" onPress={() => setOpen(false)}>Cancel</Button>
+      <Button variant="destructive" onPress={confirm}>Delete</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
 ## API Reference
 
 ### Dialog
@@ -74,6 +116,6 @@ import { Dialog, Button } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `dismissible` | `boolean` | — | Tap on the backdrop closes the dialog. Default true. |
+| `dismissible` | `boolean` | `true` | Tap on the backdrop closes the dialog. Default true. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

@@ -10,7 +10,7 @@ An on/off toggle, animated on the UI thread.
 Switch ships with the library — no separate install.
 
 ```tsx
-import { Switch } from 'panelui-native';
+import { Switch, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -19,12 +19,47 @@ import { Switch } from 'panelui-native';
 <Switch value={enabled} onValueChange={setEnabled} />
 ```
 
+## Examples
+
+### In a settings row
+
+```tsx
+<View className="flex-row items-center justify-between py-3">
+  <View className="flex-1 gap-0.5">
+    <Text weight="medium">Push notifications</Text>
+    <Text size="sm" muted>Alerts on this device.</Text>
+  </View>
+  <Switch value={push} onValueChange={setPush} />
+</View>
+```
+
+### Sizes and disabled
+
+```tsx
+<Switch size="sm" value={compact} onValueChange={setCompact} />
+<Switch value={enabled} onValueChange={setEnabled} />
+<Switch value disabled onValueChange={() => {}} />
+```
+
+### Native
+
+Renders the platform switch, which brings a `label` the styled one does not have. Theme tokens do not apply.
+
+```tsx
+<Switch native label="Wi-Fi" value={wifi} onValueChange={setWifi} />
+```
+
 ## Variants
 
 ### `size`
 
 - `sm`
 - `md` *(default)*
+
+```tsx
+<Switch size="sm" value={on} onValueChange={setOn} />
+<Switch size="md" value={on} onValueChange={setOn} />
+```
 
 ## API Reference
 

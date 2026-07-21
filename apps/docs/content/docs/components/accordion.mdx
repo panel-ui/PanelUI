@@ -10,7 +10,7 @@ Collapsible sections for FAQs, settings groups and anything that would otherwise
 Accordion ships with the library — no separate install.
 
 ```tsx
-import { Accordion } from 'panelui-native';
+import { Accordion, Text, Button } from 'panelui-native';
 ```
 
 ## Usage
@@ -49,6 +49,78 @@ import { Accordion } from 'panelui-native';
 - **`Accordion.Indicator`** — Chevron that rotates 180° while the item is open.
 - **`Accordion.Content`** — The collapsible body. Unmounts when closed.
 
+## Examples
+
+### Single open section
+
+The default. Opening one section closes the others — use it when the panels are alternatives rather than a checklist.
+
+```tsx
+<Accordion defaultValue="shipping">
+  <Accordion.Item value="shipping">
+    <Accordion.Trigger>
+      <Accordion.Title>Shipping</Accordion.Title>
+      <Accordion.Indicator />
+    </Accordion.Trigger>
+    <Accordion.Content>
+      <Text size="sm" muted>Free over $50. Arrives in 2–4 days.</Text>
+    </Accordion.Content>
+  </Accordion.Item>
+
+  <Accordion.Item value="returns">
+    <Accordion.Trigger>
+      <Accordion.Title>Returns</Accordion.Title>
+      <Accordion.Indicator />
+    </Accordion.Trigger>
+    <Accordion.Content>
+      <Text size="sm" muted>30 days, unopened, receipt required.</Text>
+    </Accordion.Content>
+  </Accordion.Item>
+</Accordion>
+```
+
+### Several open at once
+
+`selectionMode="multiple"` switches `value` from a string to an array.
+
+```tsx
+<Accordion selectionMode="multiple" defaultValue={['shipping', 'returns']}>
+  {/* …items… */}
+</Accordion>
+```
+
+### Controlled
+
+Drive it from state when something outside the accordion needs to open a section.
+
+```tsx
+const [open, setOpen] = useState<string>('shipping');
+
+<>
+  <Button onPress={() => setOpen('returns')}>Jump to returns</Button>
+
+  <Accordion value={open} onValueChange={(v) => setOpen(v as string)}>
+    {/* …items… */}
+  </Accordion>
+</>
+```
+
+### Disabled section
+
+A section that exists but cannot be opened yet — an upsell, or a step not reached.
+
+```tsx
+<Accordion.Item value="enterprise" isDisabled>
+  <Accordion.Trigger>
+    <Accordion.Title>Enterprise billing</Accordion.Title>
+    <Accordion.Indicator />
+  </Accordion.Trigger>
+  <Accordion.Content>
+    <Text size="sm" muted>Contact sales.</Text>
+  </Accordion.Content>
+</Accordion.Item>
+```
+
 ## Variants
 
 ### `variant`
@@ -59,6 +131,14 @@ import { Accordion } from 'panelui-native';
 - `bordered`
 - `ghost`
 
+```tsx
+<Accordion variant="default">…</Accordion>
+<Accordion variant="surface">…</Accordion>
+<Accordion variant="separated">…</Accordion>
+<Accordion variant="bordered">…</Accordion>
+<Accordion variant="ghost">…</Accordion>
+```
+
 ## API Reference
 
 ### Accordion
@@ -67,11 +147,11 @@ import { Accordion } from 'panelui-native';
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `variant` | `AccordionVariant` | `default` |  |
-| `selectionMode` | `AccordionSelectionMode` | — | `single` collapses the open item when another opens. |
+| `selectionMode` | `AccordionSelectionMode` | `'single'` | `single` collapses the open item when another opens. |
 | `value` | `string \| string[]` | — | Expanded item value(s), controlled. |
 | `defaultValue` | `string \| string[]` | — |  |
 | `onValueChange` | `(value: string \| string[]) => void` | — |  |
-| `hideSeparator` | `boolean` | — | Hide the hairlines drawn between items. |
+| `hideSeparator` | `boolean` | `false` | Hide the hairlines drawn between items. |
 
 ### Accordion.Item
 

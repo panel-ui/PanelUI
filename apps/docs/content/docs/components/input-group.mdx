@@ -10,7 +10,7 @@ An input with leading or trailing decorators. The prefix and suffix are measured
 InputGroup ships with the library — no separate install.
 
 ```tsx
-import { InputGroup, Button, SearchIcon } from 'panelui-native';
+import { InputGroup, Text, Button, SearchIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -46,6 +46,55 @@ import { InputGroup, Button, SearchIcon } from 'panelui-native';
 - **`InputGroup.Prefix`** — Leading decorator, absolutely positioned.
 - **`InputGroup.Input`** — The field itself. Accepts all `Input` props.
 - **`InputGroup.Suffix`** — Trailing decorator, absolutely positioned.
+
+## Examples
+
+### A prefix and a suffix
+
+The decorators are measured, and the field is padded around them — so text never runs underneath.
+
+```tsx
+<InputGroup>
+  <InputGroup.Prefix>
+    <Text muted>https://</Text>
+  </InputGroup.Prefix>
+  <InputGroup.Input placeholder="yoursite.com" />
+  <InputGroup.Suffix>
+    <Text muted>.dev</Text>
+  </InputGroup.Suffix>
+</InputGroup>
+```
+
+### A search field
+
+```tsx
+<InputGroup>
+  <InputGroup.Prefix isDecorative>
+    <SearchIcon size={16} />
+  </InputGroup.Prefix>
+  <InputGroup.Input
+    placeholder="Search"
+    value={query}
+    onChangeText={setQuery}
+    autoCorrect={false}
+  />
+</InputGroup>
+```
+
+### An interactive suffix
+
+Leave `isDecorative` off when the decorator is pressable, so it stays in the touch path.
+
+```tsx
+<InputGroup>
+  <InputGroup.Input secureTextEntry={hidden} placeholder="Password" />
+  <InputGroup.Suffix>
+    <Button size="icon" variant="ghost" onPress={() => setHidden(!hidden)}>
+      <Text size="sm" muted>{hidden ? 'Show' : 'Hide'}</Text>
+    </Button>
+  </InputGroup.Suffix>
+</InputGroup>
+```
 
 ## API Reference
 

@@ -40,6 +40,70 @@ import { BottomSheet, Button, Input, Text } from 'panelui-native';
 - **`BottomSheet.Trigger`** — Clones its child and opens the sheet on press.
 - **`BottomSheet.Content`** — The sheet surface. Renders through a portal above everything else.
 
+## Examples
+
+### Uncontrolled, with a trigger
+
+`BottomSheet.Trigger` clones its child and adds the press handler, so any pressable works as the trigger.
+
+```tsx
+<BottomSheet>
+  <BottomSheet.Trigger>
+    <Button variant="outline">Share</Button>
+  </BottomSheet.Trigger>
+  <BottomSheet.Content>
+    <Text size="lg" weight="semibold" className="mb-3">Share this page</Text>
+    <Input placeholder="https://panelui.dev/p/xK2f9" />
+    <Button className="mt-3">Copy link</Button>
+  </BottomSheet.Content>
+</BottomSheet>
+```
+
+### Controlled
+
+Needed whenever something other than the trigger opens or closes it — a deep link, a failed request, a confirmation.
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<BottomSheet open={open} onOpenChange={setOpen}>
+  <BottomSheet.Content>
+    <Text size="lg" weight="semibold">Delete project?</Text>
+    <View className="mt-4 gap-2">
+      <Button variant="destructive" onPress={confirmDelete}>Delete</Button>
+      <Button variant="ghost" onPress={() => setOpen(false)}>Cancel</Button>
+    </View>
+  </BottomSheet.Content>
+</BottomSheet>
+```
+
+### A sheet you cannot dismiss by tapping out
+
+`dismissible={false}` removes the backdrop press. The drag-to-dismiss gesture still works, so use it for "are you sure", not for anything you must not escape.
+
+```tsx
+<BottomSheet.Content dismissible={false}>
+  <Text size="lg" weight="semibold">Finish setting up</Text>
+  <Button className="mt-4" onPress={complete}>Continue</Button>
+</BottomSheet.Content>
+```
+
+### A scrollable sheet
+
+Cap the height on the scrollable, not the sheet — the sheet should still size to its content when the list is short.
+
+```tsx
+<BottomSheet.Content>
+  <ScrollView className="max-h-96" bounces={false}>
+    {options.map((option) => (
+      <Button key={option.id} variant="ghost" fullWidth>
+        {option.label}
+      </Button>
+    ))}
+  </ScrollView>
+</BottomSheet.Content>
+```
+
 ## API Reference
 
 ### BottomSheet
@@ -48,7 +112,7 @@ import { BottomSheet, Button, Input, Text } from 'panelui-native';
 | --- | --- | --- | --- |
 | `open` | `boolean` | — |  |
 | `onOpenChange` | `(open: boolean) => void` | — |  |
-| `defaultOpen` | `boolean` | — |  |
+| `defaultOpen` | `boolean` | `false` |  |
 | `native` | `boolean` | — | Present the platform's own sheet instead of this one, so it gets the system's detents, scroll interaction and dismiss gesture. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply to the sheet chrome** — the platform draws the container, so `BottomSheet.Content`'s `className` and its drag handle are ignored. The content inside is still yours. |
 | `snapPoints` | `('half' \| 'full' \| { fraction: number } \| { height: number })[]` | — | Heights the native sheet can rest at. Omit to size to the content. `{ fraction }` and `{ height }` are iOS-only; Android snaps them to the nearest of `half` / `full`. |
 
@@ -57,7 +121,7 @@ import { BottomSheet, Button, Input, Text } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `dismissible` | `boolean` | — | Tap on the backdrop closes the sheet. Default true. |
+| `dismissible` | `boolean` | `true` | Tap on the backdrop closes the sheet. Default true. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

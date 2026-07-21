@@ -44,16 +44,86 @@ import { InlineSelect } from 'panelui-native';
 
 - **`InlineSelect.Item`** — One option. `value` identifies it, `label` is what is shown.
 
+## Examples
+
+### Overlay presentation
+
+The list floats above the page, so opening it does not push the content below it down. This is what you want inside a form or a scroll view.
+
+```tsx
+const [region, setRegion] = useState<string>();
+
+<InlineSelect
+  overlay
+  value={region}
+  onValueChange={setRegion}
+  placeholder="Select a region"
+>
+  <InlineSelect.Item value="us" label="United States" />
+  <InlineSelect.Item value="eu" label="Europe" />
+  <InlineSelect.Item value="apac" label="Asia Pacific" />
+</InlineSelect>
+```
+
+### Inline presentation
+
+The default. The list expands in layout flow and everything below moves down — right inside a settings list, where it reads as the row growing.
+
+```tsx
+<InlineSelect value={region} onValueChange={setRegion}>
+  <InlineSelect.Item value="us" label="United States" />
+  <InlineSelect.Item value="eu" label="Europe" />
+</InlineSelect>
+```
+
+### Sizing the floating list
+
+```tsx
+{/* Match the trigger — the default. */}
+<InlineSelect overlay overlayWidth="trigger" {...props} />
+
+{/* Size to the longest option, never narrower than the trigger. */}
+<InlineSelect overlay overlayWidth="content" {...props} />
+
+{/* Fixed width, and a wider gap from the trigger. */}
+<InlineSelect overlay overlayWidth={280} overlayOffset={12} {...props} />
+```
+
+### Reacting to open and close
+
+```tsx
+<InlineSelect
+  overlay
+  value={region}
+  onValueChange={setRegion}
+  onOpenChange={(open) => setScrollEnabled(!open)}
+>
+  {/* …items… */}
+</InlineSelect>
+```
+
 ## Variants
 
 ### `selected`
 
 - `true`
 
+```tsx
+<InlineSelect selected="true">…</InlineSelect>
+```
+
 ### `presentation`
 
 - `inline` *(default)*
 - `overlay`
+
+```tsx
+{/* Expands in layout flow — content below moves down. */}
+<InlineSelect>…</InlineSelect>
+
+{/* Floats above the page — nothing moves. */}
+<InlineSelect overlay>…</InlineSelect>
+```
 
 ## API Reference
 
@@ -71,11 +141,11 @@ import { InlineSelect } from 'panelui-native';
 | `className` | `string` | — |  |
 | `value` | `string` | — |  |
 | `onValueChange` | `(value: string) => void` | — |  |
-| `placeholder` | `string` | — |  |
+| `placeholder` | `string` | `'Select an option'` |  |
 | `disabled` | `boolean` | — |  |
-| `overlay` | `boolean` | — | Float the list above the page instead of expanding it in layout flow, so opening the select does not push the content below it down. |
-| `overlayWidth` | `'trigger' \| 'content' \| number` | — | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. Ignored without `overlay`. |
-| `overlayOffset` | `number` | — | Gap between the trigger and the floating list. Ignored without `overlay`. |
+| `overlay` | `boolean` | `false` | Float the list above the page instead of expanding it in layout flow, so opening the select does not push the content below it down. |
+| `overlayWidth` | `'trigger' \| 'content' \| number` | `'trigger'` | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. Ignored without `overlay`. |
+| `overlayOffset` | `number` | `8` | Gap between the trigger and the floating list. Ignored without `overlay`. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the list opens or closes. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

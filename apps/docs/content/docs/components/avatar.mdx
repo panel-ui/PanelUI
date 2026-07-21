@@ -10,7 +10,7 @@ A user image that falls back to initials when the source is missing or fails to 
 Avatar ships with the library — no separate install.
 
 ```tsx
-import { Avatar, Badge } from 'panelui-native';
+import { Avatar } from 'panelui-native';
 ```
 
 ## Usage
@@ -35,6 +35,49 @@ import { Avatar, Badge } from 'panelui-native';
 
 - **`Avatar.Badge`** — Overlay pinned to the top-right — an unread count or a presence dot.
 
+## Examples
+
+### Image with an initials fallback
+
+The fallback shows while the image is missing **and** if it fails to load, so a dead URL never leaves an empty circle.
+
+```tsx
+<Avatar source={{ uri: user.avatarUrl }} fallback="KA" />
+
+{/* No source at all — straight to initials. */}
+<Avatar fallback="OL" />
+```
+
+### A presence dot
+
+`Avatar.Badge` hangs off an unclipped wrapper, so it is not cut in half by the avatar’s rounding.
+
+```tsx
+<Avatar size="lg" source={{ uri: user.avatarUrl }} fallback="KA">
+  <Avatar.Badge>
+    <View className="h-3 w-3 rounded-full bg-green-500" />
+  </Avatar.Badge>
+</Avatar>
+```
+
+### A stack
+
+Negative margins overlap them; reverse the row so the first is on top.
+
+```tsx
+<View className="flex-row-reverse justify-end">
+  {members.map((member) => (
+    <Avatar
+      key={member.id}
+      size="sm"
+      source={{ uri: member.avatarUrl }}
+      fallback={member.initials}
+      className="-ml-2 border-2 border-background"
+    />
+  ))}
+</View>
+```
+
 ## Variants
 
 ### `size`
@@ -43,6 +86,13 @@ import { Avatar, Badge } from 'panelui-native';
 - `md` *(default)*
 - `lg`
 - `xl`
+
+```tsx
+<Avatar size="sm" fallback="KA" />
+<Avatar size="md" fallback="KA" />
+<Avatar size="lg" fallback="KA" />
+<Avatar size="xl" fallback="KA" />
+```
 
 ## API Reference
 

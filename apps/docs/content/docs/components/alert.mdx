@@ -10,7 +10,7 @@ A status message. `Alert.Indicator` resolves both the icon and its colour from t
 Alert ships with the library — no separate install.
 
 ```tsx
-import { Alert } from 'panelui-native';
+import { Alert, ShieldCheckIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -42,6 +42,50 @@ import { Alert } from 'panelui-native';
 - **`Alert.Title`** — Heading, coloured by the variant.
 - **`Alert.Description`** — Body text, always muted.
 
+## Examples
+
+### With a title and description
+
+The indicator picks its icon from the variant, so most alerts need no `icon` prop.
+
+```tsx
+<Alert variant="warning">
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>Card expiring</Alert.Title>
+    <Alert.Description>
+      Your card ending 4242 expires next month.
+    </Alert.Description>
+  </Alert.Content>
+</Alert>
+```
+
+### Title only
+
+Drop the description when the title says everything.
+
+```tsx
+<Alert variant="success">
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>Changes saved</Alert.Title>
+  </Alert.Content>
+</Alert>
+```
+
+### A custom icon
+
+Pass `icon` on the root to replace the variant icon everywhere, or give `Alert.Indicator` children to replace it for one alert.
+
+```tsx
+<Alert variant="info" icon={<ShieldCheckIcon size={18} />}>
+  <Alert.Indicator />
+  <Alert.Content>
+    <Alert.Title>Two-factor authentication is on</Alert.Title>
+  </Alert.Content>
+</Alert>
+```
+
 ## Variants
 
 ### `variant`
@@ -51,6 +95,14 @@ import { Alert } from 'panelui-native';
 - `success`
 - `warning`
 - `destructive`
+
+```tsx
+<Alert variant="default">…</Alert>
+<Alert variant="info">…</Alert>
+<Alert variant="success">…</Alert>
+<Alert variant="warning">…</Alert>
+<Alert variant="destructive">…</Alert>
+```
 
 ## API Reference
 

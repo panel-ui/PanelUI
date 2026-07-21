@@ -10,7 +10,7 @@ A single-select list of options.
 RadioGroup ships with the library — no separate install.
 
 ```tsx
-import { RadioGroup } from 'panelui-native';
+import { RadioGroup, Text } from 'panelui-native';
 ```
 
 ## Usage
@@ -32,6 +32,51 @@ import { RadioGroup } from 'panelui-native';
 ```
 
 - **`RadioGroup.Item`** — One option. `value` identifies it, `label` is what is shown.
+
+## Examples
+
+### Basic
+
+One value for the group, set by whichever item is pressed.
+
+```tsx
+const [plan, setPlan] = useState('pro');
+
+<RadioGroup value={plan} onValueChange={setPlan}>
+  <RadioGroup.Item value="free" label="Free" />
+  <RadioGroup.Item value="pro" label="Pro" />
+  <RadioGroup.Item value="team" label="Team" />
+</RadioGroup>
+```
+
+### Custom item content
+
+Give an item children instead of a `label` when the row needs more than one line.
+
+```tsx
+<RadioGroup value={plan} onValueChange={setPlan}>
+  {plans.map((p) => (
+    <RadioGroup.Item key={p.id} value={p.id}>
+      <View className="flex-1 gap-0.5">
+        <Text weight="medium">{p.name}</Text>
+        <Text size="sm" muted>{p.price} · {p.summary}</Text>
+      </View>
+    </RadioGroup.Item>
+  ))}
+</RadioGroup>
+```
+
+### Disabling the group or one option
+
+```tsx
+{/* The whole group. */}
+<RadioGroup value={plan} onValueChange={setPlan} disabled={!canChangePlan}>
+  {/* …items… */}
+</RadioGroup>
+
+{/* One option. */}
+<RadioGroup.Item value="enterprise" label="Enterprise" disabled />
+```
 
 ## API Reference
 

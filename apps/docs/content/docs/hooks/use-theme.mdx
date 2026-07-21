@@ -48,6 +48,87 @@ setFamily('grass');    // switch family, same mode
 `PANEL_THEMES` lists every family with a display name and swatch, so a picker
 needs nothing hardcoded.
 
+## Examples
+
+### A sun/moon toggle
+
+```tsx
+import { useThemeMode, Button, SunIcon, MoonIcon } from 'panelui-native';
+
+function ThemeToggle() {
+  const { mode, toggleMode } = useThemeMode();
+
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      onPress={toggleMode}
+      accessibilityLabel={mode === 'dark' ? 'Use light theme' : 'Use dark theme'}
+    >
+      {mode === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+    </Button>
+  );
+}
+```
+
+`toggleMode` stays inside the current family, so a user on `grass-dark` lands
+on `grass` rather than the default light theme.
+
+### A family picker
+
+```tsx
+import { useThemeMode, PANEL_THEMES } from 'panelui-native';
+
+function FamilyPicker() {
+  const { family, setFamily } = useThemeMode();
+
+  return (
+    <View className="flex-row gap-2">
+      {PANEL_THEMES.map((t) => (
+        <Pressable
+          key={t.id}
+          onPress={() => setFamily(t.id)}
+          accessibilityRole="button"
+          accessibilityState={{ selected: family.id === t.id }}
+          className={cn(
+            'h-10 w-10 rounded-full border-2',
+            family.id === t.id ? 'border-ring' : 'border-transparent'
+          )}
+          style={{ backgroundColor: t.swatch }}
+        />
+      ))}
+    </View>
+  );
+}
+```
+
+### Following the device
+
+```tsx
+const { setTheme } = useTheme();
+
+<RadioGroup value={preference} onValueChange={(next) => {
+  setPreference(next);
+  setTheme(next as ThemeName);
+}}>
+  <RadioGroup.Item value="system" label="System" />
+  <RadioGroup.Item value="light" label="Light" />
+  <RadioGroup.Item value="dark" label="Dark" />
+</RadioGroup>
+```
+
+### Reading a token in JavaScript
+
+Themes are CSS variables, so a colour you need as a *value* — for a chart, a
+status bar, a native navigator — comes from `useCSSVariable`, not from these
+hooks.
+
+```tsx
+import { useCSSVariable } from 'uniwind';
+
+const background = useCSSVariable('--color-background');
+```
+
 ## useToast
 
 Covered on the [Toast](/docs/components/toast) page.

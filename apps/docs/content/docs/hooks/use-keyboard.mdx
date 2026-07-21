@@ -29,6 +29,48 @@ function Screen() {
 }
 ```
 
+## Examples
+
+### Hiding a footer while typing
+
+```tsx
+const { isVisible } = useKeyboard();
+
+<View className="flex-1">
+  <Content />
+  {isVisible ? null : (
+    <View className="border-t border-border p-4">
+      <Button fullWidth>Continue</Button>
+    </View>
+  )}
+</View>;
+```
+
+### Reserving space for the keyboard
+
+Rendering with the height is fine; *animating* with it is not — use
+`useKeyboardAvoidance` for that.
+
+```tsx
+const { height } = useKeyboard();
+
+<ScrollView contentContainerStyle={{ paddingBottom: height + 24 }}>
+  {/* … */}
+</ScrollView>;
+```
+
+### Dismissing on a tap
+
+```tsx
+const { isVisible } = useKeyboard();
+
+<Pressable
+  onPress={Keyboard.dismiss}
+  pointerEvents={isVisible ? 'auto' : 'none'}
+  className="absolute inset-0"
+/>;
+```
+
 ## API Reference
 
 ### Returns

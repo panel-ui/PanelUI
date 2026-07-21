@@ -12,7 +12,7 @@ Vertical only — a horizontal timeline gives each item roughly a fifth of a pho
 Timeline ships with the library — no separate install.
 
 ```tsx
-import { Timeline, ShieldCheckIcon } from 'panelui-native';
+import { Timeline } from 'panelui-native';
 ```
 
 ## Usage
@@ -85,6 +85,74 @@ import { Timeline, ShieldCheckIcon } from 'panelui-native';
 - **`Timeline.Stats`** — Bordered strip of label/value pairs.
 - **`Timeline.Stat`** — One label/value pair inside `Stats`.
 
+## Examples
+
+### An activity feed
+
+`value` is the index of the current entry; earlier ones render as completed.
+
+```tsx
+<Timeline value={2}>
+  <Timeline.Item step={0}>
+    <Timeline.Aside><Timeline.Indicator /></Timeline.Aside>
+    <Timeline.Content>
+      <Timeline.Header>
+        <Timeline.Title>Order placed</Timeline.Title>
+        <Timeline.Date>Mon 09:14</Timeline.Date>
+      </Timeline.Header>
+      <Timeline.Description>Payment authorised.</Timeline.Description>
+    </Timeline.Content>
+  </Timeline.Item>
+
+  <Timeline.Item step={1}>
+    {/* … */}
+  </Timeline.Item>
+
+  <Timeline.Item step={2} last>
+    {/* `last` drops the connector below the final entry. */}
+  </Timeline.Item>
+</Timeline>
+```
+
+### Tone per entry
+
+Tone is set on the item, not the root, so one failed step can stand out in an otherwise ordinary run.
+
+```tsx
+<Timeline.Item step={3} tone="danger">
+  <Timeline.Aside><Timeline.Indicator /></Timeline.Aside>
+  <Timeline.Content>
+    <Timeline.Title>Build failed</Timeline.Title>
+    <Timeline.Description>3 tests failed on node 20.</Timeline.Description>
+  </Timeline.Content>
+</Timeline.Item>
+```
+
+### Numbered and card variants
+
+```tsx
+{/* Numbers instead of dots — for ordered procedures. */}
+<Timeline variant="numbered">{/* …items… */}</Timeline>
+
+{/* Each entry on its own surface. */}
+<Timeline variant="card">{/* …items… */}</Timeline>
+
+{/* Tighter rows for long histories. */}
+<Timeline variant="compact">{/* …items… */}</Timeline>
+```
+
+### With stats
+
+```tsx
+<Timeline.Content>
+  <Timeline.Title>Deployed</Timeline.Title>
+  <Timeline.Stats>
+    <Timeline.Stat label="Duration" value="1m 42s" />
+    <Timeline.Stat label="Region" value="fra1" />
+  </Timeline.Stats>
+</Timeline.Content>
+```
+
 ## Variants
 
 ### `variant`
@@ -95,6 +163,14 @@ import { Timeline, ShieldCheckIcon } from 'panelui-native';
 - `card`
 - `compact`
 
+```tsx
+<Timeline variant="dot">…</Timeline>
+<Timeline variant="icon">…</Timeline>
+<Timeline variant="numbered">…</Timeline>
+<Timeline variant="card">…</Timeline>
+<Timeline variant="compact">…</Timeline>
+```
+
 ### `tone`
 
 - `default` *(default)*
@@ -102,6 +178,15 @@ import { Timeline, ShieldCheckIcon } from 'panelui-native';
 - `success`
 - `warning`
 - `danger`
+
+```tsx
+{/* Tone is per entry, not per timeline. */}
+<Timeline.Item step={0} tone="default">…</Timeline.Item>
+<Timeline.Item step={1} tone="info">…</Timeline.Item>
+<Timeline.Item step={2} tone="success">…</Timeline.Item>
+<Timeline.Item step={3} tone="warning">…</Timeline.Item>
+<Timeline.Item step={4} tone="danger">…</Timeline.Item>
+```
 
 ## API Reference
 

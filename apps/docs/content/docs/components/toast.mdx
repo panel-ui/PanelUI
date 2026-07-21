@@ -12,7 +12,7 @@ A transient notification. The queue lives outside React, so `toast.show()` works
 Toast ships with the library — no separate install.
 
 ```tsx
-import { Toast, useToast } from 'panelui-native';
+import { Toast, Button, useToast } from 'panelui-native';
 ```
 
 ## Usage
@@ -67,6 +67,49 @@ toast.show({
 - **`Toast.Action`** — Trailing action button. Dismisses the toast after its own `onPress`.
 - **`Toast.Close`** — Icon-only dismiss button.
 
+## Examples
+
+### Firing one
+
+Toasts are queued through `useToast`, so any component can raise one without rendering it.
+
+```tsx
+const { toast } = useToast();
+
+<Button
+  onPress={() =>
+    toast({
+      variant: 'success',
+      title: 'Saved',
+      description: 'Your changes are live.',
+    })
+  }
+>
+  Save
+</Button>
+```
+
+### With an action
+
+```tsx
+toast({
+  variant: 'default',
+  title: 'Message archived',
+  action: { label: 'Undo', onPress: restore },
+});
+```
+
+### An error you have to dismiss
+
+```tsx
+toast({
+  variant: 'destructive',
+  title: 'Upload failed',
+  description: 'The file is larger than 25 MB.',
+  duration: 0, // stays until dismissed
+});
+```
+
 ## Variants
 
 ### `variant`
@@ -76,6 +119,14 @@ toast.show({
 - `success`
 - `warning`
 - `destructive`
+
+```tsx
+toast({ variant: 'default', title: 'Saved' });
+toast({ variant: 'info', title: 'Syncing' });
+toast({ variant: 'success', title: 'Deployed' });
+toast({ variant: 'warning', title: 'Almost out of space' });
+toast({ variant: 'destructive', title: 'Upload failed' });
+```
 
 ## API Reference
 

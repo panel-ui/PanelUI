@@ -31,6 +31,66 @@ import { Shimmer, Skeleton } from 'panelui-native';
 </Shimmer>
 ```
 
+## Examples
+
+### A thinking indicator
+
+The default. The sweep is clipped to the glyphs, so the letters catch the light instead of sitting under a passing band.
+
+```tsx
+<Shimmer>Thinking…</Shimmer>
+
+<Shimmer duration={1400} textClassName="text-lg font-medium">
+  Generating response…
+</Shimmer>
+```
+
+### Masking a subtree
+
+`as="view"` masks the sweep to whatever you pass instead of to a string.
+
+```tsx
+<Shimmer as="view" className="w-full gap-2">
+  <Skeleton className="h-4 w-3/4" />
+  <Skeleton className="h-4 w-full" />
+  <Skeleton className="h-4 w-1/2" />
+</Shimmer>
+```
+
+### Tuning the sweep
+
+```tsx
+{/* Reverses on each pass instead of restarting from the left. */}
+<Shimmer mode="ping-pong" duration={1600}>Ping-pong</Shimmer>
+
+{/* Right to left. */}
+<Shimmer reverse>Reversed</Shimmer>
+
+{/* A wider, slower band. */}
+<Shimmer spread={4} duration={2600}>Slow and broad</Shimmer>
+
+{/* One pass, then stop. */}
+<Shimmer once>Sweeps once</Shimmer>
+```
+
+### Custom colours
+
+Both default to theme tokens, so you only need these on a surface the tokens do not suit.
+
+```tsx
+<Shimmer baseColor="#3f3f46" shimmerColor="#fafafa">
+  Neutral on dark
+</Shimmer>
+```
+
+### Turning it off
+
+Renders the content statically in `baseColor`. Useful for stopping the sweep the moment a stream finishes, without swapping components.
+
+```tsx
+<Shimmer enabled={isStreaming}>{status}</Shimmer>
+```
+
 ## API Reference
 
 ### Shimmer
@@ -38,15 +98,15 @@ import { Shimmer, Skeleton } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `as` | `'text' \| 'view'` | — | `text` renders `children` as a single styled string and masks the sweep to the glyphs. `view` masks the sweep to whatever subtree you pass. |
-| `duration` | `number` | — | Milliseconds for one sweep. |
-| `spread` | `number` | — | Width of the highlight band, as a multiple of the content width. |
+| `as` | `'text' \| 'view'` | `'text'` | `text` renders `children` as a single styled string and masks the sweep to the glyphs. `view` masks the sweep to whatever subtree you pass. |
+| `duration` | `number` | `2000` | Milliseconds for one sweep. |
+| `spread` | `number` | `2` | Width of the highlight band, as a multiple of the content width. |
 | `baseColor` | `string` | — | Colour of the content at rest. Defaults to the theme's muted foreground. |
 | `shimmerColor` | `string` | — | Colour at the centre of the sweep. Defaults to the theme's foreground. |
-| `mode` | `'loop' \| 'ping-pong'` | — | `loop` restarts from the left; `ping-pong` reverses on each pass. |
-| `once` | `boolean` | — | Sweep once instead of repeating. |
-| `reverse` | `boolean` | — | Sweep right-to-left. |
-| `enabled` | `boolean` | — | Set false to render the content statically without animating. |
+| `mode` | `'loop' \| 'ping-pong'` | `'loop'` | `loop` restarts from the left; `ping-pong` reverses on each pass. |
+| `once` | `boolean` | `false` | Sweep once instead of repeating. |
+| `reverse` | `boolean` | `false` | Sweep right-to-left. |
+| `enabled` | `boolean` | `true` | Set false to render the content statically without animating. |
 | `textClassName` | `string` | — | Extra classes for the text when `as="text"`. |
 | `textStyle` | `StyleProp<TextStyle>` | — | Extra styles for the text when `as="text"`. |
 | `color` | `string` | — | **Deprecated.** Use `shimmerColor`. |

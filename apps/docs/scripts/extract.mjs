@@ -60,11 +60,22 @@ for (const dir of fs.readdirSync(root).sort()) {
     }
   }
 
-  // Defaults.
+  // Defaults, from two places: tv()'s defaultVariants for variant props, and
+  // the component's own parameter destructuring for everything else. Without
+  // the second the Default column is empty for most props, which is the least
+  // useful column to get wrong.
   const dBlock = src.match(/defaultVariants:\s*\{([\s\S]*?)\}/);
   const defaults = {};
   if (dBlock) {
     for (const dm of dBlock[1].matchAll(/(\w+):\s*'?([\w-]+)'?/g)) defaults[dm[1]] = dm[2];
+  }
+
+  const destructured = {};
+  for (const dm of src.matchAll(/^\s{2,}(\w+) = ([^,\n]+),$/gm)) {
+    // First one wins: a prop destructured in more than one sub-component has
+    // the same default in each, and if it does not the root's is the one
+    // people mean.
+    if (!(dm[1] in destructured)) destructured[dm[1]] = dm[2].trim();
   }
 
   // Compound parts.
@@ -79,7 +90,11 @@ for (const dir of fs.readdirSync(root).sort()) {
         .filter(Boolean).join('\n')
     : '';
 
-  out[dir] = { interfaces, variants, defaults, parts, summary };
+  // tv() defaults win — they are the documented variant surface, and the
+  // destructured value is often just the same string.
+  const allDefaults = { ...destructured, ...defaults };
+
+  out[dir] = { interfaces, variants, defaults: allDefaults, parts, summary };
 }
 
 fs.writeFileSync(path.join(HERE, 'api.json'), JSON.stringify(out, null, 2));

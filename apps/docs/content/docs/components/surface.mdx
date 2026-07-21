@@ -31,6 +31,34 @@ import { Surface, Text } from 'panelui-native';
 </Surface>
 ```
 
+## Examples
+
+### The variant ladder
+
+Each step is one level further from the background — nest them to build depth without hardcoding colours.
+
+```tsx
+<Surface className="gap-3 p-4">
+  <Text>Default</Text>
+  <Surface variant="secondary" className="gap-3 p-4">
+    <Text>Secondary</Text>
+    <Surface variant="tertiary" className="p-4">
+      <Text>Tertiary</Text>
+    </Surface>
+  </Surface>
+</Surface>
+```
+
+### Transparent
+
+Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.
+
+```tsx
+<Surface variant="transparent" className="p-4">
+  <Text>No background of its own.</Text>
+</Surface>
+```
+
 ## Variants
 
 ### `variant`
@@ -39,6 +67,13 @@ import { Surface, Text } from 'panelui-native';
 - `secondary`
 - `tertiary`
 - `transparent`
+
+```tsx
+<Surface variant="default" className="p-4">Default</Surface>
+<Surface variant="secondary" className="p-4">Secondary</Surface>
+<Surface variant="tertiary" className="p-4">Tertiary</Surface>
+<Surface variant="transparent" className="p-4">Transparent</Surface>
+```
 
 ## API Reference
 

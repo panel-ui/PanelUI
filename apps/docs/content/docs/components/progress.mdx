@@ -21,6 +21,35 @@ import { Progress } from 'panelui-native';
 <Progress indeterminate color="info" />
 ```
 
+## Examples
+
+### Determinate
+
+`value` is a percentage from 0 to 100.
+
+```tsx
+<Progress value={72} />
+
+<Progress value={uploaded / total * 100} color="success" size="lg" />
+```
+
+### Indeterminate
+
+For work with no measurable progress. The animation runs on the UI thread and stops when reduce-motion is on.
+
+```tsx
+<Progress indeterminate />
+```
+
+### Colour by state
+
+```tsx
+<Progress
+  value={usage}
+  color={usage > 90 ? 'destructive' : usage > 70 ? 'warning' : 'primary'}
+/>
+```
+
 ## Variants
 
 ### `color`
@@ -31,11 +60,25 @@ import { Progress } from 'panelui-native';
 - `destructive`
 - `info`
 
+```tsx
+<Progress color="primary" value={40} />
+<Progress color="success" value={40} />
+<Progress color="warning" value={40} />
+<Progress color="destructive" value={40} />
+<Progress color="info" value={40} />
+```
+
 ### `size`
 
 - `sm`
 - `md` *(default)*
 - `lg`
+
+```tsx
+<Progress size="sm" value={40} />
+<Progress size="md" value={40} />
+<Progress size="lg" value={40} />
+```
 
 ## API Reference
 
@@ -44,8 +87,8 @@ import { Progress } from 'panelui-native';
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `value` | `number` | — | Progress value, 0–100. Ignored when `indeterminate` is set. |
-| `indeterminate` | `boolean` | — | Show a looping animation for unknown-duration work. |
+| `value` | `number` | `0` | Progress value, 0–100. Ignored when `indeterminate` is set. |
+| `indeterminate` | `boolean` | `false` | Show a looping animation for unknown-duration work. |
 | `indicatorClassName` | `string` | — | Extra classes for the moving indicator. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.

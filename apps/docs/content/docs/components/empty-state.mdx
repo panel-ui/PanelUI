@@ -10,7 +10,7 @@ The placeholder for a list or screen with nothing in it. `Media variant="icon"` 
 EmptyState ships with the library — no separate install.
 
 ```tsx
-import { EmptyState, Button, SearchIcon } from 'panelui-native';
+import { EmptyState, Button, PackageIcon, SearchIcon } from 'panelui-native';
 ```
 
 ## Usage
@@ -51,12 +51,74 @@ import { EmptyState, Button, SearchIcon } from 'panelui-native';
 - **`EmptyState.Description`** — Supporting text.
 - **`EmptyState.Content`** — Slot below the header, for actions.
 
+## Examples
+
+### With an icon and an action
+
+```tsx
+<EmptyState variant="icon">
+  <EmptyState.Header>
+    <EmptyState.Media>
+      <PackageIcon size={22} />
+    </EmptyState.Media>
+    <EmptyState.Title>No orders yet</EmptyState.Title>
+    <EmptyState.Description>
+      Orders appear here as soon as your first customer checks out.
+    </EmptyState.Description>
+  </EmptyState.Header>
+  <EmptyState.Content>
+    <Button>Share your store</Button>
+  </EmptyState.Content>
+</EmptyState>
+```
+
+### A no-results state
+
+Distinguish "nothing exists yet" from "nothing matched" — they need different words and different actions.
+
+```tsx
+<EmptyState variant="icon">
+  <EmptyState.Header>
+    <EmptyState.Media><SearchIcon size={20} /></EmptyState.Media>
+    <EmptyState.Title>No matches for “{query}”</EmptyState.Title>
+    <EmptyState.Description>Try a shorter or different term.</EmptyState.Description>
+  </EmptyState.Header>
+  <EmptyState.Content>
+    <Button variant="ghost" onPress={() => setQuery('')}>Clear search</Button>
+  </EmptyState.Content>
+</EmptyState>
+```
+
+### As a list fallback
+
+```tsx
+<FlatList
+  data={results}
+  keyExtractor={(item) => item.id}
+  renderItem={renderItem}
+  ListEmptyComponent={
+    <EmptyState variant="icon">
+      <EmptyState.Header>
+        <EmptyState.Title>Nothing here</EmptyState.Title>
+      </EmptyState.Header>
+    </EmptyState>
+  }
+/>
+```
+
 ## Variants
 
 ### `variant`
 
 - `default` *(default)*
 - `icon`
+
+```tsx
+<EmptyState variant="default">…</EmptyState>
+
+{/* Adds the framed media slot. */}
+<EmptyState variant="icon">…</EmptyState>
+```
 
 ## API Reference
 

@@ -72,13 +72,31 @@ ${u.anatomy ?? `<${name}>\n  ${parts.map((p) => `<${p}>…</${p}>`).join('\n  ')
 ${u.partNotes ?? parts.map((p) => `- **\`${p}\`** — ${u.parts?.[p.split('.')[1]] ?? 'See props below.'}`).join('\n')}`);
   }
 
+  // Worked examples, one heading each. This is the section people actually
+  // read — a prop table tells you a prop exists, an example tells you what to
+  // write.
+  if (u.examples?.length) {
+    sections.push(`## Examples
+
+${u.examples.map((ex) => [
+  `### ${ex.title}`,
+  ex.description ? `\n\n${ex.description}` : '',
+  `\n\n\`\`\`tsx\n${ex.code}\n\`\`\``,
+].join('')).join('\n\n')}`);
+  }
+
   const variantKeys = Object.entries(c.variants).filter(([k]) => !['true', 'false'].includes(k) && !['checked', 'disabled', 'completed', 'isDisabled'].includes(k));
   if (variantKeys.length) {
     sections.push(`## Variants
 
 ${variantKeys.map(([k, opts]) => {
   const def = c.defaults[k];
-  return `### \`${k}\`\n\n${opts.map((o) => `- \`${o}\`${def === o ? ' *(default)*' : ''}`).join('\n')}`;
+  const list = opts.map((o) => `- \`${o}\`${def === o ? ' *(default)*' : ''}`).join('\n');
+  // A snippet under every variant key, so the list is copy-pasteable rather
+  // than something you have to translate into JSX yourself.
+  const snippet = u.variantCode?.[k]
+    ?? opts.map((o) => `<${name} ${k}="${o}">…</${name}>`).join('\n');
+  return `### \`${k}\`\n\n${list}\n\n\`\`\`tsx\n${snippet}\n\`\`\``;
 }).join('\n\n')}`);
   }
 

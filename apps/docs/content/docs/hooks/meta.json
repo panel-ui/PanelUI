@@ -1,8 +1,5 @@
 {
-  "root": true,
   "title": "Hooks",
-  "description": "Behaviour without markup.",
-  "icon": "Anchor",
   "pages": [
     "use-copy-to-clipboard",
     "use-disclosure",

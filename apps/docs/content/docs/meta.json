@@ -1,13 +1,18 @@
 {
-  "root": true,
-  "title": "Guide",
-  "description": "Install, theme, and go native.",
-  "icon": "/tab-icon.png",
   "pages": [
+    "---Sections---",
     "index",
     "installation",
     "theming",
     "native",
-    "performance"
+    "performance",
+    "---AI (beta)---",
+    "...ai",
+    "---Components---",
+    "...components",
+    "---Hooks---",
+    "...hooks",
+    "---Utilities---",
+    "...utilities"
   ]
 }

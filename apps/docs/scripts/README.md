@@ -19,6 +19,7 @@ S=./scripts node scripts/gen.mjs       # api.json + usage.json -> MDX
   | Key | What it becomes |
   | --- | --- |
   | `intro` | The paragraph under the frontmatter |
+  | `preview` | A framed screenshot under the intro: `{ src, alt, width, height, caption? }`. Put the file in `public/previews/`, and give the real pixel dimensions — Next needs them for the aspect ratio |
   | `usage` | The `## Usage` snippet |
   | `extraImports` | Extra names on the import line — must cover everything the snippets use |
   | `anatomy` / `parts` / `partNotes` | The `## Composition` section |

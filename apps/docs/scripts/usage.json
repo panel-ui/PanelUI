@@ -962,6 +962,13 @@
       "variant": "<Item variant=\"default\">…</Item>\n<Item variant=\"outline\">…</Item>\n<Item variant=\"muted\">…</Item>",
       "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>",
       "orientation": "{/* The list row — media, text and actions side by side. */}\n<Item orientation=\"horizontal\">…</Item>\n\n{/* Stacked into a card, for a carousel or for Header/Footer. */}\n<Item orientation=\"vertical\">…</Item>\n\n{/* The group has its own axis, independent of the items' own. */}\n<Item.Group orientation=\"horizontal\">…</Item.Group>"
+    },
+    "preview": {
+      "src": "/previews/item.jpg",
+      "alt": "Three Item rows on a dark screen showing the default, outline and muted variants — each with an icon tile, a title, a description and a New badge.",
+      "width": 1179,
+      "height": 969,
+      "caption": "The three surface variants, running in the example app."
     }
   },
   "message": {

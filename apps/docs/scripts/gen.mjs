@@ -41,12 +41,21 @@ for (const [slug, [name, summary, keyword]] of Object.entries(meta)) {
 
   const sections = [];
 
+  /*
+   * A screenshot of the component running on a device, directly under the
+   * intro — the first thing on the page should be what the thing looks like,
+   * not a paragraph about it.
+   */
+  const preview = u.preview
+    ? `\n\n<Preview\n  src="${u.preview.src}"\n  alt="${u.preview.alt}"\n  width={${u.preview.width}}\n  height={${u.preview.height}}${u.preview.caption ? `\n  caption="${u.preview.caption}"` : ''}\n/>`
+    : '';
+
   sections.push(`---
 title: ${name}
 description: ${summary}
 ---
 
-${u.intro ?? summary}
+${u.intro ?? summary}${preview}
 
 ## Installation
 

@@ -7,9 +7,21 @@
  * This measures the element and moves it by exactly the overlap — and not at
  * all when there is none.
  *
- * The translation is driven by `useAnimatedKeyboard`, so the element tracks
- * the keyboard's own interpolation frame for frame, on the UI thread, with no
- * re-renders while it moves.
+ * ## Install the keyboard controller
+ *
+ * ```sh
+ * npx expo install react-native-keyboard-controller
+ * ```
+ *
+ * It is an optional peer, but on Android it is close to required. Reanimated's
+ * own `useAnimatedKeyboard` — the fallback used when the controller is absent —
+ * is deprecated in Reanimated 4, and merely *calling* it switches Android out
+ * of `adjustResize` into manual inset handling for the whole app. That is a
+ * global side effect from a local hook, and it is why keyboard avoidance built
+ * on it tends to work on iOS and break on Android.
+ *
+ * With the controller installed, wrap your app in its `KeyboardProvider` —
+ * `PanelUIProvider` does this for you when the package is present.
  *
  * ```tsx
  * const { ref, onLayout, animatedStyle } = useKeyboardAvoidance();
@@ -27,6 +39,7 @@ import {
   useAnimatedStyle,
   useSharedValue,
   type AnimatedRef,
+  type SharedValue,
 } from 'react-native-reanimated';
 
 export interface UseKeyboardAvoidanceOptions {
@@ -45,36 +58,79 @@ export interface UseKeyboardAvoidanceResult {
   animatedStyle: ReturnType<typeof useAnimatedStyle>;
 }
 
+type KeyboardHeightHook = () => SharedValue<number>;
+
+/**
+ * Resolved once, at module load, so the hook below always calls the same
+ * underlying hook — swapping between them per render would break the rules of
+ * hooks.
+ */
+const useKeyboardHeight: KeyboardHeightHook = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const controller = require('react-native-keyboard-controller');
+    if (typeof controller?.useReanimatedKeyboardAnimation === 'function') {
+      return () => {
+        // The controller reports height as a negative offset, matching the
+        // translation you would apply. Normalise it to a positive height so
+        // the arithmetic below reads the same either way.
+        const { height } = controller.useReanimatedKeyboardAnimation();
+        return height as SharedValue<number>;
+      };
+    }
+  } catch {
+    // Not installed — fall through.
+  }
+
+  return () => useAnimatedKeyboard().height;
+})();
+
+/** True when the keyboard controller is driving this, rather than the fallback. */
+export function hasKeyboardController(): boolean {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return typeof require('react-native-keyboard-controller')
+      ?.useReanimatedKeyboardAnimation === 'function';
+  } catch {
+    return false;
+  }
+}
+
 export function useKeyboardAvoidance({
   enabled = true,
   offset = 16,
 }: UseKeyboardAvoidanceOptions = {}): UseKeyboardAvoidanceResult {
   const ref = useAnimatedRef<View>();
-  const keyboard = useAnimatedKeyboard();
+  const rawHeight = useKeyboardHeight();
   const { height: screenHeight } = useWindowDimensions();
 
   /** Window-space bottom edge of the element with no translation applied. */
   const restingBottom = useSharedValue(0);
 
+  const measure = useCallback(() => {
+    ref.current?.measureInWindow((_x, y, _width, height) => {
+      if (height > 0) restingBottom.value = y + height;
+    });
+  }, [ref, restingBottom]);
+
   const onLayout = useCallback(
     (_event: LayoutChangeEvent) => {
-      // Measuring while lifted would fold the current translation into the
-      // resting position and the element would creep upwards on every layout.
-      if (keyboard.height.value !== 0) return;
-
-      ref.current?.measureInWindow((_x, y, _width, height) => {
-        restingBottom.value = y + height;
-      });
+      // measureInWindow is only meaningful once the view is attached and
+      // positioned, which is a frame later than onLayout on both platforms.
+      requestAnimationFrame(measure);
     },
-    [keyboard, ref, restingBottom]
+    [measure]
   );
 
   const animatedStyle = useAnimatedStyle(() => {
-    if (!enabled || keyboard.height.value === 0 || restingBottom.value === 0) {
+    // Both sources are normalised to a positive height here.
+    const keyboardHeight = Math.abs(rawHeight.value);
+
+    if (!enabled || keyboardHeight === 0 || restingBottom.value === 0) {
       return { transform: [{ translateY: 0 }] };
     }
 
-    const keyboardTop = screenHeight - keyboard.height.value;
+    const keyboardTop = screenHeight - keyboardHeight;
     const overlap = restingBottom.value + offset - keyboardTop;
 
     return { transform: [{ translateY: overlap > 0 ? -overlap : 0 }] };

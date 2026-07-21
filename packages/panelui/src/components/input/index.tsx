@@ -1,9 +1,8 @@
 import { forwardRef, useCallback, useState } from 'react';
-import { TextInput, type TextInputProps } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { TextInput, View, type TextInputProps } from 'react-native';
 import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
-import { useKeyboardAvoidance } from '../../hooks/use-keyboard-avoidance';
+import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text } from '../../primitives/text';
 
 const inputVariants = tv({
@@ -40,6 +39,11 @@ export interface InputProps extends TextInputProps {
    * Lift the field above the software keyboard when it would otherwise be
    * covered. Moves by exactly the overlap, and not at all when the field is
    * already clear.
+   *
+   * Install `react-native-keyboard-controller` for this to behave on Android.
+   *
+   * Do not toggle this at runtime — it changes which component renders the
+   * container, which would remount the field and drop focus.
    */
   avoidKeyboard?: boolean;
   /** Gap kept between the field and the keyboard when `avoidKeyboard` is set. */
@@ -64,10 +68,6 @@ export const Input = forwardRef<TextInput, InputProps>(
     ref
   ) => {
     const [focused, setFocused] = useState(false);
-    const avoidance = useKeyboardAvoidance({
-      enabled: avoidKeyboard,
-      offset: keyboardOffset,
-    });
     const placeholderColor = useCSSVariable('--color-muted-foreground');
     const slots = inputVariants({
       focused,
@@ -91,13 +91,8 @@ export const Input = forwardRef<TextInput, InputProps>(
       [onBlur]
     );
 
-    return (
-      <Animated.View
-        ref={avoidance.ref}
-        onLayout={avoidance.onLayout}
-        style={avoidance.animatedStyle}
-        className={slots.container({ className: containerClassName })}
-      >
+    const body = (
+      <>
         {label ? <Text className={slots.label()}>{label}</Text> : null}
         <TextInput
           ref={ref}
@@ -117,8 +112,28 @@ export const Input = forwardRef<TextInput, InputProps>(
         ) : description ? (
           <Text className={slots.description()}>{description}</Text>
         ) : null}
-      </Animated.View>
+      </>
     );
+
+    const containerClasses = slots.container({ className: containerClassName });
+
+    /*
+     * The keyboard hook is deliberately behind a component boundary rather
+     * than an `enabled` flag. Calling it at all has global consequences —
+     * without the keyboard controller installed it falls back to Reanimated's
+     * useAnimatedKeyboard, which switches Android out of adjustResize for the
+     * whole app. A field that never asked to avoid the keyboard must not do
+     * that to every other screen.
+     */
+    if (avoidKeyboard) {
+      return (
+        <KeyboardAvoider offset={keyboardOffset} className={containerClasses}>
+          {body}
+        </KeyboardAvoider>
+      );
+    }
+
+    return <View className={containerClasses}>{body}</View>;
   }
 );
 

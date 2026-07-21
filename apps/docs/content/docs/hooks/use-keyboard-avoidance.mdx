@@ -13,9 +13,28 @@ overlaps it — and not at all when there is no overlap.
   bottom of a long form still ends up half covered.
 </Callout>
 
-The translation is driven by Reanimated's `useAnimatedKeyboard`, so the element
-tracks the keyboard's own interpolation frame for frame on the UI thread, and
-nothing re-renders while it moves.
+The translation runs on the UI thread, so the element tracks the keyboard's own
+interpolation frame for frame and nothing re-renders while it moves.
+
+## Install the keyboard controller
+
+```sh
+npx expo install react-native-keyboard-controller
+```
+
+<Callout type="warn">
+  On Android this is close to required. Without it the hook falls back to
+  Reanimated's `useAnimatedKeyboard`, which is **deprecated in Reanimated 4**
+  and, merely by being called, switches Android out of `adjustResize` into
+  manual inset handling *for the whole app*. That is a global side effect from
+  a local hook, and it is the usual reason keyboard avoidance works on iOS and
+  breaks on Android.
+</Callout>
+
+`PanelUIProvider` mounts the controller's `KeyboardProvider` for you when the
+package is installed, so there is no extra setup. If you see
+`Couldn't find real values for KeyboardContext`, something is rendering above
+`PanelUIProvider` — move it below.
 
 ## Usage
 
@@ -98,3 +117,12 @@ style.
 Inside a `ScrollView`, prefer the scroll view's own
 `automaticallyAdjustKeyboardInsets` (iOS) or a keyboard-aware scroll container.
 This hook moves a single element and does not know about scroll offset.
+
+## Why not `enabled: false` on every field
+
+`Input` deliberately does **not** call this hook with `enabled: false` when
+`avoidKeyboard` is unset — it renders a different container component instead.
+Calling the underlying keyboard hook at all has app-wide consequences on the
+fallback path, and a field that never asked to avoid the keyboard must not
+impose them on every other screen. Do the same in your own components: keep the
+hook behind a component boundary rather than a flag.

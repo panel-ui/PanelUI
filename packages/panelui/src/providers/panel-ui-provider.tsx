@@ -1,9 +1,26 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ComponentType, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PortalHost, PortalProvider } from '../primitives/portal';
 import { ToastViewport } from '../components/toast';
 import { cn } from '../utils/cn';
+
+/**
+ * `react-native-keyboard-controller` needs its provider at the root, and
+ * forgetting it is a silent failure — the hooks return zeroes and keyboard
+ * avoidance simply does nothing. Mount it here when the package is installed
+ * so `avoidKeyboard` works without any extra setup, and fall back to a
+ * pass-through when it is not.
+ */
+const KeyboardProvider: ComponentType<{ children?: ReactNode }> = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const controller = require('react-native-keyboard-controller');
+    return controller?.KeyboardProvider ?? Fragment;
+  } catch {
+    return Fragment;
+  }
+})();
 
 export interface PanelUIProviderProps {
   children: ReactNode;
@@ -38,14 +55,18 @@ export function PanelUIProvider({
 }: PanelUIProviderProps) {
   return (
     <GestureHandlerRootView style={styles.root}>
-      <View className={cn('flex-1', background && 'bg-background', className)}>
-        <PortalProvider>
-          {children}
-          {/* Sits before PortalHost so it can portal into it. */}
-          <ToastViewport />
-          <PortalHost />
-        </PortalProvider>
-      </View>
+      {/* Outermost of ours, so every field below it can avoid the keyboard.
+          A no-op Fragment when the controller is not installed. */}
+      <KeyboardProvider>
+        <View className={cn('flex-1', background && 'bg-background', className)}>
+          <PortalProvider>
+            {children}
+            {/* Sits before PortalHost so it can portal into it. */}
+            <ToastViewport />
+            <PortalHost />
+          </PortalProvider>
+        </View>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

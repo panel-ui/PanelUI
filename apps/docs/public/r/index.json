@@ -237,6 +237,12 @@
     ]
   },
   {
+    "name": "separator",
+    "type": "registry:ui",
+    "description": "Horizontal or vertical rule between content.",
+    "registryDependencies": []
+  },
+  {
     "name": "shimmer",
     "type": "registry:ui",
     "description": "Animated highlight sweeping across content.",

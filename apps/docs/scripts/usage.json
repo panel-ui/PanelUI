@@ -484,6 +484,77 @@
       }
     ]
   },
+  "item": {
+    "intro": "A row of content: media on one side, a title and description in the middle, actions on the other.\n\nIt is the shape almost every list in an app already has — a settings row, a file in a picker, a member in a team list, a tool call in a transcript — so it exists as one composable primitive instead of being rebuilt per screen with slightly different padding each time.",
+    "usage": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>\n\n// Pressable rows. Without onPress it renders as a plain view and does not\n// announce itself as a button.\n<Item.Group>\n  <Item size=\"sm\" onPress={() => open(file)}>\n    <Item.Content>\n      <Item.Title>Notifications</Item.Title>\n      <Item.Description>Push, email and in-app</Item.Description>\n    </Item.Content>\n    <Item.Actions>\n      <ChevronRightIcon size={16} />\n    </Item.Actions>\n  </Item>\n  <Item.Separator />\n  <Item size=\"sm\" onPress={() => open(privacy)}>\n    <Item.Content>\n      <Item.Title>Privacy</Item.Title>\n    </Item.Content>\n  </Item>\n</Item.Group>",
+    "extraImports": [
+      "Avatar",
+      "Badge",
+      "Button",
+      "Switch",
+      "Text",
+      "ReceiptIcon",
+      "BellIcon",
+      "ChevronRightIcon",
+      "PackageIcon"
+    ],
+    "anatomy": "<Item.Group>\n  <Item>\n    <Item.Header>…</Item.Header>\n    <Item.Media>…</Item.Media>\n    <Item.Content>\n      <Item.Title>…</Item.Title>\n      <Item.Description>…</Item.Description>\n    </Item.Content>\n    <Item.Actions>…</Item.Actions>\n    <Item.Footer>…</Item.Footer>\n  </Item>\n  <Item.Separator />\n</Item.Group>",
+    "parts": {
+      "Group": "Stack of rows. Announces itself as a list.",
+      "Separator": "Hairline between rows in a group.",
+      "Media": "Leading slot — an icon tile, a thumbnail, or an avatar passed straight through.",
+      "Content": "The text column. Takes the remaining width so actions stay pinned to the trailing edge.",
+      "Title": "Primary line. Its size follows the item.",
+      "Description": "Secondary line, muted. Its size follows the item.",
+      "Actions": "Trailing slot — buttons, a chevron, a switch.",
+      "Header": "Full-width strip above the row content. Needs the item laid out as a column.",
+      "Footer": "Full-width strip below the row content."
+    },
+    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### The two axes\n\n`orientation` means something different on the item and on the group, and they are independent:\n\n- On **`Item`** it decides whether the item's own parts sit side by side (`horizontal`, the default list row) or stack (`vertical`, a card).\n- On **`Item.Group`** it decides whether the items run down the screen (`vertical`, the default) or across it (`horizontal`, a carousel).\n\n`Item.Header` and `Item.Footer` are full-width strips, so they need `orientation=\"vertical\"` on the item. `Item.Separator` takes the prop too — a horizontal group needs vertical hairlines.",
+    "examples": [
+      {
+        "title": "A file row",
+        "code": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>"
+      },
+      {
+        "title": "A settings group",
+        "description": "Give a row `onPress` and it becomes a pressable with a press animation and a button role. Leave it off and it stays a plain view.",
+        "code": "<Item.Group>\n  {rows.map((row, index) => (\n    <Fragment key={row.id}>\n      {index > 0 && <Item.Separator />}\n      <Item size=\"sm\" onPress={() => router.push(row.href)}>\n        <Item.Content>\n          <Item.Title>{row.title}</Item.Title>\n          <Item.Description>{row.summary}</Item.Description>\n        </Item.Content>\n        <Item.Actions>\n          <ChevronRightIcon size={16} />\n        </Item.Actions>\n      </Item>\n    </Fragment>\n  ))}\n</Item.Group>"
+      },
+      {
+        "title": "Media types",
+        "description": "`icon` and `image` give the media slot a sized box; the default adds none, so an `Avatar` can style itself.",
+        "code": "<Item.Media variant=\"icon\"><BellIcon size={18} /></Item.Media>\n\n<Item.Media variant=\"image\">\n  <Image source={{ uri: product.image }} className=\"h-full w-full\" />\n</Item.Media>\n\n<Item.Media>\n  <Avatar size=\"md\" source={{ uri: user.avatar }} fallback=\"KA\" />\n</Item.Media>"
+      },
+      {
+        "title": "With a switch",
+        "description": "Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.",
+        "code": "<Item size=\"sm\">\n  <Item.Content>\n    <Item.Title>Push notifications</Item.Title>\n    <Item.Description>Alerts on this device.</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Switch value={push} onValueChange={setPush} />\n  </Item.Actions>\n</Item>"
+      },
+      {
+        "title": "A horizontal group of cards",
+        "description": "Two independent axes. `orientation` on the group runs the items across the screen instead of down it; `orientation` on each item stacks its own parts into a card. A carousel wants both.",
+        "code": "<ScrollView horizontal showsHorizontalScrollIndicator={false}>\n  <Item.Group orientation=\"horizontal\">\n    {plans.map((plan) => (\n      <Item\n        key={plan.id}\n        orientation=\"vertical\"\n        variant=\"outline\"\n        className=\"w-48\"\n      >\n        <Item.Media variant=\"icon\">\n          <PackageIcon size={18} />\n        </Item.Media>\n        <Item.Content>\n          <Item.Title>{plan.name}</Item.Title>\n          <Item.Description>{plan.summary}</Item.Description>\n        </Item.Content>\n        <Item.Footer>\n          <Text weight=\"semibold\">{plan.price}</Text>\n        </Item.Footer>\n      </Item>\n    ))}\n  </Item.Group>\n</ScrollView>"
+      },
+      {
+        "title": "A vertical item",
+        "description": "`orientation=\"vertical\"` is also what `Item.Header` and `Item.Footer` need — both are full-width strips, so they only make sense once the item stacks.",
+        "code": "<Item orientation=\"vertical\" variant=\"outline\">\n  <Item.Header>\n    <Badge variant=\"secondary\">Draft</Badge>\n    <Text size=\"xs\" muted>Updated 2h ago</Text>\n  </Item.Header>\n  <Item.Content>\n    <Item.Title>Quarterly report</Item.Title>\n    <Item.Description>Revenue, retention and headcount.</Item.Description>\n  </Item.Content>\n  <Item.Footer>\n    <Button size=\"sm\" variant=\"outline\">Preview</Button>\n    <Button size=\"sm\">Publish</Button>\n  </Item.Footer>\n</Item>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Item variant=\"default\">…</Item>\n<Item variant=\"outline\">…</Item>\n<Item variant=\"muted\">…</Item>",
+      "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>",
+      "orientation": "{/* The list row — media, text and actions side by side. */}\n<Item orientation=\"horizontal\">…</Item>\n\n{/* Stacked into a card, for a carousel or for Header/Footer. */}\n<Item orientation=\"vertical\">…</Item>\n\n{/* The group has its own axis, independent of the items' own. */}\n<Item.Group orientation=\"horizontal\">…</Item.Group>"
+    },
+    "preview": {
+      "src": "/previews/item.jpg",
+      "alt": "Three Item rows on a dark screen showing the default, outline and muted variants — each with an icon tile, a title, a description and a New badge.",
+      "width": 1179,
+      "height": 969,
+      "caption": "The three surface variants, running in the example app."
+    }
+  },
   "label": {
     "intro": "A form field label. String children are wrapped in `Label.Text` for you.",
     "usage": "<Label isRequired>Password</Label>\n<Input placeholder=\"Create a password\" secureTextEntry />\n\n<Label>\n  <Label.Text className=\"text-base font-semibold\">API key</Label.Text>\n</Label>",
@@ -506,6 +577,63 @@
         "code": "<Label isInvalid>Card number</Label>\n<Input errorMessage=\"Check the number and try again.\" />\n\n<Label isDisabled>Plan</Label>\n<Input value=\"Premium\" disabled />"
       }
     ]
+  },
+  "message": {
+    "intro": "A chat turn: avatar, bubble, and the metadata around it.\n\nThe pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.",
+    "usage": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" fallback=\"KA\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n// The outgoing side.\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>\n\n// Consecutive turns from one sender.\n<Message.Group align=\"start\">\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Header>Assistant</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>Looking that up…</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Bubble>\n        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n</Message.Group>",
+    "extraImports": [
+      "Avatar",
+      "Button",
+      "Shimmer"
+    ],
+    "anatomy": "<Message.Group>\n  <Message align=\"start\">\n    <Message.Avatar>…</Message.Avatar>\n    <Message.Content>\n      <Message.Header>…</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>…</Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Actions>…</Message.Actions>\n      <Message.Footer>…</Message.Footer>\n    </Message.Content>\n  </Message>\n</Message.Group>",
+    "parts": {
+      "Group": "Consecutive turns from one sender. Tightens spacing and stacks them.",
+      "Avatar": "Slot for the sender avatar. Reserved but emptied on a stacked message.",
+      "Content": "Column holding the header, bubble, actions and footer.",
+      "Header": "Sender name or timestamp above the bubble.",
+      "Bubble": "The speech bubble. Takes its colour and squared corner from align.",
+      "BubbleContent": "Text inside the bubble, in whichever colour reads against it.",
+      "Actions": "Row of controls under the bubble — copy, retry, feedback.",
+      "Footer": "Delivery state or timestamp below the bubble."
+    },
+    "notes": "### Alignment\n\n`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).\n\nSet it on `Message.Group` instead and every message inside inherits it.\n\n### Grouping\n\n`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.\n\n### In a list\n\nRender a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
+    "examples": [
+      {
+        "title": "Both sides of a conversation",
+        "description": "`align` decides the row direction, the avatar side, which bubble corner is squared off, and the bubble colour — every part reads it from context.",
+        "code": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" source={{ uri: them.avatar }} fallback=\"OL\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>"
+      },
+      {
+        "title": "Grouped turns",
+        "description": "Every turn after the first is marked `stacked`: it keeps its avatar slot but empties it, so the bubbles stay in one column.",
+        "code": "<Message.Group align=\"start\">\n  {turns.map((turn) => (\n    <Message key={turn.id}>\n      <Message.Avatar>\n        <Avatar size=\"sm\" fallback=\"AI\" />\n      </Message.Avatar>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{turn.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  ))}\n</Message.Group>"
+      },
+      {
+        "title": "A streaming turn",
+        "code": "<Message>\n  <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      {text ? (\n        <Message.BubbleContent>{text}</Message.BubbleContent>\n      ) : (\n        <Shimmer textClassName=\"text-base\">Thinking…</Shimmer>\n      )}\n    </Message.Bubble>\n  </Message.Content>\n</Message>"
+      },
+      {
+        "title": "Actions under the bubble",
+        "description": "`Message.Actions` reverses its row on the outgoing side so the buttons stay on the message’s own edge.",
+        "code": "<Message.Content>\n  <Message.Bubble>\n    <Message.BubbleContent>{answer}</Message.BubbleContent>\n  </Message.Bubble>\n  <Message.Actions>\n    <Button size=\"sm\" variant=\"ghost\" onPress={() => copy(answer)}>Copy</Button>\n    <Button size=\"sm\" variant=\"ghost\" onPress={retry}>Retry</Button>\n  </Message.Actions>\n</Message.Content>"
+      },
+      {
+        "title": "In a transcript",
+        "description": "An inverted `FlatList` keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
+        "code": "<FlatList\n  data={[...messages].reverse()}\n  inverted\n  keyExtractor={(m) => m.id}\n  contentContainerClassName=\"gap-3 px-4 py-3\"\n  renderItem={({ item }) => (\n    <Message align={item.role === 'user' ? 'end' : 'start'}>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{item.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  )}\n/>"
+      }
+    ],
+    "variantCode": {
+      "align": "{/* Incoming — muted bubble, avatar on the left. */}\n<Message align=\"start\">…</Message>\n\n{/* Outgoing — primary bubble, row reversed. */}\n<Message align=\"end\">…</Message>\n\n{/* Or set it once for a whole group. */}\n<Message.Group align=\"end\">…</Message.Group>"
+    },
+    "preview": {
+      "src": "/previews/message.jpg",
+      "alt": "A chat transcript on a dark screen. An incoming bubble with a photo avatar reads How can I help you today?, answered by a white outgoing bubble reading Set a reminder for 9am tomorrow with a Read receipt under it. Below, a turn labelled Olivia carries a timestamp of Yesterday at 18:04, and three consecutive bubbles from one sender share a single avatar.",
+      "width": 1179,
+      "height": 1888,
+      "caption": "Both sides of a conversation, a named turn with a timestamp, and grouped turns."
+    }
   },
   "progress": {
     "intro": "A progress bar, determinate or indeterminate, animated on the UI thread.",
@@ -559,6 +687,42 @@
       "Text"
     ]
   },
+  "scroll-fade": {
+    "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",
+    "usage": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>",
+    "extraImports": [
+      "Item",
+      "PackageIcon",
+      "CheckIcon"
+    ],
+    "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend.",
+    "examples": [
+      {
+        "title": "A horizontal row of cards",
+        "description": "A horizontal group of vertical items: each entry is a card, and the fade is what tells you there are more of them past the edge.",
+        "code": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "A vertical list",
+        "description": "No `horizontal` on the child, so the fades move to the top and bottom edges.",
+        "code": "<ScrollFade size={44} className=\"h-72\">\n  <ScrollView showsVerticalScrollIndicator={false}>\n    <Item.Group>\n      {events.map((event, index) => (\n        <Fragment key={event.id}>\n          {index > 0 && <Item.Separator />}\n          <Item size=\"sm\">\n            <Item.Media variant=\"icon\"><CheckIcon size={14} /></Item.Media>\n            <Item.Content>\n              <Item.Title>{event.title}</Item.Title>\n              <Item.Description>{event.when}</Item.Description>\n            </Item.Content>\n          </Item>\n        </Fragment>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "One edge, on a card",
+        "description": "The fade resolves to the theme background by default — pass `color` when the scrollable sits on another surface, or it will not blend.",
+        "code": "<Card>\n  <Card.Content>\n    <ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n      <ScrollView horizontal>\n        <Item.Group orientation=\"horizontal\">{/* … */}</Item.Group>\n      </ScrollView>\n    </ScrollFade>\n  </Card.Content>\n</Card>"
+      },
+      {
+        "title": "With your own scroll handler",
+        "description": "The child becomes a Reanimated animated component, so an `onScroll` you pass has to be an animated handler — a plain function will not run.",
+        "code": "const onScroll = useAnimatedScrollHandler({\n  onScroll: (event) => {\n    offset.value = event.contentOffset.y;\n  },\n});\n\n<ScrollFade>\n  <Animated.ScrollView onScroll={onScroll}>\n    {/* … */}\n  </Animated.ScrollView>\n</ScrollFade>"
+      },
+      {
+        "title": "Turning it off",
+        "code": "<ScrollFade enabled={!isRefreshing}>\n  <ScrollView>{/* … */}</ScrollView>\n</ScrollFade>"
+      }
+    ]
+  },
   "select": {
     "intro": "A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.",
     "usage": "<Select\n  value={fruit}\n  onValueChange={setFruit}\n  placeholder=\"Select a fruit\"\n  title=\"Favorite fruit\"\n>\n  <Select.Item value=\"apple\" label=\"Apple\" />\n  <Select.Item value=\"banana\" label=\"Banana\" />\n</Select>",
@@ -586,6 +750,75 @@
     "extraImports": [
       "Input",
       "Label"
+    ]
+  },
+  "separator": {
+    "intro": "A rule between content.\n\nReact Native has no `<hr>`, so a separator is a view sized on one axis and stretched on the other. That is why the orientation is a prop rather than something the layout works out: the component has to know which axis carries the thickness.",
+    "usage": "<Separator />\n\n{/* Vertical, inside a row that gives it a height. */}\n<View className=\"h-5 flex-row items-center\">\n  <Text size=\"sm\">Components</Text>\n  <Separator orientation=\"vertical\" className=\"mx-3\" />\n  <Text size=\"sm\">Themes</Text>\n</View>",
+    "extraImports": [
+      "Surface",
+      "Text"
+    ],
+    "examples": [
+      {
+        "title": "Between sections",
+        "description": "The common pair: a horizontal rule splitting a card, and vertical rules between inline links.",
+        "code": "<Surface variant=\"secondary\" className=\"px-6 py-7\">\n  <Text weight=\"medium\">PanelUI</Text>\n  <Text size=\"sm\" muted>A React Native component library.</Text>\n\n  <Separator className=\"my-4\" />\n\n  <View className=\"h-5 flex-row items-center\">\n    <Text size=\"sm\">Components</Text>\n    <Separator orientation=\"vertical\" className=\"mx-3\" />\n    <Text size=\"sm\">Themes</Text>\n    <Separator orientation=\"vertical\" className=\"mx-3\" />\n    <Text size=\"sm\">Examples</Text>\n  </View>\n</Surface>"
+      },
+      {
+        "title": "Custom thickness",
+        "description": "When neither variant is right, `thickness` takes a number of pixels and overrides them.",
+        "code": "<Separator thickness={1} />\n<Separator thickness={3} />\n<Separator thickness={6} />"
+      },
+      {
+        "title": "Vertical, stretched by the row",
+        "description": "A vertical separator has no length of its own. `items-stretch` on the row gives it one; without a height from somewhere it measures zero and nothing draws.",
+        "code": "<View className=\"flex-row items-stretch gap-4 py-2\">\n  <View className=\"flex-1 gap-1\">\n    <Text size=\"xs\" muted className=\"uppercase tracking-wider\">Today</Text>\n    <Text size=\"lg\" weight=\"semibold\">128</Text>\n  </View>\n\n  <Separator orientation=\"vertical\" />\n\n  <View className=\"flex-1 gap-1\">\n    <Text size=\"xs\" muted className=\"uppercase tracking-wider\">Week</Text>\n    <Text size=\"lg\" weight=\"semibold\">904</Text>\n  </View>\n</View>"
+      },
+      {
+        "title": "Announced, not decorative",
+        "description": "Separators are skipped by screen readers by default. Set `decorative={false}` when the split itself carries meaning — between two groups of menu items, say — and it is announced with its orientation.",
+        "code": "<Separator decorative={false} />"
+      }
+    ],
+    "variantCode": {
+      "orientation": "<Separator orientation=\"horizontal\" />\n\n{/* Needs a height from the parent. */}\n<View className=\"h-5 flex-row items-center\">\n  <Separator orientation=\"vertical\" />\n</View>",
+      "variant": "<Separator variant=\"thin\" />\n<Separator variant=\"thick\" />"
+    },
+    "notes": "A horizontal separator fills its parent's width; a vertical one fills its parent's height. The vertical case is the one that catches people out — inside a `flex-row` the row has no intrinsic height, so pair it with `items-stretch` on the row or an explicit `h-*` somewhere.\n\n`thickness` wins over `variant`. Both set the height of a horizontal separator and the width of a vertical one, so the same value reads the same either way round."
+  },
+  "shimmer": {
+    "intro": "A highlight that sweeps through text and content, for loading, thinking and streaming states.\n\nThe content is used as a mask and a gradient band is swept behind it on the UI thread, so the highlight is clipped to the glyph shapes — the letters themselves catch the light rather than sitting under a passing overlay.",
+    "usage": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>\n\n// Mask arbitrary content instead of a string.\n<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n</Shimmer>",
+    "extraImports": [
+      "Skeleton"
+    ],
+    "notes": "The sweep runs entirely on the UI thread and never re-renders React while animating.\n\nIt stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.\n\n`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props.",
+    "examples": [
+      {
+        "title": "A thinking indicator",
+        "description": "The default. The sweep is clipped to the glyphs, so the letters catch the light instead of sitting under a passing band.",
+        "code": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>"
+      },
+      {
+        "title": "Masking a subtree",
+        "description": "`as=\"view\"` masks the sweep to whatever you pass instead of to a string.",
+        "code": "<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n  <Skeleton className=\"h-4 w-1/2\" />\n</Shimmer>"
+      },
+      {
+        "title": "Tuning the sweep",
+        "code": "{/* Reverses on each pass instead of restarting from the left. */}\n<Shimmer mode=\"ping-pong\" duration={1600}>Ping-pong</Shimmer>\n\n{/* Right to left. */}\n<Shimmer reverse>Reversed</Shimmer>\n\n{/* A wider, slower band. */}\n<Shimmer spread={4} duration={2600}>Slow and broad</Shimmer>\n\n{/* One pass, then stop. */}\n<Shimmer once>Sweeps once</Shimmer>"
+      },
+      {
+        "title": "Custom colours",
+        "description": "Both default to theme tokens, so you only need these on a surface the tokens do not suit.",
+        "code": "<Shimmer baseColor=\"#3f3f46\" shimmerColor=\"#fafafa\">\n  Neutral on dark\n</Shimmer>"
+      },
+      {
+        "title": "Turning it off",
+        "description": "Renders the content statically in `baseColor`. Useful for stopping the sweep the moment a stream finishes, without swapping components.",
+        "code": "<Shimmer enabled={isStreaming}>{status}</Shimmer>"
+      }
     ]
   },
   "skeleton": {
@@ -670,6 +903,29 @@
     "extraImports": [
       "Text"
     ]
+  },
+  "surface": {
+    "intro": "An elevated container. Nest the variants to build hierarchy — each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
+    "usage": "<Surface>\n  <Text weight=\"medium\">Account</Text>\n\n  <Surface variant=\"secondary\" className=\"mt-3\">\n    <Text size=\"sm\" muted>Signed in as khalid@example.com</Text>\n\n    <Surface variant=\"tertiary\" className=\"mt-3\">\n      <Text size=\"xs\" muted>Session expires in 12 days</Text>\n    </Surface>\n  </Surface>\n</Surface>",
+    "extraImports": [
+      "Text"
+    ],
+    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill.",
+    "examples": [
+      {
+        "title": "The variant ladder",
+        "description": "Each step is one level further from the background — nest them to build depth without hardcoding colours.",
+        "code": "<Surface className=\"gap-3 p-4\">\n  <Text>Default</Text>\n  <Surface variant=\"secondary\" className=\"gap-3 p-4\">\n    <Text>Secondary</Text>\n    <Surface variant=\"tertiary\" className=\"p-4\">\n      <Text>Tertiary</Text>\n    </Surface>\n  </Surface>\n</Surface>"
+      },
+      {
+        "title": "Transparent",
+        "description": "Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.",
+        "code": "<Surface variant=\"transparent\" className=\"p-4\">\n  <Text>No background of its own.</Text>\n</Surface>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Surface variant=\"default\" className=\"p-4\">Default</Surface>\n<Surface variant=\"secondary\" className=\"p-4\">Secondary</Surface>\n<Surface variant=\"tertiary\" className=\"p-4\">Tertiary</Surface>\n<Surface variant=\"transparent\" className=\"p-4\">Transparent</Surface>"
+    }
   },
   "switch": {
     "intro": "An on/off toggle, animated on the UI thread.",
@@ -833,227 +1089,6 @@
     ],
     "variantCode": {
       "type": "<Typography.Heading type=\"h1\">Heading 1</Typography.Heading>\n<Typography.Heading type=\"h4\">Heading 4</Typography.Heading>\n<Typography.Paragraph type=\"body\">Body</Typography.Paragraph>\n<Typography.Paragraph type=\"body-sm\">Body small</Typography.Paragraph>\n<Typography.Code>inline code</Typography.Code>"
-    }
-  },
-  "surface": {
-    "intro": "An elevated container. Nest the variants to build hierarchy — each level sits one step further from the page background than the one around it.\n\nBoth the fill **and the corner radius** follow the active theme: the variants resolve to themed surface tokens, and `rounded-3xl` resolves through the per-theme radius scale. A Surface is tight under Moon and soft under Grass without knowing anything about either.",
-    "usage": "<Surface>\n  <Text weight=\"medium\">Account</Text>\n\n  <Surface variant=\"secondary\" className=\"mt-3\">\n    <Text size=\"sm\" muted>Signed in as khalid@example.com</Text>\n\n    <Surface variant=\"tertiary\" className=\"mt-3\">\n      <Text size=\"xs\" muted>Session expires in 12 days</Text>\n    </Surface>\n  </Surface>\n</Surface>",
-    "extraImports": [
-      "Text"
-    ],
-    "notes": "`borderCurve: 'continuous'` is applied on iOS, giving Apple's squircle corner rather than a circular arc — visibly smoother at this radius. Android ignores it.\n\nUse `variant=\"transparent\"` when you want the padding and radius without a fill.",
-    "examples": [
-      {
-        "title": "The variant ladder",
-        "description": "Each step is one level further from the background — nest them to build depth without hardcoding colours.",
-        "code": "<Surface className=\"gap-3 p-4\">\n  <Text>Default</Text>\n  <Surface variant=\"secondary\" className=\"gap-3 p-4\">\n    <Text>Secondary</Text>\n    <Surface variant=\"tertiary\" className=\"p-4\">\n      <Text>Tertiary</Text>\n    </Surface>\n  </Surface>\n</Surface>"
-      },
-      {
-        "title": "Transparent",
-        "description": "Keeps the padding and radius but paints no background — for a slot that should inherit whatever is behind it.",
-        "code": "<Surface variant=\"transparent\" className=\"p-4\">\n  <Text>No background of its own.</Text>\n</Surface>"
-      }
-    ],
-    "variantCode": {
-      "variant": "<Surface variant=\"default\" className=\"p-4\">Default</Surface>\n<Surface variant=\"secondary\" className=\"p-4\">Secondary</Surface>\n<Surface variant=\"tertiary\" className=\"p-4\">Tertiary</Surface>\n<Surface variant=\"transparent\" className=\"p-4\">Transparent</Surface>"
-    }
-  },
-  "shimmer": {
-    "intro": "A highlight that sweeps through text and content, for loading, thinking and streaming states.\n\nThe content is used as a mask and a gradient band is swept behind it on the UI thread, so the highlight is clipped to the glyph shapes — the letters themselves catch the light rather than sitting under a passing overlay.",
-    "usage": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>\n\n// Mask arbitrary content instead of a string.\n<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n</Shimmer>",
-    "extraImports": [
-      "Skeleton"
-    ],
-    "notes": "The sweep runs entirely on the UI thread and never re-renders React while animating.\n\nIt stops when the OS reduce-motion setting is on, and when `enabled` is false — in both cases the content renders statically in `baseColor`.\n\n`baseColor` and `shimmerColor` default to the theme's muted-foreground and foreground tokens, so the effect reads correctly on any surface without configuration. `color` and `intensity` still work but are deprecated in favour of the two colour props.",
-    "examples": [
-      {
-        "title": "A thinking indicator",
-        "description": "The default. The sweep is clipped to the glyphs, so the letters catch the light instead of sitting under a passing band.",
-        "code": "<Shimmer>Thinking…</Shimmer>\n\n<Shimmer duration={1400} textClassName=\"text-lg font-medium\">\n  Generating response…\n</Shimmer>"
-      },
-      {
-        "title": "Masking a subtree",
-        "description": "`as=\"view\"` masks the sweep to whatever you pass instead of to a string.",
-        "code": "<Shimmer as=\"view\" className=\"w-full gap-2\">\n  <Skeleton className=\"h-4 w-3/4\" />\n  <Skeleton className=\"h-4 w-full\" />\n  <Skeleton className=\"h-4 w-1/2\" />\n</Shimmer>"
-      },
-      {
-        "title": "Tuning the sweep",
-        "code": "{/* Reverses on each pass instead of restarting from the left. */}\n<Shimmer mode=\"ping-pong\" duration={1600}>Ping-pong</Shimmer>\n\n{/* Right to left. */}\n<Shimmer reverse>Reversed</Shimmer>\n\n{/* A wider, slower band. */}\n<Shimmer spread={4} duration={2600}>Slow and broad</Shimmer>\n\n{/* One pass, then stop. */}\n<Shimmer once>Sweeps once</Shimmer>"
-      },
-      {
-        "title": "Custom colours",
-        "description": "Both default to theme tokens, so you only need these on a surface the tokens do not suit.",
-        "code": "<Shimmer baseColor=\"#3f3f46\" shimmerColor=\"#fafafa\">\n  Neutral on dark\n</Shimmer>"
-      },
-      {
-        "title": "Turning it off",
-        "description": "Renders the content statically in `baseColor`. Useful for stopping the sweep the moment a stream finishes, without swapping components.",
-        "code": "<Shimmer enabled={isStreaming}>{status}</Shimmer>"
-      }
-    ]
-  },
-  "scroll-fade": {
-    "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",
-    "usage": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>",
-    "extraImports": [
-      "Item",
-      "PackageIcon",
-      "CheckIcon"
-    ],
-    "notes": "Orientation is read from the child's `horizontal` prop. Pass `orientation` explicitly for scrollables that do not expose it.\n\nAn edge only fades once there is content past it, and neither edge fades when the content fits inside the viewport — this is correct from the first frame, not just after the first scroll event.\n\n**The child becomes a Reanimated animated component.** If you need `onScroll` on it yourself, it has to be an animated handler from `useAnimatedScrollHandler` — a plain function will not run.\n\nThe fade resolves to the theme background by default. Pass `color` when the scrollable sits on a card or another surface, or the fade will not blend.",
-    "examples": [
-      {
-        "title": "A horizontal row of cards",
-        "description": "A horizontal group of vertical items: each entry is a card, and the fade is what tells you there are more of them past the edge.",
-        "code": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
-      },
-      {
-        "title": "A vertical list",
-        "description": "No `horizontal` on the child, so the fades move to the top and bottom edges.",
-        "code": "<ScrollFade size={44} className=\"h-72\">\n  <ScrollView showsVerticalScrollIndicator={false}>\n    <Item.Group>\n      {events.map((event, index) => (\n        <Fragment key={event.id}>\n          {index > 0 && <Item.Separator />}\n          <Item size=\"sm\">\n            <Item.Media variant=\"icon\"><CheckIcon size={14} /></Item.Media>\n            <Item.Content>\n              <Item.Title>{event.title}</Item.Title>\n              <Item.Description>{event.when}</Item.Description>\n            </Item.Content>\n          </Item>\n        </Fragment>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>"
-      },
-      {
-        "title": "One edge, on a card",
-        "description": "The fade resolves to the theme background by default — pass `color` when the scrollable sits on another surface, or it will not blend.",
-        "code": "<Card>\n  <Card.Content>\n    <ScrollFade edges=\"end\" size={56} color=\"var(--color-card)\">\n      <ScrollView horizontal>\n        <Item.Group orientation=\"horizontal\">{/* … */}</Item.Group>\n      </ScrollView>\n    </ScrollFade>\n  </Card.Content>\n</Card>"
-      },
-      {
-        "title": "With your own scroll handler",
-        "description": "The child becomes a Reanimated animated component, so an `onScroll` you pass has to be an animated handler — a plain function will not run.",
-        "code": "const onScroll = useAnimatedScrollHandler({\n  onScroll: (event) => {\n    offset.value = event.contentOffset.y;\n  },\n});\n\n<ScrollFade>\n  <Animated.ScrollView onScroll={onScroll}>\n    {/* … */}\n  </Animated.ScrollView>\n</ScrollFade>"
-      },
-      {
-        "title": "Turning it off",
-        "code": "<ScrollFade enabled={!isRefreshing}>\n  <ScrollView>{/* … */}</ScrollView>\n</ScrollFade>"
-      }
-    ]
-  },
-  "item": {
-    "intro": "A row of content: media on one side, a title and description in the middle, actions on the other.\n\nIt is the shape almost every list in an app already has — a settings row, a file in a picker, a member in a team list, a tool call in a transcript — so it exists as one composable primitive instead of being rebuilt per screen with slightly different padding each time.",
-    "usage": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>\n\n// Pressable rows. Without onPress it renders as a plain view and does not\n// announce itself as a button.\n<Item.Group>\n  <Item size=\"sm\" onPress={() => open(file)}>\n    <Item.Content>\n      <Item.Title>Notifications</Item.Title>\n      <Item.Description>Push, email and in-app</Item.Description>\n    </Item.Content>\n    <Item.Actions>\n      <ChevronRightIcon size={16} />\n    </Item.Actions>\n  </Item>\n  <Item.Separator />\n  <Item size=\"sm\" onPress={() => open(privacy)}>\n    <Item.Content>\n      <Item.Title>Privacy</Item.Title>\n    </Item.Content>\n  </Item>\n</Item.Group>",
-    "extraImports": [
-      "Avatar",
-      "Badge",
-      "Button",
-      "Switch",
-      "Text",
-      "ReceiptIcon",
-      "BellIcon",
-      "ChevronRightIcon",
-      "PackageIcon"
-    ],
-    "anatomy": "<Item.Group>\n  <Item>\n    <Item.Header>…</Item.Header>\n    <Item.Media>…</Item.Media>\n    <Item.Content>\n      <Item.Title>…</Item.Title>\n      <Item.Description>…</Item.Description>\n    </Item.Content>\n    <Item.Actions>…</Item.Actions>\n    <Item.Footer>…</Item.Footer>\n  </Item>\n  <Item.Separator />\n</Item.Group>",
-    "parts": {
-      "Group": "Stack of rows. Announces itself as a list.",
-      "Separator": "Hairline between rows in a group.",
-      "Media": "Leading slot — an icon tile, a thumbnail, or an avatar passed straight through.",
-      "Content": "The text column. Takes the remaining width so actions stay pinned to the trailing edge.",
-      "Title": "Primary line. Its size follows the item.",
-      "Description": "Secondary line, muted. Its size follows the item.",
-      "Actions": "Trailing slot — buttons, a chevron, a switch.",
-      "Header": "Full-width strip above the row content. Needs the item laid out as a column.",
-      "Footer": "Full-width strip below the row content."
-    },
-    "notes": "### Pressable or not\n\nGive the item an `onPress` and it renders as an `AnimatedPressable` with `accessibilityRole=\"button\"` and a press animation. Leave it off and it renders as a plain `View` — a static row should not announce itself as a button. React Native has no `render`-as-link escape hatch, so this is the substitute for one.\n\n### Density\n\n`size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.\n\n### The two axes\n\n`orientation` means something different on the item and on the group, and they are independent:\n\n- On **`Item`** it decides whether the item's own parts sit side by side (`horizontal`, the default list row) or stack (`vertical`, a card).\n- On **`Item.Group`** it decides whether the items run down the screen (`vertical`, the default) or across it (`horizontal`, a carousel).\n\n`Item.Header` and `Item.Footer` are full-width strips, so they need `orientation=\"vertical\"` on the item. `Item.Separator` takes the prop too — a horizontal group needs vertical hairlines.",
-    "examples": [
-      {
-        "title": "A file row",
-        "code": "<Item variant=\"outline\">\n  <Item.Media variant=\"icon\">\n    <ReceiptIcon size={18} />\n  </Item.Media>\n  <Item.Content>\n    <Item.Title>Invoice.pdf</Item.Title>\n    <Item.Description>2.4 MB · Updated yesterday</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Button size=\"sm\" variant=\"outline\">Open</Button>\n  </Item.Actions>\n</Item>"
-      },
-      {
-        "title": "A settings group",
-        "description": "Give a row `onPress` and it becomes a pressable with a press animation and a button role. Leave it off and it stays a plain view.",
-        "code": "<Item.Group>\n  {rows.map((row, index) => (\n    <Fragment key={row.id}>\n      {index > 0 && <Item.Separator />}\n      <Item size=\"sm\" onPress={() => router.push(row.href)}>\n        <Item.Content>\n          <Item.Title>{row.title}</Item.Title>\n          <Item.Description>{row.summary}</Item.Description>\n        </Item.Content>\n        <Item.Actions>\n          <ChevronRightIcon size={16} />\n        </Item.Actions>\n      </Item>\n    </Fragment>\n  ))}\n</Item.Group>"
-      },
-      {
-        "title": "Media types",
-        "description": "`icon` and `image` give the media slot a sized box; the default adds none, so an `Avatar` can style itself.",
-        "code": "<Item.Media variant=\"icon\"><BellIcon size={18} /></Item.Media>\n\n<Item.Media variant=\"image\">\n  <Image source={{ uri: product.image }} className=\"h-full w-full\" />\n</Item.Media>\n\n<Item.Media>\n  <Avatar size=\"md\" source={{ uri: user.avatar }} fallback=\"KA\" />\n</Item.Media>"
-      },
-      {
-        "title": "With a switch",
-        "description": "Keep the row non-pressable when the control is the only target — two overlapping press areas is a bad row.",
-        "code": "<Item size=\"sm\">\n  <Item.Content>\n    <Item.Title>Push notifications</Item.Title>\n    <Item.Description>Alerts on this device.</Item.Description>\n  </Item.Content>\n  <Item.Actions>\n    <Switch value={push} onValueChange={setPush} />\n  </Item.Actions>\n</Item>"
-      },
-      {
-        "title": "A horizontal group of cards",
-        "description": "Two independent axes. `orientation` on the group runs the items across the screen instead of down it; `orientation` on each item stacks its own parts into a card. A carousel wants both.",
-        "code": "<ScrollView horizontal showsHorizontalScrollIndicator={false}>\n  <Item.Group orientation=\"horizontal\">\n    {plans.map((plan) => (\n      <Item\n        key={plan.id}\n        orientation=\"vertical\"\n        variant=\"outline\"\n        className=\"w-48\"\n      >\n        <Item.Media variant=\"icon\">\n          <PackageIcon size={18} />\n        </Item.Media>\n        <Item.Content>\n          <Item.Title>{plan.name}</Item.Title>\n          <Item.Description>{plan.summary}</Item.Description>\n        </Item.Content>\n        <Item.Footer>\n          <Text weight=\"semibold\">{plan.price}</Text>\n        </Item.Footer>\n      </Item>\n    ))}\n  </Item.Group>\n</ScrollView>"
-      },
-      {
-        "title": "A vertical item",
-        "description": "`orientation=\"vertical\"` is also what `Item.Header` and `Item.Footer` need — both are full-width strips, so they only make sense once the item stacks.",
-        "code": "<Item orientation=\"vertical\" variant=\"outline\">\n  <Item.Header>\n    <Badge variant=\"secondary\">Draft</Badge>\n    <Text size=\"xs\" muted>Updated 2h ago</Text>\n  </Item.Header>\n  <Item.Content>\n    <Item.Title>Quarterly report</Item.Title>\n    <Item.Description>Revenue, retention and headcount.</Item.Description>\n  </Item.Content>\n  <Item.Footer>\n    <Button size=\"sm\" variant=\"outline\">Preview</Button>\n    <Button size=\"sm\">Publish</Button>\n  </Item.Footer>\n</Item>"
-      }
-    ],
-    "variantCode": {
-      "variant": "<Item variant=\"default\">…</Item>\n<Item variant=\"outline\">…</Item>\n<Item variant=\"muted\">…</Item>",
-      "size": "{/* Sets the row padding, and the media, title and description sizes. */}\n<Item size=\"default\">…</Item>\n<Item size=\"sm\">…</Item>\n<Item size=\"xs\">…</Item>",
-      "orientation": "{/* The list row — media, text and actions side by side. */}\n<Item orientation=\"horizontal\">…</Item>\n\n{/* Stacked into a card, for a carousel or for Header/Footer. */}\n<Item orientation=\"vertical\">…</Item>\n\n{/* The group has its own axis, independent of the items' own. */}\n<Item.Group orientation=\"horizontal\">…</Item.Group>"
-    },
-    "preview": {
-      "src": "/previews/item.jpg",
-      "alt": "Three Item rows on a dark screen showing the default, outline and muted variants — each with an icon tile, a title, a description and a New badge.",
-      "width": 1179,
-      "height": 969,
-      "caption": "The three surface variants, running in the example app."
-    }
-  },
-  "message": {
-    "intro": "A chat turn: avatar, bubble, and the metadata around it.\n\nThe pieces are separate because conversations differ in which ones they need. A support thread wants a sender name and a read receipt; an assistant transcript wants neither, but does want the bubble to carry tool output and actions.",
-    "usage": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" fallback=\"KA\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n// The outgoing side.\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>\n\n// Consecutive turns from one sender.\n<Message.Group align=\"start\">\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Header>Assistant</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>Looking that up…</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n  <Message>\n    <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n    <Message.Content>\n      <Message.Bubble>\n        <Message.BubbleContent>Your reminder is set.</Message.BubbleContent>\n      </Message.Bubble>\n    </Message.Content>\n  </Message>\n</Message.Group>",
-    "extraImports": [
-      "Avatar",
-      "Button",
-      "Shimmer"
-    ],
-    "anatomy": "<Message.Group>\n  <Message align=\"start\">\n    <Message.Avatar>…</Message.Avatar>\n    <Message.Content>\n      <Message.Header>…</Message.Header>\n      <Message.Bubble>\n        <Message.BubbleContent>…</Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Actions>…</Message.Actions>\n      <Message.Footer>…</Message.Footer>\n    </Message.Content>\n  </Message>\n</Message.Group>",
-    "parts": {
-      "Group": "Consecutive turns from one sender. Tightens spacing and stacks them.",
-      "Avatar": "Slot for the sender avatar. Reserved but emptied on a stacked message.",
-      "Content": "Column holding the header, bubble, actions and footer.",
-      "Header": "Sender name or timestamp above the bubble.",
-      "Bubble": "The speech bubble. Takes its colour and squared corner from align.",
-      "BubbleContent": "Text inside the bubble, in whichever colour reads against it.",
-      "Actions": "Row of controls under the bubble — copy, retry, feedback.",
-      "Footer": "Delivery state or timestamp below the bubble."
-    },
-    "notes": "### Alignment\n\n`align` is the only decision the root makes, and every part reads it from context: which side the row sits on, which way the avatar goes, which corner of the bubble is squared off, and which colour it takes. `start` is incoming (muted bubble), `end` is outgoing (primary bubble).\n\nSet it on `Message.Group` instead and every message inside inherits it.\n\n### Grouping\n\n`Message.Group` marks every turn after the first as `stacked`. A stacked message still renders its avatar slot but leaves it empty, so the bubbles stay in one column instead of the second sliding under the first one's avatar. Pass `stacked` on a message explicitly to override that.\n\n### In a list\n\nRender a transcript with an inverted `FlatList`, not a `ScrollView` — it keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
-    "examples": [
-      {
-        "title": "Both sides of a conversation",
-        "description": "`align` decides the row direction, the avatar side, which bubble corner is squared off, and the bubble colour — every part reads it from context.",
-        "code": "<Message>\n  <Message.Avatar>\n    <Avatar size=\"sm\" source={{ uri: them.avatar }} fallback=\"OL\" />\n  </Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How can I help you today?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Set a reminder for 9am.</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Footer>Read</Message.Footer>\n  </Message.Content>\n</Message>"
-      },
-      {
-        "title": "Grouped turns",
-        "description": "Every turn after the first is marked `stacked`: it keeps its avatar slot but empties it, so the bubbles stay in one column.",
-        "code": "<Message.Group align=\"start\">\n  {turns.map((turn) => (\n    <Message key={turn.id}>\n      <Message.Avatar>\n        <Avatar size=\"sm\" fallback=\"AI\" />\n      </Message.Avatar>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{turn.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  ))}\n</Message.Group>"
-      },
-      {
-        "title": "A streaming turn",
-        "code": "<Message>\n  <Message.Avatar><Avatar size=\"sm\" fallback=\"AI\" /></Message.Avatar>\n  <Message.Content>\n    <Message.Bubble>\n      {text ? (\n        <Message.BubbleContent>{text}</Message.BubbleContent>\n      ) : (\n        <Shimmer textClassName=\"text-base\">Thinking…</Shimmer>\n      )}\n    </Message.Bubble>\n  </Message.Content>\n</Message>"
-      },
-      {
-        "title": "Actions under the bubble",
-        "description": "`Message.Actions` reverses its row on the outgoing side so the buttons stay on the message’s own edge.",
-        "code": "<Message.Content>\n  <Message.Bubble>\n    <Message.BubbleContent>{answer}</Message.BubbleContent>\n  </Message.Bubble>\n  <Message.Actions>\n    <Button size=\"sm\" variant=\"ghost\" onPress={() => copy(answer)}>Copy</Button>\n    <Button size=\"sm\" variant=\"ghost\" onPress={retry}>Retry</Button>\n  </Message.Actions>\n</Message.Content>"
-      },
-      {
-        "title": "In a transcript",
-        "description": "An inverted `FlatList` keeps the newest turn pinned to the bottom without measuring content, and recycles rows as the conversation grows.",
-        "code": "<FlatList\n  data={[...messages].reverse()}\n  inverted\n  keyExtractor={(m) => m.id}\n  contentContainerClassName=\"gap-3 px-4 py-3\"\n  renderItem={({ item }) => (\n    <Message align={item.role === 'user' ? 'end' : 'start'}>\n      <Message.Content>\n        <Message.Bubble>\n          <Message.BubbleContent>{item.text}</Message.BubbleContent>\n        </Message.Bubble>\n      </Message.Content>\n    </Message>\n  )}\n/>"
-      }
-    ],
-    "variantCode": {
-      "align": "{/* Incoming — muted bubble, avatar on the left. */}\n<Message align=\"start\">…</Message>\n\n{/* Outgoing — primary bubble, row reversed. */}\n<Message align=\"end\">…</Message>\n\n{/* Or set it once for a whole group. */}\n<Message.Group align=\"end\">…</Message.Group>"
-    },
-    "preview": {
-      "src": "/previews/message.jpg",
-      "alt": "A chat transcript on a dark screen. An incoming bubble with a photo avatar reads How can I help you today?, answered by a white outgoing bubble reading Set a reminder for 9am tomorrow with a Read receipt under it. Below, a turn labelled Olivia carries a timestamp of Yesterday at 18:04, and three consecutive bubbles from one sender share a single avatar.",
-      "width": 1179,
-      "height": 1888,
-      "caption": "Both sides of a conversation, a named turn with a timestamp, and grouped turns."
     }
   }
 }

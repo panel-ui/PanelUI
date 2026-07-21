@@ -48,6 +48,7 @@ import {
   ShieldCheckIcon,
   Select,
   ScrollFade,
+  Separator,
   Shimmer,
   Skeleton,
   Spinner,
@@ -2452,6 +2453,88 @@ export const COMPONENTS: ComponentEntry[] = [
                 ))}
               </ScrollView>
             </ScrollFade>
+          </View>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'separator',
+    name: 'Separator',
+    summary: 'Horizontal or vertical rule between content',
+    demos: [
+      {
+        label: 'Between sections',
+        render: () => (
+          <Surface variant="secondary" className="w-full px-6 py-7">
+            <Text weight="medium">PanelUI</Text>
+            <Text size="sm" muted>
+              A React Native component library.
+            </Text>
+            <Separator className="my-4" />
+            <View className="h-5 flex-row items-center">
+              <Text size="sm">Components</Text>
+              <Separator orientation="vertical" className="mx-3" />
+              <Text size="sm">Themes</Text>
+              <Separator orientation="vertical" className="mx-3" />
+              <Text size="sm">Examples</Text>
+            </View>
+          </Surface>
+        ),
+      },
+      {
+        label: 'Variants',
+        render: () => (
+          <View className="w-full gap-5">
+            <View className="gap-2">
+              <Text size="sm" muted>
+                thin
+              </Text>
+              <Separator />
+            </View>
+            <View className="gap-2">
+              <Text size="sm" muted>
+                thick
+              </Text>
+              <Separator variant="thick" />
+            </View>
+          </View>
+        ),
+      },
+      {
+        label: 'Custom thickness',
+        render: () => (
+          <View className="w-full gap-5">
+            {[1, 3, 6].map((thickness) => (
+              <View key={thickness} className="gap-2">
+                <Text size="sm" muted>
+                  thickness={thickness}
+                </Text>
+                <Separator thickness={thickness} />
+              </View>
+            ))}
+          </View>
+        ),
+      },
+      {
+        label: 'Vertical, stretched by the row',
+        render: () => (
+          // `items-stretch` gives the separators their length — a vertical
+          // separator with no height from the parent measures zero.
+          <View className="w-full flex-row items-stretch gap-4 py-2">
+            {['Today', 'Week', 'Month'].map((label, index) => (
+              <View key={label} className="flex-1 flex-row items-stretch gap-4">
+                {index > 0 ? <Separator orientation="vertical" /> : null}
+                <View className="flex-1 gap-1">
+                  <Text size="xs" muted className="uppercase tracking-wider">
+                    {label}
+                  </Text>
+                  <Text size="lg" weight="semibold">
+                    {[128, 904, 3_612][index]?.toLocaleString()}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
         ),
       },

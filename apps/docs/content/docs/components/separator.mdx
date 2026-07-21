@@ -1,0 +1,140 @@
+---
+title: Separator
+description: Horizontal or vertical rule between content.
+---
+
+A rule between content.
+
+React Native has no `<hr>`, so a separator is a view sized on one axis and stretched on the other. That is why the orientation is a prop rather than something the layout works out: the component has to know which axis carries the thickness.
+
+## Installation
+
+Separator ships with the library — no separate install.
+
+```tsx
+import { Separator, Surface, Text } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add separator
+```
+
+## Usage
+
+```tsx
+<Separator />
+
+{/* Vertical, inside a row that gives it a height. */}
+<View className="h-5 flex-row items-center">
+  <Text size="sm">Components</Text>
+  <Separator orientation="vertical" className="mx-3" />
+  <Text size="sm">Themes</Text>
+</View>
+```
+
+## Examples
+
+### Between sections
+
+The common pair: a horizontal rule splitting a card, and vertical rules between inline links.
+
+```tsx
+<Surface variant="secondary" className="px-6 py-7">
+  <Text weight="medium">PanelUI</Text>
+  <Text size="sm" muted>A React Native component library.</Text>
+
+  <Separator className="my-4" />
+
+  <View className="h-5 flex-row items-center">
+    <Text size="sm">Components</Text>
+    <Separator orientation="vertical" className="mx-3" />
+    <Text size="sm">Themes</Text>
+    <Separator orientation="vertical" className="mx-3" />
+    <Text size="sm">Examples</Text>
+  </View>
+</Surface>
+```
+
+### Custom thickness
+
+When neither variant is right, `thickness` takes a number of pixels and overrides them.
+
+```tsx
+<Separator thickness={1} />
+<Separator thickness={3} />
+<Separator thickness={6} />
+```
+
+### Vertical, stretched by the row
+
+A vertical separator has no length of its own. `items-stretch` on the row gives it one; without a height from somewhere it measures zero and nothing draws.
+
+```tsx
+<View className="flex-row items-stretch gap-4 py-2">
+  <View className="flex-1 gap-1">
+    <Text size="xs" muted className="uppercase tracking-wider">Today</Text>
+    <Text size="lg" weight="semibold">128</Text>
+  </View>
+
+  <Separator orientation="vertical" />
+
+  <View className="flex-1 gap-1">
+    <Text size="xs" muted className="uppercase tracking-wider">Week</Text>
+    <Text size="lg" weight="semibold">904</Text>
+  </View>
+</View>
+```
+
+### Announced, not decorative
+
+Separators are skipped by screen readers by default. Set `decorative={false}` when the split itself carries meaning — between two groups of menu items, say — and it is announced with its orientation.
+
+```tsx
+<Separator decorative={false} />
+```
+
+## Variants
+
+### `orientation`
+
+- `horizontal` *(default)*
+- `vertical`
+
+```tsx
+<Separator orientation="horizontal" />
+
+{/* Needs a height from the parent. */}
+<View className="h-5 flex-row items-center">
+  <Separator orientation="vertical" />
+</View>
+```
+
+### `variant`
+
+- `thin` *(default)*
+- `thick`
+
+```tsx
+<Separator variant="thin" />
+<Separator variant="thick" />
+```
+
+## API Reference
+
+### Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `thickness` | `number` | — | Thickness in pixels, overriding the variant. Sets the height of a horizontal separator and the width of a vertical one. |
+| `decorative` | `boolean` | `true` | Whether the separator is only visual. A decorative separator is skipped by screen readers; set false when the split itself carries meaning — between two groups of menu items, say — and it is announced instead. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+A horizontal separator fills its parent's width; a vertical one fills its parent's height. The vertical case is the one that catches people out — inside a `flex-row` the row has no intrinsic height, so pair it with `items-stretch` on the row or an explicit `h-*` somewhere.
+
+`thickness` wins over `variant`. Both set the height of a horizontal separator and the width of a vertical one, so the same value reads the same either way round.

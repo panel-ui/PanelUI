@@ -1,0 +1,17 @@
+{
+  "name": "separator",
+  "type": "registry:ui",
+  "description": "Horizontal or vertical rule between content.",
+  "registryDependencies": [],
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/separator.tsx",
+      "type": "registry:ui",
+      "content": "/**\n * Separator — a rule between content.\n *\n * React Native has no `<hr>` and no border shorthand that survives a flex row,\n * so a separator here is a view with a size on one axis and a stretch on the\n * other. That is why orientation is a prop rather than something the layout\n * infers: the component has to know which axis carries the thickness.\n *\n * ```tsx\n * <Separator />\n * <Separator orientation=\"vertical\" />\n * ```\n *\n * A vertical separator takes its length from the parent, so the parent needs a\n * height — inside a `flex-row` with `items-stretch`, or with an explicit `h-*`\n * on either the row or the separator itself. Without one it measures zero and\n * nothing draws.\n */\nimport { forwardRef } from 'react';\nimport { View, type ViewProps } from 'react-native';\nimport { tv, type VariantProps } from 'tailwind-variants';\n\nconst separatorVariants = tv({\n  base: 'bg-border',\n  variants: {\n    orientation: {\n      horizontal: 'w-full',\n      vertical: 'h-full',\n    },\n    variant: {\n      thin: '',\n      thick: '',\n    },\n  },\n  compoundVariants: [\n    // Thickness is on whichever axis is *not* the length, so it cannot be\n    // expressed by the orientation and variant classes independently.\n    { orientation: 'horizontal', variant: 'thin', class: 'h-px' },\n    { orientation: 'horizontal', variant: 'thick', class: 'h-1' },\n    { orientation: 'vertical', variant: 'thin', class: 'w-px' },\n    { orientation: 'vertical', variant: 'thick', class: 'w-1' },\n  ],\n  defaultVariants: {\n    orientation: 'horizontal',\n    variant: 'thin',\n  },\n});\n\nexport interface SeparatorProps\n  extends ViewProps,\n    VariantProps<typeof separatorVariants> {\n  className?: string;\n  /**\n   * Thickness in pixels, overriding the variant. Sets the height of a\n   * horizontal separator and the width of a vertical one.\n   */\n  thickness?: number;\n  /**\n   * Whether the separator is only visual. A decorative separator is skipped by\n   * screen readers; set false when the split itself carries meaning — between\n   * two groups of menu items, say — and it is announced instead.\n   */\n  decorative?: boolean;\n}\n\nexport const Separator = forwardRef<View, SeparatorProps>(\n  (\n    {\n      className,\n      orientation = 'horizontal',\n      variant,\n      thickness,\n      decorative = true,\n      style,\n      ...props\n    },\n    ref\n  ) => (\n    <View\n      ref={ref}\n      // `role` rather than `accessibilityRole` — React Native's older role list\n      // has no separator, the ARIA-aligned one does.\n      role={decorative ? 'none' : 'separator'}\n      accessible={!decorative}\n      aria-orientation={decorative ? undefined : orientation}\n      className={separatorVariants({ orientation, variant, className })}\n      style={\n        thickness !== undefined\n          ? [orientation === 'horizontal' ? { height: thickness } : { width: thickness }, style]\n          : style\n      }\n      {...props}\n    />\n  )\n);\n\nSeparator.displayName = 'Separator';\n"
+    }
+  ]
+}

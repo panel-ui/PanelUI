@@ -104,6 +104,11 @@
     "Picker that opens in a bottom sheet.",
     "expo select component"
   ],
+  "separator": [
+    "Separator",
+    "Horizontal or vertical rule between content.",
+    "react native separator"
+  ],
   "shimmer": [
     "Shimmer",
     "Animated highlight sweeping across content.",

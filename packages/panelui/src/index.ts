@@ -126,6 +126,7 @@ export {
   ScrollFade,
   type ScrollFadeProps,
 } from './components/scroll-fade';
+export { Separator, type SeparatorProps } from './components/separator';
 export { Shimmer, type ShimmerProps } from './components/shimmer';
 export { Skeleton, type SkeletonProps } from './components/skeleton';
 export { Spinner, type SpinnerProps } from './components/spinner';

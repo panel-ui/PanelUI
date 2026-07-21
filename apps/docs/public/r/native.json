@@ -1,0 +1,17 @@
+{
+  "name": "native",
+  "type": "registry:lib",
+  "description": "Utility: native.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [
+    "@expo/ui"
+  ],
+  "files": [
+    {
+      "path": "lib/native.ts",
+      "type": "registry:lib",
+      "content": "/**\n * Optional bridge to the platform's own UI toolkit.\n *\n * A handful of controls are better served by the real thing than by a faithful\n * re-implementation: a switch, a picker, a sheet and a button are muscle\n * memory, and users notice when the animation curve or the haptic is a\n * near-miss. Passing `native` to those components hands rendering to SwiftUI\n * on iOS and Jetpack Compose on Android.\n *\n * It is optional on purpose. The package is resolved lazily and every caller\n * falls back to the styled implementation when it is missing, so nobody who\n * never writes `native` has to install anything.\n *\n * ```sh\n * npx expo install @expo/ui\n * ```\n *\n * **Theme tokens do not apply in native mode.** The platform draws the control\n * with its own colours, metrics and typography — that is the entire point, and\n * it means `className` and the variant props are ignored on those components.\n */\nimport { Platform } from 'react-native';\nimport type { ComponentType, ReactNode } from 'react';\n\ninterface NativeUIModule {\n  Host: ComponentType<{\n    children?: ReactNode;\n    matchContents?: boolean;\n    style?: unknown;\n    [key: string]: unknown;\n  }>;\n  /**\n   * Hosts React Native views inside the native tree. Anything of ours that\n   * goes inside a native container has to be wrapped in this or the native\n   * layout does not measure it — children spill outside their container.\n   */\n  RNHostView: ComponentType<{\n    children?: ReactNode;\n    matchContents?: boolean;\n    style?: unknown;\n  }>;\n  Button: ComponentType<Record<string, unknown>>;\n  Switch: ComponentType<Record<string, unknown>>;\n  Picker: ComponentType<Record<string, unknown>> & {\n    Item: ComponentType<Record<string, unknown>>;\n  };\n  BottomSheet: ComponentType<Record<string, unknown>>;\n}\n\nlet resolved = false;\nlet module: NativeUIModule | null = null;\n\n/**\n * The native UI module, or null when it is not installed or the platform has\n * no toolkit behind it. Resolved once and cached — a failed require is not\n * retried on every render.\n */\nexport function getNativeUI(): NativeUIModule | null {\n  if (resolved) return module;\n  resolved = true;\n\n  // Web has no SwiftUI and no Compose; @expo/ui renders plain views there,\n  // which loses the styling without gaining anything.\n  if (Platform.OS === 'web') return null;\n\n  try {\n    // eslint-disable-next-line @typescript-eslint/no-require-imports\n    module = require('@expo/ui') as NativeUIModule;\n  } catch {\n    module = null;\n  }\n\n  return module;\n}\n\n/** Whether `native` will actually render a platform control. */\nexport function hasNativeUI(): boolean {\n  return getNativeUI() !== null;\n}\n"
+    }
+  ]
+}

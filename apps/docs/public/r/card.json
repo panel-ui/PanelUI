@@ -1,0 +1,18 @@
+{
+  "name": "card",
+  "type": "registry:ui",
+  "description": "Content surface with header, body and footer.",
+  "registryDependencies": [
+    "cn",
+    "text"
+  ],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/card.tsx",
+      "type": "registry:ui",
+      "content": "import { forwardRef } from 'react';\nimport { View, type ViewProps } from 'react-native';\nimport { cn } from '@/lib/cn';\nimport { Text, type TextProps } from '@/components/ui/text';\n\nexport interface CardProps extends ViewProps {\n  className?: string;\n}\n\nconst CardRoot = forwardRef<View, CardProps>(({ className, ...props }, ref) => (\n  <View\n    ref={ref}\n    className={cn('rounded-2xl border border-border bg-card shadow-sm', className)}\n    {...props}\n  />\n));\nCardRoot.displayName = 'Card';\n\nconst CardHeader = forwardRef<View, CardProps>(({ className, ...props }, ref) => (\n  <View ref={ref} className={cn('gap-1.5 p-6', className)} {...props} />\n));\nCardHeader.displayName = 'Card.Header';\n\nconst CardTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(\n  ({ className, ...props }, ref) => (\n    <Text\n      ref={ref}\n      size=\"lg\"\n      weight=\"semibold\"\n      className={cn('leading-none text-card-foreground', className)}\n      {...props}\n    />\n  )\n);\nCardTitle.displayName = 'Card.Title';\n\nconst CardDescription = forwardRef<React.ElementRef<typeof Text>, TextProps>(\n  ({ className, ...props }, ref) => (\n    <Text ref={ref} size=\"sm\" muted className={className} {...props} />\n  )\n);\nCardDescription.displayName = 'Card.Description';\n\nconst CardContent = forwardRef<View, CardProps>(({ className, ...props }, ref) => (\n  <View ref={ref} className={cn('p-6 pt-0', className)} {...props} />\n));\nCardContent.displayName = 'Card.Content';\n\nconst CardFooter = forwardRef<View, CardProps>(({ className, ...props }, ref) => (\n  <View\n    ref={ref}\n    className={cn('flex-row items-center gap-2 p-6 pt-0', className)}\n    {...props}\n  />\n));\nCardFooter.displayName = 'Card.Footer';\n\nexport const Card = Object.assign(CardRoot, {\n  Header: CardHeader,\n  Title: CardTitle,\n  Description: CardDescription,\n  Content: CardContent,\n  Footer: CardFooter,\n});\n"
+    }
+  ]
+}

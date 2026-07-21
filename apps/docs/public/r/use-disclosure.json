@@ -1,0 +1,15 @@
+{
+  "name": "use-disclosure",
+  "type": "registry:hook",
+  "description": "Hook: use-disclosure.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "hooks/use-disclosure.ts",
+      "type": "registry:hook",
+      "content": "import { useCallback, useMemo, useState } from 'react';\n\nexport interface UseDisclosureOptions {\n  defaultOpen?: boolean;\n  /** Controlled open state. Pass this to drive it from outside. */\n  open?: boolean;\n  onOpenChange?: (open: boolean) => void;\n}\n\nexport interface UseDisclosureResult {\n  isOpen: boolean;\n  open: () => void;\n  close: () => void;\n  toggle: () => void;\n  /** Spread onto Dialog, BottomSheet or Select. */\n  props: { open: boolean; onOpenChange: (open: boolean) => void };\n}\n\n/**\n * Open/closed state for an overlay.\n *\n * The same controlled-or-uncontrolled pattern Dialog, BottomSheet and Select\n * implement internally, lifted out for when you need to drive one from\n * elsewhere — closing a sheet after a request settles, say.\n *\n * ```tsx\n * const sheet = useDisclosure();\n * <Button onPress={sheet.open}>Share</Button>\n * <BottomSheet {...sheet.props}>…</BottomSheet>\n * ```\n */\nexport function useDisclosure({\n  defaultOpen = false,\n  open: controlledOpen,\n  onOpenChange,\n}: UseDisclosureOptions = {}): UseDisclosureResult {\n  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);\n  const isControlled = controlledOpen !== undefined;\n  const isOpen = isControlled ? controlledOpen : uncontrolledOpen;\n\n  const setOpen = useCallback(\n    (next: boolean) => {\n      if (!isControlled) setUncontrolledOpen(next);\n      onOpenChange?.(next);\n    },\n    [isControlled, onOpenChange]\n  );\n\n  const open = useCallback(() => setOpen(true), [setOpen]);\n  const close = useCallback(() => setOpen(false), [setOpen]);\n  const toggle = useCallback(() => setOpen(!isOpen), [setOpen, isOpen]);\n\n  return useMemo(\n    () => ({ isOpen, open, close, toggle, props: { open: isOpen, onOpenChange: setOpen } }),\n    [isOpen, open, close, toggle, setOpen]\n  );\n}\n"
+    }
+  ]
+}

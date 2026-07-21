@@ -1,0 +1,17 @@
+{
+  "name": "text",
+  "type": "registry:ui",
+  "description": "Primitive: text.",
+  "registryDependencies": [],
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/text.tsx",
+      "type": "registry:ui",
+      "content": "import { forwardRef } from 'react';\nimport { Text as RNText, type Text as RNTextType, type TextProps as RNTextProps } from 'react-native';\nimport { tv, type VariantProps } from 'tailwind-variants';\n\nconst textVariants = tv({\n  base: 'text-foreground',\n  variants: {\n    size: {\n      xs: 'text-xs',\n      sm: 'text-sm',\n      base: 'text-base',\n      lg: 'text-lg',\n      xl: 'text-xl',\n      '2xl': 'text-2xl',\n      '3xl': 'text-3xl',\n    },\n    weight: {\n      normal: 'font-normal',\n      medium: 'font-medium',\n      semibold: 'font-semibold',\n      bold: 'font-bold',\n    },\n    muted: {\n      true: 'text-muted-foreground',\n    },\n  },\n  defaultVariants: {\n    size: 'base',\n    weight: 'normal',\n  },\n});\n\nexport interface TextProps extends RNTextProps, VariantProps<typeof textVariants> {\n  className?: string;\n}\n\nexport const Text = forwardRef<RNTextType, TextProps>(\n  ({ className, size, weight, muted, ...props }, ref) => (\n    <RNText\n      ref={ref}\n      className={textVariants({ size, weight, muted, className })}\n      {...props}\n    />\n  )\n);\n\nText.displayName = 'Text';\n"
+    }
+  ]
+}

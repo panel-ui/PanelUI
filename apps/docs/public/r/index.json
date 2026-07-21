@@ -1,0 +1,384 @@
+[
+  {
+    "name": "accordion",
+    "type": "registry:ui",
+    "description": "Collapsible sections with single or multiple selection.",
+    "registryDependencies": [
+      "icons",
+      "text"
+    ]
+  },
+  {
+    "name": "alert",
+    "type": "registry:ui",
+    "description": "Status message with a built-in icon.",
+    "registryDependencies": [
+      "cn",
+      "icons",
+      "text"
+    ]
+  },
+  {
+    "name": "animated-pressable",
+    "type": "registry:ui",
+    "description": "Primitive: animated-pressable.",
+    "registryDependencies": []
+  },
+  {
+    "name": "avatar",
+    "type": "registry:ui",
+    "description": "User image with an initials fallback and an optional badge overlay.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "badge",
+    "type": "registry:ui",
+    "description": "Compact status label, dot, or notification count.",
+    "registryDependencies": [
+      "text"
+    ]
+  },
+  {
+    "name": "bottom-sheet",
+    "type": "registry:ui",
+    "description": "Draggable sheet anchored to the bottom of the screen.",
+    "registryDependencies": [
+      "cn",
+      "native",
+      "portal"
+    ]
+  },
+  {
+    "name": "button",
+    "type": "registry:ui",
+    "description": "Pressable action with variants, sizes, loading state and icon slots.",
+    "registryDependencies": [
+      "animated-pressable",
+      "icons",
+      "native",
+      "spinner",
+      "text"
+    ]
+  },
+  {
+    "name": "card",
+    "type": "registry:ui",
+    "description": "Content surface with header, body and footer.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "checkbox",
+    "type": "registry:ui",
+    "description": "Animated checkbox, as a row or a selectable card.",
+    "registryDependencies": [
+      "icons",
+      "text"
+    ]
+  },
+  {
+    "name": "cn",
+    "type": "registry:lib",
+    "description": "Utility: cn.",
+    "registryDependencies": []
+  },
+  {
+    "name": "dialog",
+    "type": "registry:ui",
+    "description": "Modal dialog with a backdrop and footer actions.",
+    "registryDependencies": [
+      "cn",
+      "portal",
+      "text"
+    ]
+  },
+  {
+    "name": "empty-state",
+    "type": "registry:ui",
+    "description": "Placeholder for a list or screen with no content.",
+    "registryDependencies": [
+      "text"
+    ]
+  },
+  {
+    "name": "frame",
+    "type": "registry:ui",
+    "description": "Widget shell with a titled header, an inset panel and a caption.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "icons",
+    "type": "registry:ui",
+    "description": "Primitive: icons.",
+    "registryDependencies": []
+  },
+  {
+    "name": "inline-select",
+    "type": "registry:ui",
+    "description": "Picker that expands its options in place.",
+    "registryDependencies": [
+      "icons",
+      "portal",
+      "text"
+    ]
+  },
+  {
+    "name": "input",
+    "type": "registry:ui",
+    "description": "Text field with label, description and error message.",
+    "registryDependencies": [
+      "keyboard-avoider",
+      "text"
+    ]
+  },
+  {
+    "name": "input-group",
+    "type": "registry:ui",
+    "description": "Input with leading and trailing decorators.",
+    "registryDependencies": [
+      "input"
+    ]
+  },
+  {
+    "name": "item",
+    "type": "registry:ui",
+    "description": "Row of media, text and actions for lists and settings.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "keyboard-avoider",
+    "type": "registry:ui",
+    "description": "Primitive: keyboard-avoider.",
+    "registryDependencies": [
+      "use-keyboard-avoidance"
+    ]
+  },
+  {
+    "name": "label",
+    "type": "registry:ui",
+    "description": "Form field label with required, invalid and disabled states.",
+    "registryDependencies": [
+      "text"
+    ]
+  },
+  {
+    "name": "message",
+    "type": "registry:ui",
+    "description": "Chat turn with avatar, bubble, header and footer.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "native",
+    "type": "registry:lib",
+    "description": "Utility: native.",
+    "registryDependencies": []
+  },
+  {
+    "name": "panel-ui-provider",
+    "type": "registry:ui",
+    "description": "Primitive: panel-ui-provider.",
+    "registryDependencies": [
+      "cn",
+      "portal",
+      "toast"
+    ]
+  },
+  {
+    "name": "portal",
+    "type": "registry:ui",
+    "description": "Primitive: portal.",
+    "registryDependencies": []
+  },
+  {
+    "name": "progress",
+    "type": "registry:ui",
+    "description": "Determinate and indeterminate progress bar.",
+    "registryDependencies": []
+  },
+  {
+    "name": "radio-group",
+    "type": "registry:ui",
+    "description": "Single-select list of options.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "scroll-fade",
+    "type": "registry:ui",
+    "description": "Fades the edges of a scroll container.",
+    "registryDependencies": []
+  },
+  {
+    "name": "select",
+    "type": "registry:ui",
+    "description": "Picker that opens in a bottom sheet.",
+    "registryDependencies": [
+      "bottom-sheet",
+      "icons",
+      "native",
+      "text"
+    ]
+  },
+  {
+    "name": "shimmer",
+    "type": "registry:ui",
+    "description": "Animated highlight sweeping across content.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "skeleton",
+    "type": "registry:ui",
+    "description": "Shimmer placeholder for loading content.",
+    "registryDependencies": [
+      "cn"
+    ]
+  },
+  {
+    "name": "spinner",
+    "type": "registry:ui",
+    "description": "Indeterminate loading indicator.",
+    "registryDependencies": []
+  },
+  {
+    "name": "steps",
+    "type": "registry:ui",
+    "description": "Stepper for multi-step flows.",
+    "registryDependencies": [
+      "icons",
+      "spinner",
+      "text"
+    ]
+  },
+  {
+    "name": "surface",
+    "type": "registry:ui",
+    "description": "Elevated container with a variant ladder.",
+    "registryDependencies": []
+  },
+  {
+    "name": "switch",
+    "type": "registry:ui",
+    "description": "Animated on/off toggle.",
+    "registryDependencies": [
+      "native"
+    ]
+  },
+  {
+    "name": "tabs",
+    "type": "registry:ui",
+    "description": "Segmented navigation with an animated indicator.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
+    "name": "text",
+    "type": "registry:ui",
+    "description": "Primitive: text.",
+    "registryDependencies": []
+  },
+  {
+    "name": "theme",
+    "type": "registry:theme",
+    "description": "Design tokens for every theme, in light and dark.",
+    "registryDependencies": []
+  },
+  {
+    "name": "timeline",
+    "type": "registry:ui",
+    "description": "Vertical sequence of events.",
+    "registryDependencies": [
+      "icons",
+      "text"
+    ]
+  },
+  {
+    "name": "toast",
+    "type": "registry:ui",
+    "description": "Transient notification queue with swipe to dismiss.",
+    "registryDependencies": [
+      "button",
+      "cn",
+      "icons",
+      "portal",
+      "text"
+    ]
+  },
+  {
+    "name": "typography",
+    "type": "registry:ui",
+    "description": "Semantic text presets.",
+    "registryDependencies": [
+      "text"
+    ]
+  },
+  {
+    "name": "use-breakpoint",
+    "type": "registry:hook",
+    "description": "Hook: use-breakpoint.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-copy-to-clipboard",
+    "type": "registry:hook",
+    "description": "Hook: use-copy-to-clipboard.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-debounced-value",
+    "type": "registry:hook",
+    "description": "Hook: use-debounced-value.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-disclosure",
+    "type": "registry:hook",
+    "description": "Hook: use-disclosure.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-keyboard",
+    "type": "registry:hook",
+    "description": "Hook: use-keyboard.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-keyboard-avoidance",
+    "type": "registry:hook",
+    "description": "Hook: use-keyboard-avoidance.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-previous",
+    "type": "registry:hook",
+    "description": "Hook: use-previous.",
+    "registryDependencies": []
+  },
+  {
+    "name": "use-theme",
+    "type": "registry:hook",
+    "description": "Hook: use-theme.",
+    "registryDependencies": []
+  }
+]

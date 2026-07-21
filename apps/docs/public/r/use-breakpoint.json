@@ -1,0 +1,15 @@
+{
+  "name": "use-breakpoint",
+  "type": "registry:hook",
+  "description": "Hook: use-breakpoint.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "hooks/use-breakpoint.ts",
+      "type": "registry:hook",
+      "content": "import { useWindowDimensions } from 'react-native';\n\n/** Tailwind's breakpoints, minus the ones no phone or tablet reaches. */\nexport const BREAKPOINTS = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;\n\nexport type Breakpoint = keyof typeof BREAKPOINTS;\n\nexport interface UseBreakpointResult {\n  /** Largest breakpoint the window currently satisfies, or `base`. */\n  current: Breakpoint | 'base';\n  /** True when the window is at least this wide. */\n  isAtLeast: (breakpoint: Breakpoint) => boolean;\n  width: number;\n  height: number;\n  isLandscape: boolean;\n}\n\n/**\n * Responsive state from the window size — the React Native answer to a media\n * query, which has no equivalent here.\n *\n * For styling, prefer Uniwind's responsive class prefixes (`md:flex-row`).\n * Reach for this when the *behaviour* changes, not just the look — rendering\n * a sheet on a phone and a dialog on a tablet, say.\n *\n * ```tsx\n * const { isAtLeast } = useBreakpoint();\n * return isAtLeast('md') ? <Dialog …/> : <BottomSheet …/>;\n * ```\n */\nexport function useBreakpoint(): UseBreakpointResult {\n  const { width, height } = useWindowDimensions();\n\n  const current: Breakpoint | 'base' =\n    width >= BREAKPOINTS.xl\n      ? 'xl'\n      : width >= BREAKPOINTS.lg\n        ? 'lg'\n        : width >= BREAKPOINTS.md\n          ? 'md'\n          : width >= BREAKPOINTS.sm\n            ? 'sm'\n            : 'base';\n\n  return {\n    current,\n    isAtLeast: (breakpoint) => width >= BREAKPOINTS[breakpoint],\n    width,\n    height,\n    isLandscape: width > height,\n  };\n}\n"
+    }
+  ]
+}

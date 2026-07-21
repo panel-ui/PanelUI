@@ -1,0 +1,23 @@
+{
+  "name": "panel-ui-provider",
+  "type": "registry:ui",
+  "description": "Primitive: panel-ui-provider.",
+  "registryDependencies": [
+    "cn",
+    "portal",
+    "toast"
+  ],
+  "dependencies": [
+    "react-native-gesture-handler"
+  ],
+  "optionalDependencies": [
+    "react-native-keyboard-controller"
+  ],
+  "files": [
+    {
+      "path": "ui/panel-ui-provider.tsx",
+      "type": "registry:ui",
+      "content": "import { Fragment, type ComponentType, type ReactNode } from 'react';\nimport { StyleSheet, View } from 'react-native';\nimport { GestureHandlerRootView } from 'react-native-gesture-handler';\nimport { PortalHost, PortalProvider } from '@/components/ui/portal';\nimport { ToastViewport } from '@/components/ui/toast';\nimport { cn } from '@/lib/cn';\n\n/**\n * `react-native-keyboard-controller` needs its provider at the root, and\n * forgetting it is a silent failure — the hooks return zeroes and keyboard\n * avoidance simply does nothing. Mount it here when the package is installed\n * so `avoidKeyboard` works without any extra setup, and fall back to a\n * pass-through when it is not.\n */\nconst KeyboardProvider: ComponentType<{ children?: ReactNode }> = (() => {\n  try {\n    // eslint-disable-next-line @typescript-eslint/no-require-imports\n    const controller = require('react-native-keyboard-controller');\n    return controller?.KeyboardProvider ?? Fragment;\n  } catch {\n    return Fragment;\n  }\n})();\n\nexport interface PanelUIProviderProps {\n  children: ReactNode;\n  /**\n   * Classes for the themed page surface. Defaults to `bg-background`, which\n   * follows the active theme. Pass your own to change the page colour.\n   */\n  className?: string;\n  /**\n   * Set to false to render without the themed page background — do this only\n   * if you paint the app background yourself.\n   */\n  background?: boolean;\n}\n\n/**\n * Root provider for PanelUI. Owns three things:\n * the gesture handler root, the themed page background, and the portal host\n * used by overlay components (Dialog, BottomSheet, Select).\n *\n * The background lives here because native wrappers like SafeAreaView do not\n * accept `className` — putting `bg-background` on one silently does nothing,\n * leaving the page unthemed while its children follow the theme.\n *\n * Theme switching is handled natively by Uniwind — use the `useTheme()` hook\n * exported from panelui-native.\n */\nexport function PanelUIProvider({\n  children,\n  className,\n  background = true,\n}: PanelUIProviderProps) {\n  return (\n    <GestureHandlerRootView style={styles.root}>\n      {/* Outermost of ours, so every field below it can avoid the keyboard.\n          A no-op Fragment when the controller is not installed. */}\n      <KeyboardProvider>\n        <View className={cn('flex-1', background && 'bg-background', className)}>\n          <PortalProvider>\n            {children}\n            {/* Sits before PortalHost so it can portal into it. */}\n            <ToastViewport />\n            <PortalHost />\n          </PortalProvider>\n        </View>\n      </KeyboardProvider>\n    </GestureHandlerRootView>\n  );\n}\n\nconst styles = StyleSheet.create({\n  root: { flex: 1 },\n});\n"
+    }
+  ]
+}

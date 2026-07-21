@@ -1,0 +1,15 @@
+{
+  "name": "use-debounced-value",
+  "type": "registry:hook",
+  "description": "Hook: use-debounced-value.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "hooks/use-debounced-value.ts",
+      "type": "registry:hook",
+      "content": "import { useEffect, useState } from 'react';\n\n/**\n * A copy of `value` that only updates once it has stopped changing for\n * `delay` ms — for search fields, where you want the typed value on screen\n * immediately but the query fired once.\n *\n * ```tsx\n * const [query, setQuery] = useState('');\n * const debounced = useDebouncedValue(query, 300);\n * useEffect(() => { search(debounced); }, [debounced]);\n * ```\n */\nexport function useDebouncedValue<T>(value: T, delay = 300): T {\n  const [debounced, setDebounced] = useState(value);\n\n  useEffect(() => {\n    const timer = setTimeout(() => setDebounced(value), delay);\n    return () => clearTimeout(timer);\n  }, [value, delay]);\n\n  return debounced;\n}\n"
+    }
+  ]
+}

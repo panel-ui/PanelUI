@@ -1,0 +1,19 @@
+{
+  "name": "badge",
+  "type": "registry:ui",
+  "description": "Compact status label, dot, or notification count.",
+  "registryDependencies": [
+    "text"
+  ],
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/badge.tsx",
+      "type": "registry:ui",
+      "content": "import { forwardRef, type ReactNode } from 'react';\nimport { View, type ViewProps } from 'react-native';\nimport { tv, type VariantProps } from 'tailwind-variants';\nimport { Text } from '@/components/ui/text';\n\nconst badgeVariants = tv({\n  slots: {\n    root: 'flex-row items-center justify-center gap-1 self-start rounded-sm border border-transparent px-2 py-0.5',\n    label: 'text-xs font-medium',\n  },\n  variants: {\n    shape: {\n      default: {},\n      /** A bare status dot, no label. */\n      dot: { root: 'h-2 w-2 rounded-full px-0 py-0' },\n      /** Circular, for a count sitting over an avatar or an icon. */\n      count: { root: 'h-5 min-w-5 rounded-full px-1.5 py-0' },\n    },\n    variant: {\n      default: { root: 'bg-primary', label: 'text-primary-foreground' },\n      secondary: { root: 'bg-secondary', label: 'text-secondary-foreground' },\n      outline: { root: 'border-border bg-transparent', label: 'text-foreground' },\n      destructive: { root: 'bg-destructive', label: 'text-white' },\n      success: { root: 'bg-success-subtle', label: 'text-success-foreground' },\n      warning: { root: 'bg-warning-subtle', label: 'text-warning-foreground' },\n      info: { root: 'bg-info-subtle', label: 'text-info-foreground' },\n    },\n  },\n  defaultVariants: {\n    variant: 'default',\n    shape: 'default',\n  },\n});\n\n/** Counts past this render as \"99+\" so the badge keeps its shape. */\nconst MAX_COUNT = 99;\n\nexport interface BadgeProps\n  extends ViewProps,\n    VariantProps<typeof badgeVariants> {\n  children?: ReactNode;\n  className?: string;\n  labelClassName?: string;\n  /**\n   * Renders a number instead of children, clamped to \"99+\". Implies the\n   * `count` shape unless you set one.\n   */\n  count?: number;\n}\n\nexport const Badge = forwardRef<View, BadgeProps>(\n  ({ children, className, labelClassName, variant, shape, count, ...props }, ref) => {\n    const resolvedShape = shape ?? (count !== undefined ? 'count' : 'default');\n    const { root, label } = badgeVariants({ variant, shape: resolvedShape });\n\n    const content =\n      count !== undefined\n        ? `${Math.min(count, MAX_COUNT)}${count > MAX_COUNT ? '+' : ''}`\n        : children;\n\n    return (\n      <View\n        ref={ref}\n        accessibilityLabel={\n          count !== undefined ? `${count} unread` : undefined\n        }\n        className={root({ className })}\n        {...props}\n      >\n        {resolvedShape === 'dot' ? null : typeof content === 'string' ? (\n          <Text className={label({ className: labelClassName })}>{content}</Text>\n        ) : (\n          content\n        )}\n      </View>\n    );\n  }\n);\n\nBadge.displayName = 'Badge';\n"
+    }
+  ]
+}

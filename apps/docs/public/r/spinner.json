@@ -1,0 +1,18 @@
+{
+  "name": "spinner",
+  "type": "registry:ui",
+  "description": "Indeterminate loading indicator.",
+  "registryDependencies": [],
+  "dependencies": [
+    "react-native-reanimated",
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/spinner.tsx",
+      "type": "registry:ui",
+      "content": "import { memo, useEffect } from 'react';\nimport Animated, {\n  Easing,\n  useAnimatedStyle,\n  useSharedValue,\n  withRepeat,\n  withTiming,\n  cancelAnimation,\n} from 'react-native-reanimated';\nimport { tv, type VariantProps } from 'tailwind-variants';\n\nconst spinnerVariants = tv({\n  base: 'rounded-full border-2 border-muted border-t-primary',\n  variants: {\n    size: {\n      sm: 'h-4 w-4',\n      md: 'h-6 w-6',\n      lg: 'h-8 w-8 border-[3px]',\n    },\n  },\n  defaultVariants: {\n    size: 'md',\n  },\n});\n\nexport interface SpinnerProps extends VariantProps<typeof spinnerVariants> {\n  className?: string;\n}\n\n/** Rotating ring spinner. Animation runs entirely on the UI thread. */\nexport const Spinner = memo(function Spinner({ className, size }: SpinnerProps) {\n  const rotation = useSharedValue(0);\n\n  useEffect(() => {\n    rotation.value = withRepeat(\n      withTiming(360, { duration: 800, easing: Easing.linear }),\n      -1\n    );\n    return () => cancelAnimation(rotation);\n  }, [rotation]);\n\n  const animatedStyle = useAnimatedStyle(() => ({\n    transform: [{ rotate: `${rotation.value}deg` }],\n  }));\n\n  return (\n    <Animated.View\n      accessibilityRole=\"progressbar\"\n      style={animatedStyle}\n      className={spinnerVariants({ size, className })}\n    />\n  );\n});\n"
+    }
+  ]
+}

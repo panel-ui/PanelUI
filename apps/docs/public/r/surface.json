@@ -1,0 +1,17 @@
+{
+  "name": "surface",
+  "type": "registry:ui",
+  "description": "Elevated container with a variant ladder.",
+  "registryDependencies": [],
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/surface.tsx",
+      "type": "registry:ui",
+      "content": "/**\n * Surface — an elevated container.\n *\n * The variants form a ladder rather than a palette: each step is one level\n * further from the background, and nesting them is how you build depth without\n * hardcoding a colour anywhere.\n *\n * Both the fill and the corner radius follow the active theme: the variants\n * resolve to themed `--color-surface-*` tokens, and `rounded-3xl` resolves\n * through the per-theme radius scale — so Moon's surfaces are tight and\n * Grass's are soft, without the component knowing anything about either.\n *\n * ```tsx\n * <Surface>\n *   <Surface variant=\"secondary\">\n *     <Surface variant=\"tertiary\">…</Surface>\n *   </Surface>\n * </Surface>\n * ```\n */\nimport { forwardRef } from 'react';\nimport { StyleSheet, View, type ViewProps } from 'react-native';\nimport { tv, type VariantProps } from 'tailwind-variants';\n\nconst surfaceVariants = tv({\n  base: 'overflow-hidden rounded-3xl p-4',\n  variants: {\n    variant: {\n      default: 'bg-surface',\n      secondary: 'bg-surface-secondary',\n      tertiary: 'bg-surface-tertiary',\n      transparent: 'bg-transparent',\n    },\n  },\n  defaultVariants: {\n    variant: 'default',\n  },\n});\n\nexport interface SurfaceProps\n  extends ViewProps,\n    VariantProps<typeof surfaceVariants> {\n  className?: string;\n}\n\nexport const Surface = forwardRef<View, SurfaceProps>(\n  ({ className, variant, style, ...props }, ref) => (\n    <View\n      ref={ref}\n      // `borderCurve` has no Tailwind equivalent. On iOS it gives the\n      // continuous (squircle) corner Apple uses, which is visibly smoother\n      // than a circular arc at this radius; Android ignores it.\n      style={[styles.root, style]}\n      className={surfaceVariants({ variant, className })}\n      {...props}\n    />\n  )\n);\n\nSurface.displayName = 'Surface';\n\nconst styles = StyleSheet.create({\n  root: { borderCurve: 'continuous' },\n});\n"
+    }
+  ]
+}

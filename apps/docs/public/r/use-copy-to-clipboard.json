@@ -1,0 +1,17 @@
+{
+  "name": "use-copy-to-clipboard",
+  "type": "registry:hook",
+  "description": "Hook: use-copy-to-clipboard.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [
+    "expo-clipboard"
+  ],
+  "files": [
+    {
+      "path": "hooks/use-copy-to-clipboard.ts",
+      "type": "registry:hook",
+      "content": "import { useCallback, useEffect, useRef, useState } from 'react';\n\nexport interface UseCopyToClipboardOptions {\n  /** Milliseconds before `copied` flips back. */\n  timeout?: number;\n  onCopy?: () => void;\n}\n\nexport interface UseCopyToClipboardResult {\n  /** Writes `value` to the clipboard and sets `copied`. */\n  copy: (value: string) => Promise<void>;\n  copied: boolean;\n}\n\n/**\n * Copy text to the clipboard, with a temporary \"copied\" state.\n *\n * Requires `expo-clipboard`, which is an optional peer dependency — React\n * Native removed `Clipboard` from core, and pulling in a required native\n * module for one hook would cost every consumer who never calls it:\n *\n * ```sh\n * npx expo install expo-clipboard\n * ```\n *\n * ```tsx\n * const { copy, copied } = useCopyToClipboard();\n * <Button onPress={() => copy(url)}>{copied ? 'Copied' : 'Copy link'}</Button>\n * ```\n */\nexport function useCopyToClipboard({\n  timeout = 2000,\n  onCopy,\n}: UseCopyToClipboardOptions = {}): UseCopyToClipboardResult {\n  const [copied, setCopied] = useState(false);\n  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);\n\n  // Never leave a timer running against an unmounted component.\n  useEffect(\n    () => () => {\n      if (timer.current) clearTimeout(timer.current);\n    },\n    []\n  );\n\n  const copy = useCallback(\n    async (value: string) => {\n      const setString = await loadClipboard();\n      await setString(value);\n\n      setCopied(true);\n      onCopy?.();\n\n      if (timer.current) clearTimeout(timer.current);\n      if (timeout > 0) {\n        timer.current = setTimeout(() => setCopied(false), timeout);\n      }\n    },\n    [timeout, onCopy]\n  );\n\n  return { copy, copied };\n}\n\n/**\n * Resolves expo-clipboard lazily, so apps that never call this hook are not\n * asked to install it. The import is awaited rather than top-level for the\n * same reason.\n */\nasync function loadClipboard(): Promise<(value: string) => Promise<unknown>> {\n  try {\n    const clipboard = await import('expo-clipboard');\n    return clipboard.setStringAsync;\n  } catch {\n    throw new Error(\n      'useCopyToClipboard requires expo-clipboard. Install it with: npx expo install expo-clipboard'\n    );\n  }\n}\n"
+    }
+  ]
+}

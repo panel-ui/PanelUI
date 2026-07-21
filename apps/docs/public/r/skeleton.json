@@ -1,0 +1,19 @@
+{
+  "name": "skeleton",
+  "type": "registry:ui",
+  "description": "Shimmer placeholder for loading content.",
+  "registryDependencies": [
+    "cn"
+  ],
+  "dependencies": [
+    "react-native-reanimated"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/skeleton.tsx",
+      "type": "registry:ui",
+      "content": "import { memo, useEffect } from 'react';\nimport Animated, {\n  cancelAnimation,\n  useAnimatedStyle,\n  useSharedValue,\n  withRepeat,\n  withTiming,\n} from 'react-native-reanimated';\nimport { cn } from '@/lib/cn';\n\nexport interface SkeletonProps {\n  className?: string;\n}\n\n/** Pulsing placeholder. Opacity animation runs on the UI thread. */\nexport const Skeleton = memo(function Skeleton({ className }: SkeletonProps) {\n  const opacity = useSharedValue(1);\n\n  useEffect(() => {\n    opacity.value = withRepeat(withTiming(0.45, { duration: 700 }), -1, true);\n    return () => cancelAnimation(opacity);\n  }, [opacity]);\n\n  const animatedStyle = useAnimatedStyle(() => ({\n    opacity: opacity.value,\n  }));\n\n  return (\n    <Animated.View\n      style={animatedStyle}\n      className={cn('rounded-md bg-skeleton', className)}\n    />\n  );\n});\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "keyboard-avoider",
+  "type": "registry:ui",
+  "description": "Primitive: keyboard-avoider.",
+  "registryDependencies": [
+    "use-keyboard-avoidance"
+  ],
+  "dependencies": [
+    "react-native-reanimated"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/keyboard-avoider.tsx",
+      "type": "registry:ui",
+      "content": "/**\n * KeyboardAvoider — a view that lifts itself just clear of the keyboard.\n *\n * A thin wrapper over `useKeyboardAvoidance` for the common case of \"keep this\n * box visible\", so a form does not have to wire the ref, layout handler and\n * animated style by hand.\n */\nimport type { ReactNode } from 'react';\nimport type { ViewProps } from 'react-native';\nimport Animated from 'react-native-reanimated';\nimport { useKeyboardAvoidance } from '@/hooks/use-keyboard-avoidance';\n\nexport interface KeyboardAvoiderProps extends ViewProps {\n  className?: string;\n  /** Set false to leave the content where it is. */\n  enabled?: boolean;\n  /** Gap to keep between the content's bottom edge and the keyboard. */\n  offset?: number;\n  children?: ReactNode;\n}\n\nexport function KeyboardAvoider({\n  className,\n  enabled = true,\n  offset = 16,\n  children,\n  style,\n  onLayout,\n  ...props\n}: KeyboardAvoiderProps) {\n  const avoidance = useKeyboardAvoidance({ enabled, offset });\n\n  return (\n    <Animated.View\n      {...props}\n      ref={avoidance.ref}\n      onLayout={(event) => {\n        avoidance.onLayout(event);\n        onLayout?.(event);\n      }}\n      className={className}\n      style={[style, avoidance.animatedStyle]}\n    >\n      {children}\n    </Animated.View>\n  );\n}\n\nKeyboardAvoider.displayName = 'KeyboardAvoider';\n"
+    }
+  ]
+}

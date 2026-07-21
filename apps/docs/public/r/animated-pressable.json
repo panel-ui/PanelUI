@@ -1,0 +1,17 @@
+{
+  "name": "animated-pressable",
+  "type": "registry:ui",
+  "description": "Primitive: animated-pressable.",
+  "registryDependencies": [],
+  "dependencies": [
+    "react-native-reanimated"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/animated-pressable.tsx",
+      "type": "registry:ui",
+      "content": "import { forwardRef, useCallback } from 'react';\nimport {\n  Pressable,\n  type GestureResponderEvent,\n  type PressableProps,\n  type View,\n} from 'react-native';\nimport Animated, {\n  useAnimatedStyle,\n  useSharedValue,\n  withSpring,\n  withTiming,\n} from 'react-native-reanimated';\n\nconst AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);\n\nconst SPRING_CONFIG = { damping: 20, stiffness: 300, mass: 0.4 } as const;\n\nexport interface AnimatedPressableProps extends PressableProps {\n  className?: string;\n  /** Scale applied while pressed. Set to 1 to disable. Default 0.97. */\n  pressScale?: number;\n  /** Opacity applied while pressed. Set to 1 to disable. Default 1. */\n  pressOpacity?: number;\n}\n\n/**\n * Pressable with UI-thread press feedback (scale/opacity via Reanimated).\n * The shared base for every interactive PanelUI component.\n */\nexport const AnimatedPressable = forwardRef<View, AnimatedPressableProps>(\n  (\n    { pressScale = 0.97, pressOpacity = 1, onPressIn, onPressOut, style, ...props },\n    ref\n  ) => {\n    const pressed = useSharedValue(0);\n\n    const handlePressIn = useCallback(\n      (event: GestureResponderEvent) => {\n        pressed.value = withTiming(1, { duration: 80 });\n        onPressIn?.(event);\n      },\n      [onPressIn, pressed]\n    );\n\n    const handlePressOut = useCallback(\n      (event: GestureResponderEvent) => {\n        pressed.value = withSpring(0, SPRING_CONFIG);\n        onPressOut?.(event);\n      },\n      [onPressOut, pressed]\n    );\n\n    const animatedStyle = useAnimatedStyle(() => ({\n      transform: [{ scale: 1 + pressed.value * (pressScale - 1) }],\n      opacity: 1 + pressed.value * (pressOpacity - 1),\n    }));\n\n    return (\n      <AnimatedPressableBase\n        ref={ref}\n        style={[animatedStyle, style as never]}\n        onPressIn={handlePressIn}\n        onPressOut={handlePressOut}\n        {...props}\n      />\n    );\n  }\n);\n\nAnimatedPressable.displayName = 'AnimatedPressable';\n"
+    }
+  ]
+}

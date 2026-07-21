@@ -1,0 +1,19 @@
+{
+  "name": "label",
+  "type": "registry:ui",
+  "description": "Form field label with required, invalid and disabled states.",
+  "registryDependencies": [
+    "text"
+  ],
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/label.tsx",
+      "type": "registry:ui",
+      "content": "/**\n * Label — text that names a form field.\n *\n * A string child is wrapped in `Label.Text` automatically, so the common case\n * stays one line; pass the parts explicitly when the label needs more than\n * text. `isRequired`, `isInvalid` and `isDisabled` are visual *and* semantic —\n * they recolour and they set the accessibility state, so the two cannot drift\n * apart.\n */\nimport {\n  createContext,\n  forwardRef,\n  useContext,\n  useMemo,\n  type ReactNode,\n} from 'react';\nimport { View, type Text as RNText, type ViewProps } from 'react-native';\nimport { tv } from 'tailwind-variants';\nimport { Text, type TextProps } from '@/components/ui/text';\n\nconst labelVariants = tv({\n  slots: {\n    root: 'flex-row items-center gap-1',\n    text: 'text-sm font-medium text-foreground',\n    asterisk: 'text-sm font-medium text-destructive',\n  },\n  variants: {\n    isDisabled: {\n      true: {\n        root: 'opacity-[0.64]',\n        asterisk: 'text-muted-foreground',\n      },\n    },\n    isInvalid: {\n      true: { text: 'text-destructive' },\n    },\n  },\n});\n\ninterface LabelState {\n  isRequired: boolean;\n  isInvalid: boolean;\n  isDisabled: boolean;\n}\n\nconst LabelContext = createContext<LabelState>({\n  isRequired: false,\n  isInvalid: false,\n  isDisabled: false,\n});\n\nexport interface LabelProps extends ViewProps {\n  className?: string;\n  /** Appends an asterisk marking the field as required. */\n  isRequired?: boolean;\n  /** Recolours the label to signal a validation error. */\n  isInvalid?: boolean;\n  isDisabled?: boolean;\n  children?: ReactNode;\n}\n\nconst LabelRoot = forwardRef<View, LabelProps>(\n  (\n    {\n      className,\n      isRequired = false,\n      isInvalid = false,\n      isDisabled = false,\n      children,\n      ...props\n    },\n    ref\n  ) => {\n    const { root } = labelVariants({ isDisabled, isInvalid });\n    const state = useMemo(\n      () => ({ isRequired, isInvalid, isDisabled }),\n      [isRequired, isInvalid, isDisabled]\n    );\n\n    return (\n      <LabelContext.Provider value={state}>\n        <View\n          ref={ref}\n          className={root({ className })}\n          accessibilityState={{ disabled: isDisabled }}\n          {...props}\n        >\n          {/* Bare strings are the common case — wrap them so callers don't have to. */}\n          {typeof children === 'string' ? <LabelText>{children}</LabelText> : children}\n        </View>\n      </LabelContext.Provider>\n    );\n  }\n);\nLabelRoot.displayName = 'Label';\n\nexport interface LabelTextProps extends TextProps {\n  className?: string;\n  /** Classes for the required asterisk. */\n  asteriskClassName?: string;\n}\n\nconst LabelText = forwardRef<RNText, LabelTextProps>(\n  ({ className, asteriskClassName, children, ...props }, ref) => {\n    const { isRequired, isInvalid, isDisabled } = useContext(LabelContext);\n    const { text, asterisk } = labelVariants({ isDisabled, isInvalid });\n\n    return (\n      <>\n        <Text ref={ref} className={text({ className })} {...props}>\n          {children}\n        </Text>\n        {isRequired ? (\n          <Text\n            accessibilityElementsHidden\n            importantForAccessibility=\"no-hide-descendants\"\n            className={asterisk({ className: asteriskClassName })}\n          >\n            *\n          </Text>\n        ) : null}\n      </>\n    );\n  }\n);\nLabelText.displayName = 'Label.Text';\n\nexport const Label = Object.assign(LabelRoot, {\n  Text: LabelText,\n});\n"
+    }
+  ]
+}

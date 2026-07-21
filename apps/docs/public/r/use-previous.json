@@ -1,0 +1,15 @@
+{
+  "name": "use-previous",
+  "type": "registry:hook",
+  "description": "Hook: use-previous.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "hooks/use-previous.ts",
+      "type": "registry:hook",
+      "content": "import { useEffect, useRef } from 'react';\n\n/**\n * The value from the previous render, or `undefined` on the first.\n *\n * Useful for reacting to a transition rather than a state — firing only when\n * something *became* true.\n *\n * ```tsx\n * const wasOpen = usePrevious(isOpen);\n * useEffect(() => {\n *   if (isOpen && !wasOpen) track('sheet_opened');\n * }, [isOpen, wasOpen]);\n * ```\n */\nexport function usePrevious<T>(value: T): T | undefined {\n  const ref = useRef<T | undefined>(undefined);\n\n  useEffect(() => {\n    ref.current = value;\n  }, [value]);\n\n  return ref.current;\n}\n"
+    }
+  ]
+}

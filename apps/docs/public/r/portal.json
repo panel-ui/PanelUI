@@ -1,0 +1,15 @@
+{
+  "name": "portal",
+  "type": "registry:ui",
+  "description": "Primitive: portal.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/portal.tsx",
+      "type": "registry:ui",
+      "content": "import {\n  createContext,\n  useContext,\n  useEffect,\n  useId,\n  useRef,\n  useSyncExternalStore,\n  type ReactNode,\n} from 'react';\n\ntype PortalMap = ReadonlyMap<string, ReactNode>;\n\nclass PortalStore {\n  private portals = new Map<string, ReactNode>();\n  private snapshot: PortalMap = this.portals;\n  private listeners = new Set<() => void>();\n\n  mount = (key: string, node: ReactNode) => {\n    this.portals.set(key, node);\n    this.emit();\n  };\n\n  unmount = (key: string) => {\n    this.portals.delete(key);\n    this.emit();\n  };\n\n  subscribe = (listener: () => void) => {\n    this.listeners.add(listener);\n    return () => this.listeners.delete(listener);\n  };\n\n  getSnapshot = (): PortalMap => this.snapshot;\n\n  private emit() {\n    this.snapshot = new Map(this.portals);\n    this.listeners.forEach((listener) => listener());\n  }\n}\n\nconst PortalContext = createContext<PortalStore | null>(null);\n\nexport function PortalProvider({ children }: { children: ReactNode }) {\n  const storeRef = useRef<PortalStore | null>(null);\n  storeRef.current ??= new PortalStore();\n  return (\n    <PortalContext.Provider value={storeRef.current}>\n      {children}\n    </PortalContext.Provider>\n  );\n}\n\nfunction usePortalStore(component: string): PortalStore {\n  const store = useContext(PortalContext);\n  if (!store) {\n    throw new Error(`${component} must be used within a <PanelUIProvider>`);\n  }\n  return store;\n}\n\n/** Renders children into the nearest PortalHost (above everything else). */\nexport function Portal({ children }: { children: ReactNode }) {\n  const store = usePortalStore('Portal');\n  const key = useId();\n\n  useEffect(() => {\n    store.mount(key, children);\n    return () => store.unmount(key);\n  }, [store, key, children]);\n\n  return null;\n}\n\n/** Mount point for portaled content. PanelUIProvider renders one automatically. */\nexport function PortalHost() {\n  const store = usePortalStore('PortalHost');\n  const portals = useSyncExternalStore(store.subscribe, store.getSnapshot);\n\n  return (\n    <>\n      {Array.from(portals.entries(), ([key, node]) => (\n        <PortalFragment key={key}>{node}</PortalFragment>\n      ))}\n    </>\n  );\n}\n\nfunction PortalFragment({ children }: { children: ReactNode }) {\n  return <>{children}</>;\n}\n"
+    }
+  ]
+}

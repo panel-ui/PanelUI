@@ -5,7 +5,7 @@
  * screen derives its counts from it, so adding a component means adding one
  * entry and nothing else.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
@@ -47,6 +47,7 @@ import {
   Item,
   Label,
   LineChart,
+  type LineChartHandle,
   Marker,
   Message,
   MessageScroller,
@@ -79,6 +80,7 @@ import {
   hasNativeUI,
   useToast,
 } from 'panelui-native';
+import { useCSSVariable } from 'uniwind';
 
 const PHOTO = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=60';
 
@@ -151,121 +153,344 @@ function SwitchDemo() {
 /* LineChart                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const VISITS = MONTHS.map((month, index) => ({
+/** Monthly revenue, a rising series with some wobble. */
+const REVENUE = MONTHS.map((month, index) => ({
   month,
-  visits: [1840, 2210, 2050, 2640, 3120, 2980, 3640, 4120, 4480][index]!,
-  signups: [210, 260, 240, 330, 380, 350, 470, 520, 610][index]!,
+  revenue: [4200, 5800, 4900, 7100, 6100, 8300, 7800, 9500, 8900, 10400, 9900, 11600][index]!,
+  target: [4400, 5100, 5800, 6500, 7200, 7900, 8300, 8800, 9200, 9700, 10100, 10600][index]!,
 }));
 
-const QUIET = MONTHS.map((month, index) => ({
+/** Four traffic sources, orders of magnitude apart, sharing one axis. */
+const TRAFFIC = MONTHS.map((month, index) => ({
   month,
-  visits: [2400, 2380, 2450, 2410, 2500, 2470, 2520, 2490, 2560][index]!,
-  signups: [300, 295, 310, 305, 320, 315, 325, 318, 330][index]!,
+  organic: [2100, 3400, 5200, 6100, 7300, 9800, 8900, 12400, 11800, 14200, 15600, 15100][index]!,
+  paid: [1200, 2400, 3100, 4200, 4800, 5600, 6100, 7200, 7800, 8900, 9600, 9500][index]!,
+  referral: [800, 1400, 1900, 2600, 3100, 3400, 3900, 4200, 4600, 4900, 5100, 5100][index]!,
+  social: [600, 1100, 1500, 2100, 2400, 2600, 2900, 3200, 3400, 3700, 3900, 3800][index]!,
 }));
 
-/**
- * The chart card: a Frame carrying the title and the readout, with the chart
- * bled to the panel's edges.
- *
- * The readout lives in the header because that is where a number is actually
- * readable — a floating label over the plot covers the line it is describing.
- * The header is outside the chart, so the active point comes up through
- * `onActiveIndexChange` rather than through a hook.
- */
-function ChartCard({
-  title,
+/** Two sources for the basic linear example. */
+const SESSIONS = MONTHS.map((month, index) => ({
+  month,
+  organic: [2000, 15000, 8000, 14000, 8000, 18000, 18000, 20000, 17000, 21000, 18000, 15000][index]!,
+  paid: [1000, 10000, 8000, 15000, 8000, 12000, 11500, 5000, 15000, 10000, 18000, 9000][index]!,
+}));
+
+const RANGES: Record<string, { balance: number; delta: number; data: { t: string; v: number }[] }> = {
+  '1D': { balance: 24801, delta: 1.2, data: spark([120, 118, 124, 121, 128, 126, 132, 130, 138]) },
+  '1W': { balance: 24801, delta: 3.4, data: spark([90, 95, 92, 101, 108, 104, 118, 124, 132]) },
+  '1M': { balance: 24801, delta: 5.32, data: spark([60, 66, 62, 78, 84, 80, 96, 104, 138]) },
+  '1Y': { balance: 24801, delta: 42.8, data: spark([20, 34, 41, 55, 61, 78, 92, 110, 138]) },
+};
+
+function spark(values: number[]): { t: string; v: number }[] {
+  return values.map((v, index) => ({ t: String(index), v }));
+}
+
+/** Centers a version's chart card in the screen, matching the reference shots. */
+function ChartScreen({ children }: { children: ReactNode }) {
+  return <View className="flex-1 justify-center px-4">{children}</View>;
+}
+
+/** A KPI stat card: number and delta on the left, a sparkline on the right. */
+function KpiCard({
+  label,
+  value,
+  delta,
   data,
-  status,
-  children,
-  footer,
+  colorIndex,
 }: {
-  title: string;
-  data: typeof VISITS;
-  status?: 'loading' | 'ready';
-  children: ReactNode;
-  footer?: string;
+  label: string;
+  value: string;
+  delta: string;
+  data: { t: string; v: number }[];
+  colorIndex: 1 | 2 | 3;
 }) {
-  const [active, setActive] = useState<(typeof VISITS)[number] | null>(null);
-
+  const up = !delta.startsWith('-');
   return (
-    <Frame className="w-full">
-      <Frame.Header className="flex-col items-start gap-0.5">
-        <Frame.Title>{title}</Frame.Title>
+    <Surface variant="secondary" padding="lg" className="w-full flex-row items-center gap-4">
+      <View className="flex-1">
         <Text size="sm" muted>
-          {active
-            ? `${active.month} · ${active.visits.toLocaleString()} visits`
-            : 'Drag across the chart'}
+          {label}
         </Text>
-      </Frame.Header>
-      <Frame.Panel className="p-0">
-        <LineChart
-          data={data}
-          xDataKey="month"
-          status={status}
-          aspectRatio={1.9}
-          onActiveIndexChange={(index) => setActive(index >= 0 ? (data[index] ?? null) : null)}
-        >
-          {children}
+        <Text size="2xl" weight="bold" className="mt-1">
+          {value}
+        </Text>
+        <Text size="sm" className={up ? 'mt-1 text-success' : 'mt-1 text-destructive'}>
+          {delta}
+        </Text>
+      </View>
+      <View className="h-14 w-32">
+        <LineChart data={data} xDataKey="t" compact aspectRatio={2.3}>
+          <LineChart.Line dataKey="v" colorIndex={colorIndex} strokeWidth={2} />
         </LineChart>
-      </Frame.Panel>
-      {footer ? <Frame.Footer>{footer}</Frame.Footer> : null}
-    </Frame>
+      </View>
+    </Surface>
   );
 }
 
-/** Toggles the data so the y-domain tween is visible without a refresh. */
-function LineChartDataDemo() {
-  const [busy, setBusy] = useState(false);
+/* --- Versions ------------------------------------------------------------- */
 
+function ChartBasicVersion() {
   return (
-    <View className="w-full gap-4">
-      <ChartCard
-        title="Visits"
-        data={busy ? VISITS : QUIET}
-        footer="Switching the data tweens the axis — the reveal does not replay."
-      >
-        <LineChart.Grid />
-        <LineChart.Area dataKey="visits" />
-        <LineChart.Line dataKey="visits" />
-        <LineChart.XAxis />
-        <LineChart.Tooltip />
-      </ChartCard>
-
-      <Button variant="outline" onPress={() => setBusy((current) => !current)}>
-        {busy ? 'Show a flat quarter' : 'Show a growing quarter'}
-      </Button>
-    </View>
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header className="flex-col items-start gap-1">
+          <View className="w-full flex-row items-center justify-between">
+            <Frame.Title>Traffic Source</Frame.Title>
+            <View className="flex-row items-center gap-3">
+              <LegendDot colorIndex={1} label="Organic" />
+              <LegendDot colorIndex={2} label="Paid Ads" />
+            </View>
+          </View>
+          <Text size="2xl" weight="bold" className="mt-1">
+            292,000
+          </Text>
+          <Text size="sm" muted>
+            Sessions
+          </Text>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart data={SESSIONS} xDataKey="month" curve="linear" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Line dataKey="organic" colorIndex={1} />
+            <LineChart.Line dataKey="paid" colorIndex={2} />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip
+              formatValue={(v) => v.toLocaleString()}
+              formatX={(d) => String(d.month)}
+            />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
   );
 }
 
-/** Loading → ready, so the skeleton morphing into the series is visible. */
-function LineChartLoadingDemo() {
-  const [status, setStatus] = useState<'loading' | 'ready'>('loading');
+function ChartDotsVersion() {
+  return (
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Monthly Revenue</Frame.Title>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Line dataKey="revenue" showMarkers />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
+
+function ChartCrosshairVersion() {
+  return (
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header className="flex-col items-start gap-0.5">
+          <Frame.Title>Monthly Revenue</Frame.Title>
+          <Text size="sm" muted>
+            Press and drag across the chart to inspect values
+          </Text>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Area dataKey="revenue" />
+            <LineChart.Line dataKey="revenue" />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip formatValue={(v) => `$${v.toLocaleString()}`} />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
+
+function ChartAnimatedVersion() {
+  const chart = useRef<LineChartHandle>(null);
 
   return (
-    <View className="w-full gap-4">
-      <ChartCard
-        title="Visits"
-        data={VISITS}
-        status={status}
-        footer="One component throughout — no spinner swapped for a chart."
-      >
-        <LineChart.Grid />
-        <LineChart.Skeleton />
-        <LineChart.Area dataKey="visits" />
-        <LineChart.Line dataKey="visits" />
-        <LineChart.XAxis />
-        <LineChart.Tooltip />
-      </ChartCard>
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Monthly Revenue</Frame.Title>
+          <Frame.Action>
+            <Button variant="ghost" size="sm" onPress={() => chart.current?.replay()}>
+              Replay
+            </Button>
+          </Frame.Action>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart ref={chart} data={REVENUE} xDataKey="month" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Area dataKey="revenue" />
+            <LineChart.Line dataKey="revenue" />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip formatValue={(v) => `$${v.toLocaleString()}`} />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
 
-      <Button
-        variant="outline"
-        onPress={() => setStatus((current) => (current === 'loading' ? 'ready' : 'loading'))}
-      >
-        {status === 'loading' ? 'Resolve the data' : 'Back to loading'}
-      </Button>
+function ChartFinanceVersion() {
+  const [range, setRange] = useState('1M');
+  const current = RANGES[range]!;
+  const up = current.delta >= 0;
+
+  return (
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header className="flex-col items-start gap-0.5">
+          <Text size="sm" muted>
+            Total balance
+          </Text>
+          <Text size="2xl" weight="bold">
+            ${current.balance.toLocaleString()}.32
+          </Text>
+          <Text size="sm" className={up ? 'text-success' : 'text-destructive'}>
+            {up ? '+' : ''}
+            {current.delta}% this {range === '1D' ? 'day' : range === '1W' ? 'week' : 'period'}
+          </Text>
+        </Frame.Header>
+        <Frame.Panel className="gap-3 p-3">
+          <LineChart data={current.data} xDataKey="t" aspectRatio={1.9}>
+            <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
+            <LineChart.Area dataKey="v" />
+            <LineChart.Line dataKey="v" />
+          </LineChart>
+          <Tabs value={range} defaultValue={range} onValueChange={setRange}>
+            <Tabs.List>
+              {Object.keys(RANGES).map((key) => (
+                <Tabs.Trigger key={key} value={key}>
+                  {key}
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+          </Tabs>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
+
+function ChartDashedVersion() {
+  return (
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header className="flex-col items-start gap-1">
+          <View className="w-full flex-row items-center justify-between">
+            <Frame.Title>Actual vs Target</Frame.Title>
+            <View className="flex-row items-center gap-3">
+              <LegendDot colorIndex={1} label="Actual" />
+              <View className="flex-row items-center gap-1.5">
+                <View className="h-0.5 w-4 rounded-full bg-muted-foreground" />
+                <Text size="xs" muted>
+                  Target
+                </Text>
+              </View>
+            </View>
+          </View>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Line dataKey="revenue" colorIndex={1} />
+            <LineChart.Line dataKey="target" colorIndex={2} dashArray="6,5" />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
+
+function ChartMultiVersion() {
+  return (
+    <ChartScreen>
+      <Frame className="w-full">
+        <Frame.Header className="flex-col items-start gap-2">
+          <Frame.Title>Traffic Sources</Frame.Title>
+          <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
+            <LegendDot colorIndex={1} label="Organic" />
+            <LegendDot colorIndex={2} label="Paid Ads" />
+            <LegendDot colorIndex={3} label="Referral" />
+            <LegendDot colorIndex={4} label="Social" />
+          </View>
+        </Frame.Header>
+        <Frame.Panel className="p-0">
+          <LineChart data={TRAFFIC} xDataKey="month" aspectRatio={1.7}>
+            <LineChart.Grid />
+            <LineChart.Line dataKey="organic" colorIndex={1} />
+            <LineChart.Line dataKey="paid" colorIndex={2} />
+            <LineChart.Line dataKey="referral" colorIndex={3} />
+            <LineChart.Line dataKey="social" colorIndex={4} />
+            <LineChart.XAxis ticks={5} />
+            <LineChart.Tooltip formatValue={(v) => `${(v / 1000).toFixed(1)}k`} />
+          </LineChart>
+        </Frame.Panel>
+      </Frame>
+    </ChartScreen>
+  );
+}
+
+function ChartKpiVersion() {
+  return (
+    <ChartScreen>
+      <View className="w-full gap-3">
+        <KpiCard
+          label="Total Revenue"
+          value="$228,451"
+          delta="+3.3% last 30d"
+          colorIndex={1}
+          data={spark([40, 44, 41, 52, 58, 54, 68, 74, 82])}
+        />
+        <KpiCard
+          label="Bounce Rate"
+          value="42.3%"
+          delta="-5.9% vs last 7d"
+          colorIndex={3}
+          data={spark([82, 78, 80, 70, 66, 68, 58, 52, 44])}
+        />
+        <KpiCard
+          label="New Customers"
+          value="1,234"
+          delta="+1.0% this week"
+          colorIndex={2}
+          data={spark([30, 38, 34, 48, 54, 50, 66, 72, 84])}
+        />
+      </View>
+    </ChartScreen>
+  );
+}
+
+/** A coloured dot and a label, reading its colour from the chart token ramp. */
+function LegendDot({
+  colorIndex,
+  label,
+}: {
+  colorIndex: 1 | 2 | 3 | 4;
+  label: string;
+}) {
+  const color = useCSSVariable(`--color-chart-${colorIndex}`);
+  return (
+    <View className="flex-row items-center gap-1.5">
+      <View
+        style={{ backgroundColor: typeof color === 'string' ? color : undefined }}
+        className="h-2.5 w-2.5 rounded-full"
+      />
+      <Text size="xs" muted>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -2709,40 +2934,60 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Animated time series, drawn on the UI thread',
     demos: [
       {
-        label: 'A chart card',
-        render: () => (
-          <ChartCard title="Visits" data={VISITS} footer="Last nine months">
-            <LineChart.Grid />
-            <LineChart.Area dataKey="visits" />
-            <LineChart.Line dataKey="visits" showMarkers />
-            <LineChart.XAxis />
-            <LineChart.Tooltip />
-          </ChartCard>
-        ),
+        label: 'Basic',
+        id: 'basic',
+        fullPage: true,
+        description: 'Two straight-line series sharing one axis, with a legend.',
+        render: () => <ChartBasicVersion />,
       },
       {
-        label: 'Two series',
-        render: () => (
-          <ChartCard title="Visits and signups" data={VISITS}>
-            <LineChart.Grid />
-            <LineChart.Area dataKey="visits" />
-            <LineChart.Line dataKey="visits" />
-            {/* The second series takes the next token and a dash, so the two
-                are told apart by shape as well as by colour. */}
-            <LineChart.Line dataKey="signups" colorIndex={2} dashArray="6,4" />
-            <LineChart.XAxis />
-            <LineChart.Legend labels={{ visits: 'Visits', signups: 'Signups' }} />
-            <LineChart.Tooltip />
-          </ChartCard>
-        ),
+        label: 'With dots',
+        id: 'dots',
+        fullPage: true,
+        description: 'A dot at every point, for a short series where each reading matters.',
+        render: () => <ChartDotsVersion />,
       },
       {
-        label: 'Changing data',
-        render: () => <LineChartDataDemo />,
+        label: 'Crosshair',
+        id: 'crosshair',
+        fullPage: true,
+        description: 'Drag across the chart and a label rides the crosshair with the value.',
+        render: () => <ChartCrosshairVersion />,
       },
       {
-        label: 'Loading',
-        render: () => <LineChartLoadingDemo />,
+        label: 'Animated line',
+        id: 'animated',
+        fullPage: true,
+        description: 'A Replay button re-runs the reveal through the chart ref.',
+        render: () => <ChartAnimatedVersion />,
+      },
+      {
+        label: 'Finance',
+        id: 'finance',
+        fullPage: true,
+        description: 'A balance, a delta, and a range selector that tweens the axis on change.',
+        render: () => <ChartFinanceVersion />,
+      },
+      {
+        label: 'Dashed comparison',
+        id: 'dashed',
+        fullPage: true,
+        description: 'A solid actual against a dashed target — told apart by shape, not just colour.',
+        render: () => <ChartDashedVersion />,
+      },
+      {
+        label: 'Multi-line',
+        id: 'multi',
+        fullPage: true,
+        description: 'Four series in the chart-token ramp.',
+        render: () => <ChartMultiVersion />,
+      },
+      {
+        label: 'KPI sparklines',
+        id: 'kpi',
+        fullPage: true,
+        description: 'Compact lines beside a headline number — no grid, no axis.',
+        render: () => <ChartKpiVersion />,
       },
     ],
   },

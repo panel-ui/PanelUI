@@ -59,118 +59,83 @@ npx panelui-cli@latest add line-chart
 
 ## Examples
 
-### A chart card
+### A chart card with a crosshair
 
-Pair it with `Frame`: the title and the readout go in the header, and the chart bleeds to the panel's edges. The readout belongs there rather than floating over the plot, where it would cover the line it is describing — and since the header is outside the chart, the active point comes up through `onActiveIndexChange` rather than through a hook.
+Pair it with `Frame`, and add `LineChart.Tooltip`. Dragging across the chart moves a crosshair and floats a small label at the point with the value — the minimal readout a drag wants. The label tracks the finger on the UI thread; only its text crosses back into JS, and only when the active index changes.
 
 ```tsx
-const [active, setActive] = useState(null);
-
 <Frame>
   <Frame.Header className="flex-col items-start gap-0.5">
-    <Frame.Title>Visits</Frame.Title>
-    <Text size="sm" muted>
-      {active ? `${active.month} · ${active.visits.toLocaleString()} visits` : "Drag across the chart"}
-    </Text>
+    <Frame.Title>Monthly Revenue</Frame.Title>
+    <Text size="sm" muted>Press and drag across the chart to inspect values</Text>
   </Frame.Header>
 
   <Frame.Panel className="p-0">
-    <LineChart
-      data={visits}
-      xDataKey="month"
-      aspectRatio={1.9}
-      onActiveIndexChange={(index) => setActive(index >= 0 ? visits[index] : null)}
-    >
+    <LineChart data={revenue} xDataKey="month">
       <LineChart.Grid />
-      <LineChart.Area dataKey="visits" />
-      <LineChart.Line dataKey="visits" showMarkers />
-      <LineChart.XAxis />
-      <LineChart.Tooltip />
+      <LineChart.Area dataKey="revenue" />
+      <LineChart.Line dataKey="revenue" />
+      <LineChart.XAxis ticks={5} />
+      <LineChart.Tooltip formatValue={(v) => `$${v.toLocaleString()}`} />
     </LineChart>
   </Frame.Panel>
-
-  <Frame.Footer>Last nine months</Frame.Footer>
 </Frame>
 ```
 
-### Two series
+### Replay the reveal
 
-Both series share one y-axis, so they stay comparable. Give the second one the next colour token *and* a dash pattern — colour alone fails for anyone who cannot tell those two hues apart.
+Take a ref and call `replay()` to run the entrance again — for a control that lets the reader watch the line draw itself once more.
 
 ```tsx
-<LineChart data={data} xDataKey="month">
+const chart = useRef<LineChartHandle>(null);
+
+<Button onPress={() => chart.current?.replay()}>Replay</Button>
+
+<LineChart ref={chart} data={revenue} xDataKey="month">
   <LineChart.Grid />
+  <LineChart.Line dataKey="revenue" />
+</LineChart>
+```
 
-  {/* The fill goes on one series only. Two translucent fills over each
-      other make a third colour that means nothing. */}
-  <LineChart.Area dataKey="visits" />
-  <LineChart.Line dataKey="visits" />
-  <LineChart.Line dataKey="signups" colorIndex={2} dashArray="6,4" />
+### A sparkline
 
-  <LineChart.XAxis />
-  <LineChart.Legend labels={{ visits: "Visits", signups: "Signups" }} />
-  <LineChart.Tooltip />
+Set `compact` and drop the grid, axis and crosshair: the line reaches the edges and the shape is the whole point. Sits beside a number in a KPI card.
+
+```tsx
+<View className="h-14 w-32">
+  <LineChart data={points} xDataKey="t" compact aspectRatio={2.3}>
+    <LineChart.Line dataKey="v" strokeWidth={2} />
+  </LineChart>
+</View>
+```
+
+### Two series and a dashed comparison
+
+Both series share one y-axis so they stay comparable. Give a target line the next colour token and a dash pattern, so actual and target are told apart by shape as well as by colour.
+
+```tsx
+<LineChart data={revenue} xDataKey="month">
+  <LineChart.Grid />
+  <LineChart.Line dataKey="revenue" colorIndex={1} />
+  <LineChart.Line dataKey="target" colorIndex={2} dashArray="6,5" />
+  <LineChart.XAxis ticks={5} />
+  <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />
 </LineChart>
 ```
 
 ### Loading, and then data
 
-Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits where the series will be with a highlight travelling along it; on `ready` that same line grows into the data. It is one component the whole way through — a spinner swapped for a chart has nothing to transition from.
+Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits where the series will be with a highlight travelling along it; on `ready` that same line grows into the data — one component the whole way through.
 
 ```tsx
-const [status, setStatus] = useState<"loading" | "ready">("loading");
-
-useEffect(() => {
-  fetchVisits().then((rows) => {
-    setData(rows);
-    setStatus("ready");
-  });
-}, []);
-
 <LineChart data={data} status={status} xDataKey="month">
   <LineChart.Grid />
   <LineChart.Skeleton />
-  <LineChart.Area dataKey="visits" />
-  <LineChart.Line dataKey="visits" />
+  <LineChart.Area dataKey="revenue" />
+  <LineChart.Line dataKey="revenue" />
   <LineChart.XAxis />
   <LineChart.Tooltip />
 </LineChart>
-```
-
-### Putting it on brand
-
-Override the chart tokens in your app's global.css, after the theme import. Every chart in the app follows, and each theme can carry its own ramp.
-
-```tsx
-/* global.css */
-@import "tailwindcss";
-@import "uniwind";
-@import "panelui-native/theme.css";
-
-@layer theme {
-  :root {
-    @variant light {
-      --color-chart-1: #6d28d9;
-      --color-chart-2: #db2777;
-    }
-    @variant dark {
-      --color-chart-1: #a78bfa;
-      --color-chart-2: #f472b6;
-    }
-  }
-}
-```
-
-### Gaps in the data
-
-A `null` breaks the series rather than being crossed. A month with no reading is a month with no reading, and joining the points either side of it draws a number that was never measured.
-
-```tsx
-const data = [
-  { month: "Jan", visits: 1840 },
-  { month: "Feb", visits: null },  // the meter was down
-  { month: "Mar", visits: 2050 },
-];
 ```
 
 ## API Reference
@@ -189,6 +154,7 @@ const data = [
 | `yDomain` | `[number, number]` | — | Fix the y-axis instead of deriving it from the data. |
 | `curve` | `LineChartCurve` | `'monotone'` | `monotone` never overshoots between points; `linear` joins them straight. |
 | `onActiveIndexChange` | `(index: number, datum: LineChartDatum \| null) => void` | — | The point under the crosshair as it moves, and `-1`/`null` when the finger lifts. This is how a readout in the card's header gets its value — that header is outside the chart, so it cannot use `useLineChart`. Fires when the index changes, not per frame. |
+| `compact` | `boolean` | `false` | Drop the axis padding so the line reaches the edges — for a sparkline with no grid, axis or crosshair, where the shape is the whole point. |
 
 ### LineChart.Grid
 
@@ -239,6 +205,9 @@ const data = [
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `color` | `string` | — |  |
+| `showLabel` | `boolean` | — | Float a small label at the crosshair showing the x-value and each series' value at that point — the minimal readout a drag wants. On by default. |
+| `formatValue` | `(value: number, key: string) => string` | — | Format one series' value for the label. Defaults to a compact number. |
+| `formatX` | `(datum: LineChartDatum) => string` | — | Format the label's heading from the row. Defaults to the value at xDataKey. |
 
 ### LineChart.Legend
 
@@ -268,6 +237,10 @@ All three respect the system's reduce-motion setting: the chart renders at its f
 ### Reading out the active point
 
 `onActiveIndexChange` fires as the crosshair moves between points, and with `-1`/`null` when the finger lifts. That is the one to use for a readout in the card header, because the header is outside the chart and a hook cannot reach up out of the subtree it is called in. `useLineChart` is for something rendered *inside* the chart, which is the rarer case.
+
+### The crosshair label
+
+`LineChart.Tooltip` floats a small label at the crosshair by default, showing the x-value and each series' value at that point. Turn it off with `showLabel={false}`, or format its numbers with `formatValue`. For a readout in the card *header* instead — outside the plot, where it does not cover the line — use `onActiveIndexChange` on the root.
 
 ### The curve
 

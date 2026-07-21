@@ -44,9 +44,11 @@
 import {
   Children,
   createContext,
+  forwardRef,
   isValidElement,
   useContext,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -184,23 +186,37 @@ export interface LineChartProps extends ViewProps {
    * Fires when the index changes, not per frame.
    */
   onActiveIndexChange?: (index: number, datum: LineChartDatum | null) => void;
+  /**
+   * Drop the axis padding so the line reaches the edges — for a sparkline with
+   * no grid, axis or crosshair, where the shape is the whole point.
+   */
+  compact?: boolean;
   children?: ReactNode;
 }
 
-function LineChartRoot({
-  className,
-  data,
-  xDataKey = 'date',
-  status = 'ready',
-  aspectRatio = 2,
-  animationDuration = 1100,
-  domainDuration = 500,
-  yDomain,
-  curve = 'monotone',
-  onActiveIndexChange,
-  children,
-  ...props
-}: LineChartProps) {
+/** Imperative handle: re-run the reveal on demand, for a "replay" control. */
+export interface LineChartHandle {
+  replay: () => void;
+}
+
+const LineChartRoot = forwardRef<LineChartHandle, LineChartProps>(function LineChartRoot(
+  {
+    className,
+    data,
+    xDataKey = 'date',
+    status = 'ready',
+    aspectRatio = 2,
+    animationDuration = 1100,
+    domainDuration = 500,
+    yDomain,
+    curve = 'monotone',
+    onActiveIndexChange,
+    compact = false,
+    children,
+    ...props
+  },
+  ref
+) {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [series, setSeries] = useState<[string, string][]>([]);
   const [activeIndexJS, setActiveIndexJS] = useState(-1);
@@ -227,11 +243,15 @@ function LineChartRoot({
     []
   );
 
+  // A sparkline has no axis or grid to leave room for, so the line reaches the
+  // edges; a stroke of a couple of pixels still needs a hair of inset not to be
+  // clipped at the very top and bottom.
+  const pad = compact ? { top: 2, right: 1, bottom: 2, left: 1 } : PADDING;
   const plot: Plot = {
-    left: PADDING.left,
-    top: PADDING.top,
-    width: Math.max(size.width - PADDING.left - PADDING.right, 0),
-    height: Math.max(size.height - PADDING.top - PADDING.bottom, 0),
+    left: pad.left,
+    top: pad.top,
+    width: Math.max(size.width - pad.left - pad.right, 0),
+    height: Math.max(size.height - pad.top - pad.bottom, 0),
   };
 
   // One extent across every registered series, so two series share one axis
@@ -279,18 +299,29 @@ function LineChartRoot({
 
   // Plays once, when there is both a plot to reveal and data to reveal in it.
   const revealed = useRef(false);
+  const playReveal = useMemo(
+    () => () => {
+      if (reducedMotion) {
+        reveal.value = 1;
+        return;
+      }
+      reveal.value = 0;
+      reveal.value = withTiming(1, {
+        duration: animationDuration,
+        easing: Easing.bezier(0.85, 0, 0.15, 1),
+      });
+    },
+    [reducedMotion, animationDuration, reveal]
+  );
+
   useEffect(() => {
     if (revealed.current || loading || plot.width <= 0 || !data.length) return;
     revealed.current = true;
-    if (reducedMotion) {
-      reveal.value = 1;
-      return;
-    }
-    reveal.value = withTiming(1, {
-      duration: animationDuration,
-      easing: Easing.bezier(0.85, 0, 0.15, 1),
-    });
-  }, [loading, plot.width, data.length, reducedMotion, animationDuration, reveal]);
+    playReveal();
+  }, [loading, plot.width, data.length, playReveal]);
+
+  // `replay()` re-runs the reveal — for a control the caller wires up.
+  useImperativeHandle(ref, () => ({ replay: playReveal }), [playReveal]);
 
   const clipProps = useAnimatedProps(() => ({ width: plot.width * reveal.value }));
 
@@ -390,7 +421,7 @@ function LineChartRoot({
       </View>
     </LineChartContext.Provider>
   );
-}
+});
 LineChartRoot.displayName = 'LineChart';
 
 /** Sorts the children into the SVG tree and the view layer over it. */
@@ -728,21 +759,42 @@ LineChartXAxis.layer = 'overlay' as Layer;
 
 export interface LineChartTooltipProps {
   color?: string;
+  /**
+   * Float a small label at the crosshair showing the x-value and each series'
+   * value at that point — the minimal readout a drag wants. On by default.
+   */
+  showLabel?: boolean;
+  /** Format one series' value for the label. Defaults to a compact number. */
+  formatValue?: (value: number, key: string) => string;
+  /** Format the label's heading from the row. Defaults to the value at xDataKey. */
+  formatX?: (datum: LineChartDatum) => string;
 }
 
 /**
- * The crosshair, and the gesture that drives it.
+ * The crosshair, the gesture that drives it, and the label that rides it.
  *
- * Both live in the view layer: a gesture handler cannot be attached to an SVG
+ * They live in the view layer: a gesture handler cannot be attached to an SVG
  * node, and once the gesture is a view the crosshair may as well be one too —
  * a 1px view moved by `translateX` costs less than re-rendering an SVG line.
+ * The label follows on the UI thread the same way; only its *text* crosses back
+ * into JS, and only when the active index changes.
  *
  * The hit area is the whole plot. A crosshair you have to land on the line to
  * summon is a crosshair nobody finds.
  */
-function LineChartTooltip({ color }: LineChartTooltipProps) {
-  const { data, plot, domainMin, domainMax, series, activeIndex, setActiveIndexJS, status } =
-    useChart('LineChart.Tooltip');
+function LineChartTooltip({ color, showLabel = true, formatValue, formatX }: LineChartTooltipProps) {
+  const {
+    data,
+    xDataKey,
+    plot,
+    domainMin,
+    domainMax,
+    series,
+    activeIndex,
+    activeIndexJS,
+    setActiveIndexJS,
+    status,
+  } = useChart('LineChart.Tooltip');
   const token = useCSSVariable('--color-foreground');
   const stroke = color ?? (typeof token === 'string' ? token : '#888888');
 
@@ -796,6 +848,29 @@ function LineChartTooltip({ color }: LineChartTooltipProps) {
     };
   });
 
+  // The label centres over the crosshair but is clamped inside the plot, so it
+  // never runs off the edge at the first or last point.
+  const labelStyle = useAnimatedStyle(() => {
+    const index = activeIndex.value;
+    if (index < 0) return { opacity: 0 };
+    const x = xOf(index, total, plot);
+    const half = LABEL_WIDTH / 2;
+    const clamped = Math.min(
+      plot.left + plot.width - half,
+      Math.max(plot.left + half, x)
+    );
+    return {
+      opacity: 1,
+      transform: [{ translateX: clamped - half }],
+    };
+  });
+
+  const active = activeIndexJS >= 0 ? data[activeIndexJS] : null;
+  const fmtValue =
+    formatValue ?? ((value: number) => compactNumber(value));
+  const fmtX =
+    formatX ?? ((datum: LineChartDatum) => String(datum[xDataKey] ?? ''));
+
   if (status === 'loading') return null;
 
   return (
@@ -826,12 +901,64 @@ function LineChartTooltip({ color }: LineChartTooltipProps) {
             color={seriesColor}
           />
         ))}
+
+        {showLabel ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                position: 'absolute',
+                left: 0,
+                top: Math.max(plot.top - 4, 0),
+                width: LABEL_WIDTH,
+              },
+              labelStyle,
+            ]}
+          >
+            <View className="items-center rounded-xl border border-border bg-popover px-2.5 py-1.5 shadow-lg">
+              {active ? (
+                <>
+                  <Text size="xs" muted numberOfLines={1}>
+                    {fmtX(active)}
+                  </Text>
+                  {series.map(([key, seriesColor]) => {
+                    const value = active[key];
+                    if (typeof value !== 'number') return null;
+                    return (
+                      <View key={key} className="flex-row items-center gap-1.5">
+                        {series.length > 1 ? (
+                          <View
+                            style={{ backgroundColor: seriesColor }}
+                            className="h-1.5 w-1.5 rounded-full"
+                          />
+                        ) : null}
+                        <Text size="sm" weight="semibold" numberOfLines={1}>
+                          {fmtValue(value, key)}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </>
+              ) : null}
+            </View>
+          </Animated.View>
+        ) : null}
       </View>
     </GestureDetector>
   );
 }
 LineChartTooltip.displayName = 'LineChart.Tooltip';
 LineChartTooltip.layer = 'overlay' as Layer;
+
+const LABEL_WIDTH = 112;
+
+/** A compact number for the crosshair label: 1204 → "1.2k", 24801 → "24.8k". */
+function compactNumber(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
+  return `${Math.round(value)}`;
+}
 
 const DOT = 9;
 

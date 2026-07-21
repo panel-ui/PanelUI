@@ -120,6 +120,7 @@ export {
   LineChart,
   useLineChart,
   type LineChartProps,
+  type LineChartHandle,
   type LineChartGridProps,
   type LineChartLineProps,
   type LineChartAreaProps,

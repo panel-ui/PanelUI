@@ -150,6 +150,7 @@
     "description": "Text field with label, description and error message.",
     "registryDependencies": [
       "keyboard-avoider",
+      "label",
       "text"
     ]
   },

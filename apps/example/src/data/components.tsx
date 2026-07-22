@@ -2651,6 +2651,34 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-4">
+            <Input size="sm" label="Small" placeholder="40 tall" />
+            <Input size="md" label="Medium" placeholder="48 tall" />
+            <Input size="lg" label="Large" placeholder="56 tall" />
+          </View>
+        ),
+      },
+      {
+        label: 'Filled',
+        render: () => (
+          // `filled` inside a card: a second border beside the card's own
+          // reads as a seam, so the field carries a background instead.
+          <Card className="w-full">
+            <Card.Content className="gap-4 p-4">
+              <Input variant="filled" label="Workspace" placeholder="Acme" isRequired />
+              <Input
+                variant="filled"
+                label="Notes"
+                placeholder="Anything we should know?"
+                multiline
+              />
+            </Card.Content>
+          </Card>
+        ),
+      },
+      {
         label: 'In a form',
         render: () => (
           <Card className="w-full">
@@ -2659,8 +2687,8 @@ export const COMPONENTS: ComponentEntry[] = [
               <Card.Description>Welcome back.</Card.Description>
             </Card.Header>
             <Card.Content className="gap-4">
-              <Input label="Email" placeholder="you@example.com" />
-              <Input label="Password" secureTextEntry placeholder="••••••••" />
+              <Input label="Email" placeholder="you@example.com" isRequired />
+              <Input label="Password" secureTextEntry placeholder="••••••••" isRequired />
             </Card.Content>
             <Card.Footer>
               <Button fullWidth>Continue</Button>

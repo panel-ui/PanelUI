@@ -1,39 +1,88 @@
-import { forwardRef, useCallback, useState } from 'react';
+/**
+ * Input — a text field with a label, a description and an error line.
+ *
+ * The field's focus state is animated rather than switched. A border that
+ * snaps between two colours reads as a redraw; one that crosses over in
+ * 150ms reads as the field responding to you. The interpolation runs on the
+ * UI thread, so it costs nothing and keeps up with a fast tab through a form.
+ *
+ * Two backgrounds, because a field's job changes with what surrounds it:
+ * `outline` sits on the page and draws its own edge; `filled` sits inside a
+ * card or a sheet, where a second border next to the container's own reads as
+ * a seam.
+ *
+ * ```tsx
+ * <Input label="Email" placeholder="you@example.com" />
+ * <Input variant="filled" size="lg" label="Name" isRequired />
+ * ```
+ *
+ * For a field with an icon or a button attached, reach for `InputGroup` — it
+ * measures its decorators and pads this field around them.
+ */
+import { forwardRef, useCallback, useEffect, useState } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
-import { tv } from 'tailwind-variants';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text } from '../../primitives/text';
+import { Label } from '../label';
+
+/** Long enough to read as a transition, short enough not to lag a fast tab. */
+const FOCUS_DURATION = 150;
 
 const inputVariants = tv({
   slots: {
     container: 'w-full gap-1.5',
-    field:
-      'h-11 w-full rounded-lg border border-input bg-background px-3 text-base text-foreground',
-    label: 'text-sm font-medium text-foreground',
+    field: 'w-full rounded-lg border text-foreground',
     description: 'text-sm text-muted-foreground',
     error: 'text-sm text-destructive',
   },
   variants: {
-    focused: {
-      true: { field: 'border-ring' },
+    variant: {
+      // The border colour is animated, so it is deliberately not set here —
+      // only the background and the resting border width belong to the class.
+      outline: { field: 'bg-background' },
+      filled: { field: 'bg-muted' },
     },
-    invalid: {
-      true: { field: 'border-destructive/40' },
+    size: {
+      sm: { field: 'h-10 px-3 text-sm' },
+      md: { field: 'h-12 px-3.5 text-base' },
+      lg: { field: 'h-14 px-4 text-base' },
+    },
+    multiline: {
+      // A multiline field grows, so a fixed height would crop it. Text starts
+      // at the top rather than floating in the middle of an empty box.
+      true: { field: 'h-auto min-h-24 py-3' },
     },
     disabled: {
       true: { field: 'opacity-[0.64]' },
     },
   },
+  defaultVariants: {
+    variant: 'outline',
+    size: 'md',
+  },
 });
 
-export interface InputProps extends TextInputProps {
+type InputVariantProps = VariantProps<typeof inputVariants>;
+
+export interface InputProps
+  extends TextInputProps,
+    Omit<InputVariantProps, 'disabled' | 'multiline'> {
   className?: string;
   containerClassName?: string;
   label?: string;
   description?: string;
   /** Error message. When set, the field renders in its invalid state. */
   errorMessage?: string;
+  /** Marks the field required — an asterisk on the label, and the a11y state. */
+  isRequired?: boolean;
   disabled?: boolean;
   /**
    * Lift the field above the software keyboard when it would otherwise be
@@ -50,6 +99,8 @@ export interface InputProps extends TextInputProps {
   keyboardOffset?: number;
 }
 
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+
 export const Input = forwardRef<TextInput, InputProps>(
   (
     {
@@ -58,22 +109,60 @@ export const Input = forwardRef<TextInput, InputProps>(
       label,
       description,
       errorMessage,
+      isRequired,
       disabled,
+      variant,
+      size,
       avoidKeyboard = false,
       keyboardOffset = 16,
       onFocus,
       onBlur,
+      style,
       ...props
     },
     ref
   ) => {
     const [focused, setFocused] = useState(false);
+    const invalid = !!errorMessage;
+
     const placeholderColor = useCSSVariable('--color-muted-foreground');
+    const restColor = useCSSVariable('--color-input');
+    const focusColor = useCSSVariable('--color-ring');
+    const errorColor = useCSSVariable('--color-destructive');
+
     const slots = inputVariants({
-      focused,
-      invalid: !!errorMessage,
+      variant,
+      size,
+      multiline: !!props.multiline,
       disabled: !!disabled,
     });
+
+    /*
+     * Border colour is driven by one 0..1 value rather than by a class per
+     * state. Uniwind can only swap a class wholesale, which is the snap this
+     * is here to avoid, and a shared value crosses between the two colours on
+     * the UI thread without a re-render.
+     */
+    const focus = useSharedValue(0);
+    useEffect(() => {
+      focus.value = withTiming(focused ? 1 : 0, { duration: FOCUS_DURATION });
+    }, [focused, focus]);
+
+    const resting = typeof restColor === 'string' ? restColor : '#e5e5e5';
+    const active = invalid
+      ? typeof errorColor === 'string'
+        ? errorColor
+        : '#ef4444'
+      : typeof focusColor === 'string'
+        ? focusColor
+        : '#a3a3a3';
+    // An invalid field is tinted even at rest — the error is a fact about the
+    // value, not about whether the field happens to be focused.
+    const idle = invalid ? active : resting;
+
+    const borderStyle = useAnimatedStyle(() => ({
+      borderColor: interpolateColor(focus.value, [0, 1], [idle, active]),
+    }));
 
     const handleFocus = useCallback<NonNullable<TextInputProps['onFocus']>>(
       (event) => {
@@ -93,15 +182,24 @@ export const Input = forwardRef<TextInput, InputProps>(
 
     const body = (
       <>
-        {label ? <Text className={slots.label()}>{label}</Text> : null}
-        <TextInput
+        {label ? (
+          <Label isRequired={isRequired} isInvalid={invalid} isDisabled={!!disabled}>
+            {label}
+          </Label>
+        ) : null}
+        <AnimatedTextInput
           ref={ref}
           editable={!disabled}
           onFocus={handleFocus}
           onBlur={handleBlur}
           accessibilityLabel={label}
           accessibilityState={{ disabled: !!disabled }}
+          aria-required={isRequired}
+          aria-invalid={invalid}
           className={slots.field({ className })}
+          // Caller styles come last so InputGroup can pad the field around its
+          // decorators, but never last enough to drop the animated border.
+          style={[borderStyle, style]}
           placeholderTextColor={
             typeof placeholderColor === 'string' ? placeholderColor : undefined
           }

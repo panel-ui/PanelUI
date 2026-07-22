@@ -125,6 +125,7 @@
     "description": "Widget shell with a titled header, an inset panel and a caption.",
     "registryDependencies": [
       "cn",
+      "icons",
       "text"
     ]
   },

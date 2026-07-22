@@ -15,28 +15,67 @@
  *   </Frame.Header>
  *   <Frame.Panel>
  *     <Frame.Row>…</Frame.Row>
- *     <Frame.Row divided>…</Frame.Row>
+ *     <Frame.Row>…</Frame.Row>
  *   </Frame.Panel>
  *   <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
  * </Frame>
  * ```
+ *
+ * The panel draws the hairlines between its own rows. React Native has no
+ * `:first-child`, so the alternative is every caller writing
+ * `divided={index > 0}` on every row and getting it wrong once.
  */
-import { forwardRef, type ReactNode } from 'react';
-import { View, type Text as RNText, type ViewProps } from 'react-native';
+import { Children, cloneElement, forwardRef, isValidElement, type ReactNode } from 'react';
+import {
+  Pressable,
+  View,
+  type PressableProps,
+  type Text as RNText,
+  type ViewProps,
+} from 'react-native';
+import { tv } from 'tailwind-variants';
+import { ChevronRightIcon } from '../../icons';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+
+const frameVariants = tv({
+  slots: {
+    root: '',
+    panel: 'overflow-hidden rounded-xl border border-border bg-card',
+  },
+  variants: {
+    variant: {
+      default: { root: 'rounded-2xl border border-border bg-surface p-1.5' },
+      // No shell: the panel is the whole widget. For a Frame nested inside a
+      // card that already draws a border, where the shell's own edge sitting
+      // just inside it reads as a double line.
+      plain: { root: '', panel: 'rounded-2xl' },
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+export type FrameVariant = 'default' | 'plain';
 
 export interface FrameProps extends ViewProps {
   className?: string;
 }
 
-const FrameRoot = forwardRef<View, FrameProps>(({ className, ...props }, ref) => (
-  <View
-    ref={ref}
-    className={cn('rounded-2xl border border-border bg-surface p-1.5', className)}
-    {...props}
-  />
-));
+export interface FrameRootProps extends FrameProps {
+  /**
+   * `plain` drops the outer shell so the panel is the widget — for a Frame
+   * inside a container that already draws its own border.
+   */
+  variant?: FrameVariant;
+}
+
+const FrameRoot = forwardRef<View, FrameRootProps>(
+  ({ className, variant, ...props }, ref) => (
+    <View ref={ref} className={frameVariants({ variant }).root({ className })} {...props} />
+  )
+);
 FrameRoot.displayName = 'Frame';
 
 export interface FrameHeaderProps extends FrameProps {
@@ -104,40 +143,146 @@ const FrameDescription = forwardRef<RNText, TextProps>(
 FrameDescription.displayName = 'Frame.Description';
 
 /**
- * The inset card holding the frame's content — the raised surface sitting in
- * from the shell's edges, with its own smaller radius.
+ * Marks the parts that take part in the panel's own divider bookkeeping —
+ * a Row draws a line above itself, a Section draws one above its heading.
+ * Anything else the panel is given is left alone.
  */
-const FramePanel = forwardRef<View, FrameProps>(({ className, ...props }, ref) => (
-  <View
-    ref={ref}
-    className={cn('overflow-hidden rounded-xl border border-border bg-card', className)}
-    {...props}
-  />
-));
-FramePanel.displayName = 'Frame.Panel';
-
-/**
- * A row inside a Frame.Panel. Pass `divided` on every row after the first to
- * draw a hairline separator above it (React Native has no :first-child).
- */
-export interface FrameRowProps extends FrameProps {
+interface Dividable {
   divided?: boolean;
 }
 
-const FrameRow = forwardRef<View, FrameRowProps>(
-  ({ className, divided, ...props }, ref) => (
-    <View
-      ref={ref}
-      className={cn(
-        'flex-row items-center gap-3 px-4 py-3.5',
-        divided && 'border-t border-border',
-        className
-      )}
-      {...props}
-    />
+/**
+ * Draws the hairline above every child but the first. An explicit `divided`
+ * on a child wins, so a row can still opt out or force one.
+ */
+function divideChildren(children: ReactNode) {
+  let seen = 0;
+  return Children.map(children, (child) => {
+    if (!isValidElement<Dividable>(child)) return child;
+    if (!DIVIDABLE.has(child.type)) return child;
+
+    const index = seen++;
+    if (child.props.divided !== undefined) return child;
+    return cloneElement(child, { divided: index > 0 });
+  });
+}
+
+export interface FramePanelProps extends FrameProps {
+  /**
+   * Set false to place the hairlines by hand instead — for a panel whose rows
+   * are generated somewhere the divider order is not obvious.
+   */
+  dividers?: boolean;
+  children?: ReactNode;
+}
+
+/**
+ * The inset card holding the frame's content — the raised surface sitting in
+ * from the shell's edges, with its own smaller radius.
+ */
+const FramePanel = forwardRef<View, FramePanelProps>(
+  ({ className, dividers = true, children, ...props }, ref) => (
+    <View ref={ref} className={frameVariants().panel({ className })} {...props}>
+      {dividers ? divideChildren(children) : children}
+    </View>
   )
 );
+FramePanel.displayName = 'Frame.Panel';
+
+export interface FrameRowProps extends Omit<PressableProps, 'children'>, Dividable {
+  className?: string;
+  /**
+   * Draw a hairline above this row. `Frame.Panel` sets it for you; pass it
+   * explicitly to override the panel's decision either way.
+   */
+  divided?: boolean;
+  /** Trailing chevron marking the row as leading somewhere. */
+  chevron?: boolean;
+  children?: ReactNode;
+}
+
+/**
+ * A row inside a Frame.Panel. Give it an `onPress` and it becomes a real
+ * pressable — press feedback, a button role — rather than a View with a
+ * handler bolted on.
+ */
+const FrameRow = forwardRef<View, FrameRowProps>(
+  ({ className, divided, chevron, children, onPress, ...props }, ref) => {
+    const classes = cn(
+      'flex-row items-center gap-3 px-4 py-3.5',
+      divided && 'border-t border-border',
+      onPress && 'active:bg-muted',
+      className
+    );
+
+    const body = (
+      <>
+        {children}
+        {chevron ? <ChevronRightIcon size={16} /> : null}
+      </>
+    );
+
+    if (!onPress) {
+      return (
+        <View ref={ref} className={classes} {...(props as ViewProps)}>
+          {body}
+        </View>
+      );
+    }
+
+    return (
+      <Pressable
+        ref={ref}
+        accessibilityRole="button"
+        onPress={onPress}
+        className={classes}
+        {...props}
+      >
+        {body}
+      </Pressable>
+    );
+  }
+);
 FrameRow.displayName = 'Frame.Row';
+
+export interface FrameSectionProps extends FrameProps, Dividable {
+  /** Heading above the rows. Strings are wrapped for you. */
+  title?: ReactNode;
+  divided?: boolean;
+  children?: ReactNode;
+}
+
+/**
+ * A labelled cluster of rows inside a Panel, for a widget holding more than
+ * one group. It divides its own rows the way the panel does, so the two nest
+ * without either having to know about the other.
+ */
+const FrameSection = forwardRef<View, FrameSectionProps>(
+  ({ className, title, divided, children, ...props }, ref) => (
+    <View
+      ref={ref}
+      className={cn(divided && 'border-t border-border', className)}
+      {...props}
+    >
+      {title ? (
+        <View className="bg-muted/40 px-4 pb-1.5 pt-2.5">
+          {typeof title === 'string' ? (
+            <Text size="xs" weight="medium" muted className="uppercase tracking-wider">
+              {title}
+            </Text>
+          ) : (
+            title
+          )}
+        </View>
+      ) : null}
+      {divideChildren(children)}
+    </View>
+  )
+);
+FrameSection.displayName = 'Frame.Section';
+
+/** Parts the panel divides. Declared after them, since it holds references. */
+const DIVIDABLE = new Set<unknown>([FrameRow, FrameSection]);
 
 export interface FrameFooterProps extends FrameProps {
   children?: ReactNode;
@@ -169,6 +314,7 @@ export const Frame = Object.assign(FrameRoot, {
   Action: FrameAction,
   Description: FrameDescription,
   Panel: FramePanel,
+  Section: FrameSection,
   Row: FrameRow,
   Footer: FrameFooter,
 });

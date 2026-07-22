@@ -411,36 +411,51 @@
     }
   },
   "frame": {
-    "intro": "A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel's radius is derived from the shell's, so the nesting stays proportional as the theme changes it.",
-    "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Usage Type</Frame.Title>\n    <Frame.Action>Amount</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row divided>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>\n</Frame>",
+    "intro": "A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel draws the hairlines between its own rows, and its radius is derived from the shell’s, so the nesting stays proportional as the theme changes it.",
+    "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Usage Type</Frame.Title>\n    <Frame.Action>Amount</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>\n</Frame>",
     "extraImports": [
       "Button",
       "Switch",
       "Text",
-      "Badge"
+      "Badge",
+      "Card"
     ],
     "parts": {
       "Header": "Row holding the title and the action.",
       "Title": "Frame heading.",
       "Action": "Trailing slot — a label, a button, a badge. Strings render muted.",
       "Description": "Secondary line, inside a column-wrapped header.",
-      "Panel": "The inset card holding the rows.",
-      "Row": "A row inside the panel. Pass `divided` on every row after the first.",
-      "Footer": "Muted caption under the panel. Strings are wrapped for you."
+      "Panel": "The inset card holding the rows. Divides them for you.",
+      "Row": "A row inside the panel. Give it an `onPress` and it becomes a pressable.",
+      "Footer": "Muted caption under the panel. Strings are wrapped for you.",
+      "Section": "A labelled cluster of rows, for a panel holding more than one group."
     },
-    "notes": "React Native has no `:first-child`, so `divided` is set explicitly on each row after the first rather than inferred.",
-    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>",
+    "notes": "React Native has no `:first-child`, so the hairline between rows cannot be a CSS rule. `Frame.Panel` places them instead — a line above every child but the first. Passing `divided` on a row overrides that either way, and `dividers={false}` on the panel hands the whole job back to you.\n\n`Frame.Section` divides its own rows the same way, so the two nest without either needing to know about the other.",
+    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Section title=\"…\">\n      <Frame.Row>…</Frame.Row>\n    </Frame.Section>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>",
     "examples": [
       {
         "title": "A settings panel",
-        "description": "`Frame.Row` with `divided` draws the hairline between rows for you.",
-        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Notifications</Frame.Title>\n    <Frame.Description>How we reach you.</Frame.Description>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row divided>\n      <Text>Push</Text>\n      <Switch value={push} onValueChange={setPush} />\n    </Frame.Row>\n    <Frame.Row divided>\n      <Text>Email</Text>\n      <Switch value={email} onValueChange={setEmail} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text>SMS</Text>\n      <Switch value={sms} onValueChange={setSms} />\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>"
+        "description": "Nothing has to say where the hairlines go — the panel puts one above every row but the first.",
+        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Notifications</Frame.Title>\n    <Frame.Description>How we reach you.</Frame.Description>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Push</Text>\n      <Switch value={push} onValueChange={setPush} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Email</Text>\n      <Switch value={email} onValueChange={setEmail} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">SMS</Text>\n      <Switch value={sms} onValueChange={setSms} />\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>"
       },
       {
         "title": "With a header action and a footer",
-        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>API keys</Frame.Title>\n    <Frame.Action>\n      <Button size=\"sm\" variant=\"outline\">New key</Button>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {keys.map((key) => (\n      <Frame.Row key={key.id} divided>\n        <Text>{key.name}</Text>\n        <Badge variant=\"outline\">{key.lastUsed}</Badge>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Text size=\"sm\" muted>Keys are shown once at creation.</Text>\n  </Frame.Footer>\n</Frame>"
+        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>API keys</Frame.Title>\n    <Frame.Action>\n      <Button size=\"sm\" variant=\"outline\">New key</Button>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {keys.map((key) => (\n      <Frame.Row key={key.id}>\n        <Text>{key.name}</Text>\n        <Badge variant=\"outline\">{key.lastUsed}</Badge>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Text size=\"sm\" muted>Keys are shown once at creation.</Text>\n  </Frame.Footer>\n</Frame>"
+      },
+      {
+        "title": "Rows that lead somewhere",
+        "description": "A row with an `onPress` is a real pressable — press feedback and a button role — instead of a View with a handler bolted on. `chevron` says so before you tap it.",
+        "code": "<Frame.Panel>\n  {sections.map((section) => (\n    <Frame.Row\n      key={section.id}\n      chevron\n      onPress={() => router.push(section.href)}\n    >\n      <Text size=\"sm\" className=\"flex-1\">{section.label}</Text>\n    </Frame.Row>\n  ))}\n</Frame.Panel>"
+      },
+      {
+        "title": "Sections inside a panel",
+        "description": "For a widget with more than one cluster of rows. Each section labels its group and divides its own rows.",
+        "code": "<Frame.Panel>\n  <Frame.Section title=\"General\">\n    <Frame.Row>…</Frame.Row>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Section>\n  <Frame.Section title=\"Danger zone\">\n    <Frame.Row chevron onPress={confirmDelete}>\n      <Text size=\"sm\" className=\"flex-1 text-destructive\">\n        Delete workspace\n      </Text>\n    </Frame.Row>\n  </Frame.Section>\n</Frame.Panel>"
       }
-    ]
+    ],
+    "variantCode": {
+      "variant": "{/* The default: a shell with the panel inset inside it. */}\n<Frame variant=\"default\">…</Frame>\n\n{/* No shell — for a Frame inside a card that already draws a border,\n    where the shell’s own edge just inside it reads as a double line. */}\n<Card>\n  <Card.Content className=\"p-4\">\n    <Frame variant=\"plain\">\n      <Frame.Panel>…</Frame.Panel>\n    </Frame>\n  </Card.Content>\n</Card>"
+    }
   },
   "inline-select": {
     "intro": "A select that reveals its options next to the trigger instead of taking over the screen with a sheet.",

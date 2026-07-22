@@ -2573,8 +2573,8 @@ export const COMPONENTS: ComponentEntry[] = [
                 ['Input Tokens', '98.2M', 70],
                 ['Output Tokens', '59M', 45],
                 ['Total Spend', '$149.61', 85],
-              ].map(([label, value, pct], index) => (
-                <Frame.Row key={label as string} divided={index > 0}>
+              ].map(([label, value, pct]) => (
+                <Frame.Row key={label as string}>
                   <Meter percent={pct as number} />
                   <Text className="flex-1">{label}</Text>
                   <Text weight="medium">{value}</Text>
@@ -2600,8 +2600,8 @@ export const COMPONENTS: ComponentEntry[] = [
                 ['KA', 'Khalid Abdi', 'khalid@example.com', 'Owner'],
                 ['JD', 'Jamie Doe', 'jamie@example.com', 'Editor'],
                 ['SM', 'Sam Miller', 'sam@example.com', 'Viewer'],
-              ].map(([initials, name, email, role], index) => (
-                <Frame.Row key={email} divided={index > 0}>
+              ].map(([initials, name, email, role]) => (
+                <Frame.Row key={email}>
                   <Avatar size="sm" fallback={initials} />
                   <View className="flex-1">
                     <Text size="sm" weight="medium">
@@ -2632,8 +2632,8 @@ export const COMPONENTS: ComponentEntry[] = [
                 ['Language', 'English'],
                 ['Region', 'United States'],
                 ['Time zone', 'GMT+3'],
-              ].map(([label, value], index) => (
-                <Frame.Row key={label} divided={index > 0}>
+              ].map(([label, value]) => (
+                <Frame.Row key={label}>
                   <Text size="sm" className="flex-1">
                     {label}
                   </Text>
@@ -2644,6 +2644,91 @@ export const COMPONENTS: ComponentEntry[] = [
               ))}
             </Frame.Panel>
           </Frame>
+        ),
+      },
+      {
+        label: 'Rows that lead somewhere',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Account</Frame.Title>
+            </Frame.Header>
+            <Frame.Panel>
+              {/* An onPress makes the row a real pressable — press feedback and
+                  a button role — and `chevron` says so before you tap it. */}
+              {['Profile', 'Notifications', 'Connected apps'].map((label) => (
+                <Frame.Row key={label} chevron onPress={() => {}}>
+                  <Text size="sm" className="flex-1">
+                    {label}
+                  </Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
+      {
+        label: 'Sections',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Workspace</Frame.Title>
+              <Frame.Action>Manage</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              <Frame.Section title="General">
+                <Frame.Row>
+                  <Text size="sm" className="flex-1">
+                    Name
+                  </Text>
+                  <Text size="sm" muted>
+                    Acme
+                  </Text>
+                </Frame.Row>
+                <Frame.Row>
+                  <Text size="sm" className="flex-1">
+                    Plan
+                  </Text>
+                  <Badge variant="secondary">Pro</Badge>
+                </Frame.Row>
+              </Frame.Section>
+              <Frame.Section title="Danger zone">
+                <Frame.Row chevron onPress={() => {}}>
+                  <Text size="sm" className="flex-1 text-destructive">
+                    Delete workspace
+                  </Text>
+                </Frame.Row>
+              </Frame.Section>
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
+      {
+        label: 'Plain, inside a card',
+        render: () => (
+          // The card already draws a border; the default shell would put a
+          // second edge just inside it.
+          <Card className="w-full">
+            <Card.Content className="p-4">
+              <Frame variant="plain">
+                <Frame.Panel>
+                  {[
+                    ['Requests', '12.4K'],
+                    ['Errors', '38'],
+                  ].map(([label, value]) => (
+                    <Frame.Row key={label}>
+                      <Text size="sm" className="flex-1">
+                        {label}
+                      </Text>
+                      <Text size="sm" weight="medium">
+                        {value}
+                      </Text>
+                    </Frame.Row>
+                  ))}
+                </Frame.Panel>
+              </Frame>
+            </Card.Content>
+          </Card>
         ),
       },
     ],

@@ -3,14 +3,14 @@ title: Frame
 description: Widget shell with a titled header, an inset panel and a caption.
 ---
 
-A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel's radius is derived from the shell's, so the nesting stays proportional as the theme changes it.
+A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel draws the hairlines between its own rows, and its radius is derived from the shell’s, so the nesting stays proportional as the theme changes it.
 
 ## Installation
 
 Frame ships with the library — no separate install.
 
 ```tsx
-import { Frame, Button, Switch, Text, Badge } from 'panelui-native';
+import { Frame, Button, Switch, Text, Badge, Card } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -32,7 +32,7 @@ npx panelui-cli@latest add frame
       <Text className="flex-1">Total API Requests</Text>
       <Text weight="medium">33.1K</Text>
     </Frame.Row>
-    <Frame.Row divided>
+    <Frame.Row>
       <Text className="flex-1">Input Tokens</Text>
       <Text weight="medium">98.2M</Text>
     </Frame.Row>
@@ -50,7 +50,9 @@ npx panelui-cli@latest add frame
     <Frame.Action>…</Frame.Action>
   </Frame.Header>
   <Frame.Panel>
-    <Frame.Row>…</Frame.Row>
+    <Frame.Section title="…">
+      <Frame.Row>…</Frame.Row>
+    </Frame.Section>
   </Frame.Panel>
   <Frame.Footer>…</Frame.Footer>
 </Frame>
@@ -60,15 +62,16 @@ npx panelui-cli@latest add frame
 - **`Frame.Title`** — Frame heading.
 - **`Frame.Action`** — Trailing slot — a label, a button, a badge. Strings render muted.
 - **`Frame.Description`** — Secondary line, inside a column-wrapped header.
-- **`Frame.Panel`** — The inset card holding the rows.
-- **`Frame.Row`** — A row inside the panel. Pass `divided` on every row after the first.
+- **`Frame.Panel`** — The inset card holding the rows. Divides them for you.
+- **`Frame.Section`** — A labelled cluster of rows, for a panel holding more than one group.
+- **`Frame.Row`** — A row inside the panel. Give it an `onPress` and it becomes a pressable.
 - **`Frame.Footer`** — Muted caption under the panel. Strings are wrapped for you.
 
 ## Examples
 
 ### A settings panel
 
-`Frame.Row` with `divided` draws the hairline between rows for you.
+Nothing has to say where the hairlines go — the panel puts one above every row but the first.
 
 ```tsx
 <Frame>
@@ -77,16 +80,16 @@ npx panelui-cli@latest add frame
     <Frame.Description>How we reach you.</Frame.Description>
   </Frame.Header>
   <Frame.Panel>
-    <Frame.Row divided>
-      <Text>Push</Text>
+    <Frame.Row>
+      <Text className="flex-1">Push</Text>
       <Switch value={push} onValueChange={setPush} />
     </Frame.Row>
-    <Frame.Row divided>
-      <Text>Email</Text>
+    <Frame.Row>
+      <Text className="flex-1">Email</Text>
       <Switch value={email} onValueChange={setEmail} />
     </Frame.Row>
     <Frame.Row>
-      <Text>SMS</Text>
+      <Text className="flex-1">SMS</Text>
       <Switch value={sms} onValueChange={setSms} />
     </Frame.Row>
   </Frame.Panel>
@@ -105,7 +108,7 @@ npx panelui-cli@latest add frame
   </Frame.Header>
   <Frame.Panel>
     {keys.map((key) => (
-      <Frame.Row key={key.id} divided>
+      <Frame.Row key={key.id}>
         <Text>{key.name}</Text>
         <Badge variant="outline">{key.lastUsed}</Badge>
       </Frame.Row>
@@ -117,6 +120,66 @@ npx panelui-cli@latest add frame
 </Frame>
 ```
 
+### Rows that lead somewhere
+
+A row with an `onPress` is a real pressable — press feedback and a button role — instead of a View with a handler bolted on. `chevron` says so before you tap it.
+
+```tsx
+<Frame.Panel>
+  {sections.map((section) => (
+    <Frame.Row
+      key={section.id}
+      chevron
+      onPress={() => router.push(section.href)}
+    >
+      <Text size="sm" className="flex-1">{section.label}</Text>
+    </Frame.Row>
+  ))}
+</Frame.Panel>
+```
+
+### Sections inside a panel
+
+For a widget with more than one cluster of rows. Each section labels its group and divides its own rows.
+
+```tsx
+<Frame.Panel>
+  <Frame.Section title="General">
+    <Frame.Row>…</Frame.Row>
+    <Frame.Row>…</Frame.Row>
+  </Frame.Section>
+  <Frame.Section title="Danger zone">
+    <Frame.Row chevron onPress={confirmDelete}>
+      <Text size="sm" className="flex-1 text-destructive">
+        Delete workspace
+      </Text>
+    </Frame.Row>
+  </Frame.Section>
+</Frame.Panel>
+```
+
+## Variants
+
+### `variant`
+
+- `default` *(default)*
+- `plain`
+
+```tsx
+{/* The default: a shell with the panel inset inside it. */}
+<Frame variant="default">…</Frame>
+
+{/* No shell — for a Frame inside a card that already draws a border,
+    where the shell’s own edge just inside it reads as a double line. */}
+<Card>
+  <Card.Content className="p-4">
+    <Frame variant="plain">
+      <Frame.Panel>…</Frame.Panel>
+    </Frame>
+  </Card.Content>
+</Card>
+```
+
 ## API Reference
 
 ### Frame
@@ -125,14 +188,37 @@ npx panelui-cli@latest add frame
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 
+### Frame.Root
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `FrameVariant` | `default` | `plain` drops the outer shell so the panel is the widget — for a Frame inside a container that already draws its own border. |
+
+### Frame.Panel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dividers` | `boolean` | — | Set false to place the hairlines by hand instead — for a panel whose rows are generated somewhere the divider order is not obvious. |
+
 ### Frame.Row
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `divided` | `boolean` | — | Draw a hairline above this row. `Frame.Panel` sets it for you; pass it explicitly to override the panel's decision either way. |
+| `chevron` | `boolean` | — | Trailing chevron marking the row as leading somewhere. |
+
+### Frame.Section
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Heading above the rows. Strings are wrapped for you. |
 | `divided` | `boolean` | — |  |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
-React Native has no `:first-child`, so `divided` is set explicitly on each row after the first rather than inferred.
+React Native has no `:first-child`, so the hairline between rows cannot be a CSS rule. `Frame.Panel` places them instead — a line above every child but the first. Passing `divided` on a row overrides that either way, and `dividers={false}` on the panel hands the whole job back to you.
+
+`Frame.Section` divides its own rows the same way, so the two nest without either needing to know about the other.

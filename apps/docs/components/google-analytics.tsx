@@ -13,7 +13,7 @@ import { site } from '@/lib/site';
  * Nothing is sent from a development build. Localhost traffic in the property
  * is noise you then have to remember to filter out of every report.
  */
-export function Analytics() {
+export function GoogleAnalytics() {
   if (process.env.NODE_ENV !== 'production' || !site.analyticsId) return null;
 
   return (

@@ -3,7 +3,8 @@ import './global.css';
 import type { Metadata } from 'next';
 import { Geist_Mono, Inter } from 'next/font/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Analytics } from '@/components/analytics';
+import { Analytics } from '@vercel/analytics/next';
+import { GoogleAnalytics } from '@/components/google-analytics';
 import { absoluteUrl, site } from '@/lib/site';
 import { cn } from "@/lib/utils";
 
@@ -88,9 +89,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {/* `isolate` keeps Base UI portals layering against this root. */}
       <body className="isolate flex min-h-screen flex-col font-sans antialiased">
         <RootProvider>{children}</RootProvider>
-        {/* One tag for the whole site — the root layout wraps every page, so
-            nothing else should mount another. */}
+        {/*
+          Both mount once here, because the root layout wraps every page and
+          nothing else should mount either again.
+
+          Two of them on purpose, measuring different things. Vercel Web
+          Analytics is cookieless and needs no consent banner, so it is the one
+          that will still be counting for visitors who decline or block the
+          other; Google Analytics is what gives the long tail — acquisition,
+          search terms, the funnel — that the Vercel dashboard does not.
+        */}
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );

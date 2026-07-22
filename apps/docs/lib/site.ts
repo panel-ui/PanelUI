@@ -17,7 +17,7 @@ export const site = {
    * source either way — but it lives here so a fork or a preview deploy can
    * point at its own property instead of reporting into this one.
    */
-  analyticsId: process.env.NEXT_PUBLIC_GA_ID ?? 'G-7LGNDVHWPZ',
+  analyticsId: process.env.NEXT_PUBLIC_GA_ID ?? 'G-B7QYTQH288',
 } as const;
 
 /** Absolute URL for a path, for canonical tags and the sitemap. */

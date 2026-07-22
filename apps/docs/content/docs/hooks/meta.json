@@ -6,6 +6,7 @@
     "use-breakpoint",
     "use-keyboard",
     "use-keyboard-avoidance",
+    "use-scroll-sections",
     "use-debounced-value",
     "use-previous",
     "use-theme"

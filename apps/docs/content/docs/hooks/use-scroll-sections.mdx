@@ -1,0 +1,130 @@
+---
+title: useScrollSections
+description: Track which section of a scroll view is being read.
+---
+
+Records where each section of a scroll view sits, reports which one is being
+read, and scrolls back to any of them. Built for [SectionRail](/docs/components/section-rail),
+but it has nothing to do with the rail — anything that needs to follow a long
+page can use it.
+
+```tsx
+import { SectionRail, useScrollSections } from 'panelui-native';
+
+const SECTIONS = [
+  { id: 'intro', label: 'Introduction' },
+  { id: 'setup', label: 'Setup' },
+  { id: 'faq', label: 'Frequently asked' },
+];
+
+function Page() {
+  const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });
+
+  return (
+    <View className="flex-1">
+      <ScrollView ref={sections.ref} {...sections.scrollProps}>
+        {SECTIONS.map((section) => (
+          <View key={section.id} onLayout={sections.measure(section.id)}>
+            <Text size="2xl" weight="semibold">{section.label}</Text>
+            {/* …section body… */}
+          </View>
+        ))}
+      </ScrollView>
+
+      <SectionRail
+        align="bottom"
+        value={sections.active}
+        onValueChange={sections.scrollTo}
+      >
+        <SectionRail.Trigger>
+          {SECTIONS.map((s) => <SectionRail.Bar key={s.id} value={s.id} />)}
+        </SectionRail.Trigger>
+        <SectionRail.Content>
+          {SECTIONS.map((s) => (
+            <SectionRail.Item key={s.id} value={s.id}>{s.label}</SectionRail.Item>
+          ))}
+        </SectionRail.Content>
+      </SectionRail>
+    </View>
+  );
+}
+```
+
+## The reading line
+
+The active section is the last one whose top has passed a line `offset` pixels
+down the viewport — 120 by default. The line is not at the very top on purpose:
+a heading you have just scrolled past should still count as the section you are
+in, not the one you have left.
+
+Raise `offset` to switch later, lower it to switch sooner.
+
+```tsx
+const sections = useScrollSections({ ids, offset: 200 });
+```
+
+## The last section
+
+<Callout>
+  This is the part worth knowing about, because it is the bug every
+  hand-written scrollspy has.
+</Callout>
+
+The reading line alone cannot reach the final section. Its top may never travel
+far enough up the screen, because the content runs out before it does — so its
+entry never highlights, and users find they have to over-scroll past the bottom
+of the page to make it light up.
+
+So the hook treats **being at the bottom of the scroll view as being in the
+last section**, whatever the reading line says. There is no more scrolling left
+with which to get there, so there is nothing else it could reasonably be.
+
+`endThreshold` (24px) is how close to the bottom counts as at it.
+
+## Scrolling back
+
+`scrollTo` takes a section id and animates to it, which is exactly the shape a
+rail's `onValueChange` wants:
+
+```tsx
+<SectionRail value={sections.active} onValueChange={sections.scrollTo}>
+```
+
+Use `scrollPadding` to stop a section landing flush against the top edge, or
+under a floating header:
+
+```tsx
+const sections = useScrollSections({ ids, scrollPadding: 64 });
+```
+
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ids` | `string[]` | — | Section ids, in the order they appear down the page. |
+| `offset` | `number` | `120` | How far down the viewport the reading line sits. |
+| `endThreshold` | `number` | `24` | How close to the bottom counts as at the bottom. |
+| `scrollPadding` | `number` | `0` | Gap left above a section when scrolling to it. |
+
+### Returns
+
+| Value | Type | Description |
+| --- | --- | --- |
+| `ref` | `RefObject<ScrollView>` | Attach to the ScrollView, so `scrollTo` has something to drive. |
+| `active` | `string \| undefined` | The section being read. |
+| `scrollProps` | `object` | Spread onto the ScrollView — the scroll handler and its throttle. |
+| `measure` | `(id) => (event) => void` | `onLayout` for a section wrapper: `onLayout={measure(id)}`. |
+| `scrollTo` | `(id) => void` | Scroll a section to the top. |
+
+## Notes
+
+`measure` reads each section's `y` **relative to the scroll view's content**,
+so the wrapper you attach it to has to be a direct child of the `ScrollView`.
+Nest it inside another view and the offsets are measured against that instead,
+and every section will read as the first one.
+
+For a pager — one full-screen section per swipe — you do not need this hook.
+The active page is `contentOffset.y / layoutMeasurement.height`, and there is
+no reading line to place.

@@ -473,6 +473,12 @@
     "registryDependencies": []
   },
   {
+    "name": "use-scroll-sections",
+    "type": "registry:hook",
+    "description": "use-scroll-sections.",
+    "registryDependencies": []
+  },
+  {
     "name": "use-theme",
     "type": "registry:hook",
     "description": "Read and change the active theme.",

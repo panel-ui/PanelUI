@@ -20,5 +20,10 @@ export {
   type UseKeyboardAvoidanceOptions,
   type UseKeyboardAvoidanceResult,
 } from './use-keyboard-avoidance';
+export {
+  useScrollSections,
+  type UseScrollSectionsOptions,
+  type UseScrollSectionsResult,
+} from './use-scroll-sections';
 export { useDebouncedValue } from './use-debounced-value';
 export { usePrevious } from './use-previous';

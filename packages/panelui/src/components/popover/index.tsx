@@ -242,6 +242,8 @@ function PopoverContent({
   dismissible = true,
   blur = false,
   children,
+  onLayout: onLayoutProp,
+  style,
   ...props
 }: PopoverContentProps) {
   const context = usePopover('Popover.Content');
@@ -259,7 +261,7 @@ function PopoverContent({
         ? current
         : { width: w, height: h }
     );
-    props.onLayout?.(event);
+    onLayoutProp?.(event);
   };
 
   const bounds = {
@@ -362,31 +364,39 @@ function PopoverContent({
             className="absolute inset-0"
             onPress={dismissible ? () => setOpen(false) : undefined}
           />
+          {/*
+            Two views, not one, and the reason is a Reanimated rule: a layout
+            animation and an animated style may not drive the same property on
+            the same component, or the layout animation silently wins. The exit
+            fade and `panelStyle`'s opacity both want it — so the outer view
+            owns the position and the exit, and the inner one owns the entrance
+            and the panel's own surface.
+          */}
           <Animated.View
             exiting={FadeOut.duration(120)}
             onLayout={onLayout}
-            accessibilityViewIsModal
-            style={[
-              {
-                position: 'absolute',
-                // Until it has measured itself the panel has no honest
-                // position, so it is laid out off-screen rather than at the
-                // origin — an invisible view at 0,0 still catches taps.
-                top: position?.top ?? -9999,
-                left: position?.left ?? -9999,
-                maxWidth: bounds.right - bounds.left,
-                width: resolvedWidth,
-              },
-              panelStyle,
-              props.style,
-            ]}
-            className={cn(
-              'gap-1.5 rounded-2xl border border-border bg-popover p-4 shadow-lg',
-              className
-            )}
-            {...props}
+            style={{
+              position: 'absolute',
+              // Until it has measured itself the panel has no honest position,
+              // so it is laid out off-screen rather than at the origin — an
+              // invisible view at 0,0 still catches taps.
+              top: position?.top ?? -9999,
+              left: position?.left ?? -9999,
+              maxWidth: bounds.right - bounds.left,
+              width: resolvedWidth,
+            }}
           >
-            {children}
+            <Animated.View
+              accessibilityViewIsModal
+              style={[panelStyle, style]}
+              className={cn(
+                'gap-1.5 rounded-2xl border border-border bg-popover p-4 shadow-lg',
+                className
+              )}
+              {...props}
+            >
+              {children}
+            </Animated.View>
           </Animated.View>
         </View>
       </PopoverContext.Provider>

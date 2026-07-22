@@ -1258,7 +1258,7 @@ function ProgressDemo() {
 
   return (
     <View className="w-full gap-4">
-      <Progress value={uploaded} />
+      <Progress value={uploaded} label="Uploading" showValueLabel />
       <Progress value={uploaded} color="success" size="sm" />
       <Progress value={70} color="warning" size="lg" />
       <Progress indeterminate color="info" />
@@ -3400,6 +3400,23 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Determinate and indeterminate progress bar',
     demos: [
       { label: 'Animated', render: () => <ProgressDemo /> },
+      {
+        label: 'Labelled',
+        render: () => (
+          <View className="w-full gap-4">
+            <Progress value={64} label="Downloading" showValueLabel />
+            <Progress
+              value={40}
+              color="success"
+              label="Storage"
+              showValueLabel
+              formatOptions={{ style: 'currency', currency: 'USD' }}
+              valueLabel="8.2 GB of 20 GB"
+            />
+            <Progress value={90} color="warning" showValueLabel />
+          </View>
+        ),
+      },
       {
         label: 'Colors',
         render: () => (

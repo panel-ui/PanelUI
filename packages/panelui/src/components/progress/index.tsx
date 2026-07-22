@@ -11,6 +11,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { Text } from '../../primitives/text';
+import { cn } from '../../utils/cn';
 
 const SPRING = { damping: 20, stiffness: 180, mass: 0.6 } as const;
 /** Fraction of the track covered by the sliding bar in indeterminate mode. */
@@ -18,6 +20,8 @@ const INDETERMINATE_WIDTH = 0.4;
 
 const progressVariants = tv({
   slots: {
+    root: 'w-full gap-2',
+    header: 'flex-row items-center justify-between',
     track: 'w-full overflow-hidden rounded-full',
     indicator: 'h-full rounded-full',
   },
@@ -53,6 +57,30 @@ export interface ProgressProps
   indeterminate?: boolean;
   /** Extra classes for the moving indicator. */
   indicatorClassName?: string;
+  /**
+   * Caption drawn above the track, on the left. Supplying it (or
+   * `showValueLabel`) wraps the bar in a header row; the track alone renders
+   * otherwise.
+   */
+  label?: string;
+  /**
+   * Draw the percentage above the track, on the right. Hidden while
+   * `indeterminate` — there is nothing meaningful to show.
+   */
+  showValueLabel?: boolean;
+  /**
+   * Text for the value label. Overrides the formatted percentage — use it for
+   * a byte count, a step tally, anything that is not a bare percent.
+   */
+  valueLabel?: string;
+  /**
+   * Format the value label as a fraction of the whole with `Intl.NumberFormat`
+   * — e.g. `{ style: 'currency', currency: 'USD' }`. Falls back to a rounded
+   * percent when omitted.
+   */
+  formatOptions?: Intl.NumberFormatOptions;
+  /** Extra classes for the label + value-label row. */
+  headerClassName?: string;
 }
 
 function clamp(value: number) {
@@ -62,18 +90,43 @@ function clamp(value: number) {
   return value;
 }
 
+/** The right-hand caption: an explicit override, an Intl fraction, or a percent. */
+function formatValue(
+  value: number,
+  valueLabel?: string,
+  formatOptions?: Intl.NumberFormatOptions
+) {
+  if (valueLabel != null) return valueLabel;
+  if (formatOptions) {
+    try {
+      return new Intl.NumberFormat(undefined, formatOptions).format(value / 100);
+    } catch {
+      // Some engines ship a partial Intl; fall through to the plain percent.
+    }
+  }
+  return `${Math.round(value)}%`;
+}
+
 /**
  * Determinate or indeterminate progress bar. The fill width (determinate) and
  * the sliding bar (indeterminate) are both driven on the UI thread, so updates
  * never re-render past the value change itself.
+ *
+ * Pass `label` or `showValueLabel` to caption the bar with a header row; the
+ * bare track renders when neither is set, so existing call sites are untouched.
  */
 export const Progress = forwardRef<View, ProgressProps>(
   (
     {
       className,
       indicatorClassName,
+      headerClassName,
       value = 0,
       indeterminate = false,
+      label,
+      showValueLabel = false,
+      valueLabel,
+      formatOptions,
       color,
       size,
       ...props
@@ -124,10 +177,15 @@ export const Progress = forwardRef<View, ProgressProps>(
       };
     });
 
-    return (
+    // The value label is meaningless while looping, so it is dropped there.
+    const showValue = showValueLabel && !indeterminate;
+    const hasHeader = label != null || showValue;
+
+    const track = (
       <View
         ref={ref}
         accessibilityRole="progressbar"
+        accessibilityLabel={label}
         accessibilityValue={
           indeterminate ? undefined : { min: 0, max: 100, now: clamp(value) }
         }
@@ -139,6 +197,28 @@ export const Progress = forwardRef<View, ProgressProps>(
           style={indeterminate ? indeterminateStyle : determinateStyle}
           className={slots.indicator({ className: indicatorClassName })}
         />
+      </View>
+    );
+
+    if (!hasHeader) return track;
+
+    return (
+      <View className={slots.root()}>
+        <View className={slots.header({ className: headerClassName })}>
+          {label != null ? (
+            <Text size="sm" weight="medium" numberOfLines={1}>
+              {label}
+            </Text>
+          ) : (
+            <View />
+          )}
+          {showValue ? (
+            <Text size="sm" muted className={cn(label == null && 'ml-auto')}>
+              {formatValue(clamp(value), valueLabel, formatOptions)}
+            </Text>
+          ) : null}
+        </View>
+        {track}
       </View>
     );
   }

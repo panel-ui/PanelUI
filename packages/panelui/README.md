@@ -105,7 +105,7 @@ overlays, and the toast viewport.
 | `Input` | Text field with label, description and error message |
 | `InputGroup` | Input with leading and trailing decorators, auto-measured |
 | `Label` | Form field label with required, invalid and disabled states |
-| `Progress` | Determinate and indeterminate progress bar |
+| `Progress` | Determinate and indeterminate progress bar, optionally captioned |
 | `RadioGroup` | Single-select list of options |
 | `ScrollFade` | Fades the edges of a scroll container |
 | `Select` | Picker that opens in a bottom sheet |

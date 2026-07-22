@@ -453,24 +453,24 @@ function ChartKpiVersion() {
       <View className="w-full gap-3">
         <KpiCard
           label="Total Revenue"
-          value="$228,451"
-          delta="+3.3% last 30d"
+          value="$317,904"
+          delta="+7.8% last 30d"
           colorIndex={1}
-          data={spark([40, 44, 41, 52, 58, 54, 68, 74, 82])}
+          data={spark([36, 39, 47, 44, 55, 63, 61, 76, 88])}
         />
         <KpiCard
           label="Bounce Rate"
-          value="42.3%"
-          delta="-5.9% vs last 7d"
+          value="37.6%"
+          delta="-8.4% vs last 7d"
           colorIndex={3}
-          data={spark([82, 78, 80, 70, 66, 68, 58, 52, 44])}
+          data={spark([88, 85, 73, 76, 64, 59, 61, 48, 39])}
         />
         <KpiCard
           label="New Customers"
-          value="1,234"
-          delta="+1.0% this week"
+          value="2,867"
+          delta="+4.2% this week"
           colorIndex={2}
-          data={spark([30, 38, 34, 48, 54, 50, 66, 72, 84])}
+          data={spark([27, 35, 33, 46, 59, 55, 64, 79, 91])}
         />
       </View>
     </ChartScreen>

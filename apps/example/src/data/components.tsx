@@ -855,14 +855,19 @@ function PopoverFormDemo() {
   const [open, setOpen] = useState(false);
 
   return (
-    <View className="w-full items-center py-4">
+    <View className="w-full py-4">
       <Popover open={open} onOpenChange={setOpen}>
         <Popover.Trigger>
-          <Button variant="outline">Rename board</Button>
+          {/* A full-width trigger, because `width="trigger"` is only worth
+              having when the trigger is wide enough to hold the content. */}
+          <Button variant="outline" fullWidth>
+            Rename board
+          </Button>
         </Popover.Trigger>
-        {/* `width="trigger"` locks the panel to the trigger's width, so the
-            two read as one control rather than as a panel over a button. */}
-        <Popover.Content width="trigger" align="start" className="gap-3">
+        {/* The panel takes the trigger's width, so the two read as one control
+            rather than as a panel floating over a button. `minWidth` is the
+            floor for the day the trigger turns out narrower than the form. */}
+        <Popover.Content width="trigger" minWidth={260} align="start" className="gap-3">
           <Popover.Title>Rename</Popover.Title>
           <Input
             value={name}

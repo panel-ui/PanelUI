@@ -221,6 +221,12 @@ export interface PopoverContentProps extends ViewProps {
    * `full` spans the safe area, and a number is that many pixels.
    */
   width?: number | 'trigger' | 'full' | 'content-fit';
+  /**
+   * Floor for the panel's width, in pixels. Worth setting with
+   * `width="trigger"`, where a narrow trigger would otherwise squeeze the
+   * content into a column.
+   */
+  minWidth?: number;
   /** Tap outside the panel closes it. Default true. */
   dismissible?: boolean;
   /**
@@ -239,6 +245,7 @@ function PopoverContent({
   offset = DEFAULT_OFFSET,
   alignOffset = 0,
   width = 'content-fit',
+  minWidth,
   dismissible = true,
   blur = false,
   children,
@@ -271,14 +278,22 @@ function PopoverContent({
     bottom: screenHeight - insets.bottom - SCREEN_MARGIN,
   };
 
-  const resolvedWidth =
+  const available = bounds.right - bounds.left;
+  const requestedWidth =
     width === 'content-fit'
       ? undefined
       : width === 'trigger'
         ? trigger?.width
         : width === 'full'
-          ? bounds.right - bounds.left
+          ? available
           : width;
+
+  // The floor never wins past the space there actually is — a panel wider than
+  // the screen is worse than a cramped one.
+  const resolvedWidth =
+    minWidth !== undefined && requestedWidth !== undefined
+      ? Math.min(Math.max(requestedWidth, minWidth), available)
+      : requestedWidth;
 
   const position =
     trigger && size

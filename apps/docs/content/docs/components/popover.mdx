@@ -109,7 +109,7 @@ The arrow is a rotated square half-buried under the panel, so only the point sho
 
 ### A form, matching the trigger width
 
-`width="trigger"` locks the panel to the trigger, so the two read as one control rather than as a panel floating over a button. Controlled here, because the form needs to close itself on save.
+`width="trigger"` locks the panel to the trigger, so the two read as one control rather than as a panel floating over a button. It only earns its keep when the trigger is wide — a form pinned to the width of a short outline button is squeezed into a column. Give the trigger `fullWidth`, and set `minWidth` as the floor for the day it turns out narrower than the content. Controlled here, because the form needs to close itself on save.
 
 ```tsx
 const [open, setOpen] = useState(false);
@@ -117,9 +117,14 @@ const [name, setName] = useState("Untitled board");
 
 <Popover open={open} onOpenChange={setOpen}>
   <Popover.Trigger>
-    <Button variant="outline">Rename board</Button>
+    <Button variant="outline" fullWidth>Rename board</Button>
   </Popover.Trigger>
-  <Popover.Content width="trigger" align="start" className="gap-3">
+  <Popover.Content
+    width="trigger"
+    minWidth={260}
+    align="start"
+    className="gap-3"
+  >
     <Popover.Title>Rename</Popover.Title>
     <Input value={name} onChangeText={setName} accessibilityLabel="Board name" />
     <View className="flex-row justify-end gap-2">
@@ -206,6 +211,7 @@ Set `presentation="bottom-sheet"` on the root and the same content opens in a dr
 | `offset` | `number` | `DEFAULT_OFFSET` | Gap between the trigger and the panel, in pixels. |
 | `alignOffset` | `number` | `0` | Nudge along the alignment axis, in pixels. |
 | `width` | `number \| 'trigger' \| 'full' \| 'content-fit'` | `'content-fit'` | `content-fit` sizes to the content, `trigger` matches the trigger's width, `full` spans the safe area, and a number is that many pixels. |
+| `minWidth` | `number` | — | Floor for the panel's width, in pixels. Worth setting with `width="trigger"`, where a narrow trigger would otherwise squeeze the content into a column. |
 | `dismissible` | `boolean` | `true` | Tap outside the panel closes it. Default true. |
 | `blur` | `boolean` | `false` | Frost the background behind the panel instead of dimming it. Uses `expo-blur` when installed and falls back to the dimmed scrim when it is not, so it is safe to pass either way. |
 
@@ -230,3 +236,7 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 **`Popover.Trigger` wraps its child in a view.** The ref has to survive whatever the child is — a Button, a Pressable, an icon — and only a wrapper the component owns is guaranteed to be measurable.
 
 Use a **BottomSheet** instead when the content is long, needs its own scroll, or is the whole point of the interaction. A popover that fills the screen is a dialog wearing the wrong clothes.
+
+### Sizing the panel
+
+`content-fit` is the default and right for a menu. `trigger` ties the panel to the control that opened it, which reads as one thing rather than two — but only when the trigger is wide enough to hold what goes inside. `minWidth` is the floor, and it never wins past the space that actually exists: a panel wider than the screen is worse than a cramped one.

@@ -3,14 +3,14 @@ title: Tabs
 description: Segmented navigation with an animated indicator.
 ---
 
-Segmented navigation with an indicator that springs to the active trigger.
+Segmented navigation with one indicator that springs between measured trigger positions. A single thing travelling is what makes a switch two tabs away read as one movement rather than as two states swapping.
 
 ## Installation
 
 Tabs ships with the library — no separate install.
 
 ```tsx
-import { Tabs, Text, Button, ScrollFade } from 'panelui-native';
+import { Tabs, Text, Button, Input, Badge } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -43,9 +43,9 @@ npx panelui-cli@latest add tabs
 </Tabs>
 ```
 
-- **`Tabs.List`** — Holds the triggers and the animated indicator.
-- **`Tabs.Trigger`** — One tab. Must be inside `Tabs.List`.
-- **`Tabs.Content`** — Panel for a tab. Renders only while its tab is active.
+- **`Tabs.List`** — Holds the triggers and the animated indicator. Takes `scrollable` for more tabs than fit.
+- **`Tabs.Trigger`** — One tab, with optional `icon`, `badge` and `disabled`. Must be inside `Tabs.List`.
+- **`Tabs.Content`** — Panel for a tab. Unmounted while inactive unless the root sets `keepMounted`.
 
 ## Examples
 
@@ -89,24 +89,75 @@ const [tab, setTab] = useState('overview');
 </>
 ```
 
-### Tabs that scroll
+### More tabs than fit
 
-Wrap the list when there are more tabs than fit, and fade the edges so it reads as scrollable.
+A fixed row splits its width between the triggers, which crushes every label once there are more than about four. `scrollable` gives each trigger its natural width, puts the row in a horizontal scroller, and scrolls the active tab into view when it changes from elsewhere.
 
 ```tsx
-<Tabs defaultValue="all">
-  <ScrollFade size={32}>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <Tabs.List>
-        {categories.map((c) => (
-          <Tabs.Trigger key={c.id} value={c.id}>{c.name}</Tabs.Trigger>
-        ))}
-      </Tabs.List>
-    </ScrollView>
-  </ScrollFade>
+<Tabs variant="underline" defaultValue="overview">
+  <Tabs.List scrollable>
+    {sections.map((s) => (
+      <Tabs.Trigger key={s.id} value={s.id}>{s.name}</Tabs.Trigger>
+    ))}
+  </Tabs.List>
 
   {/* …content… */}
 </Tabs>
+```
+
+### Icons, badges and disabled tabs
+
+A count or a status goes in `badge` rather than into the children, so the label keeps its own typography. A disabled trigger is dimmed, unselectable, and announced as disabled.
+
+```tsx
+<Tabs.List>
+  <Tabs.Trigger value="inbox" icon={<InboxIcon size={16} />}>
+    Inbox
+  </Tabs.Trigger>
+  <Tabs.Trigger value="activity" badge={<Badge variant="secondary">4</Badge>}>
+    Activity
+  </Tabs.Trigger>
+  <Tabs.Trigger value="archived" disabled>
+    Archived
+  </Tabs.Trigger>
+</Tabs.List>
+```
+
+### Keeping panels mounted
+
+By default a panel is unmounted when you leave it, and a scroll position or a half-filled form goes with it. `keepMounted` renders every panel and hides the inactive ones — out of layout and out of the screen-reader order, but still there. It costs the render of every panel up front, so it is opt-in.
+
+```tsx
+<Tabs keepMounted defaultValue="draft">
+  <Tabs.List>
+    <Tabs.Trigger value="draft">Draft</Tabs.Trigger>
+    <Tabs.Trigger value="preview">Preview</Tabs.Trigger>
+  </Tabs.List>
+
+  <Tabs.Content value="draft">
+    <Input label="Title" value={title} onChangeText={setTitle} />
+  </Tabs.Content>
+  <Tabs.Content value="preview">…</Tabs.Content>
+</Tabs>
+```
+
+## Variants
+
+### `variant`
+
+- `segmented` *(default)*
+- `underline`
+- `pill`
+
+```tsx
+{/* A chip travelling inside a recessed track — the default. */}
+<Tabs variant="segmented" defaultValue="a">…</Tabs>
+
+{/* A rule under the active tab, for a page-level switch. */}
+<Tabs variant="underline" defaultValue="a">…</Tabs>
+
+{/* A filled chip on the page, active label inverted against it. */}
+<Tabs variant="pill" defaultValue="a">…</Tabs>
 ```
 
 ## API Reference
@@ -119,12 +170,15 @@ Wrap the list when there are more tabs than fit, and fade the edges so it reads 
 | `value` | `string` | — |  |
 | `onValueChange` | `(value: string) => void` | — |  |
 | `defaultValue` | `string` | — |  |
+| `variant` | `TabsVariant` | `segmented` | `segmented` is a chip travelling inside a recessed track, `underline` is a rule under the active tab, `pill` is a filled chip on the page. |
+| `keepMounted` | `boolean` | `false` | Keep inactive panels mounted and hidden instead of unmounting them, so a scroll position or a half-filled form survives a switch away and back. Costs the render of every panel up front. |
 
 ### Tabs.List
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `scrollable` | `boolean` | `false` | Lay the triggers out at their natural widths inside a horizontal scroller instead of splitting the row between them. For more tabs than fit — which a fixed row answers by crushing every label. |
 
 ### Tabs.Trigger
 
@@ -132,6 +186,9 @@ Wrap the list when there are more tabs than fit, and fade the edges so it reads 
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `value` | `string` | — |  |
+| `icon` | `ReactNode` | — | Rendered before the label. |
+| `badge` | `ReactNode` | — | Rendered after the label — a count, a dot, a status. |
+| `disabled` | `boolean` | `false` | Unselectable, dimmed, and announced as disabled. |
 
 ### Tabs.Content
 

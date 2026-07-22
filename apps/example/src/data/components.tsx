@@ -1288,6 +1288,72 @@ function SliderDemo() {
   );
 }
 
+const TAB_SECTIONS = [
+  'Overview',
+  'Activity',
+  'Members',
+  'Billing',
+  'Integrations',
+  'Security',
+  'Audit log',
+];
+
+function ScrollableTabsDemo() {
+  return (
+    // More tabs than fit. A fixed row answers that by crushing every label to
+    // an unreadable width; `scrollable` gives each one its natural width and
+    // scrolls the active tab into view instead.
+    <Tabs variant="underline" defaultValue="Overview" className="w-full">
+      <Tabs.List scrollable>
+        {TAB_SECTIONS.map((section) => (
+          <Tabs.Trigger key={section} value={section}>
+            {section}
+          </Tabs.Trigger>
+        ))}
+      </Tabs.List>
+      {TAB_SECTIONS.map((section) => (
+        <Tabs.Content key={section} value={section}>
+          <Text size="sm" muted className="py-4">
+            {section}
+          </Text>
+        </Tabs.Content>
+      ))}
+    </Tabs>
+  );
+}
+
+function KeepMountedTabsDemo() {
+  return (
+    // Type into the field, switch away, come back: the text is still there.
+    // Without `keepMounted` the panel is unmounted and the value goes with it.
+    <Tabs keepMounted defaultValue="draft" className="w-full">
+      <Tabs.List>
+        <Tabs.Trigger value="draft">Draft</Tabs.Trigger>
+        <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="draft">
+        <Card>
+          <Card.Content className="gap-3 p-4">
+            <Input label="Title" placeholder="Type something, then switch tab" />
+            <Text size="xs" muted>
+              This panel stays mounted, so what you type survives the switch.
+            </Text>
+          </Card.Content>
+        </Card>
+      </Tabs.Content>
+      <Tabs.Content value="settings">
+        <Card>
+          <Card.Content className="p-4">
+            <Text size="sm" muted>
+              Switch back to Draft — the title you typed is still in the field.
+            </Text>
+          </Card.Content>
+        </Card>
+      </Tabs.Content>
+    </Tabs>
+  );
+}
+
 function PasswordInputDemo() {
   const [visible, setVisible] = useState(false);
 
@@ -4193,6 +4259,74 @@ export const COMPONENTS: ComponentEntry[] = [
             </Tabs.Content>
           </Tabs>
         ),
+      },
+      {
+        label: 'Underline',
+        render: () => (
+          <Tabs variant="underline" defaultValue="overview" className="w-full">
+            <Tabs.List>
+              <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
+              <Tabs.Trigger value="activity" badge={<Badge variant="secondary">4</Badge>}>
+                Activity
+              </Tabs.Trigger>
+              <Tabs.Trigger value="archived" disabled>
+                Archived
+              </Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="overview">
+              <Text size="sm" muted className="py-4">
+                A rule under the active tab, on a row that has no track of its
+                own — for a page-level switch rather than a control.
+              </Text>
+            </Tabs.Content>
+            <Tabs.Content value="activity">
+              <Text size="sm" muted className="py-4">
+                Four things happened while you were away.
+              </Text>
+            </Tabs.Content>
+            <Tabs.Content value="archived">
+              <Text size="sm" muted className="py-4">
+                Unreachable — the trigger is disabled.
+              </Text>
+            </Tabs.Content>
+          </Tabs>
+        ),
+      },
+      {
+        label: 'Pill',
+        render: () => (
+          <Tabs variant="pill" defaultValue="all" className="w-full">
+            <Tabs.List>
+              <Tabs.Trigger value="all">All</Tabs.Trigger>
+              <Tabs.Trigger value="unread">Unread</Tabs.Trigger>
+              <Tabs.Trigger value="flagged">Flagged</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="all">
+              <Text size="sm" muted className="py-4">
+                A filled chip on the page, with the active label inverted
+                against it.
+              </Text>
+            </Tabs.Content>
+            <Tabs.Content value="unread">
+              <Text size="sm" muted className="py-4">
+                Nothing unread.
+              </Text>
+            </Tabs.Content>
+            <Tabs.Content value="flagged">
+              <Text size="sm" muted className="py-4">
+                Nothing flagged.
+              </Text>
+            </Tabs.Content>
+          </Tabs>
+        ),
+      },
+      {
+        label: 'Scrollable',
+        render: () => <ScrollableTabsDemo />,
+      },
+      {
+        label: 'Keeping panels mounted',
+        render: () => <KeepMountedTabsDemo />,
       },
     ],
   },

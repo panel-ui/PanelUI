@@ -509,7 +509,14 @@
         "description": "`className` goes on the text field; `containerClassName` goes on the wrapper that holds the label, field and message.",
         "code": "<Input\n  containerClassName=\"flex-1\"\n  className=\"h-12 rounded-full px-4\"\n  placeholder=\"Search components\"\n/>"
       }
-    ]
+    ],
+    "hideVariants": [
+      "multiline"
+    ],
+    "variantCode": {
+      "variant": "{/* On the page, where the field draws its own edge. */}\n<Input variant=\"outline\" label=\"Email\" />\n\n{/* Inside a card or a sheet, where a second border reads as a seam. */}\n<Input variant=\"filled\" label=\"Email\" />",
+      "size": "<Input size=\"sm\" placeholder=\"40 tall\" />\n<Input size=\"md\" placeholder=\"48 tall\" />\n<Input size=\"lg\" placeholder=\"56 tall\" />"
+    }
   },
   "input-group": {
     "intro": "An input with leading or trailing decorators. The prefix and suffix are measured and their widths applied as padding on the input, so text never runs underneath them however wide they turn out to be.",
@@ -1254,12 +1261,12 @@
     ]
   },
   "tabs": {
-    "intro": "Segmented navigation with an indicator that springs to the active trigger.",
+    "intro": "Segmented navigation with one indicator that springs between measured trigger positions. A single thing travelling is what makes a switch two tabs away read as one movement rather than as two states swapping.",
     "usage": "<Tabs defaultValue=\"account\">\n  <Tabs.List>\n    <Tabs.Trigger value=\"account\">Account</Tabs.Trigger>\n    <Tabs.Trigger value=\"password\">Password</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"account\">…</Tabs.Content>\n  <Tabs.Content value=\"password\">…</Tabs.Content>\n</Tabs>",
     "parts": {
-      "List": "Holds the triggers and the animated indicator.",
-      "Trigger": "One tab. Must be inside `Tabs.List`.",
-      "Content": "Panel for a tab. Renders only while its tab is active."
+      "List": "Holds the triggers and the animated indicator. Takes `scrollable` for more tabs than fit.",
+      "Trigger": "One tab, with optional `icon`, `badge` and `disabled`. Must be inside `Tabs.List`.",
+      "Content": "Panel for a tab. Unmounted while inactive unless the root sets `keepMounted`."
     },
     "anatomy": "<Tabs>\n  <Tabs.List>\n    <Tabs.Trigger value=\"…\">…</Tabs.Trigger>\n  </Tabs.List>\n  <Tabs.Content value=\"…\">…</Tabs.Content>\n</Tabs>",
     "examples": [
@@ -1274,15 +1281,32 @@
         "code": "const [tab, setTab] = useState('overview');\n\n<>\n  <Button onPress={() => setTab('settings')}>Go to settings</Button>\n\n  <Tabs value={tab} onValueChange={setTab} defaultValue=\"overview\">\n    {/* …list and content… */}\n  </Tabs>\n</>"
       },
       {
-        "title": "Tabs that scroll",
-        "description": "Wrap the list when there are more tabs than fit, and fade the edges so it reads as scrollable.",
-        "code": "<Tabs defaultValue=\"all\">\n  <ScrollFade size={32}>\n    <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n      <Tabs.List>\n        {categories.map((c) => (\n          <Tabs.Trigger key={c.id} value={c.id}>{c.name}</Tabs.Trigger>\n        ))}\n      </Tabs.List>\n    </ScrollView>\n  </ScrollFade>\n\n  {/* …content… */}\n</Tabs>"
+        "title": "More tabs than fit",
+        "description": "A fixed row splits its width between the triggers, which crushes every label once there are more than about four. `scrollable` gives each trigger its natural width, puts the row in a horizontal scroller, and scrolls the active tab into view when it changes from elsewhere.",
+        "code": "<Tabs variant=\"underline\" defaultValue=\"overview\">\n  <Tabs.List scrollable>\n    {sections.map((s) => (\n      <Tabs.Trigger key={s.id} value={s.id}>{s.name}</Tabs.Trigger>\n    ))}\n  </Tabs.List>\n\n  {/* …content… */}\n</Tabs>"
+      },
+      {
+        "title": "Icons, badges and disabled tabs",
+        "description": "A count or a status goes in `badge` rather than into the children, so the label keeps its own typography. A disabled trigger is dimmed, unselectable, and announced as disabled.",
+        "code": "<Tabs.List>\n  <Tabs.Trigger value=\"inbox\" icon={<InboxIcon size={16} />}>\n    Inbox\n  </Tabs.Trigger>\n  <Tabs.Trigger value=\"activity\" badge={<Badge variant=\"secondary\">4</Badge>}>\n    Activity\n  </Tabs.Trigger>\n  <Tabs.Trigger value=\"archived\" disabled>\n    Archived\n  </Tabs.Trigger>\n</Tabs.List>"
+      },
+      {
+        "title": "Keeping panels mounted",
+        "description": "By default a panel is unmounted when you leave it, and a scroll position or a half-filled form goes with it. `keepMounted` renders every panel and hides the inactive ones — out of layout and out of the screen-reader order, but still there. It costs the render of every panel up front, so it is opt-in.",
+        "code": "<Tabs keepMounted defaultValue=\"draft\">\n  <Tabs.List>\n    <Tabs.Trigger value=\"draft\">Draft</Tabs.Trigger>\n    <Tabs.Trigger value=\"preview\">Preview</Tabs.Trigger>\n  </Tabs.List>\n\n  <Tabs.Content value=\"draft\">\n    <Input label=\"Title\" value={title} onChangeText={setTitle} />\n  </Tabs.Content>\n  <Tabs.Content value=\"preview\">…</Tabs.Content>\n</Tabs>"
       }
     ],
     "extraImports": [
       "Text",
       "Button",
-      "ScrollFade"
+      "Input",
+      "Badge"
+    ],
+    "variantCode": {
+      "variant": "{/* A chip travelling inside a recessed track — the default. */}\n<Tabs variant=\"segmented\" defaultValue=\"a\">…</Tabs>\n\n{/* A rule under the active tab, for a page-level switch. */}\n<Tabs variant=\"underline\" defaultValue=\"a\">…</Tabs>\n\n{/* A filled chip on the page, active label inverted against it. */}\n<Tabs variant=\"pill\" defaultValue=\"a\">…</Tabs>"
+    },
+    "hideVariants": [
+      "scrollable"
     ]
   },
   "timeline": {

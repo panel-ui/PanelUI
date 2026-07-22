@@ -150,8 +150,11 @@ Anything `TextInput` accepts works here.
 - `filled`
 
 ```tsx
-<Input variant="outline">…</Input>
-<Input variant="filled">…</Input>
+{/* On the page, where the field draws its own edge. */}
+<Input variant="outline" label="Email" />
+
+{/* Inside a card or a sheet, where a second border reads as a seam. */}
+<Input variant="filled" label="Email" />
 ```
 
 ### `size`
@@ -161,17 +164,9 @@ Anything `TextInput` accepts works here.
 - `lg`
 
 ```tsx
-<Input size="sm">…</Input>
-<Input size="md">…</Input>
-<Input size="lg">…</Input>
-```
-
-### `multiline`
-
-- `true`
-
-```tsx
-<Input multiline="true">…</Input>
+<Input size="sm" placeholder="40 tall" />
+<Input size="md" placeholder="48 tall" />
+<Input size="lg" placeholder="56 tall" />
 ```
 
 ## API Reference

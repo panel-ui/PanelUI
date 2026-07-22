@@ -3,6 +3,7 @@ import './global.css';
 import type { Metadata } from 'next';
 import { Geist_Mono, Inter } from 'next/font/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import { Analytics } from '@/components/analytics';
 import { absoluteUrl, site } from '@/lib/site';
 import { cn } from "@/lib/utils";
 
@@ -87,6 +88,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {/* `isolate` keeps Base UI portals layering against this root. */}
       <body className="isolate flex min-h-screen flex-col font-sans antialiased">
         <RootProvider>{children}</RootProvider>
+        {/* One tag for the whole site — the root layout wraps every page, so
+            nothing else should mount another. */}
+        <Analytics />
       </body>
     </html>
   );

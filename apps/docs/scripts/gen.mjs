@@ -10,8 +10,44 @@ const S = HERE;
 const api = JSON.parse(fs.readFileSync(`${S}/api.json`, 'utf8'));
 const meta = JSON.parse(fs.readFileSync(`${S}/meta.json`, 'utf8'));
 const usage = JSON.parse(fs.readFileSync(`${S}/usage.json`, 'utf8'));
-const outDir = path.join(HERE, '../content/docs/components');
-fs.mkdirSync(outDir, { recursive: true });
+const contentDir = path.join(HERE, '../content/docs');
+
+/** Where a component's page goes, and what its sidebar group is called. */
+const GROUPS = {
+  components: 'Components',
+  'ai-components': 'AI Components',
+};
+const DEFAULT_GROUP = 'components';
+
+/** The version being documented, for the `new` badge below. */
+const libVersion = JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'packages/panelui/package.json'), 'utf8')
+).version;
+
+/**
+ * How many minor releases a component keeps its blue "new" dot in the sidebar.
+ *
+ * Deriving this from `addedIn` rather than hand-writing a `status` field means
+ * nobody has to remember to take the badge off — which is the failure mode
+ * every "new" marker has, and the reason half of them end up permanent.
+ */
+const NEW_FOR_MINORS = 3;
+
+function isNew(addedIn) {
+  if (!addedIn) return false;
+  const [addedMajor, addedMinor] = addedIn.split('.').map(Number);
+  const [major, minor] = libVersion.split('.').map(Number);
+  if (major !== addedMajor) return major < addedMajor;
+  return minor - addedMinor < NEW_FOR_MINORS;
+}
+
+/** Options are an optional 4th element, so the common entry stays a triple. */
+const optionsOf = (entry) => entry[3] ?? {};
+const groupOf = (entry) => optionsOf(entry).group ?? DEFAULT_GROUP;
+
+for (const group of Object.keys(GROUPS)) {
+  fs.mkdirSync(path.join(contentDir, group), { recursive: true });
+}
 
 const esc = (s) => String(s).replace(/\|/g, '\\|');
 const inlineCode = (s) => '`' + String(s).replace(/`/g, '') + '`';
@@ -38,7 +74,9 @@ function propsTable(iface, defaults) {
 }
 
 let count = 0;
-for (const [slug, [name, summary, keyword]] of Object.entries(meta)) {
+for (const [slug, entry] of Object.entries(meta)) {
+  const [name, summary, keyword] = entry;
+  const options = optionsOf(entry);
   const c = api[slug];
   if (!c) { console.error('missing api for', slug); continue; }
   const u = usage[slug] ?? {};
@@ -57,7 +95,7 @@ for (const [slug, [name, summary, keyword]] of Object.entries(meta)) {
 
   sections.push(`---
 title: ${name}
-description: ${summary}
+description: ${summary}${isNew(options.addedIn) ? '\nstatus: new' : ''}
 ---
 
 ${u.intro ?? summary}${preview}
@@ -157,12 +195,33 @@ Every part also accepts the underlying React Native props (\`ViewProps\` or \`Te
 
   if (u.notes) sections.push(`## Notes\n\n${u.notes}`);
 
-  fs.writeFileSync(path.join(outDir, `${slug}.mdx`), sections.join('\n\n') + '\n');
+  fs.writeFileSync(
+    path.join(contentDir, groupOf(entry), `${slug}.mdx`),
+    sections.join('\n\n') + '\n'
+  );
   count++;
 }
 
-fs.writeFileSync(
-  path.join(outDir, 'meta.json'),
-  JSON.stringify({ title: 'Components', pages: Object.keys(meta) }, null, 2) + '\n'
-);
+/*
+ * One meta.json per group, listing only the slugs in it. Written from the same
+ * source as the pages, so a component cannot be filed in one place and listed
+ * in another — and a page left behind by a regroup is deleted rather than
+ * quietly kept in the sidebar.
+ */
+for (const [group, title] of Object.entries(GROUPS)) {
+  const pages = Object.entries(meta)
+    .filter(([, entry]) => groupOf(entry) === group)
+    .map(([slug]) => slug);
+
+  const dir = path.join(contentDir, group);
+  fs.writeFileSync(
+    path.join(dir, 'meta.json'),
+    JSON.stringify({ title, pages }, null, 2) + '\n'
+  );
+
+  const keep = new Set([...pages.map((slug) => `${slug}.mdx`), 'meta.json']);
+  for (const file of fs.readdirSync(dir)) {
+    if (!keep.has(file)) fs.rmSync(path.join(dir, file));
+  }
+}
 console.log('wrote', count, 'component pages');

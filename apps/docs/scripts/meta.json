@@ -122,7 +122,10 @@
   "section-rail": [
     "SectionRail",
     "Floating section navigator for a long screen.",
-    "react native table of contents"
+    "react native table of contents",
+    {
+      "addedIn": "0.11.0"
+    }
   ],
   "select": [
     "Select",
@@ -137,7 +140,10 @@
   "shimmer": [
     "Shimmer",
     "Animated highlight sweeping across content.",
-    "react native shimmer effect"
+    "react native shimmer effect",
+    {
+      "group": "ai-components"
+    }
   ],
   "skeleton": [
     "Skeleton",
@@ -187,7 +193,10 @@
   "toggle-button": [
     "ToggleButton",
     "A button that stays down, on its own or in a group.",
-    "react native toggle button"
+    "react native toggle button",
+    {
+      "addedIn": "0.11.0"
+    }
   ],
   "typography": [
     "Typography",

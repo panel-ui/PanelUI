@@ -72,8 +72,8 @@ changing the library:
 `apps/docs` is the published documentation site. **A component change is not complete until its
 docs page is updated in the same commit.**
 
-- Adding a component → add `apps/docs/content/docs/components/<name>.mdx` and register it in the
-  sibling `meta.json`.
+- Adding a component → add an entry to `apps/docs/scripts/meta.json` and `usage.json`, then
+  regenerate. The MDX file and the group's `meta.json` are written for you.
 - Changing a component → update that page's props table, anatomy, variant list and examples. New
   props, renamed variants and changed defaults all count.
 - Removing or renaming anything → fix every page that references it.
@@ -87,6 +87,32 @@ the library source into `api.json`; `gen.mjs` merges it with the hand-written `u
 `meta.json` and writes the MDX. Edit those two JSON files and run
 `npm run docs:generate --workspace=docs`, which also rebuilds the registry. See
 `apps/docs/scripts/README.md` for what each `usage.json` key becomes.
+
+### meta.json entries: group and addedIn
+
+A `scripts/meta.json` entry is `[name, summary, keyword]`, optionally followed by an options
+object. Two keys live there:
+
+- **`group`** — which sidebar section the page is filed under. Omit it for `components`; pass
+  `"ai-components"` for the AI Components section. The group decides both the folder the MDX is
+  written to *and* the page's URL, so **regrouping an existing component moves its URL** — add a
+  redirect in `apps/docs/next.config.mjs` when you do.
+- **`addedIn`** — the version the component first ships in. Set it when adding a component, to
+  the version you are about to release.
+
+```json
+"section-rail": ["SectionRail", "…", "…", { "addedIn": "0.11.0" }],
+"shimmer": ["Shimmer", "…", "…", { "group": "ai-components" }]
+```
+
+**`addedIn` drives the blue "new" dot in the docs sidebar.** `gen.mjs` emits `status: new` into
+the page's frontmatter while the library version is within **three minor releases** of
+`addedIn`, and `lib/source.tsx` renders it as a dot. Past that window it stops being emitted and
+the badge disappears on the next regeneration.
+
+Never hand-write a `status` field into an MDX file — it is generated, and the next
+`docs:generate` will drop it. The whole point of deriving it is that nobody has to remember to
+take the badge off.
 
 ### Full-screen demos go behind a version row
 

@@ -12,6 +12,14 @@
     "registry:build": "node scripts/build-registry.mjs",
     "prebuild": "node scripts/build-registry.mjs"
   },
+  "//browserslist": "Next's default target still down-levels Array.prototype.at, Object.hasOwn and friends, shipping ~14KB of polyfills for engines that have had them since 2021. This is a docs site for a React Native library — its readers are on current browsers.",
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4",
+    "not dead"
+  ],
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "class-variance-authority": "^0.7.1",

@@ -199,8 +199,12 @@
       --color-secondary-foreground: #f5f5f5;
 
       --color-muted: rgba(255, 255, 255, 0.08);
-      /* color-mix(neutral-500 90%, white) */
-      --color-muted-foreground: #818181;
+      /*
+       * color-mix(neutral-500 86%, white). Was 90% (#818181), which came out
+       * at 4.42:1 on the popover surface — under the 4.5:1 floor for body
+       * text. Every other theme's muted foreground already clears it.
+       */
+      --color-muted-foreground: #878787;
 
       --color-accent: rgba(255, 255, 255, 0.08);
       --color-accent-foreground: #f5f5f5;

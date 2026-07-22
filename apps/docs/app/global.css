@@ -103,7 +103,9 @@
   --secondary-foreground: var(--color-neutral-100);
 
   --muted: --alpha(var(--color-white) / 4%);
-  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 90%, var(--color-white));
+  /* 86%, not 90%: at 90% this lands on 4.42:1 against the card, under the
+     4.5:1 floor for body text. Kept in sync with packages/panelui/theme.css. */
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 86%, var(--color-white));
 
   --accent: --alpha(var(--color-white) / 4%);
   --accent-foreground: var(--color-neutral-100);

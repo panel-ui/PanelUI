@@ -78,11 +78,18 @@ const COMPONENTS = [
   ['Progress', 'progress'], ['RadioGroup', 'radio-group'], ['ScrollFade', 'scroll-fade'],
   ['SectionRail', 'section-rail'], ['Select', 'select'], ['Separator', 'separator'],
   ['Shimmer', 'shimmer'],
-  ['Skeleton', 'skeleton'], ['Spinner', 'spinner'], ['Steps', 'steps'],
+  ['Skeleton', 'skeleton'], ['Slider', 'slider'], ['Spinner', 'spinner'],
+  ['Steps', 'steps'],
   ['Surface', 'surface'], ['Switch', 'switch'], ['Tabs', 'tabs'],
   ['Timeline', 'timeline'], ['Toast', 'toast'], ['ToggleButton', 'toggle-button'],
   ['Typography', 'typography'],
 ] as const;
+
+/**
+ * Derived, not written down. The count appeared in three places and had
+ * already drifted apart in two of them.
+ */
+const COMPONENT_COUNT = COMPONENTS.length;
 
 const THEMES = [
   { name: 'Panel', body: 'The default — neutral greys, moderate corners.', swatch: '#262626' },
@@ -110,7 +117,7 @@ const FAQ = [
   },
   {
     q: 'How many components are there?',
-    a: '37, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, file attachments, timelines and toasts.',
+    a: `${COMPONENT_COUNT}, covering overlays, forms, feedback, data and layout — from bottom sheets and popovers to chat transcripts, animated line charts, file attachments, timelines and toasts.`,
   },
 ];
 
@@ -152,7 +159,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 px-6 py-24 text-center">
-        <Badge variant="secondary">26 components · MIT · Expo SDK 57+</Badge>
+        <Badge variant="secondary">{COMPONENT_COUNT} components · MIT · Expo SDK 57+</Badge>
         <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
           React Native UI components for Expo, styled with Tailwind CSS
         </h1>
@@ -207,7 +214,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-5xl flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="font-heading text-3xl font-semibold tracking-tight">
-              26 components, documented
+              {COMPONENT_COUNT} components, documented
             </h2>
             <p className="max-w-2xl text-muted-foreground">
               Each page covers the anatomy, every prop, and the variants — read straight from

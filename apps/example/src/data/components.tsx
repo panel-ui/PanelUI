@@ -67,6 +67,7 @@ import {
   Separator,
   Shimmer,
   Skeleton,
+  Slider,
   Spinner,
   Steps,
   Surface,
@@ -1258,10 +1259,29 @@ function ProgressDemo() {
 
   return (
     <View className="w-full gap-4">
-      <Progress value={uploaded} />
+      <Progress value={uploaded} label="Uploading" showValueLabel />
       <Progress value={uploaded} color="success" size="sm" />
       <Progress value={70} color="warning" size="lg" />
       <Progress indeterminate color="info" />
+    </View>
+  );
+}
+
+function SliderDemo() {
+  const [volume, setVolume] = useState(40);
+
+  return (
+    <View className="w-full gap-5">
+      <View className="gap-2">
+        <View className="flex-row justify-between">
+          <Text className="text-sm font-medium text-foreground">Volume</Text>
+          <Text className="text-sm text-muted-foreground">{volume}%</Text>
+        </View>
+        <Slider value={volume} onValueChange={setVolume} />
+      </View>
+      <Slider defaultValue={70} color="success" size="sm" />
+      <Slider defaultValue={5} min={0} max={10} step={1} color="warning" size="lg" />
+      <Slider defaultValue={30} disabled />
     </View>
   );
 }
@@ -3401,6 +3421,23 @@ export const COMPONENTS: ComponentEntry[] = [
     demos: [
       { label: 'Animated', render: () => <ProgressDemo /> },
       {
+        label: 'Labelled',
+        render: () => (
+          <View className="w-full gap-4">
+            <Progress value={64} label="Downloading" showValueLabel />
+            <Progress
+              value={40}
+              color="success"
+              label="Storage"
+              showValueLabel
+              formatOptions={{ style: 'currency', currency: 'USD' }}
+              valueLabel="8.2 GB of 20 GB"
+            />
+            <Progress value={90} color="warning" showValueLabel />
+          </View>
+        ),
+      },
+      {
         label: 'Colors',
         render: () => (
           <View className="w-full gap-4">
@@ -3890,6 +3927,44 @@ export const COMPONENTS: ComponentEntry[] = [
               <Skeleton className="h-4 w-4/5" />
             </Card.Content>
           </Card>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'slider',
+    name: 'Slider',
+    summary: 'Pick a value by dragging a thumb along a track',
+    demos: [
+      { label: 'Interactive', render: () => <SliderDemo /> },
+      {
+        label: 'Colors',
+        render: () => (
+          <View className="w-full gap-5">
+            <Slider defaultValue={40} color="primary" />
+            <Slider defaultValue={55} color="success" />
+            <Slider defaultValue={70} color="warning" />
+            <Slider defaultValue={85} color="destructive" />
+          </View>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-5">
+            <Slider defaultValue={40} size="sm" />
+            <Slider defaultValue={40} size="md" />
+            <Slider defaultValue={40} size="lg" />
+          </View>
+        ),
+      },
+      {
+        label: 'Stepped',
+        render: () => (
+          <View className="w-full gap-5">
+            <Slider defaultValue={2} min={0} max={5} step={1} />
+            <Slider defaultValue={30} disabled />
+          </View>
         ),
       },
     ],

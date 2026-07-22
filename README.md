@@ -48,13 +48,14 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 | --- | --- | --- |
 | Accordion | EmptyState | Select |
 | Alert | Frame | Skeleton |
-| Avatar | InlineSelect | Spinner |
-| Badge | Input | Steps |
-| BottomSheet | InputGroup | Switch |
-| Button | Label | Tabs |
-| Card | Progress | Timeline |
-| Checkbox | RadioGroup | Toast |
-| Dialog | | Typography |
+| Avatar | InlineSelect | Slider |
+| Badge | Input | Spinner |
+| BottomSheet | InputGroup | Steps |
+| Button | Label | Switch |
+| Card | Progress | Tabs |
+| Checkbox | RadioGroup | Timeline |
+| Dialog | | Toast |
+| | | Typography |
 
 `Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
 `Frame` is a widget shell: a titled header row with an action on the right, an

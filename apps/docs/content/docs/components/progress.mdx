@@ -3,7 +3,7 @@ title: Progress
 description: Determinate and indeterminate progress bar.
 ---
 
-A progress bar, determinate or indeterminate, animated on the UI thread.
+A progress bar, determinate or indeterminate, animated on the UI thread. Caption it with a label and a value readout when the bar needs a heading.
 
 ## Installation
 
@@ -37,6 +37,21 @@ npx panelui-cli@latest add progress
 <Progress value={72} />
 
 <Progress value={uploaded / total * 100} color="success" size="lg" />
+```
+
+### Labelled
+
+`label` captions the bar on the left; `showValueLabel` prints the percentage on the right. `valueLabel` replaces that text for anything that is not a bare percent.
+
+```tsx
+<Progress value={64} label="Downloading" showValueLabel />
+
+<Progress
+  value={40}
+  label="Storage"
+  valueLabel="8.2 GB of 20 GB"
+  showValueLabel
+/>
 ```
 
 ### Indeterminate
@@ -96,9 +111,14 @@ For work with no measurable progress. The animation runs on the UI thread and st
 | `value` | `number` | `0` | Progress value, 0–100. Ignored when `indeterminate` is set. |
 | `indeterminate` | `boolean` | `false` | Show a looping animation for unknown-duration work. |
 | `indicatorClassName` | `string` | — | Extra classes for the moving indicator. |
+| `label` | `string` | — | Caption drawn above the track, on the left. Supplying it (or `showValueLabel`) wraps the bar in a header row; the track alone renders otherwise. |
+| `showValueLabel` | `boolean` | `false` | Draw the percentage above the track, on the right. Hidden while `indeterminate` — there is nothing meaningful to show. |
+| `valueLabel` | `string` | — | Text for the value label. Overrides the formatted percentage — use it for a byte count, a step tally, anything that is not a bare percent. |
+| `formatOptions` | `Intl.NumberFormatOptions` | — | Format the value label as a fraction of the whole with `Intl.NumberFormat` — e.g. `{ style: 'currency', currency: 'USD' }`. Falls back to a rounded percent when omitted. |
+| `headerClassName` | `string` | — | Extra classes for the label + value-label row. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
-`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops.
+`value` is `0–100`. With `indeterminate` the value is ignored, the bar loops, and the value label is dropped. `formatOptions` renders the readout with `Intl.NumberFormat` over `value / 100`.

@@ -872,14 +872,19 @@
     "notes": "**Placement is resolved, not obeyed.** The side is flipped only when the preferred one genuinely has less room than its opposite; after that the panel is slid along the other axis to stay inside the safe area. That order matters — sliding first would let a badly placed panel look like it fits.\n\n**The panel is measured before it is shown.** Its size is not known until it has laid out once, so the first frame is laid out off-screen and the entrance starts from the frame after. That entrance is driven by hand rather than by a preset, because it has to start from whichever side was resolved — a panel that opened upwards should not appear to come from above.\n\n**The arrow points at the trigger, not the panel.** When `align` shifts the panel off-centre or a clamp slides it back on screen, the arrow tracks the trigger's centre rather than the panel's middle.\n\n**The trigger is measured on every open**, not once on layout. A trigger inside a scroll view has moved since it was laid out, and a stale rectangle anchors the panel to where it used to be.\n\n**`Popover.Trigger` wraps its child in a view.** The ref has to survive whatever the child is — a Button, a Pressable, an icon — and only a wrapper the component owns is guaranteed to be measurable.\n\nUse a **BottomSheet** instead when the content is long, needs its own scroll, or is the whole point of the interaction. A popover that fills the screen is a dialog wearing the wrong clothes."
   },
   "progress": {
-    "intro": "A progress bar, determinate or indeterminate, animated on the UI thread.",
+    "intro": "A progress bar, determinate or indeterminate, animated on the UI thread. Caption it with a label and a value readout when the bar needs a heading.",
     "usage": "<Progress value={uploaded} />\n<Progress value={70} color=\"success\" size=\"lg\" />\n<Progress indeterminate color=\"info\" />",
-    "notes": "`value` is `0–100`. With `indeterminate` the value is ignored and the bar loops.",
+    "notes": "`value` is `0–100`. With `indeterminate` the value is ignored, the bar loops, and the value label is dropped. `formatOptions` renders the readout with `Intl.NumberFormat` over `value / 100`.",
     "examples": [
       {
         "title": "Determinate",
         "description": "`value` is a percentage from 0 to 100.",
         "code": "<Progress value={72} />\n\n<Progress value={uploaded / total * 100} color=\"success\" size=\"lg\" />"
+      },
+      {
+        "title": "Labelled",
+        "description": "`label` captions the bar on the left; `showValueLabel` prints the percentage on the right. `valueLabel` replaces that text for anything that is not a bare percent.",
+        "code": "<Progress value={64} label=\"Downloading\" showValueLabel />\n\n<Progress\n  value={40}\n  label=\"Storage\"\n  valueLabel=\"8.2 GB of 20 GB\"\n  showValueLabel\n/>"
       },
       {
         "title": "Indeterminate",
@@ -1078,6 +1083,36 @@
       "Card",
       "Text"
     ]
+  },
+  "slider": {
+    "intro": "A value picker driven by a single thumb. The thumb and the fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.",
+    "usage": "<Slider defaultValue={40} />\n<Slider value={volume} onValueChange={setVolume} />\n<Slider min={0} max={10} step={1} defaultValue={5} />",
+    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.",
+    "examples": [
+      {
+        "title": "Controlled",
+        "description": "Hold the value in state and read it back for a live label.",
+        "code": "const [volume, setVolume] = useState(40);\n\n<Slider value={volume} onValueChange={setVolume} />"
+      },
+      {
+        "title": "Range and step",
+        "description": "`min`, `max` and `step` bound the value and snap it to fixed increments.",
+        "code": "<Slider min={0} max={10} step={1} defaultValue={5} />"
+      },
+      {
+        "title": "Commit on release",
+        "description": "`onValueChange` tracks the drag; `onValueCommit` fires once at the end — the place for a network write.",
+        "code": "<Slider\n  defaultValue={50}\n  onValueChange={setPreview}\n  onValueCommit={save}\n/>"
+      },
+      {
+        "title": "Disabled",
+        "code": "<Slider defaultValue={30} disabled />"
+      }
+    ],
+    "variantCode": {
+      "size": "<Slider size=\"sm\" defaultValue={40} />\n<Slider size=\"md\" defaultValue={40} />\n<Slider size=\"lg\" defaultValue={40} />",
+      "color": "<Slider color=\"primary\" defaultValue={40} />\n<Slider color=\"success\" defaultValue={40} />\n<Slider color=\"warning\" defaultValue={40} />\n<Slider color=\"destructive\" defaultValue={40} />\n<Slider color=\"info\" defaultValue={40} />"
+    }
   },
   "spinner": {
     "intro": "An indeterminate loading indicator. `Button` renders one for you when `loading` is set.",

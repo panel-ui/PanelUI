@@ -118,6 +118,22 @@ export interface ButtonProps
   native?: boolean;
 }
 
+/**
+ * Height given to the native host, matching the styled scale above.
+ *
+ * `matchContents` on its own is not enough on the vertical axis: the platform
+ * measures its own content asynchronously, so the host starts at nothing —
+ * the button collapses against whatever sits above it — and then re-measures
+ * on the first interaction, which is the jolt you see when you press it. A
+ * known height means there is nothing to discover.
+ */
+const NATIVE_HEIGHT: Record<NonNullable<ButtonVariantProps['size']>, number> = {
+  sm: 36,
+  md: 44,
+  lg: 48,
+  icon: 44,
+};
+
 /** PanelUI variants mapped onto the platform button styles. */
 const NATIVE_VARIANT: Record<
   NonNullable<ButtonVariantProps['variant']>,
@@ -178,7 +194,10 @@ export const Button = forwardRef<View, ButtonProps>(
       const isStringLabel = typeof children === 'string';
 
       return (
-        <Host matchContents>
+        <Host
+          matchContents={{ horizontal: true }}
+          style={{ height: NATIVE_HEIGHT[size ?? 'md'] }}
+        >
           <NativeButton
             label={isStringLabel ? children : undefined}
             variant={NATIVE_VARIANT[variant ?? 'primary']}

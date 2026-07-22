@@ -1171,7 +1171,7 @@ function SelectDemo() {
  */
 function NativeDemo({ children }: { children: ReactNode }) {
   return (
-    <View className="w-full gap-3">
+    <View className="w-full gap-5">
       <Alert variant={hasNativeUI() ? 'info' : 'warning'}>
         <Alert.Content>
           <Alert.Title>
@@ -1186,8 +1186,57 @@ function NativeDemo({ children }: { children: ReactNode }) {
           </Alert.Description>
         </Alert.Content>
       </Alert>
-      {children}
+      {/* A rule between the note and the control, so a platform button
+          sitting right under the alert does not read as part of it. */}
+      <Separator />
+      <View className="w-full gap-4">{children}</View>
     </View>
+  );
+}
+
+function NativeSliderDemo() {
+  const [level, setLevel] = useState(40);
+
+  return (
+    <NativeDemo>
+      <Slider
+        native
+        label="Brightness"
+        showValue
+        formatValue={(v) => `${Math.round(v)}%`}
+        value={level}
+        onValueChange={setLevel}
+      />
+      {/* The caption row is ours either way — only the control below it is
+          handed to the platform. */}
+      <Slider
+        label="For comparison, the styled one"
+        showValue
+        formatValue={(v) => `${Math.round(v)}%`}
+        value={level}
+        onValueChange={setLevel}
+      />
+    </NativeDemo>
+  );
+}
+
+function NativeWheelPickerDemo() {
+  const [size, setSize] = useState('m');
+
+  return (
+    <NativeDemo>
+      {/* `wheel` is the always-visible rotor on iOS; elsewhere it falls back
+          to the compact menu. */}
+      <Select native nativeAppearance="wheel" value={size} onValueChange={setSize}>
+        <Select.Item value="s" label="Small" />
+        <Select.Item value="m" label="Medium" />
+        <Select.Item value="l" label="Large" />
+        <Select.Item value="xl" label="X-Large" />
+      </Select>
+      <Text size="sm" muted>
+        Selected: {size}
+      </Text>
+    </NativeDemo>
   );
 }
 
@@ -1234,17 +1283,33 @@ function NativeBottomSheetDemo() {
             Open the platform sheet
           </Button>
         </BottomSheet.Trigger>
-        <BottomSheet.Content>
-          <View className="gap-3 p-5">
-            <Text size="lg" weight="semibold">
-              Platform chrome, your content
-            </Text>
-            <Text size="sm" muted>
-              The container, corner radius, grabber and dismiss gesture belong
-              to the platform. Everything in here is still themed.
-            </Text>
-            <Button onPress={() => setOpen(false)}>Close</Button>
-          </View>
+        <BottomSheet.Content className="gap-3 pt-4">
+          <Text size="lg" weight="semibold">
+            Platform chrome, your content
+          </Text>
+          <Text size="sm" muted>
+            The container, corner radius, grabber and dismiss gesture belong to
+            the platform. Everything in here is still themed — and it starts at
+            the top of the sheet rather than floating in the middle of it.
+          </Text>
+          <Item.Group className="mt-1">
+            <Item size="sm">
+              <Item.Content>
+                <Item.Title>Detent</Item.Title>
+                <Item.Description>Half height, set by snapPoints.</Item.Description>
+              </Item.Content>
+            </Item>
+            <Item.Separator />
+            <Item size="sm">
+              <Item.Content>
+                <Item.Title>Dismiss</Item.Title>
+                <Item.Description>Swipe down, or the button below.</Item.Description>
+              </Item.Content>
+            </Item>
+          </Item.Group>
+          <Button fullWidth onPress={() => setOpen(false)}>
+            Close
+          </Button>
         </BottomSheet.Content>
       </BottomSheet>
     </NativeDemo>
@@ -3896,7 +3961,8 @@ export const COMPONENTS: ComponentEntry[] = [
           </Card>
         ),
       },
-      { label: 'Native', render: () => <NativeSelectDemo /> },
+      { label: 'Native — menu', render: () => <NativeSelectDemo /> },
+      { label: 'Native — wheel', render: () => <NativeWheelPickerDemo /> },
     ],
   },
   {
@@ -4333,6 +4399,7 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Pick a value by dragging a thumb along a track',
     demos: [
       { label: 'Interactive', render: () => <SliderDemo /> },
+      { label: 'Native', render: () => <NativeSliderDemo /> },
       {
         label: 'Colors',
         render: () => (

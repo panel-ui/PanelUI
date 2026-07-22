@@ -335,6 +335,7 @@
     "type": "registry:ui",
     "description": "Pick a value by dragging a thumb along a track.",
     "registryDependencies": [
+      "native",
       "text"
     ]
   },

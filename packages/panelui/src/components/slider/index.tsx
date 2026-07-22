@@ -34,6 +34,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { getNativeUI } from '../../native';
 import { Text } from '../../primitives/text';
 
 /**
@@ -92,6 +93,9 @@ const sliderVariants = tv({
 /** Thumb width per size. Wider than it is tall, so the pill reads as a grip. */
 const THUMB_WIDTH: Record<'sm' | 'md' | 'lg', number> = { sm: 24, md: 28, lg: 32 };
 
+/** Row height reserved for the platform's own slider. */
+const NATIVE_HEIGHT = 32;
+
 type SliderVariantProps = VariantProps<typeof sliderVariants>;
 
 export interface SliderProps extends Omit<SliderVariantProps, 'disabled'> {
@@ -111,6 +115,15 @@ export interface SliderProps extends Omit<SliderVariantProps, 'disabled'> {
   /** Fires once when the gesture ends — the place for expensive side effects. */
   onValueCommit?: (value: number) => void;
   disabled?: boolean;
+  /**
+   * Render the platform's own slider instead of this one. Requires the
+   * optional `@expo/ui` package; without it this prop does nothing.
+   *
+   * **Theme tokens do not apply** — the platform draws the control, so
+   * `color`, `size` and the slot classNames are ignored. `label` and
+   * `showValue` still render the caption row above it, since that is ours.
+   */
+  native?: boolean;
   /** Caption above the track. Also becomes the accessibility label. */
   label?: string;
   /** Show the current value on the caption row, opposite the label. */
@@ -156,6 +169,7 @@ export const Slider = forwardRef<View, SliderProps>(
       onValueChange,
       onValueCommit,
       disabled = false,
+      native,
       label,
       showValue = false,
       formatValue,
@@ -170,6 +184,7 @@ export const Slider = forwardRef<View, SliderProps>(
 
     const slots = sliderVariants({ color, size, disabled });
     const thumbWidth = THUMB_WIDTH[size ?? 'md'];
+    const nativeUI = native ? getNativeUI() : null;
 
     // Measured on layout; the thumb travels across (trackWidth - thumbWidth) so
     // it stays inside the track at both ends.
@@ -280,14 +295,42 @@ export const Slider = forwardRef<View, SliderProps>(
 
     const shownValue = formatValue ? formatValue(value) : String(Math.round(value));
 
+    const header =
+      label || showValue ? (
+        <View className={slots.header({ className: headerClassName })}>
+          {label ? <Text className={slots.label()}>{label}</Text> : <View />}
+          {showValue ? <Text className={slots.value()}>{shownValue}</Text> : null}
+        </View>
+      ) : null;
+
+    if (nativeUI) {
+      const { Host, Slider: NativeSlider } = nativeUI;
+      return (
+        <View ref={ref} className={slots.root({ className })}>
+          {header}
+          {/* A fixed height rather than matchContents on the vertical axis:
+              the platform measures itself asynchronously, so a host left to
+              discover its own height collapses on the first frame and jumps
+              once it has. */}
+          <Host style={{ height: NATIVE_HEIGHT }}>
+            <NativeSlider
+              value={value}
+              onValueChange={(next: number) => {
+                emitChange(snap(next, min, max, step));
+              }}
+              min={min}
+              max={max}
+              step={step}
+              disabled={disabled}
+            />
+          </Host>
+        </View>
+      );
+    }
+
     return (
       <View ref={ref} className={slots.root({ className })} collapsable={false}>
-        {label || showValue ? (
-          <View className={slots.header({ className: headerClassName })}>
-            {label ? <Text className={slots.label()}>{label}</Text> : <View />}
-            {showValue ? <Text className={slots.value()}>{shownValue}</Text> : null}
-          </View>
-        ) : null}
+        {header}
 
         <GestureDetector gesture={gesture}>
           <View

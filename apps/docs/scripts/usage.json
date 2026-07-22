@@ -195,7 +195,7 @@
       "Trigger": "Clones its child and opens the sheet on press.",
       "Content": "The sheet surface. Renders through a portal above everything else."
     },
-    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.\n\n### Native rendering\n\nPass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.\n\n**A close button sits in the top-right by default.** Drop it with `showClose={false}` when the sheet is already dismissible by drag or backdrop and the corner X would be clutter. The native sheet ignores it — the platform provides its own affordances.",
+    "notes": "Control it with `open` / `onOpenChange`, or leave it uncontrolled with `defaultOpen`. Style the sheet itself through `className` on `BottomSheet.Content` — `mx-4 mb-6 rounded-3xl` gives a detached sheet, and a `height` style gives a full-height one.\n\n### Native rendering\n\nPass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. Only the chrome is the platform's — the content inside stays yours and stays themed. Adds a `snapPoints` prop for the detents the sheet rests at.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.\n\n**A close button sits in the top-right by default.** Drop it with `showClose={false}` when the sheet is already dismissible by drag or backdrop and the corner X would be clutter. The native sheet ignores it — the platform provides its own affordances.\n\nIn native mode the sheet content is given a minimum height matching its first detent. A hosted box shorter than the sheet is centred in it by the platform, which is why short content would otherwise float in the middle of a half-height sheet instead of starting at the top.",
     "anatomy": "<BottomSheet>\n  <BottomSheet.Trigger>…</BottomSheet.Trigger>\n  <BottomSheet.Content>…</BottomSheet.Content>\n</BottomSheet>",
     "examples": [
       {
@@ -1141,7 +1141,7 @@
   "slider": {
     "intro": "A value picker driven by a single thumb. The thumb is a pill exactly as tall as the track — the two are the same height, so nothing has to escape the track to be drawn whole — with a knob inside it that shrinks while you drag. Position and fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.",
     "usage": "<Slider defaultValue={40} />\n<Slider label=\"Volume\" showValue defaultValue={40} />\n<Slider value={volume} onValueChange={setVolume} />\n<Slider min={0} max={10} step={1} defaultValue={5} />",
-    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.\n\nThe knob is painted with the page background rather than a per-colour on-token, because the status foregrounds are the darker text hues meant for soft fills — a green-700 knob on a green-500 pill would barely show. Override `knobClassName` if a theme needs something else.",
+    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.\n\nThe knob is painted with the page background rather than a per-colour on-token, because the status foregrounds are the darker text hues meant for soft fills — a green-700 knob on a green-500 pill would barely show. Override `knobClassName` if a theme needs something else.\n\nSee [Native rendering](/docs/native) for what `native` keeps and what it gives up — notably `onValueCommit`, which the platform control does not report.",
     "examples": [
       {
         "title": "Controlled",
@@ -1171,6 +1171,11 @@
       {
         "title": "Disabled",
         "code": "<Slider defaultValue={30} disabled />"
+      },
+      {
+        "title": "The platform's own slider",
+        "description": "Passing `native` hands the track and thumb to SwiftUI or Jetpack Compose. The caption row stays ours, so a native control still gets the label and value above it. Needs the optional `@expo/ui` package; without it the prop is a silent no-op.",
+        "code": "<Slider\n  native\n  label=\"Brightness\"\n  showValue\n  formatValue={(v) => `${Math.round(v)}%`}\n  value={level}\n  onValueChange={setLevel}\n/>"
       }
     ],
     "variantCode": {

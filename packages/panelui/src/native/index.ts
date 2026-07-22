@@ -25,7 +25,13 @@ import type { ComponentType, ReactNode } from 'react';
 interface NativeUIModule {
   Host: ComponentType<{
     children?: ReactNode;
-    matchContents?: boolean;
+    /**
+     * Whether the host resizes itself to the platform content. The per-axis
+     * form matters: the vertical measurement arrives a frame late, so a host
+     * left to discover its own height collapses and then jumps. Components
+     * here match horizontally and give an explicit height.
+     */
+    matchContents?: boolean | { vertical?: boolean; horizontal?: boolean };
     style?: unknown;
     [key: string]: unknown;
   }>;
@@ -41,6 +47,7 @@ interface NativeUIModule {
   }>;
   Button: ComponentType<Record<string, unknown>>;
   Switch: ComponentType<Record<string, unknown>>;
+  Slider: ComponentType<Record<string, unknown>>;
   Picker: ComponentType<Record<string, unknown>> & {
     Item: ComponentType<Record<string, unknown>>;
   };

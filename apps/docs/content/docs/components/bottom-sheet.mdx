@@ -145,3 +145,5 @@ Pass `native` to render the platform's own sheet instead — SwiftUI on iOS, Jet
 See [Native rendering](/docs/native) for the full prop-by-prop breakdown.
 
 **A close button sits in the top-right by default.** Drop it with `showClose={false}` when the sheet is already dismissible by drag or backdrop and the corner X would be clutter. The native sheet ignores it — the platform provides its own affordances.
+
+In native mode the sheet content is given a minimum height matching its first detent. A hosted box shorter than the sheet is centred in it by the platform, which is why short content would otherwise float in the middle of a half-height sheet instead of starting at the top.

@@ -72,6 +72,39 @@ export interface BottomSheetProps {
 }
 
 /**
+ * Roughly how tall the platform will make the sheet at a given detent, as a
+ * fraction of the screen. Approximate on purpose — it is used as a floor for
+ * the content, not as the sheet's real height, which the platform owns.
+ */
+const DETENT_FRACTION = { half: 0.5, full: 0.9 } as const;
+
+/**
+ * The height the content should at least fill for a given set of detents.
+ *
+ * Without this the hosted content sizes to itself and the platform centres
+ * that smaller box inside the taller sheet, which is why a short sheet shows
+ * its content floating in the middle. Filling the detent leaves nothing to
+ * centre, so the content sits where it was written: at the top.
+ */
+function detentFloor(
+  snapPoints: BottomSheetProps['snapPoints'],
+  screenHeight: number
+): number | undefined {
+  if (!snapPoints?.length) return undefined;
+
+  // The sheet opens at its first detent, so that is the one to fill.
+  const first = snapPoints[0];
+  if (first === 'half' || first === 'full') {
+    return screenHeight * DETENT_FRACTION[first];
+  }
+  if (typeof first === 'object' && 'fraction' in first) {
+    return screenHeight * first.fraction;
+  }
+  if (typeof first === 'object' && 'height' in first) return first.height;
+  return undefined;
+}
+
+/**
  * Set by the root so Content knows the platform is drawing the sheet, and with
  * which detents. Null means the styled sheet renders.
  */
@@ -210,7 +243,7 @@ function BottomSheetContent({
                 className={cn(
                   // The platform draws the container, but it hands us a bare
                   // box — padding and safe-area are still ours.
-                  'gap-2 px-5 pb-2 pt-1',
+                  'justify-start gap-2 px-5 pb-2 pt-1',
                   className
                 )}
                 style={{
@@ -219,6 +252,7 @@ function BottomSheetContent({
                   // against, so `100%` measures against nothing and the
                   // content lays out wider than the sheet it sits in.
                   width: screenWidth,
+                  minHeight: detentFloor(nativeSheet.snapPoints, screenHeight),
                   paddingBottom: Math.max(insets.bottom, 16),
                 }}
               >

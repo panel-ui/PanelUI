@@ -3,22 +3,22 @@ title: Native rendering
 description: Hand a component to the platform's own UI toolkit with the native prop.
 ---
 
-Four components can render the platform's real control instead of PanelUI's:
-`Button`, `Switch`, `Select` and `BottomSheet`. Pass `native` and rendering
-goes to SwiftUI on iOS and Jetpack Compose on Android.
+Five components can render the platform's real control instead of PanelUI's:
+`Button`, `Switch`, `Slider`, `Select` and `BottomSheet`. Pass `native` and
+rendering goes to SwiftUI on iOS and Jetpack Compose on Android.
 
 ```tsx
 <Switch native value={enabled} onValueChange={setEnabled} label="Notifications" />
 ```
 
-## Why only these four
+## Why only these five
 
 These are the controls where a faithful re-implementation is not good enough. A
-switch, a picker, a sheet and a button are muscle memory — users notice when
-the animation curve, the spring, the haptic or the dismiss gesture is a
-near-miss, even when they cannot say why. Everything else in the library is
-better served by tokens and Reanimated, where matching the platform is not the
-goal.
+switch, a slider, a picker, a sheet and a button are muscle memory — users
+notice when the animation curve, the spring, the haptic or the dismiss gesture
+is a near-miss, even when they cannot say why. Everything else in the library
+is better served by tokens and Reanimated, where matching the platform is not
+the goal.
 
 ## Installation
 
@@ -90,6 +90,21 @@ use `native` on buttons that load.
 | `label` | Text drawn beside the control — **native only**, the styled switch has no label |
 | `size`, `className` | Ignored |
 
+### Slider
+
+```tsx
+<Slider native label="Brightness" showValue value={level} onValueChange={setLevel} />
+```
+
+| Prop | In native mode |
+| --- | --- |
+| `value` / `onValueChange` | Passed through |
+| `min`, `max`, `step` | Passed through |
+| `disabled` | Passed through |
+| `label`, `showValue`, `formatValue` | **Still yours** — the caption row above the track is not part of the platform control |
+| `color`, `size`, the slot classNames | Ignored |
+| `onValueCommit` | Not fired — the platform reports changes, not gesture ends |
+
 ### Select
 
 ```tsx
@@ -135,6 +150,17 @@ dismiss gesture — belongs to the platform.
 two are iOS-only; Android snaps them to the nearest of half and full.
 
 ## Notes
+
+Every native control is given an explicit height rather than left to size
+itself on the vertical axis. The platform measures its own content a frame
+late, so a host that has to discover its height renders at nothing on the
+first frame — the control collapses against whatever sits above it — and jumps
+into place on the first interaction.
+
+The same reasoning applies inside the native sheet: its content is given a
+floor matching the first detent, because a hosted box shorter than the sheet
+gets centred in it, which is why short sheet content used to float in the
+middle instead of starting at the top.
 
 The native sheet stays mounted and toggles its presentation, where the styled
 sheet unmounts on close. If you rely on the content unmounting to reset state,

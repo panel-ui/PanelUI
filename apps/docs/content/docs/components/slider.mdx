@@ -99,6 +99,21 @@ The thumb is two elements — the coloured pill and the knob inside it — and e
 <Slider defaultValue={30} disabled />
 ```
 
+### The platform's own slider
+
+Passing `native` hands the track and thumb to SwiftUI or Jetpack Compose. The caption row stays ours, so a native control still gets the label and value above it. Needs the optional `@expo/ui` package; without it the prop is a silent no-op.
+
+```tsx
+<Slider
+  native
+  label="Brightness"
+  showValue
+  formatValue={(v) => `${Math.round(v)}%`}
+  value={level}
+  onValueChange={setLevel}
+/>
+```
+
 ## Variants
 
 ### `color`
@@ -144,6 +159,7 @@ The thumb is two elements — the coloured pill and the knob inside it — and e
 | `onValueChange` | `(value: number) => void` | — | Fires on every change while dragging — cheap updates only. |
 | `onValueCommit` | `(value: number) => void` | — | Fires once when the gesture ends — the place for expensive side effects. |
 | `disabled` | `boolean` | `false` |  |
+| `native` | `boolean` | — | Render the platform's own slider instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the control, so `color`, `size` and the slot classNames are ignored. `label` and `showValue` still render the caption row above it, since that is ours. |
 | `label` | `string` | — | Caption above the track. Also becomes the accessibility label. |
 | `showValue` | `boolean` | `false` | Show the current value on the caption row, opposite the label. |
 | `formatValue` | `(value: number) => string` | — | Format the shown value. Defaults to the rounded number. |
@@ -160,3 +176,5 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.
 
 The knob is painted with the page background rather than a per-colour on-token, because the status foregrounds are the darker text hues meant for soft fills — a green-700 knob on a green-500 pill would barely show. Override `knobClassName` if a theme needs something else.
+
+See [Native rendering](/docs/native) for what `native` keeps and what it gives up — notably `onValueCommit`, which the platform control does not report.

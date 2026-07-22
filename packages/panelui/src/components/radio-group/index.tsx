@@ -41,7 +41,10 @@ type RadioVariant = 'dot' | 'card';
 
 const itemVariants = tv({
   slots: {
-    row: 'flex-row items-center gap-2.5',
+    // `self-start` matters: the group is a column, so without it Yoga stretches
+    // the row to the full width and the dead space to the right of the label
+    // becomes part of the target. Tapping nothing would select the option.
+    row: 'flex-row items-center gap-2.5 self-start',
     indicator:
       'h-5 w-5 items-center justify-center rounded-full border border-input bg-background',
     label: 'text-sm text-foreground',
@@ -52,8 +55,9 @@ const itemVariants = tv({
       dot: {},
       card: {
         // The whole surface is the target; the disc moves to the trailing edge
-        // as a confirmation of the row, not the affordance for it.
-        row: 'w-full items-start justify-between gap-3 rounded-xl border border-border bg-card p-4',
+        // as a confirmation of the row, not the affordance for it. Here the
+        // full width is deliberate, so it takes `self-stretch` back.
+        row: 'w-full self-stretch items-start justify-between gap-3 rounded-xl border border-border bg-card p-4',
         label: 'text-base font-medium',
       },
     },

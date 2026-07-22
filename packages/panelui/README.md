@@ -111,6 +111,7 @@ overlays, and the toast viewport.
 | `Select` | Picker that opens in a bottom sheet |
 | `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |
+| `Slider` | Pick a value by dragging a thumb along a track |
 | `Spinner` | Indeterminate loading indicator |
 | `Steps` | Stepper for multi-step flows, horizontal or vertical |
 | `Switch` | Animated on/off toggle |

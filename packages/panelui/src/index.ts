@@ -185,6 +185,7 @@ export {
 export { Separator, type SeparatorProps } from './components/separator';
 export { Shimmer, type ShimmerProps } from './components/shimmer';
 export { Skeleton, type SkeletonProps } from './components/skeleton';
+export { Slider, type SliderProps } from './components/slider';
 export { Spinner, type SpinnerProps } from './components/spinner';
 export {
   Steps,

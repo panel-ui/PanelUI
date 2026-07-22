@@ -267,7 +267,10 @@
     "name": "progress",
     "type": "registry:ui",
     "description": "Determinate and indeterminate progress bar.",
-    "registryDependencies": []
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
   },
   {
     "name": "radio-group",
@@ -323,6 +326,12 @@
     "registryDependencies": [
       "cn"
     ]
+  },
+  {
+    "name": "slider",
+    "type": "registry:ui",
+    "description": "Pick a value by dragging a thumb along a track.",
+    "registryDependencies": []
   },
   {
     "name": "spinner",

@@ -1,0 +1,121 @@
+---
+title: Slider
+description: Pick a value by dragging a thumb along a track.
+---
+
+A value picker driven by a single thumb. The thumb and the fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.
+
+## Installation
+
+Slider ships with the library — no separate install.
+
+```tsx
+import { Slider } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add slider
+```
+
+## Usage
+
+```tsx
+<Slider defaultValue={40} />
+<Slider value={volume} onValueChange={setVolume} />
+<Slider min={0} max={10} step={1} defaultValue={5} />
+```
+
+## Examples
+
+### Controlled
+
+Hold the value in state and read it back for a live label.
+
+```tsx
+const [volume, setVolume] = useState(40);
+
+<Slider value={volume} onValueChange={setVolume} />
+```
+
+### Range and step
+
+`min`, `max` and `step` bound the value and snap it to fixed increments.
+
+```tsx
+<Slider min={0} max={10} step={1} defaultValue={5} />
+```
+
+### Commit on release
+
+`onValueChange` tracks the drag; `onValueCommit` fires once at the end — the place for a network write.
+
+```tsx
+<Slider
+  defaultValue={50}
+  onValueChange={setPreview}
+  onValueCommit={save}
+/>
+```
+
+### Disabled
+
+```tsx
+<Slider defaultValue={30} disabled />
+```
+
+## Variants
+
+### `color`
+
+- `primary` *(default)*
+- `success`
+- `warning`
+- `destructive`
+- `info`
+
+```tsx
+<Slider color="primary" defaultValue={40} />
+<Slider color="success" defaultValue={40} />
+<Slider color="warning" defaultValue={40} />
+<Slider color="destructive" defaultValue={40} />
+<Slider color="info" defaultValue={40} />
+```
+
+### `size`
+
+- `sm`
+- `md` *(default)*
+- `lg`
+
+```tsx
+<Slider size="sm" defaultValue={40} />
+<Slider size="md" defaultValue={40} />
+<Slider size="lg" defaultValue={40} />
+```
+
+## API Reference
+
+### Slider
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `number` | — | Controlled value. Leave unset and pass `defaultValue` to run uncontrolled. |
+| `defaultValue` | `number` | `0` | Starting value when uncontrolled. |
+| `min` | `number` | `0` | Lower bound. |
+| `max` | `number` | `100` | Upper bound. |
+| `step` | `number` | `1` | Snap granularity. The value is always a multiple of `step` from `min`. |
+| `onValueChange` | `(value: number) => void` | — | Fires on every change while dragging — cheap updates only. |
+| `onValueCommit` | `(value: number) => void` | — | Fires once when the gesture ends — the place for expensive side effects. |
+| `disabled` | `boolean` | `false` |  |
+| `trackClassName` | `string` | — | Extra classes for the unfilled track. |
+| `fillClassName` | `string` | — | Extra classes for the filled portion. |
+| `thumbClassName` | `string` | — | Extra classes for the draggable thumb. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.

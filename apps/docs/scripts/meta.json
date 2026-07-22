@@ -144,6 +144,11 @@
     "Shimmer placeholder for loading content.",
     "react native skeleton loader"
   ],
+  "slider": [
+    "Slider",
+    "Pick a value by dragging a thumb along a track.",
+    "react native slider"
+  ],
   "spinner": [
     "Spinner",
     "Indeterminate loading indicator.",

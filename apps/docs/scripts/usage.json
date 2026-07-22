@@ -1084,6 +1084,36 @@
       "Text"
     ]
   },
+  "slider": {
+    "intro": "A value picker driven by a single thumb. The thumb and the fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.",
+    "usage": "<Slider defaultValue={40} />\n<Slider value={volume} onValueChange={setVolume} />\n<Slider min={0} max={10} step={1} defaultValue={5} />",
+    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.",
+    "examples": [
+      {
+        "title": "Controlled",
+        "description": "Hold the value in state and read it back for a live label.",
+        "code": "const [volume, setVolume] = useState(40);\n\n<Slider value={volume} onValueChange={setVolume} />"
+      },
+      {
+        "title": "Range and step",
+        "description": "`min`, `max` and `step` bound the value and snap it to fixed increments.",
+        "code": "<Slider min={0} max={10} step={1} defaultValue={5} />"
+      },
+      {
+        "title": "Commit on release",
+        "description": "`onValueChange` tracks the drag; `onValueCommit` fires once at the end — the place for a network write.",
+        "code": "<Slider\n  defaultValue={50}\n  onValueChange={setPreview}\n  onValueCommit={save}\n/>"
+      },
+      {
+        "title": "Disabled",
+        "code": "<Slider defaultValue={30} disabled />"
+      }
+    ],
+    "variantCode": {
+      "size": "<Slider size=\"sm\" defaultValue={40} />\n<Slider size=\"md\" defaultValue={40} />\n<Slider size=\"lg\" defaultValue={40} />",
+      "color": "<Slider color=\"primary\" defaultValue={40} />\n<Slider color=\"success\" defaultValue={40} />\n<Slider color=\"warning\" defaultValue={40} />\n<Slider color=\"destructive\" defaultValue={40} />\n<Slider color=\"info\" defaultValue={40} />"
+    }
+  },
   "spinner": {
     "intro": "An indeterminate loading indicator. `Button` renders one for you when `loading` is set.",
     "usage": "<Spinner />\n<Spinner size=\"lg\" />",

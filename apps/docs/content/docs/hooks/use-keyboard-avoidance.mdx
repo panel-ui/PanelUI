@@ -100,13 +100,24 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({
 | Value | Type | Description |
 | --- | --- | --- |
 | `ref` | `AnimatedRef<View>` | Attach to the element that should stay visible. |
-| `onLayout` | `(event) => void` | Attach to the same element — it is how the resting position is measured. |
+| `onLayout` | `(event) => void` | Attach to the same element — it seeds the resting position. |
 | `animatedStyle` | `AnimatedStyle` | Apply to the same element. |
 
-All three go on the same element. The `onLayout` handler is not optional: it is
-what records where the element sits with no translation applied, and the hook
-deliberately ignores layout events fired while the element is already lifted so
-the position cannot creep upwards.
+All three go on the same element, and the `ref` is the one that matters most:
+the resting position is re-measured through it on the UI thread every time the
+keyboard begins to appear, which is the only moment the element is guaranteed
+to be untranslated.
+
+That re-measurement is what makes the hook work in the two places a
+measure-once approach fails. An element inside an overlay is laid out before
+the overlay has decided where to put it, so a position recorded then is
+meaningless; and an element that has scrolled since it was laid out would
+otherwise be avoided against where it used to be.
+
+`onLayout` remains worth attaching — it covers the case the re-measurement
+cannot, an element mounting while the keyboard is *already* up, where there is
+no appearance to react to. It ignores layout events fired while the element is
+already lifted, so the position cannot creep upwards.
 
 ## Notes
 

@@ -34,7 +34,9 @@
 import { useCallback } from 'react';
 import { useWindowDimensions, type LayoutChangeEvent, type View } from 'react-native';
 import {
+  measure,
   useAnimatedKeyboard,
+  useAnimatedReaction,
   useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
@@ -107,19 +109,60 @@ export function useKeyboardAvoidance({
   /** Window-space bottom edge of the element with no translation applied. */
   const restingBottom = useSharedValue(0);
 
-  const measure = useCallback(() => {
+  /*
+   * The resting position is taken the moment the keyboard starts to open, on
+   * the UI thread, rather than once at layout time.
+   *
+   * Measuring at layout is wrong in two ways that both show up as "avoidance
+   * does nothing". A field inside an overlay is laid out before the overlay
+   * knows where it goes — it is parked off-screen at that point, so the stored
+   * position is a large negative number that is nonetheless non-zero, and the
+   * arithmetic below happily concludes there is no overlap. And a field that
+   * has scrolled since it was laid out is measured where it used to be.
+   *
+   * At the instant the keyboard begins to appear the element is by definition
+   * untranslated, so what is measured then is the honest resting position.
+   */
+  useAnimatedReaction(
+    () => Math.abs(rawHeight.value) > 0,
+    (keyboardOpen, wasOpen) => {
+      if (keyboardOpen === wasOpen) return;
+
+      if (!keyboardOpen) {
+        // Forget it, so the next appearance measures wherever the element has
+        // got to in the meantime.
+        restingBottom.value = 0;
+        return;
+      }
+
+      const frame = measure(ref);
+      if (frame && frame.height > 0 && frame.pageY >= 0) {
+        restingBottom.value = frame.pageY + frame.height;
+      }
+    }
+  );
+
+  const seed = useCallback(() => {
+    // Skipped only when a position is already known and the keyboard is up —
+    // the element is lifted then, and this would store the lifted position as
+    // the resting one. With no position yet there is no translation to undo,
+    // so measuring is safe whatever the keyboard is doing.
+    if (restingBottom.value !== 0 && Math.abs(rawHeight.value) > 0) return;
+
     ref.current?.measureInWindow((_x, y, _width, height) => {
-      if (height > 0) restingBottom.value = y + height;
+      if (height > 0 && y >= 0) restingBottom.value = y + height;
     });
-  }, [ref, restingBottom]);
+  }, [ref, rawHeight, restingBottom]);
 
   const onLayout = useCallback(
     (_event: LayoutChangeEvent) => {
+      // Covers the case the reaction above cannot: a keyboard that is already
+      // up when this element mounts, where there is no transition to react to.
       // measureInWindow is only meaningful once the view is attached and
       // positioned, which is a frame later than onLayout on both platforms.
-      requestAnimationFrame(measure);
+      requestAnimationFrame(seed);
     },
-    [measure]
+    [seed]
   );
 
   const animatedStyle = useAnimatedStyle(() => {

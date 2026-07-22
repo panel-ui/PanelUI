@@ -101,6 +101,15 @@ export {
   type SelectPresentation,
 } from './components/select';
 export {
+  SectionRail,
+  type SectionRailProps,
+  type SectionRailTriggerProps,
+  type SectionRailBarProps,
+  type SectionRailContentProps,
+  type SectionRailItemProps,
+  type SectionRailPlacement,
+} from './components/section-rail';
+export {
   Tabs,
   type TabsProps,
   type TabsListProps,

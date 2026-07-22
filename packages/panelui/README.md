@@ -107,6 +107,7 @@ overlays, and the toast viewport.
 | `Progress` | Determinate and indeterminate progress bar, optionally captioned |
 | `RadioGroup` | Single-select list of options |
 | `ScrollFade` | Fades the edges of a scroll container |
+| `SectionRail` | Floating section navigator — bars that expand into a jump list |
 | `Select` | Picker shown in a bottom sheet, in place, or floating over the page |
 | `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |

@@ -53,7 +53,7 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 | BottomSheet | Label | Steps |
 | Button | Progress | Switch |
 | Card | RadioGroup | Tabs |
-| Checkbox | | ToggleButton |
+| Checkbox | SectionRail | ToggleButton |
 | Dialog | | Timeline |
 | | | Toast |
 | | | Typography |

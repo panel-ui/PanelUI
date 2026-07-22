@@ -119,6 +119,11 @@
     "Fades the edges of a scroll container.",
     "react native scroll fade"
   ],
+  "section-rail": [
+    "SectionRail",
+    "Floating section navigator for a long screen.",
+    "react native table of contents"
+  ],
   "select": [
     "Select",
     "Picker shown in a bottom sheet, expanded in place, or floating over the page.",

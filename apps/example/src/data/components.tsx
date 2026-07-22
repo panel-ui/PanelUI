@@ -63,6 +63,7 @@ import {
   ShieldCheckIcon,
   Select,
   ScrollFade,
+  SectionRail,
   Separator,
   Shimmer,
   Skeleton,
@@ -1326,6 +1327,85 @@ function SliderDemo() {
       <Slider defaultValue={70} color="success" size="sm" />
       <Slider defaultValue={5} min={0} max={10} step={1} color="warning" size="lg" />
       <Slider label="Locked" showValue defaultValue={30} disabled />
+    </View>
+  );
+}
+
+const RAIL_SECTIONS = [
+  { id: 'intro', label: 'Introduction', level: 0 },
+  { id: 'install', label: 'Installation', level: 0 },
+  { id: 'expo', label: 'Expo', level: 1 },
+  { id: 'bare', label: 'Bare React Native', level: 1 },
+  { id: 'theming', label: 'Theming', level: 0 },
+  { id: 'tokens', label: 'Design tokens', level: 1 },
+  { id: 'dark', label: 'Dark mode', level: 1 },
+  { id: 'faq', label: 'Frequently asked', level: 0 },
+];
+
+function SectionRailVersion({ placement }: { placement?: 'left' | 'right' }) {
+  const [active, setActive] = useState('intro');
+  const scroller = useRef<ScrollView>(null);
+  const offsets = useRef<Record<string, number>>({});
+
+  return (
+    <View className="flex-1">
+      <ScrollView
+        ref={scroller}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: 240 }}
+        onScroll={(event) => {
+          // Whichever section's top has most recently passed the reading line
+          // is the one you are in. A quarter down the viewport, not the very
+          // top, so the heading you just scrolled past still counts.
+          const y = event.nativeEvent.contentOffset.y + 120;
+          let current = RAIL_SECTIONS[0].id;
+          for (const section of RAIL_SECTIONS) {
+            if ((offsets.current[section.id] ?? Infinity) <= y) current = section.id;
+          }
+          setActive(current);
+        }}
+      >
+        {RAIL_SECTIONS.map((section) => (
+          <View
+            key={section.id}
+            onLayout={(event) => {
+              offsets.current[section.id] = event.nativeEvent.layout.y;
+            }}
+            className="gap-3 px-6 py-10"
+          >
+            <Text size={section.level ? 'lg' : '2xl'} weight="semibold">
+              {section.label}
+            </Text>
+            <Text size="sm" muted>
+              Scroll and the bar for this section widens and brightens. Touch
+              the rail to open the list and jump anywhere.
+            </Text>
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </View>
+        ))}
+      </ScrollView>
+
+      <SectionRail
+        placement={placement}
+        value={active}
+        onValueChange={(next) => {
+          setActive(next);
+          scroller.current?.scrollTo({ y: offsets.current[next] ?? 0, animated: true });
+        }}
+      >
+        <SectionRail.Trigger>
+          {RAIL_SECTIONS.map((section) => (
+            <SectionRail.Bar key={section.id} value={section.id} level={section.level} />
+          ))}
+        </SectionRail.Trigger>
+        <SectionRail.Content>
+          {RAIL_SECTIONS.map((section) => (
+            <SectionRail.Item key={section.id} value={section.id} level={section.level}>
+              {section.label}
+            </SectionRail.Item>
+          ))}
+        </SectionRail.Content>
+      </SectionRail>
     </View>
   );
 }
@@ -3730,6 +3810,28 @@ export const COMPONENTS: ComponentEntry[] = [
             </Card.Content>
           </Card>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'section-rail',
+    name: 'SectionRail',
+    summary: 'Floating section navigator for a long screen',
+    demos: [
+      {
+        label: 'On the right',
+        id: 'right',
+        fullPage: true,
+        description:
+          'Scroll a long page and the bar for the current section widens. Touch the rail to jump.',
+        render: () => <SectionRailVersion />,
+      },
+      {
+        label: 'On the left',
+        id: 'left',
+        fullPage: true,
+        description: 'The same rail against the other edge, panel and all.',
+        render: () => <SectionRailVersion placement="left" />,
       },
     ],
   },

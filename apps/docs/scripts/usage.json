@@ -972,6 +972,38 @@
       }
     ]
   },
+  "section-rail": {
+    "intro": "A floating navigator for a long screen: a stack of short bars pinned to one edge, one per section, that expands into a labelled panel when you touch it. Collapsed it is a position indicator you can read at a glance without giving up any content width; expanded it is a list you can jump from.",
+    "usage": "<SectionRail value={active} onValueChange={scrollToSection}>\n  <SectionRail.Trigger>\n    <SectionRail.Bar value=\"intro\" />\n    <SectionRail.Bar value=\"setup\" level={1} />\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    <SectionRail.Item value=\"intro\">Introduction</SectionRail.Item>\n    <SectionRail.Item value=\"setup\" level={1}>Setup</SectionRail.Item>\n  </SectionRail.Content>\n</SectionRail>",
+    "anatomy": "<SectionRail>\n  <SectionRail.Trigger>\n    <SectionRail.Bar value=\"…\" />\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    <SectionRail.Item value=\"…\">…</SectionRail.Item>\n  </SectionRail.Content>\n</SectionRail>",
+    "parts": {
+      "Trigger": "The collapsed rail. One press target over the whole stack of bars, because a hairline is not something anyone can hit.",
+      "Bar": "One section, drawn as a bar. Widens and brightens when it is the active one; a deeper `level` draws a shorter bar.",
+      "Content": "The expanded panel, mounted through a portal so it floats over everything and unmounted after it fades out.",
+      "Item": "A labelled row in the panel, indented to match its bar."
+    },
+    "extraImports": [
+      "Text"
+    ],
+    "examples": [
+      {
+        "title": "Driving it from a scroll position",
+        "description": "The rail does not watch the scroll itself — it takes a `value`. Record where each section landed on layout, and pick the last one whose top has passed a reading line a little down the viewport, so the heading you just scrolled past still counts.",
+        "code": "const [active, setActive] = useState('intro');\nconst scroller = useRef<ScrollView>(null);\nconst offsets = useRef<Record<string, number>>({});\n\n<ScrollView\n  ref={scroller}\n  scrollEventThrottle={16}\n  onScroll={(e) => {\n    const y = e.nativeEvent.contentOffset.y + 120;\n    let current = sections[0].id;\n    for (const s of sections) {\n      if ((offsets.current[s.id] ?? Infinity) <= y) current = s.id;\n    }\n    setActive(current);\n  }}\n>\n  {sections.map((s) => (\n    <View\n      key={s.id}\n      onLayout={(e) => { offsets.current[s.id] = e.nativeEvent.layout.y; }}\n    >\n      {/* …section… */}\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  value={active}\n  onValueChange={(next) => {\n    setActive(next);\n    scroller.current?.scrollTo({ y: offsets.current[next] ?? 0, animated: true });\n  }}\n>\n  {/* …bars and items… */}\n</SectionRail>"
+      },
+      {
+        "title": "Nesting",
+        "description": "`level` does two jobs from one number: it shortens the bar and indents the row, so the collapsed rail and the expanded panel agree about the shape of the page.",
+        "code": "<SectionRail.Trigger>\n  <SectionRail.Bar value=\"install\" />\n  <SectionRail.Bar value=\"expo\" level={1} />\n  <SectionRail.Bar value=\"bare\" level={1} />\n</SectionRail.Trigger>\n\n<SectionRail.Content>\n  <SectionRail.Item value=\"install\">Installation</SectionRail.Item>\n  <SectionRail.Item value=\"expo\" level={1}>Expo</SectionRail.Item>\n  <SectionRail.Item value=\"bare\" level={1}>Bare React Native</SectionRail.Item>\n</SectionRail.Content>"
+      },
+      {
+        "title": "Anchoring it to the other edge",
+        "description": "The panel follows — it is anchored to the same edge and slides in from it.",
+        "code": "<SectionRail placement=\"left\" value={active} onValueChange={setActive}>\n  {/* … */}\n</SectionRail>"
+      }
+    ],
+    "notes": "The bars carry no labels, and that is the design rather than an omission. A permanent list of section titles down the side of a phone screen is either too small to read or too wide to keep; the bars carry the two things that survive at that size — which section you are in, and roughly how deep it sits.\n\nThe root is absolutely positioned with `pointerEvents=\"box-none\"`, so the rail takes touches but the empty column around it does not. Without that a strip down the side of the screen would swallow every scroll that started in it.\n\nChoosing a section leaves the panel up for `closeDelay` (300ms) so a mis-tap can be corrected without opening it again. Pass `0` to close immediately."
+  },
   "select": {
     "intro": "A picker with one trigger and three ways of showing its options: a bottom sheet, a list expanded in place, or a panel floating over the page. Which is right depends on what surrounds the trigger rather than on what the options are, so it is one prop rather than three components.",
     "usage": "<Select\n  value={fruit}\n  onValueChange={setFruit}\n  placeholder=\"Select a fruit\"\n  title=\"Favorite fruit\"\n>\n  <Select.Item value=\"apple\" label=\"Apple\" />\n  <Select.Item value=\"banana\" label=\"Banana\" />\n</Select>",

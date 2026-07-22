@@ -286,6 +286,16 @@
     "registryDependencies": []
   },
   {
+    "name": "section-rail",
+    "type": "registry:ui",
+    "description": "Floating section navigator for a long screen.",
+    "registryDependencies": [
+      "cn",
+      "portal",
+      "text"
+    ]
+  },
+  {
     "name": "select",
     "type": "registry:ui",
     "description": "Picker shown in a bottom sheet, expanded in place, or floating over the page.",

@@ -108,7 +108,19 @@ ${u.examples.map((ex) => [
 ].join('')).join('\n\n')}`);
   }
 
-  const variantKeys = Object.entries(c.variants).filter(([k]) => !['true', 'false'].includes(k) && !['checked', 'disabled', 'completed', 'isDisabled'].includes(k));
+  /*
+   * `tv()` variant keys are an implementation detail, and only some of them
+   * are public props on the root. A key can be internal state the component
+   * derives for itself, or a prop that belongs to a compound part rather than
+   * the root — documenting either as `<Name key="value">` sends readers to
+   * write something that does not exist. STATE_KEYS covers the ones every
+   * component names the same way; `hideVariants` in usage.json covers the rest.
+   */
+  const STATE_KEYS = ['checked', 'disabled', 'completed', 'isDisabled', 'active', 'selected'];
+  const hidden = new Set([...STATE_KEYS, ...(u.hideVariants ?? [])]);
+  const variantKeys = Object.entries(c.variants).filter(
+    ([k]) => !['true', 'false'].includes(k) && !hidden.has(k)
+  );
   if (variantKeys.length) {
     sections.push(`## Variants
 

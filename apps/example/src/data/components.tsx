@@ -3070,9 +3070,13 @@ export const COMPONENTS: ComponentEntry[] = [
         render: () => (
           <View className="w-full gap-4">
             <Text size="sm" muted>
-              Focus the field below. It sits low enough that the keyboard would
+              Focus the second field. It sits low enough that the keyboard would
               cover it, so it lifts by exactly the overlap — no more.
             </Text>
+            {/* The plain field first, to make the point that only the focused
+                avoiding field moves. Tapping this one leaves everything on the
+                screen exactly where it is. */}
+            <Input label="Subject" placeholder="An ordinary field" />
             <View className="h-72 justify-end">
               <Input
                 avoidKeyboard
@@ -3081,10 +3085,6 @@ export const COMPONENTS: ComponentEntry[] = [
                 description="Lifts on focus, settles back on blur."
               />
             </View>
-            <Text size="sm" muted>
-              This one is already clear of the keyboard, so it never moves.
-            </Text>
-            <Input avoidKeyboard label="Subject" placeholder="Stays put" />
           </View>
         ),
       },

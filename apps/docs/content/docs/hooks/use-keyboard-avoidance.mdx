@@ -86,6 +86,37 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({
 });
 ```
 
+## Which element should move
+
+`active` decides whether this element is the one that gets out of the way, and
+the right answer depends on what you have wrapped.
+
+A composer, a toolbar or a footer should ride the keyboard whatever is focused,
+which is why `active` defaults to `true`.
+
+A **field** wants the opposite. Leave it on the default and every avoiding field
+on the screen lifts the moment any one of them is tapped — and because they all
+aim at the same gap above the keyboard, they arrive stacked on top of each
+other. Pass the field's own focus state:
+
+```tsx
+const [focused, setFocused] = useState(false);
+const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({ active: focused });
+
+<Animated.View ref={ref} onLayout={onLayout} style={animatedStyle}>
+  <TextInput onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+</Animated.View>
+```
+
+`Input`'s `avoidKeyboard` prop already does this for you.
+
+<Callout>
+  `active` is also what lets the hook measure correctly when you move straight
+  from one field to another. That never closes the keyboard, so a hook watching
+  only the keyboard would have no event to measure on — the second field would
+  stay where it is.
+</Callout>
+
 ## API Reference
 
 ### Options
@@ -93,6 +124,7 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `enabled` | `boolean` | `true` | Set false to leave the element where it is. |
+| `active` | `boolean` | `true` | Whether this is the element that should move. |
 | `offset` | `number` | `16` | Gap kept between the element's bottom edge and the keyboard. |
 
 ### Returns
@@ -105,8 +137,8 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({
 
 All three go on the same element, and the `ref` is the one that matters most:
 the resting position is re-measured through it on the UI thread every time the
-keyboard begins to appear, which is the only moment the element is guaranteed
-to be untranslated.
+element becomes the one that should move — `active` and the keyboard up — which
+is the moment it is guaranteed to be untranslated.
 
 That re-measurement is what makes the hook work in the two places a
 measure-once approach fails. An element inside an overlay is laid out before

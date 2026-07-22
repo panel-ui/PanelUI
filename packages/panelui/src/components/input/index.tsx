@@ -87,7 +87,7 @@ export interface InputProps
   /**
    * Lift the field above the software keyboard when it would otherwise be
    * covered. Moves by exactly the overlap, and not at all when the field is
-   * already clear.
+   * already clear — or when the keyboard belongs to a different field.
    *
    * Install `react-native-keyboard-controller` for this to behave on Android.
    *
@@ -225,7 +225,15 @@ export const Input = forwardRef<TextInput, InputProps>(
      */
     if (avoidKeyboard) {
       return (
-        <KeyboardAvoider offset={keyboardOffset} className={containerClasses}>
+        <KeyboardAvoider
+          // Only while *this* field is the one being typed into. Without it
+          // every avoiding field on the screen lifts the moment any field
+          // anywhere is tapped, and since they all aim at the same gap above
+          // the keyboard, they arrive stacked on top of one another.
+          active={focused}
+          offset={keyboardOffset}
+          className={containerClasses}
+        >
           {body}
         </KeyboardAvoider>
       );

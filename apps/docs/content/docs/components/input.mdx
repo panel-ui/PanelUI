@@ -182,7 +182,7 @@ Anything `TextInput` accepts works here.
 | `errorMessage` | `string` | — | Error message. When set, the field renders in its invalid state. |
 | `isRequired` | `boolean` | — | Marks the field required — an asterisk on the label, and the a11y state. |
 | `disabled` | `boolean` | — |  |
-| `avoidKeyboard` | `boolean` | `false` | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear. Install `react-native-keyboard-controller` for this to behave on Android. Do not toggle this at runtime — it changes which component renders the container, which would remount the field and drop focus. |
+| `avoidKeyboard` | `boolean` | `false` | Lift the field above the software keyboard when it would otherwise be covered. Moves by exactly the overlap, and not at all when the field is already clear — or when the keyboard belongs to a different field. Install `react-native-keyboard-controller` for this to behave on Android. Do not toggle this at runtime — it changes which component renders the container, which would remount the field and drop focus. |
 | `keyboardOffset` | `number` | `16` | Gap kept between the field and the keyboard when `avoidKeyboard` is set. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
@@ -197,7 +197,7 @@ For a field with an icon or a button attached, reach for [InputGroup](/docs/comp
 
 ### Avoiding the keyboard
 
-`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.
+`avoidKeyboard` measures the field and translates it by exactly the overlap with the keyboard — and not at all when the field is already above it, or when the keyboard was opened by a different field. Only the field being typed into moves; without that rule every avoiding field on the screen would lift at once and land stacked on top of the others. That is the difference from `KeyboardAvoidingView`, which shifts an entire subtree by the full keyboard height wherever the field happens to sit.
 
 Install `react-native-keyboard-controller` for this to behave on Android:
 

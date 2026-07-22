@@ -31,7 +31,7 @@
  * </Animated.View>
  * ```
  */
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useWindowDimensions, type LayoutChangeEvent, type View } from 'react-native';
 import {
   measure,
@@ -47,6 +47,15 @@ import {
 export interface UseKeyboardAvoidanceOptions {
   /** Set false to leave the element where it is. */
   enabled?: boolean;
+  /**
+   * Whether this element is the one that should get out of the keyboard's way.
+   *
+   * Defaults to true, which suits a composer or a toolbar: it rides the
+   * keyboard whatever is focused. A *field* wants the opposite — pass its own
+   * focus state, or every field on the screen lifts whenever any one of them
+   * is tapped, and they all arrive at the same place on top of each other.
+   */
+  active?: boolean;
   /** Gap to keep between the element's bottom edge and the keyboard. */
   offset?: number;
 }
@@ -100,6 +109,7 @@ export function hasKeyboardController(): boolean {
 
 export function useKeyboardAvoidance({
   enabled = true,
+  active = true,
   offset = 16,
 }: UseKeyboardAvoidanceOptions = {}): UseKeyboardAvoidanceResult {
   const ref = useAnimatedRef<View>();
@@ -109,9 +119,17 @@ export function useKeyboardAvoidance({
   /** Window-space bottom edge of the element with no translation applied. */
   const restingBottom = useSharedValue(0);
 
+  // `active` is a plain prop and the reaction below is a worklet, so it is
+  // mirrored rather than closed over — written in an effect, because touching
+  // a shared value during render is a Reanimated strict-mode violation.
+  const isActive = useSharedValue(active && enabled);
+  useEffect(() => {
+    isActive.value = active && enabled;
+  }, [active, enabled, isActive]);
+
   /*
-   * The resting position is taken the moment the keyboard starts to open, on
-   * the UI thread, rather than once at layout time.
+   * The resting position is taken the moment this element becomes the one that
+   * should move, on the UI thread, rather than once at layout time.
    *
    * Measuring at layout is wrong in two ways that both show up as "avoidance
    * does nothing". A field inside an overlay is laid out before the overlay
@@ -120,16 +138,21 @@ export function useKeyboardAvoidance({
    * arithmetic below happily concludes there is no overlap. And a field that
    * has scrolled since it was laid out is measured where it used to be.
    *
-   * At the instant the keyboard begins to appear the element is by definition
-   * untranslated, so what is measured then is the honest resting position.
+   * Keying off "active and the keyboard is up" rather than off the keyboard
+   * alone matters for the second field you tap: moving straight from one field
+   * to another never closes the keyboard, so there is no opening to react to,
+   * and a hook watching only the keyboard would never measure it.
+   *
+   * At the instant it becomes active the element has no translation applied,
+   * so what is measured then is the honest resting position.
    */
   useAnimatedReaction(
-    () => Math.abs(rawHeight.value) > 0,
-    (keyboardOpen, wasOpen) => {
-      if (keyboardOpen === wasOpen) return;
+    () => isActive.value && Math.abs(rawHeight.value) > 0,
+    (shouldLift, wasLifting) => {
+      if (shouldLift === wasLifting) return;
 
-      if (!keyboardOpen) {
-        // Forget it, so the next appearance measures wherever the element has
+      if (!shouldLift) {
+        // Forget it, so the next time round measures wherever the element has
         // got to in the meantime.
         restingBottom.value = 0;
         return;
@@ -169,7 +192,7 @@ export function useKeyboardAvoidance({
     // Both sources are normalised to a positive height here.
     const keyboardHeight = Math.abs(rawHeight.value);
 
-    if (!enabled || keyboardHeight === 0 || restingBottom.value === 0) {
+    if (!isActive.value || keyboardHeight === 0 || restingBottom.value === 0) {
       return { transform: [{ translateY: 0 }] };
     }
 

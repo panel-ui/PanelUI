@@ -1271,17 +1271,19 @@ function SliderDemo() {
   const [volume, setVolume] = useState(40);
 
   return (
-    <View className="w-full gap-5">
-      <View className="gap-2">
-        <View className="flex-row justify-between">
-          <Text className="text-sm font-medium text-foreground">Volume</Text>
-          <Text className="text-sm text-muted-foreground">{volume}%</Text>
-        </View>
-        <Slider value={volume} onValueChange={setVolume} />
-      </View>
+    <View className="w-full gap-6">
+      {/* `label` + `showValue` draw the caption row, so a controlled slider
+          does not have to hand-build one to display what it is set to. */}
+      <Slider
+        label="Volume"
+        showValue
+        formatValue={(v) => `${Math.round(v)}%`}
+        value={volume}
+        onValueChange={setVolume}
+      />
       <Slider defaultValue={70} color="success" size="sm" />
       <Slider defaultValue={5} min={0} max={10} step={1} color="warning" size="lg" />
-      <Slider defaultValue={30} disabled />
+      <Slider label="Locked" showValue defaultValue={30} disabled />
     </View>
   );
 }
@@ -3964,6 +3966,26 @@ export const COMPONENTS: ComponentEntry[] = [
           <View className="w-full gap-5">
             <Slider defaultValue={2} min={0} max={5} step={1} />
             <Slider defaultValue={30} disabled />
+          </View>
+        ),
+      },
+      {
+        label: 'Labelled',
+        render: () => (
+          <View className="w-full gap-6">
+            <Slider label="Brightness" showValue defaultValue={62} />
+            {/* formatValue owns the units, so the caption reads the way the
+                value is actually spoken rather than as a bare number. */}
+            <Slider
+              label="Budget"
+              showValue
+              formatValue={(v) => `$${Math.round(v)}`}
+              defaultValue={340}
+              min={0}
+              max={1000}
+              step={20}
+              color="success"
+            />
           </View>
         ),
       },

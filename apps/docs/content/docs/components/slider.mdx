@@ -3,7 +3,7 @@ title: Slider
 description: Pick a value by dragging a thumb along a track.
 ---
 
-A value picker driven by a single thumb. The thumb and the fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.
+A value picker driven by a single thumb. The thumb is a pill exactly as tall as the track — the two are the same height, so nothing has to escape the track to be drawn whole — with a knob inside it that shrinks while you drag. Position and fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.
 
 ## Installation
 
@@ -23,6 +23,7 @@ npx panelui-cli@latest add slider
 
 ```tsx
 <Slider defaultValue={40} />
+<Slider label="Volume" showValue defaultValue={40} />
 <Slider value={volume} onValueChange={setVolume} />
 <Slider min={0} max={10} step={1} defaultValue={5} />
 ```
@@ -37,6 +38,39 @@ Hold the value in state and read it back for a live label.
 const [volume, setVolume] = useState(40);
 
 <Slider value={volume} onValueChange={setVolume} />
+```
+
+### With a caption row
+
+`label` and `showValue` draw a row above the track. `formatValue` owns the units, so the caption reads the way the value is spoken rather than as a bare number. The label doubles as the accessibility label.
+
+```tsx
+<Slider label="Brightness" showValue defaultValue={62} />
+
+<Slider
+  label="Budget"
+  showValue
+  formatValue={(v) => `$${Math.round(v)}`}
+  min={0}
+  max={1000}
+  step={20}
+  defaultValue={340}
+  color="success"
+/>
+```
+
+### Restyling the thumb
+
+The thumb is two elements — the coloured pill and the knob inside it — and each takes its own classes, so a custom slider does not have to give up the press animation to get a different look.
+
+```tsx
+<Slider
+  defaultValue={65}
+  trackClassName="bg-success/15"
+  fillClassName="bg-success"
+  thumbClassName="bg-success"
+  knobClassName="bg-white"
+/>
 ```
 
 ### Range and step
@@ -110,12 +144,19 @@ const [volume, setVolume] = useState(40);
 | `onValueChange` | `(value: number) => void` | — | Fires on every change while dragging — cheap updates only. |
 | `onValueCommit` | `(value: number) => void` | — | Fires once when the gesture ends — the place for expensive side effects. |
 | `disabled` | `boolean` | `false` |  |
+| `label` | `string` | — | Caption above the track. Also becomes the accessibility label. |
+| `showValue` | `boolean` | `false` | Show the current value on the caption row, opposite the label. |
+| `formatValue` | `(value: number) => string` | — | Format the shown value. Defaults to the rounded number. |
+| `headerClassName` | `string` | — | Extra classes for the caption row. |
 | `trackClassName` | `string` | — | Extra classes for the unfilled track. |
 | `fillClassName` | `string` | — | Extra classes for the filled portion. |
 | `thumbClassName` | `string` | — | Extra classes for the draggable thumb. |
+| `knobClassName` | `string` | — | Extra classes for the knob inside the thumb. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
 Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.
+
+The knob is painted with the page background rather than a per-colour on-token, because the status foregrounds are the darker text hues meant for soft fills — a green-700 knob on a green-500 pill would barely show. Override `knobClassName` if a theme needs something else.

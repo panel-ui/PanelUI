@@ -1085,14 +1085,24 @@
     ]
   },
   "slider": {
-    "intro": "A value picker driven by a single thumb. The thumb and the fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.",
-    "usage": "<Slider defaultValue={40} />\n<Slider value={volume} onValueChange={setVolume} />\n<Slider min={0} max={10} step={1} defaultValue={5} />",
-    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.",
+    "intro": "A value picker driven by a single thumb. The thumb is a pill exactly as tall as the track — the two are the same height, so nothing has to escape the track to be drawn whole — with a knob inside it that shrinks while you drag. Position and fill are animated on the UI thread, so dragging never round-trips through React; the picked value bridges back on change and again on release.",
+    "usage": "<Slider defaultValue={40} />\n<Slider label=\"Volume\" showValue defaultValue={40} />\n<Slider value={volume} onValueChange={setVolume} />\n<Slider min={0} max={10} step={1} defaultValue={5} />",
+    "notes": "Runs controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`). `onValueChange` fires on every frame of a drag; `onValueCommit` fires once on release — reach for it when the change is expensive. The value is always snapped to a multiple of `step` from `min`.\n\nThe knob is painted with the page background rather than a per-colour on-token, because the status foregrounds are the darker text hues meant for soft fills — a green-700 knob on a green-500 pill would barely show. Override `knobClassName` if a theme needs something else.",
     "examples": [
       {
         "title": "Controlled",
         "description": "Hold the value in state and read it back for a live label.",
         "code": "const [volume, setVolume] = useState(40);\n\n<Slider value={volume} onValueChange={setVolume} />"
+      },
+      {
+        "title": "With a caption row",
+        "description": "`label` and `showValue` draw a row above the track. `formatValue` owns the units, so the caption reads the way the value is spoken rather than as a bare number. The label doubles as the accessibility label.",
+        "code": "<Slider label=\"Brightness\" showValue defaultValue={62} />\n\n<Slider\n  label=\"Budget\"\n  showValue\n  formatValue={(v) => `$${Math.round(v)}`}\n  min={0}\n  max={1000}\n  step={20}\n  defaultValue={340}\n  color=\"success\"\n/>"
+      },
+      {
+        "title": "Restyling the thumb",
+        "description": "The thumb is two elements — the coloured pill and the knob inside it — and each takes its own classes, so a custom slider does not have to give up the press animation to get a different look.",
+        "code": "<Slider\n  defaultValue={65}\n  trackClassName=\"bg-success/15\"\n  fillClassName=\"bg-success\"\n  thumbClassName=\"bg-success\"\n  knobClassName=\"bg-white\"\n/>"
       },
       {
         "title": "Range and step",

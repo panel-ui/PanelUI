@@ -53,8 +53,9 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 | BottomSheet | Label | Steps |
 | Button | Progress | Switch |
 | Card | RadioGroup | Tabs |
-| Checkbox | | Timeline |
-| Dialog | | Toast |
+| Checkbox | | ToggleButton |
+| Dialog | | Timeline |
+| | | Toast |
 | | | Typography |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating

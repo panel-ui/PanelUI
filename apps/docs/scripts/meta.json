@@ -179,6 +179,11 @@
     "Transient notification queue with swipe to dismiss.",
     "react native toast"
   ],
+  "toggle-button": [
+    "ToggleButton",
+    "A button that stays down, on its own or in a group.",
+    "react native toggle button"
+  ],
   "typography": [
     "Typography",
     "Semantic text presets.",

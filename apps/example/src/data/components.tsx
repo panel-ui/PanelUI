@@ -76,6 +76,8 @@ import {
   XIcon,
   Timeline,
   Toast,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
   hasNativeUI,
   useToast,
@@ -1324,6 +1326,76 @@ function SliderDemo() {
       <Slider defaultValue={70} color="success" size="sm" />
       <Slider defaultValue={5} min={0} max={10} step={1} color="warning" size="lg" />
       <Slider label="Locked" showValue defaultValue={30} disabled />
+    </View>
+  );
+}
+
+function ToggleButtonDemo() {
+  const [liked, setLiked] = useState(false);
+
+  return (
+    <View className="w-full gap-3">
+      {/* Uncontrolled — it holds its own state. */}
+      <ToggleButton defaultSelected>Follow</ToggleButton>
+
+      {/* Controlled, with an icon beside a label. ToggleButton.Label reads the
+          selected state itself, so nothing has to be threaded through. */}
+      <ToggleButton selected={liked} onSelectedChange={setLiked}>
+        <BellIcon size={16} />
+        <ToggleButton.Label>{liked ? 'Subscribed' : 'Subscribe'}</ToggleButton.Label>
+      </ToggleButton>
+
+      <ToggleButton variant="ghost" iconOnly accessibilityLabel="Save">
+        <PlusSquareIcon size={18} />
+      </ToggleButton>
+    </View>
+  );
+}
+
+function ToggleButtonToolbarDemo() {
+  const [marks, setMarks] = useState<string[]>(['shield']);
+
+  return (
+    <View className="w-full gap-3">
+      {/* `multiple`: independent marks, any number on at once. */}
+      <ToggleButtonGroup
+        selectionMode="multiple"
+        variant="ghost"
+        value={marks}
+        onValueChange={setMarks}
+      >
+        <ToggleButton id="shield" iconOnly accessibilityLabel="Protected">
+          <ShieldCheckIcon size={18} />
+        </ToggleButton>
+        <ToggleButton id="bell" iconOnly accessibilityLabel="Notify">
+          <BellIcon size={18} />
+        </ToggleButton>
+        <ToggleButton id="share" iconOnly accessibilityLabel="Shared">
+          <ShareNodesIcon size={18} />
+        </ToggleButton>
+      </ToggleButtonGroup>
+      <Text size="sm" muted>
+        On: {marks.length ? marks.join(', ') : 'nothing'}
+      </Text>
+    </View>
+  );
+}
+
+function ToggleButtonSingleDemo() {
+  const [view, setView] = useState<string[]>(['day']);
+
+  return (
+    <View className="w-full gap-3">
+      {/* `single`: picking one clears the last, and pressing the selected one
+          again clears it — a filter you cannot turn off is a trap. */}
+      <ToggleButtonGroup selectionMode="single" value={view} onValueChange={setView}>
+        <ToggleButton id="day">Day</ToggleButton>
+        <ToggleButton id="week">Week</ToggleButton>
+        <ToggleButton id="month">Month</ToggleButton>
+      </ToggleButtonGroup>
+      <Text size="sm" muted>
+        Showing: {view[0] ?? 'nothing'}
+      </Text>
     </View>
   );
 }
@@ -4448,6 +4520,38 @@ export const COMPONENTS: ComponentEntry[] = [
       {
         label: 'Keeping panels mounted',
         render: () => <KeepMountedTabsDemo />,
+      },
+    ],
+  },
+  {
+    slug: 'toggle-button',
+    name: 'ToggleButton',
+    summary: 'A button that stays down',
+    demos: [
+      { label: 'On its own', render: () => <ToggleButtonDemo /> },
+      { label: 'A toolbar of marks', render: () => <ToggleButtonToolbarDemo /> },
+      { label: 'An either-or choice', render: () => <ToggleButtonSingleDemo /> },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full gap-3">
+            <ToggleButtonGroup defaultValue={['s']} size="sm">
+              <ToggleButton id="s">Small</ToggleButton>
+              <ToggleButton id="s2">Small</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup defaultValue={['m']}>
+              <ToggleButton id="m">Medium</ToggleButton>
+              <ToggleButton id="m2">Medium</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup defaultValue={['l']} size="lg">
+              <ToggleButton id="l">Large</ToggleButton>
+              <ToggleButton id="l2">Large</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButton disabled defaultSelected>
+              Disabled
+            </ToggleButton>
+          </View>
+        ),
       },
     ],
   },

@@ -79,7 +79,8 @@ const COMPONENTS = [
   ['Select', 'select'], ['Separator', 'separator'], ['Shimmer', 'shimmer'],
   ['Skeleton', 'skeleton'], ['Spinner', 'spinner'], ['Steps', 'steps'],
   ['Surface', 'surface'], ['Switch', 'switch'], ['Tabs', 'tabs'],
-  ['Timeline', 'timeline'], ['Toast', 'toast'], ['Typography', 'typography'],
+  ['Timeline', 'timeline'], ['Toast', 'toast'], ['ToggleButton', 'toggle-button'],
+  ['Typography', 'typography'],
 ] as const;
 
 const THEMES = [

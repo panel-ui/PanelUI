@@ -70,6 +70,17 @@ export {
 } from './components/bottom-sheet';
 export { Button, type ButtonProps } from './components/button';
 export {
+  ToggleButton,
+  ToggleButtonGroup,
+  useToggleButton,
+  type ToggleButtonProps,
+  type ToggleButtonGroupProps,
+  type ToggleButtonLabelProps,
+  type ToggleButtonSize,
+  type ToggleButtonVariant,
+  type ToggleSelectionMode,
+} from './components/toggle-button';
+export {
   Dialog,
   type DialogProps,
   type DialogContentProps,

@@ -1396,6 +1396,53 @@
       "variant": "toast({ variant: 'default', title: 'Saved' });\ntoast({ variant: 'info', title: 'Syncing' });\ntoast({ variant: 'success', title: 'Deployed' });\ntoast({ variant: 'warning', title: 'Almost out of space' });\ntoast({ variant: 'destructive', title: 'Upload failed' });"
     }
   },
+  "toggle-button": {
+    "intro": "A button that stays down. The difference from Button is the whole point: a button does something and springs back, a toggle button *is* something afterwards — so the selected state is the loud one and the resting state is quiet.",
+    "usage": "<ToggleButton defaultSelected>Follow</ToggleButton>\n\n<ToggleButton iconOnly accessibilityLabel=\"Save\">\n  <PlusSquareIcon size={18} />\n</ToggleButton>\n\n<ToggleButtonGroup selectionMode=\"multiple\" value={marks} onValueChange={setMarks}>\n  <ToggleButton id=\"bold\">Bold</ToggleButton>\n  <ToggleButton id=\"italic\">Italic</ToggleButton>\n</ToggleButtonGroup>",
+    "anatomy": "<ToggleButtonGroup>\n  <ToggleButton id=\"…\">\n    <Icon />\n    <ToggleButton.Label>…</ToggleButton.Label>\n  </ToggleButton>\n</ToggleButtonGroup>",
+    "parts": {
+      "Label": "The label, when the button holds more than a string. Reads the selected state itself, so an icon-plus-text button does not thread the colour through by hand."
+    },
+    "extraImports": [
+      "ToggleButtonGroup",
+      "useToggleButton",
+      "Text",
+      "PlusSquareIcon"
+    ],
+    "examples": [
+      {
+        "title": "On its own",
+        "description": "Uncontrolled with `defaultSelected`, or controlled with `selected` and `onSelectedChange`.",
+        "code": "<ToggleButton defaultSelected>Follow</ToggleButton>\n\nconst [liked, setLiked] = useState(false);\n\n<ToggleButton selected={liked} onSelectedChange={setLiked}>\n  <HeartIcon size={16} />\n  <ToggleButton.Label>{liked ? 'Liked' : 'Like'}</ToggleButton.Label>\n</ToggleButton>"
+      },
+      {
+        "title": "A toolbar of independent marks",
+        "description": "`selectionMode=\"multiple\"` lets any number be on at once. Inside a group each button needs an `id` — that is the value the group reports — and the group owns the state, so a `selected` prop on the button is ignored.",
+        "code": "const [marks, setMarks] = useState<string[]>([]);\n\n<ToggleButtonGroup\n  selectionMode=\"multiple\"\n  variant=\"ghost\"\n  value={marks}\n  onValueChange={setMarks}\n>\n  <ToggleButton id=\"bold\" iconOnly accessibilityLabel=\"Bold\">\n    <BoldIcon size={18} />\n  </ToggleButton>\n  <ToggleButton id=\"italic\" iconOnly accessibilityLabel=\"Italic\">\n    <ItalicIcon size={18} />\n  </ToggleButton>\n</ToggleButtonGroup>"
+      },
+      {
+        "title": "An either-or choice",
+        "description": "`selectionMode=\"single\"` clears the last selection when a new one is made. Pressing the selected button again clears it — a filter you cannot turn off is a trap.",
+        "code": "const [view, setView] = useState(['day']);\n\n<ToggleButtonGroup selectionMode=\"single\" value={view} onValueChange={setView}>\n  <ToggleButton id=\"day\">Day</ToggleButton>\n  <ToggleButton id=\"week\">Week</ToggleButton>\n  <ToggleButton id=\"month\">Month</ToggleButton>\n</ToggleButtonGroup>"
+      },
+      {
+        "title": "Reading the state further down",
+        "description": "Anything inside the button can ask whether it is on, without the state being passed to it.",
+        "code": "function Count() {\n  const { selected } = useToggleButton();\n  return selected ? <Text size=\"xs\">1</Text> : null;\n}\n\n<ToggleButton>\n  <ToggleButton.Label>Pinned</ToggleButton.Label>\n  <Count />\n</ToggleButton>"
+      }
+    ],
+    "variantCode": {
+      "variant": "{/* A soft fill at rest, so the control is visible before you touch it. */}\n<ToggleButton variant=\"default\">Follow</ToggleButton>\n\n{/* Nothing at rest — for a dense toolbar where six fills would be noise. */}\n<ToggleButton variant=\"ghost\" iconOnly accessibilityLabel=\"Bold\">\n  <BoldIcon size={18} />\n</ToggleButton>",
+      "size": "<ToggleButton size=\"sm\">Small</ToggleButton>\n<ToggleButton size=\"md\">Medium</ToggleButton>\n<ToggleButton size=\"lg\">Large</ToggleButton>"
+    },
+    "hideVariants": [
+      "iconOnly"
+    ],
+    "notes": "The selected state is announced, not just drawn: every button sets `accessibilityState.checked`, which is what a screen reader reads out as on or off. An `iconOnly` button has no label to read, so give it an `accessibilityLabel`.\n\nA group takes `variant` and `size` and applies them to every button that does not set its own, so a toolbar is styled in one place.",
+    "interfaceNames": {
+      "ToggleButtonGroupProps": "ToggleButtonGroup"
+    }
+  },
   "typography": {
     "intro": "Semantic text presets, built on the `Text` primitive.",
     "usage": "<Typography type=\"h1\">Heading 1</Typography>\n<Typography type=\"body-sm\" muted>Small body text</Typography>\n\n<Typography.Heading type=\"h2\">Section title</Typography.Heading>\n<Typography.Paragraph>Body copy.</Typography.Paragraph>\n<Typography.Code>npm i panelui-native</Typography.Code>",

@@ -401,6 +401,17 @@
     ]
   },
   {
+    "name": "toggle-button",
+    "type": "registry:ui",
+    "description": "A button that stays down, on its own or in a group.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "icons",
+      "text"
+    ]
+  },
+  {
     "name": "typography",
     "type": "registry:ui",
     "description": "Semantic text presets.",

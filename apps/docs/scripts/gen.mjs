@@ -143,7 +143,12 @@ ${variantKeys.map(([k, opts]) => {
 
 ${tables.map(({ i, t }) => {
   const label = i.name.replace(/Props$/, '');
-  const heading = label === name ? name : `${name}.${label.replace(new RegExp('^' + name), '')}`;
+  // A name starting with the component's is assumed to be a compound part —
+  // `FooBarProps` is `Foo.Bar`. Not always true: a sibling exported in its own
+  // right shares the prefix without being a part of it, so `interfaceNames`
+  // lets usage.json name those itself.
+  const inferred = label === name ? name : `${name}.${label.replace(new RegExp('^' + name), '')}`;
+  const heading = u.interfaceNames?.[i.name] ?? inferred;
   return `### ${heading.replace(/\.$/, '')}\n\n${t}`;
 }).join('\n\n')}
 

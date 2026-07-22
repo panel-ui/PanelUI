@@ -59,6 +59,13 @@ const inlineCode = (s) => '`' + String(s).replace(/`/g, '') + '`';
 const previewTag = (p) =>
   `<Preview\n  src="${p.src}"\n  alt="${p.alt}"\n  width={${p.width}}\n  height={${p.height}}${p.caption ? `\n  caption="${p.caption}"` : ''}\n/>`;
 
+/**
+ * A framed screen recording, for a component whose point is that it moves —
+ * a still of a sweep is a still of nothing.
+ */
+const previewVideoTag = (p) =>
+  `<PreviewVideo\n  src="${p.src}"${p.poster ? `\n  poster="${p.poster}"` : ''}\n  alt="${p.alt}"\n  width={${p.width}}\n  height={${p.height}}${p.caption ? `\n  caption="${p.caption}"` : ''}\n/>`;
+
 /** Props inherited from React Native, documented once rather than per row. */
 const INHERITED = /^(ViewProps|TextProps|ViewProps, VariantProps|.*VariantProps.*)$/;
 
@@ -91,7 +98,11 @@ for (const [slug, entry] of Object.entries(meta)) {
    * intro — the first thing on the page should be what the thing looks like,
    * not a paragraph about it.
    */
-  const preview = u.preview ? `\n\n${previewTag(u.preview)}` : '';
+  const preview = u.preview
+    ? `\n\n${previewTag(u.preview)}`
+    : u.previewVideo
+      ? `\n\n${previewVideoTag(u.previewVideo)}`
+      : '';
 
   sections.push(`---
 title: ${name}

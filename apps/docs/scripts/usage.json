@@ -1124,7 +1124,15 @@
         "description": "Renders the content statically in `baseColor`. Useful for stopping the sweep the moment a stream finishes, without swapping components.",
         "code": "<Shimmer enabled={isStreaming}>{status}</Shimmer>"
       }
-    ]
+    ],
+    "previewVideo": {
+      "src": "/previews/shimmer.mp4",
+      "poster": "/previews/shimmer-poster.jpg",
+      "alt": "A screen recording of the Shimmer demo on a dark phone screen. A band of light sweeps repeatedly through the words of “Generating response…”, “Thinking…” and “Searching the web”, lighting each letter as it passes, then through further rows demonstrating a ping-pong sweep, a right-to-left sweep, a wider slower band, a disabled row that stays still, and two colour variants.",
+      "width": 640,
+      "height": 1122,
+      "caption": "The sweep is clipped to the glyphs, so the letters catch the light rather than a box over them."
+    }
   },
   "skeleton": {
     "intro": "A shimmer placeholder for content that has not loaded. Size it with Tailwind utilities.",
@@ -1192,6 +1200,13 @@
     "variantCode": {
       "size": "<Slider size=\"sm\" defaultValue={40} />\n<Slider size=\"md\" defaultValue={40} />\n<Slider size=\"lg\" defaultValue={40} />",
       "color": "<Slider color=\"primary\" defaultValue={40} />\n<Slider color=\"success\" defaultValue={40} />\n<Slider color=\"warning\" defaultValue={40} />\n<Slider color=\"destructive\" defaultValue={40} />\n<Slider color=\"info\" defaultValue={40} />"
+    },
+    "preview": {
+      "src": "/previews/slider.jpg",
+      "alt": "Four sliders on a dark screen. The first is labelled Volume with 40% on the right, its light fill ending in a pill-shaped thumb with a dark knob inside it; below are a green slider at about two thirds and an orange one at about half; the last is dimmed and labelled Locked, 30.",
+      "width": 1179,
+      "height": 831,
+      "caption": "The pill thumb at three sizes and colours, running in the example app."
     }
   },
   "spinner": {

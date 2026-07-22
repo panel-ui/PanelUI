@@ -31,6 +31,7 @@ const OPTIONAL = new Set([
   '@expo/ui',
   'expo-blur',
   'expo-clipboard',
+  'expo-haptics',
   'react-native-keyboard-controller',
 ]);
 
@@ -56,6 +57,7 @@ const SUPPORT_DESCRIPTIONS = {
   icons: 'The icon set, plus the colour context components use to tint them.',
   cn: 'Merges Tailwind class names, with later classes winning conflicts.',
   native: 'Optional bridge to the platform UI toolkit, behind the `native` prop.',
+  haptics: 'Optional bridge to the platform haptic engine, behind the `haptics` prop.',
   'use-theme': 'Read and change the active theme.',
   'use-breakpoint': 'Responsive state derived from the window size.',
   'use-copy-to-clipboard': 'Copy text, with a temporary copied state.',
@@ -133,6 +135,14 @@ register(
   [path.join(SRC, 'utils/cn.ts')],
   () => 'lib/cn.ts',
   () => `${ALIAS.lib}/cn`
+);
+
+register(
+  'haptics',
+  'registry:lib',
+  [path.join(SRC, 'utils/haptics.ts')],
+  () => 'lib/haptics.ts',
+  () => `${ALIAS.lib}/haptics`
 );
 
 register(

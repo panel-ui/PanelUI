@@ -52,6 +52,7 @@ import { useCSSVariable } from 'uniwind';
 import { Portal } from '../../primitives/portal';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import { selectionTick } from '../../utils/haptics';
 
 const SPRING = { damping: 20, stiffness: 260, mass: 0.6 } as const;
 /** Bar width at the top level, and how much each nested level takes off it. */
@@ -63,6 +64,14 @@ const BAR_ACTIVE_EXTRA = 8;
 const ITEM_INDENT = 12;
 
 export type SectionRailPlacement = 'left' | 'right';
+export type SectionRailAlign = 'center' | 'top' | 'bottom';
+
+/** Vertical position of the rail, and of the panel that opens from it. */
+const ALIGNMENT: Record<SectionRailAlign, string> = {
+  center: 'justify-center',
+  top: 'justify-start',
+  bottom: 'justify-end',
+};
 
 interface SectionRailContextValue {
   value: string | undefined;
@@ -71,6 +80,7 @@ interface SectionRailContextValue {
   setOpen: (open: boolean) => void;
   close: () => void;
   placement: SectionRailPlacement;
+  align: SectionRailAlign;
 }
 
 const SectionRailContext = createContext<SectionRailContextValue | null>(null);
@@ -87,6 +97,18 @@ export interface SectionRailProps extends ViewProps {
   className?: string;
   /** Which edge the rail sits against. */
   placement?: SectionRailPlacement;
+  /**
+   * Where along that edge it sits. `bottom` puts it in a corner, out of the
+   * way of the text — the panel then opens upward from the rail rather than
+   * centred on the screen.
+   */
+  align?: SectionRailAlign;
+  /**
+   * Tick under the finger on every change of section, however it was made —
+   * tapped in the panel, or scrolled past. Needs the optional `expo-haptics`
+   * package; without it this does nothing.
+   */
+  haptics?: boolean;
   /** Active section id. Controlled — usually driven by a scroll handler. */
   value?: string;
   /** Starting section when uncontrolled. */
@@ -110,6 +132,8 @@ export interface SectionRailProps extends ViewProps {
 function SectionRailRoot({
   className,
   placement = 'right',
+  align = 'center',
+  haptics = false,
   value: valueProp,
   defaultValue,
   onValueChange,
@@ -168,6 +192,22 @@ function SectionRailRoot({
     [isControlled, onValueChange, closeDelay, setOpen]
   );
 
+  /*
+   * Fired from the resolved value rather than from the change handler, so a
+   * section arrived at by scrolling ticks as well as one that was tapped —
+   * "every change" means every change. The ref skips the first run, since
+   * mounting is not a change of section.
+   */
+  const ticked = useRef(false);
+  useEffect(() => {
+    if (!haptics) return;
+    if (!ticked.current) {
+      ticked.current = true;
+      return;
+    }
+    selectionTick();
+  }, [value, haptics]);
+
   const context = useMemo(
     () => ({
       value,
@@ -176,8 +216,9 @@ function SectionRailRoot({
       setOpen,
       close,
       placement,
+      align,
     }),
-    [value, handleValueChange, open, setOpen, close, placement]
+    [value, handleValueChange, open, setOpen, close, placement, align]
   );
 
   return (
@@ -188,7 +229,8 @@ function SectionRailRoot({
         // strip down the side of the screen would swallow every scroll.
         pointerEvents="box-none"
         className={cn(
-          'absolute justify-center',
+          'absolute',
+          ALIGNMENT[align],
           placement === 'right' ? 'right-0' : 'left-0',
           className
         )}
@@ -294,7 +336,7 @@ export interface SectionRailContentProps extends ViewProps {
  */
 function SectionRailContent({ className, children, ...props }: SectionRailContentProps) {
   const context = useSectionRail('SectionRail.Content');
-  const { open, close, placement } = context;
+  const { open, close, placement, align } = context;
   const insets = useSafeAreaInsets();
 
   if (!open) return null;
@@ -312,7 +354,10 @@ function SectionRailContent({ className, children, ...props }: SectionRailConten
         <Animated.View
           entering={FadeIn.duration(140)}
           exiting={FadeOut.duration(120)}
-          className="absolute justify-center"
+          // Aligned the same way the rail is, so a panel opened from a corner
+          // unfolds out of that corner instead of appearing across the middle
+          // of the screen away from the thing that was pressed.
+          className={cn('absolute', ALIGNMENT[align])}
           style={{
             top: insets.top,
             bottom: insets.bottom,

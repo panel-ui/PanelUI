@@ -67,6 +67,7 @@
     "@react-native-masked-view/masked-view": ">=0.3.0",
     "expo-blur": ">=13.0.0",
     "expo-clipboard": ">=7.0.0",
+    "expo-haptics": ">=13.0.0",
     "expo-linear-gradient": ">=13.0.0",
     "react": "*",
     "react-native": "*",
@@ -107,6 +108,9 @@
       "optional": true
     },
     "expo-clipboard": {
+      "optional": true
+    },
+    "expo-haptics": {
       "optional": true
     },
     "react-native-keyboard-controller": {

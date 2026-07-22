@@ -28,6 +28,7 @@ export {
 
 // Native UI bridge
 export { hasNativeUI } from './native';
+export { hasHaptics, selectionTick } from './utils/haptics';
 
 // Components
 export {
@@ -108,6 +109,7 @@ export {
   type SectionRailContentProps,
   type SectionRailItemProps,
   type SectionRailPlacement,
+  type SectionRailAlign,
 } from './components/section-rail';
 export {
   Tabs,

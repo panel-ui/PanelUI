@@ -9,6 +9,7 @@
     "expo-blur": "~57.0.1",
     "expo-clipboard": "^57.0.1",
     "expo-constants": "^57.0.6",
+    "expo-haptics": "~57.0.1",
     "expo-linear-gradient": "~57.0.1",
     "expo-linking": "^57.0.3",
     "expo-router": "^57.0.7",

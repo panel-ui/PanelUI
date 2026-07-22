@@ -974,7 +974,7 @@
   },
   "section-rail": {
     "intro": "A floating navigator for a long screen: a stack of short bars pinned to one edge, one per section, that expands into a labelled panel when you touch it. Collapsed it is a position indicator you can read at a glance without giving up any content width; expanded it is a list you can jump from.",
-    "usage": "<SectionRail value={active} onValueChange={scrollToSection}>\n  <SectionRail.Trigger>\n    <SectionRail.Bar value=\"intro\" />\n    <SectionRail.Bar value=\"setup\" level={1} />\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    <SectionRail.Item value=\"intro\">Introduction</SectionRail.Item>\n    <SectionRail.Item value=\"setup\" level={1}>Setup</SectionRail.Item>\n  </SectionRail.Content>\n</SectionRail>",
+    "usage": "<SectionRail align=\"bottom\" haptics value={active} onValueChange={scrollToSection}>\n  <SectionRail.Trigger>\n    <SectionRail.Bar value=\"intro\" />\n    <SectionRail.Bar value=\"setup\" level={1} />\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    <SectionRail.Item value=\"intro\">Introduction</SectionRail.Item>\n    <SectionRail.Item value=\"setup\" level={1}>Setup</SectionRail.Item>\n  </SectionRail.Content>\n</SectionRail>",
     "anatomy": "<SectionRail>\n  <SectionRail.Trigger>\n    <SectionRail.Bar value=\"…\" />\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    <SectionRail.Item value=\"…\">…</SectionRail.Item>\n  </SectionRail.Content>\n</SectionRail>",
     "parts": {
       "Trigger": "The collapsed rail. One press target over the whole stack of bars, because a hairline is not something anyone can hit.",
@@ -983,13 +983,14 @@
       "Item": "A labelled row in the panel, indented to match its bar."
     },
     "extraImports": [
-      "Text"
+      "Text",
+      "useScrollSections"
     ],
     "examples": [
       {
         "title": "Driving it from a scroll position",
-        "description": "The rail does not watch the scroll itself — it takes a `value`. Record where each section landed on layout, and pick the last one whose top has passed a reading line a little down the viewport, so the heading you just scrolled past still counts.",
-        "code": "const [active, setActive] = useState('intro');\nconst scroller = useRef<ScrollView>(null);\nconst offsets = useRef<Record<string, number>>({});\n\n<ScrollView\n  ref={scroller}\n  scrollEventThrottle={16}\n  onScroll={(e) => {\n    const y = e.nativeEvent.contentOffset.y + 120;\n    let current = sections[0].id;\n    for (const s of sections) {\n      if ((offsets.current[s.id] ?? Infinity) <= y) current = s.id;\n    }\n    setActive(current);\n  }}\n>\n  {sections.map((s) => (\n    <View\n      key={s.id}\n      onLayout={(e) => { offsets.current[s.id] = e.nativeEvent.layout.y; }}\n    >\n      {/* …section… */}\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  value={active}\n  onValueChange={(next) => {\n    setActive(next);\n    scroller.current?.scrollTo({ y: offsets.current[next] ?? 0, animated: true });\n  }}\n>\n  {/* …bars and items… */}\n</SectionRail>"
+        "description": "The rail does not watch the scroll itself — it takes a `value`. [useScrollSections](/docs/hooks/use-scroll-sections) supplies one: it records where each section landed, picks the one being read, and hands back a `scrollTo` that is exactly the shape `onValueChange` wants. It also handles the end of the page, where the last section’s top never reaches the reading line because the content runs out first.",
+        "code": "const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });\n\n<ScrollView ref={sections.ref} {...sections.scrollProps}>\n  {SECTIONS.map((section) => (\n    <View key={section.id} onLayout={sections.measure(section.id)}>\n      {/* …section… */}\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  align=\"bottom\"\n  value={sections.active}\n  onValueChange={sections.scrollTo}\n>\n  {/* …bars and items… */}\n</SectionRail>"
       },
       {
         "title": "Nesting",
@@ -997,12 +998,22 @@
         "code": "<SectionRail.Trigger>\n  <SectionRail.Bar value=\"install\" />\n  <SectionRail.Bar value=\"expo\" level={1} />\n  <SectionRail.Bar value=\"bare\" level={1} />\n</SectionRail.Trigger>\n\n<SectionRail.Content>\n  <SectionRail.Item value=\"install\">Installation</SectionRail.Item>\n  <SectionRail.Item value=\"expo\" level={1}>Expo</SectionRail.Item>\n  <SectionRail.Item value=\"bare\" level={1}>Bare React Native</SectionRail.Item>\n</SectionRail.Content>"
       },
       {
+        "title": "Putting it in a corner",
+        "description": "Centred on an edge, the rail sits over the middle of the text — the part you are reading — where it is both in the way and easy to miss. `align=\"bottom\"` moves it into a corner clear of the content, and the panel then opens upward out of that corner rather than across the middle of the screen.",
+        "code": "{/* Bottom right */}\n<SectionRail align=\"bottom\" value={active} onValueChange={setActive}>…</SectionRail>\n\n{/* Bottom left */}\n<SectionRail placement=\"left\" align=\"bottom\" value={active} onValueChange={setActive}>\n  …\n</SectionRail>"
+      },
+      {
         "title": "Anchoring it to the other edge",
         "description": "The panel follows — it is anchored to the same edge and slides in from it.",
         "code": "<SectionRail placement=\"left\" value={active} onValueChange={setActive}>\n  {/* … */}\n</SectionRail>"
+      },
+      {
+        "title": "One section per screen",
+        "description": "A pager needs no reading line — the active page is the scroll offset over the viewport height — so it drives the rail directly. Size the pages from the scroll view's **measured** height rather than the window's: anything above the pager makes the viewport shorter than the screen, and window-height pages then drift further out of alignment with each snap position until one lands between two and never shows.",
+        "code": "const [page, setPage] = useState(0);\nconst [pageHeight, setPageHeight] = useState(0);\nconst scroller = useRef<ScrollView>(null);\n\n<ScrollView\n  ref={scroller}\n  pagingEnabled\n  scrollEventThrottle={16}\n  onLayout={(e) => setPageHeight(e.nativeEvent.layout.height)}\n  onScroll={(e) => {\n    const { contentOffset, layoutMeasurement } = e.nativeEvent;\n    if (!layoutMeasurement.height) return;\n    setPage(Math.round(contentOffset.y / layoutMeasurement.height));\n  }}\n>\n  {SECTIONS.map((s) => (\n    <View key={s.id} style={{ height: pageHeight || undefined }}>\n      {/* …page… */}\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  placement=\"left\"\n  align=\"bottom\"\n  haptics\n  value={SECTIONS[page]?.id}\n  onValueChange={(next) => {\n    const index = SECTIONS.findIndex((s) => s.id === next);\n    if (index < 0 || !pageHeight) return;\n    setPage(index);\n    scroller.current?.scrollTo({ y: index * pageHeight, animated: true });\n  }}\n>\n  {/* …bars and items… */}\n</SectionRail>"
       }
     ],
-    "notes": "The bars carry no labels, and that is the design rather than an omission. A permanent list of section titles down the side of a phone screen is either too small to read or too wide to keep; the bars carry the two things that survive at that size — which section you are in, and roughly how deep it sits.\n\nThe root is absolutely positioned with `pointerEvents=\"box-none\"`, so the rail takes touches but the empty column around it does not. Without that a strip down the side of the screen would swallow every scroll that started in it.\n\nChoosing a section leaves the panel up for `closeDelay` (300ms) so a mis-tap can be corrected without opening it again. Pass `0` to close immediately."
+    "notes": "The bars carry no labels, and that is the design rather than an omission. A permanent list of section titles down the side of a phone screen is either too small to read or too wide to keep; the bars carry the two things that survive at that size — which section you are in, and roughly how deep it sits.\n\nThe root is absolutely positioned with `pointerEvents=\"box-none\"`, so the rail takes touches but the empty column around it does not. Without that a strip down the side of the screen would swallow every scroll that started in it.\n\nChoosing a section leaves the panel up for `closeDelay` (300ms) so a mis-tap can be corrected without opening it again. Pass `0` to close immediately.\n\n### Haptics\n\n`haptics` ticks under the finger on every change of section — tapped in the panel or scrolled past, because both are the section changing. It is the light selection tick rather than an impact: anything heavier gets tiring when it can fire on every scroll.\n\nIt needs the optional `expo-haptics` package and does nothing without it, so it is safe to pass either way.\n\n```sh\nnpx expo install expo-haptics\n```"
   },
   "select": {
     "intro": "A picker with one trigger and three ways of showing its options: a bottom sheet, a list expanded in place, or a panel floating over the page. Which is right depends on what surrounds the trigger rather than on what the options are, so it is one prop rather than three components.",

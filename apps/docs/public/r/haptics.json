@@ -1,0 +1,17 @@
+{
+  "name": "haptics",
+  "type": "registry:lib",
+  "description": "Optional bridge to the platform haptic engine, behind the `haptics` prop.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [
+    "expo-haptics"
+  ],
+  "files": [
+    {
+      "path": "lib/haptics.ts",
+      "type": "registry:lib",
+      "content": "/**\n * Optional bridge to the platform's haptic engine.\n *\n * A tick under the finger is the difference between a control that responds\n * and one that merely updates — but it is also the kind of thing that has to\n * be free to ignore. `expo-haptics` is resolved lazily and every caller falls\n * back to doing nothing, so a component with `haptics` set is silent rather\n * than broken when the package is absent.\n *\n * ```sh\n * npx expo install expo-haptics\n * ```\n */\nimport { Platform } from 'react-native';\n\ninterface HapticsModule {\n  selectionAsync: () => Promise<void>;\n  impactAsync: (style?: unknown) => Promise<void>;\n  ImpactFeedbackStyle?: Record<string, unknown>;\n}\n\nlet resolved = false;\nlet module: HapticsModule | null = null;\n\n/**\n * The haptics module, or null when it is not installed or the platform has no\n * engine behind it. Resolved once and cached — a failed require is not retried\n * on every keystroke.\n */\nfunction getHaptics(): HapticsModule | null {\n  if (resolved) return module;\n  resolved = true;\n\n  // Web has no haptic engine; the Vibration API is a different thing and a\n  // worse one — a buzz where a tick was meant.\n  if (Platform.OS === 'web') return null;\n\n  try {\n    // eslint-disable-next-line @typescript-eslint/no-require-imports\n    module = require('expo-haptics') as HapticsModule;\n  } catch {\n    module = null;\n  }\n\n  return module;\n}\n\n/** Whether a haptic will actually be felt. */\nexport function hasHaptics(): boolean {\n  return getHaptics() !== null;\n}\n\n/**\n * The light tick for moving between options — a segmented control, a picker,\n * a section marker. Deliberately not an impact: selection is the lightest of\n * the feedbacks, and anything heavier gets tiring when it fires on scroll.\n *\n * Fire-and-forget. A rejected haptic is not worth an unhandled rejection, and\n * there is nothing useful to do about one.\n */\nexport function selectionTick(): void {\n  void getHaptics()?.selectionAsync().catch(() => {});\n}\n"
+    }
+  ]
+}

@@ -130,6 +130,12 @@
     ]
   },
   {
+    "name": "haptics",
+    "type": "registry:lib",
+    "description": "Optional bridge to the platform haptic engine, behind the `haptics` prop.",
+    "registryDependencies": []
+  },
+  {
     "name": "icons",
     "type": "registry:ui",
     "description": "The icon set, plus the colour context components use to tint them.",
@@ -291,6 +297,7 @@
     "description": "Floating section navigator for a long screen.",
     "registryDependencies": [
       "cn",
+      "haptics",
       "portal",
       "text"
     ]

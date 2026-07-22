@@ -81,6 +81,7 @@ import {
   ToggleButtonGroup,
   Typography,
   hasNativeUI,
+  useScrollSections,
   useToast,
 } from 'panelui-native';
 import { useCSSVariable } from 'uniwind';
@@ -1412,35 +1413,34 @@ const RAIL_SECTIONS = [
   { id: 'faq', label: 'Frequently asked', level: 0 },
 ];
 
-function SectionRailVersion({ placement }: { placement?: 'left' | 'right' }) {
-  const [active, setActive] = useState('intro');
-  const scroller = useRef<ScrollView>(null);
-  const offsets = useRef<Record<string, number>>({});
+/** Shared body for the scrolling rail demos — only the rail's corner differs. */
+function SectionRailVersion({
+  placement = 'right',
+  align = 'center',
+  haptics,
+}: {
+  placement?: 'left' | 'right';
+  align?: 'center' | 'top' | 'bottom';
+  haptics?: boolean;
+}) {
+  // The hook owns the offsets, the reading line and the scroll-back — and the
+  // end case, where the last section's top never reaches the reading line
+  // because the page runs out first.
+  const sections = useScrollSections({
+    ids: RAIL_SECTIONS.map((section) => section.id),
+  });
 
   return (
     <View className="flex-1">
       <ScrollView
-        ref={scroller}
-        scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 240 }}
-        onScroll={(event) => {
-          // Whichever section's top has most recently passed the reading line
-          // is the one you are in. A quarter down the viewport, not the very
-          // top, so the heading you just scrolled past still counts.
-          const y = event.nativeEvent.contentOffset.y + 120;
-          let current = RAIL_SECTIONS[0].id;
-          for (const section of RAIL_SECTIONS) {
-            if ((offsets.current[section.id] ?? Infinity) <= y) current = section.id;
-          }
-          setActive(current);
-        }}
+        ref={sections.ref}
+        {...sections.scrollProps}
+        contentContainerStyle={{ paddingBottom: 160 }}
       >
         {RAIL_SECTIONS.map((section) => (
           <View
             key={section.id}
-            onLayout={(event) => {
-              offsets.current[section.id] = event.nativeEvent.layout.y;
-            }}
+            onLayout={sections.measure(section.id)}
             className="gap-3 px-6 py-10"
           >
             <Text size={section.level ? 'lg' : '2xl'} weight="semibold">
@@ -1457,11 +1457,10 @@ function SectionRailVersion({ placement }: { placement?: 'left' | 'right' }) {
 
       <SectionRail
         placement={placement}
-        value={active}
-        onValueChange={(next) => {
-          setActive(next);
-          scroller.current?.scrollTo({ y: offsets.current[next] ?? 0, animated: true });
-        }}
+        align={align}
+        haptics={haptics}
+        value={sections.active}
+        onValueChange={sections.scrollTo}
       >
         <SectionRail.Trigger>
           {RAIL_SECTIONS.map((section) => (
@@ -1471,6 +1470,97 @@ function SectionRailVersion({ placement }: { placement?: 'left' | 'right' }) {
         <SectionRail.Content>
           {RAIL_SECTIONS.map((section) => (
             <SectionRail.Item key={section.id} value={section.id} level={section.level}>
+              {section.label}
+            </SectionRail.Item>
+          ))}
+        </SectionRail.Content>
+      </SectionRail>
+    </View>
+  );
+}
+
+const PAGER_SECTIONS = [
+  { id: 'welcome', label: 'Welcome', body: 'Swipe up to move through the deck.' },
+  { id: 'tokens', label: 'Tokens', body: 'Every colour and radius comes from the theme.' },
+  { id: 'motion', label: 'Motion', body: 'Animations run on the UI thread, never on JS.' },
+  { id: 'native', label: 'Native', body: 'Some controls hand off to the platform entirely.' },
+  { id: 'ship', label: 'Ship it', body: 'No native modules, so it runs in Expo Go.' },
+];
+
+/**
+ * One section per screen. A pager needs no reading line — the active page is
+ * the scroll offset over the viewport height — so this drives the rail
+ * directly rather than through useScrollSections.
+ */
+function SectionRailPagerVersion() {
+  const [page, setPage] = useState(0);
+  const scroller = useRef<ScrollView>(null);
+
+  /*
+   * The page height is the scroll view's own, measured — not the window's.
+   * Anything above the pager (a header, a caption) makes the viewport shorter
+   * than the screen, and window-height pages then sit a little further out of
+   * alignment with each snap position than the last, until one of them lands
+   * entirely between two and never shows.
+   */
+  const [pageHeight, setPageHeight] = useState(0);
+
+  return (
+    <View className="flex-1">
+      <ScrollView
+        ref={scroller}
+        pagingEnabled
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onLayout={(event) => setPageHeight(event.nativeEvent.layout.height)}
+        onScroll={(event) => {
+          const { contentOffset, layoutMeasurement } = event.nativeEvent;
+          if (!layoutMeasurement.height) return;
+          const next = Math.round(contentOffset.y / layoutMeasurement.height);
+          if (next !== page) setPage(next);
+        }}
+      >
+        {PAGER_SECTIONS.map((section, index) => (
+          <View
+            key={section.id}
+            // Nothing to lay out until the viewport has been measured; a page
+            // of the wrong height would scroll to the wrong place first.
+            style={{ height: pageHeight || undefined }}
+            className="justify-center gap-4 px-8"
+          >
+            <Text size="sm" muted>
+              {index + 1} of {PAGER_SECTIONS.length}
+            </Text>
+            <Text size="3xl" weight="semibold">
+              {section.label}
+            </Text>
+            <Text size="base" muted>
+              {section.body}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <SectionRail
+        placement="left"
+        align="bottom"
+        haptics
+        value={PAGER_SECTIONS[page]?.id}
+        onValueChange={(next) => {
+          const index = PAGER_SECTIONS.findIndex((section) => section.id === next);
+          if (index < 0 || !pageHeight) return;
+          setPage(index);
+          scroller.current?.scrollTo({ y: index * pageHeight, animated: true });
+        }}
+      >
+        <SectionRail.Trigger>
+          {PAGER_SECTIONS.map((section) => (
+            <SectionRail.Bar key={section.id} value={section.id} />
+          ))}
+        </SectionRail.Trigger>
+        <SectionRail.Content>
+          {PAGER_SECTIONS.map((section) => (
+            <SectionRail.Item key={section.id} value={section.id}>
               {section.label}
             </SectionRail.Item>
           ))}
@@ -3900,19 +3990,35 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Floating section navigator for a long screen',
     demos: [
       {
-        label: 'On the right',
-        id: 'right',
+        label: 'Bottom right',
+        id: 'bottom-right',
         fullPage: true,
         description:
-          'Scroll a long page and the bar for the current section widens. Touch the rail to jump.',
-        render: () => <SectionRailVersion />,
+          'Out of the corner, clear of the text, with the panel opening upward. Haptics on.',
+        render: () => <SectionRailVersion align="bottom" haptics />,
       },
       {
-        label: 'On the left',
-        id: 'left',
+        label: 'Bottom left',
+        id: 'bottom-left',
         fullPage: true,
-        description: 'The same rail against the other edge, panel and all.',
-        render: () => <SectionRailVersion placement="left" />,
+        description: 'The same corner treatment against the other edge.',
+        render: () => <SectionRailVersion placement="left" align="bottom" haptics />,
+      },
+      {
+        label: 'Pager',
+        id: 'pager',
+        fullPage: true,
+        description:
+          'One section per screen. Swipe up and the rail in the bottom-left tracks the page.',
+        render: () => <SectionRailPagerVersion />,
+      },
+      {
+        label: 'Centred on the edge',
+        id: 'side',
+        fullPage: true,
+        description:
+          'The original placement — halfway down the right edge, over the content it indexes.',
+        render: () => <SectionRailVersion />,
       },
     ],
   },

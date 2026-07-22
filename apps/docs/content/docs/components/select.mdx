@@ -1,9 +1,9 @@
 ---
 title: Select
-description: Picker that opens in a bottom sheet.
+description: Picker shown in a bottom sheet, expanded in place, or floating over the page.
 ---
 
-A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.
+A picker with one trigger and three ways of showing its options: a bottom sheet, a list expanded in place, or a panel floating over the page. Which is right depends on what surrounds the trigger rather than on what the options are, so it is one prop rather than three components.
 
 ## Installation
 
@@ -90,6 +90,65 @@ The options open in a sheet, so nothing in the form moves.
 </View>
 ```
 
+### Expanding in place
+
+The list opens in layout flow and pushes the content below it down. Inside a settings list that reads as the row growing, which is exactly what you want there.
+
+```tsx
+<Select
+  presentation="inline"
+  value={region}
+  onValueChange={setRegion}
+  placeholder="Select a region"
+>
+  <Select.Item value="us" label="United States" />
+  <Select.Item value="eu" label="Europe" />
+</Select>
+```
+
+### Floating over the page
+
+Anchored to the trigger, flipped above it when there is no room below, and clamped inside the screen. Nothing else moves. `contentWidth` matches the trigger by default; pass `content` to size to the longest option, or a number for a fixed width.
+
+```tsx
+<Select
+  presentation="overlay"
+  contentWidth="content"
+  offset={12}
+  value={region}
+  onValueChange={setRegion}
+>
+  <Select.Item value="us" label="United States" />
+  <Select.Item value="apac" label="Asia Pacific" />
+</Select>
+```
+
+## Variants
+
+### `presentation`
+
+- `sheet` *(default)*
+- `inline`
+- `overlay`
+
+```tsx
+{/* Takes the bottom of the screen. The default, and the right one
+    for a long list or a small screen. */}
+<Select presentation="sheet" title="Region" value={region} onValueChange={setRegion}>
+  <Select.Item value="us" label="United States" />
+</Select>
+
+{/* Expands in layout flow — everything below moves down. */}
+<Select presentation="inline" value={region} onValueChange={setRegion}>
+  <Select.Item value="us" label="United States" />
+</Select>
+
+{/* Floats over the page, anchored to the trigger. Nothing else moves. */}
+<Select presentation="overlay" value={region} onValueChange={setRegion}>
+  <Select.Item value="us" label="United States" />
+</Select>
+```
+
 ## API Reference
 
 ### Select.Item
@@ -107,21 +166,31 @@ The options open in a sheet, so nothing in the form moves.
 | `value` | `string` | — |  |
 | `onValueChange` | `(value: string) => void` | — |  |
 | `placeholder` | `string` | `'Select an option'` |  |
-| `title` | `string` | — | Sheet title shown above the options. |
 | `disabled` | `boolean` | — |  |
-| `native` | `boolean` | — | Render the platform's own picker instead of the trigger-and-sheet pair. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the picker, so `className` and `title` are ignored. `Select.Item` children still declare the options. |
+| `presentation` | `SelectPresentation` | `sheet` | Where the options appear. `sheet` takes the bottom of the screen, `inline` expands the list in layout flow, `overlay` floats it above the page anchored to the trigger. |
+| `title` | `string` | — | Sheet title shown above the options. `sheet` presentation only. |
+| `contentWidth` | `'trigger' \| 'content' \| number` | `'trigger'` | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. `overlay` only. |
+| `offset` | `number` | `8` | Gap between the trigger and the floating list. `overlay` only. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the options open or close. |
+| `native` | `boolean` | — | Render the platform's own picker instead of the trigger-and-list pair. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the picker, so `className`, `title` and `presentation` are ignored. `Select.Item` children still declare the options. |
 | `nativeAppearance` | `'menu' \| 'wheel'` | `'menu'` | Native picker style. `menu` is a compact button opening a dropdown; `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere). |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
 
-Use `InlineSelect` instead when the option list is short enough to expand in place.
+### Choosing a presentation
+
+`sheet` takes the bottom of the screen. Reach for it when the list is long, or on a small screen where an anchored panel would cover the very thing you are choosing for.
+
+`inline` expands the list in normal layout flow, so everything below it moves down. That reads as the row growing inside a settings list, and reads as the page jumping anywhere else.
+
+`overlay` floats the list through a portal, anchored to the trigger and flipped above it when there is no room below. Nothing else on the screen moves. `contentWidth` and `offset` apply here only.
 
 ### Native rendering
 
-Pass `native` to render the platform's own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
+Pass `native` to render the platform’s own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
 
-**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit "None" item.
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className`, `presentation` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit "None" item.
 
 See [Native rendering](/docs/native) for the full prop-by-prop breakdown.

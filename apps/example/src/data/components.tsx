@@ -40,7 +40,6 @@ import {
   Frame,
   GoogleIcon,
   InfoIcon,
-  InlineSelect,
   Input,
   InputGroup,
   ImageIcon,
@@ -1244,29 +1243,29 @@ function NativeBottomSheetDemo() {
   );
 }
 
-function InlineSelectDemo({
-  overlay,
-  overlayWidth,
+function RegionSelectDemo({
+  presentation,
+  contentWidth,
 }: {
-  overlay?: boolean;
-  overlayWidth?: 'trigger' | 'content' | number;
+  presentation?: 'sheet' | 'inline' | 'overlay';
+  contentWidth?: 'trigger' | 'content' | number;
 }) {
   const [region, setRegion] = useState<string>();
 
   return (
     <View className="w-full gap-1.5">
       <Label>Region</Label>
-      <InlineSelect
+      <Select
         value={region}
         onValueChange={setRegion}
         placeholder="Select a region"
-        overlay={overlay}
-        overlayWidth={overlayWidth}
+        presentation={presentation}
+        contentWidth={contentWidth}
       >
-        <InlineSelect.Item value="us" label="United States" />
-        <InlineSelect.Item value="eu" label="Europe" />
-        <InlineSelect.Item value="apac" label="Asia Pacific" />
-      </InlineSelect>
+        <Select.Item value="us" label="United States" />
+        <Select.Item value="eu" label="Europe" />
+        <Select.Item value="apac" label="Asia Pacific" />
+      </Select>
     </View>
   );
 }
@@ -2775,50 +2774,6 @@ export const COMPONENTS: ComponentEntry[] = [
     ],
   },
   {
-    slug: 'inline-select',
-    name: 'InlineSelect',
-    summary: 'Picker that expands in place',
-    demos: [
-      { label: 'Inline (default)', render: () => <InlineSelectDemo /> },
-      {
-        label: 'Overlay — nothing below moves',
-        render: () => (
-          <View className="w-full gap-4">
-            <InlineSelectDemo overlay />
-            <Text size="sm" muted>
-              This paragraph stays exactly where it is when the list above
-              opens. Without `overlay` it would be pushed down by the height of
-              the list.
-            </Text>
-            <Button variant="outline" fullWidth>
-              And so does this button
-            </Button>
-          </View>
-        ),
-      },
-      {
-        label: 'Overlay width',
-        render: () => (
-          <View className="w-full gap-4">
-            <InlineSelectDemo overlay overlayWidth="content" />
-            <InlineSelectDemo overlay overlayWidth={220} />
-          </View>
-        ),
-      },
-      {
-        label: 'In a form',
-        render: () => (
-          <Card className="w-full">
-            <Card.Content className="gap-4 p-4">
-              <Input label="Company" placeholder="Acme Inc." />
-              <InlineSelectDemo overlay />
-            </Card.Content>
-          </Card>
-        ),
-      },
-    ],
-  },
-  {
     slug: 'input',
     name: 'Input',
     summary: 'Text field with label and validation',
@@ -3709,9 +3664,47 @@ export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'select',
     name: 'Select',
-    summary: 'Picker that opens in a bottom sheet',
+    summary: 'Picker shown in a sheet, in place, or floating over the page',
     demos: [
-      { label: 'Basic', render: () => <SelectDemo /> },
+      { label: 'Sheet (default)', render: () => <SelectDemo /> },
+      {
+        label: 'Inline — the row grows',
+        render: () => (
+          <View className="w-full gap-4">
+            <RegionSelectDemo presentation="inline" />
+            <Text size="sm" muted>
+              The list expands in layout flow, so this paragraph is pushed down
+              by its height. Right inside a settings list, where that reads as
+              the row growing.
+            </Text>
+          </View>
+        ),
+      },
+      {
+        label: 'Overlay — nothing below moves',
+        render: () => (
+          <View className="w-full gap-4">
+            <RegionSelectDemo presentation="overlay" />
+            <Text size="sm" muted>
+              This paragraph stays exactly where it is when the list above
+              opens. With `inline` it would be pushed down by the height of the
+              list.
+            </Text>
+            <Button variant="outline" fullWidth>
+              And so does this button
+            </Button>
+          </View>
+        ),
+      },
+      {
+        label: 'Overlay width',
+        render: () => (
+          <View className="w-full gap-4">
+            <RegionSelectDemo presentation="overlay" contentWidth="content" />
+            <RegionSelectDemo presentation="overlay" contentWidth={220} />
+          </View>
+        ),
+      },
       {
         label: 'In a form',
         render: () => (
@@ -3719,6 +3712,7 @@ export const COMPONENTS: ComponentEntry[] = [
             <Card.Content className="gap-4 p-4">
               <Input label="Full name" placeholder="Khalid Abdi" />
               <SelectDemo />
+              <RegionSelectDemo presentation="overlay" />
             </Card.Content>
           </Card>
         ),

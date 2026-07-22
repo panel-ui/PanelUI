@@ -48,16 +48,18 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 | --- | --- | --- |
 | Accordion | EmptyState | Select |
 | Alert | Frame | Skeleton |
-| Avatar | InlineSelect | Slider |
-| Badge | Input | Spinner |
-| BottomSheet | InputGroup | Steps |
-| Button | Label | Switch |
-| Card | Progress | Tabs |
-| Checkbox | RadioGroup | Timeline |
+| Avatar | Input | Slider |
+| Badge | InputGroup | Spinner |
+| BottomSheet | Label | Steps |
+| Button | Progress | Switch |
+| Card | RadioGroup | Tabs |
+| Checkbox | | Timeline |
 | Dialog | | Toast |
 | | | Typography |
 
-`Select` opens a bottom-sheet picker; `InlineSelect` expands its options in place.
+`Select` shows its options in a bottom sheet, expanded in place, or floating
+over the page — one `presentation` prop, because which is right depends on what
+surrounds the trigger rather than on what the options are.
 `Frame` is a widget shell: a titled header row with an action on the right, an
 inset `Frame.Panel` of rows with its own radius, and a caption footer.
 `InputGroup` measures its prefix/suffix and pads the input to match.

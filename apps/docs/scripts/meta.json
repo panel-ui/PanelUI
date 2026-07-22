@@ -59,11 +59,6 @@
     "Widget shell with a titled header, an inset panel and a caption.",
     "react native list section"
   ],
-  "inline-select": [
-    "InlineSelect",
-    "Picker that expands its options in place.",
-    "react native picker"
-  ],
   "input": [
     "Input",
     "Text field with label, description and error message.",
@@ -126,7 +121,7 @@
   ],
   "select": [
     "Select",
-    "Picker that opens in a bottom sheet.",
+    "Picker shown in a bottom sheet, expanded in place, or floating over the page.",
     "expo select component"
   ],
   "separator": [

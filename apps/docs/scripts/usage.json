@@ -457,38 +457,6 @@
       "variant": "{/* The default: a shell with the panel inset inside it. */}\n<Frame variant=\"default\">…</Frame>\n\n{/* No shell — for a Frame inside a card that already draws a border,\n    where the shell’s own edge just inside it reads as a double line. */}\n<Card>\n  <Card.Content className=\"p-4\">\n    <Frame variant=\"plain\">\n      <Frame.Panel>…</Frame.Panel>\n    </Frame>\n  </Card.Content>\n</Card>"
     }
   },
-  "inline-select": {
-    "intro": "A select that reveals its options next to the trigger instead of taking over the screen with a sheet.",
-    "usage": "// Inline: the list expands in layout flow and pushes content below it down.\n<InlineSelect value={region} onValueChange={setRegion} placeholder=\"Select a region\">\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n</InlineSelect>\n\n// Overlay: the list floats above the page. Nothing else moves.\n<InlineSelect overlay value={region} onValueChange={setRegion}>\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n</InlineSelect>\n\n// Size the floating list to its longest option instead of the trigger.\n<InlineSelect overlay overlayWidth=\"content\" value={region} onValueChange={setRegion}>\n  <InlineSelect.Item value=\"apac\" label=\"Asia Pacific\" />\n</InlineSelect>",
-    "parts": {
-      "Item": "One option. `value` identifies it, `label` is what is shown."
-    },
-    "anatomy": "<InlineSelect>\n  <InlineSelect.Item value=\"…\" label=\"…\" />\n</InlineSelect>",
-    "notes": "### Choosing a presentation\n\nBy default the list expands **in layout flow**, so everything below the select moves down. That reads correctly inside a settings list, where it looks like the row itself growing — and badly anywhere the shift is jarring.\n\nPass `overlay` to float the list above the page through a portal instead. It is anchored to the trigger, flips above it when there is not enough room below, scrolls when the options do not fit, and closes on a press anywhere outside. **Nothing on the screen moves.** This is what you want inside a form or a scroll view.\n\n### Anchoring\n\nThe floating list is positioned from a window-space measurement of the trigger taken when it opens, so it is correct inside scroll views and transformed parents. `overlayWidth` matches the trigger by default; `\"content\"` sizes to the longest option (never narrower than the trigger) and a number sets a fixed width. `overlayOffset` is the gap between the two.\n\n### Compared to Select\n\n`Select` opens a bottom sheet, which suits long option lists and small screens. `InlineSelect` keeps the options next to what they belong to, which suits short lists inside a form.",
-    "examples": [
-      {
-        "title": "Overlay presentation",
-        "description": "The list floats above the page, so opening it does not push the content below it down. This is what you want inside a form or a scroll view.",
-        "code": "const [region, setRegion] = useState<string>();\n\n<InlineSelect\n  overlay\n  value={region}\n  onValueChange={setRegion}\n  placeholder=\"Select a region\"\n>\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n  <InlineSelect.Item value=\"apac\" label=\"Asia Pacific\" />\n</InlineSelect>"
-      },
-      {
-        "title": "Inline presentation",
-        "description": "The default. The list expands in layout flow and everything below moves down — right inside a settings list, where it reads as the row growing.",
-        "code": "<InlineSelect value={region} onValueChange={setRegion}>\n  <InlineSelect.Item value=\"us\" label=\"United States\" />\n  <InlineSelect.Item value=\"eu\" label=\"Europe\" />\n</InlineSelect>"
-      },
-      {
-        "title": "Sizing the floating list",
-        "code": "{/* Match the trigger — the default. */}\n<InlineSelect overlay overlayWidth=\"trigger\" {...props} />\n\n{/* Size to the longest option, never narrower than the trigger. */}\n<InlineSelect overlay overlayWidth=\"content\" {...props} />\n\n{/* Fixed width, and a wider gap from the trigger. */}\n<InlineSelect overlay overlayWidth={280} overlayOffset={12} {...props} />"
-      },
-      {
-        "title": "Reacting to open and close",
-        "code": "<InlineSelect\n  overlay\n  value={region}\n  onValueChange={setRegion}\n  onOpenChange={(open) => setScrollEnabled(!open)}\n>\n  {/* …items… */}\n</InlineSelect>"
-      }
-    ],
-    "variantCode": {
-      "presentation": "{/* Expands in layout flow — content below moves down. */}\n<InlineSelect>…</InlineSelect>\n\n{/* Floats above the page — nothing moves. */}\n<InlineSelect overlay>…</InlineSelect>"
-    }
-  },
   "input": {
     "intro": "A text field with an optional label, description and error message. Its focus border crosses between colours on the UI thread rather than snapping, and it comes in two backgrounds and three heights. Passing `errorMessage` puts the field in its invalid state and replaces the description.",
     "usage": "<Input label=\"Email\" placeholder=\"you@example.com\" />\n\n<Input variant=\"filled\" size=\"lg\" label=\"Workspace\" isRequired />\n\n<Input\n  label=\"Description\"\n  placeholder=\"A short description\"\n  description=\"Shown on your public profile.\"\n/>\n\n<Input\n  label=\"Email\"\n  value={email}\n  onChangeText={setEmail}\n  errorMessage={error}\n/>\n\n// Lifts clear of the software keyboard when it would be covered.\n<Input avoidKeyboard label=\"Comment\" placeholder=\"Say something…\" />",
@@ -1005,12 +973,12 @@
     ]
   },
   "select": {
-    "intro": "A picker that opens its options in a bottom sheet — the right choice when the list is long or the surrounding layout cannot grow.",
+    "intro": "A picker with one trigger and three ways of showing its options: a bottom sheet, a list expanded in place, or a panel floating over the page. Which is right depends on what surrounds the trigger rather than on what the options are, so it is one prop rather than three components.",
     "usage": "<Select\n  value={fruit}\n  onValueChange={setFruit}\n  placeholder=\"Select a fruit\"\n  title=\"Favorite fruit\"\n>\n  <Select.Item value=\"apple\" label=\"Apple\" />\n  <Select.Item value=\"banana\" label=\"Banana\" />\n</Select>",
     "parts": {
       "Item": "One option. `value` identifies it, `label` is what is shown."
     },
-    "notes": "Use `InlineSelect` instead when the option list is short enough to expand in place.\n\n### Native rendering\n\nPass `native` to render the platform's own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit \"None\" item.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
+    "notes": "### Choosing a presentation\n\n`sheet` takes the bottom of the screen. Reach for it when the list is long, or on a small screen where an anchored panel would cover the very thing you are choosing for.\n\n`inline` expands the list in normal layout flow, so everything below it moves down. That reads as the row growing inside a settings list, and reads as the page jumping anywhere else.\n\n`overlay` floats the list through a portal, anchored to the trigger and flipped above it when there is no room below. Nothing else on the screen moves. `contentWidth` and `offset` apply here only.\n\n### Native rendering\n\nPass `native` to render the platform’s own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.\n\n**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className`, `presentation` and most styling props are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit \"None\" item.\n\nSee [Native rendering](/docs/native) for the full prop-by-prop breakdown.",
     "anatomy": "<Select>\n  <Select.Item value=\"…\" label=\"…\" />\n</Select>",
     "examples": [
       {
@@ -1026,12 +994,25 @@
         "title": "In a form",
         "description": "The options open in a sheet, so nothing in the form moves.",
         "code": "<View className=\"gap-4\">\n  <Input label=\"Full name\" />\n  <View className=\"gap-1.5\">\n    <Label isRequired>Country</Label>\n    <Select value={country} onValueChange={setCountry} title=\"Country\">\n      {/* …items… */}\n    </Select>\n  </View>\n</View>"
+      },
+      {
+        "title": "Expanding in place",
+        "description": "The list opens in layout flow and pushes the content below it down. Inside a settings list that reads as the row growing, which is exactly what you want there.",
+        "code": "<Select\n  presentation=\"inline\"\n  value={region}\n  onValueChange={setRegion}\n  placeholder=\"Select a region\"\n>\n  <Select.Item value=\"us\" label=\"United States\" />\n  <Select.Item value=\"eu\" label=\"Europe\" />\n</Select>"
+      },
+      {
+        "title": "Floating over the page",
+        "description": "Anchored to the trigger, flipped above it when there is no room below, and clamped inside the screen. Nothing else moves. `contentWidth` matches the trigger by default; pass `content` to size to the longest option, or a number for a fixed width.",
+        "code": "<Select\n  presentation=\"overlay\"\n  contentWidth=\"content\"\n  offset={12}\n  value={region}\n  onValueChange={setRegion}\n>\n  <Select.Item value=\"us\" label=\"United States\" />\n  <Select.Item value=\"apac\" label=\"Asia Pacific\" />\n</Select>"
       }
     ],
     "extraImports": [
       "Input",
       "Label"
-    ]
+    ],
+    "variantCode": {
+      "presentation": "{/* Takes the bottom of the screen. The default, and the right one\n    for a long list or a small screen. */}\n<Select presentation=\"sheet\" title=\"Region\" value={region} onValueChange={setRegion}>\n  <Select.Item value=\"us\" label=\"United States\" />\n</Select>\n\n{/* Expands in layout flow — everything below moves down. */}\n<Select presentation=\"inline\" value={region} onValueChange={setRegion}>\n  <Select.Item value=\"us\" label=\"United States\" />\n</Select>\n\n{/* Floats over the page, anchored to the trigger. Nothing else moves. */}\n<Select presentation=\"overlay\" value={region} onValueChange={setRegion}>\n  <Select.Item value=\"us\" label=\"United States\" />\n</Select>"
+    }
   },
   "separator": {
     "intro": "A rule between content.\n\nReact Native has no `<hr>`, so a separator is a view sized on one axis and stretched on the other. That is why the orientation is a prop rather than something the layout works out: the component has to know which axis carries the thickness.",

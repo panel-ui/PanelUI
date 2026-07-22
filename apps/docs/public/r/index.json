@@ -136,16 +136,6 @@
     "registryDependencies": []
   },
   {
-    "name": "inline-select",
-    "type": "registry:ui",
-    "description": "Picker that expands its options in place.",
-    "registryDependencies": [
-      "icons",
-      "portal",
-      "text"
-    ]
-  },
-  {
     "name": "input",
     "type": "registry:ui",
     "description": "Text field with label, description and error message.",
@@ -298,11 +288,12 @@
   {
     "name": "select",
     "type": "registry:ui",
-    "description": "Picker that opens in a bottom sheet.",
+    "description": "Picker shown in a bottom sheet, expanded in place, or floating over the page.",
     "registryDependencies": [
       "bottom-sheet",
       "icons",
       "native",
+      "portal",
       "text"
     ]
   },

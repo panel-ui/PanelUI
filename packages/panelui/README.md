@@ -101,14 +101,13 @@ overlays, and the toast viewport.
 | `Dialog` | Modal dialog with backdrop, title, description and footer actions |
 | `EmptyState` | Placeholder for an empty list or screen, with a stacked-icon media slot |
 | `Frame` | Widget shell — header row with action, inset panel of rows, caption footer |
-| `InlineSelect` | Picker that expands its options in place |
 | `Input` | Text field with label, description and error message |
 | `InputGroup` | Input with leading and trailing decorators, auto-measured |
 | `Label` | Form field label with required, invalid and disabled states |
 | `Progress` | Determinate and indeterminate progress bar, optionally captioned |
 | `RadioGroup` | Single-select list of options |
 | `ScrollFade` | Fades the edges of a scroll container |
-| `Select` | Picker that opens in a bottom sheet |
+| `Select` | Picker shown in a bottom sheet, in place, or floating over the page |
 | `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |
 | `Slider` | Pick a value by dragging a thumb along a track |

@@ -71,7 +71,7 @@ const COMPONENTS = [
   ['Accordion', 'accordion'], ['Alert', 'alert'], ['Attachment', 'attachment'],
   ['Avatar', 'avatar'], ['Badge', 'badge'], ['BottomSheet', 'bottom-sheet'], ['Button', 'button'],
   ['Card', 'card'], ['Checkbox', 'checkbox'], ['Dialog', 'dialog'],
-  ['EmptyState', 'empty-state'], ['Frame', 'frame'], ['InlineSelect', 'inline-select'],
+  ['EmptyState', 'empty-state'], ['Frame', 'frame'],
   ['Input', 'input'], ['InputGroup', 'input-group'], ['Item', 'item'],
   ['Label', 'label'], ['LineChart', 'line-chart'], ['Marker', 'marker'],
   ['Message', 'message'], ['MessageScroller', 'message-scroller'], ['Popover', 'popover'],

@@ -308,10 +308,9 @@ export const Slider = forwardRef<View, SliderProps>(
       return (
         <View ref={ref} className={slots.root({ className })}>
           {header}
-          {/* A fixed height rather than matchContents on the vertical axis:
-              the platform measures itself asynchronously, so a host left to
-              discover its own height collapses on the first frame and jumps
-              once it has. */}
+          {/* Told its height rather than left to measure the platform's own
+              content, which arrives a frame late — a host that has to work its
+              size out renders at nothing and then jumps. */}
           <Host style={{ height: NATIVE_HEIGHT }}>
             <NativeSlider
               value={value}

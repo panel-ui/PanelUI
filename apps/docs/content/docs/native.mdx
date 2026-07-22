@@ -71,12 +71,17 @@ system, do not pass `native`.
 | `onPress` | Passed through |
 | `disabled` | Passed through |
 | `variant` | Mapped: `primary`/`secondary`/`destructive` → filled, `outline`/`social` → outlined, `ghost` → text |
-| `size`, `fullWidth`, `className` | Ignored |
+| `size` | Sets the height |
+| `fullWidth`, `className` | Ignored — see sizing below |
 | `loading`, `startContent`, `endContent` | Ignored |
 
 `loading` is the one to watch — a native button has no spinner state, so a
 loading button looks identical to an idle one. Disable it yourself, or do not
 use `native` on buttons that load.
+
+A native button **fills the width it is given**. Put two in a `flex-row` with
+`flex-1` on each to share a line, or in a narrower parent to shrink them —
+width is ordinary layout rather than something the button decides.
 
 ### Switch
 
@@ -151,11 +156,14 @@ two are iOS-only; Android snaps them to the nearest of half and full.
 
 ## Notes
 
-Every native control is given an explicit height rather than left to size
-itself on the vertical axis. The platform measures its own content a frame
-late, so a host that has to discover its height renders at nothing on the
-first frame — the control collapses against whatever sits above it — and jumps
-into place on the first interaction.
+Every native control is given an explicit height, and takes its width from
+ordinary layout. None of them ask the platform to size the host for them.
+
+That is not a stylistic choice. The platform measures its own content a frame
+late, and again whenever that content changes — so a host left to work its own
+size out renders at nothing on the first frame, collapsing against whatever
+sits above it, and jumps into place on the first press. Asking for one axis
+only does not avoid it. The answer is not to ask.
 
 The same reasoning applies inside the native sheet: its content is given a
 floor matching the first detent, because a hosted box shorter than the sheet

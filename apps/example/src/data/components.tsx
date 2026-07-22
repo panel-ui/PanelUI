@@ -1283,7 +1283,7 @@ function NativeBottomSheetDemo() {
             Open the platform sheet
           </Button>
         </BottomSheet.Trigger>
-        <BottomSheet.Content className="gap-3 pt-4">
+        <BottomSheet.Content className="gap-3">
           <Text size="lg" weight="semibold">
             Platform chrome, your content
           </Text>
@@ -2527,9 +2527,20 @@ export const COMPONENTS: ComponentEntry[] = [
             <Button native variant="outline" onPress={() => {}}>
               Outlined
             </Button>
-            <Button native variant="ghost" onPress={() => {}}>
-              Text
-            </Button>
+            {/* A native button fills the width it is given, so two share a
+                line by sharing the row rather than by shrinking themselves. */}
+            <View className="w-full flex-row gap-3">
+              <View className="flex-1">
+                <Button native variant="ghost" onPress={() => {}}>
+                  Text
+                </Button>
+              </View>
+              <View className="flex-1">
+                <Button native size="sm" onPress={() => {}}>
+                  Small
+                </Button>
+              </View>
+            </View>
           </NativeDemo>
         ),
       },

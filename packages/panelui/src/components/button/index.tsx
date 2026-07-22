@@ -110,10 +110,15 @@ export interface ButtonProps
    * optional `@expo/ui` package; without it this prop does nothing.
    *
    * **Theme tokens do not apply** — the platform draws the button, so
-   * `className`, `size`, `fullWidth`, `startContent`, `endContent` and
-   * `loading` are all ignored. `variant` maps onto the nearest platform
-   * style: `primary`/`destructive` → filled, `outline` → outlined, everything
-   * else → text.
+   * `className`, `fullWidth`, `startContent`, `endContent` and `loading` are
+   * all ignored. `variant` maps onto the nearest platform style:
+   * `primary`/`destructive` → filled, `outline` → outlined, everything else
+   * → text; `size` sets the height.
+   *
+   * A native button **fills the width it is given**, because the host is told
+   * its size rather than left to measure the platform's content — which is
+   * what made it collapse and then jump on first press. Put it in a row to
+   * share the width, or in a narrower parent to shrink it.
    */
   native?: boolean;
 }
@@ -121,11 +126,11 @@ export interface ButtonProps
 /**
  * Height given to the native host, matching the styled scale above.
  *
- * `matchContents` on its own is not enough on the vertical axis: the platform
- * measures its own content asynchronously, so the host starts at nothing —
- * the button collapses against whatever sits above it — and then re-measures
- * on the first interaction, which is the jolt you see when you press it. A
- * known height means there is nothing to discover.
+ * The host is told its size rather than asked to work it out. `matchContents`
+ * measures the platform's own content a frame late and again when that content
+ * changes — so the button renders at nothing, collapses against whatever sits
+ * above it, and jolts into place on the first press. Width comes from ordinary
+ * layout instead, which is why a native button fills its container.
  */
 const NATIVE_HEIGHT: Record<NonNullable<ButtonVariantProps['size']>, number> = {
   sm: 36,
@@ -194,10 +199,7 @@ export const Button = forwardRef<View, ButtonProps>(
       const isStringLabel = typeof children === 'string';
 
       return (
-        <Host
-          matchContents={{ horizontal: true }}
-          style={{ height: NATIVE_HEIGHT[size ?? 'md'] }}
-        >
+        <Host style={{ height: NATIVE_HEIGHT[size ?? 'md'] }}>
           <NativeButton
             label={isStringLabel ? children : undefined}
             variant={NATIVE_VARIANT[variant ?? 'primary']}

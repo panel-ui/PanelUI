@@ -160,7 +160,7 @@ The `social` variant is a neutral surface sized for a full-width column of provi
 | `startContent` | `ReactNode` | — | Content rendered before the label (replaced by the spinner while loading). |
 | `endContent` | `ReactNode` | — | Content rendered after the label. |
 | `labelClassName` | `string` | — | Extra classes for the label when children is a string. |
-| `native` | `boolean` | — | Render the platform's own button instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the button, so `className`, `size`, `fullWidth`, `startContent`, `endContent` and `loading` are all ignored. `variant` maps onto the nearest platform style: `primary`/`destructive` → filled, `outline` → outlined, everything else → text. |
+| `native` | `boolean` | — | Render the platform's own button instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the button, so `className`, `fullWidth`, `startContent`, `endContent` and `loading` are all ignored. `variant` maps onto the nearest platform style: `primary`/`destructive` → filled, `outline` → outlined, everything else → text; `size` sets the height. A native button **fills the width it is given**, because the host is told its size rather than left to measure the platform's content — which is what made it collapse and then jump on first press. Put it in a row to share the width, or in a narrower parent to shrink it. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

@@ -242,8 +242,10 @@ function BottomSheetContent({
                 {...props}
                 className={cn(
                   // The platform draws the container, but it hands us a bare
-                  // box — padding and safe-area are still ours.
-                  'justify-start gap-2 px-5 pb-2 pt-1',
+                  // box — padding and safe-area are still ours. The top
+                  // padding has to clear the platform's grabber, which sits
+                  // inside the sheet rather than above the content.
+                  'justify-start gap-2 px-5 pb-2 pt-5',
                   className
                 )}
                 style={{

@@ -26,10 +26,15 @@ interface NativeUIModule {
   Host: ComponentType<{
     children?: ReactNode;
     /**
-     * Whether the host resizes itself to the platform content. The per-axis
-     * form matters: the vertical measurement arrives a frame late, so a host
-     * left to discover its own height collapses and then jumps. Components
-     * here match horizontally and give an explicit height.
+     * Whether the host resizes itself to the platform content.
+     *
+     * Every control here gives the host an explicit height instead, and takes
+     * its width from ordinary layout. The measurement arrives a frame late and
+     * again whenever the platform's content changes, so a host left to work
+     * its own size out renders at nothing and then jumps — on first paint, and
+     * again on first press. The per-axis form does not help; the answer is not
+     * to ask. Only the natively-presented sheet still uses it, where the host
+     * is a zero-size anchor rather than the control itself.
      */
     matchContents?: boolean | { vertical?: boolean; horizontal?: boolean };
     style?: unknown;

@@ -33,6 +33,13 @@ const switchVariants = tv({
 
 const TRAVEL: Record<'sm' | 'md', number> = { sm: 16, md: 20 };
 
+/**
+ * Row height given to the native host. It is told its size rather than asked
+ * to measure the platform's own content, which arrives a frame late and leaves
+ * the control collapsed until something forces a second pass.
+ */
+const NATIVE_HEIGHT = 32;
+
 export interface SwitchProps extends VariantProps<typeof switchVariants> {
   className?: string;
   value: boolean;
@@ -77,7 +84,7 @@ export const Switch = forwardRef<View, SwitchProps>(
     if (nativeUI) {
       const { Host, Switch: NativeSwitch } = nativeUI;
       return (
-        <Host matchContents>
+        <Host style={{ height: NATIVE_HEIGHT }}>
           <NativeSwitch
             value={value}
             onValueChange={(next: boolean) => onValueChange?.(next)}

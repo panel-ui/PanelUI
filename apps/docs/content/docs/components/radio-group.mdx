@@ -74,6 +74,28 @@ The `card` variant makes the whole surface the target and highlights the selecte
 </RadioGroup>
 ```
 
+### Laying the options out in a row
+
+Short labels stacked one per line read as a longer list than they are. `orientation="horizontal"` wraps them along a row instead — and cards share the width rather than each filling it.
+
+```tsx
+<RadioGroup orientation="horizontal" value={size} onValueChange={setSize}>
+  <RadioGroup.Item value="s" label="Small" />
+  <RadioGroup.Item value="m" label="Medium" />
+  <RadioGroup.Item value="l" label="Large" />
+</RadioGroup>
+
+<RadioGroup
+  orientation="horizontal"
+  variant="card"
+  value={billing}
+  onValueChange={setBilling}
+>
+  <RadioGroup.Item value="monthly" label="Monthly" description="$12/mo" />
+  <RadioGroup.Item value="yearly" label="Yearly" description="$120/yr" />
+</RadioGroup>
+```
+
 ## Variants
 
 ### `variant`
@@ -102,6 +124,7 @@ The `card` variant makes the whole surface the target and highlights the selecte
 | `onValueChange` | `(value: string) => void` | — |  |
 | `disabled` | `boolean` | — |  |
 | `variant` | `RadioVariant` | `dot` | `dot` is the label-beside-a-disc row. `card` makes the whole surface the target and highlights the selected option — for a plan picker or a settings choice where each option carries a description. |
+| `orientation` | `RadioOrientation` | `'vertical'` | `horizontal` lays the options out along a row that wraps — for two or three short choices, where a stacked list wastes the width and reads as longer than it is. |
 
 ### RadioGroup.Item
 
@@ -115,3 +138,9 @@ The `card` variant makes the whole surface the target and highlights the selecte
 | `hideIndicator` | `boolean` | — | Hide the disc entirely — for a card whose selected fill is enough. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+The row of a `dot` item is only as wide as its label, so the empty space beside it is not part of the target — pressing nothing selects nothing. A `card` is the opposite on purpose: there the whole surface is what you aim at.
+
+The options wrap rather than scroll when laid out horizontally. A choice that has run off the edge of the screen is a choice nobody knows is there.

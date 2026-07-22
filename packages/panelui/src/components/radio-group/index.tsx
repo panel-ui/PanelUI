@@ -38,6 +38,7 @@ import { cn } from '../../utils/cn';
 import { Text } from '../../primitives/text';
 
 type RadioVariant = 'dot' | 'card';
+type RadioOrientation = 'vertical' | 'horizontal';
 
 const itemVariants = tv({
   slots: {
@@ -67,9 +68,19 @@ const itemVariants = tv({
     disabled: {
       true: { row: 'opacity-50' },
     },
+    /**
+     * A card in a row shares the width rather than filling it, so two or three
+     * options sit side by side instead of each taking the whole line.
+     */
+    horizontal: {
+      true: {},
+    },
   },
   compoundVariants: [
     { variant: 'card', selected: true, class: { row: 'border-primary bg-accent' } },
+    // Share the row instead of filling it, keeping the disc on the trailing
+    // edge of each narrower card.
+    { variant: 'card', horizontal: true, class: { row: 'w-auto flex-1' } },
   ],
   defaultVariants: {
     variant: 'dot',
@@ -81,6 +92,7 @@ interface RadioGroupContextValue {
   onValueChange: (value: string) => void;
   disabled?: boolean;
   variant: RadioVariant;
+  orientation: RadioOrientation;
 }
 
 const RadioGroupContext = createContext<RadioGroupContextValue | null>(null);
@@ -96,14 +108,32 @@ export interface RadioGroupProps extends ViewProps {
    * settings choice where each option carries a description.
    */
   variant?: RadioVariant;
+  /**
+   * `horizontal` lays the options out along a row that wraps — for two or
+   * three short choices, where a stacked list wastes the width and reads as
+   * longer than it is.
+   */
+  orientation?: RadioOrientation;
   children: ReactNode;
 }
 
 const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
-  ({ className, value, onValueChange, disabled, variant = 'dot', children, ...props }, ref) => {
+  (
+    {
+      className,
+      value,
+      onValueChange,
+      disabled,
+      variant = 'dot',
+      orientation = 'vertical',
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const context = useMemo(
-      () => ({ value, onValueChange, disabled, variant }),
-      [value, onValueChange, disabled, variant]
+      () => ({ value, onValueChange, disabled, variant, orientation }),
+      [value, onValueChange, disabled, variant, orientation]
     );
 
     return (
@@ -111,7 +141,15 @@ const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
         <View
           ref={ref}
           accessibilityRole="radiogroup"
-          className={cn('gap-3', className)}
+          className={cn(
+            orientation === 'horizontal'
+              ? // Wrapping, not scrolling: a choice that runs off the edge is
+                // a choice nobody knows is there. The cross-axis gap is
+                // smaller because wrapped rows already read as separate.
+                'flex-row flex-wrap items-stretch gap-x-5 gap-y-3'
+              : 'gap-3',
+            className
+          )}
           {...props}
         >
           {children}
@@ -160,7 +198,12 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
       transform: [{ scale: progress.value }],
     }));
 
-    const slots = itemVariants({ variant, selected, disabled: !!disabled });
+    const slots = itemVariants({
+      variant,
+      selected,
+      disabled: !!disabled,
+      horizontal: context.orientation === 'horizontal',
+    });
 
     const indicator = hideIndicator ? null : (
       <View className={slots.indicator()}>

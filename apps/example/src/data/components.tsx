@@ -1071,6 +1071,47 @@ function RadioGroupDemo() {
   );
 }
 
+function RadioGroupRowDemo() {
+  const [size, setSize] = useState('m');
+  const [billing, setBilling] = useState('monthly');
+
+  return (
+    <View className="w-full gap-6">
+      <View className="gap-2">
+        <Label>Size</Label>
+        {/* Short labels stacked one per line read as a longer list than they
+            are. A wrapping row uses the width the choices actually need. */}
+        <RadioGroup
+          orientation="horizontal"
+          value={size}
+          onValueChange={setSize}
+          className="w-full"
+        >
+          <RadioGroup.Item value="s" label="Small" />
+          <RadioGroup.Item value="m" label="Medium" />
+          <RadioGroup.Item value="l" label="Large" />
+          <RadioGroup.Item value="xl" label="X-Large" />
+        </RadioGroup>
+      </View>
+
+      <View className="gap-2">
+        <Label>Billing</Label>
+        {/* Cards share the row rather than filling it. */}
+        <RadioGroup
+          orientation="horizontal"
+          variant="card"
+          value={billing}
+          onValueChange={setBilling}
+          className="w-full"
+        >
+          <RadioGroup.Item value="monthly" label="Monthly" description="$12/mo" />
+          <RadioGroup.Item value="yearly" label="Yearly" description="$120/yr" />
+        </RadioGroup>
+      </View>
+    </View>
+  );
+}
+
 function RadioGroupCardDemo() {
   const [plan, setPlan] = useState('pro');
 
@@ -3647,6 +3688,7 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Single-select list of options',
     demos: [
       { label: 'Plans', render: () => <RadioGroupDemo /> },
+      { label: 'Horizontal', render: () => <RadioGroupRowDemo /> },
       { label: 'Cards', render: () => <RadioGroupCardDemo /> },
       {
         label: 'In a card',

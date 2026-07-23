@@ -418,6 +418,36 @@
       "caption": "A destructive confirmation, with the backdrop dimming the screen behind it."
     }
   },
+  "direction": {
+    "intro": "Sets the reading direction for everything below it. Rows, `start`/`end` insets and horizontal padding mirror natively, so a right-to-left locale needs one wrapper rather than a mirrored copy of every screen.\n\nThe flip is the layout engine's own, which is why this is a component and not a bare context: `direction` is a style, so a subtree is the unit it applies to. Unlike forcing the whole process right-to-left, it takes effect on the next frame, can be scoped to part of a screen, and can be nested — an identifier or a phone number can stay left-to-right inside a right-to-left page.",
+    "usage": "<Direction dir=\"rtl\">\n  <App />\n</Direction>",
+    "extraImports": [
+      "useDirection"
+    ],
+    "examples": [
+      {
+        "title": "At the root",
+        "description": "Wrap the app once. `Direction` fills its parent by default, which is what you want here — it is standing in for the screen.",
+        "code": "<PanelUIProvider>\n  <Direction dir={locale.rtl ? 'rtl' : 'ltr'}>\n    <App />\n  </Direction>\n</PanelUIProvider>"
+      },
+      {
+        "title": "Around one section",
+        "description": "Inside a screen the default `flex-1` is wrong — it would fill the space instead of hugging the rows. `flex-none` wins over it, since `className` merges with later classes taking precedence.",
+        "code": "<Direction dir=\"rtl\" className=\"w-full flex-none\">\n  <Item.Group>\n    <Item>\n      <Item.Media variant=\"icon\">\n        <BellIcon size={16} />\n      </Item.Media>\n      <Item.Content>\n        <Item.Title>الإشعارات</Item.Title>\n        <Item.Description>Badges, sounds, banners</Item.Description>\n      </Item.Content>\n      <ChevronRightIcon size={16} />\n    </Item>\n  </Item.Group>\n</Direction>"
+      },
+      {
+        "title": "An island that must not flip",
+        "description": "Nesting resets the direction for one subtree and nothing else. A phone number, an account ID or a code snippet reads the same way in every locale — mirroring it makes it wrong rather than localised.",
+        "code": "<Direction dir=\"rtl\">\n  <Text>رقم الهاتف</Text>\n\n  <Direction dir=\"ltr\" className=\"flex-none\">\n    <Text>+1 (555) 010-4477</Text>\n  </Direction>\n</Direction>"
+      },
+      {
+        "title": "Flipping maths the layout cannot",
+        "description": "Anything measured in raw pixels rather than laid out — a drag translation, an indicator offset, the direction a sweep travels — has to negate itself. `useDirection()` is safe to call with no provider mounted: it falls back to the device's own setting.",
+        "code": "function Scrubber({ width }: { width: number }) {\n  const dir = useDirection();\n\n  const pan = Gesture.Pan().onChange((event) => {\n    const dx = dir === 'rtl' ? -event.changeX : event.changeX;\n    progress.value = clamp(progress.value + dx / width, 0, 1);\n  });\n\n  return <GestureDetector gesture={pan}>{/* … */}</GestureDetector>;\n}"
+      }
+    ],
+    "notes": "Nesting inherits: a `Direction` with no `dir` takes the value from the nearest one above it, and falls back to the device when there is none. So a provider added for structure does not silently reset a subtree to left-to-right.\n\n**What it does not mirror is anything not laid out by flexbox.** Gesture translations, animated offsets in pixels and the direction of a sweep or a shimmer all keep their sign — read `useDirection()` and negate them yourself. The layout flip covers rows, insets and padding, which is the large majority of a screen.\n\nIt does not replace localised strings, date formats or number formats. It mirrors the furniture; the content is still yours to translate."
+  },
   "empty-state": {
     "intro": "The placeholder for a list or screen with nothing in it. `Media variant=\"icon\"` frames the icon in a small card with two rotated ghost cards fanned behind it.",
     "usage": "<EmptyState>\n  <EmptyState.Header>\n    <EmptyState.Media variant=\"icon\">\n      <SearchIcon size={18} />\n    </EmptyState.Media>\n    <EmptyState.Title>No results found</EmptyState.Title>\n    <EmptyState.Description>\n      Try adjusting your search or filters.\n    </EmptyState.Description>\n  </EmptyState.Header>\n  <EmptyState.Content>\n    <Button variant=\"outline\" fullWidth>Clear filters</Button>\n  </EmptyState.Content>\n</EmptyState>",

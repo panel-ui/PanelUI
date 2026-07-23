@@ -35,6 +35,7 @@ import {
   ChevronRightIcon,
   Chip,
   Dialog,
+  Direction,
   EmptyState,
   FacebookIcon,
   FileIcon,
@@ -90,6 +91,7 @@ import {
   ToggleButtonGroup,
   Typography,
   hasNativeUI,
+  useDirection,
   useScrollSections,
   useToast,
 } from 'panelui-native';
@@ -2044,6 +2046,107 @@ function ThinkingOrbControlsVersion() {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Direction                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** Rows with a leading icon and a trailing chevron — the thing RTL mirrors. */
+function DirectionRows() {
+  return (
+    <Item.Group>
+      <Item>
+        <Item.Media variant="icon">
+          <BellIcon size={16} />
+        </Item.Media>
+        <Item.Content>
+          <Item.Title>Notifications</Item.Title>
+          <Item.Description>Badges, sounds, banners</Item.Description>
+        </Item.Content>
+        <ChevronRightIcon size={16} />
+      </Item>
+      <Item.Separator />
+      <Item>
+        <Item.Media variant="icon">
+          <ShieldCheckIcon size={16} />
+        </Item.Media>
+        <Item.Content>
+          <Item.Title>Privacy</Item.Title>
+          <Item.Description>Two-factor is on</Item.Description>
+        </Item.Content>
+        <ChevronRightIcon size={16} />
+      </Item>
+      <Item.Separator />
+      <Item>
+        <Item.Media variant="icon">
+          <CardIcon size={16} />
+        </Item.Media>
+        <Item.Content>
+          <Item.Title>Payment</Item.Title>
+          <Item.Description>Visa ending 4242</Item.Description>
+        </Item.Content>
+        <ChevronRightIcon size={16} />
+      </Item>
+    </Item.Group>
+  );
+}
+
+function DirectionFlipDemo() {
+  const [dir, setDir] = useState<string[]>(['rtl']);
+  const value = dir[0] === 'rtl' ? 'rtl' : 'ltr';
+
+  return (
+    <View className="w-full gap-4">
+      <ToggleButtonGroup selectionMode="single" value={dir} onValueChange={setDir}>
+        <ToggleButton id="ltr">ltr</ToggleButton>
+        <ToggleButton id="rtl">rtl</ToggleButton>
+      </ToggleButtonGroup>
+      {/* `flex-none` because the default fills its parent — that default is for
+          wrapping an app, not for sitting in a section. */}
+      <Direction dir={value} className="w-full flex-none">
+        <DirectionRows />
+      </Direction>
+    </View>
+  );
+}
+
+/** Reads the value back out, which is what a component flipping its own maths does. */
+function DirectionReadout() {
+  const dir = useDirection();
+
+  return (
+    <View className="flex-row items-center justify-between gap-3 px-4 py-3">
+      <Text size="sm" muted>
+        useDirection()
+      </Text>
+      <Badge variant="secondary">{dir}</Badge>
+    </View>
+  );
+}
+
+function DirectionNestedDemo() {
+  return (
+    <Direction dir="rtl" className="w-full flex-none gap-3">
+      <Surface variant="secondary" className="w-full p-4">
+        <Text weight="medium">حساب المستخدم</Text>
+        <Text size="sm" muted>
+          The card, its padding and its rows all mirror.
+        </Text>
+      </Surface>
+      <Surface variant="secondary" className="w-full">
+        <DirectionReadout />
+        {/* An island that must not flip: an identifier reads the same way in
+            every locale, and mirroring it makes it wrong rather than localised. */}
+        <Direction dir="ltr" className="flex-none border-t border-border">
+          <View className="px-4 pt-3">
+            <Text size="sm">+1 (555) 010-4477</Text>
+          </View>
+          <DirectionReadout />
+        </Direction>
+      </Surface>
+    </Direction>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* HeatmapChart                                                               */
 /* -------------------------------------------------------------------------- */
 
@@ -3476,6 +3579,23 @@ export const COMPONENTS: ComponentEntry[] = [
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'direction',
+    name: 'Direction',
+    summary: 'Reading direction for everything below it',
+    demos: [
+      { label: 'Flip it live', render: () => <DirectionFlipDemo /> },
+      { label: 'Nested, with an island', render: () => <DirectionNestedDemo /> },
+      {
+        label: 'Right to left',
+        render: () => (
+          <Direction dir="rtl" className="w-full flex-none">
+            <DirectionRows />
+          </Direction>
         ),
       },
     ],

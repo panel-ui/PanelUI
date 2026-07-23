@@ -101,6 +101,7 @@ overlays, and the toast viewport.
 | `Checkbox` | Animated checkbox, as a row or a selectable card |
 | `Chip` | Interactive pill — a filter, a tag, or a removable token |
 | `Dialog` | Modal dialog with a backdrop and footer actions |
+| `Direction` | Reading direction for everything below it |
 | `EmptyState` | Placeholder for a list or screen with no content |
 | `Frame` | Widget shell — a card of rows sitting in a titled tray |
 | `HeatmapChart` | Contribution grid with a themed colour ramp and a readout |

@@ -12,6 +12,7 @@
     "checkbox",
     "chip",
     "dialog",
+    "direction",
     "empty-state",
     "frame",
     "heatmap-chart",

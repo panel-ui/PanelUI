@@ -124,6 +124,14 @@
     ]
   },
   {
+    "name": "direction",
+    "type": "registry:ui",
+    "description": "Reading direction for everything below it.",
+    "registryDependencies": [
+      "cn"
+    ]
+  },
+  {
     "name": "empty-state",
     "type": "registry:ui",
     "description": "Placeholder for a list or screen with no content.",

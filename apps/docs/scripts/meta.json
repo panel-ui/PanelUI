@@ -46,7 +46,7 @@
   ],
   "chip": [
     "Chip",
-    "Interactive pill — a filter, a tag, or a removable token.",
+    "Interactive pill \u2014 a filter, a tag, or a removable token.",
     "react native chip",
     {
       "addedIn": "0.13.0"
@@ -57,6 +57,14 @@
     "Modal dialog with a backdrop and footer actions.",
     "react native modal dialog"
   ],
+  "direction": [
+    "Direction",
+    "Reading direction for everything below it.",
+    "react native rtl support",
+    {
+      "addedIn": "0.15.0"
+    }
+  ],
   "empty-state": [
     "EmptyState",
     "Placeholder for a list or screen with no content.",
@@ -64,7 +72,7 @@
   ],
   "frame": [
     "Frame",
-    "Widget shell — a card of rows sitting in a titled tray.",
+    "Widget shell \u2014 a card of rows sitting in a titled tray.",
     "react native list section"
   ],
   "heatmap-chart": [

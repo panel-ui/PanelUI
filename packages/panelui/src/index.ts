@@ -93,6 +93,12 @@ export {
   type DialogContentProps,
 } from './components/dialog';
 export {
+  Direction,
+  useDirection,
+  type DirectionProps,
+  type DirectionValue,
+} from './components/direction';
+export {
   Frame,
   type FrameProps,
   type FrameRootProps,

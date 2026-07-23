@@ -46,21 +46,21 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 
 | | | |
 | --- | --- | --- |
-| Accordion | InputGroup | Separator |
-| Alert | Item | Shimmer |
-| Attachment | Label | Skeleton |
-| Avatar | LineChart | Slider |
-| Badge | Marker | Spinner |
-| BottomSheet | Message | Steps |
-| Button | MessageScroller | Surface |
-| Card | Popover | Switch |
-| Checkbox | Progress | Tabs |
-| Chip | RadioGroup | ThinkingOrb |
-| Dialog | ScrollCanvas | Timeline |
+| Accordion | Input | Select |
+| Alert | InputGroup | Separator |
+| Attachment | Item | Shimmer |
+| Avatar | Label | Skeleton |
+| Badge | LineChart | Slider |
+| BottomSheet | Marker | Spinner |
+| Button | Message | Steps |
+| Card | MessageScroller | Surface |
+| Checkbox | Popover | Switch |
+| Chip | Progress | Tabs |
+| Dialog | RadioGroup | ThinkingOrb |
+| Direction | ScrollCanvas | Timeline |
 | EmptyState | ScrollFade | Toast |
 | Frame | ScrollText | ToggleButton |
 | HeatmapChart | SectionRail | Typography |
-| Input | Select |  |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating
 over the page — one `presentation` prop, because which is right depends on what

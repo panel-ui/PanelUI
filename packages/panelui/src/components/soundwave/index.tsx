@@ -158,6 +158,24 @@ interface Engine {
 const isShared = (value: unknown): value is SharedValue<number> =>
   typeof value === 'object' && value !== null && 'value' in value;
 
+/**
+ * One shared value to read, whether the caller passed a number or their own.
+ *
+ * A plain number is copied in; a `SharedValue` is handed straight back, which
+ * is the whole reason for accepting one — metering written into it never
+ * re-renders anything.
+ */
+function useNumberSource(value: number | SharedValue<number> | undefined): SharedValue<number> {
+  const own = useSharedValue(0);
+  const external = isShared(value) ? value : null;
+
+  useEffect(() => {
+    if (typeof value === 'number') own.value = value;
+  }, [value, own]);
+
+  return external ?? own;
+}
+
 /** How often `scrolling` mode takes a sample, in seconds. */
 const SAMPLE_INTERVAL = 1 / 24;
 
@@ -185,17 +203,8 @@ function useEngine({
   const samples = useSharedValue<number[]>([]);
   const nextSample = useSharedValue(0);
 
-  // A plain number is copied into a shared value so the worklet has one thing
-  // to read either way. An external SharedValue is read directly — that is the
-  // whole point of accepting one.
-  const own = useSharedValue(0);
-  const external = isShared(level) ? level : null;
-  const source = external ?? own;
+  const source = useNumberSource(level);
   const driven = level !== undefined;
-
-  useEffect(() => {
-    if (typeof level === 'number') own.value = level;
-  }, [level, own]);
 
   const running = !paused && !reducedMotion;
 
@@ -237,14 +246,14 @@ function useEngine({
   // animating" and "broken".
   useEffect(() => {
     if (running) return;
-    const still = driven ? clamp01(own.value * sensitivity) : 0.42;
+    const still = driven ? clamp01(source.value * sensitivity) : 0.42;
     energy.value = still;
     if (history > 0) {
       samples.value = Array.from({ length: history }, (_unused, index) =>
         clamp01(still * (0.45 + 0.55 * Math.abs(Math.sin(index * 0.7))))
       );
     }
-  }, [running, driven, sensitivity, history, own, energy, samples]);
+  }, [running, driven, sensitivity, history, source, energy, samples]);
 
   return { clock, energy, samples };
 }
@@ -351,9 +360,50 @@ function PillsWave({
 /* bars                                                                       */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * One bar's height, 0–1, from whichever source is driving this wave.
+ *
+ * Pulled out of the drawing loop because two paths walk the same bars — the
+ * played part of a recording and the rest of it — and a bar has to come out
+ * identical in both or the split shows as a step.
+ */
+function barValue(
+  i: number,
+  count: number,
+  scrolling: boolean,
+  supplied: number[],
+  history: number[],
+  clock: number,
+  energy: number
+): number {
+  'worklet';
+  if (scrolling) {
+    // The buffer fills from empty, so the newest sample sits at the trailing
+    // edge from the first frame rather than the wave sliding in from nowhere.
+    const offset = i - (count - history.length);
+    return offset >= 0 ? (history[offset] ?? 0) : 0;
+  }
+  if (supplied.length) {
+    // Real bands, resampled to the bar count — an analysis rarely hands back
+    // exactly as many numbers as there are bars, and a recorded waveform never
+    // does.
+    return supplied[Math.floor((i / count) * supplied.length)] ?? 0;
+  }
+  const rate = 2.1 + hashD(i, 1.3) * 2.9;
+  const phase = hashD(i, 4.7) * Math.PI * 2;
+  const wobble = 0.5 + 0.5 * Math.sin(clock * rate + phase);
+  const centre = count > 1 ? Math.sin((Math.PI * (i + 0.5)) / count) : 1;
+  return energy * wobble * (0.45 + 0.55 * centre);
+}
+
+/** Ink left on the part of a recording that has not played yet. */
+const UNPLAYED_OPACITY = 0.3;
+
 function BarsWave({
   engine,
   bands,
+  progress,
+  hasProgress,
   count,
   barWidth,
   height,
@@ -365,6 +415,8 @@ function BarsWave({
 }: {
   engine: Engine;
   bands: SharedValue<number[]>;
+  progress: SharedValue<number>;
+  hasProgress: boolean;
   count: number;
   barWidth: number;
   height: number;
@@ -374,33 +426,39 @@ function BarsWave({
   color: string;
   fadeId: string | null;
 }) {
-  const animatedProps = useAnimatedProps(() => {
+  /*
+   * Two paths, split at the playhead: the bars behind it keep full ink, the
+   * ones ahead are dimmed. It is two animated props a frame rather than one,
+   * and still nothing per bar — which is the point of drawing bars as a stroked
+   * path in the first place.
+   *
+   * With no `progress` the first path takes everything and the second is empty,
+   * so a live meter and a voice note run the same code.
+   */
+  const drawSegment = (played: boolean) => () => {
+    'worklet';
     const step = count > 1 ? (width - barWidth) / (count - 1) : 0;
     const span = height - barWidth;
     const supplied = bands.value;
     const history = engine.samples.value;
+    const head = hasProgress ? clamp01(progress.value) * count : count;
     let d = '';
 
     for (let i = 0; i < count; i++) {
-      let value: number;
-      if (scrolling) {
-        // The buffer fills from empty, so the newest sample sits at the right
-        // edge from the first frame rather than the wave sliding in from
-        // nowhere.
-        const offset = i - (count - history.length);
-        value = offset >= 0 ? (history[offset] ?? 0) : 0;
-      } else if (supplied.length) {
-        // Real bands, resampled to the bar count — an FFT rarely hands back
-        // exactly as many numbers as there are bars.
-        value = supplied[Math.floor((i / count) * supplied.length)] ?? 0;
-      } else {
-        const rate = 2.1 + hashD(i, 1.3) * 2.9;
-        const phase = hashD(i, 4.7) * Math.PI * 2;
-        const wobble = 0.5 + 0.5 * Math.sin(engine.clock.value * rate + phase);
-        const centre = count > 1 ? Math.sin((Math.PI * (i + 0.5)) / count) : 1;
-        value = engine.energy.value * wobble * (0.45 + 0.55 * centre);
-      }
+      // The playhead cuts between bars, not through one: a bar is either
+      // played or it is not, which is what makes the fill land on a beat.
+      const isPlayed = i + 0.5 <= head;
+      if (isPlayed !== played) continue;
 
+      const value = barValue(
+        i,
+        count,
+        scrolling,
+        supplied,
+        history,
+        engine.clock.value,
+        engine.energy.value
+      );
       const length = span * clamp01(Math.max(FLOOR, value));
       const x = q(barWidth / 2 + i * step);
       if (centered) {
@@ -412,7 +470,12 @@ function BarsWave({
     }
 
     return { d };
-  });
+  };
+
+  const playedProps = useAnimatedProps(drawSegment(true));
+  const restProps = useAnimatedProps(drawSegment(false));
+
+  const stroke = fadeId ? `url(#${fadeId})` : color;
 
   return (
     <Svg width={width} height={height}>
@@ -432,8 +495,16 @@ function BarsWave({
         </Defs>
       ) : null}
       <AnimatedPath
-        animatedProps={animatedProps}
-        stroke={fadeId ? `url(#${fadeId})` : color}
+        animatedProps={restProps}
+        stroke={stroke}
+        strokeOpacity={hasProgress ? UNPLAYED_OPACITY : 1}
+        strokeWidth={barWidth}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <AnimatedPath
+        animatedProps={playedProps}
+        stroke={stroke}
         strokeWidth={barWidth}
         strokeLinecap="round"
         fill="none"
@@ -659,9 +730,16 @@ export interface SoundwaveProps extends Omit<ViewProps, 'children'> {
   level?: number | SharedValue<number>;
   /**
    * Per-band levels, 0–1 each, for `bars` in `static` mode when the app has a
-   * real frequency analysis. Resampled to the bar count.
+   * real frequency analysis — or the stored shape of a finished recording.
+   * Resampled to the bar count, and drawn still rather than animated.
    */
   levels?: number[];
+  /**
+   * Playback position through a recording, 0–1. Bars behind it keep full ink
+   * and the rest are dimmed, which is the voice-note progress bar. `bars` only,
+   * and it goes with `levels` — a recording has a fixed shape to play through.
+   */
+  progress?: number | SharedValue<number>;
   /** How many capsules (`pills`) or bars (`bars`) to draw. */
   bars?: number;
   /** Capsule width, or bar stroke width. Also the stroke width of `line`. */
@@ -702,6 +780,7 @@ export function Soundwave({
   state = 'listening',
   level,
   levels,
+  progress,
   bars,
   barWidth,
   barGap,
@@ -731,12 +810,21 @@ export function Soundwave({
   const themed = variant === 'ambient' ? info : foreground;
   const ink = color ?? (typeof themed === 'string' ? themed : '#0a0a0a');
 
+  /*
+   * A recording drawn from `levels` has no motion in it: every bar comes from
+   * the stored shape, so the clock advances a frame nobody reads. A transcript
+   * can hold twenty voice notes, and twenty idle frame callbacks is twenty too
+   * many — so a supplied waveform stops the engine, and `progress` still
+   * redraws it, because that is a shared value of its own.
+   */
+  const stillWaveform = variant === 'bars' && !scrolling && (levels?.length ?? 0) > 0;
+
   const engine = useEngine({
     level,
     state,
     sensitivity,
     speed,
-    paused,
+    paused: paused || stillWaveform,
     history: scrolling ? count : 0,
   });
 
@@ -746,6 +834,8 @@ export function Soundwave({
   useEffect(() => {
     bands.value = levels ?? [];
   }, [levels, bands]);
+
+  const playhead = useNumberSource(progress);
 
   // `bars` and `line` are drawn to the width they are given, which is only
   // known after layout — a metering strip is nearly always as wide as its row.
@@ -780,6 +870,8 @@ export function Soundwave({
         <BarsWave
           engine={engine}
           bands={bands}
+          progress={playhead}
+          hasProgress={progress !== undefined}
           count={count}
           barWidth={stroke}
           height={box}

@@ -526,3 +526,23 @@ export function MicIcon({ size = 16, color, ...props }: IconProps) {
     </Svg>
   );
 }
+
+/** A filled triangle — start playback. */
+export function PlayIcon({ size = 16, color, ...props }: IconProps) {
+  const resolved = useResolvedColor(color, '#737373');
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+      <Path d="M7 4.5v15l13-7.5z" fill={resolved} stroke={resolved} strokeWidth={2} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Two filled bars — hold playback where it is. */
+export function PauseIcon({ size = 16, color, ...props }: IconProps) {
+  const resolved = useResolvedColor(color, '#737373');
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+      <Path d="M8 5h2v14H8zM14 5h2v14h-2z" fill={resolved} stroke={resolved} strokeWidth={1.5} strokeLinejoin="round" />
+    </Svg>
+  );
+}

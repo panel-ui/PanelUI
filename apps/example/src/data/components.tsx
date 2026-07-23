@@ -7,9 +7,15 @@
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Animated, {
+  cancelAnimation,
+  Easing,
+  runOnJS,
   useAnimatedKeyboard,
   useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Image,
@@ -58,6 +64,8 @@ import {
   MessageScroller,
   MicIcon,
   PackageIcon,
+  PauseIcon,
+  PlayIcon,
   PlusSquareIcon,
   Popover,
   Progress,
@@ -98,6 +106,11 @@ import {
   useToast,
 } from 'panelui-native';
 import { useCSSVariable } from 'uniwind';
+import {
+  formatClock,
+  useVoiceRecorder,
+  VoiceControls,
+} from '../components/voice';
 
 const PHOTO = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=60';
 
@@ -2053,115 +2066,17 @@ function ThinkingOrbControlsVersion() {
 
 const WAVE_STATES = ['idle', 'listening', 'thinking', 'speaking'] as const;
 
-/**
- * A microphone the demos can actually press, standing in for a recorder.
- *
- * Every version runs with no permission prompt and no audio session, so they
- * work on a simulator: pressing record starts a clock, and the wave switches
- * from `idle` to `listening`. Turn the slider on and it becomes the microphone
- * — dragging the level by hand shows what the smoothing does far better than
- * talking at a phone does.
- */
-function useVoiceDemo() {
-  const [recording, setRecording] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [level, setLevel] = useState(0.55);
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    if (!recording) return;
-    const id = setInterval(() => setSeconds((value) => value + 1), 1000);
-    return () => clearInterval(id);
-  }, [recording]);
-
-  const toggle = () => {
-    setRecording((value) => !value);
-    setSeconds(0);
-  };
-
-  return {
-    recording,
-    toggle,
-    seconds,
-    level,
-    setLevel,
-    live,
-    setLive,
-    // What the wave is handed: nothing at all unless the slider is driving it,
-    // so the state's own motion is what shows.
-    state: (recording ? 'listening' : 'idle') as 'listening' | 'idle',
-    driven: recording && live ? level : undefined,
-  };
-}
-
-const clock = (seconds: number) =>
-  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-
-/** Record button, timer, and the slider stand-in for a microphone. */
-function VoiceControls({
-  voice,
-  compact = false,
-}: {
-  voice: ReturnType<typeof useVoiceDemo>;
-  compact?: boolean;
-}) {
-  return (
-    <View className="w-full gap-5 px-5">
-      <View className="flex-row items-center justify-center gap-5">
-        <Button
-          variant={voice.recording ? 'destructive' : 'primary'}
-          size="icon"
-          className={compact ? 'size-12 rounded-full' : 'size-16 rounded-full'}
-          onPress={voice.toggle}
-          accessibilityLabel={voice.recording ? 'Stop' : 'Start listening'}
-        >
-          {voice.recording ? (
-            <View className="size-4 rounded-sm bg-white" />
-          ) : (
-            <MicIcon size={compact ? 18 : 22} color="#ffffff" />
-          )}
-        </Button>
-        <Text size="lg" muted={!voice.recording}>
-          {clock(voice.seconds)}
-        </Text>
-      </View>
-
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1 pr-4">
-          <Text size="sm">Drive it from the slider</Text>
-          <Text size="xs" muted>
-            Off, and the wave animates the state on its own.
-          </Text>
-        </View>
-        <Switch value={voice.live} onValueChange={voice.setLive} />
-      </View>
-
-      <Slider
-        label="Mic level"
-        showValue
-        formatValue={(value) => value.toFixed(2)}
-        min={0}
-        max={1}
-        step={0.01}
-        value={voice.level}
-        onValueChange={voice.setLevel}
-        disabled={!voice.live || !voice.recording}
-      />
-    </View>
-  );
-}
-
 /** The capsules over a microphone button — a voice-mode screen. */
 function SoundwavePillsVersion() {
-  const voice = useVoiceDemo();
+  const voice = useVoiceRecorder();
 
   return (
     <View className="flex-1 justify-between py-6">
       <View className="flex-1 items-center justify-center gap-8">
         <Soundwave
           variant="pills"
-          state={voice.state}
-          level={voice.driven}
+          state={voice.recording ? 'listening' : 'idle'}
+          level={voice.recording ? voice.level : undefined}
           height={120}
           barWidth={34}
           barGap={12}
@@ -2176,7 +2091,7 @@ function SoundwavePillsVersion() {
 
 /** The metering strip, in both modes, at the size it is actually used. */
 function SoundwaveBarsVersion() {
-  const voice = useVoiceDemo();
+  const voice = useVoiceRecorder();
 
   return (
     <ScrollView contentContainerClassName="gap-6 py-6">
@@ -2189,8 +2104,8 @@ function SoundwaveBarsVersion() {
             <Soundwave
               variant="bars"
               mode="static"
-              state={voice.state}
-              level={voice.driven}
+              state={voice.recording ? 'listening' : 'idle'}
+              level={voice.recording ? voice.level : undefined}
               height={64}
             />
           </Card.Content>
@@ -2206,8 +2121,8 @@ function SoundwaveBarsVersion() {
             <Soundwave
               variant="bars"
               mode="scrolling"
-              state={voice.state}
-              level={voice.driven}
+              state={voice.recording ? 'listening' : 'idle'}
+              level={voice.recording ? voice.level : undefined}
               height={64}
             />
           </Card.Content>
@@ -2229,12 +2144,12 @@ function SoundwaveBarsVersion() {
                 bars={28}
                 barWidth={5}
                 height={40}
-                state={voice.state}
-                level={voice.driven}
+                state={voice.recording ? 'listening' : 'idle'}
+                level={voice.recording ? voice.level : undefined}
               />
             </View>
             <Text size="sm" muted>
-              {clock(voice.seconds)}
+              {formatClock(voice.seconds)}
             </Text>
           </Card.Content>
         </Card>
@@ -2248,7 +2163,7 @@ function SoundwaveBarsVersion() {
 /** The travelling wave, and what each state does to it with no level supplied. */
 function SoundwaveLineVersion() {
   const [state, setState] = useState<string[]>(['speaking']);
-  const voice = useVoiceDemo();
+  const voice = useVoiceRecorder();
   const picked = WAVE_STATES.find((name) => name === state[0]) ?? 'speaking';
   // Recording wins over the picker: pressing the button is the demo, and a
   // wave that ignored it would be the wrong lesson.
@@ -2262,7 +2177,7 @@ function SoundwaveLineVersion() {
             <Soundwave
               variant="line"
               state={current}
-              level={voice.driven}
+              level={voice.recording ? voice.level : undefined}
               height={96}
             />
           </Card.Content>
@@ -2308,7 +2223,7 @@ function SoundwaveLineVersion() {
 
 /** The glow that takes the whole screen, behind a microphone button. */
 function SoundwaveAmbientVersion() {
-  const voice = useVoiceDemo();
+  const voice = useVoiceRecorder();
 
   return (
     <View className="flex-1">
@@ -2316,8 +2231,8 @@ function SoundwaveAmbientVersion() {
           screen's own content rather than wrapping it. */}
       <Soundwave
         variant="ambient"
-        state={voice.state}
-        level={voice.driven}
+        state={voice.recording ? 'listening' : 'idle'}
+        level={voice.recording ? voice.level : undefined}
         radius={40}
       />
 
@@ -2332,6 +2247,259 @@ function SoundwaveAmbientVersion() {
 
       <View className="pb-8">
         <VoiceControls voice={voice} />
+      </View>
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Soundwave in a conversation                                                */
+/* -------------------------------------------------------------------------- */
+
+interface VoiceNote {
+  id: string;
+  align: 'start' | 'end';
+  /** The stored shape of the recording — 40 numbers, not the audio. */
+  levels: number[];
+  seconds: number;
+  time: string;
+  /** Empty for the seeded notes: there is no file, only a waveform. */
+  uri: string;
+}
+
+/** A plausible waveform, seeded so a note looks the same on every render. */
+function seedWaveform(seed: number, bars = 40): number[] {
+  let state = seed;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+  return Array.from({ length: bars }, (_unused, index) => {
+    // Syllables, not noise: a slow envelope with quick peaks riding it, which
+    // is what speech looks like once it is metered.
+    const envelope = 0.45 + 0.55 * Math.sin((index / bars) * Math.PI * 2.2 + seed);
+    return Math.max(0.08, Math.min(1, envelope * (0.5 + 0.7 * random())));
+  });
+}
+
+const SEED_NOTES: VoiceNote[] = [
+  { id: 'n1', align: 'start', levels: seedWaveform(3), seconds: 8, time: '09:41', uri: '' },
+  { id: 'n2', align: 'end', levels: seedWaveform(11), seconds: 4, time: '09:42', uri: '' },
+  { id: 'n3', align: 'start', levels: seedWaveform(27), seconds: 12, time: '09:44', uri: '' },
+];
+
+/**
+ * One voice note: play, the waveform, the duration.
+ *
+ * The waveform is `levels` — the shape captured while recording — and the
+ * playhead is `progress`, so the bars behind it fill as it plays. A recorded
+ * note plays for real; the seeded ones have no file, so their playhead is
+ * animated at the same rate rather than pretending there is audio behind it.
+ */
+function VoiceNoteBubble({ note }: { note: VoiceNote }) {
+  const player = useAudioPlayer(note.uri || null);
+  const status = useAudioPlayerStatus(player);
+  const progress = useSharedValue(0);
+  const [playingSeed, setPlayingSeed] = useState(false);
+
+  useEffect(() => {
+    if (!note.uri) return;
+    progress.value = status.duration
+      ? Math.min(1, status.currentTime / status.duration)
+      : 0;
+  }, [note.uri, status.currentTime, status.duration, progress]);
+
+  const playing = note.uri ? status.playing : playingSeed;
+
+  const toggle = () => {
+    if (note.uri) {
+      if (status.playing) player.pause();
+      else {
+        if (status.didJustFinish || status.currentTime >= status.duration) player.seekTo(0);
+        player.play();
+      }
+      return;
+    }
+
+    if (playingSeed) {
+      cancelAnimation(progress);
+      setPlayingSeed(false);
+      return;
+    }
+    setPlayingSeed(true);
+    progress.value = 0;
+    progress.value = withTiming(
+      1,
+      { duration: note.seconds * 1000, easing: Easing.linear },
+      (finished) => {
+        if (finished) runOnJS(setPlayingSeed)(false);
+      }
+    );
+  };
+
+  return (
+    <Message align={note.align}>
+      <Message.Content>
+        <Message.Bubble className="px-3 py-2.5">
+          <View className="w-64 flex-row items-center gap-3">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={playing ? 'Pause' : 'Play'}
+              onPress={toggle}
+              className="size-9 items-center justify-center rounded-full bg-background/20"
+            >
+              {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+            </Pressable>
+
+            <View className="flex-1">
+              {/* `levels` freezes the wave into the recorded shape, so nothing
+                  animates until the playhead moves. */}
+              <Soundwave
+                variant="bars"
+                levels={note.levels}
+                progress={progress}
+                bars={40}
+                barWidth={2}
+                height={28}
+              />
+            </View>
+
+            <Text size="xs" muted>
+              {formatClock(note.seconds)}
+            </Text>
+          </View>
+        </Message.Bubble>
+        <Message.Footer>{note.time}</Message.Footer>
+      </Message.Content>
+    </Message>
+  );
+}
+
+/** Voice notes in a transcript — record one and it joins the thread. */
+function SoundwaveNotesVersion() {
+  const voice = useVoiceRecorder();
+  const [notes, setNotes] = useState<VoiceNote[]>(SEED_NOTES);
+
+  useEffect(() => {
+    if (!voice.note) return;
+    setNotes((current) => [
+      ...current,
+      {
+        id: `rec-${current.length}`,
+        align: 'end',
+        levels: voice.note!.levels,
+        seconds: voice.note!.seconds,
+        time: 'now',
+        uri: voice.note!.uri,
+      },
+    ]);
+    voice.clearNote();
+  }, [voice]);
+
+  return (
+    <View className="flex-1">
+      <ScrollView contentContainerClassName="gap-3 px-4 py-4">
+        {notes.map((note) => (
+          <VoiceNoteBubble key={note.id} note={note} />
+        ))}
+      </ScrollView>
+
+      <View className="border-t border-border py-5">
+        <VoiceControls voice={voice} compact />
+      </View>
+    </View>
+  );
+}
+
+/** The composer that turns into a recorder, over a live transcript. */
+function SoundwaveComposerVersion() {
+  const voice = useVoiceRecorder();
+  const [notes, setNotes] = useState<VoiceNote[]>(SEED_NOTES.slice(0, 2));
+
+  useEffect(() => {
+    if (!voice.note) return;
+    setNotes((current) => [
+      ...current,
+      {
+        id: `rec-${current.length}`,
+        align: 'end',
+        levels: voice.note!.levels,
+        seconds: voice.note!.seconds,
+        time: 'now',
+        uri: voice.note!.uri,
+      },
+    ]);
+    voice.clearNote();
+  }, [voice]);
+
+  return (
+    <View className="flex-1">
+      {voice.meter}
+
+      <MessageScroller autoScroll className="flex-1">
+        <MessageScroller.Viewport>
+          <MessageScroller.Content className="gap-3 px-4 py-4">
+            {notes.map((note) => (
+              <MessageScroller.Item key={note.id} messageId={note.id}>
+                <VoiceNoteBubble note={note} />
+              </MessageScroller.Item>
+            ))}
+          </MessageScroller.Content>
+        </MessageScroller.Viewport>
+        <MessageScroller.Button />
+      </MessageScroller>
+
+      <View className="border-t border-border p-3">
+        {voice.recording ? (
+          <View className="flex-row items-center gap-3">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cancel recording"
+              onPress={voice.cancel}
+              className="size-10 items-center justify-center rounded-full"
+            >
+              <XIcon size={18} />
+            </Pressable>
+
+            <View className="flex-1">
+              {/* Scrolling, because a composer is showing what was just said
+                  rather than a level: the last few seconds slide past. */}
+              <Soundwave
+                variant="bars"
+                mode="scrolling"
+                level={voice.level}
+                bars={32}
+                barWidth={3}
+                height={36}
+              />
+            </View>
+
+            <Text size="sm" muted>
+              {formatClock(voice.seconds)}
+            </Text>
+
+            <Button size="icon" className="size-10 rounded-full" onPress={voice.toggle}>
+              <SendIcon size={16} />
+            </Button>
+          </View>
+        ) : (
+          <View className="flex-row items-center gap-3">
+            <View className="flex-1 rounded-full bg-muted px-4 py-2.5">
+              <Text size="sm" muted>
+                Hold the mic, or press it
+              </Text>
+            </View>
+            <Button size="icon" className="size-10 rounded-full" onPress={voice.toggle}>
+              <MicIcon size={18} />
+            </Button>
+          </View>
+        )}
+
+        {voice.reason ? (
+          <Text size="xs" muted className="pt-3 text-center">
+            {voice.reason}
+          </Text>
+        ) : null}
       </View>
     </View>
   );
@@ -5529,6 +5697,20 @@ export const COMPONENTS: ComponentEntry[] = [
         fullPage: true,
         description: 'A bloom off the bottom edge and a rim around the screen.',
         render: () => <SoundwaveAmbientVersion />,
+      },
+      {
+        label: 'Voice notes',
+        id: 'notes',
+        fullPage: true,
+        description: 'Recorded waveforms in bubbles, filling as they play.',
+        render: () => <SoundwaveNotesVersion />,
+      },
+      {
+        label: 'Recording composer',
+        id: 'composer',
+        fullPage: true,
+        description: 'A composer that turns into a recorder over a transcript.',
+        render: () => <SoundwaveComposerVersion />,
       },
     ],
   },

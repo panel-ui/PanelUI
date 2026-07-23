@@ -23,7 +23,13 @@
     },
     "scheme": "panelui",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "PanelUI uses the microphone so the Soundwave demos can react to your voice."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

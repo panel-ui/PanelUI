@@ -341,6 +341,8 @@ export {
   MoonIcon,
   PackageIcon,
   PaperclipIcon,
+  PauseIcon,
+  PlayIcon,
   PlusSquareIcon,
   ReceiptIcon,
   SearchIcon,

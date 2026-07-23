@@ -238,6 +238,11 @@ export {
 } from './components/scroll-fade';
 export { Separator, type SeparatorProps } from './components/separator';
 export { Shimmer, type ShimmerProps } from './components/shimmer';
+export {
+  ThinkingOrb,
+  type ThinkingOrbProps,
+  type ThinkingOrbState,
+} from './components/thinking-orb';
 export { Skeleton, type SkeletonProps } from './components/skeleton';
 export { Slider, type SliderProps } from './components/slider';
 export { Spinner, type SpinnerProps } from './components/spinner';

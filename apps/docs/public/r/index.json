@@ -420,6 +420,14 @@
     "registryDependencies": []
   },
   {
+    "name": "thinking-orb",
+    "type": "registry:ui",
+    "description": "Dotted orb saying which kind of busy an agent is.",
+    "registryDependencies": [
+      "cn"
+    ]
+  },
+  {
     "name": "timeline",
     "type": "registry:ui",
     "description": "Vertical sequence of events.",

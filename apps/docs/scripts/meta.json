@@ -218,5 +218,14 @@
     "Typography",
     "Semantic text presets.",
     "react native typography"
+  ],
+  "thinking-orb": [
+    "ThinkingOrb",
+    "Dotted orb saying which kind of busy an agent is.",
+    "react native ai thinking indicator",
+    {
+      "group": "ai-components",
+      "addedIn": "0.14.0"
+    }
   ]
 }

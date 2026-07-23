@@ -333,6 +333,44 @@
       "variant": "<Checkbox variant=\"default\" checked={a} onCheckedChange={setA} label=\"Default\" />\n\n{/* A bordered surface that fills its width. */}\n<Checkbox\n  variant=\"card\"\n  checked={b}\n  onCheckedChange={setB}\n  label=\"Card\"\n  description=\"For options that are real choices, not small toggles.\"\n/>"
     }
   },
+  "chip": {
+    "intro": "A compact, interactive pill. Where Badge only shows, Chip is the one you press: the filter in a filter bar, the tag on a photo, the removable recipient in a “To:” field. Set `selected` to make it a filter, `onClose` to make it removable.",
+    "usage": "<Chip>Design</Chip>\n\n<Chip variant=\"info\" onClose={() => remove('design')}>Design</Chip>\n\n<Chip selected={on} onPress={() => setOn(!on)}>Available</Chip>",
+    "anatomy": "<Chip start={<Icon />} onClose={() => {}}>\n  <Chip.Label>…</Chip.Label>\n</Chip>",
+    "parts": {
+      "Label": "The label, when the chip holds more than a string. Reads the chip's variant and selected state itself, so an icon-plus-text chip does not thread the colour through by hand."
+    },
+    "extraImports": [
+      "CheckIcon"
+    ],
+    "examples": [
+      {
+        "title": "Tags",
+        "description": "A static token, in any of the tones. With no `onPress` it is a plain View — it does not invite a tap it will not answer.",
+        "code": "<Chip>Default</Chip>\n<Chip variant=\"primary\">Primary</Chip>\n<Chip variant=\"success\">Shipped</Chip>\n<Chip variant=\"warning\">Beta</Chip>\n<Chip variant=\"info\">New</Chip>\n<Chip variant=\"outline\">Draft</Chip>"
+      },
+      {
+        "title": "A filter bar",
+        "description": "`selected` promotes any chip to a loud accent surface, so a row of filters toggles on and off without a second colour. Pair it with `onPress` — setting `selected` makes the chip announce as a toggle.",
+        "code": "const [tags, setTags] = useState<string[]>(['design']);\n\nconst toggle = (id: string) =>\n  setTags((prev) =>\n    prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]\n  );\n\n<View className=\"flex-row flex-wrap gap-2\">\n  {['design', 'code', 'research'].map((id) => (\n    <Chip\n      key={id}\n      selected={tags.includes(id)}\n      onPress={() => toggle(id)}\n    >\n      {id}\n    </Chip>\n  ))}\n</View>"
+      },
+      {
+        "title": "Removable tokens",
+        "description": "`onClose` adds a trailing ✕ that is its own hit target — removing a chip never also fires its `onPress`. Perfect for the recipients in a “To:” field or the applied filters above a list.",
+        "code": "const [people, setPeople] = useState(['Ada', 'Grace', 'Alan']);\n\n<View className=\"flex-row flex-wrap gap-2\">\n  {people.map((name) => (\n    <Chip\n      key={name}\n      variant=\"outline\"\n      onClose={() => setPeople((p) => p.filter((n) => n !== name))}\n    >\n      {name}\n    </Chip>\n  ))}\n</View>"
+      },
+      {
+        "title": "With a leading icon",
+        "description": "`start` takes an icon or an avatar before the label. Compose with `Chip.Label` and the icon inherits the chip's colour on its own.",
+        "code": "<Chip variant=\"success\" start={<CheckIcon size={13} />}>\n  <Chip.Label>Available</Chip.Label>\n</Chip>"
+      }
+    ],
+    "variantCode": {
+      "variant": "<Chip variant=\"default\">Default</Chip>\n<Chip variant=\"primary\">Primary</Chip>\n<Chip variant=\"outline\">Outline</Chip>\n<Chip variant=\"success\">Success</Chip>\n<Chip variant=\"warning\">Warning</Chip>\n<Chip variant=\"info\">Info</Chip>\n<Chip variant=\"destructive\">Destructive</Chip>",
+      "size": "<Chip size=\"sm\">Small</Chip>\n<Chip size=\"md\">Medium</Chip>\n<Chip size=\"lg\">Large</Chip>"
+    },
+    "notes": "A chip is only pressable when you give it an `onPress` or a `selected` state — otherwise it is a plain tag and is not announced as a control. A `selected` chip is read out as checked or unchecked; a plain pressable one as a button.\n\nThe close button carries its own `accessibilityLabel` (“Remove” by default — override with `closeLabel`) and a generous hit slop, since a small pill leaves little room for the finger.\n\nSet `haptics` for a tick under the finger on press or removal. It needs the optional `expo-haptics` and is silent without it."
+  },
   "dialog": {
     "intro": "A modal dialog. Mounts through a portal and unmounts after its exit animation.",
     "usage": "<Dialog>\n  <Dialog.Trigger>\n    <Button variant=\"outline\">Delete</Button>\n  </Dialog.Trigger>\n  <Dialog.Content>\n    <Dialog.Title>Delete project?</Dialog.Title>\n    <Dialog.Description>\n      This action cannot be undone.\n    </Dialog.Description>\n    <Dialog.Footer>\n      <Dialog.Close>\n        <Button size=\"sm\" variant=\"ghost\">Cancel</Button>\n      </Dialog.Close>\n      <Dialog.Close>\n        <Button size=\"sm\" variant=\"destructive\">Delete</Button>\n      </Dialog.Close>\n    </Dialog.Footer>\n  </Dialog.Content>\n</Dialog>",

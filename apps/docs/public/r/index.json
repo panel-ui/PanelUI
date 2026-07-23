@@ -95,6 +95,18 @@
     ]
   },
   {
+    "name": "chip",
+    "type": "registry:ui",
+    "description": "Interactive pill — a filter, a tag, or a removable token.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "haptics",
+      "icons",
+      "text"
+    ]
+  },
+  {
     "name": "cn",
     "type": "registry:lib",
     "description": "Merges Tailwind class names, with later classes winning conflicts.",
@@ -425,6 +437,7 @@
     "registryDependencies": [
       "animated-pressable",
       "cn",
+      "haptics",
       "icons",
       "text"
     ]

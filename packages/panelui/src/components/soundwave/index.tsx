@@ -42,7 +42,7 @@
  * more expensive than the thing it saves. Everything runs in a worklet on the
  * UI thread; React renders on a resize and otherwise not at all.
  */
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import {
   StyleSheet,
   View,
@@ -400,6 +400,55 @@ function barValue(
 /** Ink left on the part of a recording that has not played yet. */
 const UNPLAYED_OPACITY = 0.3;
 
+/**
+ * The stroke a wave is painted with, when it is not one flat colour.
+ *
+ * One definition covers both jobs, because they are the same object: a run of
+ * colour stops across the width, optionally pinned to transparent at each end.
+ * Doing the edge fade this way rather than as an overlay in the background
+ * colour is what lets a wave sit on a card, a bubble or a photograph — an
+ * overlay only disappears against the one surface it was told about.
+ */
+function WaveGradient({
+  id,
+  colors,
+  fade,
+  edge,
+}: {
+  id: string;
+  colors: readonly string[];
+  fade: boolean;
+  edge: number;
+}) {
+  const stops = colors.length ? colors : ['#000000'];
+  const span = fade ? 1 - edge * 2 : 1;
+  const from = fade ? edge : 0;
+
+  const nodes: ReactElement[] = [];
+  if (fade) nodes.push(<Stop key="fade-start" offset="0" stopColor={stops[0]} stopOpacity="0" />);
+  stops.forEach((stop, index) => {
+    const at = stops.length > 1 ? from + (index / (stops.length - 1)) * span : from;
+    nodes.push(
+      <Stop key={index} offset={String(at)} stopColor={stop} stopOpacity="1" />
+    );
+  });
+  if (fade) {
+    nodes.push(
+      <Stop key="fade-end" offset="1" stopColor={stops[stops.length - 1]} stopOpacity="0" />
+    );
+  }
+
+  return (
+    <Defs>
+      {/* Built as a list rather than inline, because the stop count varies with
+          the palette and with whether the ends are faded. */}
+      <SvgGradient id={id} x1="0" y1="0" x2="1" y2="0">
+        {nodes}
+      </SvgGradient>
+    </Defs>
+  );
+}
+
 function BarsWave({
   engine,
   bands,
@@ -411,8 +460,9 @@ function BarsWave({
   width,
   centered,
   scrolling,
-  color,
-  fadeId,
+  stroke,
+  trackStroke,
+  defs,
 }: {
   engine: Engine;
   bands: SharedValue<number[]>;
@@ -424,8 +474,10 @@ function BarsWave({
   width: number;
   centered: boolean;
   scrolling: boolean;
-  color: string;
-  fadeId: string | null;
+  stroke: string;
+  /** Explicit colour for the unplayed part, if the caller set one. */
+  trackStroke: string | null;
+  defs: ReactNode;
 }) {
   /*
    * Two paths, split at the playhead: the bars behind it keep full ink, the
@@ -476,29 +528,15 @@ function BarsWave({
   const playedProps = useAnimatedProps(drawSegment(true));
   const restProps = useAnimatedProps(drawSegment(false));
 
-  const stroke = fadeId ? `url(#${fadeId})` : color;
-
   return (
     <Svg width={width} height={height}>
-      {fadeId ? (
-        <Defs>
-          {/*
-           * The fade is on the stroke, not an overlay in the background colour.
-           * A strip like this often sits on a card or a photo, and an overlay
-           * only disappears against the one surface it was told about.
-           */}
-          <SvgGradient id={fadeId} x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor={color} stopOpacity="0" />
-            <Stop offset="0.12" stopColor={color} stopOpacity="1" />
-            <Stop offset="0.88" stopColor={color} stopOpacity="1" />
-            <Stop offset="1" stopColor={color} stopOpacity="0" />
-          </SvgGradient>
-        </Defs>
-      ) : null}
+      {defs}
       <AnimatedPath
         animatedProps={restProps}
-        stroke={stroke}
-        strokeOpacity={hasProgress ? UNPLAYED_OPACITY : 1}
+        stroke={trackStroke ?? stroke}
+        // A track colour of its own is drawn as given; without one, the unplayed
+        // part is the same ink turned down.
+        strokeOpacity={trackStroke ? 1 : hasProgress ? UNPLAYED_OPACITY : 1}
         strokeWidth={barWidth}
         strokeLinecap="round"
         fill="none"
@@ -526,15 +564,15 @@ function LineWave({
   width,
   height,
   strokeWidth,
-  color,
-  fadeId,
+  stroke,
+  defs,
 }: {
   engine: Engine;
   width: number;
   height: number;
   strokeWidth: number;
-  color: string;
-  fadeId: string | null;
+  stroke: string;
+  defs: ReactNode;
 }) {
   const animatedProps = useAnimatedProps(() => {
     const mid = height / 2;
@@ -566,19 +604,10 @@ function LineWave({
 
   return (
     <Svg width={width} height={height}>
-      {fadeId ? (
-        <Defs>
-          <SvgGradient id={fadeId} x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor={color} stopOpacity="0" />
-            <Stop offset="0.18" stopColor={color} stopOpacity="1" />
-            <Stop offset="0.82" stopColor={color} stopOpacity="1" />
-            <Stop offset="1" stopColor={color} stopOpacity="0" />
-          </SvgGradient>
-        </Defs>
-      ) : null}
+      {defs}
       <AnimatedPath
         animatedProps={animatedProps}
-        stroke={fadeId ? `url(#${fadeId})` : color}
+        stroke={stroke}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -591,6 +620,14 @@ function LineWave({
 /* -------------------------------------------------------------------------- */
 /* ambient                                                                    */
 /* -------------------------------------------------------------------------- */
+
+/** A theme token name — `--color-info` — rather than a literal colour. */
+const isToken = (value: string | undefined): value is string =>
+  typeof value === 'string' && value.startsWith('--');
+
+/** `useCSSVariable` can hand back a non-string when a variable is unset. */
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
 
 /** Turns any resolved colour into the same colour at a given alpha. */
 function withAlpha(color: string, alpha: number): string {
@@ -630,10 +667,13 @@ function withAlpha(color: string, alpha: number): string {
 function AmbientWave({
   engine,
   color,
+  bloomColors,
   radius,
 }: {
   engine: Engine;
   color: string;
+  /** Bottom to top. Two or more colours make the bloom a gradient of its own. */
+  bloomColors: readonly string[] | null;
   radius: number;
 }) {
   const bloom = useAnimatedStyle(() => {
@@ -649,6 +689,20 @@ function AmbientWave({
     const e = clamp01(Math.max(FLOOR, engine.energy.value));
     return { opacity: 0.12 + 0.5 * e };
   });
+
+  /*
+   * The bloom fades in from nothing at the top whatever it is made of, so a
+   * supplied palette is ramped rather than used flat — a gradient that starts
+   * at full strength has a visible edge across the middle of the screen.
+   */
+  const ramp: string[] = bloomColors?.length
+    ? [
+        withAlpha(bloomColors[0]!, 0),
+        ...bloomColors.map((stop, index) =>
+          withAlpha(stop, 0.16 + (0.34 * index) / Math.max(1, bloomColors.length - 1))
+        ),
+      ]
+    : [withAlpha(color, 0), withAlpha(color, 0.16), withAlpha(color, 0.5)];
 
   return (
     <View
@@ -684,8 +738,7 @@ function AmbientWave({
         ]}
       >
         <LinearGradient
-          colors={[withAlpha(color, 0), withAlpha(color, 0.16), withAlpha(color, 0.5)]}
-          locations={[0, 0.55, 1]}
+          colors={ramp as [string, string, ...string[]]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -763,10 +816,28 @@ export interface SoundwaveProps extends Omit<ViewProps, 'children'> {
   /** Multiplier on the wave's own tempo, including how fast history scrolls. */
   speed?: number;
   /**
-   * Ink. Defaults to the theme foreground, or to `--color-info` for `ambient`,
-   * so a wave inverts with the theme and needs no palette of its own.
+   * Ink. Takes a colour — `#f97316`, `rgba(…)` — or a **theme token name**,
+   * `color="--color-info"`, which resolves against the active theme and follows
+   * it into dark mode.
+   *
+   * Left unset, a wave inside a surface that publishes a foreground (a chat
+   * bubble, a button) is drawn in that foreground, and anywhere else in
+   * `--color-foreground` — or `--color-info` for `ambient`.
    */
   color?: string;
+  /**
+   * Colour across the wave instead of one flat ink: two or more colours spread
+   * left to right, or ramped up from the bottom edge for `ambient`. Literal
+   * colours only — for a themed one, resolve the tokens with `useCSSVariable`
+   * and pass the result.
+   */
+  gradient?: readonly string[];
+  /**
+   * Colour of the part of a recording that has not played yet. Defaults to the
+   * ink at low opacity, which is right for most surfaces; set it when you want
+   * the track to read as its own thing. `bars` with `progress`.
+   */
+  trackColor?: string;
   /** Freeze on the current frame. */
   paused?: boolean;
   /** Corner radius `ambient` traces. Match it to the screen it sits on. */
@@ -792,6 +863,8 @@ export function Soundwave({
   sensitivity = 1,
   speed = 1,
   color,
+  gradient,
+  trackColor,
   paused = false,
   radius = 44,
   accessibilityLabel,
@@ -808,6 +881,13 @@ export function Soundwave({
 
   const foreground = useCSSVariable('--color-foreground');
   const info = useCSSVariable('--color-info');
+  /*
+   * A token name is resolved here rather than by the caller, so `color` and
+   * `trackColor` can be written the way the rest of the library is themed —
+   * `--color-info` instead of a hex someone has to keep in step with the theme.
+   */
+  const colorToken = useCSSVariable(isToken(color) ? color : '--color-foreground');
+  const trackToken = useCSSVariable(isToken(trackColor) ? trackColor : '--color-foreground');
   const themed = variant === 'ambient' ? info : foreground;
   /*
    * A wave inside a coloured surface has to be drawn in that surface's
@@ -822,7 +902,9 @@ export function Soundwave({
    */
   const inherited = useIconColor();
   const surface = variant === 'ambient' ? undefined : inherited;
-  const ink = color ?? surface ?? (typeof themed === 'string' ? themed : '#0a0a0a');
+  const explicit = isToken(color) ? asString(colorToken) : color;
+  const ink = explicit ?? surface ?? asString(themed) ?? '#0a0a0a';
+  const track = isToken(trackColor) ? asString(trackToken) : trackColor;
 
   /*
    * A recording drawn from `levels` has no motion in it: every bar comes from
@@ -862,7 +944,23 @@ export function Soundwave({
   // Two Defs in one tree cannot share an id, and a screen can hold more than
   // one wave.
   const gradientId = `panelui-soundwave-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const fadeId = fade ? gradientId : null;
+
+  /*
+   * A gradient and an edge fade are the same object — colour stops across the
+   * width — so one definition serves both, and a wave that needs neither is
+   * painted with a flat colour and no `Defs` at all.
+   */
+  const ramp = gradient?.length ? gradient : null;
+  const needsDefs = fade || (ramp !== null && ramp.length > 1);
+  const paint = needsDefs ? `url(#${gradientId})` : ink;
+  const defs = needsDefs ? (
+    <WaveGradient
+      id={gradientId}
+      colors={ramp ?? [ink]}
+      fade={fade}
+      edge={variant === 'line' ? 0.18 : 0.12}
+    />
+  ) : null;
 
   let content: ReactNode = null;
   if (variant === 'pills') {
@@ -877,7 +975,9 @@ export function Soundwave({
       />
     );
   } else if (variant === 'ambient') {
-    content = <AmbientWave engine={engine} color={ink} radius={radius} />;
+    content = (
+      <AmbientWave engine={engine} color={ink} bloomColors={ramp} radius={radius} />
+    );
   } else if (measured > 0) {
     content =
       variant === 'bars' ? (
@@ -892,8 +992,9 @@ export function Soundwave({
           width={measured}
           centered={centered}
           scrolling={scrolling}
-          color={ink}
-          fadeId={fadeId}
+          stroke={paint}
+          trackStroke={track ?? null}
+          defs={defs}
         />
       ) : (
         <LineWave
@@ -901,8 +1002,8 @@ export function Soundwave({
           width={measured}
           height={box}
           strokeWidth={stroke}
-          color={ink}
-          fadeId={fadeId}
+          stroke={paint}
+          defs={defs}
         />
       );
   }

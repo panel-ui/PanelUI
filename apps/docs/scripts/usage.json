@@ -1875,19 +1875,37 @@
     }
   },
   "typography": {
-    "intro": "Semantic text presets, built on the `Text` primitive.",
-    "usage": "<Typography type=\"h1\">Heading 1</Typography>\n<Typography type=\"body-sm\" muted>Small body text</Typography>\n\n<Typography.Heading type=\"h2\">Section title</Typography.Heading>\n<Typography.Paragraph>Body copy.</Typography.Paragraph>\n<Typography.Code>npm i panelui-native</Typography.Code>",
+    "intro": "Semantic text presets, built on the `Text` primitive.\n\nA preset sets size, weight and tracking together; the marks — `underline`, `italic`, `strike` — and `weight`, `align` and `transform` layer on top of whichever preset is in force. They are props rather than class names so a screen never has to know which utilities add up to \"a bolded lead paragraph\".",
+    "usage": "<Typography type=\"h1\">Heading 1</Typography>\n<Typography type=\"body-sm\" muted>Small body text</Typography>\n<Typography underline>Terms of service</Typography>\n\n<Typography.Heading type=\"h2\">Section title</Typography.Heading>\n<Typography.Paragraph>Body copy.</Typography.Paragraph>\n<Typography.Code>npm i panelui-native</Typography.Code>",
     "parts": {
       "Heading": "Heading text, wired up with the matching accessibility heading level.",
-      "Paragraph": "Body copy.",
-      "Code": "Inline code on a muted surface."
+      "Paragraph": "Body copy, at any of the body presets.",
+      "Code": "Inline code on a muted surface.",
+      "Blockquote": "A quotation, marked by a rule down its leading edge.",
+      "List": "A bulleted or numbered list. Draws the markers React Native does not have.",
+      "ListItem": "One line of a list. The marker beside it belongs to the list."
     },
-    "anatomy": "<Typography type=\"h1\">…</Typography>\n\n<Typography.Heading type=\"h2\">…</Typography.Heading>\n<Typography.Paragraph>…</Typography.Paragraph>\n<Typography.Code>…</Typography.Code>",
+    "anatomy": "<Typography type=\"h1\">…</Typography>\n\n<Typography.Heading type=\"h2\">…</Typography.Heading>\n<Typography.Paragraph>…</Typography.Paragraph>\n<Typography.Code>…</Typography.Code>\n<Typography.Blockquote>…</Typography.Blockquote>\n\n<Typography.List>\n  <Typography.ListItem>…</Typography.ListItem>\n</Typography.List>",
     "examples": [
       {
         "title": "Headings and body",
-        "description": "The type scale in one place, so headings stay consistent instead of being rebuilt from size and weight classes.",
-        "code": "<Typography.Heading type=\"h1\">Ship it</Typography.Heading>\n<Typography.Heading type=\"h3\">Getting started</Typography.Heading>\n\n<Typography.Paragraph>\n  Body copy at the default size.\n</Typography.Paragraph>\n\n<Typography.Paragraph type=\"body-sm\" muted>\n  Secondary copy, one step down and muted.\n</Typography.Paragraph>"
+        "description": "The type scale in one place, so headings stay consistent instead of being rebuilt from size and weight classes. `lead` is the sentence under a heading; `large` and `small` are the two steps either side of body.",
+        "code": "<Typography.Heading type=\"h1\">Ship it</Typography.Heading>\n\n<Typography.Paragraph type=\"lead\">\n  Everything you need to build a screen, and nothing you have to style twice.\n</Typography.Paragraph>\n\n<Typography.Paragraph>\n  Body copy at the default size.\n</Typography.Paragraph>\n\n<Typography.Paragraph type=\"small\" muted>\n  Updated 3 minutes ago\n</Typography.Paragraph>"
+      },
+      {
+        "title": "Marks",
+        "description": "`underline`, `italic` and `strike` are booleans and stack, and `weight` overrides whatever the preset set — which is how a paragraph gets bolded without becoming a heading.",
+        "code": "<Typography underline>Terms of service</Typography>\n<Typography italic>An aside, in passing.</Typography>\n<Typography strike muted>£24.00</Typography>\n<Typography weight=\"bold\">Total due today</Typography>\n\n{/* They stack. */}\n<Typography italic strike muted>Withdrawn</Typography>"
+      },
+      {
+        "title": "Alignment and case",
+        "description": "`transform` changes how the text is drawn, not the string underneath — so a screen reader still announces the original, and a label copied out of the UI is not shouting.",
+        "code": "<Typography align=\"center\">Centred</Typography>\n\n<Typography type=\"body-xs\" transform=\"uppercase\" muted>\n  Section label\n</Typography>"
+      },
+      {
+        "title": "Quotes and lists",
+        "description": "React Native draws no list markers and has no blockquote, so both are built here: a rule down the leading edge for the quote, and a marker beside each row for the list. The bullet is a view rather than the `•` character, whose size and baseline move with the platform font. Both use logical edges, so they mirror under a right-to-left `Direction`.",
+        "code": "<Typography.Blockquote>\n  A component library is a set of decisions you only have to make once.\n</Typography.Blockquote>\n\n<Typography.List>\n  <Typography.ListItem>Runs in Expo Go</Typography.ListItem>\n  <Typography.ListItem>Animates on the UI thread</Typography.ListItem>\n</Typography.List>\n\n<Typography.List ordered>\n  <Typography.ListItem>Install the package</Typography.ListItem>\n  <Typography.ListItem>Import the stylesheet</Typography.ListItem>\n</Typography.List>"
       },
       {
         "title": "Inline and block code",
@@ -1895,8 +1913,12 @@
       }
     ],
     "variantCode": {
-      "type": "<Typography.Heading type=\"h1\">Heading 1</Typography.Heading>\n<Typography.Heading type=\"h4\">Heading 4</Typography.Heading>\n<Typography.Paragraph type=\"body\">Body</Typography.Paragraph>\n<Typography.Paragraph type=\"body-sm\">Body small</Typography.Paragraph>\n<Typography.Code>inline code</Typography.Code>"
-    }
+      "type": "<Typography.Heading type=\"h1\">Heading 1</Typography.Heading>\n<Typography.Heading type=\"h4\">Heading 4</Typography.Heading>\n<Typography.Paragraph type=\"lead\">Lead</Typography.Paragraph>\n<Typography.Paragraph type=\"body\">Body</Typography.Paragraph>\n<Typography.Paragraph type=\"large\">Large</Typography.Paragraph>\n<Typography.Paragraph type=\"small\">Small</Typography.Paragraph>\n<Typography.Blockquote>Quoted</Typography.Blockquote>\n<Typography.Code>inline code</Typography.Code>",
+      "weight": "<Typography weight=\"normal\">Normal</Typography>\n<Typography weight=\"medium\">Medium</Typography>\n<Typography weight=\"semibold\">Semibold</Typography>\n<Typography weight=\"bold\">Bold</Typography>",
+      "align": "<Typography align=\"left\">Left</Typography>\n<Typography align=\"center\">Centre</Typography>\n<Typography align=\"right\">Right</Typography>",
+      "transform": "<Typography transform=\"uppercase\">shouted</Typography>\n<Typography transform=\"lowercase\">Quietened</Typography>\n<Typography transform=\"capitalize\">title case</Typography>"
+    },
+    "notes": "`weight`, `align`, `transform` and the marks apply to every preset and to every part — a heading, a list item and a blockquote all take them.\n\n`Typography.List` draws its own markers because React Native has none. It reads its children to number them, so an ordered list counts correctly however the items were generated, and the marker is a view rather than the `•` character — that character's size and baseline shift with the platform font, and a view does not."
   },
   "thinking-orb": {
     "intro": "A spinner says “busy”. This says *which kind of busy*: particles running tilted orbits for work in flight, a scan meridian sweeping a globe for a search, bands that scramble and click back for a solve. Six states, each a distinct silhouette in motion, so a glance is enough.",
@@ -1955,6 +1977,7 @@
     "usage": "<Soundwave variant=\"pills\" state=\"listening\" level={level} />",
     "extraImports": [
       "Card",
+      "Message",
       "MicIcon",
       "Text"
     ],
@@ -1970,6 +1993,11 @@
         "code": "<Card>\n  <Card.Content className=\"flex-row items-center gap-3 p-4\">\n    <MicIcon size={18} />\n    <View className=\"flex-1\">\n      <Soundwave\n        variant=\"bars\"\n        mode=\"scrolling\"\n        centered={false}\n        bars={28}\n        barWidth={5}\n        height={40}\n        level={level}\n      />\n    </View>\n    <Text size=\"sm\" muted>0:12</Text>\n  </Card.Content>\n</Card>"
       },
       {
+        "title": "A voice note",
+        "description": "`levels` is the shape of a finished recording — collect the metering while recording and store the numbers beside the file. Supplying it draws the wave still rather than animated, and stops the engine entirely, so a transcript of twenty notes runs no animation at all until one is played. `progress` is the playhead: bars behind it keep full ink and the rest are dimmed.",
+        "code": "const player = useAudioPlayer(note.uri);\nconst status = useAudioPlayerStatus(player);\nconst progress = status.duration ? status.currentTime / status.duration : 0;\n\n<Message align=\"end\">\n  <Message.Content>\n    <Message.Bubble>\n      <View className=\"w-64 flex-row items-center gap-3\">\n        <Pressable onPress={() => player.play()}>\n          <PlayIcon size={16} />\n        </Pressable>\n\n        <View className=\"flex-1\">\n          <Soundwave\n            variant=\"bars\"\n            levels={note.levels}\n            progress={progress}\n            bars={40}\n            barWidth={2}\n            height={28}\n          />\n        </View>\n\n        <Text size=\"xs\" muted>0:12</Text>\n      </View>\n    </Message.Bubble>\n  </Message.Content>\n</Message>"
+      },
+      {
         "title": "Real frequency bands",
         "description": "If your app already runs an analysis, hand the bands over directly with `levels` and `bars` in `static` mode draws them instead of synthesising a shape. They are resampled to the bar count, so the two numbers do not have to match.",
         "code": "<Soundwave variant=\"bars\" levels={bands} bars={24} />"
@@ -1983,6 +2011,11 @@
         "title": "Ambient, over a whole screen",
         "description": "`ambient` positions itself absolutely and takes no touches, so it goes behind a screen's content rather than wrapping it. `radius` traces the screen's own corners. It takes its colour from `--color-info` rather than the foreground, since a bloom in the text colour reads as a shadow.",
         "code": "<View className=\"flex-1\">\n  <Soundwave variant=\"ambient\" state=\"listening\" level={level} radius={40} />\n\n  <View className=\"flex-1 items-center justify-center\">\n    <Text size=\"xl\">Start chatting anytime</Text>\n  </View>\n</View>"
+      },
+      {
+        "title": "Colour",
+        "description": "`color` takes a literal colour or a **theme token name**, which resolves against the active theme and follows it into dark mode. `gradient` paints across the wave instead of one flat ink — left to right for `bars` and `line`, up from the bottom edge for `ambient`. `trackColor` sets the part of a recording that has not played yet, which otherwise draws as the ink turned down.",
+        "code": "{/* Follows the theme. */}\n<Soundwave variant=\"bars\" color=\"--color-info\" />\n\n{/* Or a colour of your own. */}\n<Soundwave variant=\"bars\" color=\"#f97316\" />\n\n{/* Across the wave. */}\n<Soundwave variant=\"line\" gradient={['#6366f1', '#ec4899', '#f59e0b']} />\n\n{/* Played and unplayed, separately. */}\n<Soundwave\n  variant=\"bars\"\n  levels={note.levels}\n  progress={progress}\n  color=\"--color-success\"\n  trackColor=\"--color-muted\"\n/>"
       }
     ],
     "versions": [
@@ -2005,8 +2038,18 @@
         "title": "Ambient glow",
         "description": "A bloom rising off the bottom edge and a rim of light around the rest, both breathing on the level — a glow that only changes opacity reads as a screen dimming, one that also grows reads as something in the room getting louder.",
         "code": "<Soundwave variant=\"ambient\" state=\"listening\" level={level} radius={40} />"
+      },
+      {
+        "title": "Voice notes",
+        "description": "Recorded waveforms in bubbles, filling as they play. Each note stores forty numbers rather than the audio, so the wave draws instantly on scroll — decoding a file to work out a bar chart is work no phone should repeat.",
+        "code": "<Soundwave\n  variant=\"bars\"\n  levels={note.levels}\n  progress={progress}\n  bars={40}\n  barWidth={2}\n  height={28}\n/>"
+      },
+      {
+        "title": "Recording composer",
+        "description": "A composer that turns into a recorder over a live transcript: the last few seconds slide past in `scrolling` mode while a timer runs, cancel throws the recording away, and send appends it to the thread as a note.",
+        "code": "<Soundwave\n  variant=\"bars\"\n  mode=\"scrolling\"\n  level={level}\n  bars={32}\n  barWidth={3}\n  height={36}\n/>"
       }
     ],
-    "notes": "**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them.\n\nLevels are smoothed with a fast attack and a slow release, which is what makes a meter read as a meter — it snaps up on a syllable and falls back gently instead of chattering around every sample. `sensitivity` multiplies the incoming value before it is clamped, for a quiet source.\n\n`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. Both measure their own width, so they need a parent with one.\n\n`paused` and the system's reduced-motion setting both hold a representative frame rather than clearing to a flat line: a stopped wave is not an empty one."
+    "notes": "**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them. There is a full walkthrough in [Voice](/docs/ai/voice) — metering, an assistant loop, and voice notes.\n\nLevels are smoothed with a fast attack and a slow release, which is what makes a meter read as a meter — it snaps up on a syllable and falls back gently instead of chattering around every sample. `sensitivity` multiplies the incoming value before it is clamped, for a quiet source.\n\n**Ink follows the surface.** A wave inside something that publishes a foreground — a chat bubble, a button — is drawn in that foreground rather than the page's, because a sent bubble is painted in the primary colour and in most themes the primary colour *is* the text colour. `ambient` opts out: it is a glow behind a screen, not ink on a surface.\n\nAnything above that is a prop: `color` (a colour or a theme token name), `gradient` across the wave, and `trackColor` for the unplayed part of a recording. Only `gradient` needs literal colours — resolve tokens with `useCSSVariable` if you want a themed one.\n\n`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. With `progress` it is two: one for the played part, one for the rest. Both measure their own width, so they need a parent with one.\n\n`paused` and the system's reduced-motion setting both hold a representative frame rather than clearing to a flat line: a stopped wave is not an empty one."
   }
 }

@@ -70,6 +70,45 @@ Every frame stays mounted and its opacity is switched, rather than one image who
 />
 ```
 
+## Versions
+
+### Parallax
+
+The image drifts against the scroll inside a frame that stays put. It is drawn taller than the frame so the drift never exposes an edge.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="parallax" />
+```
+
+### Zoom
+
+It settles from slightly oversized to its natural size as the frame crosses the viewport.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="zoom" />
+```
+
+### Reveal
+
+A wipe uncovers it from the bottom edge up. A cover that retreats rather than a height that grows — animating a height relayouts the image inside it every frame.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="reveal" />
+```
+
+### Sequence
+
+The scroll position picks the frame, so the thumb scrubs the animation. Every frame stays mounted and switches opacity; swapping one image's source would cross into JS and then wait on a decode.
+
+```tsx
+<ScrollCanvas
+  effect="sequence"
+  sources={frames}
+  start={0.95}
+  end={0.1}
+/>
+```
+
 ## API Reference
 
 ### ScrollCanvas

@@ -138,6 +138,128 @@ Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits whe
 </LineChart>
 ```
 
+## Versions
+
+### Basic
+
+Two series sharing one axis. `curve="linear"` joins the points straight rather than easing between them, which is the honest choice when the readings are discrete.
+
+```tsx
+<LineChart data={sessions} xDataKey="month" curve="linear" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Line dataKey="organic" colorIndex={1} />
+  <LineChart.Line dataKey="paid" colorIndex={2} />
+  <LineChart.XAxis ticks={5} />
+  <LineChart.Tooltip formatValue={(v) => v.toLocaleString()} />
+</LineChart>
+```
+
+### With dots
+
+`showMarkers` puts a dot at every point. For a short series where each reading is a fact worth pointing at — on a hundred points it is noise.
+
+```tsx
+<LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Line dataKey="revenue" showMarkers />
+  <LineChart.XAxis ticks={5} />
+  <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />
+</LineChart>
+```
+
+### Crosshair
+
+Drag across the chart and a label rides the crosshair. The nearest index is resolved on the UI thread and only crosses into JS when it changes, so a drag costs a handful of re-renders rather than one per frame.
+
+```tsx
+<LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Area dataKey="revenue" />
+  <LineChart.Line dataKey="revenue" />
+  <LineChart.XAxis ticks={5} />
+  <LineChart.Tooltip formatValue={(v) => `$${v.toLocaleString()}`} />
+</LineChart>
+```
+
+### Animated line
+
+The reveal plays once on mount; `replay()` on the chart ref runs it again. A data change redraws without replaying — repeating the reveal on every refresh turns an update into an animation.
+
+```tsx
+const chart = useRef<LineChartHandle>(null);
+
+<Button variant="ghost" size="sm" onPress={() => chart.current?.replay()}>
+  Replay
+</Button>
+
+<LineChart ref={chart} data={revenue} xDataKey="month">
+  <LineChart.Grid />
+  <LineChart.Area dataKey="revenue" />
+  <LineChart.Line dataKey="revenue" />
+</LineChart>
+```
+
+### Finance
+
+A balance, a delta and a range selector. Switching the range tweens the y-domain rather than swapping the path, so a series that grows is redrawn against a moving axis instead of jumping to a new shape.
+
+```tsx
+const [range, setRange] = useState("1M");
+
+<LineChart data={RANGES[range].data} xDataKey="t" aspectRatio={1.9}>
+  <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
+  <LineChart.Area dataKey="v" />
+  <LineChart.Line dataKey="v" />
+</LineChart>
+
+<Tabs value={range} onValueChange={setRange}>
+  <Tabs.List>
+    {Object.keys(RANGES).map((key) => (
+      <Tabs.Trigger key={key} value={key}>{key}</Tabs.Trigger>
+    ))}
+  </Tabs.List>
+</Tabs>
+```
+
+### Dashed comparison
+
+An actual against a target. The two are told apart by *shape* as well as colour, so the chart still reads for a colour-blind reader and in a screenshot printed in grey.
+
+```tsx
+<LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Line dataKey="revenue" colorIndex={1} />
+  <LineChart.Line dataKey="target" colorIndex={2} dashArray="6,5" />
+  <LineChart.XAxis ticks={5} />
+</LineChart>
+```
+
+### Multi-line
+
+Four series across the chart token ramp. They share one y-domain, so they stay comparable — a per-series scale makes two lines look alike when they are orders of magnitude apart.
+
+```tsx
+<LineChart data={traffic} xDataKey="month" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Line dataKey="organic" colorIndex={1} />
+  <LineChart.Line dataKey="paid" colorIndex={2} />
+  <LineChart.Line dataKey="referral" colorIndex={3} />
+  <LineChart.Line dataKey="social" colorIndex={4} />
+  <LineChart.XAxis ticks={5} />
+</LineChart>
+```
+
+### KPI sparklines
+
+`compact` drops the axis padding so the line reaches the edges. Beside a headline number the shape is the whole point — a grid and an axis around it are furniture.
+
+```tsx
+<LineChart data={spark} xDataKey="i" aspectRatio={3} compact>
+  <LineChart.Area dataKey="v" colorIndex={1} />
+  <LineChart.Line dataKey="v" colorIndex={1} />
+</LineChart>
+```
+
 ## API Reference
 
 ### LineChart

@@ -88,6 +88,56 @@ const progress = useSharedValue(0);
 <ScrollText progress={progress}>Driven by hand.</ScrollText>
 ```
 
+## Versions
+
+### Colour
+
+Each word crossfades from the muted token to the foreground as the line passes. The default, and the one that survives being used on a whole paragraph.
+
+```tsx
+<ScrollText effect="color" size="2xl" weight="semibold">
+  Every control ships with its accessibility wiring already done.
+</ScrollText>
+```
+
+### Fade
+
+Words come up from nearly transparent — not fully, because a word that vanishes takes the line's shape with it and the paragraph reflows as you scroll.
+
+```tsx
+<ScrollText effect="fade" size="2xl" weight="semibold">…</ScrollText>
+```
+
+### Rise
+
+Words lift into place. This is the one that lays out as a wrapping row rather than as nested text, because a transform needs a view — it buys the motion and costs real line-breaking.
+
+```tsx
+<ScrollText effect="rise" size="2xl" weight="semibold">…</ScrollText>
+```
+
+### Highlight
+
+A background sweeps behind the line as it resolves, using the accent token.
+
+```tsx
+<ScrollText effect="highlight" size="2xl" weight="semibold">…</ScrollText>
+```
+
+### Splitting and stagger
+
+`by="character"` reads as typing rather than as reading, and wants a smaller stagger since there are far more tokens. A wide stagger brightens the whole line together instead of running an edge along it.
+
+```tsx
+<ScrollText by="character" stagger={0.12} size="3xl" weight="bold">
+  One character at a time.
+</ScrollText>
+
+<ScrollText stagger={0.9} size="3xl" weight="bold">
+  And one where the whole line arrives at once.
+</ScrollText>
+```
+
 ## API Reference
 
 ### ScrollText

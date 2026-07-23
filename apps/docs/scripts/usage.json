@@ -545,6 +545,28 @@
         "code": "const [active, setActive] = useState(null);\n\n<Card.Header>\n  <Card.Description>\n    {active ? `${active.count} on ${active.date?.toDateString()}` : 'Drag to read a day.'}\n  </Card.Description>\n</Card.Header>\n\n<HeatmapChart data={weeks} onActiveCellChange={setActive}>\n  <HeatmapChart.Cells />\n  <HeatmapChart.Tooltip />\n</HeatmapChart>"
       }
     ],
+    "versions": [
+      {
+        "title": "Contribution grid",
+        "description": "A full year with a readout that follows the finger. Fifty-three weeks do not fit across a phone, so the chart is `fluid` inside a horizontal `ScrollView` and the legend sits outside it, at the card's width.",
+        "code": "<ScrollView horizontal showsHorizontalScrollIndicator={false}>\n  <HeatmapChart data={weeks} weekStartDay={1} binSize={13} onActiveCellChange={setActive}>\n    <HeatmapChart.XAxis />\n    <HeatmapChart.YAxis />\n    <HeatmapChart.Cells />\n    <HeatmapChart.Tooltip />\n  </HeatmapChart>\n</ScrollView>"
+      },
+      {
+        "title": "Filling the width",
+        "description": "For a short range, `fill` divides the available width between the columns rather than drawing them at a fixed size, so the chart always meets both edges of its card.",
+        "code": "<HeatmapChart data={weeks.slice(-13)} layout=\"fill\" weekStartDay={1} gap={4}>\n  <HeatmapChart.XAxis />\n  <HeatmapChart.YAxis />\n  <HeatmapChart.Cells cornerRadius={3} />\n  <HeatmapChart.Tooltip />\n  <HeatmapChart.Legend />\n</HeatmapChart>"
+      },
+      {
+        "title": "Quarters",
+        "description": "A rule every thirteen columns, and the ramp derived from a colour of your own instead of the chart token. `tickFilter=\"all\"` labels every row, which a narrower axis has room for once the labels are initials.",
+        "code": "<HeatmapChart data={weeks} weekStartDay={1} binSize={11} color={success}>\n  <HeatmapChart.XAxis />\n  <HeatmapChart.YAxis tickFilter=\"all\" labelFormat=\"initial\" width={16} />\n  <HeatmapChart.Separator every=\"quarter\" dashArray=\"2,3\" />\n  <HeatmapChart.Cells />\n  <HeatmapChart.Tooltip />\n</HeatmapChart>"
+      },
+      {
+        "title": "Uptime strip",
+        "description": "`rows={1}` turns the calendar into a band, and nothing else changes. The same grid does an hourly chart at `rows={24}` with the hour names passed to the axis.",
+        "code": "<HeatmapChart data={days} rows={1} layout=\"fill\" gap={3}>\n  <HeatmapChart.Cells />\n  <HeatmapChart.Tooltip formatLabel={(cell) => `${cell.count} incidents`} />\n</HeatmapChart>"
+      }
+    ],
     "notes": "### The colour ramp\n\nOne colour at five opacities, not five colours. A heatmap reads as *more* and *less* of one thing, and five distinct hues read as five different things — which is what the `--color-chart-*` tokens are for, and why only the first of them is used here. The base is `--color-chart-1`, so the ramp follows the active theme; `color` swaps the base for one of your own, and `levelColors` replaces all five outright (the opacities are dropped then, since dimming a colour someone chose on purpose is not a ramp).\n\nThe four thresholds are the data's own quartiles by default, so a chart of single-digit counts and a chart of thousands both use the whole ramp. Zero is its own level and is left out of the quartiles — counting it drags every threshold to nothing on a sparse chart. Pass `levels` to fix them yourself.\n\n### Layout\n\nThe parts sit in a real layout rather than stacking over the plot: the labels are *beside* and *above* the grid and the legend is below it, so they take up room and the grid is sized with them accounted for. Only the cells and the rules are SVG — every label is a React Native view, because SVG text ignores the platform's text scaling and the theme's font.\n\n### The reveal\n\nColumns arrive left to right on mount, drawn by one clip rectangle wiping across the grid rather than by an animation per column. The effect is the same and it costs one animated value instead of fifty-two. It plays once; a data change redraws without replaying it, because repeating it turns a refresh into an animation. `useReducedMotion` skips it."
   },
   "input": {
@@ -581,6 +603,18 @@
         "title": "Styling the field and the container separately",
         "description": "`className` goes on the text field; `containerClassName` goes on the wrapper that holds the label, field and message.",
         "code": "<Input\n  containerClassName=\"flex-1\"\n  className=\"h-12 rounded-full px-4\"\n  placeholder=\"Search components\"\n/>"
+      }
+    ],
+    "versions": [
+      {
+        "title": "Lifting in a scroll view",
+        "description": "A field partway down a long form. Focus it and it lifts by exactly its overlap with the keyboard; scroll and it holds its place between the fields around it, because the overlap is re-read every frame rather than captured once at focus.",
+        "code": "<ScrollView keyboardShouldPersistTaps=\"handled\">\n  <Input label=\"From\" placeholder=\"you@example.com\" />\n  <Input label=\"Subject\" placeholder=\"An ordinary field\" />\n  <Input\n    avoidKeyboard\n    label=\"Comment\"\n    placeholder=\"Say something…\"\n    multiline\n  />\n  <Input label=\"Signature\" placeholder=\"Sent from my phone\" />\n</ScrollView>"
+      },
+      {
+        "title": "Docked composer",
+        "description": "A bar pinned above the home indicator that rides the keyboard up and back down. Nothing is measured — `dock` travels by the keyboard height less the inset the bar already sits above.",
+        "code": "const insets = useSafeAreaInsets();\n\n<KeyboardAvoider\n  mode=\"dock\"\n  bottomInset={insets.bottom}\n  className=\"absolute left-0 right-0 px-5\"\n  style={{ bottom: insets.bottom + 16 }}\n>\n  <View className=\"flex-row items-center gap-2 rounded-full border border-border bg-surface px-4\">\n    <Input\n      placeholder=\"Message\"\n      className=\"flex-1 border-0 bg-transparent px-0\"\n      containerClassName=\"flex-1\"\n    />\n    <SendIcon size={18} />\n  </View>\n</KeyboardAvoider>"
       }
     ],
     "hideVariants": [
@@ -761,6 +795,48 @@
         "code": "<LineChart data={data} status={status} xDataKey=\"month\">\n  <LineChart.Grid />\n  <LineChart.Skeleton />\n  <LineChart.Area dataKey=\"revenue\" />\n  <LineChart.Line dataKey=\"revenue\" />\n  <LineChart.XAxis />\n  <LineChart.Tooltip />\n</LineChart>"
       }
     ],
+    "versions": [
+      {
+        "title": "Basic",
+        "description": "Two series sharing one axis. `curve=\"linear\"` joins the points straight rather than easing between them, which is the honest choice when the readings are discrete.",
+        "code": "<LineChart data={sessions} xDataKey=\"month\" curve=\"linear\" aspectRatio={1.7}>\n  <LineChart.Grid />\n  <LineChart.Line dataKey=\"organic\" colorIndex={1} />\n  <LineChart.Line dataKey=\"paid\" colorIndex={2} />\n  <LineChart.XAxis ticks={5} />\n  <LineChart.Tooltip formatValue={(v) => v.toLocaleString()} />\n</LineChart>"
+      },
+      {
+        "title": "With dots",
+        "description": "`showMarkers` puts a dot at every point. For a short series where each reading is a fact worth pointing at — on a hundred points it is noise.",
+        "code": "<LineChart data={revenue} xDataKey=\"month\" aspectRatio={1.7}>\n  <LineChart.Grid />\n  <LineChart.Line dataKey=\"revenue\" showMarkers />\n  <LineChart.XAxis ticks={5} />\n  <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />\n</LineChart>"
+      },
+      {
+        "title": "Crosshair",
+        "description": "Drag across the chart and a label rides the crosshair. The nearest index is resolved on the UI thread and only crosses into JS when it changes, so a drag costs a handful of re-renders rather than one per frame.",
+        "code": "<LineChart data={revenue} xDataKey=\"month\" aspectRatio={1.7}>\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"revenue\" />\n  <LineChart.Line dataKey=\"revenue\" />\n  <LineChart.XAxis ticks={5} />\n  <LineChart.Tooltip formatValue={(v) => `$${v.toLocaleString()}`} />\n</LineChart>"
+      },
+      {
+        "title": "Animated line",
+        "description": "The reveal plays once on mount; `replay()` on the chart ref runs it again. A data change redraws without replaying — repeating the reveal on every refresh turns an update into an animation.",
+        "code": "const chart = useRef<LineChartHandle>(null);\n\n<Button variant=\"ghost\" size=\"sm\" onPress={() => chart.current?.replay()}>\n  Replay\n</Button>\n\n<LineChart ref={chart} data={revenue} xDataKey=\"month\">\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"revenue\" />\n  <LineChart.Line dataKey=\"revenue\" />\n</LineChart>"
+      },
+      {
+        "title": "Finance",
+        "description": "A balance, a delta and a range selector. Switching the range tweens the y-domain rather than swapping the path, so a series that grows is redrawn against a moving axis instead of jumping to a new shape.",
+        "code": "const [range, setRange] = useState(\"1M\");\n\n<LineChart data={RANGES[range].data} xDataKey=\"t\" aspectRatio={1.9}>\n  <LineChart.Grid rows={3} dashArray=\"\" opacity={0.4} />\n  <LineChart.Area dataKey=\"v\" />\n  <LineChart.Line dataKey=\"v\" />\n</LineChart>\n\n<Tabs value={range} onValueChange={setRange}>\n  <Tabs.List>\n    {Object.keys(RANGES).map((key) => (\n      <Tabs.Trigger key={key} value={key}>{key}</Tabs.Trigger>\n    ))}\n  </Tabs.List>\n</Tabs>"
+      },
+      {
+        "title": "Dashed comparison",
+        "description": "An actual against a target. The two are told apart by *shape* as well as colour, so the chart still reads for a colour-blind reader and in a screenshot printed in grey.",
+        "code": "<LineChart data={revenue} xDataKey=\"month\" aspectRatio={1.7}>\n  <LineChart.Grid />\n  <LineChart.Line dataKey=\"revenue\" colorIndex={1} />\n  <LineChart.Line dataKey=\"target\" colorIndex={2} dashArray=\"6,5\" />\n  <LineChart.XAxis ticks={5} />\n</LineChart>"
+      },
+      {
+        "title": "Multi-line",
+        "description": "Four series across the chart token ramp. They share one y-domain, so they stay comparable — a per-series scale makes two lines look alike when they are orders of magnitude apart.",
+        "code": "<LineChart data={traffic} xDataKey=\"month\" aspectRatio={1.7}>\n  <LineChart.Grid />\n  <LineChart.Line dataKey=\"organic\" colorIndex={1} />\n  <LineChart.Line dataKey=\"paid\" colorIndex={2} />\n  <LineChart.Line dataKey=\"referral\" colorIndex={3} />\n  <LineChart.Line dataKey=\"social\" colorIndex={4} />\n  <LineChart.XAxis ticks={5} />\n</LineChart>"
+      },
+      {
+        "title": "KPI sparklines",
+        "description": "`compact` drops the axis padding so the line reaches the edges. Beside a headline number the shape is the whole point — a grid and an axis around it are furniture.",
+        "code": "<LineChart data={spark} xDataKey=\"i\" aspectRatio={3} compact>\n  <LineChart.Area dataKey=\"v\" colorIndex={1} />\n  <LineChart.Line dataKey=\"v\" colorIndex={1} />\n</LineChart>"
+      }
+    ],
     "notes": "### The two layers\n\nThe geometry is SVG and anything with text or a gesture on it is a React Native view laid over the top. The parts sort themselves into the right layer, so composition stays a flat list of children — but it is why `LineChart.XAxis` renders real text rather than SVG text. SVG text ignores the platform's text scaling and the theme's font, and a gesture handler cannot be attached to an SVG node at all.\n\n### Three animations, three reasons\n\n**The reveal** uncovers the plot left to right on mount, with everything inside sharing one clip — so the line, its fill and its markers arrive together rather than as three separate effects.\n\n**The y-domain** is tweened when the data changes, rather than the path being swapped. A series that grows is redrawn against a moving axis instead of jumping to a new shape. The reveal deliberately does not replay: it happened once, and repeating it on every refresh turns a data update into an animation.\n\n**The crosshair** resolves the nearest index on the UI thread. Only that index crosses back into JS, and only when it changes, so a drag across a hundred points costs a hundred re-renders at most rather than one per frame.\n\nAll three respect the system's reduce-motion setting: the chart renders at its final state instead.\n\n### Reading out the active point\n\n`onActiveIndexChange` fires as the crosshair moves between points, and with `-1`/`null` when the finger lifts. That is the one to use for a readout in the card header, because the header is outside the chart and a hook cannot reach up out of the subtree it is called in. `useLineChart` is for something rendered *inside* the chart, which is the rarer case.\n\n### The crosshair label\n\n`LineChart.Tooltip` floats a small label at the crosshair by default, showing the x-value and each series' value at that point. Turn it off with `showLabel={false}`, or format its numbers with `formatValue`. For a readout in the card *header* instead — outside the plot, where it does not cover the line — use `onActiveIndexChange` on the root.\n\n### The curve\n\n`monotone` is the default and is the right one for a time series. A plain cubic spline overshoots between points, so a series that never goes below zero draws a dip under the axis between two low values — a shape that is not in the data. Use `curve=\"linear\"` when the points are exact readings and the eye should not be given anything between them.\n\n### Sizing\n\nThe chart fills its parent's width and takes its height from `aspectRatio`. Give it a wider ratio for a card and a squarer one for a narrow column; do not set a height directly, as the aspect ratio is what keeps the plot geometry stable while the layout settles."
   },
   "marker": {
@@ -906,6 +982,23 @@
         "code": "function JumpToLatest() {\n  const { scrollToEnd, scrollToMessage } = useMessageScroller();\n  const { currentAnchorId, atEnd } = useMessageScrollerVisibility();\n\n  if (atEnd) return null;\n\n  return (\n    <Button size=\"sm\" onPress={() => scrollToEnd()}>\n      Jump to latest\n    </Button>\n  );\n}"
       }
     ],
+    "versions": [
+      {
+        "title": "Following a streamed reply",
+        "description": "`autoScroll` pins to the bottom while a reply streams — but only while you are already there. Scroll up mid-stream and it stops chasing, because a transcript that drags you back down while you are reading is worse than one that does not follow at all.",
+        "code": "<MessageScroller autoScroll className=\"flex-1\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      {turns.map((turn) => (\n        <MessageScroller.Item key={turn.id}>\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button />\n</MessageScroller>"
+      },
+      {
+        "title": "Loading history",
+        "description": "Older turns are prepended. The message being read stays exactly where it is — content added above you must not move you, which is the whole difficulty of an infinite transcript.",
+        "code": "<MessageScroller className=\"flex-1\" defaultScrollPosition=\"end\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      <Button variant=\"ghost\" size=\"sm\" onPress={loadOlder}>\n        Load older\n      </Button>\n      {turns.map((turn) => (\n        <MessageScroller.Item key={turn.id}>\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button />\n</MessageScroller>"
+      },
+      {
+        "title": "Opening a saved thread",
+        "description": "`last-anchor` opens on the last turn that *started* something, rather than at the bottom of the reply to it. Reopening a thread at the end of a long answer shows you the end of an answer to a question you can no longer see.",
+        "code": "<MessageScroller className=\"flex-1\" defaultScrollPosition=\"last-anchor\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      <Marker variant=\"separator\">\n        <Marker.Content>Yesterday</Marker.Content>\n      </Marker>\n      {turns.map((turn) => (\n        <MessageScroller.Item key={turn.id} anchor={turn.role === \"user\"}>\n          <Turn turn={turn} />\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button target=\"start\" />\n</MessageScroller>"
+      }
+    ],
     "notes": "**It needs a bounded height.** From `flex-1` in a column, or an explicit one. Given an unbounded parent it grows to fit its content and never scrolls at all.\n\n**Follow-output is conditional, not automatic.** `autoScroll` means *follow the bottom while the reader is at the bottom* — never *drag them to the bottom*. Being pulled away from a message you were half way through reading is the behaviour this exists to avoid.\n\n**The scroll position is not React state.** The at-end test runs per frame on the UI thread and only crosses into JS when the boolean flips, and the button fades from that same shared value. A transcript scrolls constantly; re-rendering on every frame of it would be the most expensive thing on the screen.\n\n**Every turn needs a stable `messageId`.** It is the key for the offset the component measures, so an id derived from the array index breaks scrolling the moment anything is prepended.\n\n**The four scroll events are owned.** `onScroll`, `onScrollEndDrag`, `onMomentumScrollEnd` and `onContentSizeChange` are taken off `MessageScroller.Viewport`'s props type. They are not decoration on a scroll view — they *are* the behaviour, and a call site that quietly replaced one would look like a bug in the scrolling."
   },
   "popover": {
@@ -1049,6 +1142,28 @@
         "code": "<ScrollCanvas source={{ uri }} aspectRatio={1} distance={1.6} />\n\n<ScrollCanvas\n  source={{ uri }}\n  aspectRatio={21 / 9}\n  className=\"rounded-none\"\n/>"
       }
     ],
+    "versions": [
+      {
+        "title": "Parallax",
+        "description": "The image drifts against the scroll inside a frame that stays put. It is drawn taller than the frame so the drift never exposes an edge.",
+        "code": "<ScrollCanvas source={{ uri }} effect=\"parallax\" />"
+      },
+      {
+        "title": "Zoom",
+        "description": "It settles from slightly oversized to its natural size as the frame crosses the viewport.",
+        "code": "<ScrollCanvas source={{ uri }} effect=\"zoom\" />"
+      },
+      {
+        "title": "Reveal",
+        "description": "A wipe uncovers it from the bottom edge up. A cover that retreats rather than a height that grows — animating a height relayouts the image inside it every frame.",
+        "code": "<ScrollCanvas source={{ uri }} effect=\"reveal\" />"
+      },
+      {
+        "title": "Sequence",
+        "description": "The scroll position picks the frame, so the thumb scrubs the animation. Every frame stays mounted and switches opacity; swapping one image's source would cross into JS and then wait on a decode.",
+        "code": "<ScrollCanvas\n  effect=\"sequence\"\n  sources={frames}\n  start={0.95}\n  end={0.1}\n/>"
+      }
+    ],
     "notes": "The frame clips, so the image can be oversized and moved without disturbing anything around it. `reveal` is a cover that retreats rather than a height that grows, because animating a height relayouts the image inside it every frame — and it is a wipe rather than a fade so the frame keeps its shape while it fills.\n\n“Canvas” here is the frame the pictures move behind, not a drawing surface: nothing is rasterised and there is no `<canvas>` involved.\n\nUnder `useReducedMotion`, or with `enabled={false}`, the image renders plainly at rest."
   },
   "scroll-fade": {
@@ -1120,6 +1235,33 @@
         "code": "const progress = useSharedValue(0);\n\n<ScrollText progress={progress}>Driven by hand.</ScrollText>"
       }
     ],
+    "versions": [
+      {
+        "title": "Colour",
+        "description": "Each word crossfades from the muted token to the foreground as the line passes. The default, and the one that survives being used on a whole paragraph.",
+        "code": "<ScrollText effect=\"color\" size=\"2xl\" weight=\"semibold\">\n  Every control ships with its accessibility wiring already done.\n</ScrollText>"
+      },
+      {
+        "title": "Fade",
+        "description": "Words come up from nearly transparent — not fully, because a word that vanishes takes the line's shape with it and the paragraph reflows as you scroll.",
+        "code": "<ScrollText effect=\"fade\" size=\"2xl\" weight=\"semibold\">…</ScrollText>"
+      },
+      {
+        "title": "Rise",
+        "description": "Words lift into place. This is the one that lays out as a wrapping row rather than as nested text, because a transform needs a view — it buys the motion and costs real line-breaking.",
+        "code": "<ScrollText effect=\"rise\" size=\"2xl\" weight=\"semibold\">…</ScrollText>"
+      },
+      {
+        "title": "Highlight",
+        "description": "A background sweeps behind the line as it resolves, using the accent token.",
+        "code": "<ScrollText effect=\"highlight\" size=\"2xl\" weight=\"semibold\">…</ScrollText>"
+      },
+      {
+        "title": "Splitting and stagger",
+        "description": "`by=\"character\"` reads as typing rather than as reading, and wants a smaller stagger since there are far more tokens. A wide stagger brightens the whole line together instead of running an edge along it.",
+        "code": "<ScrollText by=\"character\" stagger={0.12} size=\"3xl\" weight=\"bold\">\n  One character at a time.\n</ScrollText>\n\n<ScrollText stagger={0.9} size=\"3xl\" weight=\"bold\">\n  And one where the whole line arrives at once.\n</ScrollText>"
+      }
+    ],
     "notes": "### Two layouts, and why\n\n`color`, `fade` and `highlight` render the words as nested `Text` inside one parent, which is the only way React Native will break them into real lines. Nested text cannot be transformed, though — a `translateY` on it is simply ignored.\n\nSo `rise` lays the words out as a wrapping row of separate views instead. That buys transforms and costs real line-breaking: words wrap on their own boundaries and the spacing is a margin rather than a space. Worth knowing before reaching for it on a paragraph rather than a heading.\n\n### Measurement\n\nThe block is measured on the UI thread whenever the scroll position changes — not every frame, and not once at layout. Once is wrong the moment anything above it resizes; every frame is a measurement pass for a value that only changes when the scroller moves.\n\n`useReducedMotion` renders the text fully resolved, with no effect at all. So does `enabled={false}` — the text is always readable, which is the one thing an effect on text must never take away."
   },
   "section-rail": {
@@ -1161,6 +1303,28 @@
         "title": "One section per screen",
         "description": "A pager needs no reading line — the active page is the scroll offset over the viewport height — so it drives the rail directly. Size the pages from the scroll view's **measured** height rather than the window's: anything above the pager makes the viewport shorter than the screen, and window-height pages then drift further out of alignment with each snap position until one lands between two and never shows.",
         "code": "const [page, setPage] = useState(0);\nconst [pageHeight, setPageHeight] = useState(0);\nconst scroller = useRef<ScrollView>(null);\n\n<ScrollView\n  ref={scroller}\n  pagingEnabled\n  scrollEventThrottle={16}\n  onLayout={(e) => setPageHeight(e.nativeEvent.layout.height)}\n  onScroll={(e) => {\n    const { contentOffset, layoutMeasurement } = e.nativeEvent;\n    if (!layoutMeasurement.height) return;\n    setPage(Math.round(contentOffset.y / layoutMeasurement.height));\n  }}\n>\n  {SECTIONS.map((s) => (\n    <View key={s.id} style={{ height: pageHeight || undefined }}>\n      {/* …page… */}\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  placement=\"left\"\n  align=\"bottom\"\n  haptics\n  value={SECTIONS[page]?.id}\n  onValueChange={(next) => {\n    const index = SECTIONS.findIndex((s) => s.id === next);\n    if (index < 0 || !pageHeight) return;\n    setPage(index);\n    scroller.current?.scrollTo({ y: index * pageHeight, animated: true });\n  }}\n>\n  {/* …bars and items… */}\n</SectionRail>"
+      }
+    ],
+    "versions": [
+      {
+        "title": "Bottom right",
+        "description": "Out of the corner, clear of the text, with the panel opening upward. The placement most screens want: it is where a thumb already is, and it covers nothing worth reading.",
+        "code": "const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });\n\n<ScrollView ref={sections.ref} {...sections.scrollProps}>\n  {SECTIONS.map((section) => (\n    <View key={section.id} onLayout={sections.measure(section.id)}>\n      …\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  placement=\"right\"\n  align=\"bottom\"\n  haptics\n  value={sections.active}\n  onValueChange={sections.scrollTo}\n>\n  <SectionRail.Trigger>\n    {SECTIONS.map((s) => (\n      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />\n    ))}\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    {SECTIONS.map((s) => (\n      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>\n    ))}\n  </SectionRail.Content>\n</SectionRail>"
+      },
+      {
+        "title": "Bottom left",
+        "description": "The same corner treatment against the other edge — for a screen whose right-hand corner is already spoken for by a compose button.",
+        "code": "const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });\n\n<ScrollView ref={sections.ref} {...sections.scrollProps}>\n  {SECTIONS.map((section) => (\n    <View key={section.id} onLayout={sections.measure(section.id)}>\n      …\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  placement=\"left\"\n  align=\"bottom\"\n  haptics\n  value={sections.active}\n  onValueChange={sections.scrollTo}\n>\n  <SectionRail.Trigger>\n    {SECTIONS.map((s) => (\n      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />\n    ))}\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    {SECTIONS.map((s) => (\n      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>\n    ))}\n  </SectionRail.Content>\n</SectionRail>"
+      },
+      {
+        "title": "Pager",
+        "description": "One section per screen. A pager needs no reading line — the active page *is* the scroll offset over the viewport height — so it drives the rail directly rather than through `useScrollSections`.",
+        "code": "const [page, setPage] = useState(0);\n\n<ScrollView\n  pagingEnabled\n  onScroll={(event) => {\n    const { contentOffset, layoutMeasurement } = event.nativeEvent;\n    setPage(Math.round(contentOffset.y / layoutMeasurement.height));\n  }}\n  scrollEventThrottle={16}\n>\n  {PAGES.map((p) => <Page key={p.id} {...p} />)}\n</ScrollView>\n\n<SectionRail placement=\"left\" align=\"bottom\" value={PAGES[page].id} onValueChange={goTo}>\n  <SectionRail.Trigger>\n    {PAGES.map((p) => <SectionRail.Bar key={p.id} value={p.id} />)}\n  </SectionRail.Trigger>\n</SectionRail>"
+      },
+      {
+        "title": "Centred on the edge",
+        "description": "Halfway down the right edge, over the content it indexes. The classic placement — closest to a scrollbar, and the one to reach for when the corners are busy.",
+        "code": "const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });\n\n<ScrollView ref={sections.ref} {...sections.scrollProps}>\n  {SECTIONS.map((section) => (\n    <View key={section.id} onLayout={sections.measure(section.id)}>\n      …\n    </View>\n  ))}\n</ScrollView>\n\n<SectionRail\n  placement=\"right\"\n  align=\"center\"\n  haptics\n  value={sections.active}\n  onValueChange={sections.scrollTo}\n>\n  <SectionRail.Trigger>\n    {SECTIONS.map((s) => (\n      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />\n    ))}\n  </SectionRail.Trigger>\n  <SectionRail.Content>\n    {SECTIONS.map((s) => (\n      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>\n    ))}\n  </SectionRail.Content>\n</SectionRail>"
       }
     ],
     "notes": "The bars carry no labels, and that is the design rather than an omission. A permanent list of section titles down the side of a phone screen is either too small to read or too wide to keep; the bars carry the two things that survive at that size — which section you are in, and roughly how deep it sits.\n\nThe root is absolutely positioned with `pointerEvents=\"box-none\"`, so the rail takes touches but the empty column around it does not. Without that a strip down the side of the screen would swallow every scroll that started in it.\n\nChoosing a section leaves the panel up for `closeDelay` (300ms) so a mis-tap can be corrected without opening it again. Pass `0` to close immediately.\n\n### Haptics\n\n`haptics` ticks under the finger on every change of section — tapped in the panel or scrolled past, because both are the section changing. It is the light selection tick rather than an impact: anything heavier gets tiring when it can fire on every scroll.\n\nIt needs the optional `expo-haptics` package and does nothing without it, so it is safe to pass either way.\n\n```sh\nnpx expo install expo-haptics\n```"
@@ -1703,6 +1867,23 @@
         "title": "Speed, pause and colour",
         "description": "`speed` multiplies the state's own tuning and can change mid-animation without the orb jumping. `paused` holds the current frame rather than clearing it — a still orb is not an empty one. `color` overrides the ink, which is otherwise `--color-foreground` so the orb inverts with the theme.",
         "code": "<ThinkingOrb state=\"working\" speed={1.6} />\n\n<ThinkingOrb state=\"working\" paused={busy === false} />\n\n<ThinkingOrb state=\"composing\" color=\"#22c55e\" />"
+      }
+    ],
+    "versions": [
+      {
+        "title": "The six states",
+        "description": "Each one side by side at the large tuning, so the silhouettes can be compared. They are not interchangeable decoration — the shape in motion is the message.",
+        "code": "{[\"working\", \"searching\", \"solving\", \"listening\", \"composing\", \"shaping\"].map((state) => (\n  <Item key={state}>\n    <Item.Media>\n      <ThinkingOrb state={state} size={56} />\n    </Item.Media>\n    <Item.Content>\n      <Item.Title>{state}</Item.Title>\n    </Item.Content>\n  </Item>\n))}"
+      },
+      {
+        "title": "Inline in a reply",
+        "description": "The small tuning, in a line of chat text beside a `Shimmer`. Below 32px the orb switches to far fewer, much larger dots moving faster — the motion has to read at a size where the dots barely do.",
+        "code": "<Message.Bubble>\n  <View className=\"flex-row items-center gap-2\">\n    <ThinkingOrb state=\"searching\" size={20} />\n    <Shimmer>Searching the docs…</Shimmer>\n  </View>\n</Message.Bubble>"
+      },
+      {
+        "title": "Speed and pause",
+        "description": "`speed` multiplies the state's own tuning and can change mid-animation without the orb jumping. `paused` holds the current frame rather than clearing it — a still orb is not an empty one.",
+        "code": "const [speed, setSpeed] = useState(1);\nconst [paused, setPaused] = useState(false);\n\n<ThinkingOrb state=\"working\" size={140} speed={speed} paused={paused} />\n\n<Slider min={0.2} max={3} step={0.1} value={speed} onValueChange={setSpeed} />\n<Switch value={paused} onValueChange={setPaused} />"
       }
     ],
     "notes": "### How it is drawn\n\nThe geometry is honestly three-dimensional — points on a sphere, rotated and tilted, projected orthographically, with depth carried by dot size and ink weight. React Native has no 2D canvas to paint that into, and one animated SVG node per dot would be two hundred native prop writes a frame, which no amount of tuning survives.\n\nSo the dots are quantised into eight ink levels and each level is emitted as a *single* path of circle arcs. Eight animated props a frame whatever the dot count, and depth ordering comes free — depth is what drives the ink in the first place, so painting faint to strong paints far to near. Everything from the trigonometry to the path strings runs in one worklet on the UI thread; React renders once and then never again.\n\n### Size is two designs, not a scale\n\nTwo tunings ship. At or below 32px the orb uses far fewer, proportionally much larger dots moving faster, because the motion has to read at a size where the individual dots barely do. Sizes in between are scaled from the nearer tuning; the dot radii scale sub-linearly, which is what keeps a small orb from becoming a smudge and a large one from becoming beads.\n\n### Motion and accessibility\n\n`role=\"img\"` with a per-state label out of the box; `accessibilityLabel` overrides it with something more specific — “Analysing the repository…” beats “Searching”. Under `prefers-reduced-motion` the orb renders one representative frame and stops, which is why a paused orb still shows a shape."

@@ -76,6 +76,52 @@ At or below 32px the orb switches to a different tuning — far fewer, proportio
 <ThinkingOrb state="composing" color="#22c55e" />
 ```
 
+## Versions
+
+### The six states
+
+Each one side by side at the large tuning, so the silhouettes can be compared. They are not interchangeable decoration — the shape in motion is the message.
+
+```tsx
+{["working", "searching", "solving", "listening", "composing", "shaping"].map((state) => (
+  <Item key={state}>
+    <Item.Media>
+      <ThinkingOrb state={state} size={56} />
+    </Item.Media>
+    <Item.Content>
+      <Item.Title>{state}</Item.Title>
+    </Item.Content>
+  </Item>
+))}
+```
+
+### Inline in a reply
+
+The small tuning, in a line of chat text beside a `Shimmer`. Below 32px the orb switches to far fewer, much larger dots moving faster — the motion has to read at a size where the dots barely do.
+
+```tsx
+<Message.Bubble>
+  <View className="flex-row items-center gap-2">
+    <ThinkingOrb state="searching" size={20} />
+    <Shimmer>Searching the docs…</Shimmer>
+  </View>
+</Message.Bubble>
+```
+
+### Speed and pause
+
+`speed` multiplies the state's own tuning and can change mid-animation without the orb jumping. `paused` holds the current frame rather than clearing it — a still orb is not an empty one.
+
+```tsx
+const [speed, setSpeed] = useState(1);
+const [paused, setPaused] = useState(false);
+
+<ThinkingOrb state="working" size={140} speed={speed} paused={paused} />
+
+<Slider min={0.2} max={3} step={0.1} value={speed} onValueChange={setSpeed} />
+<Switch value={paused} onValueChange={setPaused} />
+```
+
 ## API Reference
 
 ### ThinkingOrb

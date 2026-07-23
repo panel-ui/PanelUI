@@ -164,6 +164,138 @@ const scroller = useRef<ScrollView>(null);
 </SectionRail>
 ```
 
+## Versions
+
+### Bottom right
+
+Out of the corner, clear of the text, with the panel opening upward. The placement most screens want: it is where a thumb already is, and it covers nothing worth reading.
+
+```tsx
+const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });
+
+<ScrollView ref={sections.ref} {...sections.scrollProps}>
+  {SECTIONS.map((section) => (
+    <View key={section.id} onLayout={sections.measure(section.id)}>
+      …
+    </View>
+  ))}
+</ScrollView>
+
+<SectionRail
+  placement="right"
+  align="bottom"
+  haptics
+  value={sections.active}
+  onValueChange={sections.scrollTo}
+>
+  <SectionRail.Trigger>
+    {SECTIONS.map((s) => (
+      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />
+    ))}
+  </SectionRail.Trigger>
+  <SectionRail.Content>
+    {SECTIONS.map((s) => (
+      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>
+    ))}
+  </SectionRail.Content>
+</SectionRail>
+```
+
+### Bottom left
+
+The same corner treatment against the other edge — for a screen whose right-hand corner is already spoken for by a compose button.
+
+```tsx
+const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });
+
+<ScrollView ref={sections.ref} {...sections.scrollProps}>
+  {SECTIONS.map((section) => (
+    <View key={section.id} onLayout={sections.measure(section.id)}>
+      …
+    </View>
+  ))}
+</ScrollView>
+
+<SectionRail
+  placement="left"
+  align="bottom"
+  haptics
+  value={sections.active}
+  onValueChange={sections.scrollTo}
+>
+  <SectionRail.Trigger>
+    {SECTIONS.map((s) => (
+      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />
+    ))}
+  </SectionRail.Trigger>
+  <SectionRail.Content>
+    {SECTIONS.map((s) => (
+      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>
+    ))}
+  </SectionRail.Content>
+</SectionRail>
+```
+
+### Pager
+
+One section per screen. A pager needs no reading line — the active page *is* the scroll offset over the viewport height — so it drives the rail directly rather than through `useScrollSections`.
+
+```tsx
+const [page, setPage] = useState(0);
+
+<ScrollView
+  pagingEnabled
+  onScroll={(event) => {
+    const { contentOffset, layoutMeasurement } = event.nativeEvent;
+    setPage(Math.round(contentOffset.y / layoutMeasurement.height));
+  }}
+  scrollEventThrottle={16}
+>
+  {PAGES.map((p) => <Page key={p.id} {...p} />)}
+</ScrollView>
+
+<SectionRail placement="left" align="bottom" value={PAGES[page].id} onValueChange={goTo}>
+  <SectionRail.Trigger>
+    {PAGES.map((p) => <SectionRail.Bar key={p.id} value={p.id} />)}
+  </SectionRail.Trigger>
+</SectionRail>
+```
+
+### Centred on the edge
+
+Halfway down the right edge, over the content it indexes. The classic placement — closest to a scrollbar, and the one to reach for when the corners are busy.
+
+```tsx
+const sections = useScrollSections({ ids: SECTIONS.map((s) => s.id) });
+
+<ScrollView ref={sections.ref} {...sections.scrollProps}>
+  {SECTIONS.map((section) => (
+    <View key={section.id} onLayout={sections.measure(section.id)}>
+      …
+    </View>
+  ))}
+</ScrollView>
+
+<SectionRail
+  placement="right"
+  align="center"
+  haptics
+  value={sections.active}
+  onValueChange={sections.scrollTo}
+>
+  <SectionRail.Trigger>
+    {SECTIONS.map((s) => (
+      <SectionRail.Bar key={s.id} value={s.id} level={s.level} />
+    ))}
+  </SectionRail.Trigger>
+  <SectionRail.Content>
+    {SECTIONS.map((s) => (
+      <SectionRail.Item key={s.id} value={s.id} level={s.level}>{s.label}</SectionRail.Item>
+    ))}
+  </SectionRail.Content>
+</SectionRail>
+```
+
 ## API Reference
 
 ### SectionRail

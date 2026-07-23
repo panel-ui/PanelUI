@@ -138,6 +138,62 @@ const [active, setActive] = useState(null);
 </HeatmapChart>
 ```
 
+## Versions
+
+### Contribution grid
+
+A full year with a readout that follows the finger. Fifty-three weeks do not fit across a phone, so the chart is `fluid` inside a horizontal `ScrollView` and the legend sits outside it, at the card's width.
+
+```tsx
+<ScrollView horizontal showsHorizontalScrollIndicator={false}>
+  <HeatmapChart data={weeks} weekStartDay={1} binSize={13} onActiveCellChange={setActive}>
+    <HeatmapChart.XAxis />
+    <HeatmapChart.YAxis />
+    <HeatmapChart.Cells />
+    <HeatmapChart.Tooltip />
+  </HeatmapChart>
+</ScrollView>
+```
+
+### Filling the width
+
+For a short range, `fill` divides the available width between the columns rather than drawing them at a fixed size, so the chart always meets both edges of its card.
+
+```tsx
+<HeatmapChart data={weeks.slice(-13)} layout="fill" weekStartDay={1} gap={4}>
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis />
+  <HeatmapChart.Cells cornerRadius={3} />
+  <HeatmapChart.Tooltip />
+  <HeatmapChart.Legend />
+</HeatmapChart>
+```
+
+### Quarters
+
+A rule every thirteen columns, and the ramp derived from a colour of your own instead of the chart token. `tickFilter="all"` labels every row, which a narrower axis has room for once the labels are initials.
+
+```tsx
+<HeatmapChart data={weeks} weekStartDay={1} binSize={11} color={success}>
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis tickFilter="all" labelFormat="initial" width={16} />
+  <HeatmapChart.Separator every="quarter" dashArray="2,3" />
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip />
+</HeatmapChart>
+```
+
+### Uptime strip
+
+`rows={1}` turns the calendar into a band, and nothing else changes. The same grid does an hourly chart at `rows={24}` with the hour names passed to the axis.
+
+```tsx
+<HeatmapChart data={days} rows={1} layout="fill" gap={3}>
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip formatLabel={(cell) => `${cell.count} incidents`} />
+</HeatmapChart>
+```
+
 ## API Reference
 
 ### HeatmapChart

@@ -335,6 +335,13 @@
   },
   "chip": {
     "intro": "A compact, interactive pill. Where Badge only shows, Chip is the one you press: the filter in a filter bar, the tag on a photo, the removable recipient in a “To:” field. Set `selected` to make it a filter, `onClose` to make it removable.",
+    "preview": {
+      "src": "/previews/chip.jpg",
+      "alt": "Seven chips on a dark screen under a VARIANTS heading — a neutral Default, a filled Primary, an Outline, and the four tone variants labelled Shipped, Beta, New and Blocked.",
+      "width": 1179,
+      "height": 397,
+      "caption": "Every variant, running in the example app."
+    },
     "usage": "<Chip>Design</Chip>\n\n<Chip variant=\"info\" onClose={() => remove('design')}>Design</Chip>\n\n<Chip selected={on} onPress={() => setOn(!on)}>Available</Chip>",
     "anatomy": "<Chip start={<Icon />} onClose={() => {}}>\n  <Chip.Label>…</Chip.Label>\n</Chip>",
     "parts": {

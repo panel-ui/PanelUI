@@ -250,22 +250,15 @@ function ChartBasicVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-1">
-          <View className="w-full flex-row items-center justify-between">
-            <Frame.Title>Traffic Source</Frame.Title>
-            <View className="flex-row items-center gap-3">
-              <LegendDot colorIndex={1} label="Organic" />
-              <LegendDot colorIndex={2} label="Paid Ads" />
-            </View>
-          </View>
-          <Text size="2xl" weight="bold" className="mt-1">
-            292,000
-          </Text>
-          <Text size="sm" muted>
-            Sessions
-          </Text>
+        <Frame.Header>
+          <Frame.Title>Traffic Source</Frame.Title>
+          <Frame.Action>Last 12 months</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartStat value="292,000" caption="Sessions">
+            <LegendDot colorIndex={1} label="Organic" />
+            <LegendDot colorIndex={2} label="Paid Ads" />
+          </ChartStat>
           <LineChart data={SESSIONS} xDataKey="month" curve="linear" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="organic" colorIndex={1} />
@@ -289,7 +282,7 @@ function ChartDotsVersion() {
         <Frame.Header>
           <Frame.Title>Monthly Revenue</Frame.Title>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="revenue" showMarkers />
@@ -306,13 +299,12 @@ function ChartCrosshairVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-0.5">
+        <Frame.Header>
           <Frame.Title>Monthly Revenue</Frame.Title>
-          <Text size="sm" muted>
-            Press and drag across the chart to inspect values
-          </Text>
+          <Frame.Action>Drag to inspect</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartStat value="$317,904" caption="Last 12 months" />
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Area dataKey="revenue" />
@@ -340,7 +332,7 @@ function ChartAnimatedVersion() {
             </Button>
           </Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
           <LineChart ref={chart} data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Area dataKey="revenue" />
@@ -362,33 +354,35 @@ function ChartFinanceVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-0.5">
-          <Text size="sm" muted>
-            Total balance
-          </Text>
-          <Text size="2xl" weight="bold">
-            ${current.balance.toLocaleString()}.32
-          </Text>
-          <Text size="sm" className={up ? 'text-success' : 'text-destructive'}>
-            {up ? '+' : ''}
-            {current.delta}% this {range === '1D' ? 'day' : range === '1W' ? 'week' : 'period'}
-          </Text>
+        <Frame.Header>
+          <Frame.Title>Total balance</Frame.Title>
+          <Frame.Action>{range}</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="gap-3 p-3">
-          <LineChart data={current.data} xDataKey="t" aspectRatio={1.9}>
-            <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
-            <LineChart.Area dataKey="v" />
-            <LineChart.Line dataKey="v" />
-          </LineChart>
-          <Tabs value={range} defaultValue={range} onValueChange={setRange}>
-            <Tabs.List>
-              {Object.keys(RANGES).map((key) => (
-                <Tabs.Trigger key={key} value={key}>
-                  {key}
-                </Tabs.Trigger>
-              ))}
-            </Tabs.List>
-          </Tabs>
+        <Frame.Panel>
+          {/* The delta rides beside the number rather than under it — three
+              stacked lines is what made this header a wall of text. */}
+          <ChartStat value={`$${current.balance.toLocaleString()}.32`}>
+            <Text size="sm" className={up ? 'text-success' : 'text-destructive'}>
+              {up ? '+' : ''}
+              {current.delta}% this {range === '1D' ? 'day' : range === '1W' ? 'week' : 'period'}
+            </Text>
+          </ChartStat>
+          <View className="gap-3 px-3 pb-3">
+            <LineChart data={current.data} xDataKey="t" aspectRatio={1.9}>
+              <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
+              <LineChart.Area dataKey="v" />
+              <LineChart.Line dataKey="v" />
+            </LineChart>
+            <Tabs value={range} defaultValue={range} onValueChange={setRange}>
+              <Tabs.List>
+                {Object.keys(RANGES).map((key) => (
+                  <Tabs.Trigger key={key} value={key}>
+                    {key}
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </Tabs>
+          </View>
         </Frame.Panel>
       </Frame>
     </ChartScreen>
@@ -399,21 +393,20 @@ function ChartDashedVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-1">
-          <View className="w-full flex-row items-center justify-between">
-            <Frame.Title>Actual vs Target</Frame.Title>
-            <View className="flex-row items-center gap-3">
-              <LegendDot colorIndex={1} label="Actual" />
-              <View className="flex-row items-center gap-1.5">
-                <View className="h-0.5 w-4 rounded-full bg-muted-foreground" />
-                <Text size="xs" muted>
-                  Target
-                </Text>
-              </View>
-            </View>
-          </View>
+        <Frame.Header>
+          <Frame.Title>Actual vs Target</Frame.Title>
+          <Frame.Action>2026</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartLegendRow>
+            <LegendDot colorIndex={1} label="Actual" />
+            <View className="flex-row items-center gap-1.5">
+              <View className="h-0.5 w-4 rounded-full bg-muted-foreground" />
+              <Text size="xs" muted>
+                Target
+              </Text>
+            </View>
+          </ChartLegendRow>
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="revenue" colorIndex={1} />
@@ -431,16 +424,20 @@ function ChartMultiVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-2">
+        <Frame.Header>
           <Frame.Title>Traffic Sources</Frame.Title>
-          <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
+          <Frame.Action>Last 12 months</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel>
+          {/* Four keys wrap onto two rows on a narrow phone. In the header
+              strip that pushed the chart down the card; in the panel it is
+              simply part of the content. */}
+          <ChartLegendRow>
             <LegendDot colorIndex={1} label="Organic" />
             <LegendDot colorIndex={2} label="Paid Ads" />
             <LegendDot colorIndex={3} label="Referral" />
             <LegendDot colorIndex={4} label="Social" />
-          </View>
-        </Frame.Header>
-        <Frame.Panel className="p-0">
+          </ChartLegendRow>
           <LineChart data={TRAFFIC} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="organic" colorIndex={1} />
@@ -483,6 +480,55 @@ function ChartKpiVersion() {
         />
       </View>
     </ChartScreen>
+  );
+}
+
+/**
+ * The band above a chart, inside the panel: the headline reading on the left,
+ * the legend on the right.
+ *
+ * It sits in the card rather than in `Frame.Header` because the header is a
+ * caption on the tray the card sits in — one muted line. A title, a legend, a
+ * 2xl number and a subtitle all crammed into that strip is four levels of
+ * hierarchy in a space that has room for one, and the number, which is the
+ * thing the card is actually about, ends up the hardest part to find.
+ */
+function ChartStat({
+  value,
+  caption,
+  children,
+}: {
+  value: string;
+  caption?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <View className="flex-row items-start justify-between gap-3 px-4 pb-2 pt-3.5">
+      <View className="gap-0.5">
+        <Text size="2xl" weight="bold">
+          {value}
+        </Text>
+        {caption ? (
+          <Text size="sm" muted>
+            {caption}
+          </Text>
+        ) : null}
+      </View>
+      {children ? (
+        <View className="flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1.5">
+          {children}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** The legend on its own, for a chart with no headline number above it. */
+function ChartLegendRow({ children }: { children: ReactNode }) {
+  return (
+    <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1 px-4 pb-1 pt-3">
+      {children}
+    </View>
   );
 }
 

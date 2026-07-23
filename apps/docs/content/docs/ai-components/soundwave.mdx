@@ -1,0 +1,187 @@
+---
+title: Soundwave
+description: What a voice looks like while an app listens.
+status: new
+---
+
+Draws the level of a voice, in four looks: capsules over a microphone button, a metering strip for a transcript, a travelling wave for a reply being spoken, and an ambient glow that fills a screen.
+
+It draws a level; it does not record one. Your app owns the recorder and hands over a number between 0 and 1 — so there is no audio dependency here, and the same component works against a real meter, a synthesised one, or a remote peer's. With no level at all it animates plausible motion for the current `state`, which is enough to build and review a voice screen before any audio exists.
+
+## Installation
+
+Soundwave ships with the library — no separate install.
+
+```tsx
+import { Soundwave, Card, MicIcon, Text } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add soundwave
+```
+
+## Usage
+
+```tsx
+<Soundwave variant="pills" state="listening" level={level} />
+```
+
+## Examples
+
+### Driving it from a recorder
+
+A recorder reports every 30–60ms. Putting that in React state is dozens of renders a second for a number that only moves pixels, so `level` also takes a `SharedValue` — write metering straight into it and nothing above the wave re-renders. A plain number is accepted too, and smoothed identically; it is the right choice for something slow, like a server-side speaking flag.
+
+```tsx
+const level = useSharedValue(0);
+
+useEffect(() => {
+  recorder.onMetering(({ db }) => {
+    // dBFS is negative and logarithmic; the wave wants 0–1.
+    level.value = Math.max(0, (db + 60) / 60);
+  });
+}, [level]);
+
+<Soundwave variant="pills" level={level} />
+```
+
+### A metering strip in a transcript
+
+`static` gives every bar a band of the current level, for a live meter. `scrolling` keeps a history that slides across with the newest sample at the trailing edge, for a recording in progress. `centered` decides whether bars grow from the middle out or up from a baseline.
+
+```tsx
+<Card>
+  <Card.Content className="flex-row items-center gap-3 p-4">
+    <MicIcon size={18} />
+    <View className="flex-1">
+      <Soundwave
+        variant="bars"
+        mode="scrolling"
+        centered={false}
+        bars={28}
+        barWidth={5}
+        height={40}
+        level={level}
+      />
+    </View>
+    <Text size="sm" muted>0:12</Text>
+  </Card.Content>
+</Card>
+```
+
+### Real frequency bands
+
+If your app already runs an analysis, hand the bands over directly with `levels` and `bars` in `static` mode draws them instead of synthesising a shape. They are resampled to the bar count, so the two numbers do not have to match.
+
+```tsx
+<Soundwave variant="bars" levels={bands} bars={24} />
+```
+
+### The state, when there is no level yet
+
+`state` always sets what a screen reader announces. With no `level` supplied it also picks the motion: `idle` barely breathes, `listening` and `speaking` run layered waves at unrelated tempi so neither repeats on a beat, and `thinking` is slower and shallower than both.
+
+```tsx
+<Soundwave variant="line" state="speaking" />
+<Soundwave variant="line" state="thinking" />
+<Soundwave variant="line" state="idle" />
+```
+
+### Ambient, over a whole screen
+
+`ambient` positions itself absolutely and takes no touches, so it goes behind a screen's content rather than wrapping it. `radius` traces the screen's own corners. It takes its colour from `--color-info` rather than the foreground, since a bloom in the text colour reads as a shadow.
+
+```tsx
+<View className="flex-1">
+  <Soundwave variant="ambient" state="listening" level={level} radius={40} />
+
+  <View className="flex-1 items-center justify-center">
+    <Text size="xl">Start chatting anytime</Text>
+  </View>
+</View>
+```
+
+## Versions
+
+### Capsules
+
+The voice-mode screen: a few big capsules over a microphone button. Each capsule runs at its own hashed tempo and phase, so the group responds to one level without moving as a block, and the middle ones lead — a flat profile reads as a progress bar.
+
+```tsx
+<Soundwave
+  variant="pills"
+  state="listening"
+  level={level}
+  height={120}
+  barWidth={34}
+  barGap={12}
+/>
+```
+
+### Metering bars
+
+The same strip in both modes, at the size it is actually used: static bands, a scrolling history, and a compact recording row with a duration beside it.
+
+```tsx
+<Soundwave variant="bars" mode="static" level={level} height={64} />
+
+<Soundwave variant="bars" mode="scrolling" level={level} height={64} />
+```
+
+### Travelling wave
+
+One ribbon, tapered to nothing at both ends so it leaves and meets the edges flat instead of stopping at a hard cut. Shown at full size with a state switcher, and again inline under a reply.
+
+```tsx
+<Soundwave variant="line" state="speaking" height={96} />
+
+// Inline in a bubble, where the stroke has to be finer.
+<Soundwave variant="line" state="speaking" height={36} barWidth={2} />
+```
+
+### Ambient glow
+
+A bloom rising off the bottom edge and a rim of light around the rest, both breathing on the level — a glow that only changes opacity reads as a screen dimming, one that also grows reads as something in the room getting louder.
+
+```tsx
+<Soundwave variant="ambient" state="listening" level={level} radius={40} />
+```
+
+## API Reference
+
+### Soundwave
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `variant` | `SoundwaveVariant` | `'pills'` | Which look to draw: `pills` for a few capsules over a microphone button, `bars` for a metering strip, `line` for a travelling wave, `ambient` for a glow that fills its parent. |
+| `state` | `SoundwaveState` | `'listening'` | What the app is doing. With no `level` supplied this picks the motion the wave runs on its own; it always sets what a screen reader announces. |
+| `level` | `number \| SharedValue<number>` | — | Input level, 0–1, from your own recorder's metering. Pass a `SharedValue` to keep updates off the JS thread entirely. Omit it and the wave animates plausible motion for the current `state`. |
+| `levels` | `number[]` | — | Per-band levels, 0–1 each, for `bars` in `static` mode when the app has a real frequency analysis. Resampled to the bar count. |
+| `bars` | `number` | — | How many capsules (`pills`) or bars (`bars`) to draw. |
+| `barWidth` | `number` | — | Capsule width, or bar stroke width. Also the stroke width of `line`. |
+| `barGap` | `number` | — | Gap between capsules. `bars` spaces itself evenly across the width. |
+| `height` | `number` | — | Drawing height. `ambient` ignores it and fills its parent. |
+| `mode` | `'static' \| 'scrolling'` | `'static'` | `static` gives every bar a band of the current level; `scrolling` keeps a history that slides across, newest at the trailing edge. `bars` only. |
+| `centered` | `boolean` | `true` | Grow bars from the middle out rather than up from the baseline. |
+| `fadeEdges` | `boolean` | — | Fade the wave out at both ends, so it does not stop at a hard edge. |
+| `sensitivity` | `number` | `1` | Multiplier on the incoming level, applied before it is clamped to 1. |
+| `speed` | `number` | `1` | Multiplier on the wave's own tempo, including how fast history scrolls. |
+| `color` | `string` | — | Ink. Defaults to the theme foreground, or to `--color-info` for `ambient`, so a wave inverts with the theme and needs no palette of its own. |
+| `paused` | `boolean` | `false` | Freeze on the current frame. |
+| `radius` | `number` | `44` | Corner radius `ambient` traces. Match it to the screen it sits on. |
+| `accessibilityLabel` | `string` | — | Overrides the per-state default announced to screen readers. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them.
+
+Levels are smoothed with a fast attack and a slow release, which is what makes a meter read as a meter — it snaps up on a syllable and falls back gently instead of chattering around every sample. `sensitivity` multiplies the incoming value before it is clamped, for a quiet source.
+
+`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. Both measure their own width, so they need a parent with one.
+
+`paused` and the system's reduced-motion setting both hold a representative frame rather than clearing to a flat line: a stopped wave is not an empty one.

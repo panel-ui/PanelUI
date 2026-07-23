@@ -93,6 +93,12 @@ export {
   type DialogContentProps,
 } from './components/dialog';
 export {
+  Soundwave,
+  type SoundwaveProps,
+  type SoundwaveState,
+  type SoundwaveVariant,
+} from './components/soundwave';
+export {
   Direction,
   useDirection,
   type DirectionProps,
@@ -331,6 +337,7 @@ export {
   IconColorProvider,
   InfoIcon,
   ImageIcon,
+  MicIcon,
   MoonIcon,
   PackageIcon,
   PaperclipIcon,

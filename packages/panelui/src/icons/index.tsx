@@ -510,3 +510,19 @@ export function PaperclipIcon({ size = 16, color, ...props }: IconProps) {
     </Svg>
   );
 }
+
+/** A capsule on a stand — a microphone, for anything voice. */
+export function MicIcon({ size = 16, color, ...props }: IconProps) {
+  const resolved = useResolvedColor(color, '#737373');
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+      <Path
+        d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11v1a7 7 0 0 0 14 0v-1M12 19v3"
+        stroke={resolved}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}

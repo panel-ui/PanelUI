@@ -56,6 +56,7 @@ import {
   Marker,
   Message,
   MessageScroller,
+  MicIcon,
   PackageIcon,
   PlusSquareIcon,
   Popover,
@@ -77,6 +78,7 @@ import {
   Shimmer,
   Skeleton,
   Slider,
+  Soundwave,
   Spinner,
   Steps,
   Surface,
@@ -2040,6 +2042,296 @@ function ThinkingOrbControlsVersion() {
         {/* Pausing holds the current frame rather than clearing it — a still
             orb is not an empty one. */}
         <Switch value={paused} onValueChange={setPaused} />
+      </View>
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Soundwave                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const WAVE_STATES = ['idle', 'listening', 'thinking', 'speaking'] as const;
+
+/**
+ * A microphone the demos can actually press, standing in for a recorder.
+ *
+ * Every version runs with no permission prompt and no audio session, so they
+ * work on a simulator: pressing record starts a clock, and the wave switches
+ * from `idle` to `listening`. Turn the slider on and it becomes the microphone
+ * — dragging the level by hand shows what the smoothing does far better than
+ * talking at a phone does.
+ */
+function useVoiceDemo() {
+  const [recording, setRecording] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [level, setLevel] = useState(0.55);
+  const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    if (!recording) return;
+    const id = setInterval(() => setSeconds((value) => value + 1), 1000);
+    return () => clearInterval(id);
+  }, [recording]);
+
+  const toggle = () => {
+    setRecording((value) => !value);
+    setSeconds(0);
+  };
+
+  return {
+    recording,
+    toggle,
+    seconds,
+    level,
+    setLevel,
+    live,
+    setLive,
+    // What the wave is handed: nothing at all unless the slider is driving it,
+    // so the state's own motion is what shows.
+    state: (recording ? 'listening' : 'idle') as 'listening' | 'idle',
+    driven: recording && live ? level : undefined,
+  };
+}
+
+const clock = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
+/** Record button, timer, and the slider stand-in for a microphone. */
+function VoiceControls({
+  voice,
+  compact = false,
+}: {
+  voice: ReturnType<typeof useVoiceDemo>;
+  compact?: boolean;
+}) {
+  return (
+    <View className="w-full gap-5 px-5">
+      <View className="flex-row items-center justify-center gap-5">
+        <Button
+          variant={voice.recording ? 'destructive' : 'primary'}
+          size="icon"
+          className={compact ? 'size-12 rounded-full' : 'size-16 rounded-full'}
+          onPress={voice.toggle}
+          accessibilityLabel={voice.recording ? 'Stop' : 'Start listening'}
+        >
+          {voice.recording ? (
+            <View className="size-4 rounded-sm bg-white" />
+          ) : (
+            <MicIcon size={compact ? 18 : 22} color="#ffffff" />
+          )}
+        </Button>
+        <Text size="lg" muted={!voice.recording}>
+          {clock(voice.seconds)}
+        </Text>
+      </View>
+
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1 pr-4">
+          <Text size="sm">Drive it from the slider</Text>
+          <Text size="xs" muted>
+            Off, and the wave animates the state on its own.
+          </Text>
+        </View>
+        <Switch value={voice.live} onValueChange={voice.setLive} />
+      </View>
+
+      <Slider
+        label="Mic level"
+        showValue
+        formatValue={(value) => value.toFixed(2)}
+        min={0}
+        max={1}
+        step={0.01}
+        value={voice.level}
+        onValueChange={voice.setLevel}
+        disabled={!voice.live || !voice.recording}
+      />
+    </View>
+  );
+}
+
+/** The capsules over a microphone button — a voice-mode screen. */
+function SoundwavePillsVersion() {
+  const voice = useVoiceDemo();
+
+  return (
+    <View className="flex-1 justify-between py-6">
+      <View className="flex-1 items-center justify-center gap-8">
+        <Soundwave
+          variant="pills"
+          state={voice.state}
+          level={voice.driven}
+          height={120}
+          barWidth={34}
+          barGap={12}
+        />
+        <Text muted>{voice.recording ? 'Listening' : 'Press record to start'}</Text>
+      </View>
+
+      <VoiceControls voice={voice} />
+    </View>
+  );
+}
+
+/** The metering strip, in both modes, at the size it is actually used. */
+function SoundwaveBarsVersion() {
+  const voice = useVoiceDemo();
+
+  return (
+    <ScrollView contentContainerClassName="gap-6 py-6">
+      <View className="gap-3 px-5">
+        <Text size="sm" muted>
+          static — every bar is a band of the current level
+        </Text>
+        <Card>
+          <Card.Content className="p-4">
+            <Soundwave
+              variant="bars"
+              mode="static"
+              state={voice.state}
+              level={voice.driven}
+              height={64}
+            />
+          </Card.Content>
+        </Card>
+      </View>
+
+      <View className="gap-3 px-5">
+        <Text size="sm" muted>
+          scrolling — history slides left, newest on the right
+        </Text>
+        <Card>
+          <Card.Content className="p-4">
+            <Soundwave
+              variant="bars"
+              mode="scrolling"
+              state={voice.state}
+              level={voice.driven}
+              height={64}
+            />
+          </Card.Content>
+        </Card>
+      </View>
+
+      <View className="gap-3 px-5">
+        <Text size="sm" muted>
+          not centered, and thicker — a recording row
+        </Text>
+        <Card>
+          <Card.Content className="flex-row items-center gap-3 p-4">
+            <MicIcon size={18} />
+            <View className="flex-1">
+              <Soundwave
+                variant="bars"
+                mode="scrolling"
+                centered={false}
+                bars={28}
+                barWidth={5}
+                height={40}
+                state={voice.state}
+                level={voice.driven}
+              />
+            </View>
+            <Text size="sm" muted>
+              {clock(voice.seconds)}
+            </Text>
+          </Card.Content>
+        </Card>
+      </View>
+
+      <VoiceControls voice={voice} compact />
+    </ScrollView>
+  );
+}
+
+/** The travelling wave, and what each state does to it with no level supplied. */
+function SoundwaveLineVersion() {
+  const [state, setState] = useState<string[]>(['speaking']);
+  const voice = useVoiceDemo();
+  const picked = WAVE_STATES.find((name) => name === state[0]) ?? 'speaking';
+  // Recording wins over the picker: pressing the button is the demo, and a
+  // wave that ignored it would be the wrong lesson.
+  const current = voice.recording ? 'listening' : picked;
+
+  return (
+    <ScrollView contentContainerClassName="gap-6 py-6">
+      <View className="px-5">
+        <Card>
+          <Card.Content className="p-4">
+            <Soundwave
+              variant="line"
+              state={current}
+              level={voice.driven}
+              height={96}
+            />
+          </Card.Content>
+        </Card>
+      </View>
+
+      <View className="gap-3 px-5">
+        <Text size="sm" muted>
+          state — what it animates with no level supplied
+        </Text>
+        <ToggleButtonGroup selectionMode="single" value={state} onValueChange={setState}>
+          {WAVE_STATES.map((name) => (
+            <ToggleButton key={name} id={name}>
+              {name}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </View>
+
+      <View className="gap-3 px-5">
+        <Text size="sm" muted>
+          Under a reply, at the size it would sit there
+        </Text>
+        <Message>
+          <Message.Avatar>
+            <Avatar size="sm" fallback="AI" />
+          </Message.Avatar>
+          <Message.Content>
+            <Message.Bubble>
+              <View className="w-full gap-2">
+                <Text size="sm">Here is what I found in the changelog.</Text>
+                <Soundwave variant="line" state="speaking" height={36} barWidth={2} />
+              </View>
+            </Message.Bubble>
+          </Message.Content>
+        </Message>
+      </View>
+
+      <VoiceControls voice={voice} compact />
+    </ScrollView>
+  );
+}
+
+/** The glow that takes the whole screen, behind a microphone button. */
+function SoundwaveAmbientVersion() {
+  const voice = useVoiceDemo();
+
+  return (
+    <View className="flex-1">
+      {/* Absolutely positioned and non-interactive, so it goes behind the
+          screen's own content rather than wrapping it. */}
+      <Soundwave
+        variant="ambient"
+        state={voice.state}
+        level={voice.driven}
+        radius={40}
+      />
+
+      <View className="flex-1 items-center justify-center gap-3">
+        <Text size="xl" weight="medium">
+          {voice.recording ? 'Listening' : 'Start chatting anytime'}
+        </Text>
+        <Text size="sm" muted>
+          The room is lit by the level, not by a spinner.
+        </Text>
+      </View>
+
+      <View className="pb-8">
+        <VoiceControls voice={voice} />
       </View>
     </View>
   );
@@ -5202,6 +5494,41 @@ export const COMPONENTS: ComponentEntry[] = [
         fullPage: true,
         description: 'What `speed` and `paused` do to a running orb.',
         render: () => <ThinkingOrbControlsVersion />,
+      },
+    ],
+  },
+  {
+    slug: 'soundwave',
+    name: 'Soundwave',
+    summary: 'What a voice looks like while an app listens',
+    demos: [
+      {
+        label: 'Capsules',
+        id: 'pills',
+        fullPage: true,
+        description: 'The few big capsules over a microphone button.',
+        render: () => <SoundwavePillsVersion />,
+      },
+      {
+        label: 'Metering bars',
+        id: 'bars',
+        fullPage: true,
+        description: 'Static bands and a scrolling history, in a transcript.',
+        render: () => <SoundwaveBarsVersion />,
+      },
+      {
+        label: 'Travelling wave',
+        id: 'line',
+        fullPage: true,
+        description: 'One ribbon, and what each state does to it.',
+        render: () => <SoundwaveLineVersion />,
+      },
+      {
+        label: 'Ambient glow',
+        id: 'ambient',
+        fullPage: true,
+        description: 'A bloom off the bottom edge and a rim around the screen.',
+        render: () => <SoundwaveAmbientVersion />,
       },
     ],
   },

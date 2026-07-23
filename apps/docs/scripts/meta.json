@@ -46,7 +46,7 @@
   ],
   "chip": [
     "Chip",
-    "Interactive pill \u2014 a filter, a tag, or a removable token.",
+    "Interactive pill — a filter, a tag, or a removable token.",
     "react native chip",
     {
       "addedIn": "0.13.0"
@@ -72,7 +72,7 @@
   ],
   "frame": [
     "Frame",
-    "Widget shell \u2014 a card of rows sitting in a titled tray.",
+    "Widget shell — a card of rows sitting in a titled tray.",
     "react native list section"
   ],
   "heatmap-chart": [
@@ -250,6 +250,15 @@
     {
       "group": "ai-components",
       "addedIn": "0.14.0"
+    }
+  ],
+  "soundwave": [
+    "Soundwave",
+    "What a voice looks like while an app listens.",
+    "react native voice waveform visualizer",
+    {
+      "group": "ai-components",
+      "addedIn": "0.15.0"
     }
   ]
 }

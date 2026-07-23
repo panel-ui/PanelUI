@@ -401,6 +401,14 @@
     ]
   },
   {
+    "name": "soundwave",
+    "type": "registry:ui",
+    "description": "What a voice looks like while an app listens.",
+    "registryDependencies": [
+      "cn"
+    ]
+  },
+  {
     "name": "spinner",
     "type": "registry:ui",
     "description": "Indeterminate loading indicator.",

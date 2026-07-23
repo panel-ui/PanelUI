@@ -125,6 +125,7 @@ overlays, and the toast viewport.
 | `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |
 | `Slider` | Pick a value by dragging a thumb along a track |
+| `Soundwave` | What a voice looks like while an app listens |
 | `Spinner` | Indeterminate loading indicator |
 | `Steps` | Stepper for multi-step flows |
 | `Surface` | Elevated container with a variant ladder |

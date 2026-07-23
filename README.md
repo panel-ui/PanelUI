@@ -46,21 +46,22 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 
 | | | |
 | --- | --- | --- |
-| Accordion | Input | Select |
-| Alert | InputGroup | Separator |
-| Attachment | Item | Shimmer |
-| Avatar | Label | Skeleton |
-| Badge | LineChart | Slider |
-| BottomSheet | Marker | Spinner |
-| Button | Message | Steps |
-| Card | MessageScroller | Surface |
-| Checkbox | Popover | Switch |
-| Chip | Progress | Tabs |
-| Dialog | RadioGroup | ThinkingOrb |
-| Direction | ScrollCanvas | Timeline |
-| EmptyState | ScrollFade | Toast |
-| Frame | ScrollText | ToggleButton |
-| HeatmapChart | SectionRail | Typography |
+| Accordion | InputGroup | Shimmer |
+| Alert | Item | Skeleton |
+| Attachment | Label | Slider |
+| Avatar | LineChart | Soundwave |
+| Badge | Marker | Spinner |
+| BottomSheet | Message | Steps |
+| Button | MessageScroller | Surface |
+| Card | Popover | Switch |
+| Checkbox | Progress | Tabs |
+| Chip | RadioGroup | ThinkingOrb |
+| Dialog | ScrollCanvas | Timeline |
+| Direction | ScrollFade | Toast |
+| EmptyState | ScrollText | ToggleButton |
+| Frame | SectionRail | Typography |
+| HeatmapChart | Select |  |
+| Input | Separator |  |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating
 over the page — one `presentation` prop, because which is right depends on what
@@ -68,8 +69,11 @@ surrounds the trigger rather than on what the options are.
 `Frame` is a widget shell: a card of rows sitting in a tray, with the strip of
 tray left showing above it carrying the title.
 `InputGroup` measures its prefix/suffix and pads the input to match.
-`ScrollText` and `ScrollCanvas` scrub a reveal off the scroll position, and
-`ThinkingOrb` says which kind of busy an agent is rather than just that it is.
+`ScrollText` and `ScrollCanvas` scrub a reveal off the scroll position,
+`ThinkingOrb` says which kind of busy an agent is rather than just that it is,
+and `Soundwave` draws the level of a voice — capsules, metering bars, a
+travelling wave or an ambient glow — from a number your recorder already has.
+`Direction` flips a subtree right to left without restarting the app.
 
 Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`,
 `useThemeMode`, `useToast`, `cn`.

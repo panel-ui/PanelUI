@@ -16,6 +16,13 @@ const config = {
         destination: '/docs/ai-components/shimmer',
         permanent: true,
       },
+      // The landing page's grid links every component under /components, so an
+      // AI one needs a way back to the folder it actually lives in.
+      {
+        source: '/docs/components/soundwave',
+        destination: '/docs/ai-components/soundwave',
+        permanent: true,
+      },
     ];
   },
 };

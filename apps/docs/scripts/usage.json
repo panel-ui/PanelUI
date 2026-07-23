@@ -1949,5 +1949,64 @@
       }
     ],
     "notes": "### How it is drawn\n\nThe geometry is honestly three-dimensional — points on a sphere, rotated and tilted, projected orthographically, with depth carried by dot size and ink weight. React Native has no 2D canvas to paint that into, and one animated SVG node per dot would be two hundred native prop writes a frame, which no amount of tuning survives.\n\nSo the dots are quantised into eight ink levels and each level is emitted as a *single* path of circle arcs. Eight animated props a frame whatever the dot count, and depth ordering comes free — depth is what drives the ink in the first place, so painting faint to strong paints far to near. Everything from the trigonometry to the path strings runs in one worklet on the UI thread; React renders once and then never again.\n\n### Size is two designs, not a scale\n\nTwo tunings ship. At or below 32px the orb uses far fewer, proportionally much larger dots moving faster, because the motion has to read at a size where the individual dots barely do. Sizes in between are scaled from the nearer tuning; the dot radii scale sub-linearly, which is what keeps a small orb from becoming a smudge and a large one from becoming beads.\n\n### Motion and accessibility\n\n`role=\"img\"` with a per-state label out of the box; `accessibilityLabel` overrides it with something more specific — “Analysing the repository…” beats “Searching”. Under `prefers-reduced-motion` the orb renders one representative frame and stops, which is why a paused orb still shows a shape."
+  },
+  "soundwave": {
+    "intro": "Draws the level of a voice, in four looks: capsules over a microphone button, a metering strip for a transcript, a travelling wave for a reply being spoken, and an ambient glow that fills a screen.\n\nIt draws a level; it does not record one. Your app owns the recorder and hands over a number between 0 and 1 — so there is no audio dependency here, and the same component works against a real meter, a synthesised one, or a remote peer's. With no level at all it animates plausible motion for the current `state`, which is enough to build and review a voice screen before any audio exists.",
+    "usage": "<Soundwave variant=\"pills\" state=\"listening\" level={level} />",
+    "extraImports": [
+      "Card",
+      "MicIcon",
+      "Text"
+    ],
+    "examples": [
+      {
+        "title": "Driving it from a recorder",
+        "description": "A recorder reports every 30–60ms. Putting that in React state is dozens of renders a second for a number that only moves pixels, so `level` also takes a `SharedValue` — write metering straight into it and nothing above the wave re-renders. A plain number is accepted too, and smoothed identically; it is the right choice for something slow, like a server-side speaking flag.",
+        "code": "const level = useSharedValue(0);\n\nuseEffect(() => {\n  recorder.onMetering(({ db }) => {\n    // dBFS is negative and logarithmic; the wave wants 0–1.\n    level.value = Math.max(0, (db + 60) / 60);\n  });\n}, [level]);\n\n<Soundwave variant=\"pills\" level={level} />"
+      },
+      {
+        "title": "A metering strip in a transcript",
+        "description": "`static` gives every bar a band of the current level, for a live meter. `scrolling` keeps a history that slides across with the newest sample at the trailing edge, for a recording in progress. `centered` decides whether bars grow from the middle out or up from a baseline.",
+        "code": "<Card>\n  <Card.Content className=\"flex-row items-center gap-3 p-4\">\n    <MicIcon size={18} />\n    <View className=\"flex-1\">\n      <Soundwave\n        variant=\"bars\"\n        mode=\"scrolling\"\n        centered={false}\n        bars={28}\n        barWidth={5}\n        height={40}\n        level={level}\n      />\n    </View>\n    <Text size=\"sm\" muted>0:12</Text>\n  </Card.Content>\n</Card>"
+      },
+      {
+        "title": "Real frequency bands",
+        "description": "If your app already runs an analysis, hand the bands over directly with `levels` and `bars` in `static` mode draws them instead of synthesising a shape. They are resampled to the bar count, so the two numbers do not have to match.",
+        "code": "<Soundwave variant=\"bars\" levels={bands} bars={24} />"
+      },
+      {
+        "title": "The state, when there is no level yet",
+        "description": "`state` always sets what a screen reader announces. With no `level` supplied it also picks the motion: `idle` barely breathes, `listening` and `speaking` run layered waves at unrelated tempi so neither repeats on a beat, and `thinking` is slower and shallower than both.",
+        "code": "<Soundwave variant=\"line\" state=\"speaking\" />\n<Soundwave variant=\"line\" state=\"thinking\" />\n<Soundwave variant=\"line\" state=\"idle\" />"
+      },
+      {
+        "title": "Ambient, over a whole screen",
+        "description": "`ambient` positions itself absolutely and takes no touches, so it goes behind a screen's content rather than wrapping it. `radius` traces the screen's own corners. It takes its colour from `--color-info` rather than the foreground, since a bloom in the text colour reads as a shadow.",
+        "code": "<View className=\"flex-1\">\n  <Soundwave variant=\"ambient\" state=\"listening\" level={level} radius={40} />\n\n  <View className=\"flex-1 items-center justify-center\">\n    <Text size=\"xl\">Start chatting anytime</Text>\n  </View>\n</View>"
+      }
+    ],
+    "versions": [
+      {
+        "title": "Capsules",
+        "description": "The voice-mode screen: a few big capsules over a microphone button. Each capsule runs at its own hashed tempo and phase, so the group responds to one level without moving as a block, and the middle ones lead — a flat profile reads as a progress bar.",
+        "code": "<Soundwave\n  variant=\"pills\"\n  state=\"listening\"\n  level={level}\n  height={120}\n  barWidth={34}\n  barGap={12}\n/>"
+      },
+      {
+        "title": "Metering bars",
+        "description": "The same strip in both modes, at the size it is actually used: static bands, a scrolling history, and a compact recording row with a duration beside it.",
+        "code": "<Soundwave variant=\"bars\" mode=\"static\" level={level} height={64} />\n\n<Soundwave variant=\"bars\" mode=\"scrolling\" level={level} height={64} />"
+      },
+      {
+        "title": "Travelling wave",
+        "description": "One ribbon, tapered to nothing at both ends so it leaves and meets the edges flat instead of stopping at a hard cut. Shown at full size with a state switcher, and again inline under a reply.",
+        "code": "<Soundwave variant=\"line\" state=\"speaking\" height={96} />\n\n// Inline in a bubble, where the stroke has to be finer.\n<Soundwave variant=\"line\" state=\"speaking\" height={36} barWidth={2} />"
+      },
+      {
+        "title": "Ambient glow",
+        "description": "A bloom rising off the bottom edge and a rim of light around the rest, both breathing on the level — a glow that only changes opacity reads as a screen dimming, one that also grows reads as something in the room getting louder.",
+        "code": "<Soundwave variant=\"ambient\" state=\"listening\" level={level} radius={40} />"
+      }
+    ],
+    "notes": "**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them.\n\nLevels are smoothed with a fast attack and a slow release, which is what makes a meter read as a meter — it snaps up on a syllable and falls back gently instead of chattering around every sample. `sensitivity` multiplies the incoming value before it is clamped, for a quiet source.\n\n`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. Both measure their own width, so they need a parent with one.\n\n`paused` and the system's reduced-motion setting both hold a representative frame rather than clearing to a flat line: a stopped wave is not an empty one."
   }
 }

@@ -11,9 +11,20 @@ import { COMPONENTS_BY_SLUG, type Demo } from '../../../src/data/components';
  * demonstrates nothing except that it does not fit — so it is listed,
  * described, and opened on a screen of its own.
  */
-function VersionRow({ slug, demo }: { slug: string; demo: Demo }) {
+function VersionRow({ slug, demo, index }: { slug: string; demo: Demo; index: number }) {
   return (
-    <Item size="sm" onPress={() => router.push(`/components/${slug}/${demo.id}`)}>
+    <Item
+      variant="muted"
+      size="sm"
+      onPress={() => router.push(`/components/${slug}/${demo.id}`)}
+    >
+      {/* Numbered, because "version three" is how these get talked about — and
+          a filled row needs something on its leading edge to sit against. */}
+      <Item.Media variant="icon">
+        <Text size="sm" weight="medium" muted>
+          {index + 1}
+        </Text>
+      </Item.Media>
       <Item.Content>
         <Item.Title>{demo.label}</Item.Title>
         {demo.description ? <Item.Description>{demo.description}</Item.Description> : null}
@@ -68,12 +79,11 @@ export default function ComponentDetailScreen() {
             <Text size="xs" weight="semibold" muted className="mb-4 uppercase tracking-wider">
               Versions
             </Text>
-            <Item.Group>
+            {/* Gaps, not hairlines: each row is its own filled surface now, and
+                a separator between two cards reads as a mistake. */}
+            <Item.Group className="gap-2">
               {versions.map((demo, index) => (
-                <View key={demo.id}>
-                  {index > 0 ? <Item.Separator /> : null}
-                  <VersionRow slug={entry.slug} demo={demo} />
-                </View>
+                <VersionRow key={demo.id} slug={entry.slug} demo={demo} index={index} />
               ))}
             </Item.Group>
           </View>

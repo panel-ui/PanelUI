@@ -33,13 +33,6 @@ const switchVariants = tv({
 
 const TRAVEL: Record<'sm' | 'md', number> = { sm: 16, md: 20 };
 
-/**
- * Row height given to the native host. It is told its size rather than asked
- * to measure the platform's own content, which arrives a frame late and leaves
- * the control collapsed until something forces a second pass.
- */
-const NATIVE_HEIGHT = 32;
-
 export interface SwitchProps extends VariantProps<typeof switchVariants> {
   className?: string;
   value: boolean;
@@ -84,7 +77,11 @@ export const Switch = forwardRef<View, SwitchProps>(
     if (nativeUI) {
       const { Host, Switch: NativeSwitch } = nativeUI;
       return (
-        <Host style={{ height: NATIVE_HEIGHT }}>
+        // A platform toggle has a definite intrinsic size on both platforms,
+        // so the host is left to follow it. Pinning the host to a number
+        // instead is what leaves the control laid out against a box it never
+        // agreed to, and settling into it a frame later.
+        <Host matchContents>
           <NativeSwitch
             value={value}
             onValueChange={(next: boolean) => onValueChange?.(next)}

@@ -93,9 +93,6 @@ const sliderVariants = tv({
 /** Thumb width per size. Wider than it is tall, so the pill reads as a grip. */
 const THUMB_WIDTH: Record<'sm' | 'md' | 'lg', number> = { sm: 24, md: 28, lg: 32 };
 
-/** Row height reserved for the platform's own slider. */
-const NATIVE_HEIGHT = 32;
-
 type SliderVariantProps = VariantProps<typeof sliderVariants>;
 
 export interface SliderProps extends Omit<SliderVariantProps, 'disabled'> {
@@ -308,10 +305,10 @@ export const Slider = forwardRef<View, SliderProps>(
       return (
         <View ref={ref} className={slots.root({ className })}>
           {header}
-          {/* Told its height rather than left to measure the platform's own
-              content, which arrives a frame late — a host that has to work its
-              size out renders at nothing and then jumps. */}
-          <Host style={{ height: NATIVE_HEIGHT }}>
+          {/* A slider has no intrinsic width — it fills whatever it is given —
+              so the width comes from ordinary layout and only the height is
+              matched to the platform's content. */}
+          <Host matchContents={{ vertical: true }}>
             <NativeSlider
               value={value}
               onValueChange={(next: number) => {

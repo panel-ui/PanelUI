@@ -90,42 +90,58 @@ overlays, and the toast viewport.
 
 | Component | What it does |
 | --- | --- |
-| `Accordion` | Collapsible sections — five variants, single or multiple selection |
-| `Alert` | Status message with a built-in icon — info, success, warning, destructive |
-| `Avatar` | User image with initials fallback, four sizes, `Avatar.Badge` overlay |
-| `Badge` | Status label, dot, or a count clamped at 99+ |
-| `BottomSheet` | Draggable bottom sheet with swipe-to-dismiss |
-| `Button` | Variants (including social sign-in), sizes, loading, theme-aware icon slots |
-| `Card` | Content surface with `Header`, `Content` and `Footer` |
-| `Checkbox` | Animated checkbox with label, description, and a checkable card variant |
-| `Dialog` | Modal dialog with backdrop, title, description and footer actions |
-| `EmptyState` | Placeholder for an empty list or screen, with a stacked-icon media slot |
-| `Frame` | Widget shell — header row with action, inset panel of rows, caption footer |
+| `Accordion` | Collapsible sections with single or multiple selection |
+| `Alert` | Status message with a built-in icon |
+| `Attachment` | File row with upload states, built on Item |
+| `Avatar` | User image with an initials fallback and an optional badge overlay |
+| `Badge` | Compact status label, dot, or notification count |
+| `BottomSheet` | Draggable sheet anchored to the bottom of the screen |
+| `Button` | Pressable action with variants, sizes, loading state and icon slots |
+| `Card` | Content surface with header, body and footer |
+| `Checkbox` | Animated checkbox, as a row or a selectable card |
+| `Chip` | Interactive pill — a filter, a tag, or a removable token |
+| `Dialog` | Modal dialog with a backdrop and footer actions |
+| `EmptyState` | Placeholder for a list or screen with no content |
+| `Frame` | Widget shell — a card of rows sitting in a titled tray |
+| `HeatmapChart` | Contribution grid with a themed colour ramp and a readout |
 | `Input` | Text field with label, description and error message |
-| `InputGroup` | Input with leading and trailing decorators, auto-measured |
+| `InputGroup` | Input with leading and trailing decorators |
+| `Item` | Row of media, text and actions for lists and settings |
 | `Label` | Form field label with required, invalid and disabled states |
-| `Progress` | Determinate and indeterminate progress bar, optionally captioned |
+| `LineChart` | Animated time series, drawn on the UI thread |
+| `Marker` | Inline note between conversation turns |
+| `Message` | Chat turn with avatar, bubble, header and footer |
+| `MessageScroller` | Scroll behaviour a chat transcript needs |
+| `Popover` | Panel anchored to the element that opened it |
+| `Progress` | Determinate and indeterminate progress bar |
 | `RadioGroup` | Single-select list of options |
+| `ScrollCanvas` | Image frame whose contents move as you scroll |
 | `ScrollFade` | Fades the edges of a scroll container |
-| `SectionRail` | Floating section navigator — bars that expand into a jump list |
-| `Select` | Picker shown in a bottom sheet, in place, or floating over the page |
+| `ScrollText` | Text that resolves word by word as you scroll |
+| `SectionRail` | Floating section navigator for a long screen |
+| `Select` | Picker shown in a bottom sheet, expanded in place, or floating over the page |
+| `Separator` | Horizontal or vertical rule between content |
 | `Shimmer` | Animated highlight sweeping across content |
 | `Skeleton` | Shimmer placeholder for loading content |
 | `Slider` | Pick a value by dragging a thumb along a track |
 | `Spinner` | Indeterminate loading indicator |
-| `Steps` | Stepper for multi-step flows, horizontal or vertical |
+| `Steps` | Stepper for multi-step flows |
+| `Surface` | Elevated container with a variant ladder |
 | `Switch` | Animated on/off toggle |
-| `Tabs` | Segmented navigation with animated indicator |
+| `Tabs` | Segmented navigation with an animated indicator |
+| `ThinkingOrb` | Dotted orb saying which kind of busy an agent is |
+| `Timeline` | Vertical sequence of events |
+| `Toast` | Transient notification queue with swipe to dismiss |
 | `ToggleButton` | A button that stays down, on its own or in a group |
-| `Timeline` | Vertical sequence of events — dot, icon, numbered, card or compact, with per-item tones |
-| `Toast` | Transient notification queue with swipe-to-dismiss |
-| `Typography` | Semantic text presets — `h1`–`h6`, body sizes, inline code |
+| `Typography` | Semantic text presets |
 
-Plus `PanelUIProvider`, `Portal`, `AnimatedPressable`, `Text`, a set of SVG icons (with brand
-marks for Google, Facebook and Apple), and the `cn` class-merging helper.
+Plus `PanelUIProvider`, `Portal`, `AnimatedPressable`, `KeyboardAvoider`, `ScrollProgress`,
+`Text`, a set of SVG icons (with brand marks for Google, Facebook and Apple), and the `cn`
+class-merging helper.
 
 **Hooks:** `useTheme`, `useThemeMode`, `useToast`, `useCopyToClipboard`, `useDisclosure`,
-`useBreakpoint`, `useKeyboard`, `useDebouncedValue`, `usePrevious`.
+`useBreakpoint`, `useKeyboard`, `useKeyboardAvoidance`, `useScrollSections`,
+`useRevealProgress`, `useDebouncedValue`, `usePrevious`.
 
 Icons inside a coloured surface inherit a readable colour automatically — `Button` provides the
 foreground its variant reads against, so an icon in `startContent` follows the theme without a

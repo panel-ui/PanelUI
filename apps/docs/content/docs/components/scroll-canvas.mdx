@@ -1,0 +1,138 @@
+---
+title: ScrollCanvas
+description: Image frame whose contents move as you scroll.
+status: new
+---
+
+The counterpart to [ScrollText](/docs/components/scroll-text): the same scrubbed reveal applied to a picture. The frame stays where the layout puts it and the image moves *inside* it, which is what separates a parallax from a thing sliding about the page.
+
+## Installation
+
+ScrollCanvas ships with the library — no separate install.
+
+```tsx
+import { ScrollCanvas, ScrollProgress } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add scroll-canvas
+```
+
+## Usage
+
+```tsx
+<ScrollProgress>
+  <ScrollView>
+    <ScrollCanvas source={{ uri }} effect="parallax" />
+  </ScrollView>
+</ScrollProgress>
+```
+
+## Examples
+
+### The four effects
+
+They are four different jobs. `parallax` drifts the image against the scroll so the frame reads as a window onto something further away; `zoom` settles it from slightly oversized to its natural size; `reveal` wipes it in from the bottom edge; `sequence` picks a frame out of a series, so the reader scrubs an animation with their thumb.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="parallax" />
+<ScrollCanvas source={{ uri }} effect="zoom" />
+<ScrollCanvas source={{ uri }} effect="reveal" />
+<ScrollCanvas sources={frames} effect="sequence" />
+```
+
+### Scrubbing a sequence
+
+Every frame stays mounted and its opacity is switched, rather than one image whose source is swapped. A swap crosses back into JS at each step and then waits on a decode, so a fast scrub shows the previous frame or nothing at all. Keep it to a couple of dozen frames — each one is a decoded bitmap held for as long as the canvas is mounted.
+
+```tsx
+<ScrollCanvas
+  effect="sequence"
+  sources={frames}
+  start={0.95}
+  end={0.1}
+/>
+```
+
+### Shape and travel
+
+`aspectRatio` sets the frame; `distance` multiplies how far the effect moves. A parallaxing image is drawn taller than its frame so the drift never exposes an edge — pushing `distance` far past `1` spends more of that budget than there is.
+
+```tsx
+<ScrollCanvas source={{ uri }} aspectRatio={1} distance={1.6} />
+
+<ScrollCanvas
+  source={{ uri }}
+  aspectRatio={21 / 9}
+  className="rounded-none"
+/>
+```
+
+## Versions
+
+### Parallax
+
+The image drifts against the scroll inside a frame that stays put. It is drawn taller than the frame so the drift never exposes an edge.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="parallax" />
+```
+
+### Zoom
+
+It settles from slightly oversized to its natural size as the frame crosses the viewport.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="zoom" />
+```
+
+### Reveal
+
+A wipe uncovers it from the bottom edge up. A cover that retreats rather than a height that grows — animating a height relayouts the image inside it every frame.
+
+```tsx
+<ScrollCanvas source={{ uri }} effect="reveal" />
+```
+
+### Sequence
+
+The scroll position picks the frame, so the thumb scrubs the animation. Every frame stays mounted and switches opacity; swapping one image's source would cross into JS and then wait on a decode.
+
+```tsx
+<ScrollCanvas
+  effect="sequence"
+  sources={frames}
+  start={0.95}
+  end={0.1}
+/>
+```
+
+## API Reference
+
+### ScrollCanvas
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `source` | `ImageSourcePropType` | — | The image. Ignored by `sequence`, which reads `sources` instead. |
+| `sources` | `ImageSourcePropType[]` | — | The frames a `sequence` scrubs through, in order. Keep it to a couple of dozen — every frame is a decoded bitmap held in memory for the whole time the canvas is mounted. |
+| `effect` | `ScrollCanvasEffect` | `'parallax'` | Which of the four scroll effects to apply. |
+| `aspectRatio` | `number` | `16 / 10` | Width ÷ height of the frame. |
+| `distance` | `number` | `1` | Multiplier on how far the effect travels. |
+| `start` | `number` | `1` | Where down the viewport the frame's top sits when the effect starts, as a fraction of the viewport height. |
+| `end` | `number` | `0.3` | Where its bottom sits when the effect completes. Smaller is a longer scrub. |
+| `progress` | `SharedValue<number>` | — | Drive the effect from a value of your own rather than from scroll. |
+| `enabled` | `boolean` | `true` | Set false to render the image plainly. |
+| `imageClassName` | `string` | — | Extra classes for the image itself, rather than the frame around it. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+The frame clips, so the image can be oversized and moved without disturbing anything around it. `reveal` is a cover that retreats rather than a height that grows, because animating a height relayouts the image inside it every frame — and it is a wipe rather than a fade so the frame keeps its shape while it fills.
+
+“Canvas” here is the frame the pictures move behind, not a drawing surface: nothing is rasterised and there is no `<canvas>` involved.
+
+Under `useReducedMotion`, or with `enabled={false}`, the image renders plainly at rest.

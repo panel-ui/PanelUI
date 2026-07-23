@@ -158,6 +158,71 @@ function JumpToLatest() {
 }
 ```
 
+## Versions
+
+### Following a streamed reply
+
+`autoScroll` pins to the bottom while a reply streams — but only while you are already there. Scroll up mid-stream and it stops chasing, because a transcript that drags you back down while you are reading is worse than one that does not follow at all.
+
+```tsx
+<MessageScroller autoScroll className="flex-1">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {turns.map((turn) => (
+        <MessageScroller.Item key={turn.id}>
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+  <MessageScroller.Button />
+</MessageScroller>
+```
+
+### Loading history
+
+Older turns are prepended. The message being read stays exactly where it is — content added above you must not move you, which is the whole difficulty of an infinite transcript.
+
+```tsx
+<MessageScroller className="flex-1" defaultScrollPosition="end">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      <Button variant="ghost" size="sm" onPress={loadOlder}>
+        Load older
+      </Button>
+      {turns.map((turn) => (
+        <MessageScroller.Item key={turn.id}>
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+  <MessageScroller.Button />
+</MessageScroller>
+```
+
+### Opening a saved thread
+
+`last-anchor` opens on the last turn that *started* something, rather than at the bottom of the reply to it. Reopening a thread at the end of a long answer shows you the end of an answer to a question you can no longer see.
+
+```tsx
+<MessageScroller className="flex-1" defaultScrollPosition="last-anchor">
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      <Marker variant="separator">
+        <Marker.Content>Yesterday</Marker.Content>
+      </Marker>
+      {turns.map((turn) => (
+        <MessageScroller.Item key={turn.id} anchor={turn.role === "user"}>
+          <Turn turn={turn} />
+        </MessageScroller.Item>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+  <MessageScroller.Button target="start" />
+</MessageScroller>
+```
+
 ## API Reference
 
 ### MessageScroller

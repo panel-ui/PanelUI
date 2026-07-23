@@ -158,6 +158,25 @@ ${u.examples.map((ex) => [
   }
 
   /*
+   * The full-screen demos in the example app, written out with their code.
+   *
+   * A component whose behaviour only shows at full height is listed on its own
+   * screen there rather than rendered inline — and until now the docs said
+   * nothing about any of them, so the one place a reader could find out what a
+   * version *is* was to install the example app and go looking. Each entry is
+   * the same demo, described and with the code you would write for it.
+   */
+  if (u.versions?.length) {
+    sections.push(`## Versions
+
+${u.versions.map((v) => [
+  `### ${v.title}`,
+  v.description ? `\n\n${v.description}` : '',
+  `\n\n\`\`\`tsx\n${v.code}\n\`\`\``,
+].join('')).join('\n\n')}`);
+  }
+
+  /*
    * `tv()` variant keys are an implementation detail, and only some of them
    * are public props on the root. A key can be internal state the component
    * derives for itself, or a prop that belongs to a compound part rather than

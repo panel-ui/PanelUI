@@ -134,7 +134,7 @@
   {
     "name": "frame",
     "type": "registry:ui",
-    "description": "Widget shell with a titled header, an inset panel and a caption.",
+    "description": "Widget shell — a card of rows sitting in a titled tray.",
     "registryDependencies": [
       "cn",
       "icons",
@@ -146,6 +146,15 @@
     "type": "registry:lib",
     "description": "Optional bridge to the platform haptic engine, behind the `haptics` prop.",
     "registryDependencies": []
+  },
+  {
+    "name": "heatmap-chart",
+    "type": "registry:ui",
+    "description": "Contribution grid with a themed colour ramp and a readout.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
   },
   {
     "name": "icons",
@@ -160,7 +169,8 @@
     "registryDependencies": [
       "keyboard-avoider",
       "label",
-      "text"
+      "text",
+      "use-keyboard-avoidance"
     ]
   },
   {
@@ -298,10 +308,34 @@
     "registryDependencies": []
   },
   {
+    "name": "scroll-canvas",
+    "type": "registry:ui",
+    "description": "Image frame whose contents move as you scroll.",
+    "registryDependencies": [
+      "cn",
+      "use-reveal-progress"
+    ]
+  },
+  {
     "name": "scroll-fade",
     "type": "registry:ui",
     "description": "Fades the edges of a scroll container.",
     "registryDependencies": []
+  },
+  {
+    "name": "scroll-progress",
+    "type": "registry:ui",
+    "description": "scroll-progress.",
+    "registryDependencies": []
+  },
+  {
+    "name": "scroll-text",
+    "type": "registry:ui",
+    "description": "Text that resolves word by word as you scroll.",
+    "registryDependencies": [
+      "text",
+      "use-reveal-progress"
+    ]
   },
   {
     "name": "section-rail",
@@ -410,6 +444,14 @@
     "registryDependencies": []
   },
   {
+    "name": "thinking-orb",
+    "type": "registry:ui",
+    "description": "Dotted orb saying which kind of busy an agent is.",
+    "registryDependencies": [
+      "cn"
+    ]
+  },
+  {
     "name": "timeline",
     "type": "registry:ui",
     "description": "Vertical sequence of events.",
@@ -491,6 +533,14 @@
     "type": "registry:hook",
     "description": "The value from the previous render.",
     "registryDependencies": []
+  },
+  {
+    "name": "use-reveal-progress",
+    "type": "registry:hook",
+    "description": "use-reveal-progress.",
+    "registryDependencies": [
+      "scroll-progress"
+    ]
   },
   {
     "name": "use-scroll-sections",

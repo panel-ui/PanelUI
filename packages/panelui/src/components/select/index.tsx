@@ -87,14 +87,6 @@ const selectVariants = tv({
 
 export type SelectPresentation = 'sheet' | 'inline' | 'overlay';
 
-/**
- * Height given to the native host per appearance — a menu is a compact button,
- * a wheel is a full rotor. The host is told its size rather than asked to
- * measure the platform's content, which arrives a frame late and leaves the
- * control collapsed until something forces a second pass.
- */
-const NATIVE_HEIGHT = { menu: 44, wheel: 216 } as const;
-
 interface SelectContextValue {
   value: string | undefined;
   onSelect: (value: string) => void;
@@ -279,7 +271,10 @@ function SelectRoot({
     // The native picker has no empty state, so an unset value shows the first
     // option rather than the placeholder.
     return (
-      <Host style={{ height: NATIVE_HEIGHT[nativeAppearance] }}>
+      // A picker fills the width of the row it sits in and reports its own
+      // height — a menu is a compact button, a wheel a full rotor, and the
+      // platform is the only thing that knows which by how much.
+      <Host matchContents={{ vertical: true }}>
         <Picker
           selectedValue={value ?? options[0]?.value ?? ''}
           onValueChange={(next: string) => onValueChange(next)}

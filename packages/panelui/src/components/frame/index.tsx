@@ -1,23 +1,29 @@
 /**
- * Frame — a widget shell: a titled surface wrapping an inset panel of rows,
- * with an optional action on the header row and a caption underneath.
+ * Frame — a widget shell: a card of rows sitting in a tray, with the tray's
+ * one exposed strip along the top carrying the title.
  *
- * Layout follows the nested-radius rule (inner radius = outer radius minus the
- * gap between them), which is why the panel is `rounded-xl` inside a
- * `rounded-2xl` shell. Since v0.4.0 the radius scale is theme-scoped, so this
- * relationship holds while the absolute values change per theme.
+ * The two surfaces are nested rather than stacked, and only one edge of the
+ * outer one is ever visible. The panel is flush to the shell's left, right and
+ * bottom, so the shell reads as something the card is *sitting in* rather than
+ * as a border around it — and the strip left at the top is the header, which
+ * is why the header needs no rule under it and no background of its own.
+ *
+ * The shell's radius is the larger of the two, and the panel's top corners are
+ * tighter. That is the reverse of the usual nested-radius rule, and it is
+ * deliberate: with only the top corners free, matching them would make the two
+ * surfaces read as one misdrawn shape. The panel's bottom corners are not set
+ * at all — the shell clips them, so they take its radius exactly.
  *
  * ```tsx
  * <Frame>
  *   <Frame.Header>
- *     <Frame.Title>Usage Type</Frame.Title>
- *     <Frame.Action>Amount</Frame.Action>
+ *     <Frame.Title>Agent monitor</Frame.Title>
+ *     <Frame.Action>All agents under 25% token limit</Frame.Action>
  *   </Frame.Header>
  *   <Frame.Panel>
  *     <Frame.Row>…</Frame.Row>
  *     <Frame.Row>…</Frame.Row>
  *   </Frame.Panel>
- *   <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
  * </Frame>
  * ```
  *
@@ -41,15 +47,24 @@ import { cn } from '../../utils/cn';
 const frameVariants = tv({
   slots: {
     root: '',
-    panel: 'overflow-hidden rounded-xl border border-border bg-card',
+    // Flush left, right and bottom: no side or bottom border, because the
+    // shell's own edge is already there, and no bottom radius, because the
+    // shell clips it. Only the top corners and the rule under the header are
+    // the panel's to draw.
+    panel: 'overflow-hidden rounded-t-2xl border-t border-border bg-card',
   },
   variants: {
     variant: {
-      default: { root: 'rounded-2xl border border-border bg-surface p-1.5' },
+      // `overflow-hidden` is load-bearing — it is what makes the panel's
+      // bottom corners take the shell's radius instead of squaring off
+      // against it.
+      default: {
+        root: 'overflow-hidden rounded-3xl border border-border bg-surface',
+      },
       // No shell: the panel is the whole widget. For a Frame nested inside a
       // card that already draws a border, where the shell's own edge sitting
       // just inside it reads as a double line.
-      plain: { root: '', panel: 'rounded-2xl' },
+      plain: { root: '', panel: 'rounded-3xl border border-border' },
     },
   },
   defaultVariants: {
@@ -83,15 +98,16 @@ export interface FrameHeaderProps extends FrameProps {
 }
 
 /**
- * The header row: title on the left, `Frame.Action` on the right. Add
- * `className="flex-col items-start"` when you want a description underneath.
+ * The header row — the strip of shell left exposed above the panel. Title on
+ * the left, `Frame.Action` on the right. Add `className="flex-col items-start"`
+ * when you want a description underneath.
  */
 const FrameHeader = forwardRef<View, FrameHeaderProps>(
   ({ className, ...props }, ref) => (
     <View
       ref={ref}
       className={cn(
-        'flex-row items-center justify-between gap-3 px-3 pb-2.5 pt-2',
+        'flex-row items-center justify-between gap-3 px-4 pb-3 pt-2.5',
         className
       )}
       {...props}
@@ -100,14 +116,12 @@ const FrameHeader = forwardRef<View, FrameHeaderProps>(
 );
 FrameHeader.displayName = 'Frame.Header';
 
+/**
+ * Muted by default. The header is a caption on the tray the card sits in, not
+ * a heading over a section — the card's own rows carry the weight.
+ */
 const FrameTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => (
-  <Text
-    ref={ref}
-    size="base"
-    weight="medium"
-    className={cn('text-foreground', className)}
-    {...props}
-  />
+  <Text ref={ref} size="sm" muted className={className} {...props} />
 ));
 FrameTitle.displayName = 'Frame.Title';
 
@@ -123,7 +137,7 @@ const FrameAction = forwardRef<View, FrameActionProps>(
   ({ className, children, ...props }, ref) => (
     <View ref={ref} className={cn('flex-row items-center gap-2', className)} {...props}>
       {typeof children === 'string' ? (
-        <Text size="base" muted>
+        <Text size="sm" muted>
           {children}
         </Text>
       ) : (
@@ -177,8 +191,8 @@ export interface FramePanelProps extends FrameProps {
 }
 
 /**
- * The inset card holding the frame's content — the raised surface sitting in
- * from the shell's edges, with its own smaller radius.
+ * The card holding the frame's content — flush to the shell on three sides,
+ * with the header strip above it.
  */
 const FramePanel = forwardRef<View, FramePanelProps>(
   ({ className, dividers = true, children, ...props }, ref) => (
@@ -284,30 +298,6 @@ FrameSection.displayName = 'Frame.Section';
 /** Parts the panel divides. Declared after them, since it holds references. */
 const DIVIDABLE = new Set<unknown>([FrameRow, FrameSection]);
 
-export interface FrameFooterProps extends FrameProps {
-  children?: ReactNode;
-}
-
-/** Muted caption under the panel. Strings are wrapped for you. */
-const FrameFooter = forwardRef<View, FrameFooterProps>(
-  ({ className, children, ...props }, ref) => (
-    <View
-      ref={ref}
-      className={cn('flex-row items-center gap-2 px-3 pb-1.5 pt-2.5', className)}
-      {...props}
-    >
-      {typeof children === 'string' ? (
-        <Text size="sm" muted>
-          {children}
-        </Text>
-      ) : (
-        children
-      )}
-    </View>
-  )
-);
-FrameFooter.displayName = 'Frame.Footer';
-
 export const Frame = Object.assign(FrameRoot, {
   Header: FrameHeader,
   Title: FrameTitle,
@@ -316,5 +306,4 @@ export const Frame = Object.assign(FrameRoot, {
   Panel: FramePanel,
   Section: FrameSection,
   Row: FrameRow,
-  Footer: FrameFooter,
 });

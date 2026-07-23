@@ -61,16 +61,23 @@ npx panelui-cli@latest add line-chart
 
 ### A chart card with a crosshair
 
-Pair it with `Frame`, and add `LineChart.Tooltip`. Dragging across the chart moves a crosshair and floats a small label at the point with the value — the minimal readout a drag wants. The label tracks the finger on the UI thread; only its text crosses back into JS, and only when the active index changes.
+Pair it with `Frame`, and add `LineChart.Tooltip`. Dragging across the chart moves a crosshair and floats a small label at the point with the value — the minimal readout a drag wants. The label tracks the finger on the UI thread; only its text crosses back into JS, and only when the active index changes. A stat band above the chart, inside the panel. `Frame.Header` is a caption on the tray the card sits in — one muted line — so a title, a legend, a headline number and a subtitle all crammed into it is four levels of hierarchy in a space with room for one, and the number the card is actually about ends up the hardest part to find.
 
 ```tsx
 <Frame>
-  <Frame.Header className="flex-col items-start gap-0.5">
+  <Frame.Header>
     <Frame.Title>Monthly Revenue</Frame.Title>
-    <Text size="sm" muted>Press and drag across the chart to inspect values</Text>
+    <Frame.Action>Drag to inspect</Frame.Action>
   </Frame.Header>
 
-  <Frame.Panel className="p-0">
+  <Frame.Panel>
+    <View className="flex-row items-start justify-between px-4 pb-2 pt-3.5">
+      <View className="gap-0.5">
+        <Text size="2xl" weight="bold">$317,904</Text>
+        <Text size="sm" muted>Last 12 months</Text>
+      </View>
+    </View>
+
     <LineChart data={revenue} xDataKey="month">
       <LineChart.Grid />
       <LineChart.Area dataKey="revenue" />
@@ -135,6 +142,186 @@ Add `LineChart.Skeleton` and drive `status`. While loading, a flat rule sits whe
   <LineChart.Line dataKey="revenue" />
   <LineChart.XAxis />
   <LineChart.Tooltip />
+</LineChart>
+```
+
+## Versions
+
+### Basic
+
+Two series sharing one axis, with the headline reading and the legend in a band above the chart rather than in the header. `curve="linear"` joins the points straight rather than easing between them, which is the honest choice when the readings are discrete.
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Traffic Source</Frame.Title>
+    <Frame.Action>Last 12 months</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <ChartStat value="292,000" caption="Sessions">
+      <LegendDot colorIndex={1} label="Organic" />
+      <LegendDot colorIndex={2} label="Paid Ads" />
+    </ChartStat>
+    <LineChart data={sessions} xDataKey="month" curve="linear" aspectRatio={1.7}>
+      <LineChart.Grid />
+      <LineChart.Line dataKey="organic" colorIndex={1} />
+      <LineChart.Line dataKey="paid" colorIndex={2} />
+      <LineChart.XAxis ticks={5} />
+      <LineChart.Tooltip formatValue={(v) => v.toLocaleString()} />
+    </LineChart>
+  </Frame.Panel>
+</Frame>
+```
+
+### With dots
+
+`showMarkers` puts a dot at every point. For a short series where each reading is a fact worth pointing at — on a hundred points it is noise.
+
+```tsx
+<LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+  <LineChart.Grid />
+  <LineChart.Line dataKey="revenue" showMarkers />
+  <LineChart.XAxis ticks={5} />
+  <LineChart.Tooltip formatValue={(v) => `$${(v / 1000).toFixed(1)}k`} />
+</LineChart>
+```
+
+### Crosshair
+
+Drag across the chart and a label rides the crosshair. The nearest index is resolved on the UI thread and only crosses into JS when it changes, so a drag costs a handful of re-renders rather than one per frame. The hint that it is draggable lives in the header's action slot, where one short line fits.
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Monthly Revenue</Frame.Title>
+    <Frame.Action>Drag to inspect</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <ChartStat value="$317,904" caption="Last 12 months" />
+    <LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+      <LineChart.Grid />
+      <LineChart.Area dataKey="revenue" />
+      <LineChart.Line dataKey="revenue" />
+      <LineChart.XAxis ticks={5} />
+    </LineChart>
+  </Frame.Panel>
+</Frame>
+```
+
+### Animated line
+
+The reveal plays once on mount; `replay()` on the chart ref runs it again. A data change redraws without replaying — repeating the reveal on every refresh turns an update into an animation.
+
+```tsx
+const chart = useRef<LineChartHandle>(null);
+
+<Button variant="ghost" size="sm" onPress={() => chart.current?.replay()}>
+  Replay
+</Button>
+
+<LineChart ref={chart} data={revenue} xDataKey="month">
+  <LineChart.Grid />
+  <LineChart.Area dataKey="revenue" />
+  <LineChart.Line dataKey="revenue" />
+</LineChart>
+```
+
+### Finance
+
+A balance, a delta and a range selector. The delta rides beside the number rather than under it — three stacked lines is what made this header a wall of text. Switching the range tweens the y-domain rather than swapping the path, so a series that grows is redrawn against a moving axis instead of jumping to a new shape.
+
+```tsx
+const [range, setRange] = useState("1M");
+
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Total balance</Frame.Title>
+    <Frame.Action>{range}</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <ChartStat value={`$${balance.toLocaleString()}`}>
+      <Text size="sm" className="text-success">+{delta}% this period</Text>
+    </ChartStat>
+    <View className="gap-3 px-3 pb-3">
+      <LineChart data={RANGES[range].data} xDataKey="t" aspectRatio={1.9}>
+        <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
+        <LineChart.Area dataKey="v" />
+        <LineChart.Line dataKey="v" />
+      </LineChart>
+      <Tabs value={range} onValueChange={setRange}>
+        <Tabs.List>
+          {Object.keys(RANGES).map((key) => (
+            <Tabs.Trigger key={key} value={key}>{key}</Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs>
+    </View>
+  </Frame.Panel>
+</Frame>
+```
+
+### Dashed comparison
+
+An actual against a target. The two are told apart by *shape* as well as colour, so the chart still reads for a colour-blind reader and in a screenshot printed in grey. The key sits in the panel, above the chart.
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Actual vs Target</Frame.Title>
+    <Frame.Action>2026</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <ChartLegendRow>
+      <LegendDot colorIndex={1} label="Actual" />
+      <DashedKey label="Target" />
+    </ChartLegendRow>
+    <LineChart data={revenue} xDataKey="month" aspectRatio={1.7}>
+      <LineChart.Grid />
+      <LineChart.Line dataKey="revenue" colorIndex={1} />
+      <LineChart.Line dataKey="target" colorIndex={2} dashArray="6,5" />
+      <LineChart.XAxis ticks={5} />
+    </LineChart>
+  </Frame.Panel>
+</Frame>
+```
+
+### Multi-line
+
+Four series across the chart token ramp. They share one y-domain, so they stay comparable — a per-series scale makes two lines look alike when they are orders of magnitude apart. Four keys wrap onto two rows on a narrow phone, which is another reason the legend belongs in the panel rather than in the header strip.
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Traffic Sources</Frame.Title>
+    <Frame.Action>Last 12 months</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    <ChartLegendRow>
+      <LegendDot colorIndex={1} label="Organic" />
+      <LegendDot colorIndex={2} label="Paid Ads" />
+      <LegendDot colorIndex={3} label="Referral" />
+      <LegendDot colorIndex={4} label="Social" />
+    </ChartLegendRow>
+    <LineChart data={traffic} xDataKey="month" aspectRatio={1.7}>
+      <LineChart.Grid />
+      <LineChart.Line dataKey="organic" colorIndex={1} />
+      <LineChart.Line dataKey="paid" colorIndex={2} />
+      <LineChart.Line dataKey="referral" colorIndex={3} />
+      <LineChart.Line dataKey="social" colorIndex={4} />
+      <LineChart.XAxis ticks={5} />
+    </LineChart>
+  </Frame.Panel>
+</Frame>
+```
+
+### KPI sparklines
+
+`compact` drops the axis padding so the line reaches the edges. Beside a headline number the shape is the whole point — a grid and an axis around it are furniture.
+
+```tsx
+<LineChart data={spark} xDataKey="i" aspectRatio={3} compact>
+  <LineChart.Area dataKey="v" colorIndex={1} />
+  <LineChart.Line dataKey="v" colorIndex={1} />
 </LineChart>
 ```
 
@@ -249,3 +436,9 @@ All three respect the system's reduce-motion setting: the chart renders at its f
 ### Sizing
 
 The chart fills its parent's width and takes its height from `aspectRatio`. Give it a wider ratio for a card and a squarer one for a narrow column; do not set a height directly, as the aspect ratio is what keeps the plot geometry stable while the layout settles.
+
+### Laying out a chart card
+
+`Frame.Header` is a caption on the tray the card sits in — one muted line, a title on the left and a short note or control on the right. The headline reading, the legend and any subtitle belong in the panel, in a band above the chart.
+
+Putting all of them in the header is the usual way a chart card goes wrong: four levels of hierarchy in a strip with room for one, and the number the card is actually about ends up the hardest thing on it to find. A legend of four keys makes it worse, because it wraps onto a second row on a narrow phone and pushes the chart down the card.

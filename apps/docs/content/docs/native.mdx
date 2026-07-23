@@ -79,9 +79,10 @@ system, do not pass `native`.
 loading button looks identical to an idle one. Disable it yourself, or do not
 use `native` on buttons that load.
 
-A native button **fills the width it is given**. Put two in a `flex-row` with
-`flex-1` on each to share a line, or in a narrower parent to shrink them —
-width is ordinary layout rather than something the button decides.
+A native button **sizes itself to its label**, the way a platform button is
+supposed to. It does not stretch to fill its container, which is why
+`fullWidth` is in the ignored list — wrap it if you need it placed rather than
+sized.
 
 ### Switch
 
@@ -156,14 +157,20 @@ two are iOS-only; Android snaps them to the nearest of half and full.
 
 ## Notes
 
-Every native control is given an explicit height, and takes its width from
-ordinary layout. None of them ask the platform to size the host for them.
+Every native control lets the host follow the platform's own size, and any
+control that needs a definite size is given one **on the control**, not on the
+host.
 
-That is not a stylistic choice. The platform measures its own content a frame
-late, and again whenever that content changes — so a host left to work its own
-size out renders at nothing on the first frame, collapsing against whatever
-sits above it, and jumps into place on the first press. Asking for one axis
-only does not avoid it. The answer is not to ask.
+That distinction is the whole of it. Sizing the host and leaving the control
+unsized inside it hands the platform a box the control never agreed to: SwiftUI
+and Compose both lay out against their own intrinsic size and only settle into
+the box when something forces a second pass — which for a button is the first
+press, and is what used to make it jump. A control with a definite size of its
+own has nothing left to recompute.
+
+Controls with no intrinsic width — the slider and the picker — match only their
+height and take their width from ordinary layout, since "as wide as the row"
+is not something the platform can work out on its own.
 
 The same reasoning applies inside the native sheet: its content is given a
 floor matching the first detent, because a hosted box shorter than the sheet

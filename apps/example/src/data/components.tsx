@@ -5,7 +5,7 @@
  * screen derives its counts from it, so adding a component means adding one
  * entry and nothing else.
  */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
@@ -40,11 +40,15 @@ import {
   FileIcon,
   Frame,
   GoogleIcon,
+  HeatmapChart,
+  type HeatmapCell,
+  buildHeatmapCalendar,
   InfoIcon,
   Input,
   InputGroup,
   ImageIcon,
   Item,
+  KeyboardAvoider,
   Label,
   LineChart,
   type LineChartHandle,
@@ -63,7 +67,10 @@ import {
   ShieldAlertIcon,
   ShieldCheckIcon,
   Select,
+  ScrollCanvas,
   ScrollFade,
+  ScrollProgress,
+  ScrollText,
   SectionRail,
   Separator,
   Shimmer,
@@ -75,6 +82,7 @@ import {
   Switch,
   Tabs,
   Text,
+  ThinkingOrb,
   XIcon,
   Timeline,
   Toast,
@@ -242,22 +250,15 @@ function ChartBasicVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-1">
-          <View className="w-full flex-row items-center justify-between">
-            <Frame.Title>Traffic Source</Frame.Title>
-            <View className="flex-row items-center gap-3">
-              <LegendDot colorIndex={1} label="Organic" />
-              <LegendDot colorIndex={2} label="Paid Ads" />
-            </View>
-          </View>
-          <Text size="2xl" weight="bold" className="mt-1">
-            292,000
-          </Text>
-          <Text size="sm" muted>
-            Sessions
-          </Text>
+        <Frame.Header>
+          <Frame.Title>Traffic Source</Frame.Title>
+          <Frame.Action>Last 12 months</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartStat value="292,000" caption="Sessions">
+            <LegendDot colorIndex={1} label="Organic" />
+            <LegendDot colorIndex={2} label="Paid Ads" />
+          </ChartStat>
           <LineChart data={SESSIONS} xDataKey="month" curve="linear" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="organic" colorIndex={1} />
@@ -281,7 +282,7 @@ function ChartDotsVersion() {
         <Frame.Header>
           <Frame.Title>Monthly Revenue</Frame.Title>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="revenue" showMarkers />
@@ -298,13 +299,12 @@ function ChartCrosshairVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-0.5">
+        <Frame.Header>
           <Frame.Title>Monthly Revenue</Frame.Title>
-          <Text size="sm" muted>
-            Press and drag across the chart to inspect values
-          </Text>
+          <Frame.Action>Drag to inspect</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartStat value="$317,904" caption="Last 12 months" />
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Area dataKey="revenue" />
@@ -332,7 +332,7 @@ function ChartAnimatedVersion() {
             </Button>
           </Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
           <LineChart ref={chart} data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Area dataKey="revenue" />
@@ -354,33 +354,35 @@ function ChartFinanceVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-0.5">
-          <Text size="sm" muted>
-            Total balance
-          </Text>
-          <Text size="2xl" weight="bold">
-            ${current.balance.toLocaleString()}.32
-          </Text>
-          <Text size="sm" className={up ? 'text-success' : 'text-destructive'}>
-            {up ? '+' : ''}
-            {current.delta}% this {range === '1D' ? 'day' : range === '1W' ? 'week' : 'period'}
-          </Text>
+        <Frame.Header>
+          <Frame.Title>Total balance</Frame.Title>
+          <Frame.Action>{range}</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="gap-3 p-3">
-          <LineChart data={current.data} xDataKey="t" aspectRatio={1.9}>
-            <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
-            <LineChart.Area dataKey="v" />
-            <LineChart.Line dataKey="v" />
-          </LineChart>
-          <Tabs value={range} defaultValue={range} onValueChange={setRange}>
-            <Tabs.List>
-              {Object.keys(RANGES).map((key) => (
-                <Tabs.Trigger key={key} value={key}>
-                  {key}
-                </Tabs.Trigger>
-              ))}
-            </Tabs.List>
-          </Tabs>
+        <Frame.Panel>
+          {/* The delta rides beside the number rather than under it — three
+              stacked lines is what made this header a wall of text. */}
+          <ChartStat value={`$${current.balance.toLocaleString()}.32`}>
+            <Text size="sm" className={up ? 'text-success' : 'text-destructive'}>
+              {up ? '+' : ''}
+              {current.delta}% this {range === '1D' ? 'day' : range === '1W' ? 'week' : 'period'}
+            </Text>
+          </ChartStat>
+          <View className="gap-3 px-3 pb-3">
+            <LineChart data={current.data} xDataKey="t" aspectRatio={1.9}>
+              <LineChart.Grid rows={3} dashArray="" opacity={0.4} />
+              <LineChart.Area dataKey="v" />
+              <LineChart.Line dataKey="v" />
+            </LineChart>
+            <Tabs value={range} defaultValue={range} onValueChange={setRange}>
+              <Tabs.List>
+                {Object.keys(RANGES).map((key) => (
+                  <Tabs.Trigger key={key} value={key}>
+                    {key}
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </Tabs>
+          </View>
         </Frame.Panel>
       </Frame>
     </ChartScreen>
@@ -391,21 +393,20 @@ function ChartDashedVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-1">
-          <View className="w-full flex-row items-center justify-between">
-            <Frame.Title>Actual vs Target</Frame.Title>
-            <View className="flex-row items-center gap-3">
-              <LegendDot colorIndex={1} label="Actual" />
-              <View className="flex-row items-center gap-1.5">
-                <View className="h-0.5 w-4 rounded-full bg-muted-foreground" />
-                <Text size="xs" muted>
-                  Target
-                </Text>
-              </View>
-            </View>
-          </View>
+        <Frame.Header>
+          <Frame.Title>Actual vs Target</Frame.Title>
+          <Frame.Action>2026</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-0">
+        <Frame.Panel>
+          <ChartLegendRow>
+            <LegendDot colorIndex={1} label="Actual" />
+            <View className="flex-row items-center gap-1.5">
+              <View className="h-0.5 w-4 rounded-full bg-muted-foreground" />
+              <Text size="xs" muted>
+                Target
+              </Text>
+            </View>
+          </ChartLegendRow>
           <LineChart data={REVENUE} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="revenue" colorIndex={1} />
@@ -423,16 +424,20 @@ function ChartMultiVersion() {
   return (
     <ChartScreen>
       <Frame className="w-full">
-        <Frame.Header className="flex-col items-start gap-2">
+        <Frame.Header>
           <Frame.Title>Traffic Sources</Frame.Title>
-          <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
+          <Frame.Action>Last 12 months</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel>
+          {/* Four keys wrap onto two rows on a narrow phone. In the header
+              strip that pushed the chart down the card; in the panel it is
+              simply part of the content. */}
+          <ChartLegendRow>
             <LegendDot colorIndex={1} label="Organic" />
             <LegendDot colorIndex={2} label="Paid Ads" />
             <LegendDot colorIndex={3} label="Referral" />
             <LegendDot colorIndex={4} label="Social" />
-          </View>
-        </Frame.Header>
-        <Frame.Panel className="p-0">
+          </ChartLegendRow>
           <LineChart data={TRAFFIC} xDataKey="month" aspectRatio={1.7}>
             <LineChart.Grid />
             <LineChart.Line dataKey="organic" colorIndex={1} />
@@ -475,6 +480,55 @@ function ChartKpiVersion() {
         />
       </View>
     </ChartScreen>
+  );
+}
+
+/**
+ * The band above a chart, inside the panel: the headline reading on the left,
+ * the legend on the right.
+ *
+ * It sits in the card rather than in `Frame.Header` because the header is a
+ * caption on the tray the card sits in — one muted line. A title, a legend, a
+ * 2xl number and a subtitle all crammed into that strip is four levels of
+ * hierarchy in a space that has room for one, and the number, which is the
+ * thing the card is actually about, ends up the hardest part to find.
+ */
+function ChartStat({
+  value,
+  caption,
+  children,
+}: {
+  value: string;
+  caption?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <View className="flex-row items-start justify-between gap-3 px-4 pb-2 pt-3.5">
+      <View className="gap-0.5">
+        <Text size="2xl" weight="bold">
+          {value}
+        </Text>
+        {caption ? (
+          <Text size="sm" muted>
+            {caption}
+          </Text>
+        ) : null}
+      </View>
+      {children ? (
+        <View className="flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1.5">
+          {children}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** The legend on its own, for a chart with no headline number above it. */
+function ChartLegendRow({ children }: { children: ReactNode }) {
+  return (
+    <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1 px-4 pb-1 pt-3">
+      {children}
+    </View>
   );
 }
 
@@ -1774,6 +1828,500 @@ function PasswordInputDemo() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* ScrollText and ScrollCanvas                                                */
+/* -------------------------------------------------------------------------- */
+
+const SCROLL_LINES = [
+  'Every control ships with its accessibility wiring already done.',
+  'Animations run on the UI thread, so a busy list never drops them.',
+  'Semantic tokens mean a theme swap moves every component at once.',
+  'Overlays mount lazily and unmount once they have finished leaving.',
+];
+
+/** Spacers, so each block gets a screen of scroll to resolve across. */
+function ScrollGap({ label }: { label?: string }) {
+  return (
+    <View className="h-72 items-center justify-center">
+      {label ? (
+        <Text size="xs" muted className="uppercase tracking-wider">
+          {label}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function ScrollTextVersion({ effect }: { effect: 'color' | 'fade' | 'rise' | 'highlight' }) {
+  return (
+    <ScrollProgress className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollGap label={`scroll down — ${effect}`} />
+        {SCROLL_LINES.map((line) => (
+          <View key={line} className="px-6">
+            <ScrollText effect={effect} size="2xl" weight="semibold">
+              {line}
+            </ScrollText>
+            <ScrollGap />
+          </View>
+        ))}
+        <ScrollGap label="that is all of them" />
+      </ScrollView>
+    </ScrollProgress>
+  );
+}
+
+/** Character-by-character, which reads as typing rather than as reading. */
+function ScrollTextCharactersVersion() {
+  return (
+    <ScrollProgress className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollGap label="scroll down" />
+        <View className="px-6">
+          <ScrollText by="character" stagger={0.12} size="3xl" weight="bold">
+            One character at a time.
+          </ScrollText>
+        </View>
+        <ScrollGap />
+        <View className="px-6">
+          {/* A wide stagger brightens the whole line together instead of
+              running an edge along it. */}
+          <ScrollText stagger={0.9} size="3xl" weight="bold">
+            And one where the whole line arrives at once.
+          </ScrollText>
+        </View>
+        <ScrollGap label="that is all of them" />
+      </ScrollView>
+    </ScrollProgress>
+  );
+}
+
+const CANVAS_PHOTOS = [
+  'https://images.unsplash.com/photo-1554080353-a576cf803bda?w=900&q=60',
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=900&q=60',
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900&q=60',
+  'https://images.unsplash.com/photo-1439853949127-fa647821eba0?w=900&q=60',
+];
+
+function ScrollCanvasVersion({
+  effect,
+}: {
+  effect: 'parallax' | 'zoom' | 'reveal';
+}) {
+  return (
+    <ScrollProgress className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollGap label={`scroll down — ${effect}`} />
+        {CANVAS_PHOTOS.map((uri) => (
+          <View key={uri} className="px-6">
+            <ScrollCanvas source={{ uri }} effect={effect} />
+            <ScrollGap />
+          </View>
+        ))}
+        <ScrollGap label="that is all of them" />
+      </ScrollView>
+    </ScrollProgress>
+  );
+}
+
+/** The scroll position picks the frame — the thumb scrubs the animation. */
+function ScrollCanvasSequenceVersion() {
+  const sources = useMemo(() => CANVAS_PHOTOS.map((uri) => ({ uri })), []);
+
+  return (
+    <ScrollProgress className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollGap label="scroll slowly" />
+        <View className="px-6">
+          <ScrollCanvas effect="sequence" sources={sources} start={0.95} end={0.1} />
+          <Text size="sm" muted className="pt-3">
+            Four frames across one screen of scroll. Every frame stays mounted,
+            so scrubbing back up never waits on a decode.
+          </Text>
+        </View>
+        <ScrollGap label="that is all of it" />
+      </ScrollView>
+    </ScrollProgress>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* ThinkingOrb                                                                */
+/* -------------------------------------------------------------------------- */
+
+const ORB_STATES = [
+  ['working', 'Running a task'],
+  ['searching', 'Looking something up'],
+  ['solving', 'Working a problem out'],
+  ['listening', 'Taking input'],
+  ['composing', 'Writing a reply'],
+  ['shaping', 'Forming a structure'],
+] as const;
+
+function ThinkingOrbStatesVersion() {
+  return (
+    <ScrollView
+      contentContainerClassName="px-5 py-4"
+      showsVerticalScrollIndicator={false}
+    >
+      <Item.Group>
+        {ORB_STATES.map(([state, caption], index) => (
+          <View key={state}>
+            {index > 0 ? <Item.Separator /> : null}
+            <Item>
+              <Item.Media>
+                <ThinkingOrb state={state} size={56} />
+              </Item.Media>
+              <Item.Content>
+                <Item.Title>{state}</Item.Title>
+                <Item.Description>{caption}</Item.Description>
+              </Item.Content>
+            </Item>
+          </View>
+        ))}
+      </Item.Group>
+    </ScrollView>
+  );
+}
+
+/** The 20px tuning is a separate design, not the 64px one scaled down. */
+function ThinkingOrbInlineVersion() {
+  return (
+    <ScrollView contentContainerClassName="gap-4 px-5 py-4">
+      <Message>
+        <Message.Avatar>
+          <Avatar size="sm" fallback="AI" />
+        </Message.Avatar>
+        <Message.Content>
+          <Message.Bubble>
+            <View className="flex-row items-center gap-2">
+              <ThinkingOrb state="searching" size={20} />
+              <Shimmer>Searching the docs…</Shimmer>
+            </View>
+          </Message.Bubble>
+        </Message.Content>
+      </Message>
+
+      {ORB_STATES.map(([state]) => (
+        <View key={state} className="flex-row items-center gap-2">
+          <ThinkingOrb state={state} size={20} />
+          <Text size="sm" muted>
+            {state}
+          </Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+function ThinkingOrbControlsVersion() {
+  const [speed, setSpeed] = useState(1);
+  const [paused, setPaused] = useState(false);
+
+  return (
+    <View className="flex-1 justify-center gap-8 px-5">
+      <View className="items-center">
+        <ThinkingOrb state="working" size={140} speed={speed} paused={paused} />
+      </View>
+      <Slider
+        label="Speed"
+        showValue
+        formatValue={(value) => `${value.toFixed(1)}×`}
+        min={0.2}
+        max={3}
+        step={0.1}
+        value={speed}
+        onValueChange={setSpeed}
+      />
+      <View className="flex-row items-center justify-between">
+        <Text>Paused</Text>
+        {/* Pausing holds the current frame rather than clearing it — a still
+            orb is not an empty one. */}
+        <Switch value={paused} onValueChange={setPaused} />
+      </View>
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* HeatmapChart                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A year of plausible daily counts, seeded so the pattern is the same on every
+ * render — a heatmap redrawn from `Math.random()` on each pass has no shape to
+ * look at, and the reveal animation replays against different data every time.
+ */
+function heatmapYear(days = 371, seed = 7) {
+  let state = seed;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+
+  const end = new Date(2026, 6, 23);
+  const entries: { date: Date; count: number }[] = [];
+
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const date = new Date(end);
+    date.setDate(date.getDate() - offset);
+    const weekend = date.getDay() === 0 || date.getDay() === 6;
+    const roll = random();
+    // Quiet weekends, the odd blank weekday, and a long tail — the shape real
+    // activity has, rather than an even scatter.
+    const count = weekend
+      ? roll > 0.75
+        ? Math.floor(roll * 6)
+        : 0
+      : roll > 0.12
+        ? Math.floor(roll * 18)
+        : 0;
+    entries.push({ date, count });
+  }
+
+  return entries;
+}
+
+const HEATMAP_YEAR = buildHeatmapCalendar(heatmapYear(), { weekStartDay: 1 });
+const HEATMAP_QUARTER = HEATMAP_YEAR.slice(-13);
+
+/** A full year, scrolled sideways — 53 weeks do not fit on a phone. */
+function HeatmapContributionVersion() {
+  const [active, setActive] = useState<HeatmapCell | null>(null);
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Contributions</Card.Title>
+          <Card.Description>
+            {active
+              ? `${active.count} on ${active.date?.toDateString() ?? '—'}`
+              : 'Press and hold, then drag, to read a day.'}
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <HeatmapChart
+              data={HEATMAP_YEAR}
+              weekStartDay={1}
+              binSize={13}
+              onActiveCellChange={setActive}
+            >
+              <HeatmapChart.XAxis />
+              <HeatmapChart.YAxis />
+              <HeatmapChart.Cells />
+              <HeatmapChart.Tooltip />
+            </HeatmapChart>
+          </ScrollView>
+          <HeatmapLegendRow />
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/**
+ * The legend belongs under the chart at the *card's* width, not the scrolled
+ * grid's, so it is its own one-cell chart rather than a child of the big one.
+ */
+function HeatmapLegendRow() {
+  return (
+    <HeatmapChart data={[]} className="pt-1">
+      <HeatmapChart.Legend swatchSize={12} />
+    </HeatmapChart>
+  );
+}
+
+/** A quarter, with the cells sized to the width they are given. */
+function HeatmapFillVersion() {
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Last 13 weeks</Card.Title>
+          <Card.Description>
+            `layout="fill"` divides the width between the columns instead of
+            drawing them at a fixed size.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <HeatmapChart data={HEATMAP_QUARTER} layout="fill" weekStartDay={1} gap={4}>
+            <HeatmapChart.XAxis />
+            <HeatmapChart.YAxis />
+            <HeatmapChart.Cells cornerRadius={3} />
+            <HeatmapChart.Tooltip />
+            <HeatmapChart.Legend />
+          </HeatmapChart>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/** Quarter rules, and the whole chart on one accent colour. */
+function HeatmapQuartersVersion() {
+  const success = useCSSVariable('--color-success');
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Deploys by quarter</Card.Title>
+          <Card.Description>
+            A rule every thirteen columns, and a ramp off one colour rather than
+            the chart token.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <HeatmapChart
+              data={HEATMAP_YEAR}
+              weekStartDay={1}
+              binSize={11}
+              color={typeof success === 'string' ? success : undefined}
+            >
+              <HeatmapChart.XAxis />
+              <HeatmapChart.YAxis tickFilter="all" labelFormat="initial" width={16} />
+              <HeatmapChart.Separator every="quarter" dashArray="2,3" />
+              <HeatmapChart.Cells />
+              <HeatmapChart.Tooltip />
+            </HeatmapChart>
+          </ScrollView>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/** One row per column: the same grid, used as an uptime strip. */
+function HeatmapUptimeVersion() {
+  const data = useMemo(
+    () =>
+      HEATMAP_YEAR.slice(-45).map((column, index) => ({
+        bin: index,
+        bins: [{ bin: 0, count: column.bins[3]?.count ?? 0, date: column.bins[3]?.date }],
+      })),
+    []
+  );
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Uptime</Card.Title>
+          <Card.Description>
+            `rows={1}` turns the calendar into a band. Nothing else changes.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <HeatmapChart data={data} rows={1} layout="fill" gap={3} cornerRadius={2}>
+            <HeatmapChart.Cells />
+            {/* Nothing scrolls here, so the readout can claim the touch
+                straight away instead of waiting for a hold. */}
+            <HeatmapChart.Tooltip
+              activateAfterLongPress={0}
+              formatLabel={(cell) => `${cell.count} incidents`}
+            />
+          </HeatmapChart>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/**
+ * A field that has to get out of the keyboard's way inside a scroll view —
+ * the case a fixed-height box cannot show.
+ *
+ * Focus "Comment", then scroll the form. The field holds its place between
+ * "Subject" and "Signature": its lift decays to nothing as it scrolls clear of
+ * the keyboard, and comes back as it scrolls under it again.
+ */
+function KeyboardLiftDemo() {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <ScrollView
+      contentContainerClassName="gap-4 px-5 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Plain fields first, to make the point that only the focused avoiding
+          field moves. Tapping one of these leaves the screen exactly as it is. */}
+      <Input label="From" placeholder="you@example.com" />
+      <Input label="To" placeholder="them@example.com" />
+      <Input label="Subject" placeholder="An ordinary field" />
+      <Input
+        avoidKeyboard
+        label="Comment"
+        placeholder="Say something…"
+        description="Lifts on focus, follows the scroll, settles back on blur."
+        multiline
+      />
+      <Input label="Signature" placeholder="Sent from my phone" />
+      <Input label="Reply-to" placeholder="Optional" />
+      <Input label="Tags" placeholder="Comma separated" />
+    </ScrollView>
+  );
+}
+
+/**
+ * The other half of the job: a bar already pinned to the bottom edge, which
+ * should ride the keyboard rather than measure anything. `dock` moves it by the
+ * keyboard height less the inset it is already sitting above.
+ */
+function KeyboardDockDemo() {
+  const insets = useSafeAreaInsets();
+  const [draft, setDraft] = useState('');
+
+  return (
+    <View className="flex-1">
+      <ScrollView
+        contentContainerClassName="gap-3 px-5 pt-4"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {[
+          'Every control ships with its accessibility role wired up.',
+          'Animations run on the UI thread, so a busy list never drops them.',
+          'Tokens are semantic — a theme swap moves every component at once.',
+          'The composer below stays put while this list scrolls.',
+          'Open the keyboard and it travels with it, frame for frame.',
+        ].map((line) => (
+          <Card key={line}>
+            <Card.Content className="p-4">
+              <Text size="sm">{line}</Text>
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
+
+      <KeyboardAvoider
+        mode="dock"
+        bottomInset={insets.bottom}
+        pointerEvents="box-none"
+        className="absolute left-0 right-0 px-5"
+        style={{ bottom: insets.bottom + 16 }}
+      >
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 shadow-lg">
+          <Input
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Message"
+            className="flex-1 border-0 bg-transparent px-0"
+            containerClassName="flex-1"
+            accessibilityLabel="Message"
+          />
+          <SendIcon size={18} />
+        </View>
+      </KeyboardAvoider>
+    </View>
+  );
+}
+
 /** The small progress ring shown beside each row in the Frame demo. */
 function Meter({ percent }: { percent: number }) {
   return (
@@ -2667,19 +3215,15 @@ export const COMPONENTS: ComponentEntry[] = [
             <Button native variant="outline" onPress={() => {}}>
               Outlined
             </Button>
-            {/* A native button fills the width it is given, so two share a
-                line by sharing the row rather than by shrinking themselves. */}
-            <View className="w-full flex-row gap-3">
-              <View className="flex-1">
-                <Button native variant="ghost" onPress={() => {}}>
-                  Text
-                </Button>
-              </View>
-              <View className="flex-1">
-                <Button native size="sm" onPress={() => {}}>
-                  Small
-                </Button>
-              </View>
+            {/* Native buttons size to their labels, so a row of them reads as
+                a row of buttons rather than as two halves of the screen. */}
+            <View className="w-full flex-row items-center gap-3">
+              <Button native variant="ghost" onPress={() => {}}>
+                Text
+              </Button>
+              <Button native size="sm" onPress={() => {}}>
+                Small
+              </Button>
             </View>
           </NativeDemo>
         ),
@@ -3016,8 +3560,81 @@ export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'frame',
     name: 'Frame',
-    summary: 'Widget shell with a titled header and an inset panel',
+    summary: 'Widget shell with a titled header and a flush inner card',
     demos: [
+      {
+        label: 'Agent monitor',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Agent monitor</Frame.Title>
+              <Frame.Action>All agents under 25% token limit</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['GPT 5.6 Sol', 'UX research for fintech trends', 'Done', '10m7s'],
+                ['Fable 5', 'Planning out the app user flow', 'Running', '15m12s'],
+                ['GPT 5.6 Sol', 'Building out the UI design system', 'Running', '15m12s'],
+                ['Haiku 4.5', 'On standby', 'Idle', '0s'],
+              ].map(([model, task, status, elapsed]) => (
+                <Frame.Row key={task}>
+                  <View className="w-24">
+                    <Text size="sm" weight="medium" numberOfLines={1}>
+                      {model}
+                    </Text>
+                  </View>
+                  <Text size="sm" className="flex-1" numberOfLines={1}>
+                    {task}
+                  </Text>
+                  <Chip
+                    size="sm"
+                    variant={
+                      status === 'Running'
+                        ? 'success'
+                        : status === 'Done'
+                          ? 'outline'
+                          : 'default'
+                    }
+                  >
+                    {status}
+                  </Chip>
+                  <Text size="xs" muted>
+                    {elapsed}
+                  </Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
+      {
+        label: 'A single row',
+        render: () => (
+          // The whole widget is one row of the card, with the header strip
+          // above it — the compact end of the same shape.
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Agent monitor</Frame.Title>
+              <Frame.Action>25% token limit</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              <Frame.Row className="gap-2">
+                <Chip size="sm" variant="success">
+                  2 Running
+                </Chip>
+                <Chip size="sm">1 Idle</Chip>
+                <Chip size="sm" variant="outline">
+                  1 Done
+                </Chip>
+                <View className="flex-1" />
+                <Text size="xs" muted>
+                  15m12s ago
+                </Text>
+              </Frame.Row>
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
       {
         label: 'Usage summary',
         render: () => (
@@ -3040,7 +3657,6 @@ export const COMPONENTS: ComponentEntry[] = [
                 </Frame.Row>
               ))}
             </Frame.Panel>
-            <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
           </Frame>
         ),
       },
@@ -3074,7 +3690,6 @@ export const COMPONENTS: ComponentEntry[] = [
                 </Frame.Row>
               ))}
             </Frame.Panel>
-            <Frame.Footer>3 members with access</Frame.Footer>
           </Frame>
         ),
       },
@@ -3193,6 +3808,42 @@ export const COMPONENTS: ComponentEntry[] = [
     ],
   },
   {
+    slug: 'heatmap-chart',
+    name: 'HeatmapChart',
+    summary: 'Contribution grid with a themed colour ramp',
+    demos: [
+      {
+        label: 'Contribution grid',
+        id: 'contribution',
+        fullPage: true,
+        description:
+          'A full year, scrolled sideways. Hold to read a day — a swipe scrolls instead.',
+        render: () => <HeatmapContributionVersion />,
+      },
+      {
+        label: 'Filling the width',
+        id: 'fill',
+        fullPage: true,
+        description: 'A quarter with the cells sized to the space they are given.',
+        render: () => <HeatmapFillVersion />,
+      },
+      {
+        label: 'Quarters',
+        id: 'quarters',
+        fullPage: true,
+        description: 'Rules grouping the columns, and a ramp off a colour of your own.',
+        render: () => <HeatmapQuartersVersion />,
+      },
+      {
+        label: 'Uptime strip',
+        id: 'uptime',
+        fullPage: true,
+        description: 'One row per column — the same grid used as a band.',
+        render: () => <HeatmapUptimeVersion />,
+      },
+    ],
+  },
+  {
     slug: 'input',
     name: 'Input',
     summary: 'Text field with label and validation',
@@ -3263,27 +3914,20 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
-        label: 'Avoiding the keyboard',
-        render: () => (
-          <View className="w-full gap-4">
-            <Text size="sm" muted>
-              Focus the second field. It sits low enough that the keyboard would
-              cover it, so it lifts by exactly the overlap — no more.
-            </Text>
-            {/* The plain field first, to make the point that only the focused
-                avoiding field moves. Tapping this one leaves everything on the
-                screen exactly where it is. */}
-            <Input label="Subject" placeholder="An ordinary field" />
-            <View className="h-72 justify-end">
-              <Input
-                avoidKeyboard
-                label="Comment"
-                placeholder="Say something…"
-                description="Lifts on focus, settles back on blur."
-              />
-            </View>
-          </View>
-        ),
+        label: 'Lifting in a scroll view',
+        id: 'in-a-scroll-view',
+        fullPage: true,
+        description:
+          'A field that lifts by its overlap with the keyboard, and keeps its place in the form as you scroll.',
+        render: () => <KeyboardLiftDemo />,
+      },
+      {
+        label: 'Docked composer',
+        id: 'docked-composer',
+        fullPage: true,
+        description:
+          'A bar pinned to the bottom edge that rides the keyboard up and back down.',
+        render: () => <KeyboardDockDemo />,
       },
     ],
   },
@@ -4333,6 +4977,111 @@ export const COMPONENTS: ComponentEntry[] = [
             </View>
           </Shimmer>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'scroll-text',
+    name: 'ScrollText',
+    summary: 'Text that resolves word by word as you scroll',
+    demos: [
+      {
+        label: 'Colour',
+        id: 'color',
+        fullPage: true,
+        description: 'Each word crossfades from muted to foreground as the line passes.',
+        render: () => <ScrollTextVersion effect="color" />,
+      },
+      {
+        label: 'Fade',
+        id: 'fade',
+        fullPage: true,
+        description: 'Words come up from nearly transparent, without reflowing the line.',
+        render: () => <ScrollTextVersion effect="fade" />,
+      },
+      {
+        label: 'Rise',
+        id: 'rise',
+        fullPage: true,
+        description: 'Words lift into place — a wrapping row, since nested text cannot transform.',
+        render: () => <ScrollTextVersion effect="rise" />,
+      },
+      {
+        label: 'Highlight',
+        id: 'highlight',
+        fullPage: true,
+        description: 'A background sweeps behind the line as it resolves.',
+        render: () => <ScrollTextVersion effect="highlight" />,
+      },
+      {
+        label: 'Splitting and stagger',
+        id: 'splitting',
+        fullPage: true,
+        description: 'By character, and with a stagger wide enough to arrive all at once.',
+        render: () => <ScrollTextCharactersVersion />,
+      },
+    ],
+  },
+  {
+    slug: 'scroll-canvas',
+    name: 'ScrollCanvas',
+    summary: 'Image frame whose contents move as you scroll',
+    demos: [
+      {
+        label: 'Parallax',
+        id: 'parallax',
+        fullPage: true,
+        description: 'The image drifts against the scroll inside a frame that stays put.',
+        render: () => <ScrollCanvasVersion effect="parallax" />,
+      },
+      {
+        label: 'Zoom',
+        id: 'zoom',
+        fullPage: true,
+        description: 'It settles from slightly oversized to its natural size.',
+        render: () => <ScrollCanvasVersion effect="zoom" />,
+      },
+      {
+        label: 'Reveal',
+        id: 'reveal',
+        fullPage: true,
+        description: 'A wipe uncovers it from the bottom edge up.',
+        render: () => <ScrollCanvasVersion effect="reveal" />,
+      },
+      {
+        label: 'Sequence',
+        id: 'sequence',
+        fullPage: true,
+        description: 'The scroll position picks a frame, so the thumb scrubs the animation.',
+        render: () => <ScrollCanvasSequenceVersion />,
+      },
+    ],
+  },
+  {
+    slug: 'thinking-orb',
+    name: 'ThinkingOrb',
+    summary: 'Dotted orb saying which kind of busy an agent is',
+    demos: [
+      {
+        label: 'The six states',
+        id: 'states',
+        fullPage: true,
+        description: 'Each one side by side, at the large tuning.',
+        render: () => <ThinkingOrbStatesVersion />,
+      },
+      {
+        label: 'Inline in a reply',
+        id: 'inline',
+        fullPage: true,
+        description: 'The small tuning, sitting in a line of chat text.',
+        render: () => <ThinkingOrbInlineVersion />,
+      },
+      {
+        label: 'Speed and pause',
+        id: 'controls',
+        fullPage: true,
+        description: 'What `speed` and `paused` do to a running orb.',
+        render: () => <ThinkingOrbControlsVersion />,
       },
     ],
   },

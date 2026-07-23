@@ -24,6 +24,7 @@ S=./scripts node scripts/gen.mjs       # api.json + usage.json -> MDX
   | `extraImports` | Extra names on the import line — must cover everything the snippets use |
   | `anatomy` / `parts` / `partNotes` | The `## Composition` section |
   | `examples` | `## Examples` — an array of `{ title, description?, code }` |
+  | `versions` | `## Versions` — an array of `{ title, description?, code }`, one per `fullPage` demo in `apps/example/src/data/components.tsx`. Only for components that have them |
   | `variantCode` | Per-variant snippet, keyed by variant name. Overrides the generic `<Name variant="x">…</Name>` fallback, which is wrong for components that take no children |
   | `notes` | The `## Notes` section |
 

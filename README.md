@@ -46,24 +46,30 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 
 | | | |
 | --- | --- | --- |
-| Accordion | EmptyState | Select |
-| Alert | Frame | Skeleton |
-| Avatar | Input | Slider |
-| Badge | InputGroup | Spinner |
-| BottomSheet | Label | Steps |
-| Button | Progress | Switch |
-| Card | RadioGroup | Tabs |
-| Checkbox | SectionRail | ToggleButton |
-| Chip | | Timeline |
-| Dialog | | Toast |
-| | | Typography |
+| Accordion | InputGroup | Separator |
+| Alert | Item | Shimmer |
+| Attachment | Label | Skeleton |
+| Avatar | LineChart | Slider |
+| Badge | Marker | Spinner |
+| BottomSheet | Message | Steps |
+| Button | MessageScroller | Surface |
+| Card | Popover | Switch |
+| Checkbox | Progress | Tabs |
+| Chip | RadioGroup | ThinkingOrb |
+| Dialog | ScrollCanvas | Timeline |
+| EmptyState | ScrollFade | Toast |
+| Frame | ScrollText | ToggleButton |
+| HeatmapChart | SectionRail | Typography |
+| Input | Select |  |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating
 over the page — one `presentation` prop, because which is right depends on what
 surrounds the trigger rather than on what the options are.
-`Frame` is a widget shell: a titled header row with an action on the right, an
-inset `Frame.Panel` of rows with its own radius, and a caption footer.
+`Frame` is a widget shell: a card of rows sitting in a tray, with the strip of
+tray left showing above it carrying the title.
 `InputGroup` measures its prefix/suffix and pads the input to match.
+`ScrollText` and `ScrollCanvas` scrub a reveal off the scroll position, and
+`ThinkingOrb` says which kind of busy an agent is rather than just that it is.
 
 Plus primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`,
 `useThemeMode`, `useToast`, `cn`.

@@ -1,9 +1,9 @@
 ---
 title: Frame
-description: Widget shell with a titled header, an inset panel and a caption.
+description: Widget shell — a card of rows sitting in a titled tray.
 ---
 
-A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel draws the hairlines between its own rows, and its radius is derived from the shell’s, so the nesting stays proportional as the theme changes it.
+A card of rows sitting in a tray. The tray shows along one edge only — the strip left above the card is the header — and the card itself is flush to its left, right and bottom. The panel draws the hairlines between its own rows.
 
 ## Installation
 
@@ -24,8 +24,8 @@ npx panelui-cli@latest add frame
 ```tsx
 <Frame>
   <Frame.Header>
-    <Frame.Title>Usage Type</Frame.Title>
-    <Frame.Action>Amount</Frame.Action>
+    <Frame.Title>Agent monitor</Frame.Title>
+    <Frame.Action>All agents under 25% token limit</Frame.Action>
   </Frame.Header>
   <Frame.Panel>
     <Frame.Row>
@@ -37,7 +37,6 @@ npx panelui-cli@latest add frame
       <Text weight="medium">98.2M</Text>
     </Frame.Row>
   </Frame.Panel>
-  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
 </Frame>
 ```
 
@@ -54,18 +53,16 @@ npx panelui-cli@latest add frame
       <Frame.Row>…</Frame.Row>
     </Frame.Section>
   </Frame.Panel>
-  <Frame.Footer>…</Frame.Footer>
 </Frame>
 ```
 
-- **`Frame.Header`** — Row holding the title and the action.
-- **`Frame.Title`** — Frame heading.
+- **`Frame.Header`** — The strip of shell above the panel, holding the title and the action.
+- **`Frame.Title`** — Frame heading. Muted — it captions the tray, it does not head a section.
 - **`Frame.Action`** — Trailing slot — a label, a button, a badge. Strings render muted.
 - **`Frame.Description`** — Secondary line, inside a column-wrapped header.
-- **`Frame.Panel`** — The inset card holding the rows. Divides them for you.
+- **`Frame.Panel`** — The card holding the rows. Divides them for you.
 - **`Frame.Section`** — A labelled cluster of rows, for a panel holding more than one group.
 - **`Frame.Row`** — A row inside the panel. Give it an `onPress` and it becomes a pressable.
-- **`Frame.Footer`** — Muted caption under the panel. Strings are wrapped for you.
 
 ## Examples
 
@@ -114,9 +111,6 @@ Nothing has to say where the hairlines go — the panel puts one above every row
       </Frame.Row>
     ))}
   </Frame.Panel>
-  <Frame.Footer>
-    <Text size="sm" muted>Keys are shown once at creation.</Text>
-  </Frame.Footer>
 </Frame>
 ```
 
@@ -166,7 +160,7 @@ For a widget with more than one cluster of rows. Each section labels its group a
 - `plain`
 
 ```tsx
-{/* The default: a shell with the panel inset inside it. */}
+{/* The default: a card flush inside a shell, with the header in the strip above it. */}
 <Frame variant="default">…</Frame>
 
 {/* No shell — for a Frame inside a card that already draws a border,
@@ -218,6 +212,14 @@ For a widget with more than one cluster of rows. Each section labels its group a
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
+
+### Why the card is flush
+
+The two surfaces are nested rather than stacked, and only one edge of the outer one is ever visible. The panel meets the shell's left, right and bottom exactly, so the shell reads as something the card is *sitting in* rather than as a border drawn around it — and the strip left at the top is the header, which is why the header needs no rule under it and no background of its own.
+
+The shell's radius is the larger of the two, and the panel's top corners are tighter. That is the reverse of the usual nested-radius rule, and it is deliberate: with only the top corners free, matching them would make the two surfaces read as one misdrawn shape. The panel's bottom corners are not set at all — the shell clips them, so they take its radius exactly, which is what `overflow-hidden` on the root is doing.
+
+### Dividers
 
 React Native has no `:first-child`, so the hairline between rows cannot be a CSS rule. `Frame.Panel` places them instead — a line above every child but the first. Passing `divided` on a row overrides that either way, and `dividers={false}` on the panel hands the whole job back to you.
 

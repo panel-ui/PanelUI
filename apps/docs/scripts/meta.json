@@ -48,7 +48,9 @@
     "Chip",
     "Interactive pill — a filter, a tag, or a removable token.",
     "react native chip",
-    { "addedIn": "0.13.0" }
+    {
+      "addedIn": "0.13.0"
+    }
   ],
   "dialog": [
     "Dialog",
@@ -64,6 +66,14 @@
     "Frame",
     "Widget shell with a titled header, an inset panel and a caption.",
     "react native list section"
+  ],
+  "heatmap-chart": [
+    "HeatmapChart",
+    "Contribution grid with a themed colour ramp and a readout.",
+    "react native heatmap chart",
+    {
+      "addedIn": "0.14.0"
+    }
   ],
   "input": [
     "Input",

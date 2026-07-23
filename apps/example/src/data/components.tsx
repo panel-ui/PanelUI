@@ -5,7 +5,7 @@
  * screen derives its counts from it, so adding a component means adding one
  * entry and nothing else.
  */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
@@ -40,6 +40,9 @@ import {
   FileIcon,
   Frame,
   GoogleIcon,
+  HeatmapChart,
+  type HeatmapCell,
+  buildHeatmapCalendar,
   InfoIcon,
   Input,
   InputGroup,
@@ -1775,6 +1778,190 @@ function PasswordInputDemo() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* HeatmapChart                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A year of plausible daily counts, seeded so the pattern is the same on every
+ * render — a heatmap redrawn from `Math.random()` on each pass has no shape to
+ * look at, and the reveal animation replays against different data every time.
+ */
+function heatmapYear(days = 371, seed = 7) {
+  let state = seed;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+
+  const end = new Date(2026, 6, 23);
+  const entries: { date: Date; count: number }[] = [];
+
+  for (let offset = days - 1; offset >= 0; offset--) {
+    const date = new Date(end);
+    date.setDate(date.getDate() - offset);
+    const weekend = date.getDay() === 0 || date.getDay() === 6;
+    const roll = random();
+    // Quiet weekends, the odd blank weekday, and a long tail — the shape real
+    // activity has, rather than an even scatter.
+    const count = weekend
+      ? roll > 0.75
+        ? Math.floor(roll * 6)
+        : 0
+      : roll > 0.12
+        ? Math.floor(roll * 18)
+        : 0;
+    entries.push({ date, count });
+  }
+
+  return entries;
+}
+
+const HEATMAP_YEAR = buildHeatmapCalendar(heatmapYear(), { weekStartDay: 1 });
+const HEATMAP_QUARTER = HEATMAP_YEAR.slice(-13);
+
+/** A full year, scrolled sideways — 53 weeks do not fit on a phone. */
+function HeatmapContributionVersion() {
+  const [active, setActive] = useState<HeatmapCell | null>(null);
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Contributions</Card.Title>
+          <Card.Description>
+            {active
+              ? `${active.count} on ${active.date?.toDateString() ?? '—'}`
+              : 'Drag across the grid to read a day.'}
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <HeatmapChart
+              data={HEATMAP_YEAR}
+              weekStartDay={1}
+              binSize={13}
+              onActiveCellChange={setActive}
+            >
+              <HeatmapChart.XAxis />
+              <HeatmapChart.YAxis />
+              <HeatmapChart.Cells />
+              <HeatmapChart.Tooltip />
+            </HeatmapChart>
+          </ScrollView>
+          <HeatmapLegendRow />
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/**
+ * The legend belongs under the chart at the *card's* width, not the scrolled
+ * grid's, so it is its own one-cell chart rather than a child of the big one.
+ */
+function HeatmapLegendRow() {
+  return (
+    <HeatmapChart data={[]} className="pt-1">
+      <HeatmapChart.Legend swatchSize={12} />
+    </HeatmapChart>
+  );
+}
+
+/** A quarter, with the cells sized to the width they are given. */
+function HeatmapFillVersion() {
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Last 13 weeks</Card.Title>
+          <Card.Description>
+            `layout="fill"` divides the width between the columns instead of
+            drawing them at a fixed size.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <HeatmapChart data={HEATMAP_QUARTER} layout="fill" weekStartDay={1} gap={4}>
+            <HeatmapChart.XAxis />
+            <HeatmapChart.YAxis />
+            <HeatmapChart.Cells cornerRadius={3} />
+            <HeatmapChart.Tooltip />
+            <HeatmapChart.Legend />
+          </HeatmapChart>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/** Quarter rules, and the whole chart on one accent colour. */
+function HeatmapQuartersVersion() {
+  const success = useCSSVariable('--color-success');
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Deploys by quarter</Card.Title>
+          <Card.Description>
+            A rule every thirteen columns, and a ramp off one colour rather than
+            the chart token.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <HeatmapChart
+              data={HEATMAP_YEAR}
+              weekStartDay={1}
+              binSize={11}
+              color={typeof success === 'string' ? success : undefined}
+            >
+              <HeatmapChart.XAxis />
+              <HeatmapChart.YAxis tickFilter="all" labelFormat="initial" width={16} />
+              <HeatmapChart.Separator every="quarter" dashArray="2,3" />
+              <HeatmapChart.Cells />
+              <HeatmapChart.Tooltip />
+            </HeatmapChart>
+          </ScrollView>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
+/** One row per column: the same grid, used as an uptime strip. */
+function HeatmapUptimeVersion() {
+  const data = useMemo(
+    () =>
+      HEATMAP_YEAR.slice(-45).map((column, index) => ({
+        bin: index,
+        bins: [{ bin: 0, count: column.bins[3]?.count ?? 0, date: column.bins[3]?.date }],
+      })),
+    []
+  );
+
+  return (
+    <View className="flex-1 justify-center px-5">
+      <Card>
+        <Card.Header>
+          <Card.Title>Uptime</Card.Title>
+          <Card.Description>
+            `rows={1}` turns the calendar into a band. Nothing else changes.
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <HeatmapChart data={data} rows={1} layout="fill" gap={3} cornerRadius={2}>
+            <HeatmapChart.Cells />
+            <HeatmapChart.Tooltip
+              formatLabel={(cell) => `${cell.count} incidents`}
+            />
+          </HeatmapChart>
+        </Card.Content>
+      </Card>
+    </View>
+  );
+}
+
 /**
  * A field that has to get out of the keyboard's way inside a scroll view —
  * the case a fixed-height box cannot show.
@@ -3349,6 +3536,41 @@ export const COMPONENTS: ComponentEntry[] = [
             </Card.Content>
           </Card>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'heatmap-chart',
+    name: 'HeatmapChart',
+    summary: 'Contribution grid with a themed colour ramp',
+    demos: [
+      {
+        label: 'Contribution grid',
+        id: 'contribution',
+        fullPage: true,
+        description: 'A full year, scrolled sideways, with a readout that follows the finger.',
+        render: () => <HeatmapContributionVersion />,
+      },
+      {
+        label: 'Filling the width',
+        id: 'fill',
+        fullPage: true,
+        description: 'A quarter with the cells sized to the space they are given.',
+        render: () => <HeatmapFillVersion />,
+      },
+      {
+        label: 'Quarters',
+        id: 'quarters',
+        fullPage: true,
+        description: 'Rules grouping the columns, and a ramp off a colour of your own.',
+        render: () => <HeatmapQuartersVersion />,
+      },
+      {
+        label: 'Uptime strip',
+        id: 'uptime',
+        fullPage: true,
+        description: 'One row per column — the same grid used as a band.',
+        render: () => <HeatmapUptimeVersion />,
       },
     ],
   },

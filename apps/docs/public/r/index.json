@@ -148,6 +148,15 @@
     "registryDependencies": []
   },
   {
+    "name": "heatmap-chart",
+    "type": "registry:ui",
+    "description": "Contribution grid with a themed colour ramp and a readout.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ]
+  },
+  {
     "name": "icons",
     "type": "registry:ui",
     "description": "The icon set, plus the colour context components use to tint them.",

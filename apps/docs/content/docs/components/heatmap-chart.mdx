@@ -1,0 +1,225 @@
+---
+title: HeatmapChart
+description: Contribution grid with a themed colour ramp and a readout.
+status: new
+---
+
+A calendar of bins shaded by how much happened in each — one column per period, one row per bin inside it. It answers “when was this busy” at a glance, which no line can: a year of daily numbers plotted as a series is a hairball, and as a grid it is a pattern.
+
+## Installation
+
+HeatmapChart ships with the library — no separate install.
+
+```tsx
+import { HeatmapChart, buildHeatmapCalendar, Card, Text } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add heatmap-chart
+```
+
+## Usage
+
+```tsx
+<HeatmapChart data={weeks} weekStartDay={1}>
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis />
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip />
+  <HeatmapChart.Legend />
+</HeatmapChart>
+```
+
+## Composition
+
+```tsx
+<HeatmapChart>
+  <HeatmapChart.XAxis />      {/* month labels, above the grid */}
+  <HeatmapChart.YAxis />      {/* weekday labels, beside it */}
+  <HeatmapChart.Separator />  {/* rules grouping the columns */}
+  <HeatmapChart.Cells />      {/* the grid itself */}
+  <HeatmapChart.Tooltip />    {/* the readout under the finger */}
+  <HeatmapChart.Legend />     {/* the Less → More key, below */}
+</HeatmapChart>
+```
+
+- **`HeatmapChart.Cells`** — The grid. Every row of every column is drawn, including the empty ones.
+- **`HeatmapChart.Separator`** — Vertical rules grouping the columns — quarters, months, sprints.
+- **`HeatmapChart.XAxis`** — Month labels above the grid, emitted where the month changes.
+- **`HeatmapChart.YAxis`** — Row labels beside the grid. Weekdays by default; pass `labels` for anything else.
+- **`HeatmapChart.Tooltip`** — The readout that follows the finger across the grid.
+- **`HeatmapChart.Legend`** — The `Less ▢▢▢▢▢ More` key, under the grid.
+
+## Examples
+
+### Building the calendar
+
+Data arrives as dates and numbers; `buildHeatmapCalendar` does the bucketing — including the two parts that are easy to get wrong. It backs up to the first day of the week the range starts in, so every row lines up with a weekday for the rest of the chart, and it emits a cell for every day in the range whether or not there was an entry, because a calendar with holes in it stops being a calendar.
+
+```tsx
+const weeks = buildHeatmapCalendar(commits, {
+  start: new Date(2025, 6, 23),
+  end: new Date(2026, 6, 23),
+  weekStartDay: 1,
+});
+
+<HeatmapChart data={weeks} weekStartDay={1}>
+  <HeatmapChart.Cells />
+</HeatmapChart>
+```
+
+### Scrolling a full year
+
+Fifty-three weeks do not fit across a phone. `fluid` draws the cells at `binSize` and lets the grid be as wide as it needs to be, so a horizontal `ScrollView` is all it takes. The legend belongs at the card's width rather than the grid's, so give it a chart of its own outside the scroller.
+
+```tsx
+<ScrollView horizontal showsHorizontalScrollIndicator={false}>
+  <HeatmapChart data={weeks} binSize={13} weekStartDay={1}>
+    <HeatmapChart.XAxis />
+    <HeatmapChart.YAxis />
+    <HeatmapChart.Cells />
+    <HeatmapChart.Tooltip />
+  </HeatmapChart>
+</ScrollView>
+
+<HeatmapChart data={[]}>
+  <HeatmapChart.Legend swatchSize={12} />
+</HeatmapChart>
+```
+
+### Filling the width instead
+
+For a short range — a quarter, a sprint — `fill` divides the available width between the columns rather than drawing them at a fixed size, so the chart always meets both edges.
+
+```tsx
+<HeatmapChart data={weeks.slice(-13)} layout="fill" gap={4}>
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis />
+  <HeatmapChart.Cells cornerRadius={3} />
+  <HeatmapChart.Tooltip />
+  <HeatmapChart.Legend />
+</HeatmapChart>
+```
+
+### A grid whose rows are not days
+
+`rows` is the only thing that makes this a calendar. Set it to one for an uptime band, or to twenty-four for an hour-by-hour chart, and pass the row names to the axis.
+
+```tsx
+<HeatmapChart data={days} rows={1} layout="fill">
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip formatLabel={(cell) => `${cell.count} incidents`} />
+</HeatmapChart>
+
+<HeatmapChart data={days} rows={24} layout="fill">
+  <HeatmapChart.YAxis labels={HOURS} tickFilter="all" />
+  <HeatmapChart.Cells />
+</HeatmapChart>
+```
+
+### Reading the active cell above the chart
+
+`useHeatmapChart` only reaches children of the chart. A readout in the card's header is outside that subtree, so it takes `onActiveCellChange` instead — which fires when the cell changes, not once per frame.
+
+```tsx
+const [active, setActive] = useState(null);
+
+<Card.Header>
+  <Card.Description>
+    {active ? `${active.count} on ${active.date?.toDateString()}` : 'Drag to read a day.'}
+  </Card.Description>
+</Card.Header>
+
+<HeatmapChart data={weeks} onActiveCellChange={setActive}>
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip />
+</HeatmapChart>
+```
+
+## API Reference
+
+### HeatmapChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `data` | `HeatmapColumn[]` | — | One column per period, with its row bins inside. |
+| `layout` | `HeatmapLayout` | `'fluid'` | `fluid` draws cells at `binSize` and lets the grid be as wide as it needs to be — put it in a horizontal `ScrollView` for a full year. `fill` divides the available width between the columns instead. |
+| `binSize` | `number` | `12` | Side of one cell in `fluid` layout, in pixels. |
+| `gap` | `number` | `3` | Space between cells, in pixels. |
+| `cornerRadius` | `number` | `2` | Corner radius of a cell. |
+| `weekStartDay` | `number` | `0` | Which weekday is the top row. `0` is Sunday. Labels follow it. |
+| `rows` | `number` | `DAYS_IN_WEEK` | Rows per column. Seven for a calendar; use another number for a band that is not a week — twenty-four for hours, one for an uptime strip. |
+| `levels` | `number[]` | — | The four counts at which the ramp steps up. Derived from the data's own quartiles when omitted, so a chart of single digits and a chart of thousands both use the whole ramp. |
+| `levelColors` | `string[]` | — | Five colours — empty, then the four activity levels. Replaces the derived ramp outright. Omit it and the ramp is `--color-chart-1` at five opacities, which follows the theme. |
+| `color` | `string` | — | Base colour for the derived ramp. Defaults to the `--color-chart-1` token. |
+| `animationDuration` | `number` | `900` | Milliseconds for the reveal on mount. |
+| `inactiveOpacity` | `number` | `1` | Opacity of every cell that is not the one under the finger. |
+| `onActiveCellChange` | `(cell: HeatmapCell \| null) => void` | — | The cell under the finger as it moves, and `null` when it lifts. This is how a readout above the chart gets its value — that readout is outside the chart, so it cannot use `useHeatmapChart`. |
+
+### HeatmapChart.HeatmapCells
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cornerRadius` | `number` | `2` | Corner radius of a cell. Falls back to the chart's. |
+
+### HeatmapChart.HeatmapSeparator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `every` | `'quarter' \| number` | — | `quarter` draws a rule every thirteen columns; a number draws one every that many columns. |
+| `color` | `string` | — |  |
+| `dashArray` | `string` | — | Dash pattern, e.g. `"2,4"`. Omit for a solid rule. |
+
+### HeatmapChart.HeatmapXAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `formatLabel` | `(date: Date, column: number) => string` | — | Label a column. Given the first dated bin in it, so a month name can be derived. Return an empty string to leave the column unlabelled. |
+
+### HeatmapChart.HeatmapYAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `width` | `number` | `DEFAULT_AXIS_WIDTH` | Width reserved for the labels. The grid is sized around it. |
+| `tickFilter` | `'all' \| 'odd' \| 'even'` | `'odd'` | Which rows get a label. Every other row is the usual choice. |
+| `labelFormat` | `'initial' \| 'full'` | `'full'` | `initial` is the single letter; `full` is the abbreviated name. |
+| `labels` | `string[]` | — | Row labels, top to bottom. Overrides the weekday names — for a grid whose rows are not days. |
+
+### HeatmapChart.HeatmapTooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `formatLabel` | `(cell: HeatmapCell) => string` | — | The line shown for a cell. Defaults to the count and the date. |
+
+### HeatmapChart.HeatmapLegend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `lessLabel` | `string` | `'Less'` | Text at the low end of the ramp. |
+| `moreLabel` | `string` | `'More'` | Text at the high end. |
+| `swatchSize` | `number` | — | Side of a swatch, in pixels. Defaults to the chart's cell size. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### The colour ramp
+
+One colour at five opacities, not five colours. A heatmap reads as *more* and *less* of one thing, and five distinct hues read as five different things — which is what the `--color-chart-*` tokens are for, and why only the first of them is used here. The base is `--color-chart-1`, so the ramp follows the active theme; `color` swaps the base for one of your own, and `levelColors` replaces all five outright (the opacities are dropped then, since dimming a colour someone chose on purpose is not a ramp).
+
+The four thresholds are the data's own quartiles by default, so a chart of single-digit counts and a chart of thousands both use the whole ramp. Zero is its own level and is left out of the quartiles — counting it drags every threshold to nothing on a sparse chart. Pass `levels` to fix them yourself.
+
+### Layout
+
+The parts sit in a real layout rather than stacking over the plot: the labels are *beside* and *above* the grid and the legend is below it, so they take up room and the grid is sized with them accounted for. Only the cells and the rules are SVG — every label is a React Native view, because SVG text ignores the platform's text scaling and the theme's font.
+
+### The reveal
+
+Columns arrive left to right on mount, drawn by one clip rectangle wiping across the grid rather than by an animation per column. The effect is the same and it costs one animated value instead of fifty-two. It plays once; a data change redraws without replaying it, because repeating it turns a refresh into an animation. `useReducedMotion` skips it.

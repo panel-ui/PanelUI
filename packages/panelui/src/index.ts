@@ -96,6 +96,22 @@ export {
   type FrameVariant,
 } from './components/frame';
 export {
+  HeatmapChart,
+  useHeatmapChart,
+  buildHeatmapCalendar,
+  type HeatmapChartProps,
+  type HeatmapCellsProps,
+  type HeatmapSeparatorProps,
+  type HeatmapXAxisProps,
+  type HeatmapYAxisProps,
+  type HeatmapTooltipProps,
+  type HeatmapLegendProps,
+  type HeatmapColumn,
+  type HeatmapBin,
+  type HeatmapCell,
+  type HeatmapLayout,
+} from './components/heatmap-chart';
+export {
   Select,
   type SelectProps,
   type SelectItemProps,

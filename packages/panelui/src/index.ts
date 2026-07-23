@@ -25,6 +25,12 @@ export {
   AnimatedPressable,
   type AnimatedPressableProps,
 } from './primitives/animated-pressable';
+export {
+  ScrollProgress,
+  useScrollProgress,
+  type ScrollProgressProps,
+  type ScrollProgressValue,
+} from './primitives/scroll-progress';
 
 // Native UI bridge
 export { hasNativeUI } from './native';
@@ -238,6 +244,17 @@ export {
 } from './components/scroll-fade';
 export { Separator, type SeparatorProps } from './components/separator';
 export { Shimmer, type ShimmerProps } from './components/shimmer';
+export {
+  ScrollText,
+  type ScrollTextProps,
+  type ScrollTextEffect,
+  type ScrollTextSplit,
+} from './components/scroll-text';
+export {
+  ScrollCanvas,
+  type ScrollCanvasProps,
+  type ScrollCanvasEffect,
+} from './components/scroll-canvas';
 export {
   ThinkingOrb,
   type ThinkingOrbProps,

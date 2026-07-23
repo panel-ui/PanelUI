@@ -22,6 +22,11 @@ export {
   type UseKeyboardAvoidanceResult,
 } from './use-keyboard-avoidance';
 export {
+  useRevealProgress,
+  type UseRevealProgressOptions,
+  type UseRevealProgressResult,
+} from './use-reveal-progress';
+export {
   useScrollSections,
   type UseScrollSectionsOptions,
   type UseScrollSectionsResult,

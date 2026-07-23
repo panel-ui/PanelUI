@@ -1026,6 +1026,31 @@
       "horizontal"
     ]
   },
+  "scroll-canvas": {
+    "intro": "The counterpart to [ScrollText](/docs/components/scroll-text): the same scrubbed reveal applied to a picture. The frame stays where the layout puts it and the image moves *inside* it, which is what separates a parallax from a thing sliding about the page.",
+    "usage": "<ScrollProgress>\n  <ScrollView>\n    <ScrollCanvas source={{ uri }} effect=\"parallax\" />\n  </ScrollView>\n</ScrollProgress>",
+    "extraImports": [
+      "ScrollProgress"
+    ],
+    "examples": [
+      {
+        "title": "The four effects",
+        "description": "They are four different jobs. `parallax` drifts the image against the scroll so the frame reads as a window onto something further away; `zoom` settles it from slightly oversized to its natural size; `reveal` wipes it in from the bottom edge; `sequence` picks a frame out of a series, so the reader scrubs an animation with their thumb.",
+        "code": "<ScrollCanvas source={{ uri }} effect=\"parallax\" />\n<ScrollCanvas source={{ uri }} effect=\"zoom\" />\n<ScrollCanvas source={{ uri }} effect=\"reveal\" />\n<ScrollCanvas sources={frames} effect=\"sequence\" />"
+      },
+      {
+        "title": "Scrubbing a sequence",
+        "description": "Every frame stays mounted and its opacity is switched, rather than one image whose source is swapped. A swap crosses back into JS at each step and then waits on a decode, so a fast scrub shows the previous frame or nothing at all. Keep it to a couple of dozen frames — each one is a decoded bitmap held for as long as the canvas is mounted.",
+        "code": "<ScrollCanvas\n  effect=\"sequence\"\n  sources={frames}\n  start={0.95}\n  end={0.1}\n/>"
+      },
+      {
+        "title": "Shape and travel",
+        "description": "`aspectRatio` sets the frame; `distance` multiplies how far the effect moves. A parallaxing image is drawn taller than its frame so the drift never exposes an edge — pushing `distance` far past `1` spends more of that budget than there is.",
+        "code": "<ScrollCanvas source={{ uri }} aspectRatio={1} distance={1.6} />\n\n<ScrollCanvas\n  source={{ uri }}\n  aspectRatio={21 / 9}\n  className=\"rounded-none\"\n/>"
+      }
+    ],
+    "notes": "The frame clips, so the image can be oversized and moved without disturbing anything around it. `reveal` is a cover that retreats rather than a height that grows, because animating a height relayouts the image inside it every frame — and it is a wipe rather than a fade so the frame keeps its shape while it fills.\n\n“Canvas” here is the frame the pictures move behind, not a drawing surface: nothing is rasterised and there is no `<canvas>` involved.\n\nUnder `useReducedMotion`, or with `enabled={false}`, the image renders plainly at rest."
+  },
   "scroll-fade": {
     "intro": "Fades the edges of a scroll container, so content looks like it passes under the boundary rather than being cut off.\n\nA fading edge is also an affordance: it means there is more content behind it. Scroll position, content size and viewport size are held in shared values and read by the fades on the UI thread, so scrolling never re-renders React.",
     "usage": "<ScrollFade size={40}>\n  <ScrollView horizontal showsHorizontalScrollIndicator={false}>\n    <Item.Group orientation=\"horizontal\">\n      {categories.map((category) => (\n        <Item key={category.id} orientation=\"vertical\" variant=\"outline\" size=\"sm\" className=\"w-44\">\n          <Item.Media variant=\"icon\"><PackageIcon size={16} /></Item.Media>\n          <Item.Content>\n            <Item.Title>{category.name}</Item.Title>\n            <Item.Description>{category.summary}</Item.Description>\n          </Item.Content>\n        </Item>\n      ))}\n    </Item.Group>\n  </ScrollView>\n</ScrollFade>",
@@ -1061,6 +1086,41 @@
         "code": "<ScrollFade enabled={!isRefreshing}>\n  <ScrollView>{/* … */}</ScrollView>\n</ScrollFade>"
       }
     ]
+  },
+  "scroll-text": {
+    "intro": "Text that resolves word by word as you scroll past it. The reader's thumb becomes the playhead: words arrive left to right as the block crosses the viewport, and scrolling back up unresolves them — the effect is scrubbed rather than triggered, so it is reversible and lands exactly on both ends.",
+    "usage": "<ScrollProgress>\n  <ScrollView>\n    <ScrollText size=\"2xl\" weight=\"semibold\">\n      Every control ships with its accessibility wiring already done.\n    </ScrollText>\n  </ScrollView>\n</ScrollProgress>",
+    "extraImports": [
+      "ScrollProgress"
+    ],
+    "examples": [
+      {
+        "title": "Wiring up the scroll position",
+        "description": "`ScrollProgress` wraps the scroll view you already have rather than replacing it — the child is cloned with an animated scroll handler composed onto it, so a `FlatList`, a `SectionList` or your own scrollable all work and your own `onScroll` is kept. One listener serves every effect inside it.",
+        "code": "<ScrollProgress className=\"flex-1\">\n  <ScrollView>\n    <ScrollText>…</ScrollText>\n    <ScrollCanvas source={{ uri }} />\n  </ScrollView>\n</ScrollProgress>"
+      },
+      {
+        "title": "The four effects",
+        "description": "`color` crossfades each word between two colours, `fade` brings it up from nearly transparent (not fully — a word that vanishes takes the line's shape with it and the paragraph reflows as you scroll), `highlight` sweeps a background behind it, and `rise` lifts it into place.",
+        "code": "<ScrollText effect=\"color\">…</ScrollText>\n<ScrollText effect=\"fade\">…</ScrollText>\n<ScrollText effect=\"highlight\">…</ScrollText>\n<ScrollText effect=\"rise\">…</ScrollText>"
+      },
+      {
+        "title": "Splitting and stagger",
+        "description": "`stagger` is how much of the whole reveal one token takes. Small values run a hard edge along the line; large ones brighten the whole sentence together. `by=\"character\"` reads as typing rather than as reading, and wants a smaller stagger since there are far more tokens.",
+        "code": "<ScrollText stagger={0.12}>An edge travelling along the line.</ScrollText>\n\n<ScrollText stagger={0.9}>A line that arrives all at once.</ScrollText>\n\n<ScrollText by=\"character\" stagger={0.12}>One character at a time.</ScrollText>"
+      },
+      {
+        "title": "Setting the scroll window",
+        "description": "`start` and `end` are positions down the viewport, as fractions of its height. Progress is 0 while the block's top is still below `start`, and reaches 1 when its bottom passes `end` — so a tall block scrubs across its own height instead of snapping the moment its first line appears. A smaller `end` is a longer scrub.",
+        "code": "<ScrollText start={0.95} end={0.25}>A long, slow reveal.</ScrollText>"
+      },
+      {
+        "title": "Driving it from something else",
+        "description": "Pass a shared value as `progress` and nothing is measured — the reveal follows whatever you give it. For a timeline, a gesture, or a value you are animating yourself.",
+        "code": "const progress = useSharedValue(0);\n\n<ScrollText progress={progress}>Driven by hand.</ScrollText>"
+      }
+    ],
+    "notes": "### Two layouts, and why\n\n`color`, `fade` and `highlight` render the words as nested `Text` inside one parent, which is the only way React Native will break them into real lines. Nested text cannot be transformed, though — a `translateY` on it is simply ignored.\n\nSo `rise` lays the words out as a wrapping row of separate views instead. That buys transforms and costs real line-breaking: words wrap on their own boundaries and the spacing is a margin rather than a space. Worth knowing before reaching for it on a paragraph rather than a heading.\n\n### Measurement\n\nThe block is measured on the UI thread whenever the scroll position changes — not every frame, and not once at layout. Once is wrong the moment anything above it resizes; every frame is a measurement pass for a value that only changes when the scroller moves.\n\n`useReducedMotion` renders the text fully resolved, with no effect at all. So does `enabled={false}` — the text is always readable, which is the one thing an effect on text must never take away."
   },
   "section-rail": {
     "intro": "A floating navigator for a long screen: a stack of short bars pinned to one edge, one per section, that expands into a labelled panel when you touch it. Collapsed it is a position indicator you can read at a glance without giving up any content width; expanded it is a list you can jump from.",

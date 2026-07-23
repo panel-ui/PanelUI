@@ -1,0 +1,122 @@
+---
+title: ScrollText
+description: Text that resolves word by word as you scroll.
+status: new
+---
+
+Text that resolves word by word as you scroll past it. The reader's thumb becomes the playhead: words arrive left to right as the block crosses the viewport, and scrolling back up unresolves them — the effect is scrubbed rather than triggered, so it is reversible and lands exactly on both ends.
+
+## Installation
+
+ScrollText ships with the library — no separate install.
+
+```tsx
+import { ScrollText, ScrollProgress } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add scroll-text
+```
+
+## Usage
+
+```tsx
+<ScrollProgress>
+  <ScrollView>
+    <ScrollText size="2xl" weight="semibold">
+      Every control ships with its accessibility wiring already done.
+    </ScrollText>
+  </ScrollView>
+</ScrollProgress>
+```
+
+## Examples
+
+### Wiring up the scroll position
+
+`ScrollProgress` wraps the scroll view you already have rather than replacing it — the child is cloned with an animated scroll handler composed onto it, so a `FlatList`, a `SectionList` or your own scrollable all work and your own `onScroll` is kept. One listener serves every effect inside it.
+
+```tsx
+<ScrollProgress className="flex-1">
+  <ScrollView>
+    <ScrollText>…</ScrollText>
+    <ScrollCanvas source={{ uri }} />
+  </ScrollView>
+</ScrollProgress>
+```
+
+### The four effects
+
+`color` crossfades each word between two colours, `fade` brings it up from nearly transparent (not fully — a word that vanishes takes the line's shape with it and the paragraph reflows as you scroll), `highlight` sweeps a background behind it, and `rise` lifts it into place.
+
+```tsx
+<ScrollText effect="color">…</ScrollText>
+<ScrollText effect="fade">…</ScrollText>
+<ScrollText effect="highlight">…</ScrollText>
+<ScrollText effect="rise">…</ScrollText>
+```
+
+### Splitting and stagger
+
+`stagger` is how much of the whole reveal one token takes. Small values run a hard edge along the line; large ones brighten the whole sentence together. `by="character"` reads as typing rather than as reading, and wants a smaller stagger since there are far more tokens.
+
+```tsx
+<ScrollText stagger={0.12}>An edge travelling along the line.</ScrollText>
+
+<ScrollText stagger={0.9}>A line that arrives all at once.</ScrollText>
+
+<ScrollText by="character" stagger={0.12}>One character at a time.</ScrollText>
+```
+
+### Setting the scroll window
+
+`start` and `end` are positions down the viewport, as fractions of its height. Progress is 0 while the block's top is still below `start`, and reaches 1 when its bottom passes `end` — so a tall block scrubs across its own height instead of snapping the moment its first line appears. A smaller `end` is a longer scrub.
+
+```tsx
+<ScrollText start={0.95} end={0.25}>A long, slow reveal.</ScrollText>
+```
+
+### Driving it from something else
+
+Pass a shared value as `progress` and nothing is measured — the reveal follows whatever you give it. For a timeline, a gesture, or a value you are animating yourself.
+
+```tsx
+const progress = useSharedValue(0);
+
+<ScrollText progress={progress}>Driven by hand.</ScrollText>
+```
+
+## API Reference
+
+### ScrollText
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `effect` | `ScrollTextEffect` | `'color'` | `color` crossfades each word between two colours, `fade` brings it up from transparent, `rise` lifts it into place, `highlight` sweeps a background behind it. |
+| `by` | `ScrollTextSplit` | `'word'` | Reveal a word at a time, or a character at a time. |
+| `from` | `string` | — | Colour before a word is reached. Defaults to the muted foreground token. |
+| `to` | `string` | — | Colour once it has been. Defaults to the foreground token. |
+| `start` | `number` | `0.9` | Where down the viewport the block's top sits when the reveal starts, as a fraction of the viewport height. |
+| `end` | `number` | `0.5` | Where its bottom sits when the reveal completes. Smaller is a longer scrub. |
+| `stagger` | `number` | `0.35` | How much of the whole reveal a single word takes, `0` to `1`. Small values make a hard edge travelling along the line; large ones make the whole sentence brighten together. |
+| `progress` | `SharedValue<number>` | — | Drive the reveal from a value of your own rather than from scroll — a progress bar, a gesture, a timeline. |
+| `enabled` | `boolean` | `true` | Set false to render the text resolved, with no effect at all. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Two layouts, and why
+
+`color`, `fade` and `highlight` render the words as nested `Text` inside one parent, which is the only way React Native will break them into real lines. Nested text cannot be transformed, though — a `translateY` on it is simply ignored.
+
+So `rise` lays the words out as a wrapping row of separate views instead. That buys transforms and costs real line-breaking: words wrap on their own boundaries and the spacing is a margin rather than a space. Worth knowing before reaching for it on a paragraph rather than a heading.
+
+### Measurement
+
+The block is measured on the UI thread whenever the scroll position changes — not every frame, and not once at layout. Once is wrong the moment anything above it resizes; every frame is a measurement pass for a value that only changes when the scroller moves.
+
+`useReducedMotion` renders the text fully resolved, with no effect at all. So does `enabled={false}` — the text is always readable, which is the one thing an effect on text must never take away.

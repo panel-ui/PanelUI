@@ -130,10 +130,26 @@
     "Single-select list of options.",
     "react native radio button"
   ],
+  "scroll-canvas": [
+    "ScrollCanvas",
+    "Image frame whose contents move as you scroll.",
+    "react native parallax image",
+    {
+      "addedIn": "0.14.0"
+    }
+  ],
   "scroll-fade": [
     "ScrollFade",
     "Fades the edges of a scroll container.",
     "react native scroll fade"
+  ],
+  "scroll-text": [
+    "ScrollText",
+    "Text that resolves word by word as you scroll.",
+    "react native scroll text animation",
+    {
+      "addedIn": "0.14.0"
+    }
   ],
   "section-rail": [
     "SectionRail",

@@ -308,10 +308,34 @@
     "registryDependencies": []
   },
   {
+    "name": "scroll-canvas",
+    "type": "registry:ui",
+    "description": "Image frame whose contents move as you scroll.",
+    "registryDependencies": [
+      "cn",
+      "use-reveal-progress"
+    ]
+  },
+  {
     "name": "scroll-fade",
     "type": "registry:ui",
     "description": "Fades the edges of a scroll container.",
     "registryDependencies": []
+  },
+  {
+    "name": "scroll-progress",
+    "type": "registry:ui",
+    "description": "scroll-progress.",
+    "registryDependencies": []
+  },
+  {
+    "name": "scroll-text",
+    "type": "registry:ui",
+    "description": "Text that resolves word by word as you scroll.",
+    "registryDependencies": [
+      "text",
+      "use-reveal-progress"
+    ]
   },
   {
     "name": "section-rail",
@@ -509,6 +533,14 @@
     "type": "registry:hook",
     "description": "The value from the previous render.",
     "registryDependencies": []
+  },
+  {
+    "name": "use-reveal-progress",
+    "type": "registry:hook",
+    "description": "use-reveal-progress.",
+    "registryDependencies": [
+      "scroll-progress"
+    ]
   },
   {
     "name": "use-scroll-sections",

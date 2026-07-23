@@ -19,26 +19,41 @@ const GROUPS = {
 };
 const DEFAULT_GROUP = 'components';
 
-/** The version being documented, for the `new` badge below. */
+/** The version being documented, for the sidebar dots below. */
 const libVersion = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'packages/panelui/package.json'), 'utf8')
 ).version;
 
 /**
- * How many minor releases a component keeps its blue "new" dot in the sidebar.
+ * How many minor releases a component keeps its sidebar dot.
  *
- * Deriving this from `addedIn` rather than hand-writing a `status` field means
+ * Deriving this from a version rather than hand-writing a `status` field means
  * nobody has to remember to take the badge off — which is the failure mode
  * every "new" marker has, and the reason half of them end up permanent.
  */
-const NEW_FOR_MINORS = 3;
+const BADGE_FOR_MINORS = 3;
 
-function isNew(addedIn) {
-  if (!addedIn) return false;
-  const [addedMajor, addedMinor] = addedIn.split('.').map(Number);
+/** True while `version` is recent enough to still be worth marking. */
+function isRecent(version) {
+  if (!version) return false;
+  const [thenMajor, thenMinor] = version.split('.').map(Number);
   const [major, minor] = libVersion.split('.').map(Number);
-  if (major !== addedMajor) return major < addedMajor;
-  return minor - addedMinor < NEW_FOR_MINORS;
+  if (major !== thenMajor) return major < thenMajor;
+  return minor - thenMinor < BADGE_FOR_MINORS;
+}
+
+/**
+ * Which dot a component gets, if any.
+ *
+ * `addedIn` wins over `updatedIn`: a component that arrived and then changed
+ * inside the same window is still news, and two dots on one row is noise. Both
+ * expire on the same schedule — `updatedIn` is bumped by hand when a
+ * component's API changes, and forgetting to clear it costs nothing.
+ */
+function statusOf({ addedIn, updatedIn }) {
+  if (isRecent(addedIn)) return 'new';
+  if (isRecent(updatedIn)) return 'updated';
+  return null;
 }
 
 /** Options are an optional 4th element, so the common entry stays a triple. */
@@ -104,9 +119,11 @@ for (const [slug, entry] of Object.entries(meta)) {
       ? `\n\n${previewVideoTag(u.previewVideo)}`
       : '';
 
+  const status = statusOf(options);
+
   sections.push(`---
 title: ${name}
-description: ${summary}${isNew(options.addedIn) ? '\nstatus: new' : ''}
+description: ${summary}${status ? `\nstatus: ${status}` : ''}
 ---
 
 ${u.intro ?? summary}${preview}

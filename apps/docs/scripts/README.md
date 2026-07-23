@@ -28,7 +28,12 @@ S=./scripts node scripts/gen.mjs       # api.json + usage.json -> MDX
   | `variantCode` | Per-variant snippet, keyed by variant name. Overrides the generic `<Name variant="x">…</Name>` fallback, which is wrong for components that take no children |
   | `notes` | The `## Notes` section |
 
-- `meta.json` maps each slug to its display name, one-line summary and primary search keyword.
+- `meta.json` maps each slug to its display name, one-line summary and primary search keyword,
+  plus an optional options object: `group` (which sidebar section the page is filed under),
+  `addedIn` (the version the component first shipped in — blue dot) and `updatedIn` (the version
+  its API last changed in — grey dot). Both dots expire three minor releases later, so neither
+  has to be cleared by hand, and neither `status` field is ever written into an MDX file
+  directly.
 - `gen.mjs` merges the two and writes the MDX.
 
 Every component page must carry worked `examples` — a props table says a prop exists, an

@@ -88,10 +88,10 @@ the library source into `api.json`; `gen.mjs` merges it with the hand-written `u
 `npm run docs:generate --workspace=docs`, which also rebuilds the registry. See
 `apps/docs/scripts/README.md` for what each `usage.json` key becomes.
 
-### meta.json entries: group and addedIn
+### meta.json entries: group, addedIn and updatedIn
 
 A `scripts/meta.json` entry is `[name, summary, keyword]`, optionally followed by an options
-object. Two keys live there:
+object. Three keys live there:
 
 - **`group`** — which sidebar section the page is filed under. Omit it for `components`; pass
   `"ai-components"` for the AI Components section. The group decides both the folder the MDX is
@@ -99,16 +99,22 @@ object. Two keys live there:
   redirect in `apps/docs/next.config.mjs` when you do.
 - **`addedIn`** — the version the component first ships in. Set it when adding a component, to
   the version you are about to release.
+- **`updatedIn`** — the version a component's API last changed in. Set it when a change is worth
+  a reader's attention: a new prop, a renamed or removed variant, a changed default, new
+  behaviour. Not for a bug fix that leaves the API alone.
 
 ```json
 "section-rail": ["SectionRail", "…", "…", { "addedIn": "0.11.0" }],
+"slider": ["Slider", "…", "…", { "updatedIn": "0.15.0" }],
 "shimmer": ["Shimmer", "…", "…", { "group": "ai-components" }]
 ```
 
-**`addedIn` drives the blue "new" dot in the docs sidebar.** `gen.mjs` emits `status: new` into
-the page's frontmatter while the library version is within **three minor releases** of
-`addedIn`, and `lib/source.tsx` renders it as a dot. Past that window it stops being emitted and
-the badge disappears on the next regeneration.
+**Both drive a dot in the docs sidebar** — blue for `addedIn`, grey for `updatedIn`. `gen.mjs`
+emits `status: new` or `status: updated` into the page's frontmatter while the library version is
+within **three minor releases** of the version given, and `lib/source.tsx` renders it as a dot.
+Past that window it stops being emitted and the badge disappears on the next regeneration. A
+component in both windows shows the blue dot only: it is still news, and two dots on one row is
+noise.
 
 Never hand-write a `status` field into an MDX file — it is generated, and the next
 `docs:generate` will drop it. The whole point of deriving it is that nobody has to remember to

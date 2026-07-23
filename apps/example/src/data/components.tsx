@@ -45,6 +45,7 @@ import {
   InputGroup,
   ImageIcon,
   Item,
+  KeyboardAvoider,
   Label,
   LineChart,
   type LineChartHandle,
@@ -1774,6 +1775,98 @@ function PasswordInputDemo() {
   );
 }
 
+/**
+ * A field that has to get out of the keyboard's way inside a scroll view —
+ * the case a fixed-height box cannot show.
+ *
+ * Focus "Comment", then scroll the form. The field holds its place between
+ * "Subject" and "Signature": its lift decays to nothing as it scrolls clear of
+ * the keyboard, and comes back as it scrolls under it again.
+ */
+function KeyboardLiftDemo() {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <ScrollView
+      contentContainerClassName="gap-4 px-5 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Plain fields first, to make the point that only the focused avoiding
+          field moves. Tapping one of these leaves the screen exactly as it is. */}
+      <Input label="From" placeholder="you@example.com" />
+      <Input label="To" placeholder="them@example.com" />
+      <Input label="Subject" placeholder="An ordinary field" />
+      <Input
+        avoidKeyboard
+        label="Comment"
+        placeholder="Say something…"
+        description="Lifts on focus, follows the scroll, settles back on blur."
+        multiline
+      />
+      <Input label="Signature" placeholder="Sent from my phone" />
+      <Input label="Reply-to" placeholder="Optional" />
+      <Input label="Tags" placeholder="Comma separated" />
+    </ScrollView>
+  );
+}
+
+/**
+ * The other half of the job: a bar already pinned to the bottom edge, which
+ * should ride the keyboard rather than measure anything. `dock` moves it by the
+ * keyboard height less the inset it is already sitting above.
+ */
+function KeyboardDockDemo() {
+  const insets = useSafeAreaInsets();
+  const [draft, setDraft] = useState('');
+
+  return (
+    <View className="flex-1">
+      <ScrollView
+        contentContainerClassName="gap-3 px-5 pt-4"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {[
+          'Every control ships with its accessibility role wired up.',
+          'Animations run on the UI thread, so a busy list never drops them.',
+          'Tokens are semantic — a theme swap moves every component at once.',
+          'The composer below stays put while this list scrolls.',
+          'Open the keyboard and it travels with it, frame for frame.',
+        ].map((line) => (
+          <Card key={line}>
+            <Card.Content className="p-4">
+              <Text size="sm">{line}</Text>
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
+
+      <KeyboardAvoider
+        mode="dock"
+        bottomInset={insets.bottom}
+        pointerEvents="box-none"
+        className="absolute left-0 right-0 px-5"
+        style={{ bottom: insets.bottom + 16 }}
+      >
+        <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-4 shadow-lg">
+          <Input
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Message"
+            className="flex-1 border-0 bg-transparent px-0"
+            containerClassName="flex-1"
+            accessibilityLabel="Message"
+          />
+          <SendIcon size={18} />
+        </View>
+      </KeyboardAvoider>
+    </View>
+  );
+}
+
 /** The small progress ring shown beside each row in the Frame demo. */
 function Meter({ percent }: { percent: number }) {
   return (
@@ -3263,27 +3356,20 @@ export const COMPONENTS: ComponentEntry[] = [
         ),
       },
       {
-        label: 'Avoiding the keyboard',
-        render: () => (
-          <View className="w-full gap-4">
-            <Text size="sm" muted>
-              Focus the second field. It sits low enough that the keyboard would
-              cover it, so it lifts by exactly the overlap — no more.
-            </Text>
-            {/* The plain field first, to make the point that only the focused
-                avoiding field moves. Tapping this one leaves everything on the
-                screen exactly where it is. */}
-            <Input label="Subject" placeholder="An ordinary field" />
-            <View className="h-72 justify-end">
-              <Input
-                avoidKeyboard
-                label="Comment"
-                placeholder="Say something…"
-                description="Lifts on focus, settles back on blur."
-              />
-            </View>
-          </View>
-        ),
+        label: 'Lifting in a scroll view',
+        id: 'in-a-scroll-view',
+        fullPage: true,
+        description:
+          'A field that lifts by its overlap with the keyboard, and keeps its place in the form as you scroll.',
+        render: () => <KeyboardLiftDemo />,
+      },
+      {
+        label: 'Docked composer',
+        id: 'docked-composer',
+        fullPage: true,
+        description:
+          'A bar pinned to the bottom edge that rides the keyboard up and back down.',
+        render: () => <KeyboardDockDemo />,
       },
     ],
   },

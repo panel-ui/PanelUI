@@ -17,6 +17,7 @@ export {
 export { useKeyboard, type UseKeyboardResult } from './use-keyboard';
 export {
   useKeyboardAvoidance,
+  type KeyboardAvoidanceMode,
   type UseKeyboardAvoidanceOptions,
   type UseKeyboardAvoidanceResult,
 } from './use-keyboard-avoidance';

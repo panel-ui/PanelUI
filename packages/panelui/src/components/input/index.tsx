@@ -29,6 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
+import type { KeyboardAvoidanceMode } from '../../hooks/use-keyboard-avoidance';
 import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text } from '../../primitives/text';
 import { Label } from '../label';
@@ -85,9 +86,11 @@ export interface InputProps
   isRequired?: boolean;
   disabled?: boolean;
   /**
-   * Lift the field above the software keyboard when it would otherwise be
-   * covered. Moves by exactly the overlap, and not at all when the field is
-   * already clear — or when the keyboard belongs to a different field.
+   * Keep the field clear of the software keyboard. Moves by exactly the
+   * overlap, and not at all when the field is already clear — or when the
+   * keyboard belongs to a different field. The overlap is re-read every frame
+   * while the field is focused, so the field keeps its place in the page as it
+   * scrolls under and back out of the keyboard.
    *
    * Install `react-native-keyboard-controller` for this to behave on Android.
    *
@@ -95,8 +98,20 @@ export interface InputProps
    * container, which would remount the field and drop focus.
    */
   avoidKeyboard?: boolean;
-  /** Gap kept between the field and the keyboard when `avoidKeyboard` is set. */
+  /**
+   * How the field gets clear. `lift` moves it up by its overlap and follows
+   * the scroll — right for a field in the flow of a page. `dock` makes it
+   * travel with the keyboard, for a composer already pinned near the bottom
+   * edge; pair it with `keyboardBottomInset`.
+   */
+  keyboardMode?: KeyboardAvoidanceMode;
+  /** Gap kept between the field and the keyboard. `keyboardMode="lift"` only. */
   keyboardOffset?: number;
+  /**
+   * How far above the bottom edge the field already sits — usually the safe
+   * area inset. `keyboardMode="dock"` only.
+   */
+  keyboardBottomInset?: number;
 }
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -114,7 +129,9 @@ export const Input = forwardRef<TextInput, InputProps>(
       variant,
       size,
       avoidKeyboard = false,
+      keyboardMode = 'lift',
       keyboardOffset = 16,
+      keyboardBottomInset = 0,
       onFocus,
       onBlur,
       style,
@@ -231,7 +248,9 @@ export const Input = forwardRef<TextInput, InputProps>(
           // anywhere is tapped, and since they all aim at the same gap above
           // the keyboard, they arrive stacked on top of one another.
           active={focused}
+          mode={keyboardMode}
           offset={keyboardOffset}
+          bottomInset={keyboardBottomInset}
           className={containerClasses}
         >
           {body}

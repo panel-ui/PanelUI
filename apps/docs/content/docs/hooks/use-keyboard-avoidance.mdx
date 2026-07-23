@@ -1,6 +1,6 @@
 ---
 title: useKeyboardAvoidance
-description: Lift an element just clear of the software keyboard.
+description: Keep an element clear of the software keyboard.
 ---
 
 Measures an element and translates it by exactly the amount the keyboard
@@ -15,6 +15,33 @@ overlaps it — and not at all when there is no overlap.
 
 The translation runs on the UI thread, so the element tracks the keyboard's own
 interpolation frame for frame and nothing re-renders while it moves.
+
+## Two modes
+
+"Get out of the keyboard's way" and "ride the keyboard" are different jobs, and
+`mode` picks between them.
+
+| Mode | For | How it moves |
+| --- | --- | --- |
+| `lift` (default) | A field in the flow of a page | Measured every frame while the keyboard is up, and moved by the current overlap. Scroll it clear and the lift decays to nothing; scroll it back under and the lift returns. |
+| `dock` | A composer, toolbar or search bar pinned near the bottom edge | Nothing is measured. The element travels with the keyboard, less the `bottomInset` it already sits above. |
+
+```tsx
+// In the flow of a scrolling form.
+<KeyboardAvoider active={focused}>
+  <Input label="Comment" />
+</KeyboardAvoider>
+
+// Pinned to the bottom edge.
+<KeyboardAvoider
+  mode="dock"
+  bottomInset={insets.bottom}
+  className="absolute left-0 right-0 px-5"
+  style={{ bottom: insets.bottom + 16 }}
+>
+  <Composer />
+</KeyboardAvoider>
+```
 
 ## Install the keyboard controller
 
@@ -111,10 +138,10 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({ active: focused 
 `Input`'s `avoidKeyboard` prop already does this for you.
 
 <Callout>
-  `active` is also what lets the hook measure correctly when you move straight
-  from one field to another. That never closes the keyboard, so a hook watching
-  only the keyboard would have no event to measure on — the second field would
-  stay where it is.
+  `active` is also what hands the lift over when you move straight from one
+  field to another. That never closes the keyboard, so there is no keyboard
+  event to hang the handover on: the field being left is sent back down because
+  it stopped being active, not because the keyboard went away.
 </Callout>
 
 ## API Reference
@@ -125,31 +152,38 @@ const { ref, onLayout, animatedStyle } = useKeyboardAvoidance({ active: focused 
 | --- | --- | --- | --- |
 | `enabled` | `boolean` | `true` | Set false to leave the element where it is. |
 | `active` | `boolean` | `true` | Whether this is the element that should move. |
-| `offset` | `number` | `16` | Gap kept between the element's bottom edge and the keyboard. |
+| `mode` | `'lift' \| 'dock'` | `'lift'` | Move by the overlap and follow the scroll, or travel with the keyboard. |
+| `offset` | `number` | `16` | Gap kept between the element's bottom edge and the keyboard. `lift` only. |
+| `bottomInset` | `number` | `0` | How far above the bottom edge the element already sits. `dock` only. |
 
 ### Returns
 
 | Value | Type | Description |
 | --- | --- | --- |
 | `ref` | `AnimatedRef<View>` | Attach to the element that should stay visible. |
-| `onLayout` | `(event) => void` | Attach to the same element — it seeds the resting position. |
+| `onLayout` | `(event) => void` | Attach to the same element, so a re-layout at rest cannot leave it offset. |
 | `animatedStyle` | `AnimatedStyle` | Apply to the same element. |
 
-All three go on the same element, and the `ref` is the one that matters most:
-the resting position is re-measured through it on the UI thread every time the
-element becomes the one that should move — `active` and the keyboard up — which
-is the moment it is guaranteed to be untranslated.
+All three go on the same element, and in `lift` mode the `ref` is the one that
+matters most: the element is re-measured through it on the UI thread **every
+frame** for as long as it is both `active` and the keyboard is up.
 
-That re-measurement is what makes the hook work in the two places a
-measure-once approach fails. An element inside an overlay is laid out before
-the overlay has decided where to put it, so a position recorded then is
-meaningless; and an element that has scrolled since it was laid out would
-otherwise be avoided against where it used to be.
+Measuring every frame rather than once is what makes the hook survive the page
+moving underneath it. Everything interesting that shifts an element happens
+*after* the keyboard opens — the page scrolls, a sheet settles, content above it
+grows — so a position captured at the moment of focus is right for exactly one
+frame, and the element spends the rest of the time holding an offset that
+belongs to where it used to be. That is the failure that reads as a field
+hanging out of its own slot as soon as you scroll.
 
-`onLayout` remains worth attaching — it covers the case the re-measurement
-cannot, an element mounting while the keyboard is *already* up, where there is
-no appearance to react to. It ignores layout events fired while the element is
-already lifted, so the position cannot creep upwards.
+The measurement includes the translation applied on the previous frame, so the
+hook subtracts it back out to recover the honest resting edge. Without that it
+would chase its own output down the screen.
+
+Nothing runs at rest: the frame loop is switched on when the element becomes
+active with the keyboard up, and off again the moment either stops being true.
+A screen full of fields costs nothing until one of them is being typed into.
+`dock` mode measures nothing at all and needs no loop.
 
 ## Notes
 
@@ -157,9 +191,11 @@ The element must be an `Animated` component — `Animated.View`, or anything fro
 `Animated.createAnimatedComponent`. A plain `View` will not accept the animated
 style.
 
-Inside a `ScrollView`, prefer the scroll view's own
+Inside a `ScrollView` this works as it does anywhere else — the per-frame
+measurement is taken in window space, so scrolling is just another thing that
+moves the element. What it does *not* do is scroll the page for you: it moves
+one element, so a field that would need the content itself to move still wants
 `automaticallyAdjustKeyboardInsets` (iOS) or a keyboard-aware scroll container.
-This hook moves a single element and does not know about scroll offset.
 
 ## Why not `enabled: false` on every field
 

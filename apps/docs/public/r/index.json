@@ -160,7 +160,8 @@
     "registryDependencies": [
       "keyboard-avoider",
       "label",
-      "text"
+      "text",
+      "use-keyboard-avoidance"
     ]
   },
   {

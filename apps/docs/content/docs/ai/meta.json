@@ -5,6 +5,7 @@
     "setup",
     "api-route",
     "chat-ui",
+    "voice",
     "streaming-performance",
     "tools"
   ]

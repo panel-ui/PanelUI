@@ -244,6 +244,7 @@
     "registryDependencies": [
       "animated-pressable",
       "cn",
+      "icons",
       "text"
     ]
   },
@@ -405,7 +406,8 @@
     "type": "registry:ui",
     "description": "What a voice looks like while an app listens.",
     "registryDependencies": [
-      "cn"
+      "cn",
+      "icons"
     ]
   },
   {
@@ -505,6 +507,7 @@
     "type": "registry:ui",
     "description": "Semantic text presets.",
     "registryDependencies": [
+      "cn",
       "text"
     ]
   },

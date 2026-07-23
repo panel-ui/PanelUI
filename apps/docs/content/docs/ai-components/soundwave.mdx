@@ -13,7 +13,7 @@ It draws a level; it does not record one. Your app owns the recorder and hands o
 Soundwave ships with the library — no separate install.
 
 ```tsx
-import { Soundwave, Card, MicIcon, Text } from 'panelui-native';
+import { Soundwave, Card, Message, MicIcon, Text } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -71,6 +71,41 @@ useEffect(() => {
 </Card>
 ```
 
+### A voice note
+
+`levels` is the shape of a finished recording — collect the metering while recording and store the numbers beside the file. Supplying it draws the wave still rather than animated, and stops the engine entirely, so a transcript of twenty notes runs no animation at all until one is played. `progress` is the playhead: bars behind it keep full ink and the rest are dimmed.
+
+```tsx
+const player = useAudioPlayer(note.uri);
+const status = useAudioPlayerStatus(player);
+const progress = status.duration ? status.currentTime / status.duration : 0;
+
+<Message align="end">
+  <Message.Content>
+    <Message.Bubble>
+      <View className="w-64 flex-row items-center gap-3">
+        <Pressable onPress={() => player.play()}>
+          <PlayIcon size={16} />
+        </Pressable>
+
+        <View className="flex-1">
+          <Soundwave
+            variant="bars"
+            levels={note.levels}
+            progress={progress}
+            bars={40}
+            barWidth={2}
+            height={28}
+          />
+        </View>
+
+        <Text size="xs" muted>0:12</Text>
+      </View>
+    </Message.Bubble>
+  </Message.Content>
+</Message>
+```
+
 ### Real frequency bands
 
 If your app already runs an analysis, hand the bands over directly with `levels` and `bars` in `static` mode draws them instead of synthesising a shape. They are resampled to the bar count, so the two numbers do not have to match.
@@ -101,6 +136,30 @@ If your app already runs an analysis, hand the bands over directly with `levels`
     <Text size="xl">Start chatting anytime</Text>
   </View>
 </View>
+```
+
+### Colour
+
+`color` takes a literal colour or a **theme token name**, which resolves against the active theme and follows it into dark mode. `gradient` paints across the wave instead of one flat ink — left to right for `bars` and `line`, up from the bottom edge for `ambient`. `trackColor` sets the part of a recording that has not played yet, which otherwise draws as the ink turned down.
+
+```tsx
+{/* Follows the theme. */}
+<Soundwave variant="bars" color="--color-info" />
+
+{/* Or a colour of your own. */}
+<Soundwave variant="bars" color="#f97316" />
+
+{/* Across the wave. */}
+<Soundwave variant="line" gradient={['#6366f1', '#ec4899', '#f59e0b']} />
+
+{/* Played and unplayed, separately. */}
+<Soundwave
+  variant="bars"
+  levels={note.levels}
+  progress={progress}
+  color="--color-success"
+  trackColor="--color-muted"
+/>
 ```
 
 ## Versions
@@ -149,6 +208,36 @@ A bloom rising off the bottom edge and a rim of light around the rest, both brea
 <Soundwave variant="ambient" state="listening" level={level} radius={40} />
 ```
 
+### Voice notes
+
+Recorded waveforms in bubbles, filling as they play. Each note stores forty numbers rather than the audio, so the wave draws instantly on scroll — decoding a file to work out a bar chart is work no phone should repeat.
+
+```tsx
+<Soundwave
+  variant="bars"
+  levels={note.levels}
+  progress={progress}
+  bars={40}
+  barWidth={2}
+  height={28}
+/>
+```
+
+### Recording composer
+
+A composer that turns into a recorder over a live transcript: the last few seconds slide past in `scrolling` mode while a timer runs, cancel throws the recording away, and send appends it to the thread as a note.
+
+```tsx
+<Soundwave
+  variant="bars"
+  mode="scrolling"
+  level={level}
+  bars={32}
+  barWidth={3}
+  height={36}
+/>
+```
+
 ## API Reference
 
 ### Soundwave
@@ -159,7 +248,8 @@ A bloom rising off the bottom edge and a rim of light around the rest, both brea
 | `variant` | `SoundwaveVariant` | `'pills'` | Which look to draw: `pills` for a few capsules over a microphone button, `bars` for a metering strip, `line` for a travelling wave, `ambient` for a glow that fills its parent. |
 | `state` | `SoundwaveState` | `'listening'` | What the app is doing. With no `level` supplied this picks the motion the wave runs on its own; it always sets what a screen reader announces. |
 | `level` | `number \| SharedValue<number>` | — | Input level, 0–1, from your own recorder's metering. Pass a `SharedValue` to keep updates off the JS thread entirely. Omit it and the wave animates plausible motion for the current `state`. |
-| `levels` | `number[]` | — | Per-band levels, 0–1 each, for `bars` in `static` mode when the app has a real frequency analysis. Resampled to the bar count. |
+| `levels` | `number[]` | — | Per-band levels, 0–1 each, for `bars` in `static` mode when the app has a real frequency analysis — or the stored shape of a finished recording. Resampled to the bar count, and drawn still rather than animated. |
+| `progress` | `number \| SharedValue<number>` | — | Playback position through a recording, 0–1. Bars behind it keep full ink and the rest are dimmed, which is the voice-note progress bar. `bars` only, and it goes with `levels` — a recording has a fixed shape to play through. |
 | `bars` | `number` | — | How many capsules (`pills`) or bars (`bars`) to draw. |
 | `barWidth` | `number` | — | Capsule width, or bar stroke width. Also the stroke width of `line`. |
 | `barGap` | `number` | — | Gap between capsules. `bars` spaces itself evenly across the width. |
@@ -169,7 +259,9 @@ A bloom rising off the bottom edge and a rim of light around the rest, both brea
 | `fadeEdges` | `boolean` | — | Fade the wave out at both ends, so it does not stop at a hard edge. |
 | `sensitivity` | `number` | `1` | Multiplier on the incoming level, applied before it is clamped to 1. |
 | `speed` | `number` | `1` | Multiplier on the wave's own tempo, including how fast history scrolls. |
-| `color` | `string` | — | Ink. Defaults to the theme foreground, or to `--color-info` for `ambient`, so a wave inverts with the theme and needs no palette of its own. |
+| `color` | `string` | — | Ink. Takes a colour — `#f97316`, `rgba(…)` — or a **theme token name**, `color="--color-info"`, which resolves against the active theme and follows it into dark mode. Left unset, a wave inside a surface that publishes a foreground (a chat bubble, a button) is drawn in that foreground, and anywhere else in `--color-foreground` — or `--color-info` for `ambient`. |
+| `gradient` | `readonly string[]` | — | Colour across the wave instead of one flat ink: two or more colours spread left to right, or ramped up from the bottom edge for `ambient`. Literal colours only — for a themed one, resolve the tokens with `useCSSVariable` and pass the result. |
+| `trackColor` | `string` | — | Colour of the part of a recording that has not played yet. Defaults to the ink at low opacity, which is right for most surfaces; set it when you want the track to read as its own thing. `bars` with `progress`. |
 | `paused` | `boolean` | `false` | Freeze on the current frame. |
 | `radius` | `number` | `44` | Corner radius `ambient` traces. Match it to the screen it sits on. |
 | `accessibilityLabel` | `string` | — | Overrides the per-state default announced to screen readers. |
@@ -178,10 +270,14 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 
 ## Notes
 
-**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them.
+**Nothing here touches the microphone.** Recording, permissions and the audio session stay in your app; this takes the number that falls out of them. There is a full walkthrough in [Voice](/docs/ai/voice) — metering, an assistant loop, and voice notes.
 
 Levels are smoothed with a fast attack and a slow release, which is what makes a meter read as a meter — it snaps up on a syllable and falls back gently instead of chattering around every sample. `sensitivity` multiplies the incoming value before it is clamped, for a quiet source.
 
-`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. Both measure their own width, so they need a parent with one.
+**Ink follows the surface.** A wave inside something that publishes a foreground — a chat bubble, a button — is drawn in that foreground rather than the page's, because a sent bubble is painted in the primary colour and in most themes the primary colour *is* the text colour. `ambient` opts out: it is a glow behind a screen, not ink on a surface.
+
+Anything above that is a prop: `color` (a colour or a theme token name), `gradient` across the wave, and `trackColor` for the unplayed part of a recording. Only `gradient` needs literal colours — resolve tokens with `useCSSVariable` if you want a themed one.
+
+`bars` and `line` are drawn as a single animated SVG path — one segment per bar with a round cap — so forty bars cost one animated prop a frame rather than forty animated views. With `progress` it is two: one for the played part, one for the rest. Both measure their own width, so they need a parent with one.
 
 `paused` and the system's reduced-motion setting both hold a representative frame rather than clearing to a flat line: a stopped wave is not an empty one.

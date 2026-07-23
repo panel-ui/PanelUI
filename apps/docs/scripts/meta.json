@@ -116,7 +116,10 @@
   "message": [
     "Message",
     "Chat turn with avatar, bubble, header and footer.",
-    "react native chat message component"
+    "react native chat message component",
+    {
+      "updatedIn": "0.16.0"
+    }
   ],
   "message-scroller": [
     "MessageScroller",
@@ -241,7 +244,10 @@
   "typography": [
     "Typography",
     "Semantic text presets.",
-    "react native typography"
+    "react native typography",
+    {
+      "updatedIn": "0.16.0"
+    }
   ],
   "thinking-orb": [
     "ThinkingOrb",
@@ -258,7 +264,8 @@
     "react native voice waveform visualizer",
     {
       "group": "ai-components",
-      "addedIn": "0.15.0"
+      "addedIn": "0.15.0",
+      "updatedIn": "0.16.0"
     }
   ]
 }

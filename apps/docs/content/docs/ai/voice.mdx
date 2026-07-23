@@ -1,0 +1,340 @@
+---
+title: Voice
+description: A level from the microphone, an assistant that talks back, and voice notes in a transcript.
+---
+
+`Soundwave` draws a level. It never records one — your app owns the recorder,
+the permission prompt and the audio session, and hands over a number between 0
+and 1. That is what keeps the library free of an audio dependency, and it means
+the same component works against a real microphone, a synthesised level, or the
+audio a model is speaking back at you.
+
+This page is the other half: where that number comes from, and what to do with
+it.
+
+```bash
+npx expo install expo-audio
+```
+
+## A level, from the microphone
+
+Metering comes back as **dBFS** — negative, logarithmic, and platform-dependent.
+Silence is around −60 and a loud voice is near 0, so the conversion is a floor
+and a divide:
+
+```ts title="lib/metering.ts"
+/** Quietest level worth drawing. Below this a room is just noise. */
+const FLOOR_DB = -55;
+
+export function normaliseMetering(db: number | null | undefined): number {
+  if (db == null || !Number.isFinite(db)) return 0;
+  const value = (db - FLOOR_DB) / -FLOOR_DB;
+  return Math.min(1, Math.max(0, value));
+}
+```
+
+Metering arrives every 30–60ms. Putting it in React state is twenty renders a
+second for a number that only moves pixels, so write it into a shared value
+instead and hand *that* to the wave:
+
+```tsx title="components/mic-meter.tsx"
+import { useAudioRecorderState, type AudioRecorder } from 'expo-audio';
+import type { SharedValue } from 'react-native-reanimated';
+
+/**
+ * Renders nothing. That is the point: the polling re-renders this component
+ * and nothing else on the screen.
+ */
+export function MicMeter({
+  recorder,
+  level,
+}: {
+  recorder: AudioRecorder;
+  level: SharedValue<number>;
+}) {
+  const state = useAudioRecorderState(recorder, 60);
+  const { metering, durationMillis } = state;
+
+  useEffect(() => {
+    level.value = normaliseMetering(metering);
+    // `durationMillis` is in the dependencies because it changes on every poll
+    // and the level often does not.
+  }, [metering, durationMillis, level]);
+
+  return null;
+}
+```
+
+Then the screen:
+
+```tsx title="app/voice.tsx"
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from 'expo-audio';
+import { useSharedValue } from 'react-native-reanimated';
+import { Soundwave } from 'panelui-native';
+
+export default function VoiceScreen() {
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    // Without this, `metering` is always null.
+    isMeteringEnabled: true,
+  });
+  const level = useSharedValue(0);
+  const [recording, setRecording] = useState(false);
+
+  const start = async () => {
+    const permission = await requestRecordingPermissionsAsync();
+    if (!permission.granted) return;
+
+    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+    setRecording(true);
+  };
+
+  return (
+    <View className="flex-1 items-center justify-center">
+      {recording ? <MicMeter recorder={recorder} level={level} /> : null}
+
+      <Soundwave
+        variant="pills"
+        state={recording ? 'listening' : 'idle'}
+        level={recording ? level : undefined}
+      />
+    </View>
+  );
+}
+```
+
+Note what `level` does when there is nothing to show: passing `undefined` lets
+the wave animate its own motion for the current `state`, so an idle screen is
+alive rather than flat. That is also how a whole voice screen gets built and
+reviewed before any audio exists.
+
+<Callout title="A simulator has no microphone">
+  Metering will sit at the floor and the wave will barely move. Keep a slider,
+  or a synthesised level, behind a debug flag — otherwise the first thing anyone
+  sees is a wave that looks broken.
+</Callout>
+
+## An assistant that talks back
+
+The round trip is four steps, and the wave says which one you are in:
+
+| Step | What is happening | `state` | What drives `level` |
+| --- | --- | --- | --- |
+| Record | The user is talking | `listening` | Recorder metering |
+| Transcribe + reply | Waiting on the model | `thinking` | Nothing — the state animates itself |
+| Speak | The reply is playing | `speaking` | Playback level, or nothing |
+| Idle | Waiting for a press | `idle` | Nothing |
+
+```tsx
+<Soundwave
+  variant="line"
+  state={phase}
+  level={phase === 'listening' ? level : undefined}
+/>
+```
+
+The API key never goes on the device, so the transcription and the reply both go
+through your own endpoint — the same argument as [API route](/docs/ai/api-route),
+and the same file layout:
+
+```ts title="app/api/voice+api.ts"
+export async function POST(request: Request) {
+  const form = await request.formData();
+  const audio = form.get('audio') as File;
+
+  // 1. Speech to text.
+  const transcription = await openai.audio.transcriptions.create({
+    file: audio,
+    model: 'whisper-1',
+  });
+
+  // 2. A reply. Keep it short — this one is going to be spoken aloud, and
+  //    nobody wants three paragraphs read at them.
+  const reply = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: 'Answer in one or two sentences.' },
+      { role: 'user', content: transcription.text },
+    ],
+  });
+
+  // 3. Text to speech, streamed straight back to the device.
+  const speech = await openai.audio.speech.create({
+    model: 'tts-1',
+    voice: 'alloy',
+    input: reply.choices[0].message.content ?? '',
+  });
+
+  return new Response(speech.body, {
+    headers: { 'Content-Type': 'audio/mpeg' },
+  });
+}
+```
+
+On the device, `recorder.uri` is the file to upload, and the response is what
+`useAudioPlayer` plays:
+
+```tsx
+const send = async () => {
+  await recorder.stop();
+  setPhase('thinking');
+
+  const body = new FormData();
+  body.append('audio', { uri: recorder.uri, name: 'turn.m4a', type: 'audio/m4a' } as never);
+
+  const response = await fetch('/api/voice', { method: 'POST', body });
+  const uri = await cacheResponse(response);
+
+  setPhase('speaking');
+  player.replace(uri);
+  player.play();
+};
+```
+
+While the reply plays, `state="speaking"` is usually enough — the wave animates a
+livelier motion than `listening` on its own. If you want it to answer the
+assistant's actual voice, drive `level` from playback the same way you drove it
+from the recorder.
+
+### Realtime sessions
+
+A realtime API removes the middle two steps: audio goes up continuously and
+comes back continuously, so there is no "thinking" gap to fill. Two waves is the
+clearest way to show it — one for each side of the conversation:
+
+```tsx
+{/* You */}
+<Soundwave variant="bars" mode="scrolling" level={micLevel} />
+
+{/* The assistant */}
+<Soundwave variant="line" state="speaking" level={outputLevel} />
+```
+
+## Voice notes, the way a messenger does it
+
+A voice note in a transcript is not a live meter — it is a recording someone
+already made, with a playhead moving through it. That is `levels` and
+`progress`.
+
+**Store the shape, not the audio.** Collect the metering as it arrives, squash it
+down to about forty numbers when the recording stops, and save those beside the
+file. Decoding an audio file to work out a bar chart is work no phone should
+repeat every time a row scrolls into view:
+
+```ts title="lib/waveform.ts"
+/** Squashes a recording's samples down to the bars a bubble has room for. */
+export function downsample(samples: number[], bars = 40): number[] {
+  if (!samples.length) return [];
+
+  return Array.from({ length: bars }, (_unused, i) => {
+    const from = Math.floor((i / bars) * samples.length);
+    const to = Math.max(from + 1, Math.floor(((i + 1) / bars) * samples.length));
+
+    // Peak, not mean: the average of a syllable and the pause after it is a
+    // flat bar, and a waveform of flat bars says nothing about the recording.
+    let peak = 0;
+    for (let j = from; j < to; j++) peak = Math.max(peak, samples[j] ?? 0);
+    return peak;
+  });
+}
+```
+
+Then the bubble. `levels` draws the stored shape still rather than animated —
+and stops the wave's engine entirely, so a transcript of twenty notes runs no
+animation at all until one is played:
+
+```tsx title="components/voice-note.tsx"
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { Message, Soundwave, PlayIcon, PauseIcon, Text } from 'panelui-native';
+
+export function VoiceNote({ note }: { note: Note }) {
+  const player = useAudioPlayer(note.uri);
+  const status = useAudioPlayerStatus(player);
+  const progress = status.duration
+    ? Math.min(1, status.currentTime / status.duration)
+    : 0;
+
+  return (
+    <Message align={note.mine ? 'end' : 'start'}>
+      <Message.Content>
+        <Message.Bubble>
+          <View className="w-64 flex-row items-center gap-3">
+            <Pressable onPress={() => (status.playing ? player.pause() : player.play())}>
+              {status.playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+            </Pressable>
+
+            <View className="flex-1">
+              <Soundwave
+                variant="bars"
+                levels={note.levels}
+                progress={progress}
+                bars={40}
+                barWidth={2}
+                height={28}
+              />
+            </View>
+
+            <Text size="xs" muted>{formatClock(note.seconds)}</Text>
+          </View>
+        </Message.Bubble>
+        <Message.Footer>{note.time}</Message.Footer>
+      </Message.Content>
+    </Message>
+  );
+}
+```
+
+`progress` takes a `SharedValue` too, which is worth it here: the position
+changes several times a second, and a bubble that re-renders on every tick
+re-renders inside a list.
+
+Colour is handled for you. A sent bubble is painted in the primary colour, and
+in most themes that *is* the text colour — so a wave that resolved the
+foreground for itself would be invisible on exactly the screen it matters most
+on. `Message.Bubble` publishes the foreground that reads against it, and the
+wave takes its ink from there. Pass `color` when you want something else.
+
+### The composer
+
+While recording, the composer wants the opposite of a stored waveform: the last
+few seconds sliding past, which is `scrolling` mode.
+
+```tsx
+<View className="flex-row items-center gap-3">
+  <Pressable onPress={cancel}>
+    <XIcon size={18} />
+  </Pressable>
+
+  <View className="flex-1">
+    <Soundwave variant="bars" mode="scrolling" level={level} bars={32} height={36} />
+  </View>
+
+  <Text size="sm" muted>{formatClock(seconds)}</Text>
+
+  <Button size="icon" onPress={send}>
+    <SendIcon size={16} />
+  </Button>
+</View>
+```
+
+Cancel has to stop the recorder *and* throw the file away; a composer that keeps
+the audio after a cancel is a bug people notice much later, in their storage
+settings.
+
+## Which variant, where
+
+| Variant | Use it for |
+| --- | --- |
+| `pills` | A voice-mode screen: a few big capsules over a microphone button |
+| `bars` | A meter in a row, a recording composer, a stored voice note |
+| `line` | The assistant speaking — one travelling ribbon under a reply |
+| `ambient` | A glow behind a whole screen while a session is open |
+
+Every one of them takes the same `level`, so switching is a one-word change.

@@ -83,6 +83,14 @@ const DEFAULT_AXIS_WIDTH = 26;
  */
 const TOOLTIP_HEIGHT = 26;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a swipe scrolls the chart instead of reading it, short
+ * enough that a deliberate press does not feel like it was ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 /** Weekday names, indexed from Sunday, as the `Date` API numbers them. */
 const WEEKDAYS = [
   'Sunday',
@@ -815,6 +823,17 @@ export interface HeatmapTooltipProps {
   className?: string;
   /** The line shown for a cell. Defaults to the count and the date. */
   formatLabel?: (cell: HeatmapCell) => string;
+  /**
+   * How long a press has to be held before the readout takes over, in
+   * milliseconds.
+   *
+   * It is not zero, and cannot be: a full year of columns lives inside a
+   * horizontal scroller, and a readout that claims the touch on the first pixel
+   * of movement means the chart can never be scrolled. Holding first is what
+   * separates "I am moving the chart" from "I am reading it". Set `0` only for
+   * a chart that is not inside a scroll view at all.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -826,7 +845,11 @@ export interface HeatmapTooltipProps {
  * into JS when it changes, so a drag across a year costs a handful of
  * re-renders rather than one per frame.
  */
-function HeatmapTooltip({ className, formatLabel }: HeatmapTooltipProps) {
+function HeatmapTooltip({
+  className,
+  formatLabel,
+  activateAfterLongPress = DEFAULT_HOLD,
+}: HeatmapTooltipProps) {
   const { grid, activeCell, setActiveCell, cellAt } = useHeatmap(
     'HeatmapChart.Tooltip'
   );
@@ -858,9 +881,18 @@ function HeatmapTooltip({ className, formatLabel }: HeatmapTooltipProps) {
     runOnJS(resolve)(column, row);
   };
 
+  /*
+   * The readout takes over only once the press has been held.
+   *
+   * `onStart` rather than `onBegin` is the other half of it: `onBegin` fires on
+   * touch-down whatever happens next, so picking there would light a cell and
+   * dim the rest of the grid for the first moment of every scroll swipe — the
+   * gesture would yield correctly and still leave a flicker behind it.
+   */
   const pan = Gesture.Pan()
     .minDistance(0)
-    .onBegin((event) => {
+    .activateAfterLongPress(activateAfterLongPress)
+    .onStart((event) => {
       'worklet';
       pick(event.x, event.y);
     })
@@ -870,6 +902,9 @@ function HeatmapTooltip({ className, formatLabel }: HeatmapTooltipProps) {
     })
     .onFinalize(() => {
       'worklet';
+      // Fires whether or not the gesture ever activated, so a swipe that only
+      // scrolled must not report a cell change it never made.
+      if (lastKey.value === -1) return;
       lastKey.value = -1;
       runOnJS(clear)();
     });

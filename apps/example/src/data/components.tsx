@@ -2051,7 +2051,7 @@ function HeatmapContributionVersion() {
           <Card.Description>
             {active
               ? `${active.count} on ${active.date?.toDateString() ?? '—'}`
-              : 'Drag across the grid to read a day.'}
+              : 'Press and hold, then drag, to read a day.'}
           </Card.Description>
         </Card.Header>
         <Card.Content>
@@ -2171,7 +2171,10 @@ function HeatmapUptimeVersion() {
         <Card.Content>
           <HeatmapChart data={data} rows={1} layout="fill" gap={3} cornerRadius={2}>
             <HeatmapChart.Cells />
+            {/* Nothing scrolls here, so the readout can claim the touch
+                straight away instead of waiting for a hold. */}
             <HeatmapChart.Tooltip
+              activateAfterLongPress={0}
               formatLabel={(cell) => `${cell.count} incidents`}
             />
           </HeatmapChart>
@@ -3767,7 +3770,8 @@ export const COMPONENTS: ComponentEntry[] = [
         label: 'Contribution grid',
         id: 'contribution',
         fullPage: true,
-        description: 'A full year, scrolled sideways, with a readout that follows the finger.',
+        description:
+          'A full year, scrolled sideways. Hold to read a day — a swipe scrolls instead.',
         render: () => <HeatmapContributionVersion />,
       },
       {

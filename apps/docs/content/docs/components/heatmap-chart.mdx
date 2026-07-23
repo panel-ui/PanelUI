@@ -72,7 +72,7 @@ const weeks = buildHeatmapCalendar(commits, {
 
 ### Scrolling a full year
 
-Fifty-three weeks do not fit across a phone. `fluid` draws the cells at `binSize` and lets the grid be as wide as it needs to be, so a horizontal `ScrollView` is all it takes. The legend belongs at the card's width rather than the grid's, so give it a chart of its own outside the scroller.
+Fifty-three weeks do not fit across a phone. `fluid` draws the cells at `binSize` and lets the grid be as wide as it needs to be, so a horizontal `ScrollView` is all it takes. The legend belongs at the card's width rather than the grid's, so give it a chart of its own outside the scroller. The readout inside waits for a held press before it takes the touch, so the swipe still scrolls.
 
 ```tsx
 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -142,7 +142,7 @@ const [active, setActive] = useState(null);
 
 ### Contribution grid
 
-A full year with a readout that follows the finger. Fifty-three weeks do not fit across a phone, so the chart is `fluid` inside a horizontal `ScrollView` and the legend sits outside it, at the card's width.
+A full year with a readout that follows the finger. Fifty-three weeks do not fit across a phone, so the chart is `fluid` inside a horizontal `ScrollView` and the legend sits outside it, at the card's width. Press and hold to read a day — a swipe scrolls the chart instead.
 
 ```tsx
 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -190,7 +190,11 @@ A rule every thirteen columns, and the ramp derived from a colour of your own in
 ```tsx
 <HeatmapChart data={days} rows={1} layout="fill" gap={3}>
   <HeatmapChart.Cells />
-  <HeatmapChart.Tooltip formatLabel={(cell) => `${cell.count} incidents`} />
+  {/* Nothing scrolls here, so the readout need not wait for a hold. */}
+  <HeatmapChart.Tooltip
+    activateAfterLongPress={0}
+    formatLabel={(cell) => `${cell.count} incidents`}
+  />
 </HeatmapChart>
 ```
 
@@ -252,6 +256,7 @@ A rule every thirteen columns, and the ramp derived from a colour of your own in
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `formatLabel` | `(cell: HeatmapCell) => string` | — | The line shown for a cell. Defaults to the count and the date. |
+| `activateAfterLongPress` | `number` | `DEFAULT_HOLD` | How long a press has to be held before the readout takes over, in milliseconds. It is not zero, and cannot be: a full year of columns lives inside a horizontal scroller, and a readout that claims the touch on the first pixel of movement means the chart can never be scrolled. Holding first is what separates "I am moving the chart" from "I am reading it". Set `0` only for a chart that is not inside a scroll view at all. |
 
 ### HeatmapChart.HeatmapLegend
 
@@ -275,6 +280,14 @@ The four thresholds are the data's own quartiles by default, so a chart of singl
 ### Layout
 
 The parts sit in a real layout rather than stacking over the plot: the labels are *beside* and *above* the grid and the legend is below it, so they take up room and the grid is sized with them accounted for. Only the cells and the rules are SVG — every label is a React Native view, because SVG text ignores the platform's text scaling and the theme's font.
+
+### Reading a cell without hijacking the scroll
+
+`HeatmapChart.Tooltip` waits for the press to be *held* before it claims the touch. It has to: a full year of columns lives inside a horizontal scroller, and a readout that takes over on the first pixel of movement means the chart can never be scrolled at all. Holding first is what separates “I am moving the chart” from “I am reading it”, and dragging from there moves the readout as usual.
+
+`activateAfterLongPress={0}` gives the touch back immediately, for a chart that is not inside a scroll view — the uptime strip below is one.
+
+The cell is resolved on the UI thread and only crosses into JS when it *changes*, so a drag across a year costs a handful of re-renders rather than one per frame.
 
 ### The reveal
 

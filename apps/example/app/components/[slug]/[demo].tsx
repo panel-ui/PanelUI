@@ -34,6 +34,12 @@ export default function ComponentVersionScreen() {
     );
   }
 
+  // A full-bleed demo gets the screen and nothing else — no header, no
+  // description, no padding. It draws its own way back.
+  if (demo.fullBleed) {
+    return <View className="flex-1">{demo.render()}</View>;
+  }
+
   return (
     <View className="flex-1">
       <ScreenHeader title={demo.label} showBack />

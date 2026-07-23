@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Image,
@@ -38,6 +39,7 @@ import {
   CardIcon,
   CheckIcon,
   Checkbox,
+  ChevronLeftIcon,
   ChevronRightIcon,
   Chip,
   Dialog,
@@ -63,6 +65,7 @@ import {
   Message,
   MessageScroller,
   MicIcon,
+  MoonIcon,
   PackageIcon,
   PauseIcon,
   PlayIcon,
@@ -89,6 +92,7 @@ import {
   Soundwave,
   Spinner,
   Steps,
+  SunIcon,
   Surface,
   Switch,
   Tabs,
@@ -102,8 +106,8 @@ import {
   Typography,
   hasNativeUI,
   useDirection,
-  useIconColor,
   useScrollSections,
+  useThemeMode,
   useToast,
 } from 'panelui-native';
 import { useCSSVariable } from 'uniwind';
@@ -136,6 +140,14 @@ export interface Demo {
   id?: string;
   /** One line under the label on the row that opens a `fullPage` demo. */
   description?: string;
+  /**
+   * Drop the screen's header and description too, so the demo owns every
+   * pixel. For the ones whose whole point is what they do with a *whole
+   * screen* — a glow behind everything reads as a lit room at full bleed and
+   * as a coloured box under a title bar. A demo that asks for this has to draw
+   * its own way back.
+   */
+  fullBleed?: boolean;
 }
 
 export interface ComponentEntry {
@@ -2234,13 +2246,22 @@ function SoundwaveLineVersion() {
   );
 }
 
-/** The glow that takes the whole screen, behind a microphone button. */
+/**
+ * The glow, taking the whole screen.
+ *
+ * This one runs full bleed — no title bar above it — because that is the only
+ * way to see what it does: a rim of light around the *screen* reads as a lit
+ * room, and the same thing under a header reads as a coloured box. So the
+ * screen's chrome comes inside it instead: a way back, and a light/dark toggle,
+ * since half the point of an ambient glow is how differently it sits in the two.
+ */
 function SoundwaveAmbientVersion() {
   const voice = useVoiceRecorder();
   const insets = useSafeAreaInsets();
+  const { mode, toggleMode } = useThemeMode();
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       {/* Absolutely positioned and non-interactive, so it goes behind the
           screen's own content rather than wrapping it. */}
       <Soundwave
@@ -2249,6 +2270,30 @@ function SoundwaveAmbientVersion() {
         level={voice.recording ? voice.level : undefined}
         radius={40}
       />
+
+      <View
+        className="flex-row items-center justify-between px-5"
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-10 rounded-full"
+          onPress={() => router.back()}
+          accessibilityLabel="Back"
+        >
+          <ChevronLeftIcon size={20} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-10 rounded-full"
+          onPress={toggleMode}
+          accessibilityLabel={mode === 'dark' ? 'Switch to light' : 'Switch to dark'}
+        >
+          {mode === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+        </Button>
+      </View>
 
       <View className="flex-1 items-center justify-center gap-3">
         <Text size="xl" weight="medium">
@@ -2310,24 +2355,15 @@ const SEED_NOTES: VoiceNote[] = [
  * note plays for real; the seeded ones have no file, so their playhead is
  * animated at the same rate rather than pretending there is audio behind it.
  */
-/**
- * The play button, drawn in whatever colour reads against the bubble it is in.
- *
- * It has to be a component of its own: the colour comes from the context
- * `Message.Bubble` provides, so it can only be read from inside one.
- */
+/** The play button. Its icon takes the bubble's own foreground, so it reads on
+ *  the sent side and the received one alike. */
 function NoteButton({ playing, onPress }: { playing: boolean; onPress: () => void }) {
-  const ink = useIconColor();
-
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={playing ? 'Pause' : 'Play'}
       onPress={onPress}
       className="size-9 items-center justify-center rounded-full"
-      // A hairline in the bubble's own foreground, so the button has an edge on
-      // both the sent and the received side without a colour of its own.
-      style={{ borderWidth: 1, borderColor: ink ?? undefined, opacity: 0.9 }}
     >
       {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
     </Pressable>
@@ -5733,8 +5769,51 @@ export const COMPONENTS: ComponentEntry[] = [
         label: 'Ambient glow',
         id: 'ambient',
         fullPage: true,
+        fullBleed: true,
         description: 'A bloom off the bottom edge and a rim around the screen.',
         render: () => <SoundwaveAmbientVersion />,
+      },
+      {
+        label: 'Colour',
+        render: () => (
+          <View className="w-full gap-5">
+            <View className="gap-2">
+              <Text size="sm" muted>
+                a theme token, so it follows the theme into dark mode
+              </Text>
+              <Soundwave variant="bars" color="--color-info" height={48} />
+            </View>
+            <View className="gap-2">
+              <Text size="sm" muted>
+                a colour of your own
+              </Text>
+              <Soundwave variant="bars" color="#f97316" height={48} />
+            </View>
+            <View className="gap-2">
+              <Text size="sm" muted>
+                a gradient across the wave
+              </Text>
+              <Soundwave
+                variant="line"
+                gradient={['#6366f1', '#ec4899', '#f59e0b']}
+                height={64}
+              />
+            </View>
+            <View className="gap-2">
+              <Text size="sm" muted>
+                a track colour, for the part not played yet
+              </Text>
+              <Soundwave
+                variant="bars"
+                levels={seedWaveform(5)}
+                progress={0.45}
+                color="--color-success"
+                trackColor="--color-muted"
+                height={48}
+              />
+            </View>
+          </View>
+        ),
       },
       {
         label: 'Voice notes',
@@ -6428,6 +6507,10 @@ export const COMPONENTS: ComponentEntry[] = [
         label: 'Paragraphs',
         render: () => (
           <View className="w-full gap-3">
+            <Typography.Paragraph type="lead">
+              A lead paragraph: the sentence under a heading, set larger and
+              quieter than the body it introduces.
+            </Typography.Paragraph>
             <Typography.Paragraph>
               This is a default body paragraph. It uses the base font size and
               normal weight for comfortable reading.
@@ -6436,6 +6519,66 @@ export const COMPONENTS: ComponentEntry[] = [
               A smaller paragraph, useful for captions, footnotes, or secondary
               descriptions.
             </Typography.Paragraph>
+            <Typography.Paragraph type="small">
+              Small: tight, medium weight, for meta lines.
+            </Typography.Paragraph>
+          </View>
+        ),
+      },
+      {
+        label: 'Marks',
+        render: () => (
+          <View className="w-full gap-3">
+            <Typography underline>Terms of service</Typography>
+            <Typography italic>An aside, in passing.</Typography>
+            <Typography strike muted>
+              £24.00
+            </Typography>
+            <Typography weight="bold">Bolded body, without a heading.</Typography>
+            {/* Marks stack: each one is a prop, so a screen never has to know
+                which utilities add up to "a struck-through italic". */}
+            <Typography italic strike muted>
+              Withdrawn
+            </Typography>
+          </View>
+        ),
+      },
+      {
+        label: 'Alignment and case',
+        render: () => (
+          <View className="w-full gap-3">
+            <Typography align="left">Left</Typography>
+            <Typography align="center">Centre</Typography>
+            <Typography align="right">Right</Typography>
+            <Typography type="body-xs" transform="uppercase" muted>
+              Section label
+            </Typography>
+            <Typography transform="capitalize">a capitalised sentence</Typography>
+          </View>
+        ),
+      },
+      {
+        label: 'Quotes and lists',
+        render: () => (
+          <View className="w-full gap-5">
+            <Typography.Blockquote>
+              A component library is a set of decisions you only have to make
+              once.
+            </Typography.Blockquote>
+
+            <Typography.List>
+              <Typography.ListItem>Runs in Expo Go</Typography.ListItem>
+              <Typography.ListItem>Animates on the UI thread</Typography.ListItem>
+              <Typography.ListItem>
+                Wraps to as many lines as it needs, with the marker staying put
+              </Typography.ListItem>
+            </Typography.List>
+
+            <Typography.List ordered>
+              <Typography.ListItem>Install the package</Typography.ListItem>
+              <Typography.ListItem>Import the stylesheet</Typography.ListItem>
+              <Typography.ListItem>Wrap the app in the provider</Typography.ListItem>
+            </Typography.List>
           </View>
         ),
       },

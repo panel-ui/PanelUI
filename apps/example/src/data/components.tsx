@@ -2760,19 +2760,15 @@ export const COMPONENTS: ComponentEntry[] = [
             <Button native variant="outline" onPress={() => {}}>
               Outlined
             </Button>
-            {/* A native button fills the width it is given, so two share a
-                line by sharing the row rather than by shrinking themselves. */}
-            <View className="w-full flex-row gap-3">
-              <View className="flex-1">
-                <Button native variant="ghost" onPress={() => {}}>
-                  Text
-                </Button>
-              </View>
-              <View className="flex-1">
-                <Button native size="sm" onPress={() => {}}>
-                  Small
-                </Button>
-              </View>
+            {/* Native buttons size to their labels, so a row of them reads as
+                a row of buttons rather than as two halves of the screen. */}
+            <View className="w-full flex-row items-center gap-3">
+              <Button native variant="ghost" onPress={() => {}}>
+                Text
+              </Button>
+              <Button native size="sm" onPress={() => {}}>
+                Small
+              </Button>
             </View>
           </NativeDemo>
         ),

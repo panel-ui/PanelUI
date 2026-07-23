@@ -115,22 +115,23 @@ export interface ButtonProps
    * `primary`/`destructive` → filled, `outline` → outlined, everything else
    * → text; `size` sets the height.
    *
-   * A native button **fills the width it is given**, because the host is told
-   * its size rather than left to measure the platform's content — which is
-   * what made it collapse and then jump on first press. Put it in a row to
-   * share the width, or in a narrower parent to shrink it.
+   * A native button **sizes itself to its label**, the way a platform button
+   * is supposed to. It does not stretch to fill its container, and `fullWidth`
+   * has no effect on it.
    */
   native?: boolean;
 }
 
 /**
- * Height given to the native host, matching the styled scale above.
+ * Height given to the platform button, matching the styled scale above.
  *
- * The host is told its size rather than asked to work it out. `matchContents`
- * measures the platform's own content a frame late and again when that content
- * changes — so the button renders at nothing, collapses against whatever sits
- * above it, and jolts into place on the first press. Width comes from ordinary
- * layout instead, which is why a native button fills its container.
+ * It goes on the button rather than on the host, and that distinction is the
+ * whole fix for the jump. A host sized to a number with an unsized control
+ * inside it hands the platform a box the control never agreed to: SwiftUI and
+ * Compose both lay out against their own intrinsic size and only settle into
+ * the box when something forces a second pass — which for a button is the
+ * first press. Given a definite height of its own, the button has nothing left
+ * to recompute, and the host follows it with `matchContents`.
  */
 const NATIVE_HEIGHT: Record<NonNullable<ButtonVariantProps['size']>, number> = {
   sm: 36,
@@ -199,11 +200,12 @@ export const Button = forwardRef<View, ButtonProps>(
       const isStringLabel = typeof children === 'string';
 
       return (
-        <Host style={{ height: NATIVE_HEIGHT[size ?? 'md'] }}>
+        <Host matchContents>
           <NativeButton
             label={isStringLabel ? children : undefined}
             variant={NATIVE_VARIANT[variant ?? 'primary']}
             disabled={isDisabled}
+            style={{ height: NATIVE_HEIGHT[size ?? 'md'] }}
             onPress={props.onPress}
           >
             {/* Non-string children are React Native views, and the native

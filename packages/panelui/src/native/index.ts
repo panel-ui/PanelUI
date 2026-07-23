@@ -28,13 +28,15 @@ interface NativeUIModule {
     /**
      * Whether the host resizes itself to the platform content.
      *
-     * Every control here gives the host an explicit height instead, and takes
-     * its width from ordinary layout. The measurement arrives a frame late and
-     * again whenever the platform's content changes, so a host left to work
-     * its own size out renders at nothing and then jumps — on first paint, and
-     * again on first press. The per-axis form does not help; the answer is not
-     * to ask. Only the natively-presented sheet still uses it, where the host
-     * is a zero-size anchor rather than the control itself.
+     * This is on for every control here, and it is the whole answer to the
+     * jump. Sizing the *host* and leaving the control unsized inside it hands
+     * the platform a box it never agreed to: it lays out against its own
+     * intrinsic size, and settles into the box on the first thing that forces
+     * a second pass — which for a button is the first press.
+     *
+     * The per-axis form is for a control with no intrinsic width, like a
+     * slider or a picker: the width comes from ordinary layout and only the
+     * height is reported back.
      */
     matchContents?: boolean | { vertical?: boolean; horizontal?: boolean };
     style?: unknown;
@@ -50,6 +52,12 @@ interface NativeUIModule {
     matchContents?: boolean;
     style?: unknown;
   }>;
+  /**
+   * `style` here is not a React Native style — it is the small portable subset
+   * (`width`, `height`, padding, `backgroundColor`, `borderRadius`, `opacity`)
+   * that the toolkit compiles into real SwiftUI and Compose modifiers. It is
+   * how a control is given a definite size without the host having to guess.
+   */
   Button: ComponentType<Record<string, unknown>>;
   Switch: ComponentType<Record<string, unknown>>;
   Slider: ComponentType<Record<string, unknown>>;

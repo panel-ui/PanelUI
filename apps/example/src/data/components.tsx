@@ -102,6 +102,7 @@ import {
   Typography,
   hasNativeUI,
   useDirection,
+  useIconColor,
   useScrollSections,
   useToast,
 } from 'panelui-native';
@@ -2069,9 +2070,13 @@ const WAVE_STATES = ['idle', 'listening', 'thinking', 'speaking'] as const;
 /** The capsules over a microphone button — a voice-mode screen. */
 function SoundwavePillsVersion() {
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1 justify-between py-6">
+    <View
+      className="flex-1 justify-between pt-6"
+      style={{ paddingBottom: insets.bottom + 24 }}
+    >
       <View className="flex-1 items-center justify-center gap-8">
         <Soundwave
           variant="pills"
@@ -2092,9 +2097,13 @@ function SoundwavePillsVersion() {
 /** The metering strip, in both modes, at the size it is actually used. */
 function SoundwaveBarsVersion() {
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView contentContainerClassName="gap-6 py-6">
+    <ScrollView
+      contentContainerClassName="gap-6 py-6"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
       <View className="gap-3 px-5">
         <Text size="sm" muted>
           static — every bar is a band of the current level
@@ -2164,13 +2173,17 @@ function SoundwaveBarsVersion() {
 function SoundwaveLineVersion() {
   const [state, setState] = useState<string[]>(['speaking']);
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
   const picked = WAVE_STATES.find((name) => name === state[0]) ?? 'speaking';
   // Recording wins over the picker: pressing the button is the demo, and a
   // wave that ignored it would be the wrong lesson.
   const current = voice.recording ? 'listening' : picked;
 
   return (
-    <ScrollView contentContainerClassName="gap-6 py-6">
+    <ScrollView
+      contentContainerClassName="gap-6 py-6"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
       <View className="px-5">
         <Card>
           <Card.Content className="p-4">
@@ -2224,6 +2237,7 @@ function SoundwaveLineVersion() {
 /** The glow that takes the whole screen, behind a microphone button. */
 function SoundwaveAmbientVersion() {
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
 
   return (
     <View className="flex-1">
@@ -2245,7 +2259,7 @@ function SoundwaveAmbientVersion() {
         </Text>
       </View>
 
-      <View className="pb-8">
+      <View style={{ paddingBottom: insets.bottom + 24 }}>
         <VoiceControls voice={voice} />
       </View>
     </View>
@@ -2296,6 +2310,30 @@ const SEED_NOTES: VoiceNote[] = [
  * note plays for real; the seeded ones have no file, so their playhead is
  * animated at the same rate rather than pretending there is audio behind it.
  */
+/**
+ * The play button, drawn in whatever colour reads against the bubble it is in.
+ *
+ * It has to be a component of its own: the colour comes from the context
+ * `Message.Bubble` provides, so it can only be read from inside one.
+ */
+function NoteButton({ playing, onPress }: { playing: boolean; onPress: () => void }) {
+  const ink = useIconColor();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={playing ? 'Pause' : 'Play'}
+      onPress={onPress}
+      className="size-9 items-center justify-center rounded-full"
+      // A hairline in the bubble's own foreground, so the button has an edge on
+      // both the sent and the received side without a colour of its own.
+      style={{ borderWidth: 1, borderColor: ink ?? undefined, opacity: 0.9 }}
+    >
+      {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+    </Pressable>
+  );
+}
+
 function VoiceNoteBubble({ note }: { note: VoiceNote }) {
   const player = useAudioPlayer(note.uri || null);
   const status = useAudioPlayerStatus(player);
@@ -2342,14 +2380,7 @@ function VoiceNoteBubble({ note }: { note: VoiceNote }) {
       <Message.Content>
         <Message.Bubble className="px-3 py-2.5">
           <View className="w-64 flex-row items-center gap-3">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={playing ? 'Pause' : 'Play'}
-              onPress={toggle}
-              className="size-9 items-center justify-center rounded-full bg-background/20"
-            >
-              {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
-            </Pressable>
+            <NoteButton playing={playing} onPress={toggle} />
 
             <View className="flex-1">
               {/* `levels` freezes the wave into the recorded shape, so nothing
@@ -2378,6 +2409,7 @@ function VoiceNoteBubble({ note }: { note: VoiceNote }) {
 /** Voice notes in a transcript — record one and it joins the thread. */
 function SoundwaveNotesVersion() {
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<VoiceNote[]>(SEED_NOTES);
 
   useEffect(() => {
@@ -2404,7 +2436,7 @@ function SoundwaveNotesVersion() {
         ))}
       </ScrollView>
 
-      <View className="border-t border-border py-5">
+      <View className="border-t border-border pt-5" style={{ paddingBottom: insets.bottom + 20 }}>
         <VoiceControls voice={voice} compact />
       </View>
     </View>
@@ -2414,6 +2446,7 @@ function SoundwaveNotesVersion() {
 /** The composer that turns into a recorder, over a live transcript. */
 function SoundwaveComposerVersion() {
   const voice = useVoiceRecorder();
+  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<VoiceNote[]>(SEED_NOTES.slice(0, 2));
 
   useEffect(() => {
@@ -2449,7 +2482,12 @@ function SoundwaveComposerVersion() {
         <MessageScroller.Button />
       </MessageScroller>
 
-      <View className="border-t border-border p-3">
+      {/* The version screen renders edge to edge, so the composer is what has
+          to clear the home indicator. */}
+      <View
+        className="border-t border-border p-3"
+        style={{ paddingBottom: insets.bottom + 12 }}
+      >
         {voice.recording ? (
           <View className="flex-row items-center gap-3">
             <Pressable

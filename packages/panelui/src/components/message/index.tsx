@@ -31,6 +31,8 @@ import {
 } from 'react';
 import { View, type GestureResponderEvent, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { useCSSVariable } from 'uniwind';
+import { IconColorProvider } from '../../icons';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
@@ -257,9 +259,23 @@ const MessageBubble = forwardRef<View, MessageBubbleProps>(
     const { align } = useMessageContext();
     const { bubble } = messageVariants({ align });
 
+    /*
+     * A sent bubble is painted in the primary colour, and the theme's text
+     * colour is often that same colour — so anything inside it that resolves
+     * the foreground for itself draws black on black. Text has always been
+     * handled, through `Message.BubbleContent`; an icon or a waveform dropped
+     * into a bubble had no way to know. Publishing the bubble's own foreground
+     * here fixes all of them at once, the same way Button does for its label.
+     */
+    const foreground = useCSSVariable(
+      align === 'end' ? '--color-primary-foreground' : '--color-foreground'
+    );
+
     return (
       <View ref={ref} className={bubble({ className })} {...props}>
-        {children}
+        <IconColorProvider color={typeof foreground === 'string' ? foreground : undefined}>
+          {children}
+        </IconColorProvider>
       </View>
     );
   }

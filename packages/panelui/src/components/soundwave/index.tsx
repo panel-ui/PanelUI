@@ -60,6 +60,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from 'react-native-svg';
 import { useCSSVariable } from 'uniwind';
+import { useIconColor } from '../../icons';
 import { cn } from '../../utils/cn';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -808,7 +809,20 @@ export function Soundwave({
   const foreground = useCSSVariable('--color-foreground');
   const info = useCSSVariable('--color-info');
   const themed = variant === 'ambient' ? info : foreground;
-  const ink = color ?? (typeof themed === 'string' ? themed : '#0a0a0a');
+  /*
+   * A wave inside a coloured surface has to be drawn in that surface's
+   * foreground, not the page's: a sent chat bubble is painted in the primary
+   * colour, and in most themes the primary colour *is* the text colour — so a
+   * wave that resolved `--color-foreground` for itself would be invisible on
+   * the one screen it is most likely to appear on. Surfaces already publish
+   * their readable foreground for icons; a wave is ink for the same reason.
+   *
+   * `ambient` opts out: it is a glow behind a whole screen, not ink on a
+   * surface, and it wants its own colour.
+   */
+  const inherited = useIconColor();
+  const surface = variant === 'ambient' ? undefined : inherited;
+  const ink = color ?? surface ?? (typeof themed === 'string' ? themed : '#0a0a0a');
 
   /*
    * A recording drawn from `levels` has no motion in it: every bar comes from

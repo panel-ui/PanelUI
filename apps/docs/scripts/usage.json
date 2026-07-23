@@ -503,6 +503,14 @@
   },
   "heatmap-chart": {
     "intro": "A calendar of bins shaded by how much happened in each — one column per period, one row per bin inside it. It answers “when was this busy” at a glance, which no line can: a year of daily numbers plotted as a series is a hairball, and as a grid it is a pattern.",
+    "previewVideo": {
+      "src": "/previews/heatmap-chart.mp4",
+      "poster": "/previews/heatmap-chart-poster.jpg",
+      "alt": "A screen recording of the HeatmapChart demo on a dark phone screen. A year of contribution cells shaded across a colour ramp scrolls sideways, and a held press brings up a readout that follows the finger across the grid.",
+      "width": 720,
+      "height": 660,
+      "caption": "A year of cells, scrolled sideways. Hold to read a day — a swipe scrolls instead."
+    },
     "usage": "<HeatmapChart data={weeks} weekStartDay={1}>\n  <HeatmapChart.XAxis />\n  <HeatmapChart.YAxis />\n  <HeatmapChart.Cells />\n  <HeatmapChart.Tooltip />\n  <HeatmapChart.Legend />\n</HeatmapChart>",
     "extraImports": [
       "buildHeatmapCalendar",
@@ -945,6 +953,14 @@
   },
   "message-scroller": {
     "intro": "The scroll behaviour a chat transcript needs.\n\nA transcript is the one list where the interesting end is the bottom, the content grows while you are reading it, and history is added to the top. A plain scroll view gets all three wrong: it opens at the top, it stays put while a reply streams in below the fold, and it jumps a screen when older messages load.\n\nOne rule sits behind all of it — **the reader's position is theirs**. New content follows the bottom only while they are already at the bottom, scrolling away hands control back to them until they ask for it, and content added above them never moves what they are looking at.",
+    "previewVideo": {
+      "src": "/previews/message-scroller.mp4",
+      "poster": "/previews/message-scroller-poster.jpg",
+      "alt": "A screen recording of the MessageScroller demo on a dark phone screen. A chat transcript pins to the bottom while a reply streams in, then the viewer scrolls up mid-stream and the transcript stops chasing the new content.",
+      "width": 720,
+      "height": 1058,
+      "caption": "Pins to the bottom while a reply streams — but only while you are already there."
+    },
     "usage": "<MessageScroller autoScroll className=\"flex-1\">\n  <MessageScroller.Viewport>\n    <MessageScroller.Content>\n      {messages.map((message) => (\n        <MessageScroller.Item\n          key={message.id}\n          messageId={message.id}\n          scrollAnchor={message.role === \"user\"}\n        >\n          <Message>…</Message>\n        </MessageScroller.Item>\n      ))}\n    </MessageScroller.Content>\n  </MessageScroller.Viewport>\n  <MessageScroller.Button />\n</MessageScroller>",
     "extraImports": [
       "Message",
@@ -1204,6 +1220,14 @@
   },
   "scroll-text": {
     "intro": "Text that resolves word by word as you scroll past it. The reader's thumb becomes the playhead: words arrive left to right as the block crosses the viewport, and scrolling back up unresolves them — the effect is scrubbed rather than triggered, so it is reversible and lands exactly on both ends.",
+    "previewVideo": {
+      "src": "/previews/scroll-text.mp4",
+      "poster": "/previews/scroll-text-poster.jpg",
+      "alt": "A screen recording of the ScrollText demo on a dark phone screen. As the page scrolls, each word of a sentence resolves from muted grey to full foreground colour, left to right, and unresolves again on the way back up.",
+      "width": 720,
+      "height": 1200,
+      "caption": "The reveal is scrubbed off the scroll position, so it is reversible and lands exactly at both ends."
+    },
     "usage": "<ScrollProgress>\n  <ScrollView>\n    <ScrollText size=\"2xl\" weight=\"semibold\">\n      Every control ships with its accessibility wiring already done.\n    </ScrollText>\n  </ScrollView>\n</ScrollProgress>",
     "extraImports": [
       "ScrollProgress"
@@ -1846,6 +1870,14 @@
   },
   "thinking-orb": {
     "intro": "A spinner says “busy”. This says *which kind of busy*: particles running tilted orbits for work in flight, a scan meridian sweeping a globe for a search, bands that scramble and click back for a solve. Six states, each a distinct silhouette in motion, so a glance is enough.",
+    "previewVideo": {
+      "src": "/previews/thinking-orb.mp4",
+      "poster": "/previews/thinking-orb-poster.jpg",
+      "alt": "A screen recording of the ThinkingOrb demo on a dark phone screen. Six dotted orbs animate side by side — particles running tilted orbits, a scan meridian sweeping a globe, bands scrambling and clicking back, a waveform rolling through rings, an undulating sash, and an outline morphing between a circle, a triangle and a square.",
+      "width": 720,
+      "height": 684,
+      "caption": "Six states, each a distinct silhouette in motion. Every dot is drawn on the UI thread."
+    },
     "usage": "<ThinkingOrb state=\"searching\" />\n\n// The small tuning, for a line of text.\n<ThinkingOrb state=\"working\" size={20} />",
     "extraImports": [
       "Message",

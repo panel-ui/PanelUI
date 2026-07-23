@@ -1501,7 +1501,7 @@
     "hideVariants": [
       "iconOnly"
     ],
-    "notes": "The selected state is announced, not just drawn: every button sets `accessibilityState.checked`, which is what a screen reader reads out as on or off. An `iconOnly` button has no label to read, so give it an `accessibilityLabel`.\n\nA group takes `variant` and `size` and applies them to every button that does not set its own, so a toolbar is styled in one place.",
+    "notes": "The selected state is announced, not just drawn: every button sets `accessibilityState.checked`, which is what a screen reader reads out as on or off. An `iconOnly` button has no label to read, so give it an `accessibilityLabel`.\n\nA group takes `variant` and `size` and applies them to every button that does not set its own, so a toolbar is styled in one place.\n\nSet `haptics` for a tick under the finger on each press — a toolbar of filters feels more like hardware for it. It needs the optional `expo-haptics` and is silent without it, so it is safe to leave on. A group's `haptics` is inherited by every button that does not set its own.",
     "interfaceNames": {
       "ToggleButtonGroupProps": "ToggleButtonGroup"
     }

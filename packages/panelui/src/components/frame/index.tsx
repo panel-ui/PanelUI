@@ -51,7 +51,7 @@ const frameVariants = tv({
     // shell's own edge is already there, and no bottom radius, because the
     // shell clips it. Only the top corners and the rule under the header are
     // the panel's to draw.
-    panel: 'overflow-hidden rounded-t-xl border-t border-border bg-card',
+    panel: 'overflow-hidden rounded-t-2xl border-t border-border bg-card',
   },
   variants: {
     variant: {
@@ -59,12 +59,12 @@ const frameVariants = tv({
       // bottom corners take the shell's radius instead of squaring off
       // against it.
       default: {
-        root: 'overflow-hidden rounded-2xl border border-border bg-surface',
+        root: 'overflow-hidden rounded-3xl border border-border bg-surface',
       },
       // No shell: the panel is the whole widget. For a Frame nested inside a
       // card that already draws a border, where the shell's own edge sitting
       // just inside it reads as a double line.
-      plain: { root: '', panel: 'rounded-2xl border border-border' },
+      plain: { root: '', panel: 'rounded-3xl border border-border' },
     },
   },
   defaultVariants: {

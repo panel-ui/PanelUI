@@ -134,7 +134,7 @@
   {
     "name": "frame",
     "type": "registry:ui",
-    "description": "Widget shell with a titled header, an inset panel and a caption.",
+    "description": "Widget shell — a card of rows sitting in a titled tray.",
     "registryDependencies": [
       "cn",
       "icons",

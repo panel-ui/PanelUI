@@ -64,7 +64,7 @@
   ],
   "frame": [
     "Frame",
-    "Widget shell with a titled header, an inset panel and a caption.",
+    "Widget shell — a card of rows sitting in a titled tray.",
     "react native list section"
   ],
   "heatmap-chart": [

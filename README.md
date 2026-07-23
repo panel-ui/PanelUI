@@ -54,8 +54,8 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 | Button | Progress | Switch |
 | Card | RadioGroup | Tabs |
 | Checkbox | SectionRail | ToggleButton |
-| Dialog | | Timeline |
-| | | Toast |
+| Chip | | Timeline |
+| Dialog | | Toast |
 | | | Typography |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating

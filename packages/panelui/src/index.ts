@@ -121,6 +121,14 @@ export {
 export { Card, type CardProps } from './components/card';
 export { Checkbox, type CheckboxProps } from './components/checkbox';
 export {
+  Chip,
+  useChip,
+  type ChipProps,
+  type ChipLabelProps,
+  type ChipVariant,
+  type ChipSize,
+} from './components/chip';
+export {
   EmptyState,
   type EmptyStateProps,
   type EmptyStateMediaProps,

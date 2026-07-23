@@ -44,6 +44,7 @@ import {
 } from '../../primitives/animated-pressable';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import { selectionTick } from '../../utils/haptics';
 
 const toggleVariants = tv({
   slots: {
@@ -100,6 +101,7 @@ interface ToggleGroupContextValue {
   disabled: boolean;
   variant?: ToggleButtonVariant;
   size?: ToggleButtonSize;
+  haptics?: boolean;
 }
 
 const ToggleGroupContext = createContext<ToggleGroupContextValue | null>(null);
@@ -121,6 +123,12 @@ export interface ToggleButtonGroupProps extends ViewProps {
   /** Applied to every button that does not set its own. */
   variant?: ToggleButtonVariant;
   size?: ToggleButtonSize;
+  /**
+   * A tick under the finger each time a button is pressed. Off by default —
+   * needs the optional `expo-haptics`, and is silent without it. Inherited by
+   * every button that does not set its own.
+   */
+  haptics?: boolean;
   children: ReactNode;
 }
 
@@ -135,6 +143,7 @@ const ToggleButtonGroup = forwardRef<View, ToggleButtonGroupProps>(
       disabled = false,
       variant,
       size,
+      haptics,
       children,
       ...props
     },
@@ -171,8 +180,9 @@ const ToggleButtonGroup = forwardRef<View, ToggleButtonGroupProps>(
         disabled,
         variant,
         size,
+        haptics,
       }),
-      [selection, toggle, disabled, variant, size]
+      [selection, toggle, disabled, variant, size, haptics]
     );
 
     return (
@@ -232,6 +242,12 @@ export interface ToggleButtonProps
   defaultSelected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
   disabled?: boolean;
+  /**
+   * A tick under the finger each time the button is pressed. Off by default —
+   * needs the optional `expo-haptics`, and is silent without it. Inside a
+   * group, falls back to the group's `haptics`.
+   */
+  haptics?: boolean;
   /** Square, with no horizontal padding — for a single icon. */
   iconOnly?: boolean;
   /** Extra classes applied only while selected. */
@@ -253,6 +269,7 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
       disabled,
       variant,
       size,
+      haptics,
       iconOnly = false,
       selectedClassName,
       unselectedClassName,
@@ -272,6 +289,7 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
      */
     const selected = group && id ? group.isSelected(id) : (selectedProp ?? internal);
     const isDisabled = disabled || (group?.disabled ?? false);
+    const enableHaptics = haptics ?? group?.haptics ?? false;
 
     const slots = toggleVariants({
       variant: variant ?? group?.variant,
@@ -290,6 +308,10 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
     const handlePress = useCallback<NonNullable<AnimatedPressableProps['onPress']>>(
       (event) => {
         onPress?.(event);
+        // A tick per tap, not per resolved-state change — a single-select
+        // group flips two buttons on every pick, and one buzz is the honest
+        // count of "the user pressed something".
+        if (enableHaptics) selectionTick();
         if (group && id) {
           group.toggle(id);
           return;
@@ -298,7 +320,7 @@ const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
         if (selectedProp === undefined) setInternal(next);
         onSelectedChange?.(next);
       },
-      [onPress, group, id, selected, selectedProp, onSelectedChange]
+      [onPress, enableHaptics, group, id, selected, selectedProp, onSelectedChange]
     );
 
     const state = useMemo(

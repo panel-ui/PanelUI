@@ -44,6 +44,12 @@
     "Animated checkbox, as a row or a selectable card.",
     "react native checkbox"
   ],
+  "chip": [
+    "Chip",
+    "Interactive pill — a filter, a tag, or a removable token.",
+    "react native chip",
+    { "addedIn": "0.13.0" }
+  ],
   "dialog": [
     "Dialog",
     "Modal dialog with a backdrop and footer actions.",

@@ -449,8 +449,8 @@
     }
   },
   "frame": {
-    "intro": "A widget shell: a titled header row with an action on the right, an inset panel of rows, and a caption footer. The panel draws the hairlines between its own rows, and its radius is derived from the shell’s, so the nesting stays proportional as the theme changes it.",
-    "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Usage Type</Frame.Title>\n    <Frame.Action>Amount</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n  <Frame.Footer>Updated 2 minutes ago</Frame.Footer>\n</Frame>",
+    "intro": "A card of rows sitting in a tray. The tray shows along one edge only — the strip left above the card is the header — and the card itself is flush to its left, right and bottom. The panel draws the hairlines between its own rows.",
+    "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Agent monitor</Frame.Title>\n    <Frame.Action>All agents under 25% token limit</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>",
     "extraImports": [
       "Button",
       "Switch",
@@ -459,17 +459,16 @@
       "Card"
     ],
     "parts": {
-      "Header": "Row holding the title and the action.",
-      "Title": "Frame heading.",
+      "Header": "The strip of shell above the panel, holding the title and the action.",
+      "Title": "Frame heading. Muted — it captions the tray, it does not head a section.",
       "Action": "Trailing slot — a label, a button, a badge. Strings render muted.",
       "Description": "Secondary line, inside a column-wrapped header.",
-      "Panel": "The inset card holding the rows. Divides them for you.",
+      "Panel": "The card holding the rows. Divides them for you.",
       "Row": "A row inside the panel. Give it an `onPress` and it becomes a pressable.",
-      "Footer": "Muted caption under the panel. Strings are wrapped for you.",
       "Section": "A labelled cluster of rows, for a panel holding more than one group."
     },
-    "notes": "React Native has no `:first-child`, so the hairline between rows cannot be a CSS rule. `Frame.Panel` places them instead — a line above every child but the first. Passing `divided` on a row overrides that either way, and `dividers={false}` on the panel hands the whole job back to you.\n\n`Frame.Section` divides its own rows the same way, so the two nest without either needing to know about the other.",
-    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Section title=\"…\">\n      <Frame.Row>…</Frame.Row>\n    </Frame.Section>\n  </Frame.Panel>\n  <Frame.Footer>…</Frame.Footer>\n</Frame>",
+    "notes": "### Why the card is flush\n\nThe two surfaces are nested rather than stacked, and only one edge of the outer one is ever visible. The panel meets the shell's left, right and bottom exactly, so the shell reads as something the card is *sitting in* rather than as a border drawn around it — and the strip left at the top is the header, which is why the header needs no rule under it and no background of its own.\n\nThe shell's radius is the larger of the two, and the panel's top corners are tighter. That is the reverse of the usual nested-radius rule, and it is deliberate: with only the top corners free, matching them would make the two surfaces read as one misdrawn shape. The panel's bottom corners are not set at all — the shell clips them, so they take its radius exactly, which is what `overflow-hidden` on the root is doing.\n\n### Dividers\n\nReact Native has no `:first-child`, so the hairline between rows cannot be a CSS rule. `Frame.Panel` places them instead — a line above every child but the first. Passing `divided` on a row overrides that either way, and `dividers={false}` on the panel hands the whole job back to you.\n\n`Frame.Section` divides its own rows the same way, so the two nest without either needing to know about the other.",
+    "anatomy": "<Frame>\n  <Frame.Header>\n    <Frame.Title>…</Frame.Title>\n    <Frame.Action>…</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Section title=\"…\">\n      <Frame.Row>…</Frame.Row>\n    </Frame.Section>\n  </Frame.Panel>\n</Frame>",
     "examples": [
       {
         "title": "A settings panel",
@@ -478,7 +477,7 @@
       },
       {
         "title": "With a header action and a footer",
-        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>API keys</Frame.Title>\n    <Frame.Action>\n      <Button size=\"sm\" variant=\"outline\">New key</Button>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {keys.map((key) => (\n      <Frame.Row key={key.id}>\n        <Text>{key.name}</Text>\n        <Badge variant=\"outline\">{key.lastUsed}</Badge>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Text size=\"sm\" muted>Keys are shown once at creation.</Text>\n  </Frame.Footer>\n</Frame>"
+        "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>API keys</Frame.Title>\n    <Frame.Action>\n      <Button size=\"sm\" variant=\"outline\">New key</Button>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {keys.map((key) => (\n      <Frame.Row key={key.id}>\n        <Text>{key.name}</Text>\n        <Badge variant=\"outline\">{key.lastUsed}</Badge>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n</Frame>"
       },
       {
         "title": "Rows that lead somewhere",
@@ -492,7 +491,7 @@
       }
     ],
     "variantCode": {
-      "variant": "{/* The default: a shell with the panel inset inside it. */}\n<Frame variant=\"default\">…</Frame>\n\n{/* No shell — for a Frame inside a card that already draws a border,\n    where the shell’s own edge just inside it reads as a double line. */}\n<Card>\n  <Card.Content className=\"p-4\">\n    <Frame variant=\"plain\">\n      <Frame.Panel>…</Frame.Panel>\n    </Frame>\n  </Card.Content>\n</Card>"
+      "variant": "{/* The default: a card flush inside a shell, with the header in the strip above it. */}\n<Frame variant=\"default\">…</Frame>\n\n{/* No shell — for a Frame inside a card that already draws a border,\n    where the shell’s own edge just inside it reads as a double line. */}\n<Card>\n  <Card.Content className=\"p-4\">\n    <Frame variant=\"plain\">\n      <Frame.Panel>…</Frame.Panel>\n    </Frame>\n  </Card.Content>\n</Card>"
     }
   },
   "input": {

@@ -3105,8 +3105,81 @@ export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'frame',
     name: 'Frame',
-    summary: 'Widget shell with a titled header and an inset panel',
+    summary: 'Widget shell with a titled header and a flush inner card',
     demos: [
+      {
+        label: 'Agent monitor',
+        render: () => (
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Agent monitor</Frame.Title>
+              <Frame.Action>All agents under 25% token limit</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['GPT 5.6 Sol', 'UX research for fintech trends', 'Done', '10m7s'],
+                ['Fable 5', 'Planning out the app user flow', 'Running', '15m12s'],
+                ['GPT 5.6 Sol', 'Building out the UI design system', 'Running', '15m12s'],
+                ['Haiku 4.5', 'On standby', 'Idle', '0s'],
+              ].map(([model, task, status, elapsed]) => (
+                <Frame.Row key={task}>
+                  <View className="w-24">
+                    <Text size="sm" weight="medium" numberOfLines={1}>
+                      {model}
+                    </Text>
+                  </View>
+                  <Text size="sm" className="flex-1" numberOfLines={1}>
+                    {task}
+                  </Text>
+                  <Chip
+                    size="sm"
+                    variant={
+                      status === 'Running'
+                        ? 'success'
+                        : status === 'Done'
+                          ? 'outline'
+                          : 'default'
+                    }
+                  >
+                    {status}
+                  </Chip>
+                  <Text size="xs" muted>
+                    {elapsed}
+                  </Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
+      {
+        label: 'A single row',
+        render: () => (
+          // The whole widget is one row of the card, with the header strip
+          // above it — the compact end of the same shape.
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Agent monitor</Frame.Title>
+              <Frame.Action>25% token limit</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              <Frame.Row className="gap-2">
+                <Chip size="sm" variant="success">
+                  2 Running
+                </Chip>
+                <Chip size="sm">1 Idle</Chip>
+                <Chip size="sm" variant="outline">
+                  1 Done
+                </Chip>
+                <View className="flex-1" />
+                <Text size="xs" muted>
+                  15m12s ago
+                </Text>
+              </Frame.Row>
+            </Frame.Panel>
+          </Frame>
+        ),
+      },
       {
         label: 'Usage summary',
         render: () => (
@@ -3129,7 +3202,6 @@ export const COMPONENTS: ComponentEntry[] = [
                 </Frame.Row>
               ))}
             </Frame.Panel>
-            <Frame.Footer>Updated 2 minutes ago</Frame.Footer>
           </Frame>
         ),
       },
@@ -3163,7 +3235,6 @@ export const COMPONENTS: ComponentEntry[] = [
                 </Frame.Row>
               ))}
             </Frame.Panel>
-            <Frame.Footer>3 members with access</Frame.Footer>
           </Frame>
         ),
       },

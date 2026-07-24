@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
-import { CheckIcon } from '../../icons';
+import { CheckIcon, MinusIcon } from '../../icons';
 import { Text } from '../../primitives/text';
 
 const checkboxVariants = tv({
@@ -55,6 +55,14 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
   className?: string;
   checked: boolean;
   onCheckedChange?: (checked: boolean) => void;
+  /**
+   * A third, in-between state for a box that governs a group of others — some
+   * on, some off. It fills like a checked box but shows a dash rather than a
+   * tick, and announces itself as `mixed` to a screen reader. Pressing it
+   * resolves the ambiguity by turning the whole group on, so the press reports
+   * `true`. `indeterminate` overrides `checked` for what is drawn.
+   */
+  indeterminate?: boolean;
   disabled?: boolean;
   /** Optional label rendered next to the box; pressing it also toggles. */
   label?: string;
@@ -64,31 +72,45 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
 
 export const Checkbox = forwardRef<View, CheckboxProps>(
   (
-    { className, checked, onCheckedChange, disabled, label, description, variant },
+    {
+      className,
+      checked,
+      onCheckedChange,
+      indeterminate,
+      disabled,
+      label,
+      description,
+      variant,
+    },
     ref
   ) => {
-    const progress = useSharedValue(checked ? 1 : 0);
-    const slots = checkboxVariants({ variant, checked, disabled: !!disabled });
+    // The dash and the tick share one fill, so the box is "on" for either —
+    // what changes is the glyph, not whether the fill is shown.
+    const on = checked || !!indeterminate;
+    const progress = useSharedValue(on ? 1 : 0);
+    const slots = checkboxVariants({ variant, checked: on, disabled: !!disabled });
     const checkColor = useCSSVariable('--color-primary-foreground');
 
     useEffect(() => {
-      progress.value = checked
+      progress.value = on
         ? withSpring(1, { damping: 15, stiffness: 300, mass: 0.5 })
         : withTiming(0, { duration: 120 });
-    }, [checked, progress]);
+    }, [on, progress]);
 
     const fillStyle = useAnimatedStyle(() => ({
       opacity: progress.value,
       transform: [{ scale: 0.6 + progress.value * 0.4 }],
     }));
 
+    const glyphColor = typeof checkColor === 'string' ? checkColor : '#fff';
     const box = (
       <View className={slots.box()}>
         <Animated.View style={fillStyle} className={slots.fill()}>
-          <CheckIcon
-            size={12}
-            color={typeof checkColor === 'string' ? checkColor : '#fff'}
-          />
+          {indeterminate ? (
+            <MinusIcon size={12} color={glyphColor} />
+          ) : (
+            <CheckIcon size={12} color={glyphColor} />
+          )}
         </Animated.View>
       </View>
     );
@@ -97,11 +119,17 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       <Pressable
         ref={ref}
         accessibilityRole="checkbox"
-        accessibilityState={{ checked, disabled: !!disabled }}
+        // `mixed` is the a11y state for a box that governs a partly-on group;
+        // a plain boolean would tell a screen reader the group is fully one way.
+        accessibilityState={{
+          checked: indeterminate ? 'mixed' : checked,
+          disabled: !!disabled,
+        }}
         accessibilityLabel={label}
         accessibilityHint={description}
         disabled={disabled}
-        onPress={() => onCheckedChange?.(!checked)}
+        // An indeterminate box resolves upward: the press turns the group on.
+        onPress={() => onCheckedChange?.(indeterminate ? true : !checked)}
         hitSlop={8}
         // A description makes the row two lines tall — align the box to the
         // label rather than centring it against the whole block.

@@ -281,6 +281,14 @@
     "registryDependencies": []
   },
   {
+    "name": "otp-input",
+    "type": "registry:ui",
+    "description": "One-time-code field drawn as a row of separate cells.",
+    "registryDependencies": [
+      "text"
+    ]
+  },
+  {
     "name": "panel-ui-provider",
     "type": "registry:ui",
     "description": "Root provider: gesture root, themed background, portal host, toasts.",

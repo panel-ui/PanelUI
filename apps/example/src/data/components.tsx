@@ -68,6 +68,7 @@ import {
   MessageScroller,
   MicIcon,
   MoonIcon,
+  OtpInput,
   PackageIcon,
   PauseIcon,
   PlayIcon,
@@ -999,6 +1000,77 @@ function CheckboxDemo() {
         label="Product updates"
         description="News about features and releases"
       />
+    </View>
+  );
+}
+
+/**
+ * A parent checkbox that governs a group. It is `indeterminate` when the
+ * children are partly on, and pressing it turns them all on or all off.
+ */
+function CheckboxSelectAllDemo() {
+  const items = ['Email', 'Push', 'SMS'];
+  const [on, setOn] = useState<string[]>(['Email']);
+
+  const all = on.length === items.length;
+  const some = on.length > 0 && !all;
+
+  const toggle = (id: string) =>
+    setOn((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+
+  return (
+    <View className="w-full gap-4">
+      <Checkbox
+        checked={all}
+        indeterminate={some}
+        onCheckedChange={(next) => setOn(next ? [...items] : [])}
+        label={all ? 'Deselect all' : 'Select all'}
+      />
+      <View className="gap-3 pl-7">
+        {items.map((id) => (
+          <Checkbox
+            key={id}
+            checked={on.includes(id)}
+            onCheckedChange={() => toggle(id)}
+            label={id}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * A verification field: six digits, and the row confirms the moment the last
+ * one lands. `onComplete` fires once on the transition to full — the moment to
+ * submit — rather than on every keystroke that leaves the field full.
+ */
+function OtpVerifyDemo() {
+  const [code, setCode] = useState('');
+  const [status, setStatus] = useState<'idle' | 'ok' | 'bad'>('idle');
+
+  return (
+    <View className="w-full items-center gap-4">
+      <OtpInput
+        value={code}
+        onChangeText={(next) => {
+          setCode(next);
+          if (status !== 'idle') setStatus('idle');
+        }}
+        // 123456 passes; anything else reads as a wrong code.
+        onComplete={(value) => setStatus(value === '123456' ? 'ok' : 'bad')}
+        isInvalid={status === 'bad'}
+        accessibilityLabel="Verification code"
+      />
+      <Text className="text-sm text-muted-foreground">
+        {status === 'ok'
+          ? 'Verified — the code was 123456.'
+          : status === 'bad'
+            ? 'That code didn’t match. Try 123456.'
+            : 'Type a six-digit code (123456).'}
+      </Text>
     </View>
   );
 }
@@ -4243,6 +4315,7 @@ export const COMPONENTS: ComponentEntry[] = [
     summary: 'Multi-select control with label',
     demos: [
       { label: 'With descriptions', render: () => <CheckboxDemo /> },
+      { label: 'Select all', render: () => <CheckboxSelectAllDemo /> },
       { label: 'Card', render: () => <CheckboxCardDemo /> },
       {
         label: 'States',
@@ -4914,6 +4987,48 @@ export const COMPONENTS: ComponentEntry[] = [
             </InputGroup.Prefix>
             <InputGroup.Input placeholder="Disabled input" />
           </InputGroup>
+        ),
+      },
+    ],
+  },
+  {
+    slug: 'otp-input',
+    name: 'OtpInput',
+    summary: 'One-time-code field, one cell per digit',
+    demos: [
+      { label: 'Verify a code', render: () => <OtpVerifyDemo /> },
+      {
+        label: 'Masked',
+        render: () => (
+          <View className="w-full items-center">
+            <OtpInput length={4} mask defaultValue="12" />
+          </View>
+        ),
+      },
+      {
+        label: 'Grouped',
+        render: () => (
+          <View className="w-full items-center">
+            <OtpInput length={6} groupEvery={3} defaultValue="12" />
+          </View>
+        ),
+      },
+      {
+        label: 'Sizes',
+        render: () => (
+          <View className="w-full items-center gap-4">
+            <OtpInput size="sm" length={4} defaultValue="12" />
+            <OtpInput size="md" length={4} defaultValue="12" />
+            <OtpInput size="lg" length={4} defaultValue="12" />
+          </View>
+        ),
+      },
+      {
+        label: 'Letters',
+        render: () => (
+          <View className="w-full items-center">
+            <OtpInput length={5} type="text" placeholder="•" />
+          </View>
         ),
       },
     ],

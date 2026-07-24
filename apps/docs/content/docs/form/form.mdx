@@ -1,0 +1,276 @@
+---
+title: Form
+description: Form state — values, validation and submission — with no form library underneath.
+status: new
+---
+
+`useForm` holds a form's values, errors, touched state and submission lifecycle — built on `useReducer`, no form library underneath. `Form` and `Form.Field` bind that state to a control without threading `form` through every field by hand.
+
+## Installation
+
+Form ships with the library — no separate install.
+
+```tsx
+import { Form, useForm, useField, Input, Button, Checkbox } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add form
+```
+
+## Usage
+
+```tsx
+const form = useForm({
+  defaultValues: { email: '', password: '' },
+  onSubmit: async (values) => {
+    await signIn(values);
+  },
+});
+
+<Form form={form}>
+  <Form.Field
+    name="email"
+    validate={(value) => (value.includes('@') ? undefined : 'Enter a valid email')}
+  >
+    {(field) => (
+      <Input
+        label="Email"
+        value={field.value}
+        onChangeText={field.onChange}
+        onBlur={field.onBlur}
+        errorMessage={field.error}
+      />
+    )}
+  </Form.Field>
+
+  <Form.Field
+    name="password"
+    validate={(value) => (value.length >= 8 ? undefined : 'At least 8 characters')}
+  >
+    {(field) => (
+      <Input
+        label="Password"
+        secureTextEntry
+        value={field.value}
+        onChangeText={field.onChange}
+        onBlur={field.onBlur}
+        errorMessage={field.error}
+      />
+    )}
+  </Form.Field>
+
+  <Button loading={form.isSubmitting} onPress={form.handleSubmit}>
+    Sign in
+  </Button>
+</Form>
+```
+
+## Composition
+
+```tsx
+<Form form={form}>
+  <Form.Field name="…">
+    {(field) => (
+      <Input
+        value={field.value}
+        onChangeText={field.onChange}
+        onBlur={field.onBlur}
+        errorMessage={field.error}
+      />
+    )}
+  </Form.Field>
+</Form>
+```
+
+- **`Form.Field`** — Binds one field's state (`value`, `error`, `touched`) to a render prop, and validates it on blur — or on every change, with `validateOn="change"`.
+
+## Examples
+
+### Cross-field validation
+
+`validate` on `useForm` is for rules that compare two fields — a single field's own rule belongs on its `Form.Field` instead.
+
+```tsx
+const form = useForm({
+  defaultValues: { password: '', confirmPassword: '' },
+  validate: (values) =>
+    values.password !== values.confirmPassword
+      ? { confirmPassword: 'Passwords must match' }
+      : {},
+  onSubmit: async (values) => {
+    await changePassword(values);
+  },
+});
+```
+
+### A field with its own change prop
+
+`Form.Field` hands back `{ value, onChange, onBlur, error }` and leaves wiring them up to you — `Checkbox` takes `checked`/`onCheckedChange`, not `value`/`onChange`.
+
+```tsx
+<Form.Field name="acceptedTerms" validate={(value) => (value ? undefined : 'Required')}>
+  {(field) => (
+    <Checkbox
+      checked={field.value}
+      onCheckedChange={field.onChange}
+      label="I accept the terms"
+    />
+  )}
+</Form.Field>
+```
+
+### Validating as you type
+
+`validateOn="change"` runs the field's rule on every edit instead of on blur.
+
+```tsx
+<Form.Field
+  name="password"
+  validateOn="change"
+  validate={(value) => (value.length >= 8 ? undefined : 'At least 8 characters')}
+>
+  {(field) => (
+    <Input
+      label="Password"
+      secureTextEntry
+      value={field.value}
+      onChangeText={field.onChange}
+      onBlur={field.onBlur}
+      errorMessage={field.error}
+    />
+  )}
+</Form.Field>
+```
+
+### Using `useField` directly
+
+`useField` is what `Form.Field` calls internally — reach for it in a field pulled out into its own component, where `name` is checked against `keyof YourValues`.
+
+```tsx
+function EmailField({ form }: { form: FormApi<{ email: string }> }) {
+  const field = useField(form, 'email', {
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  });
+
+  return (
+    <Input
+      label="Email"
+      value={field.value}
+      onChangeText={field.onChange}
+      onBlur={field.onBlur}
+      errorMessage={field.error}
+    />
+  );
+}
+```
+
+## Versions
+
+### Sign up form
+
+Cross-field validation (`confirmPassword` against `password`), a checkbox field whose control takes a differently-shaped change prop, and a submit that only fires once every field passes.
+
+```tsx
+const form = useForm({
+  defaultValues: { name: '', email: '', password: '', confirmPassword: '', acceptedTerms: false },
+  validate: (values) =>
+    values.password !== values.confirmPassword
+      ? { confirmPassword: 'Passwords must match' }
+      : {},
+  onSubmit: async (values) => {
+    await createAccount(values);
+  },
+});
+
+<Form form={form}>
+  <Form.Field name="acceptedTerms" validate={(value) => (value ? undefined : 'Required to continue')}>
+    {(field) => (
+      <Field invalid={!!field.error}>
+        <Checkbox checked={field.value} onCheckedChange={field.onChange} label="I accept the terms" />
+        <Field.Error>{field.error}</Field.Error>
+      </Field>
+    )}
+  </Form.Field>
+  <Button loading={form.isSubmitting} onPress={form.handleSubmit}>Create account</Button>
+</Form>
+```
+
+### Preferences
+
+The layout kit grouping switches, with no form hook involved — settings that save immediately need no submit step or validation.
+
+```tsx
+<Field.Set>
+  <Field.Legend>Emails</Field.Legend>
+  <Field orientation="horizontal">
+    <Field.Content>
+      <Field.Title>Marketing</Field.Title>
+      <Field.Description>Offers and announcements.</Field.Description>
+    </Field.Content>
+    <Switch value={marketing} onValueChange={setMarketing} />
+  </Field>
+</Field.Set>
+
+<Field.Separator>Profile</Field.Separator>
+
+<Field orientation="horizontal">
+  <Field.Content>
+    <Field.Title>Public profile</Field.Title>
+    <Field.Description>Anyone can see your activity.</Field.Description>
+  </Field.Content>
+  <Switch value={publicProfile} onValueChange={setPublicProfile} />
+</Field>
+```
+
+## API Reference
+
+### Form
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `form` | `FormApi<any>` | — |  |
+
+### Form.Field
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | — |  |
+| `validate` | `(value: any, values: any) => string \| undefined \| Promise<string \| undefined>` | — |  |
+| `validateOn` | `'blur' \| 'change'` | — | Runs on blur, and always on submit. `'change'` also validates on every edit. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### `useForm`
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `defaultValues` | `T` | Read once, on the first render. |
+| `validate` | `(values: T) => FieldErrors<T> \| Promise<FieldErrors<T>>` | Whole-form validation — a rule that compares two fields. Runs on submit. |
+| `onSubmit` | `(values: T) => void \| Promise<void>` | Called with the current values once every field, and the whole form, pass validation. |
+
+| Returns | Type | Description |
+| --- | --- | --- |
+| `values` / `errors` / `touched` | | Current state. |
+| `isSubmitting` | `boolean` | True for the duration of an async `onSubmit`. |
+| `isValid` | `boolean` | No field currently carries a recorded error. Validation runs on blur and submit, so this does not guarantee an untouched field would pass. |
+| `isDirty` | `boolean` | `values` differs from `defaultValues`, compared as JSON. |
+| `setFieldValue`, `setFieldTouched`, `setFieldError` | | Update one field directly — what `useField`'s `onChange`/`onBlur` call underneath. |
+| `handleSubmit` | `() => Promise<void>` | Touches every field, runs every registered validator plus `validate`, and calls `onSubmit` only if none of them produced an error. |
+| `reset` | `(values?: T) => void` | Clears errors and touched state, and restores `values` — `defaultValues` if none given. |
+
+### `useField` and `Form.Field`
+
+Each field registers its `validate` function with the form on mount, so `handleSubmit` can run every field's rule even for a field the user never touched. `useField(form, name, options)` returns `{ value, error, touched, onChange, onBlur }` — spread the pieces a control needs onto its own props. Which prop that is (`onChangeText`, `onCheckedChange`, `onValueChange`, …) is the reason this is a hook rather than a component that clones its child: only the caller knows which one a given control takes.
+
+`Form`/`Form.Field` trade some type precision for that JSX convenience — a field's `name` isn't checked against `keyof YourValues` there, because a value's shape can't flow through React Context generically. Reach for `useField(form, name)` directly, outside `<Form>`, when a field's name should be checked against the form's own value type.
+
+### Scope
+
+Values are flat and JSON-serializable — string, number, boolean, and plain arrays/objects of those. There is no field-array helper in this version; model a repeating group with your own `useState` array of row ids and one `useForm` per row, or key a field's name with an index (`"emails.0"`) and treat it as an opaque string.
+
+See [Field](/docs/form/field) for the layout primitives — `Field.Label`, `Field.Error` and the rest — used to lay a field out when a control's own `label`/`description`/`errorMessage` props aren't enough.

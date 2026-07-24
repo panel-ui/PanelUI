@@ -140,6 +140,22 @@
     ]
   },
   {
+    "name": "field",
+    "type": "registry:ui",
+    "description": "Layout and validation-state kit a form control composes into.",
+    "registryDependencies": [
+      "label",
+      "separator",
+      "text"
+    ]
+  },
+  {
+    "name": "form",
+    "type": "registry:ui",
+    "description": "Form state — values, validation and submission — with no form library underneath.",
+    "registryDependencies": []
+  },
+  {
     "name": "frame",
     "type": "registry:ui",
     "description": "Widget shell — a card of rows sitting in a titled tray.",

@@ -80,6 +80,21 @@ export function CheckIcon({ size = 14, color, ...props }: IconProps) {
   );
 }
 
+export function MinusIcon({ size = 14, color, ...props }: IconProps) {
+  const resolved = useResolvedColor(color, '#fff');
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
+      <Path
+        d="M5 12h14"
+        stroke={resolved}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export function ChevronDownIcon({ size = 16, color, ...props }: IconProps) {
   const resolved = useResolvedColor(color, '#737373');
   return (

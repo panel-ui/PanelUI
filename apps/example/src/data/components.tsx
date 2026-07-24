@@ -46,7 +46,9 @@ import {
   Direction,
   EmptyState,
   FacebookIcon,
+  Field,
   FileIcon,
+  Form,
   Frame,
   GoogleIcon,
   HeatmapChart,
@@ -106,6 +108,7 @@ import {
   Typography,
   hasNativeUI,
   useDirection,
+  useForm,
   useScrollSections,
   useThemeMode,
   useToast,
@@ -3450,6 +3453,277 @@ function ToastDemo() {
   );
 }
 
+/** The layout kit on its own — a grouped set, a horizontal row, a manual error. */
+function FieldDemo() {
+  const [email, setEmail] = useState(true);
+  const [sms, setSms] = useState(false);
+  const [analytics, setAnalytics] = useState(true);
+  const [username, setUsername] = useState('taken-name');
+  const errors = username === 'taken-name' ? ['That username is already taken.'] : [];
+
+  return (
+    <View className="w-full gap-6">
+      <Field.Set>
+        <Field.Legend>Notifications</Field.Legend>
+        <Checkbox checked={email} onCheckedChange={setEmail} label="Email" />
+        <Checkbox checked={sms} onCheckedChange={setSms} label="SMS" />
+      </Field.Set>
+
+      <Field.Separator />
+
+      <Field orientation="horizontal">
+        <Field.Content>
+          <Field.Title>Advanced analytics</Field.Title>
+          <Field.Description>Included with the Pro plan.</Field.Description>
+        </Field.Content>
+        <Switch value={analytics} onValueChange={setAnalytics} />
+      </Field>
+
+      <Field invalid={errors.length > 0}>
+        <Field.Label isRequired>Username</Field.Label>
+        <Input value={username} onChangeText={setUsername} />
+        <Field.Error errors={errors} />
+      </Field>
+    </View>
+  );
+}
+
+/** A two-field form, validated on blur, wired to `useForm` and `Form.Field`. */
+function FormDemo() {
+  const { toast } = useToast();
+  const form = useForm({
+    defaultValues: { email: '', password: '' },
+    onSubmit: async (values) => {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      toast.show({ variant: 'success', label: `Signed in as ${values.email}` });
+      form.reset();
+    },
+  });
+
+  return (
+    <Form form={form}>
+      <View className="w-full gap-4">
+        <Form.Field
+          name="email"
+          validate={(value: string) => (value.includes('@') ? undefined : 'Enter a valid email')}
+        >
+          {(field) => (
+            <Input
+              label="Email"
+              placeholder="you@example.com"
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              errorMessage={field.error}
+            />
+          )}
+        </Form.Field>
+        <Form.Field
+          name="password"
+          validate={(value: string) => (value.length >= 8 ? undefined : 'At least 8 characters')}
+        >
+          {(field) => (
+            <Input
+              label="Password"
+              secureTextEntry
+              placeholder="••••••••"
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              errorMessage={field.error}
+            />
+          )}
+        </Form.Field>
+        <Button loading={form.isSubmitting} onPress={form.handleSubmit}>
+          Sign in
+        </Button>
+      </View>
+    </Form>
+  );
+}
+
+/**
+ * The fuller version: cross-field validation (`confirmPassword` against
+ * `password`), a checkbox field whose control takes a differently-shaped
+ * change prop, and a submit that only fires once every field passes.
+ */
+function SignUpFormVersion() {
+  const insets = useSafeAreaInsets();
+  const { toast } = useToast();
+  const form = useForm({
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '', acceptedTerms: false },
+    validate: (values) =>
+      values.password !== values.confirmPassword
+        ? { confirmPassword: 'Passwords must match' }
+        : {},
+    onSubmit: async (values) => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      toast.show({ variant: 'success', label: `Welcome, ${values.name}` });
+      form.reset();
+    },
+  });
+
+  return (
+    <ScrollView
+      contentContainerClassName="gap-4 px-5 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <Form form={form}>
+        <Card className="w-full">
+          <Card.Header>
+            <Card.Title>Create an account</Card.Title>
+            <Card.Description>It takes less than a minute.</Card.Description>
+          </Card.Header>
+          <Card.Content className="gap-4">
+            <Form.Field
+              name="name"
+              validate={(value: string) => (value ? undefined : 'Required')}
+            >
+              {(field) => (
+                <Input
+                  label="Full name"
+                  isRequired
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  errorMessage={field.error}
+                />
+              )}
+            </Form.Field>
+            <Form.Field
+              name="email"
+              validate={(value: string) => (value.includes('@') ? undefined : 'Enter a valid email')}
+            >
+              {(field) => (
+                <Input
+                  label="Email"
+                  isRequired
+                  placeholder="you@example.com"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  errorMessage={field.error}
+                />
+              )}
+            </Form.Field>
+            <Form.Field
+              name="password"
+              validate={(value: string) => (value.length >= 8 ? undefined : 'At least 8 characters')}
+            >
+              {(field) => (
+                <Input
+                  label="Password"
+                  isRequired
+                  secureTextEntry
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  errorMessage={field.error}
+                />
+              )}
+            </Form.Field>
+            <Form.Field name="confirmPassword">
+              {(field) => (
+                <Input
+                  label="Confirm password"
+                  isRequired
+                  secureTextEntry
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  errorMessage={field.error}
+                />
+              )}
+            </Form.Field>
+            <Form.Field
+              name="acceptedTerms"
+              validate={(value: boolean) => (value ? undefined : 'Required to continue')}
+            >
+              {(field) => (
+                <Field invalid={!!field.error}>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    label="I accept the terms"
+                  />
+                  <Field.Error>{field.error}</Field.Error>
+                </Field>
+              )}
+            </Form.Field>
+          </Card.Content>
+          <Card.Footer>
+            <Button fullWidth loading={form.isSubmitting} onPress={form.handleSubmit}>
+              Create account
+            </Button>
+          </Card.Footer>
+        </Card>
+      </Form>
+    </ScrollView>
+  );
+}
+
+/** The layout kit without a form hook — grouping, a horizontal row, a rule. */
+function PreferencesVersion() {
+  const insets = useSafeAreaInsets();
+  const [marketing, setMarketing] = useState(true);
+  const [product, setProduct] = useState(true);
+  const [thirdParty, setThirdParty] = useState(false);
+  const [publicProfile, setPublicProfile] = useState(false);
+
+  return (
+    <ScrollView
+      contentContainerClassName="gap-4 px-5 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <Card className="w-full">
+        <Card.Header>
+          <Card.Title>Preferences</Card.Title>
+          <Card.Description>Manage what you hear from us.</Card.Description>
+        </Card.Header>
+        <Card.Content className="gap-5">
+          <Field.Set>
+            <Field.Legend>Emails</Field.Legend>
+            <Field orientation="horizontal">
+              <Field.Content>
+                <Field.Title>Marketing</Field.Title>
+                <Field.Description>Offers and announcements.</Field.Description>
+              </Field.Content>
+              <Switch value={marketing} onValueChange={setMarketing} />
+            </Field>
+            <Field orientation="horizontal">
+              <Field.Content>
+                <Field.Title>Product updates</Field.Title>
+                <Field.Description>New features and releases.</Field.Description>
+              </Field.Content>
+              <Switch value={product} onValueChange={setProduct} />
+            </Field>
+            <Field orientation="horizontal">
+              <Field.Content>
+                <Field.Title>Third-party offers</Field.Title>
+                <Field.Description>From partners we work with.</Field.Description>
+              </Field.Content>
+              <Switch value={thirdParty} onValueChange={setThirdParty} />
+            </Field>
+          </Field.Set>
+
+          <Field.Separator>Profile</Field.Separator>
+
+          <Field orientation="horizontal">
+            <Field.Content>
+              <Field.Title>Public profile</Field.Title>
+              <Field.Description>Anyone can see your activity.</Field.Description>
+            </Field.Content>
+            <Switch value={publicProfile} onValueChange={setPublicProfile} />
+          </Field>
+        </Card.Content>
+      </Card>
+    </ScrollView>
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /* Catalogue                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -4208,6 +4482,35 @@ export const COMPONENTS: ComponentEntry[] = [
             ))}
           </View>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'field',
+    name: 'Field',
+    summary: 'Layout and validation-state kit for a form control',
+    demos: [{ label: 'Anatomy', render: () => <FieldDemo /> }],
+  },
+  {
+    slug: 'form',
+    name: 'Form',
+    summary: 'Form state with no form library underneath',
+    demos: [
+      { label: 'Sign in', render: () => <FormDemo /> },
+      {
+        label: 'Sign up form',
+        id: 'sign-up-form',
+        fullPage: true,
+        description:
+          'Cross-field validation, a checkbox with its own change prop, and a submit that waits on every field.',
+        render: () => <SignUpFormVersion />,
+      },
+      {
+        label: 'Preferences',
+        id: 'preferences',
+        fullPage: true,
+        description: 'The layout kit grouping switches, with no form hook involved.',
+        render: () => <PreferencesVersion />,
       },
     ],
   },

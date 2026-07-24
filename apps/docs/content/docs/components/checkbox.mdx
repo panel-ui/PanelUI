@@ -1,6 +1,7 @@
 ---
 title: Checkbox
 description: Animated checkbox, as a row or a selectable card.
+status: updated
 ---
 
 A checkbox with an animated check. `variant="card"` turns the whole surface into the target, for pickable options where the box confirms a choice rather than being the affordance.
@@ -88,13 +89,17 @@ A bordered surface that fills its width — for a list of options where each is 
 
 ### A select-all row
 
+The header is `indeterminate` when the selection is a partial one — some children on, some off — and pressing it turns them all on.
+
 ```tsx
-const allChecked = selected.length === items.length;
+const all = selected.length === items.length;
+const some = selected.length > 0 && !all;
 
 <Checkbox
-  checked={allChecked}
+  checked={all}
+  indeterminate={some}
   onCheckedChange={(next) => setSelected(next ? items.map((i) => i.id) : [])}
-  label={allChecked ? 'Deselect all' : 'Select all'}
+  label={all ? 'Deselect all' : 'Select all'}
 />
 ```
 
@@ -127,6 +132,7 @@ const allChecked = selected.length === items.length;
 | `className` | `string` | — |  |
 | `checked` | `boolean` | — |  |
 | `onCheckedChange` | `(checked: boolean) => void` | — |  |
+| `indeterminate` | `boolean` | — | A third, in-between state for a box that governs a group of others — some on, some off. It fills like a checked box but shows a dash rather than a tick, and announces itself as `mixed` to a screen reader. Pressing it resolves the ambiguity by turning the whole group on, so the press reports `true`. `indeterminate` overrides `checked` for what is drawn. |
 | `disabled` | `boolean` | — |  |
 | `label` | `string` | — | Optional label rendered next to the box; pressing it also toggles. |
 | `description` | `string` | — | Secondary line under the label, for extra context. |
@@ -136,3 +142,7 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 ## Notes
 
 With a `description` the row aligns the box to the label rather than centring it against the whole block. The card variant moves the box after the content so it sits top-right, and takes the primary border when checked.
+
+### The indeterminate state
+
+`indeterminate` is the third state a parent box needs when it governs a group whose children are partly on. It fills like a checked box but draws a dash instead of a tick, and announces itself to a screen reader as `mixed` rather than a plain boolean. `indeterminate` overrides `checked` for what is drawn; pressing an indeterminate box resolves the group by turning it fully on, so the press reports `true`.

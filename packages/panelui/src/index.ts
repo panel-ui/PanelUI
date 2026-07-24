@@ -202,6 +202,7 @@ export {
   type InputGroupInputProps,
   type InputGroupDecoratorProps,
 } from './components/input-group';
+export { OtpInput, type OtpInputProps } from './components/otp-input';
 export {
   Item,
   type ItemProps,
@@ -366,6 +367,7 @@ export {
   InfoIcon,
   ImageIcon,
   MicIcon,
+  MinusIcon,
   MoonIcon,
   PackageIcon,
   PaperclipIcon,

@@ -42,7 +42,8 @@
   "checkbox": [
     "Checkbox",
     "Animated checkbox, as a row or a selectable card.",
-    "react native checkbox"
+    "react native checkbox",
+    { "updatedIn": "0.18.0" }
   ],
   "chip": [
     "Chip",
@@ -110,6 +111,12 @@
     "InputGroup",
     "Input with leading and trailing decorators.",
     "react native input group"
+  ],
+  "otp-input": [
+    "OtpInput",
+    "One-time-code field drawn as a row of separate cells.",
+    "react native otp input",
+    { "addedIn": "0.18.0" }
   ],
   "item": [
     "Item",

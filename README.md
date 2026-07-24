@@ -46,22 +46,23 @@ Both are supported, and you can mix them. See [the docs](https://panelui.dev/doc
 
 | | | |
 | --- | --- | --- |
-| Accordion | InputGroup | Shimmer |
-| Alert | Item | Skeleton |
-| Attachment | Label | Slider |
-| Avatar | LineChart | Soundwave |
-| Badge | Marker | Spinner |
-| BottomSheet | Message | Steps |
-| Button | MessageScroller | Surface |
-| Card | Popover | Switch |
-| Checkbox | Progress | Tabs |
-| Chip | RadioGroup | ThinkingOrb |
-| Dialog | ScrollCanvas | Timeline |
-| Direction | ScrollFade | Toast |
-| EmptyState | ScrollText | ToggleButton |
+| Accordion | Input | Select |
+| Alert | InputGroup | Separator |
+| Attachment | Item | Shimmer |
+| Avatar | Label | Skeleton |
+| Badge | LineChart | Slider |
+| BottomSheet | Marker | Soundwave |
+| Button | Message | Spinner |
+| Card | MessageScroller | Steps |
+| Checkbox | OtpInput | Surface |
+| Chip | Popover | Switch |
+| Dialog | Progress | Tabs |
+| Direction | RadioGroup | ThinkingOrb |
+| EmptyState | ScrollCanvas | Timeline |
+| Field | ScrollFade | Toast |
+| Form | ScrollText | ToggleButton |
 | Frame | SectionRail | Typography |
-| HeatmapChart | Select |  |
-| Input | Separator |  |
+| HeatmapChart |  |  |
 
 `Select` shows its options in a bottom sheet, expanded in place, or floating
 over the page — one `presentation` prop, because which is right depends on what
@@ -69,6 +70,8 @@ surrounds the trigger rather than on what the options are.
 `Frame` is a widget shell: a card of rows sitting in a tray, with the strip of
 tray left showing above it carrying the title.
 `InputGroup` measures its prefix/suffix and pads the input to match.
+`OtpInput` spreads a one-time code across a cell per digit, over a single
+hidden field so the keyboard, SMS autofill and paste all still behave.
 `ScrollText` and `ScrollCanvas` scrub a reveal off the scroll position,
 `ThinkingOrb` says which kind of busy an agent is rather than just that it is,
 and `Soundwave` draws the level of a voice — capsules, metering bars, a

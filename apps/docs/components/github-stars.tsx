@@ -5,9 +5,6 @@ import { site } from '@/lib/site';
 const OWNER = 'panel-ui';
 const REPO = 'PanelUI';
 
-/** Refetch daily rather than per request. */
-export const revalidate = 86400;
-
 /**
  * GitHub link with a star count.
  *
@@ -15,6 +12,15 @@ export const revalidate = 86400;
  * which 404s while the repository is private. Rather than break the navbar,
  * the link falls back to a bare icon and starts showing a count on its own
  * once the repo is public.
+ *
+ * `cache: 'force-cache'` is load-bearing, not an optimisation. This component
+ * renders in the shared nav that wraps every page, so its data dependency
+ * decides how the whole tree is rendered. Left to its default the fetch
+ * revalidates on a short timer, which pulls every page into ISR and rewrites
+ * it to the cache on each crawl — a static docs site would then bill a steady
+ * stream of ISR writes for a number that barely moves. Caching the fetch
+ * permanently keeps the pages statically prerendered; the count refreshes when
+ * the data cache is purged.
  */
 export async function GithubStars() {
   let stars: number | null = null;
@@ -24,6 +30,7 @@ export async function GithubStars() {
       owner: OWNER,
       repo: REPO,
       token: process.env.GITHUB_TOKEN,
+      fetchOptions: { cache: 'force-cache' },
     });
     stars = info.stars;
   } catch {

@@ -1,0 +1,217 @@
+---
+title: Field
+description: Layout and validation-state kit a form control composes into.
+status: new
+---
+
+The layout and validation-state kit a form control composes into. PanelUI's own controls — `Input`, `Checkbox`, `Switch`, `RadioGroup` — already carry their own label, description and error slot, so a single one of them needs no wrapper at all. `Field` is for what doesn't fit that shape: a control paired with a label off to the side, several controls grouped under one legend, or a rule breaking a form into sections.
+
+## Installation
+
+Field ships with the library — no separate install.
+
+```tsx
+import { Field, Input, Checkbox, Switch, Button } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add field
+```
+
+## Usage
+
+```tsx
+<Field orientation="horizontal">
+  <Field.Content>
+    <Field.Title>Marketing emails</Field.Title>
+    <Field.Description>Product updates, at most weekly.</Field.Description>
+  </Field.Content>
+  <Switch value={subscribed} onValueChange={setSubscribed} />
+</Field>
+```
+
+## Composition
+
+```tsx
+<Field>
+  <Field.Label>…</Field.Label>
+  <Field.Description>…</Field.Description>
+  <Field.Error>…</Field.Error>
+</Field>
+
+<Field.Set>
+  <Field.Legend>…</Field.Legend>
+  <Field>…</Field>
+</Field.Set>
+
+<Field.Group>
+  <Field>…</Field>
+  <Field.Separator>Or</Field.Separator>
+  <Field>…</Field>
+</Field.Group>
+```
+
+- **`Field.Content`** — Inner column for a label and description sitting beside a control, in a horizontal `Field`.
+- **`Field.Label`** — A `Label` that reads `isRequired`/`isInvalid`/`isDisabled` from the enclosing `Field` when not set explicitly.
+- **`Field.Description`** — Helper text under the control.
+- **`Field.Error`** — One validation message, or several — pass `errors` for an array; it dedupes by message and lists more than one with bullets. Announced with `role="alert"`.
+- **`Field.Set`** — Groups related fields, e.g. a block of checkboxes for one setting.
+- **`Field.Legend`** — Heading for a `Field.Set`.
+- **`Field.Group`** — Vertical rhythm container for stacking `Field`/`Field.Set` blocks in a form.
+- **`Field.Separator`** — A rule, with an optional centered label — `Or`, between two sign-in options.
+- **`Field.Title`** — Non-label heading text, for a custom card-style row.
+
+## Examples
+
+### Grouped checkboxes
+
+`Field.Legend` names the group; each `Checkbox` keeps its own label.
+
+```tsx
+<Field.Set>
+  <Field.Legend>Notifications</Field.Legend>
+  <Checkbox checked={email} onCheckedChange={setEmail} label="Email" />
+  <Checkbox checked={sms} onCheckedChange={setSms} label="SMS" />
+  <Checkbox checked={push} onCheckedChange={setPush} label="Push" />
+</Field.Set>
+```
+
+### A rule between two options
+
+A plain `Separator` reads as a divider; `Field.Separator` reads as "or".
+
+```tsx
+<Field.Group>
+  <Button variant="outline" onPress={continueWithApple}>
+    Continue with Apple
+  </Button>
+  <Field.Separator>Or</Field.Separator>
+  <Input label="Email" value={email} onChangeText={setEmail} />
+</Field.Group>
+```
+
+### Manual error state
+
+`errors` takes an array and drops duplicate messages — for when more than one rule can fail with the same wording.
+
+```tsx
+<Field invalid={errors.length > 0}>
+  <Field.Label isRequired>Username</Field.Label>
+  <Input value={username} onChangeText={setUsername} />
+  <Field.Error errors={errors} />
+</Field>
+```
+
+### A disabled row
+
+`disabled` on the root dims the title, description and control together.
+
+```tsx
+<Field orientation="horizontal" disabled={!hasPro}>
+  <Field.Content>
+    <Field.Title>Advanced analytics</Field.Title>
+    <Field.Description>Included with the Pro plan.</Field.Description>
+  </Field.Content>
+  <Switch value={analyticsEnabled} onValueChange={setAnalyticsEnabled} disabled={!hasPro} />
+</Field>
+```
+
+## Variants
+
+### `orientation`
+
+- `vertical` *(default)*
+- `horizontal`
+
+```tsx
+<Field orientation="vertical">…</Field>
+<Field orientation="horizontal">…</Field>
+```
+
+### `legendVariant`
+
+- `legend`
+- `label`
+
+```tsx
+<Field legendVariant="legend">…</Field>
+<Field legendVariant="label">…</Field>
+```
+
+## API Reference
+
+### Field
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `orientation` | `'vertical' \| 'horizontal'` | `vertical` | `horizontal` puts a label beside the control instead of above it. |
+| `invalid` | `boolean` | `false` | Marks every `Field.Label`/`Field.Description` below as invalid. |
+| `disabled` | `boolean` | `false` |  |
+| `required` | `boolean` | `false` | Marks every `Field.Label` below as required, same as `Label`'s own prop. |
+
+### Field.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Label
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Error
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `errors` | `Array<string \| { message?: string } \| null \| undefined>` | — | Error messages to render, deduplicated by message. A single entry renders as plain text; more than one renders as a bulleted list, since RN has no `<ul>`. Prefer this over `children` when the messages come from a form's validation state, which is naturally an array. |
+
+### Field.Set
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `variant` | `'legend' \| 'label'` | — | `legend` reads as a section heading; `label` sits closer to a field label. |
+
+### Field.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### When you don't need it
+
+`Input`, `Checkbox`, `Switch` and `RadioGroup` already carry their own `label`, `description` and error slot — for a single one of those, skip `Field` and pass the props straight through:
+
+```tsx
+<Input label="Email" description="We'll never share it." errorMessage={error} />
+```
+
+Reach for `Field` when a row doesn't fit that shape. See [Form](/docs/form/form) for wiring one up to real validation state.

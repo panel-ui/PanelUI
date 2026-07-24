@@ -485,6 +485,101 @@
       "variant": "{/* Fills its parent — a whole screen or a flex slot. */}\n<EmptyState variant=\"default\">…</EmptyState>\n\n{/* A bordered block that sits inside content. */}\n<EmptyState variant=\"card\">…</EmptyState>"
     }
   },
+  "field": {
+    "intro": "The layout and validation-state kit a form control composes into. PanelUI's own controls — `Input`, `Checkbox`, `Switch`, `RadioGroup` — already carry their own label, description and error slot, so a single one of them needs no wrapper at all. `Field` is for what doesn't fit that shape: a control paired with a label off to the side, several controls grouped under one legend, or a rule breaking a form into sections.",
+    "usage": "<Field orientation=\"horizontal\">\n  <Field.Content>\n    <Field.Title>Marketing emails</Field.Title>\n    <Field.Description>Product updates, at most weekly.</Field.Description>\n  </Field.Content>\n  <Switch value={subscribed} onValueChange={setSubscribed} />\n</Field>",
+    "extraImports": [
+      "Input",
+      "Checkbox",
+      "Switch",
+      "Button"
+    ],
+    "anatomy": "<Field>\n  <Field.Label>…</Field.Label>\n  <Field.Description>…</Field.Description>\n  <Field.Error>…</Field.Error>\n</Field>\n\n<Field.Set>\n  <Field.Legend>…</Field.Legend>\n  <Field>…</Field>\n</Field.Set>\n\n<Field.Group>\n  <Field>…</Field>\n  <Field.Separator>Or</Field.Separator>\n  <Field>…</Field>\n</Field.Group>",
+    "parts": {
+      "Content": "Inner column for a label and description sitting beside a control, in a horizontal `Field`.",
+      "Label": "A `Label` that reads `isRequired`/`isInvalid`/`isDisabled` from the enclosing `Field` when not set explicitly.",
+      "Description": "Helper text under the control.",
+      "Error": "One validation message, or several — pass `errors` for an array; it dedupes by message and lists more than one with bullets. Announced with `role=\"alert\"`.",
+      "Set": "Groups related fields, e.g. a block of checkboxes for one setting.",
+      "Legend": "Heading for a `Field.Set`.",
+      "Group": "Vertical rhythm container for stacking `Field`/`Field.Set` blocks in a form.",
+      "Separator": "A rule, with an optional centered label — `Or`, between two sign-in options.",
+      "Title": "Non-label heading text, for a custom card-style row."
+    },
+    "notes": "### When you don't need it\n\n`Input`, `Checkbox`, `Switch` and `RadioGroup` already carry their own `label`, `description` and error slot — for a single one of those, skip `Field` and pass the props straight through:\n\n```tsx\n<Input label=\"Email\" description=\"We'll never share it.\" errorMessage={error} />\n```\n\nReach for `Field` when a row doesn't fit that shape. See [Form](/docs/form/form) for wiring one up to real validation state.",
+    "examples": [
+      {
+        "title": "Grouped checkboxes",
+        "description": "`Field.Legend` names the group; each `Checkbox` keeps its own label.",
+        "code": "<Field.Set>\n  <Field.Legend>Notifications</Field.Legend>\n  <Checkbox checked={email} onCheckedChange={setEmail} label=\"Email\" />\n  <Checkbox checked={sms} onCheckedChange={setSms} label=\"SMS\" />\n  <Checkbox checked={push} onCheckedChange={setPush} label=\"Push\" />\n</Field.Set>"
+      },
+      {
+        "title": "A rule between two options",
+        "description": "A plain `Separator` reads as a divider; `Field.Separator` reads as \"or\".",
+        "code": "<Field.Group>\n  <Button variant=\"outline\" onPress={continueWithApple}>\n    Continue with Apple\n  </Button>\n  <Field.Separator>Or</Field.Separator>\n  <Input label=\"Email\" value={email} onChangeText={setEmail} />\n</Field.Group>"
+      },
+      {
+        "title": "Manual error state",
+        "description": "`errors` takes an array and drops duplicate messages — for when more than one rule can fail with the same wording.",
+        "code": "<Field invalid={errors.length > 0}>\n  <Field.Label isRequired>Username</Field.Label>\n  <Input value={username} onChangeText={setUsername} />\n  <Field.Error errors={errors} />\n</Field>"
+      },
+      {
+        "title": "A disabled row",
+        "description": "`disabled` on the root dims the title, description and control together.",
+        "code": "<Field orientation=\"horizontal\" disabled={!hasPro}>\n  <Field.Content>\n    <Field.Title>Advanced analytics</Field.Title>\n    <Field.Description>Included with the Pro plan.</Field.Description>\n  </Field.Content>\n  <Switch value={analyticsEnabled} onValueChange={setAnalyticsEnabled} disabled={!hasPro} />\n</Field>"
+      }
+    ]
+  },
+  "form": {
+    "intro": "`useForm` holds a form's values, errors, touched state and submission lifecycle — built on `useReducer`, no form library underneath. `Form` and `Form.Field` bind that state to a control without threading `form` through every field by hand.",
+    "usage": "const form = useForm({\n  defaultValues: { email: '', password: '' },\n  onSubmit: async (values) => {\n    await signIn(values);\n  },\n});\n\n<Form form={form}>\n  <Form.Field\n    name=\"email\"\n    validate={(value) => (value.includes('@') ? undefined : 'Enter a valid email')}\n  >\n    {(field) => (\n      <Input\n        label=\"Email\"\n        value={field.value}\n        onChangeText={field.onChange}\n        onBlur={field.onBlur}\n        errorMessage={field.error}\n      />\n    )}\n  </Form.Field>\n\n  <Form.Field\n    name=\"password\"\n    validate={(value) => (value.length >= 8 ? undefined : 'At least 8 characters')}\n  >\n    {(field) => (\n      <Input\n        label=\"Password\"\n        secureTextEntry\n        value={field.value}\n        onChangeText={field.onChange}\n        onBlur={field.onBlur}\n        errorMessage={field.error}\n      />\n    )}\n  </Form.Field>\n\n  <Button loading={form.isSubmitting} onPress={form.handleSubmit}>\n    Sign in\n  </Button>\n</Form>",
+    "extraImports": [
+      "useForm",
+      "useField",
+      "Input",
+      "Button",
+      "Checkbox"
+    ],
+    "anatomy": "<Form form={form}>\n  <Form.Field name=\"…\">\n    {(field) => (\n      <Input\n        value={field.value}\n        onChangeText={field.onChange}\n        onBlur={field.onBlur}\n        errorMessage={field.error}\n      />\n    )}\n  </Form.Field>\n</Form>",
+    "parts": {
+      "Field": "Binds one field's state (`value`, `error`, `touched`) to a render prop, and validates it on blur — or on every change, with `validateOn=\"change\"`."
+    },
+    "notes": "### `useForm`\n\n| Option | Type | Description |\n| --- | --- | --- |\n| `defaultValues` | `T` | Read once, on the first render. |\n| `validate` | `(values: T) => FieldErrors<T> \\| Promise<FieldErrors<T>>` | Whole-form validation — a rule that compares two fields. Runs on submit. |\n| `onSubmit` | `(values: T) => void \\| Promise<void>` | Called with the current values once every field, and the whole form, pass validation. |\n\n| Returns | Type | Description |\n| --- | --- | --- |\n| `values` / `errors` / `touched` | | Current state. |\n| `isSubmitting` | `boolean` | True for the duration of an async `onSubmit`. |\n| `isValid` | `boolean` | No field currently carries a recorded error. Validation runs on blur and submit, so this does not guarantee an untouched field would pass. |\n| `isDirty` | `boolean` | `values` differs from `defaultValues`, compared as JSON. |\n| `setFieldValue`, `setFieldTouched`, `setFieldError` | | Update one field directly — what `useField`'s `onChange`/`onBlur` call underneath. |\n| `handleSubmit` | `() => Promise<void>` | Touches every field, runs every registered validator plus `validate`, and calls `onSubmit` only if none of them produced an error. |\n| `reset` | `(values?: T) => void` | Clears errors and touched state, and restores `values` — `defaultValues` if none given. |\n\n### `useField` and `Form.Field`\n\nEach field registers its `validate` function with the form on mount, so `handleSubmit` can run every field's rule even for a field the user never touched. `useField(form, name, options)` returns `{ value, error, touched, onChange, onBlur }` — spread the pieces a control needs onto its own props. Which prop that is (`onChangeText`, `onCheckedChange`, `onValueChange`, …) is the reason this is a hook rather than a component that clones its child: only the caller knows which one a given control takes.\n\n`Form`/`Form.Field` trade some type precision for that JSX convenience — a field's `name` isn't checked against `keyof YourValues` there, because a value's shape can't flow through React Context generically. Reach for `useField(form, name)` directly, outside `<Form>`, when a field's name should be checked against the form's own value type.\n\n### Scope\n\nValues are flat and JSON-serializable — string, number, boolean, and plain arrays/objects of those. There is no field-array helper in this version; model a repeating group with your own `useState` array of row ids and one `useForm` per row, or key a field's name with an index (`\"emails.0\"`) and treat it as an opaque string.\n\nSee [Field](/docs/form/field) for the layout primitives — `Field.Label`, `Field.Error` and the rest — used to lay a field out when a control's own `label`/`description`/`errorMessage` props aren't enough.",
+    "examples": [
+      {
+        "title": "Cross-field validation",
+        "description": "`validate` on `useForm` is for rules that compare two fields — a single field's own rule belongs on its `Form.Field` instead.",
+        "code": "const form = useForm({\n  defaultValues: { password: '', confirmPassword: '' },\n  validate: (values) =>\n    values.password !== values.confirmPassword\n      ? { confirmPassword: 'Passwords must match' }\n      : {},\n  onSubmit: async (values) => {\n    await changePassword(values);\n  },\n});"
+      },
+      {
+        "title": "A field with its own change prop",
+        "description": "`Form.Field` hands back `{ value, onChange, onBlur, error }` and leaves wiring them up to you — `Checkbox` takes `checked`/`onCheckedChange`, not `value`/`onChange`.",
+        "code": "<Form.Field name=\"acceptedTerms\" validate={(value) => (value ? undefined : 'Required')}>\n  {(field) => (\n    <Checkbox\n      checked={field.value}\n      onCheckedChange={field.onChange}\n      label=\"I accept the terms\"\n    />\n  )}\n</Form.Field>"
+      },
+      {
+        "title": "Validating as you type",
+        "description": "`validateOn=\"change\"` runs the field's rule on every edit instead of on blur.",
+        "code": "<Form.Field\n  name=\"password\"\n  validateOn=\"change\"\n  validate={(value) => (value.length >= 8 ? undefined : 'At least 8 characters')}\n>\n  {(field) => (\n    <Input\n      label=\"Password\"\n      secureTextEntry\n      value={field.value}\n      onChangeText={field.onChange}\n      onBlur={field.onBlur}\n      errorMessage={field.error}\n    />\n  )}\n</Form.Field>"
+      },
+      {
+        "title": "Using `useField` directly",
+        "description": "`useField` is what `Form.Field` calls internally — reach for it in a field pulled out into its own component, where `name` is checked against `keyof YourValues`.",
+        "code": "function EmailField({ form }: { form: FormApi<{ email: string }> }) {\n  const field = useField(form, 'email', {\n    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),\n  });\n\n  return (\n    <Input\n      label=\"Email\"\n      value={field.value}\n      onChangeText={field.onChange}\n      onBlur={field.onBlur}\n      errorMessage={field.error}\n    />\n  );\n}"
+      }
+    ],
+    "versions": [
+      {
+        "title": "Sign up form",
+        "description": "Cross-field validation (`confirmPassword` against `password`), a checkbox field whose control takes a differently-shaped change prop, and a submit that only fires once every field passes.",
+        "code": "const form = useForm({\n  defaultValues: { name: '', email: '', password: '', confirmPassword: '', acceptedTerms: false },\n  validate: (values) =>\n    values.password !== values.confirmPassword\n      ? { confirmPassword: 'Passwords must match' }\n      : {},\n  onSubmit: async (values) => {\n    await createAccount(values);\n  },\n});\n\n<Form form={form}>\n  <Form.Field name=\"acceptedTerms\" validate={(value) => (value ? undefined : 'Required to continue')}>\n    {(field) => (\n      <Field invalid={!!field.error}>\n        <Checkbox checked={field.value} onCheckedChange={field.onChange} label=\"I accept the terms\" />\n        <Field.Error>{field.error}</Field.Error>\n      </Field>\n    )}\n  </Form.Field>\n  <Button loading={form.isSubmitting} onPress={form.handleSubmit}>Create account</Button>\n</Form>"
+      },
+      {
+        "title": "Preferences",
+        "description": "The layout kit grouping switches, with no form hook involved — settings that save immediately need no submit step or validation.",
+        "code": "<Field.Set>\n  <Field.Legend>Emails</Field.Legend>\n  <Field orientation=\"horizontal\">\n    <Field.Content>\n      <Field.Title>Marketing</Field.Title>\n      <Field.Description>Offers and announcements.</Field.Description>\n    </Field.Content>\n    <Switch value={marketing} onValueChange={setMarketing} />\n  </Field>\n</Field.Set>\n\n<Field.Separator>Profile</Field.Separator>\n\n<Field orientation=\"horizontal\">\n  <Field.Content>\n    <Field.Title>Public profile</Field.Title>\n    <Field.Description>Anyone can see your activity.</Field.Description>\n  </Field.Content>\n  <Switch value={publicProfile} onValueChange={setPublicProfile} />\n</Field>"
+      }
+    ]
+  },
   "frame": {
     "intro": "A card of rows sitting in a tray. The tray shows along one edge only — the strip left above the card is the header — and the card itself is flush to its left, right and bottom. The panel draws the hairlines between its own rows.",
     "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Agent monitor</Frame.Title>\n    <Frame.Action>All agents under 25% token limit</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Total API Requests</Text>\n      <Text weight=\"medium\">33.1K</Text>\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Input Tokens</Text>\n      <Text weight=\"medium\">98.2M</Text>\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>",

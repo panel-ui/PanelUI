@@ -16,6 +16,7 @@ const contentDir = path.join(HERE, '../content/docs');
 const GROUPS = {
   components: 'Components',
   'ai-components': 'AI Components',
+  form: 'Form',
 };
 const DEFAULT_GROUP = 'components';
 

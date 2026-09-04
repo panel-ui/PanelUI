@@ -5,7 +5,7 @@ license: MIT
 compatibility: Expo SDK 57+ and React Native 0.86, with Uniwind (Tailwind CSS v4 for React Native) and Reanimated. Not for the web — these components are React Native only.
 metadata:
   author: Khalid Abdi
-  version: 0.90.0
+  version: 0.91.0
 allowed-tools: Bash(npx panelui-cli@latest *), Bash(pnpm dlx panelui-cli@latest *), Bash(bunx panelui-cli@latest *)
 ---
 

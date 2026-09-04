@@ -9,6 +9,83 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.91.0] — 2026-09-05
+
+### Added
+
+- **`Fab` and `Fab.Group` take `glass`**, drawing the button in the material iOS 26
+  uses for its own floating controls, in place of the variant's fill. A control
+  floating over content is what that material is for: the rows refract through it
+  as they scroll under, and it lifts its own edge, so the shadow goes with the fill.
+
+  Every variant takes the plain material rather than a tinted one. Measured on a
+  device, a colour laid on the glass turns it back into a fill and a monochrome one
+  only greys it, so the colour that carries meaning goes on the glyph instead — the
+  destructive button is a red glyph on the plain material. Pressed, it answers the
+  way the platform's own glass controls do, the material swelling and brightening
+  under the finger in place of this library's press scale.
+
+- **`Fab.Group` takes `layout`.** `menu` unfolds one panel of rows out of the
+  trigger instead of a column of buttons, in either of two appearances: `platform`,
+  which is the shape the system's own menus take, and `wells`, which leads with the
+  glyph in a tinted well and makes each row its own pill. `iconPlacement`,
+  `menuWidth`, `menuRadius`, `menuClassName` and `rowClassName` adjust either.
+
+- **`layout="native"` hands the menu to the platform** — a SwiftUI menu on iOS, a
+  Compose dropdown on Android — with the trigger passed through as the thing you
+  press, so the button keeps its variant, its size and its glass.
+
+  The two toolkits do not agree on the shape of the control, and the difference is
+  stated rather than smoothed over: iOS owns the menu's open state, so `open` and
+  `onOpenChange` are inert there, while Android's is controlled and honours both.
+  Rows take `label` and, on iOS, the new **`Fab.Action.systemImage`** — an SF Symbol
+  name, since SwiftUI names its symbols rather than taking a view for one. Without
+  the optional `@expo/ui`, and on the web, it falls back to `layout="menu"`.
+
+- **`GlassContainer`**, a container that lets the glass inside it merge. On its own
+  each piece of the material is a separate object with its own lit edge; inside a
+  container, pieces within `spacing` of each other flow together — which is what
+  makes a button that opens into other buttons look like one thing dividing rather
+  than several things arriving.
+
+- **`Glass` takes `interactive`**, letting the material answer touch the way the
+  platform's own controls do. The platform only tracks touches that land inside the
+  glass view, so with it on the material is the box and the content is hosted inside
+  it. Reach for it when the glass *is* the button.
+
+- **`useGlassMaterial()`**, for a component that changes shape around the material —
+  dropping a fill, a border or a shadow the glass replaces — so it makes the same
+  decision `Glass` makes and never strips the fill while leaving nothing behind it.
+
+### Fixed
+
+- **An extended glass button is as wide as its label.** Interactive glass hosts its
+  content so the platform can see the touch, and the material was pinned to its
+  container's edges — a child out of the flow measures nothing, so a labelled button
+  collapsed to its minimum width while its icon and text drew at full size, outside
+  a button that is deliberately not clipped.
+
+- **Closing a dial is the opening in reverse.** The actions stay mounted while the
+  spring runs back down and unmount when it rests, rather than being cut the moment
+  the dial closes.
+
+- **A closed menu panel is gone rather than small.** The panel rested at a fraction
+  of its size instead of at zero, leaving a box above the trigger for as long as the
+  spring took to report it had finished — most of a second after the panel had
+  stopped moving. Nothing was animating; a closed panel was simply visible.
+
+- **The trigger's accessibility state survives.** A caller's `accessibilityState` is
+  merged rather than replaced, so a group's trigger keeps saying whether it is
+  expanded, with the disabled state kept authoritative.
+
+- **A plain `Fab` written into a group gets its press event forwarded**, and a menu
+  row reads at the base text size.
+
+### Docs
+
+- Previews of both menu appearances, the platform menu and the glass dial, recorded
+  on a device, and a still of every size and variant together.
+
 ## [0.90.0] — 2026-09-04
 
 ### Added

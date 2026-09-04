@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1267,
-    "values": 326,
-    "types": 941,
+    "exports": 1273,
+    "values": 328,
+    "types": 945,
     "modules": 153,
     "components": 126,
     "hooks": 13
@@ -1213,6 +1213,18 @@
           },
           {
             "name": "FabVariant",
+            "kind": "type"
+          },
+          {
+            "name": "FabGroupLayout",
+            "kind": "type"
+          },
+          {
+            "name": "FabMenuAppearance",
+            "kind": "type"
+          },
+          {
+            "name": "FabMenuIconPlacement",
             "kind": "type"
           }
         ]
@@ -5705,11 +5717,23 @@
             "kind": "value"
           },
           {
+            "name": "GlassContainer",
+            "kind": "value"
+          },
+          {
             "name": "hasGlass",
             "kind": "value"
           },
           {
+            "name": "useGlassMaterial",
+            "kind": "value"
+          },
+          {
             "name": "GlassProps",
+            "kind": "type"
+          },
+          {
+            "name": "GlassContainerProps",
             "kind": "type"
           },
           {

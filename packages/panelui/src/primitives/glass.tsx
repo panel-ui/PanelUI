@@ -36,13 +36,18 @@
  * its own corners — clipping a square one to a rounded parent throws away the
  * lit edge that makes it read as glass.
  *
+ * `interactive` is the one exception to the layer: the platform only animates
+ * the glass under a touch it can see, so with it on the material is the box
+ * and the children are hosted inside it, in normal flow. Reach for it when
+ * the glass *is* the button.
+ *
  * ## Do not fade it
  *
  * Setting `opacity` to `0` on the material or on anything above it stops it
  * rendering at all, and it does not come back when the opacity does. Move it,
  * or unmount it; never animate it out.
  */
-import type { ComponentType, ReactNode } from 'react';
+import { forwardRef, type ComponentType, type ReactNode } from 'react';
 import { Platform, StyleSheet, View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
 import { useThemeMode } from '../theme/use-theme';
 import { cn } from '../utils/cn';
@@ -71,18 +76,27 @@ function shapeOf(radius: GlassRadius | undefined) {
   };
 }
 
-interface GlassViewProps {
+interface GlassViewProps extends ViewProps {
   glassEffectStyle?: GlassVariant | 'none';
   tintColor?: string;
+  isInteractive?: boolean;
   colorScheme?: 'auto' | 'light' | 'dark';
   style?: StyleProp<ViewStyle>;
-  pointerEvents?: ViewProps['pointerEvents'];
   children?: ReactNode;
 }
 
+interface GlassContainerViewProps extends ViewProps {
+  spacing?: number;
+  ref?: React.Ref<View>;
+}
+
+interface GlassModule {
+  GlassView: ComponentType<GlassViewProps>;
+  GlassContainer: ComponentType<GlassContainerViewProps>;
+}
+
 /**
- * `expo-glass-effect`'s GlassView, or null when the material cannot be drawn
- * here.
+ * `expo-glass-effect`, or null when the material cannot be drawn here.
  *
  * Resolved once at module load, behind three gates that all have to pass. The
  * package is optional, so the require can fail; the API is missing from some
@@ -91,7 +105,7 @@ interface GlassViewProps {
  * cheaper than a try/catch on every render, and there is no answer that can
  * change while the process is alive.
  */
-const GlassView: ComponentType<GlassViewProps> | null = (() => {
+const glassModule: GlassModule | null = (() => {
   if (Platform.OS !== 'ios') return null;
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -102,11 +116,14 @@ const GlassView: ComponentType<GlassViewProps> | null = (() => {
     if (typeof mod?.isLiquidGlassAvailable === 'function' && !mod.isLiquidGlassAvailable()) {
       return null;
     }
-    return (mod?.GlassView as ComponentType<GlassViewProps>) ?? null;
+    return mod?.GlassView ? (mod as GlassModule) : null;
   } catch {
     return null;
   }
 })();
+
+const GlassView = glassModule?.GlassView ?? null;
+const GlassContainerView = glassModule?.GlassContainer ?? null;
 
 /**
  * True when the real material can be drawn — for a caller that wants to know
@@ -114,6 +131,21 @@ const GlassView: ComponentType<GlassViewProps> | null = (() => {
  * is a live preference and belongs to the hook.
  */
 export const hasGlass = GlassView !== null;
+
+/**
+ * Whether the material will actually be drawn right now: the API is present
+ * *and* the user has not switched Reduce Transparency on.
+ *
+ * For a component that changes shape around the material — dropping a fill, a
+ * border or a shadow the glass replaces — so that it makes the same decision
+ * `Glass` makes and never strips the fill while leaving nothing behind it.
+ */
+export function useGlassMaterial(): boolean {
+  const reduceTransparency = useReduceTransparency();
+  // Not knowing yet counts as "do not draw it": the material arriving a frame
+  // late is invisible, and one flashing at somebody who opted out is not.
+  return hasGlass && reduceTransparency === false;
+}
 
 export interface GlassProps extends ViewProps {
   /**
@@ -129,6 +161,16 @@ export interface GlassProps extends ViewProps {
    * to a rounded parent throws away the lit edge that makes it read as glass.
    */
   radius?: GlassRadius;
+  /**
+   * Let the material answer touch the way the platform's own controls do:
+   * it brightens and swells under the finger and the highlight follows it.
+   *
+   * For a material that *is* a button. The platform only tracks touches that
+   * land inside the glass view, so with this on the content is hosted inside
+   * the material rather than above it — a pressable written as a child still
+   * gets its press, and the glass reacts to the same touch.
+   */
+  interactive?: boolean;
   /** Applied only when the material cannot be drawn. Give it a real surface. */
   fallbackClassName?: string;
   className?: string;
@@ -138,13 +180,13 @@ export function Glass({
   variant = 'regular',
   tint,
   radius,
+  interactive = false,
   fallbackClassName = 'bg-card',
   className,
   children,
   style,
   ...props
 }: GlassProps) {
-  const reduceTransparency = useReduceTransparency();
   /*
    * Which appearance the material is drawn in, from the app's theme rather
    * than the phone's.
@@ -155,10 +197,32 @@ export function Glass({
    * appearance never moved.
    */
   const { mode } = useThemeMode();
-  // Not knowing yet counts as "do not draw it": the material arriving a frame
-  // late is invisible, and one flashing at somebody who opted out is not.
-  const material = GlassView !== null && reduceTransparency === false;
+  const material = useGlassMaterial();
   const shape = shapeOf(radius);
+
+  /*
+   * Interactive, the material is the box rather than a layer in it. The
+   * platform only tracks a touch that lands inside the glass view, so the
+   * content has to be hosted in it — and hosted in normal flow, so that a
+   * box sized by its content still is. A layer pinned to the box's edges
+   * could not size it, and a button as wide as its label would collapse to
+   * its minimum. The classes go on a view inside, because the native view is
+   * not a styled one; only the positional style stays on the outside.
+   */
+  if (material && GlassView && interactive) {
+    return (
+      <GlassView
+        glassEffectStyle={variant}
+        tintColor={tint}
+        isInteractive
+        colorScheme={mode}
+        style={[shape, style]}
+        {...props}
+      >
+        <View className={className}>{children}</View>
+      </GlassView>
+    );
+  }
 
   return (
     <View
@@ -181,3 +245,44 @@ export function Glass({
 }
 
 Glass.displayName = 'Glass';
+
+export interface GlassContainerProps extends ViewProps {
+  /**
+   * How close two pieces of glass have to be before they merge, in points.
+   * Inside it their edges flow into one another; a piece moving past
+   * another blends with it and pulls free as it leaves.
+   */
+  spacing?: number;
+  className?: string;
+}
+
+/**
+ * Lets the glass inside it merge.
+ *
+ * On its own each piece of the material is a separate object with its own
+ * lit edge. Inside a container, pieces within `spacing` of each other flow
+ * together — which is what makes a button that opens into other buttons look
+ * like one thing dividing rather than several things arriving. A plain view
+ * wherever the material is not drawn, so it can be written unconditionally.
+ */
+export const GlassContainer = forwardRef<View, GlassContainerProps>(
+  ({ spacing, className, style, children, ...props }, ref) => {
+    const material = useGlassMaterial();
+    if (material && GlassContainerView) {
+      // The native container is not a styled view, so the classes go on a
+      // view inside it and only the positional style stays on the outside.
+      return (
+        <GlassContainerView ref={ref} spacing={spacing} style={style} {...props}>
+          <View className={className}>{children}</View>
+        </GlassContainerView>
+      );
+    }
+    return (
+      <View ref={ref} className={className} style={style} {...props}>
+        {children}
+      </View>
+    );
+  }
+);
+
+GlassContainer.displayName = 'GlassContainer';

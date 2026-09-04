@@ -420,8 +420,12 @@ ${variantKeys.map(([k, opts]) => {
   const list = opts.map((o) => `- \`${o}\`${def === o ? ' *(default)*' : ''}`).join('\n');
   // A snippet under every variant key, so the list is copy-pasteable rather
   // than something you have to translate into JSX yourself.
+  // A boolean variant is written the way JSX takes it — the bare prop, or
+  // `{false}` — rather than as the string it would not accept.
+  const attr = (o) =>
+    o === 'true' ? k : o === 'false' ? `${k}={false}` : `${k}="${o}"`;
   const snippet = u.variantCode?.[k]
-    ?? opts.map((o) => `<${name} ${k}="${o}">…</${name}>`).join('\n');
+    ?? opts.map((o) => `<${name} ${attr(o)}>…</${name}>`).join('\n');
   // Recordings or shots of individual variant values, each captioned with the
   // value it shows — for the keys where the difference is easier seen than read.
   const media = (u.variantMedia?.[k] ?? []).map(demoMedia).join('');

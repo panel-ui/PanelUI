@@ -182,6 +182,27 @@ interface SwiftUIModifiers {
    * changing any code on a report of "the colour did nothing".
    */
   presentationBackground: (color: string) => unknown;
+  /**
+   * Greys a control out and stops it answering.
+   *
+   * Optional because the module is cast whole rather than feature-checked, and
+   * an older `@expo/ui` without it would otherwise be a crash instead of a
+   * menu row that is merely still tappable. Call it through a guard.
+   */
+  disabled?: (disabled: boolean) => unknown;
+  /**
+   * Fires when the view is put on screen, and when it is taken off again.
+   *
+   * The way to find out that a menu has opened. SwiftUI builds a menu's
+   * content only once it is presented, so an item inside one appears exactly
+   * when the menu does — which is the only signal the control gives, since it
+   * owns its open state and reports nothing about it.
+   *
+   * Optional for the same reason as `disabled`: the module is cast whole, and
+   * a version without these should lose the backdrop rather than crash.
+   */
+  onAppear?: (handler: () => void) => unknown;
+  onDisappear?: (handler: () => void) => unknown;
 }
 
 /**
@@ -239,6 +260,131 @@ export function getSwiftUI(): SwiftUIComponents | null {
   }
 
   return swiftUI;
+}
+
+/**
+ * A hosting boundary, as both toolkits declare it. The same three props matter
+ * on either side — see `NativeUIModule.Host` above for what each one costs.
+ */
+type NativeHostComponent = ComponentType<{
+  children?: ReactNode;
+  matchContents?: boolean | { vertical?: boolean; horizontal?: boolean };
+  ignoreSafeArea?: 'all' | 'container' | 'keyboard';
+  colorScheme?: 'light' | 'dark';
+  style?: unknown;
+}>;
+
+type RNHostComponent = ComponentType<{
+  children?: ReactNode;
+  matchContents?: boolean;
+  style?: unknown;
+}>;
+
+/**
+ * SwiftUI's menu, and the button that fills a row of it.
+ *
+ * Separate from `getSwiftUI` on purpose: that resolver refuses a module with no
+ * popover in it, and a version that ships one control but not the other would
+ * take the menu down with it. Each native path asks only for what it needs.
+ */
+interface SwiftUIMenuComponents {
+  Host: NativeHostComponent;
+  RNHostView: RNHostComponent;
+  /**
+   * `label` takes a React element as well as a string — the element is passed
+   * through a native slot and becomes the thing you press. That is what lets
+   * the trigger stay a real Fab rather than a platform button wearing its name.
+   */
+  Menu: ComponentType<{
+    label?: ReactNode;
+    children?: ReactNode;
+    modifiers?: unknown[];
+  }>;
+  Button: ComponentType<{
+    label?: string;
+    systemImage?: string;
+    role?: 'default' | 'cancel' | 'destructive';
+    onPress?: () => void;
+    modifiers?: unknown[];
+  }>;
+}
+
+let swiftUIMenuResolved = false;
+let swiftUIMenu: SwiftUIMenuComponents | null = null;
+
+export function getSwiftUIMenu(): SwiftUIMenuComponents | null {
+  if (swiftUIMenuResolved) return swiftUIMenu;
+  swiftUIMenuResolved = true;
+
+  if (Platform.OS !== 'ios') return null;
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const module = require('@expo/ui/swift-ui') as Partial<SwiftUIMenuComponents>;
+    swiftUIMenu =
+      module.Host && module.RNHostView && module.Menu && module.Button
+        ? (module as SwiftUIMenuComponents)
+        : null;
+  } catch {
+    swiftUIMenu = null;
+  }
+
+  return swiftUIMenu;
+}
+
+/**
+ * Compose's dropdown menu — the same instruction, answered by a different
+ * control.
+ *
+ * It is not the shape SwiftUI's menu is. This one is controlled: it takes the
+ * open state rather than owning it, and it splits the trigger and the items
+ * into named slots instead of reading the label off a prop. Both differences
+ * reach the caller, so they are written out here rather than smoothed over.
+ */
+interface ComposeMenuComponents {
+  Host: NativeHostComponent;
+  RNHostView: RNHostComponent;
+  Text: ComponentType<{ children?: ReactNode; color?: string }>;
+  DropdownMenu: ComponentType<{
+    children?: ReactNode;
+    expanded?: boolean;
+    onDismissRequest?: () => void;
+  }> & {
+    Trigger: ComponentType<{ children?: ReactNode }>;
+    Items: ComponentType<{ children?: ReactNode }>;
+  };
+  DropdownMenuItem: ComponentType<{
+    children?: ReactNode;
+    enabled?: boolean;
+    onClick?: () => void;
+    elementColors?: { textColor?: string; disabledTextColor?: string };
+  }> & {
+    Text: ComponentType<{ children?: ReactNode }>;
+    LeadingIcon: ComponentType<{ children?: ReactNode }>;
+  };
+}
+
+let composeMenuResolved = false;
+let composeMenu: ComposeMenuComponents | null = null;
+
+export function getComposeMenu(): ComposeMenuComponents | null {
+  if (composeMenuResolved) return composeMenu;
+  composeMenuResolved = true;
+
+  if (Platform.OS !== 'android') return null;
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const module = require('@expo/ui/jetpack-compose') as Partial<ComposeMenuComponents>;
+    composeMenu =
+      module.Host && module.RNHostView && module.DropdownMenu && module.DropdownMenuItem
+        ? (module as ComposeMenuComponents)
+        : null;
+  } catch {
+    composeMenu = null;
+  }
+
+  return composeMenu;
 }
 
 let modifiersResolved = false;

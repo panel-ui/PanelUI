@@ -1012,6 +1012,85 @@ function FabPlacementsDemo() {
 }
 
 /** The speed dial, including the one action that removes something. */
+/**
+ * `glass` puts the dial in the platform's material over the list it floats on,
+ * which is where the material earns its place: the rows refract through the
+ * trigger as they scroll under, and the actions unfold in it too. It only
+ * exists on iOS 26 with `expo-glass-effect`, so below that this is the dial
+ * demo with filled buttons — a working flag and a missing floor look
+ * identical, and the description says which.
+ */
+function FabGlassDemo({
+  layout = 'dial',
+  appearance = 'platform',
+}: {
+  layout?: 'dial' | 'menu' | 'native';
+  appearance?: 'platform' | 'wells';
+}) {
+  const { toast } = useToast();
+
+  const pick = (what: string, destructive = false) =>
+    toast.show({
+      variant: destructive ? 'destructive' : 'info',
+      label: what,
+      duration: 1800,
+    });
+
+  return (
+    <View className="flex-1">
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="gap-2">
+          {FAB_NOTES.map((note) => (
+            <Surface key={note} variant="secondary" padding="default" className="rounded-xl">
+              <Text>{note}</Text>
+            </Surface>
+          ))}
+        </View>
+      </ScrollView>
+
+      <Fab.Group
+        glass
+        layout={layout}
+        appearance={appearance}
+        icon={<PlusIcon size={24} />}
+        accessibilityLabel="Add something"
+        placement="bottom-right"
+        haptics
+        blur
+      >
+        <Fab.Action
+          icon={<ImageIcon size={18} />}
+          systemImage="photo"
+          label="Photo"
+          onPress={() => pick('Photo added')}
+        />
+        <Fab.Action
+          icon={<PaperclipIcon size={18} />}
+          systemImage="paperclip"
+          label="Attachment"
+          onPress={() => pick('Attachment added')}
+        />
+        <Fab.Action
+          icon={<MicIcon size={18} />}
+          systemImage="mic"
+          label="Voice note"
+          onPress={() => pick('Recording')}
+        />
+        <Fab.Action
+          icon={<TrashIcon size={18} />}
+          systemImage="trash"
+          label="Empty drafts"
+          destructive
+          onPress={() => pick('Drafts emptied', true)}
+        />
+      </Fab.Group>
+    </View>
+  );
+}
+
 function FabDialDemo() {
   const { toast } = useToast();
 
@@ -1088,6 +1167,24 @@ function FabSizesDemo() {
           <Fab variant="secondary" icon={<StarIcon size={20} />} accessibilityLabel="Secondary" />
           <Fab variant="surface" icon={<SearchIcon size={20} />} accessibilityLabel="Surface" />
           <Fab variant="destructive" icon={<TrashIcon size={20} />} accessibilityLabel="Delete" />
+        </View>
+      </View>
+
+      <View className="gap-2">
+        <Text size="xs" muted>
+          Liquid Glass — needs iOS 26
+        </Text>
+        <View className="flex-row flex-wrap items-center gap-4">
+          <Fab glass icon={<PlusIcon size={20} />} accessibilityLabel="Primary" />
+          <Fab glass variant="secondary" icon={<StarIcon size={20} />} accessibilityLabel="Secondary" />
+          <Fab glass variant="surface" icon={<SearchIcon size={20} />} accessibilityLabel="Surface" />
+          <Fab glass variant="destructive" icon={<TrashIcon size={20} />} accessibilityLabel="Delete" />
+          <Fab glass extended icon={<SendIcon size={18} />} size="sm" variant="surface">
+            Send
+          </Fab>
+          <Fab glass extended icon={<PlusIcon size={18} />} size="sm" disabled>
+            Add
+          </Fab>
         </View>
       </View>
 
@@ -1859,6 +1956,38 @@ export const ENTRIES: ComponentEntry[] = [
         fullPage: true,
         description: 'The extended form, in each of the three corners it can take.',
         render: () => <FabPlacementsDemo />,
+      },
+      {
+        label: 'Liquid Glass',
+        id: 'glass',
+        fullPage: true,
+        description:
+          'A dial in the platform material over the list — needs iOS 26. Anywhere else it is the filled one.',
+        render: () => <FabGlassDemo />,
+      },
+      {
+        label: 'A menu',
+        id: 'menu',
+        fullPage: true,
+        description:
+          'One panel of rows springing out of the button, in the material — the shape the platform\'s own menus take.',
+        render: () => <FabGlassDemo layout="menu" />,
+      },
+      {
+        label: 'A menu, with wells',
+        id: 'menu-wells',
+        fullPage: true,
+        description:
+          'The same menu in the wells appearance: the glyph leads in a tinted well and each row is its own pill.',
+        render: () => <FabGlassDemo layout="menu" appearance="wells" />,
+      },
+      {
+        label: 'A native menu',
+        id: 'native-menu',
+        fullPage: true,
+        description:
+          "The platform's own menu, drawn by SwiftUI or Jetpack Compose, over a page the scrim frosts.",
+        render: () => <FabGlassDemo layout="native" />,
       },
       { label: 'Sizes and variants', render: () => <FabSizesDemo /> },
     ],

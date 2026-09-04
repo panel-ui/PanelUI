@@ -22,7 +22,16 @@ export { Portal, PortalHost, PortalProvider } from './primitives/portal';
 export { Scrim, hasBlur, type ScrimProps } from './primitives/scrim';
 // The material iOS draws its floating controls in, with a solid fallback where
 // there is none. Public so a surface of your own gets the same treatment.
-export { Glass, hasGlass, type GlassProps, type GlassVariant, type GlassRadius } from './primitives/glass';
+export {
+  Glass,
+  GlassContainer,
+  hasGlass,
+  useGlassMaterial,
+  type GlassProps,
+  type GlassContainerProps,
+  type GlassVariant,
+  type GlassRadius,
+} from './primitives/glass';
 export { Text, type TextProps } from './primitives/text';
 export { Collapse, type CollapseProps } from './primitives/collapse';
 export {
@@ -218,6 +227,9 @@ export {
   type FabPlacement,
   type FabSize,
   type FabVariant,
+  type FabGroupLayout,
+  type FabMenuAppearance,
+  type FabMenuIconPlacement,
 } from './components/fab';
 export {
   Flow,

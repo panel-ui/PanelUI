@@ -11,10 +11,10 @@
     "TrashIcon",
     "SendIcon"
   ],
-  "anatomy": "{/* on its own */}\n<Fab icon={…} accessibilityLabel=\"…\" onPress={…} />\n\n{/* or with a dial behind it */}\n<Fab.Group icon={…} accessibilityLabel=\"…\">\n  <Fab.Action icon={…} label=\"…\" onPress={…} />\n  <Fab.Action icon={…} label=\"…\" onPress={…} />\n</Fab.Group>",
+  "anatomy": "{/* on its own */}\n<Fab icon={…} accessibilityLabel=\"…\" onPress={…} />\n\n{/* or with a dial behind it */}\n<Fab.Group icon={…} accessibilityLabel=\"…\">\n  <Fab.Action icon={…} label=\"…\" onPress={…} />\n  <Fab.Action icon={…} label=\"…\" onPress={…} />\n</Fab.Group>\n\n{/* or a menu */}\n<Fab.Group layout=\"menu\" icon={…} accessibilityLabel=\"…\">\n  <Fab.Action icon={…} label=\"…\" onPress={…} />\n</Fab.Group>",
   "parts": {
-    "Group": "A trigger with actions behind it — the speed dial. It owns the open state, the scrim, and the quarter turn the trigger takes while it is open.",
-    "Action": "One choice in an open dial: a smaller round button with its label beside it. Pressing one closes the dial and then runs the action."
+    "Group": "A trigger with actions behind it. It owns the open state, the scrim, and the quarter turn the trigger takes while it is open. `layout` decides what the actions become: a speed dial of round buttons, or one panel of rows.",
+    "Action": "One choice behind the trigger. In a dial it is a smaller round button with its label beside it; in a menu it is a row, a label with its glyph on the side the appearance puts it. Pressing one closes the group and then runs the action."
   },
   "partNotes": "`Fab.Action` only works inside a `Fab.Group` — it reads the dial's open progress to know when its own turn to unfold is, and throws outside one rather than rendering something that would never animate.",
   "examples": [
@@ -40,9 +40,56 @@
       "code": "<Fab.Group icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\" blur>\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<PaperclipIcon size={18} />} label=\"Attachment\" onPress={attach} />\n  <Fab.Action icon={<MicIcon size={18} />} label=\"Voice note\" onPress={record} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>"
     },
     {
+      "title": "A menu",
+      "description": "`layout=\"menu\"` unfolds one panel of rows out of the button instead of a column of buttons — the shape the platform's own menus take. Each row is its label with a glyph, and the panel springs out of the corner the trigger sits in, so it reads as the button opening rather than a sheet arriving.\n\n`appearance` picks the drawing. `platform`, the default, is the system's: a hairline between rows and the glyph after the label. `wells` is tighter, with the glyph leading in a tinted well and each row its own pill — a menu the app designed rather than the system. `iconPlacement`, `menuWidth`, `menuRadius`, `menuClassName` and `rowClassName` adjust either.\n\nWith `glass` the panel is one piece of the material and the rows are content on it. Without it the panel is the same surface a popover is. Everything else is the dial's: the scrim, the close on press, the back button.",
+      "code": "<Fab.Group layout=\"menu\" glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\" blur>\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<PaperclipIcon size={18} />} label=\"Attachment\" onPress={attach} />\n  <Fab.Action icon={<MicIcon size={18} />} label=\"Voice note\" onPress={record} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>\n\n{/* the app's own shape */}\n<Fab.Group layout=\"menu\" appearance=\"wells\" glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add\">\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-a-menu.mp4",
+        "poster": "/previews/fab-a-menu-poster.jpg",
+        "alt": "Fab — A menu.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "A native menu",
+      "description": "`layout=\"native\"` hands the menu to the platform: a SwiftUI menu on iOS, a Compose dropdown on Android. The trigger stays a `Fab` — it is passed to the platform as the thing you press — so the button keeps its variant, its size and its glass, and only the menu is the system's.\n\nThe rows are drawn by the platform, so `className` and the theme tokens do not reach them. A row takes `label` and, on iOS, `systemImage` — an SF Symbol name, because SwiftUI names its symbols rather than taking a view for one. `destructive` and `disabled` cross over. On Android the `icon` element is used instead, hosted at a fixed size.\n\n`blur` still applies. The scrim behind the menu is ours, so the page recedes the way it does behind the dial and the panel, and the menu reads as belonging to the screen it opened on.\n\nWhere the menu sits is the platform's decision and cannot be set: iOS lifts it clear of the button, Android draws its dropdown over the anchor. The open state is the platform's too, so `open` and `onOpenChange` do nothing on iOS; Android's menu is controlled and honours both.\n\nIt needs the optional `@expo/ui`. Without it, and on the web, this falls back to `layout=\"menu\"` — so a working fallback and a missing package look the same, and the package is worth checking before the code is.",
+      "code": "<Fab.Group layout=\"native\" glass blur icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\">\n  <Fab.Action systemImage=\"photo\" label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action systemImage=\"paperclip\" label=\"Attachment\" onPress={attach} />\n  <Fab.Action systemImage=\"mic\" label=\"Voice note\" onPress={record} />\n  <Fab.Action systemImage=\"trash\" label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-a-native-menu.mp4",
+        "poster": "/previews/fab-a-native-menu-poster.jpg",
+        "alt": "Fab — A native menu.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "Liquid Glass",
+      "description": "`glass` draws the button in the material iOS 26 uses for its own floating controls, in place of the variant's fill. A button floating over a list is what the material is for: the rows refract through it as they scroll under, and it lifts its own edge, so the shadow goes with the fill.\n\nEvery variant takes the plain material, with its glyph in the foreground colour and in red on `destructive`. A tint would only dim the glass: a colour laid on it turns it back into a fill, and a monochrome one greys it, so the colour that carries meaning goes on the glyph instead. Pressed, the material swells and brightens under the finger the way the platform's own glass controls do, in place of the usual press scale. On a `Fab.Group` the flag covers the trigger and every action.\n\nIt needs iOS 26 and the optional `expo-glass-effect`. Below that, on Android, on web, or with Reduce Transparency on, the flag does nothing and the button keeps its ordinary fill — so it is safe to write once for every platform.",
+      "code": "<Fab\n  glass\n  placement=\"bottom-right\"\n  icon={<PlusIcon size={24} />}\n  accessibilityLabel=\"New note\"\n  onPress={compose}\n/>\n\n<Fab.Group glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add\">\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-liquid-glass.mp4",
+        "poster": "/previews/fab-liquid-glass-poster.jpg",
+        "alt": "Fab — Liquid Glass.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
       "title": "In the flow instead of over it",
       "description": "Leave `placement` out and it is an ordinary round button where you put it — for a screen that already has somewhere for it to sit, and for laying several out side by side.",
       "code": "<View className=\"flex-row items-center gap-4\">\n  <Fab icon={<PlusIcon size={20} />} accessibilityLabel=\"Add\" />\n  <Fab variant=\"surface\" icon={<SearchIcon size={20} />} accessibilityLabel=\"Search\" />\n  <Fab variant=\"destructive\" icon={<TrashIcon size={20} />} accessibilityLabel=\"Delete\" />\n</View>"
+    },
+    {
+      "title": "Sizes and variants",
+      "description": "Every size and variant together, with the same set drawn in the material below them and the extended forms under that.\n\n`size` is `sm`, `md` or `lg` — 44, 56 and 64 points. `variant` is `primary`, `secondary`, `surface` or `destructive`. Under `glass` each one drops its fill for the material and keeps its glyph colour, which is why the destructive one is a red glyph rather than a red button.\n\nAn extended button is as wide as its label, in the material as anywhere else.",
+      "code": "<Fab size=\"sm\" icon={<PlusIcon size={18} />} accessibilityLabel=\"Add\" />\n<Fab size=\"md\" icon={<PlusIcon size={24} />} accessibilityLabel=\"Add\" />\n<Fab size=\"lg\" icon={<PlusIcon size={28} />} accessibilityLabel=\"Add\" />\n\n<Fab variant=\"secondary\" icon={<StarIcon size={20} />} accessibilityLabel=\"Favourite\" />\n<Fab variant=\"surface\" icon={<SearchIcon size={20} />} accessibilityLabel=\"Search\" />\n<Fab variant=\"destructive\" icon={<TrashIcon size={20} />} accessibilityLabel=\"Delete\" />\n\n<Fab glass icon={<PlusIcon size={20} />} accessibilityLabel=\"Add\" />\n<Fab glass variant=\"destructive\" icon={<TrashIcon size={20} />} accessibilityLabel=\"Delete\" />\n<Fab glass extended size=\"sm\" icon={<SendIcon size={18} />}>Send</Fab>",
+      "preview": {
+        "src": "/previews/fab-sizes-and-variants.jpg",
+        "alt": "Fab — every size and variant, filled and in the material.",
+        "width": 1179,
+        "height": 1646
+      }
     },
     {
       "title": "The three sizes",
@@ -67,7 +114,7 @@
       }
     }
   ],
-  "notes": "### Give it a label\n\n`accessibilityLabel` is not optional in practice. An icon-only button reads out as nothing, and the plus that is obvious to someone looking at it says nothing to someone who is not. `Fab.Action` takes its label from `label`, so it is already covered.\n\n### Write a group in the screen's root container\n\nA `Fab.Group` draws its scrim and its buttons as two absolutely positioned siblings in whatever it is written inside. That parent is what `offset` is measured from and what the scrim covers, so it should be the container that fills the screen.\n\nThis is also what makes the dial belong to its screen. Pushing a new screen over this one hides the dial with everything else on it, because it is part of the screen's own view tree rather than lifted above the app.\n\nAdd your safe-area inset to `offset` to clear the home indicator.\n\n### Pressing an action closes the dial\n\nAny child of a `Fab.Group` closes it when pressed, including a plain `Fab` used as an action. A menu that stays up after a choice reads as the choice not having registered — and an action that navigates would otherwise leave the dial standing over the screen it navigated to.\n\nThe Android back button closes an open dial too, rather than popping the screen behind it.\n\n### The actions are unmounted while the dial is closed\n\nNot hidden. A column kept alive behind the trigger would still be in the accessibility tree, and a screen reader would walk into four buttons nobody can see.\n\n### One timing, not one per action\n\nThe whole dial runs off a single shared value, and each action works out its own share of it on the UI thread from its index. There is no chain of timeouts to fall out of step with itself when the dial is closed halfway through opening — closing runs the same value back down, and every action follows it.\n\n### The trigger turns rather than swapping\n\n`rotateOnOpen` gives the glyph a quarter circle while the dial is up. That is doing real work when the glyph is a plus: the same mark becomes a cross, so the button says *this closes now* without a second icon to swap in. Turn it off for a glyph that means something at one angle only.\n\n### Press behavior composes with the button\n\n`Fab` forwards the ordinary animated Pressable controls such as `hitSlop`, `onLongPress`, `pressOpacity`, and the native press event passed to `onPress`. Its button role, disabled state, haptic tick, and primary press handler remain owned by the component. Use `className` for pressed-state styling; `style` remains a placement-aware view style so an absolutely positioned Fab keeps one deterministic anchor.",
+  "notes": "### Give it a label\n\n`accessibilityLabel` is not optional in practice. An icon-only button reads out as nothing, and the plus that is obvious to someone looking at it says nothing to someone who is not. `Fab.Action` takes its label from `label`, so it is already covered.\n\n### Dial or menu\n\n`layout` on `Fab.Group` decides what opens. `dial`, the default, is the column of round buttons with labels beside them. `menu` is one panel of rows that grows out of the trigger's corner. A dial reads as a handful of buttons and suits three or four glyphs that stand on their own; a menu reads as a list and suits actions that need their words.\n\nA menu has two appearances. `platform` is the system's own shape; `wells` leads with the glyph in a tinted well and makes each row a pill. Either takes `iconPlacement`, `menuWidth`, `menuRadius`, `menuClassName` and `rowClassName`, and a row's own `className` and `labelClassName` come after those.\n\nThe menu panel scales in rather than fading in. The material cannot be faded — at zero it stops drawing — and a panel growing out of the button is what says the button opened.\n\n### Write a group in the screen's root container\n\nA `Fab.Group` draws its scrim and its buttons as two absolutely positioned siblings in whatever it is written inside. That parent is what `offset` is measured from and what the scrim covers, so it should be the container that fills the screen.\n\nThis is also what makes the dial belong to its screen. Pushing a new screen over this one hides the dial with everything else on it, because it is part of the screen's own view tree rather than lifted above the app.\n\nAdd your safe-area inset to `offset` to clear the home indicator.\n\n### Pressing an action closes the dial\n\nAny child of a `Fab.Group` closes it when pressed, including a plain `Fab` used as an action. A menu that stays up after a choice reads as the choice not having registered — and an action that navigates would otherwise leave the dial standing over the screen it navigated to.\n\nThe Android back button closes an open dial too, rather than popping the screen behind it.\n\n### The actions are unmounted while the dial is closed\n\nNot hidden. A column kept alive behind the trigger would still be in the accessibility tree, and a screen reader would walk into four buttons nobody can see.\n\n### One spring, not one per action\n\nThe whole dial runs off a single spring, and each action works out its own share of it on the UI thread from its index — the stagger is where each one reads the spring, not a delay. There is no chain of timeouts to fall out of step with itself when the dial is closed halfway through opening; closing runs the same value back down, and every action follows it. The spring overshoots a little and settles, so buttons arrive rather than stop.\n\nA glass dial's actions rise out of the trigger, small, and grow into their slots, with each label growing out of its button once it is most of the way there. Inside the group the pieces of glass merge while they overlap, so the trigger reads as dividing into its actions rather than the actions arriving from elsewhere. Nothing fades: the material stops drawing at zero opacity and does not come back.\n\n### The trigger turns rather than swapping\n\n`rotateOnOpen` gives the glyph a quarter circle while the dial is up. That is doing real work when the glyph is a plus: the same mark becomes a cross, so the button says *this closes now* without a second icon to swap in. Turn it off for a glyph that means something at one angle only.\n\n### Glass is a material, not a colour\n\n`glass` is inert where the material cannot be drawn, and it cannot be drawn below iOS 26, on Android, on web, without `expo-glass-effect`, or with Reduce Transparency on. Nothing is faked there: a hand-drawn approximation of a system material is a near-miss on the one platform that has the real thing, and an iOS look pasted onto Android. The button keeps its variant's fill instead.\n\nA disabled glass button dims its glyph and label rather than the material. A faded material stops being one.\n\n### Press behavior composes with the button\n\n`Fab` forwards the ordinary animated Pressable controls such as `hitSlop`, `onLongPress`, `pressOpacity`, and the native press event passed to `onPress`. Its button role, disabled state, haptic tick, and primary press handler remain owned by the component. Use `className` for pressed-state styling; `style` remains a placement-aware view style so an absolutely positioned Fab keeps one deterministic anchor.",
   "versions": [
     {
       "title": "Over a list",
@@ -101,6 +148,54 @@
         "src": "/previews/fab-where-it-parks.mp4",
         "poster": "/previews/fab-where-it-parks-poster.jpg",
         "alt": "Fab — Where it parks.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "Liquid Glass",
+      "description": "A dial in the platform material over the list. Needs iOS 26 — anywhere else it is the filled one.",
+      "code": "<Fab.Group glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\" blur>\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<PaperclipIcon size={18} />} label=\"Attachment\" onPress={attach} />\n  <Fab.Action icon={<MicIcon size={18} />} label=\"Voice note\" onPress={record} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-liquid-glass.mp4",
+        "poster": "/previews/fab-liquid-glass-poster.jpg",
+        "alt": "Fab — Liquid Glass.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "A menu",
+      "description": "One panel of rows springing out of the button, in the material.",
+      "code": "<Fab.Group layout=\"menu\" glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\" blur>\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<PaperclipIcon size={18} />} label=\"Attachment\" onPress={attach} />\n  <Fab.Action icon={<MicIcon size={18} />} label=\"Voice note\" onPress={record} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-a-menu.mp4",
+        "poster": "/previews/fab-a-menu-poster.jpg",
+        "alt": "Fab — A menu.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "A menu, with wells",
+      "description": "The same menu in the wells appearance: the glyph leads in a tinted well and each row is its own pill.",
+      "code": "<Fab.Group layout=\"menu\" appearance=\"wells\" glass icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\" blur>\n  <Fab.Action icon={<ImageIcon size={18} />} label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action icon={<PaperclipIcon size={18} />} label=\"Attachment\" onPress={attach} />\n  <Fab.Action icon={<MicIcon size={18} />} label=\"Voice note\" onPress={record} />\n  <Fab.Action icon={<TrashIcon size={18} />} label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-a-menu-with-wells.mp4",
+        "poster": "/previews/fab-a-menu-with-wells-poster.jpg",
+        "alt": "Fab — A menu, with wells.",
+        "width": 720,
+        "height": 1560
+      }
+    },
+    {
+      "title": "A native menu",
+      "description": "The platform's own menu, drawn by SwiftUI on iOS and Jetpack Compose on Android, over a page the scrim frosts. Without `@expo/ui` it is the panel instead.",
+      "code": "<Fab.Group layout=\"native\" glass blur icon={<PlusIcon size={24} />} accessibilityLabel=\"Add something\">\n  <Fab.Action systemImage=\"photo\" label=\"Photo\" onPress={addPhoto} />\n  <Fab.Action systemImage=\"paperclip\" label=\"Attachment\" onPress={attach} />\n  <Fab.Action systemImage=\"mic\" label=\"Voice note\" onPress={record} />\n  <Fab.Action systemImage=\"trash\" label=\"Empty drafts\" destructive onPress={empty} />\n</Fab.Group>",
+      "previewVideo": {
+        "src": "/previews/fab-a-native-menu.mp4",
+        "poster": "/previews/fab-a-native-menu-poster.jpg",
+        "alt": "Fab — A native menu.",
         "width": 720,
         "height": 1560
       }

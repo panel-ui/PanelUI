@@ -188,13 +188,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${title} — ${site.name}`,
       description,
       siteName: site.name,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+      // `type` as well as the dimensions: a crawler that will not fetch the
+      // image before laying the card out has then been told everything about
+      // it, which is what the site root's card declares too.
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title, type: 'image/png' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${title} — ${site.name}`,
       description,
-      images: [ogImage],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title, type: 'image/png' }],
     },
   };
 }

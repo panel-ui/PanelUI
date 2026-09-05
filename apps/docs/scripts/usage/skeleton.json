@@ -13,6 +13,11 @@
       "code": "<View className=\"flex-row items-center gap-3\">\n  <Skeleton className=\"h-10 w-10 rounded-full\" />\n  <View className=\"flex-1 gap-2\">\n    <Skeleton className=\"h-4 w-1/3\" />\n    <Skeleton className=\"h-3 w-2/3\" />\n  </View>\n</View>"
     },
     {
+      "title": "An exact height",
+      "description": "Sizing belongs in `className`. Reach for `style` when the number is computed at runtime, or when no utility class says it.",
+      "code": "<Skeleton style={{ height: 200 }} className=\"w-full rounded-xl\" />"
+    },
+    {
       "title": "Swapped for the real thing",
       "code": "{loading ? (\n  <Skeleton className=\"h-6 w-32\" />\n) : (\n  <Text size=\"xl\" weight=\"semibold\">{user.name}</Text>\n)}"
     },
@@ -33,5 +38,5 @@
     "width": 720,
     "height": 478
   },
-  "notes": "A placeholder is a picture of content that is not there, so it is hidden from screen readers by default. An unlabelled grey box announces nothing worth hearing, and a screen of them announces it many times over.\n\nPass `label` on the one skeleton that stands for the region — the first row of a list, the card standing in for a page — and the wait is announced once, as a busy status. Leave it off the rest.\n\nUnder the platform's reduce-motion setting the pulse stops and the placeholder holds at a middle opacity. A skeleton that stops moving still reads as content on its way, because the shape is the message."
+  "notes": "A placeholder is a picture of content that is not there, so it is hidden from screen readers by default. An unlabelled grey box announces nothing worth hearing, and a screen of them announces it many times over.\n\nPass `label` on the one skeleton that stands for the region — the first row of a list, the card standing in for a page — and the wait is announced once, as a busy status. Leave it off the rest.\n\nUnder the platform's reduce-motion setting the pulse stops and the placeholder holds at a middle opacity. A skeleton that stops moving still reads as content on its way, because the shape is the message.\n\nA `style` value wins over the utility class that sets the same property, so an exact height can sit beside `className` sizing. The pulse keeps `opacity`.\n\nAn arbitrary class such as `h-[200px]` has to be compiled before it exists. A bundler that was already running when the class was written has not seen it, and the class then applies nothing rather than reporting an error — restart the dev server with its cache cleared, or pass the number through `style`."
 }

@@ -1,4 +1,5 @@
 import { memo, useEffect } from 'react';
+import type { ViewProps } from 'react-native';
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,
@@ -21,6 +22,14 @@ const RESTING_OPACITY = 0.7;
 
 export interface SkeletonProps {
   className?: string;
+  /**
+   * View style for the placeholder — a dimension computed at runtime, or one no
+   * utility class expresses. Ordinary sizing belongs in `className`, and a
+   * value here wins over the class that sets the same property.
+   *
+   * The pulse owns `opacity`; setting it here has no effect.
+   */
+  style?: ViewProps['style'];
   /**
    * What is loading, for a screen reader. Setting it makes this skeleton
    * announce as a busy status; leaving it unset keeps the placeholder out of
@@ -49,6 +58,7 @@ export interface SkeletonProps {
  */
 export const Skeleton = memo(function Skeleton({
   className,
+  style,
   label,
 }: SkeletonProps) {
   const reducedMotion = useReducedMotion();
@@ -81,7 +91,7 @@ export const Skeleton = memo(function Skeleton({
       accessibilityState={announced ? { busy: true } : undefined}
       accessibilityElementsHidden={!announced}
       importantForAccessibility={announced ? 'auto' : 'no-hide-descendants'}
-      style={animatedStyle}
+      style={[style, animatedStyle]}
       className={cn('rounded-md bg-skeleton', className)}
     />
   );

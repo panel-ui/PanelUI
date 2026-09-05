@@ -774,7 +774,7 @@
     "Shimmer placeholder for loading content.",
     "react native skeleton loader",
     {
-      "updatedIn": "0.67.0",
+      "updatedIn": "0.92.0",
       "category": "feedback"
     }
   ],

@@ -9,6 +9,29 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.92.0] — 2026-09-06
+
+### Added
+
+- **`Skeleton` takes a `style` prop**, for a placeholder whose size is computed at
+  runtime or is not expressible as a utility class. It lands after the className
+  styles and before the pulse, so a value here wins over the class setting the same
+  property, and the animation keeps `opacity`.
+
+  An arbitrary class like `h-[200px]` has to be compiled before it exists, and a
+  bundler already running when it was written has not seen it — the class then
+  applies nothing at all rather than erroring, and the placeholder collapses to
+  whatever its parent gives it. `style` is the way past that for a number you are
+  computing anyway.
+
+### Docs
+
+- **Social cards on the documentation pages are served with a declared length, an
+  entity tag and a year of immutable caching.** They went out as an unsized stream
+  that no cache would keep, so every unfurl of a link re-rendered the image and a
+  crawler had nothing to size the download by. The card's address is a pure function
+  of its title and description, so nothing at a given URL ever goes stale.
+
 ## [0.91.0] — 2026-09-05
 
 ### Added

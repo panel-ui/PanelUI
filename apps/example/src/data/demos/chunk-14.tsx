@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View, type LayoutChangeEvent } from "react-native";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, LinkIcon, PageHeader, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
+import { useCSSVariable } from "uniwind";
 import type { ComponentEntry } from '../component-types';
 
 /** Two series side by side, which is what a bar chart is for. */
@@ -812,66 +813,87 @@ function SplitViewControlledDemo() {
   );
 }
 
-/** A face and a banner for the profile headers. */
-const PROFILE_FACE = 'https://i.pravatar.cc/150?img=12';
+/** The maintainer's own face, so the demo profile is somebody real. */
+const PROFILE_FACE = 'https://avatars.githubusercontent.com/u/127331761?v=4';
+
+/** A banner for the versions that want a photograph rather than the gradient. */
 const PROFILE_COVER =
   'https://images.unsplash.com/photo-1554080353-a576cf803bda?w=900&q=60';
 
 /**
- * The screen header: a banner to the edges, the face at the leading edge, and
- * everything about the account under it.
+ * The way out of a full-bleed version. Over the cover at the start edge, in
+ * the circle the rest of the app uses — the demo owns the whole screen, so
+ * nothing else is drawing one.
+ */
+function VersionBack() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  return (
+    <View className="absolute z-10 start-4" style={{ top: insets.top + 4 }}>
+      <CircleButton onPress={() => router.back()} label="Go back">
+        <ChevronLeftIcon size={20} />
+      </CircleButton>
+    </View>
+  );
+}
+
+/**
+ * The story button in the avatar's corner. The glyph is resolved against the
+ * page rather than left to inherit: the circle is filled in the foreground
+ * colour, so an icon that took the foreground colour too would be a dark mark
+ * on a dark disc in a light theme and invisible.
+ */
+function StoryBadge() {
+  const background = useCSSVariable('--color-background');
+  return (
+    <View className="h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-foreground">
+      <IconColorProvider color={typeof background === 'string' ? background : undefined}>
+        <PlusIcon size={13} />
+      </IconColorProvider>
+    </View>
+  );
+}
+
+/**
+ * The screen header: a gradient to the edges, the face at the leading edge,
+ * and everything about the account under it.
  */
 function PageHeaderProfileVersion() {
   const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-    >
-      <PageHeader variant="page" align="start">
-        <PageHeader.Cover
-          source={{ uri: PROFILE_COVER }}
-          height={150}
-          alt="A stretch of coastline at dusk"
-        />
-        <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
-        <PageHeader.Content>
-          <PageHeader.Title>Khalid Abdi</PageHeader.Title>
-          <PageHeader.Description>@khaliddevlog</PageHeader.Description>
-          <Text className="pt-2">
-            Building high-performance React Native components for Expo. Open source,
-            shipping in public.
-          </Text>
-          <View className="flex-row flex-wrap gap-x-4 pt-2">
-            <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
-            <PageHeader.Meta icon={<CalendarIcon size={14} />}>
-              Joined February 2022
-            </PageHeader.Meta>
-          </View>
-          <PageHeader.Stats layout="inline" className="pt-2">
-            <PageHeader.Stat value="188" label="Following" onPress={() => {}} />
-            <PageHeader.Stat value="533" label="Followers" onPress={() => {}} />
-          </PageHeader.Stats>
-        </PageHeader.Content>
-        <PageHeader.Actions>
-          <Button variant="secondary" className="flex-1">
-            Share profile
-          </Button>
-          <Button className="flex-1">Edit profile</Button>
-        </PageHeader.Actions>
-      </PageHeader>
-      <Frame variant="plain" className="px-4 pt-2">
-        <Frame.Panel>
-          {['Posts', 'Replies', 'Media'].map((label) => (
-            <Frame.Row key={label} chevron onPress={() => {}}>
-              <Text size="sm" className="flex-1">
-                {label}
-              </Text>
-            </Frame.Row>
-          ))}
-        </Frame.Panel>
-      </Frame>
-    </ScrollView>
+    <View className="flex-1 bg-background">
+      <VersionBack />
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <PageHeader variant="page" align="start">
+          <PageHeader.Cover height={insets.top + 120} />
+          <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
+          <PageHeader.Content>
+            <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+            <PageHeader.Description>@Khalidabdi1</PageHeader.Description>
+            <Text className="pt-2">
+              Building high-performance React Native components for Expo. Open source,
+              shipping in public.
+            </Text>
+            <View className="flex-row flex-wrap gap-x-4 pt-2">
+              <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
+              <PageHeader.Meta icon={<CalendarIcon size={14} />}>
+                Joined February 2022
+              </PageHeader.Meta>
+            </View>
+            <PageHeader.Stats layout="inline" className="pt-2">
+              <PageHeader.Stat value="188" label="Following" onPress={() => {}} />
+              <PageHeader.Stat value="533" label="Followers" onPress={() => {}} />
+            </PageHeader.Stats>
+          </PageHeader.Content>
+          <PageHeader.Actions>
+            <Button variant="secondary" className="flex-1">
+              Share profile
+            </Button>
+            <Button className="flex-1">Edit profile</Button>
+          </PageHeader.Actions>
+        </PageHeader>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -882,51 +904,185 @@ function PageHeaderProfileVersion() {
 function PageHeaderStatsVersion() {
   const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-    >
-      <PageHeader variant="page" align="start" className="pt-4">
-        <PageHeader.Row>
-          <PageHeader.Avatar
-            size="lg"
-            source={{ uri: PROFILE_FACE }}
-            fallback="KA"
-            badge={
-              <View className="h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-foreground">
-                <PlusIcon size={12} />
-              </View>
-            }
+    <View className="flex-1 bg-background">
+      <VersionBack />
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + 52,
+          paddingBottom: insets.bottom + 24,
+        }}
+      >
+        <PageHeader variant="page" align="start">
+          <PageHeader.Row>
+            <PageHeader.Avatar
+              size="lg"
+              source={{ uri: PROFILE_FACE }}
+              fallback="KA"
+              badge={<StoryBadge />}
+            />
+            <PageHeader.Stats className="flex-1">
+              <PageHeader.Stat value="3" label="Posts" />
+              <PageHeader.Stat value="788" label="Followers" onPress={() => {}} />
+              <PageHeader.Stat value="1,882" label="Following" onPress={() => {}} />
+            </PageHeader.Stats>
+          </PageHeader.Row>
+          <PageHeader.Content>
+            <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+            <PageHeader.Description>Science &amp; Technology</PageHeader.Description>
+            <Text size="sm" className="pt-1">
+              Components, clips and the odd screen recording. Live well, sleep well.
+            </Text>
+            <PageHeader.Meta icon={<LinkIcon size={14} />} className="pt-1">
+              panelui.dev
+            </PageHeader.Meta>
+          </PageHeader.Content>
+          <PageHeader.Actions>
+            <Button variant="secondary" className="flex-1">
+              Edit profile
+            </Button>
+            <Button variant="secondary" className="flex-1">
+              Share profile
+            </Button>
+            <Button variant="secondary" size="icon">
+              <EllipsisIcon size={18} />
+            </Button>
+          </PageHeader.Actions>
+        </PageHeader>
+      </ScrollView>
+    </View>
+  );
+}
+
+/**
+ * The tall hero: a photograph most of the way down the screen, the name under
+ * it, and a strip of ruled counts.
+ */
+function PageHeaderHeroVersion() {
+  const insets = useSafeAreaInsets();
+  return (
+    <View className="flex-1 bg-background">
+      <VersionBack />
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <PageHeader variant="page" align="start">
+          <PageHeader.Cover
+            source={{ uri: PROFILE_COVER }}
+            height={insets.top + 300}
+            alt="A stretch of coastline at dusk"
           />
-          <PageHeader.Stats className="flex-1">
-            <PageHeader.Stat value="3" label="Posts" />
-            <PageHeader.Stat value="788" label="Followers" onPress={() => {}} />
-            <PageHeader.Stat value="1,882" label="Following" onPress={() => {}} />
+          {/* No avatar. The picture is the account, so a face over it would be
+              a second subject on the same screen. */}
+          <PageHeader.Content className="pt-4">
+            <View className="flex-row items-center gap-3">
+              <PageHeader.Title className="flex-1">Coastline Weekly</PageHeader.Title>
+              <Button variant="secondary" size="sm">
+                Edit
+              </Button>
+            </View>
+            <PageHeader.Description>u/coastlineweekly · 0 followers</PageHeader.Description>
+          </PageHeader.Content>
+          <PageHeader.Stats divided className="px-4 pt-4">
+            <PageHeader.Stat value="73" label="Karma" />
+            <PageHeader.Stat value="33" label="Posts" onPress={() => {}} />
+            <PageHeader.Stat value="2mo" label="Age" />
           </PageHeader.Stats>
-        </PageHeader.Row>
-        <PageHeader.Content>
-          <PageHeader.Title>Khalid Abdi</PageHeader.Title>
-          <PageHeader.Description>Science &amp; Technology</PageHeader.Description>
-          <Text size="sm" className="pt-1">
-            Components, clips and the odd screen recording. Live well, sleep well.
-          </Text>
-          <PageHeader.Meta icon={<LinkIcon size={14} />} className="pt-1">
-            panelui.dev
-          </PageHeader.Meta>
-        </PageHeader.Content>
-        <PageHeader.Actions>
-          <Button variant="secondary" className="flex-1">
-            Edit profile
-          </Button>
-          <Button variant="secondary" className="flex-1">
-            Share profile
-          </Button>
-          <Button variant="secondary" size="icon">
-            <EllipsisIcon size={18} />
-          </Button>
-        </PageHeader.Actions>
-      </PageHeader>
-    </ScrollView>
+          <PageHeader.Actions>
+            <Button className="flex-1">Follow</Button>
+            <Button variant="secondary" size="icon">
+              <ShareNodesIcon size={18} />
+            </Button>
+          </PageHeader.Actions>
+        </PageHeader>
+      </ScrollView>
+    </View>
+  );
+}
+
+/**
+ * Everything on the centre line, over a gradient that runs to the screen's
+ * edges — the profile that opens a screen rather than sitting on one.
+ */
+function PageHeaderCenteredVersion() {
+  const insets = useSafeAreaInsets();
+  return (
+    <View className="flex-1 bg-background">
+      <VersionBack />
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <PageHeader variant="page">
+          <PageHeader.Cover height={insets.top + 140} />
+          <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
+          <PageHeader.Content>
+            <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+            <PageHeader.Description>khalid@panelui.dev</PageHeader.Description>
+            <PageHeader.Meta icon={<GlobeIcon size={14} />} className="pt-1">
+              Remote · GMT+3
+            </PageHeader.Meta>
+            <PageHeader.Stats className="pt-3">
+              <PageHeader.Stat value="127" label="Components" />
+              <PageHeader.Stat value="533" label="Followers" onPress={() => {}} />
+              <PageHeader.Stat value="0.92" label="Version" />
+            </PageHeader.Stats>
+          </PageHeader.Content>
+          <PageHeader.Actions>
+            <Button variant="secondary" className="flex-1">
+              Message
+            </Button>
+            <Button className="flex-1">Follow</Button>
+          </PageHeader.Actions>
+        </PageHeader>
+      </ScrollView>
+    </View>
+  );
+}
+
+/**
+ * An organisation rather than a person. The mark goes in the avatar slot, held
+ * clear of the circle's edge by `contain` rather than filling it — a logo
+ * cropped to a circle is a logo with its corners cut off.
+ */
+function PageHeaderBrandVersion() {
+  const insets = useSafeAreaInsets();
+  const { mode } = useThemeMode();
+  return (
+    <View className="flex-1 bg-background">
+      <VersionBack />
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <PageHeader variant="page" align="start">
+          <PageHeader.Cover height={insets.top + 120} />
+          <PageHeader.Avatar
+            source={
+              mode === 'dark'
+                ? require('../../../assets/logo-dark.png')
+                : require('../../../assets/logo-light.png')
+            }
+            fallback="PU"
+            imageProps={{ resizeMode: 'contain', className: 'p-3' }}
+          />
+          <PageHeader.Content>
+            <View className="flex-row items-center gap-2">
+              <PageHeader.Title>PanelUI</PageHeader.Title>
+              <Badge variant="secondary">Open source</Badge>
+            </View>
+            <PageHeader.Description>
+              High-performance React Native components for Expo
+            </PageHeader.Description>
+            <View className="flex-row flex-wrap gap-x-4 pt-2">
+              <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
+              <PageHeader.Meta icon={<CalendarIcon size={14} />}>Since 2025</PageHeader.Meta>
+            </View>
+            <PageHeader.Stats layout="inline" divided className="pt-3">
+              <PageHeader.Stat value="127" label="Components" />
+              <PageHeader.Stat value="6" label="Themes" />
+            </PageHeader.Stats>
+          </PageHeader.Content>
+          <PageHeader.Actions>
+            <Button className="flex-1">Install</Button>
+            <Button variant="secondary" size="icon">
+              <PencilIcon size={18} />
+            </Button>
+          </PageHeader.Actions>
+        </PageHeader>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -1424,17 +1580,46 @@ export const ENTRIES: ComponentEntry[] = [
         label: 'Profile screen',
         id: 'profile',
         fullPage: true,
+        fullBleed: true,
         description:
-          'The banner to the screen edges, the face at the leading edge, and the account under it.',
+          'The gradient to the screen edges, the face at the leading edge, and the account under it.',
         render: () => <PageHeaderProfileVersion />,
       },
       {
         label: 'Counts beside the face',
         id: 'stats',
         fullPage: true,
+        fullBleed: true,
         description:
           'No banner, so the face does not lift, and the counts sit next to it instead of under the name.',
         render: () => <PageHeaderStatsVersion />,
+      },
+      {
+        label: 'Everything centred',
+        id: 'centred',
+        fullPage: true,
+        fullBleed: true,
+        description:
+          'The face centred over the gradient, with the counts and the actions on the same line under it.',
+        render: () => <PageHeaderCenteredVersion />,
+      },
+      {
+        label: 'A hero, and no face',
+        id: 'hero',
+        fullPage: true,
+        fullBleed: true,
+        description:
+          'The picture is the account, so there is no avatar over it — and the counts are ruled apart.',
+        render: () => <PageHeaderHeroVersion />,
+      },
+      {
+        label: 'An organisation',
+        id: 'brand',
+        fullPage: true,
+        fullBleed: true,
+        description:
+          'A mark rather than a face, with the square corner a logo needs, and the counts run inline.',
+        render: () => <PageHeaderBrandVersion />,
       },
       {
         label: 'Profile card',
@@ -1445,10 +1630,10 @@ export const ENTRIES: ComponentEntry[] = [
           // card can see the cover among its children.
           <PageHeader className="w-full">
             <PageHeader.Cover />
-            <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="OR" verified />
+            <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
             <PageHeader.Content>
-              <PageHeader.Title>Olivia Rhye</PageHeader.Title>
-              <PageHeader.Description>olivia@panelui.dev</PageHeader.Description>
+              <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+              <PageHeader.Description>khalid@panelui.dev</PageHeader.Description>
             </PageHeader.Content>
             <PageHeader.Actions>
               <Button variant="secondary" className="flex-1">
@@ -1470,14 +1655,14 @@ export const ENTRIES: ComponentEntry[] = [
             <PageHeader.Avatar
               size="lg"
               source={{ uri: PROFILE_FACE }}
-              fallback="OR"
+              fallback="KA"
               verified
             />
             <PageHeader.Content>
-              <PageHeader.Title>Olivia Rhye</PageHeader.Title>
-              <PageHeader.Description>Product designer, Berlin</PageHeader.Description>
+              <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+              <PageHeader.Description>Building in public, Nairobi</PageHeader.Description>
               <PageHeader.Stats layout="inline" divided className="pt-2">
-                <PageHeader.Stat value="128" label="Projects" />
+                <PageHeader.Stat value="127" label="Components" />
                 <PageHeader.Stat value="4.2K" label="Followers" />
               </PageHeader.Stats>
             </PageHeader.Content>

@@ -200,6 +200,12 @@ A cover with no `source` draws a gradient between `--color-chart-2` and `--color
 
 Pass `colors` for a gradient of your own. It is painted rather than classed, so those are real colour strings — resolve tokens with `useCSSVariable` if that is where they come from.
 
+### At full screen, the cover needs the status bar
+
+`variant="page"` runs the cover to the screen's edges, top included. Give `height` the safe-area inset on top of the band you want — `insets.top + 120` — or the gradient stops under the clock and the header opens with a strip of page above it.
+
+The header draws nothing over the cover, so a full-screen profile needs its own way back. Put it in `PageHeader.Cover`'s children, or absolutely over the whole thing.
+
 ---
 
 Full page, with every example: https://panelui.dev/docs/components/page-header

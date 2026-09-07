@@ -17,7 +17,7 @@ For a name and avatar inside a feed row rather than at the top of a screen, use 
 PageHeader ships with the library — no separate install.
 
 ```tsx
-import { PageHeader, Button, Text, Frame, LinkIcon, CameraIcon, CalendarIcon, EllipsisIcon, ShareNodesIcon, PlusIcon } from 'panelui-native';
+import { PageHeader, Button, Badge, Text, LinkIcon, CameraIcon, CalendarIcon, GlobeIcon, EllipsisIcon, ShareNodesIcon, PencilIcon, PlusIcon } from 'panelui-native';
 import { View, ScrollView } from 'react-native';
 ```
 
@@ -105,12 +105,12 @@ Nothing here says the face should lift over the cover — the card can see the c
 ```tsx
 <PageHeader align="start">
   <PageHeader.Cover source={{ uri: banner }} alt="A stretch of coastline at dusk" />
-  <PageHeader.Avatar size="lg" source={{ uri: face }} fallback="OR" verified />
+  <PageHeader.Avatar size="lg" source={{ uri: face }} fallback="KA" verified />
   <PageHeader.Content>
-    <PageHeader.Title>Olivia Rhye</PageHeader.Title>
-    <PageHeader.Description>Product designer, Berlin</PageHeader.Description>
+    <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+    <PageHeader.Description>Building in public, Nairobi</PageHeader.Description>
     <PageHeader.Stats layout="inline" divided className="pt-2">
-      <PageHeader.Stat value="128" label="Projects" />
+      <PageHeader.Stat value="127" label="Components" />
       <PageHeader.Stat value="4.2K" label="Followers" />
     </PageHeader.Stats>
   </PageHeader.Content>
@@ -161,59 +161,54 @@ A count with an `onPress` is a real button — press feedback and a button role 
 
 ### Profile screen
 
-`variant="page"` drops the card and lets the banner run to the screen's edges. The header ends at the actions; the tabs under it are an ordinary `Frame`, and the feed below that is yours.
+`variant="page"` drops the card and lets the cover run to the screen's edges. Give it the status-bar inset on top of the band you want, so the gradient reaches the top of the screen rather than stopping under the clock.
 
-The counts are `inline` here because they are read as part of a sentence rather than as a set to compare.
+The counts are `inline` here because they read as part of a sentence rather than as a set to compare.
 
 ```tsx
-<ScrollView className="flex-1 bg-background">
-  <PageHeader variant="page" align="start">
-    <PageHeader.Cover source={{ uri: banner }} height={150} alt="A coastline at dusk" />
-    <PageHeader.Avatar source={{ uri: face }} fallback="KA" verified />
-    <PageHeader.Content>
-      <PageHeader.Title>Khalid Abdi</PageHeader.Title>
-      <PageHeader.Description>@khaliddevlog</PageHeader.Description>
-      <Text className="pt-2">
-        Building high-performance React Native components for Expo.
-      </Text>
-      <View className="flex-row flex-wrap gap-x-4 pt-2">
-        <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
-        <PageHeader.Meta icon={<CalendarIcon size={14} />}>
-          Joined February 2022
-        </PageHeader.Meta>
-      </View>
-      <PageHeader.Stats layout="inline" className="pt-2">
-        <PageHeader.Stat value="188" label="Following" onPress={openFollowing} />
-        <PageHeader.Stat value="533" label="Followers" onPress={openFollowers} />
-      </PageHeader.Stats>
-    </PageHeader.Content>
-    <PageHeader.Actions>
-      <Button variant="secondary" className="flex-1">Share profile</Button>
-      <Button className="flex-1">Edit profile</Button>
-    </PageHeader.Actions>
-  </PageHeader>
-  {/* tabs, grid, feed — all yours */}
-</ScrollView>
+const insets = useSafeAreaInsets();
+
+<PageHeader variant="page" align="start">
+  <PageHeader.Cover height={insets.top + 120} />
+  <PageHeader.Avatar source={{ uri: face }} fallback="KA" verified />
+  <PageHeader.Content>
+    <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+    <PageHeader.Description>@Khalidabdi1</PageHeader.Description>
+    <Text className="pt-2">
+      Building high-performance React Native components for Expo.
+    </Text>
+    <View className="flex-row flex-wrap gap-x-4 pt-2">
+      <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
+      <PageHeader.Meta icon={<CalendarIcon size={14} />}>
+        Joined February 2022
+      </PageHeader.Meta>
+    </View>
+    <PageHeader.Stats layout="inline" className="pt-2">
+      <PageHeader.Stat value="188" label="Following" onPress={openFollowing} />
+      <PageHeader.Stat value="533" label="Followers" onPress={openFollowers} />
+    </PageHeader.Stats>
+  </PageHeader.Content>
+  <PageHeader.Actions>
+    <Button variant="secondary" className="flex-1">Share profile</Button>
+    <Button className="flex-1">Edit profile</Button>
+  </PageHeader.Actions>
+</PageHeader>
 ```
 
 ### Counts beside the face
 
-No banner, so the face has nothing to overlap and does not lift. `PageHeader.Row` puts the counts next to the picture instead of under the name, which is the shape that fits three of them on a phone.
+No cover, so the face has nothing to overlap and does not lift. `PageHeader.Row` puts the counts next to the picture instead of under the name, which is the shape that fits three of them on a phone.
 
-`badge` takes the corner the rosette would have had — here a button to add to the story.
+`badge` takes the corner the rosette would have had. Resolve the glyph's colour against the surface you fill the badge with — a circle filled in the foreground colour with an icon that inherited the foreground colour is invisible in a light theme.
 
 ```tsx
-<PageHeader variant="page" align="start" className="pt-4">
+<PageHeader variant="page" align="start">
   <PageHeader.Row>
     <PageHeader.Avatar
       size="lg"
       source={{ uri: face }}
       fallback="KA"
-      badge={
-        <View className="h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-foreground">
-          <PlusIcon size={12} />
-        </View>
-      }
+      badge={<StoryBadge />}
     />
     <PageHeader.Stats className="flex-1">
       <PageHeader.Stat value="3" label="Posts" />
@@ -229,6 +224,111 @@ No banner, so the face has nothing to overlap and does not lift. `PageHeader.Row
     <Button variant="secondary" className="flex-1">Edit profile</Button>
     <Button variant="secondary" className="flex-1">Share profile</Button>
     <Button variant="secondary" size="icon"><EllipsisIcon size={18} /></Button>
+  </PageHeader.Actions>
+</PageHeader>
+
+/** The glyph is resolved against the page, not left to inherit. */
+function StoryBadge() {
+  const background = useCSSVariable('--color-background');
+  return (
+    <View className="h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-foreground">
+      <IconColorProvider color={typeof background === 'string' ? background : undefined}>
+        <PlusIcon size={13} />
+      </IconColorProvider>
+    </View>
+  );
+}
+```
+
+### Everything centred
+
+The default alignment, at full screen. The face is centred over the cover and the counts sit under the name rather than beside it, which is the arrangement that reads when the name is the first thing on the screen rather than one row of many.
+
+```tsx
+<PageHeader variant="page">
+  <PageHeader.Cover height={insets.top + 140} />
+  <PageHeader.Avatar source={{ uri: face }} fallback="KA" verified />
+  <PageHeader.Content>
+    <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+    <PageHeader.Description>khalid@panelui.dev</PageHeader.Description>
+    <PageHeader.Meta icon={<GlobeIcon size={14} />} className="pt-1">
+      Remote · GMT+3
+    </PageHeader.Meta>
+    <PageHeader.Stats className="pt-3">
+      <PageHeader.Stat value="127" label="Components" />
+      <PageHeader.Stat value="533" label="Followers" onPress={openFollowers} />
+      <PageHeader.Stat value="0.92" label="Version" />
+    </PageHeader.Stats>
+  </PageHeader.Content>
+  <PageHeader.Actions>
+    <Button variant="secondary" className="flex-1">Message</Button>
+    <Button className="flex-1">Follow</Button>
+  </PageHeader.Actions>
+</PageHeader>
+```
+
+### A hero, and no face
+
+Every part is optional, and this is what leaving the avatar out buys: a tall picture that is the account itself. A face over it would be a second subject on the same screen.
+
+`divided` rules the counts apart. Use it where each figure is a different kind of thing — karma, posts, an age — rather than three of one kind, which read fine on their own spacing.
+
+```tsx
+<PageHeader variant="page" align="start">
+  <PageHeader.Cover
+    source={{ uri: banner }}
+    height={insets.top + 300}
+    alt="A stretch of coastline at dusk"
+  />
+  <PageHeader.Content className="pt-4">
+    <View className="flex-row items-center gap-3">
+      <PageHeader.Title className="flex-1">Coastline Weekly</PageHeader.Title>
+      <Button variant="secondary" size="sm">Edit</Button>
+    </View>
+    <PageHeader.Description>u/coastlineweekly · 0 followers</PageHeader.Description>
+  </PageHeader.Content>
+  <PageHeader.Stats divided className="px-4 pt-4">
+    <PageHeader.Stat value="73" label="Karma" />
+    <PageHeader.Stat value="33" label="Posts" onPress={openPosts} />
+    <PageHeader.Stat value="2mo" label="Age" />
+  </PageHeader.Stats>
+  <PageHeader.Actions>
+    <Button className="flex-1">Follow</Button>
+    <Button variant="secondary" size="icon"><ShareNodesIcon size={18} /></Button>
+  </PageHeader.Actions>
+</PageHeader>
+```
+
+### An organisation
+
+A mark rather than a face. Pass `resizeMode: 'contain'` and some padding through `imageProps` so the logo is held clear of the circle's edge — a logo cropped to a circle is a logo with its corners cut off.
+
+`Title` takes children, so a badge goes beside the name on the same line.
+
+```tsx
+<PageHeader variant="page" align="start">
+  <PageHeader.Cover height={insets.top + 120} />
+  <PageHeader.Avatar
+    source={mark}
+    fallback="PU"
+    imageProps={{ resizeMode: 'contain', className: 'p-3' }}
+  />
+  <PageHeader.Content>
+    <View className="flex-row items-center gap-2">
+      <PageHeader.Title>PanelUI</PageHeader.Title>
+      <Badge variant="secondary">Open source</Badge>
+    </View>
+    <PageHeader.Description>
+      High-performance React Native components for Expo
+    </PageHeader.Description>
+    <PageHeader.Stats layout="inline" divided className="pt-3">
+      <PageHeader.Stat value="127" label="Components" />
+      <PageHeader.Stat value="6" label="Themes" />
+    </PageHeader.Stats>
+  </PageHeader.Content>
+  <PageHeader.Actions>
+    <Button className="flex-1">Install</Button>
+    <Button variant="secondary" size="icon"><PencilIcon size={18} /></Button>
   </PageHeader.Actions>
 </PageHeader>
 ```
@@ -356,6 +456,12 @@ That is also why the badge hangs off a second view rather than off the ring: the
 A cover with no `source` draws a gradient between `--color-chart-2` and `--color-chart-5`. They are series tokens rather than a pair of hexes, so an app that puts its charts on brand puts this on brand with them.
 
 Pass `colors` for a gradient of your own. It is painted rather than classed, so those are real colour strings — resolve tokens with `useCSSVariable` if that is where they come from.
+
+### At full screen, the cover needs the status bar
+
+`variant="page"` runs the cover to the screen's edges, top included. Give `height` the safe-area inset on top of the band you want — `insets.top + 120` — or the gradient stops under the clock and the header opens with a strip of page above it.
+
+The header draws nothing over the cover, so a full-screen profile needs its own way back. Put it in `PageHeader.Cover`'s children, or absolutely over the whole thing.
 
 ## Public exports
 

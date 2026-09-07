@@ -43,7 +43,7 @@ import { Frame } from 'panelui-native';
 - `Frame.Action` — Trailing slot on the header — a label, a button, a badge. Strings render muted.
 - `Frame.Description` — Secondary line under a title, in a column-wrapped header or inside a `Frame.Content`.
 - `Frame.Panel` — The card holding the rows. Divides them for you.
-- `Frame.Footer` — The row of actions under the panel — what somebody does with the widget rather than more of what it says. Under `inset` it sits in the band, held further in than the panel so it reads as things to press rather than as another edge of the shell. Under `default` and `plain` it is a padded row below the panel, which stops the panel being flush at the bottom.
+- `Frame.Footer` — The row of actions under the panel — what somebody does with the widget rather than more of what it says. Under `inset` it sits in the band, held further in than the panel so it reads as things to press rather than as another edge of the shell, and it shapes what is put in it: equal widths and full pills. Under `default` and `plain` it is a padded row below the panel, which stops the panel being flush at the bottom.
 - `Frame.Section` — A labelled cluster of rows, for a panel holding more than one group.
 - `Frame.Row` — A row inside the panel. Give it an `onPress` and it becomes a pressable.
 - `Frame.Media` — Leading slot on a row — an icon, an avatar, a status dot. Holds its size.
@@ -224,6 +224,12 @@ There is no shadow under an `inset` frame. A recessed band and a drop shadow are
 The panel's radius is the shell's less the shell's padding. Both are fixed numbers rather than classes, because an arbitrary Tailwind value a running dev server has not already compiled turns into nothing at all — no error, no warning, the corner simply squares off.
 
 The consequence is that `inset` does not follow the theme's radius scale the way `default` and `plain` do. Restyle it with `className` and give `Frame.Panel` the matching radius yourself: the shell's, less the shell's padding.
+
+### What the band does to an action
+
+An `inset` footer gives every element child `h-11 flex-1 rounded-full`: equal widths, and a full pill. The band is a row of equal decisions, and one arriving with the radius it happened to have breaks that.
+
+Your own `className` is merged after, so any of it can be overridden — `flex-none` and `w-11` for a trailing icon button that should stay square, say.
 
 ---
 

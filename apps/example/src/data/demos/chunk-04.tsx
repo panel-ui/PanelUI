@@ -2375,17 +2375,16 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       {
-        label: 'Inset, with actions',
+        label: 'Inset, the well and the band',
         render: () => (
-          // The panel floats clear of the shell on all four sides, and the band
-          // left around it carries the footer. The recess is `--color-inset`
-          // over the popover surface rather than a step down the surface
-          // ladder, so the band reads darker than the panel in every theme.
+          // The panel floats clear of the shell on all four sides, and the
+          // band left around it carries the footer. The recess is
+          // `--color-inset` over the popover surface rather than a step down
+          // the surface ladder, so the band reads darker than the panel in
+          // every theme. The band shapes what is put in it: equal widths and
+          // full pills, because a row of equal decisions should not arrive
+          // with three different radii.
           <Frame variant="inset" className="w-full">
-            <Frame.Header>
-              <Frame.Title>Pending invites</Frame.Title>
-              <Frame.Action>2</Frame.Action>
-            </Frame.Header>
             <Frame.Panel>
               {[
                 ['JD', 'Jamie Doe', 'jamie@example.com', 'Editor'],
@@ -2406,10 +2405,40 @@ export const ENTRIES: ComponentEntry[] = [
               ))}
             </Frame.Panel>
             <Frame.Footer>
-              <Button variant="secondary" className="flex-1">
-                Decline all
-              </Button>
-              <Button className="flex-1">Accept all</Button>
+              <Button variant="secondary">Decline all</Button>
+              <Button>Accept all</Button>
+            </Frame.Footer>
+          </Frame>
+        ),
+      },
+      {
+        label: 'Inset, with a header in the band',
+        render: () => (
+          // The strip above the panel is the band too, so a header sits in it
+          // without the panel losing an edge.
+          <Frame variant="inset" className="w-full">
+            <Frame.Header>
+              <Frame.Title>Usage this month</Frame.Title>
+              <Frame.Action>Aug 1 – Aug 31</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['Requests', '33.1K'],
+                ['Input tokens', '98.2M'],
+                ['Output tokens', '59M'],
+              ].map(([label, value]) => (
+                <Frame.Row key={label}>
+                  <Text size="sm" className="flex-1">
+                    {label}
+                  </Text>
+                  <Text size="sm" weight="medium">
+                    {value}
+                  </Text>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+            <Frame.Footer>
+              <Button variant="secondary">Export</Button>
             </Frame.Footer>
           </Frame>
         ),

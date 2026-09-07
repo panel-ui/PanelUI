@@ -109,6 +109,9 @@ const PANEL_RADIUS = SHELL_RADIUS - SHELL_PADDING;
 const FOOTER_INSET = 26;
 const FOOTER_GAP = 16;
 
+/** What the band does to an action put in it: equal width, and a full pill. */
+const FOOTER_ACTION = 'h-11 flex-1 rounded-full';
+
 const frameVariants = tv({
   slots: {
     root: '',
@@ -546,6 +549,26 @@ export interface FrameFooterProps extends FrameProps {
 }
 
 /**
+ * Shapes an `inset` footer's actions into the band's pills.
+ *
+ * The band is a row of equal decisions, so the actions are equal widths and
+ * full circles rather than whatever radius each one arrived with. Doing it
+ * here rather than asking every caller for three classes is the difference
+ * between a variant that looks a certain way and one that can be made to.
+ *
+ * The caller's own `className` is merged last, so any of it can still be
+ * overridden — a trailing icon button that should stay square, say.
+ */
+function pillChildren(children: ReactNode) {
+  return Children.map(children, (child) => {
+    if (!isValidElement<{ className?: string }>(child)) return child;
+    return cloneElement(child, {
+      className: cn(FOOTER_ACTION, child.props.className),
+    });
+  });
+}
+
+/**
  * The row of actions under the panel — what somebody does with the widget,
  * rather than more of what it says.
  *
@@ -555,15 +578,16 @@ export interface FrameFooterProps extends FrameProps {
  * at the bottom, which is what having a footer means there.
  */
 const FrameFooter = forwardRef<View, FrameFooterProps>(
-  ({ className, style, ...props }, ref) => {
+  ({ className, style, children, ...props }, ref) => {
     const variant = useContext(FrameVariantContext);
+    const inset = variant === 'inset';
     return (
       <View
         {...props}
         ref={ref}
         className={frameVariants({ variant }).footer({ className })}
         style={
-          variant === 'inset'
+          inset
             ? [
                 {
                   marginTop: FOOTER_GAP,
@@ -573,7 +597,9 @@ const FrameFooter = forwardRef<View, FrameFooterProps>(
               ]
             : style
         }
-      />
+      >
+        {inset ? pillChildren(children) : children}
+      </View>
     );
   }
 );

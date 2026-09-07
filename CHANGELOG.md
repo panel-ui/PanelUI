@@ -9,6 +9,41 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.93.0] — 2026-09-07
+
+### Added
+
+- **`PageHeader`** — the top of a profile screen: a cover, the face over it, who the page
+  belongs to, and what you can do about them. `variant="card"` is a surface of its own, with
+  the cover held off its edges and rounded on its top corners only so its bottom edge meets
+  the content; `variant="page"` drops the surface and lets the cover run to the screen's
+  edges. `align` puts everything on the centre line or the leading edge.
+
+  The face lifts over the cover on its own — the root looks for a `PageHeader.Cover` among its
+  children, so a header without one leaves it where it is. Its ring is drawn in the surface
+  behind it rather than in a border colour, so it reads as punched out of the cover instead of
+  outlined on top of it, and the verification rosette sits at the bottom corner beside the name
+  it vouches for. A cover with no image draws a gradient between two series tokens, so an app
+  that puts its charts on brand puts this on brand with them.
+
+- **`Frame` gains `variant="inset"` and `Frame.Footer`.** The panel floats clear of the shell
+  on all four sides instead of sitting flush against three, and the band left around it carries
+  the actions. The band is a recess rather than a lighter tray — the popover surface with
+  `--color-inset` laid over it, which reads darker than the panel in every theme where the
+  surface ladder would invert between light and dark. It also shapes what is put in it: the
+  actions take equal widths and full pills, because a row of equal decisions should not arrive
+  with three different radii.
+
+### Fixed
+
+- **A `plain` Frame's panel draws the border and radius it always declared.** `Frame.Panel`
+  resolved its classes without the root's variant, so those overrides had never applied.
+
+### Docs
+
+- PageHeader ships with eight recorded previews — one per version, one per card example, and
+  the profile screen at the top of the page.
+
 ## [0.92.0] — 2026-09-06
 
 ### Added

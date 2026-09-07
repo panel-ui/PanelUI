@@ -63,6 +63,7 @@ export const COMPONENTS = [
   {"slug":"meter","name":"Meter","summary":"A measurement on a fixed scale, coloured by where it falls"},
   {"slug":"number-input","name":"NumberInput","summary":"Numeric field stepped by buttons or typed"},
   {"slug":"otp-input","name":"OtpInput","summary":"One-time-code field, one cell per digit"},
+  {"slug":"page-header","name":"PageHeader","summary":"Cover, face and actions at the top of a profile"},
   {"slug":"pagination","name":"Pagination","summary":"Moving through a result set one page at a time"},
   {"slug":"panelside","name":"Panelside","summary":"Navigation panel that pushes and curves the app screen"},
   {"slug":"pie-chart","name":"PieChart","summary":"One whole, divided between its parts"},

@@ -1094,6 +1094,22 @@
     "docsPath": "components/otp-input"
   },
   {
+    "name": "page-header",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Cover, face and actions at the top of a profile.",
+    "registryDependencies": [
+      "animated-pressable",
+      "avatar",
+      "cn",
+      "icons",
+      "text"
+    ],
+    "docsPath": "components/page-header"
+  },
+  {
     "name": "pagination",
     "type": "registry:ui",
     "kind": "ui",

@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1273,
-    "values": 328,
-    "types": 945,
-    "modules": 153,
-    "components": 126,
+    "exports": 1288,
+    "values": 329,
+    "types": 959,
+    "modules": 154,
+    "components": 127,
     "hooks": 13
   },
   "groups": {
@@ -1534,6 +1534,10 @@
             "kind": "type"
           },
           {
+            "name": "FrameFooterProps",
+            "kind": "type"
+          },
+          {
             "name": "FrameRowProps",
             "kind": "type"
           },
@@ -2580,6 +2584,69 @@
           },
           {
             "name": "OtpInputProps",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/page-header/index.tsx",
+        "slug": "page-header",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "PageHeader",
+            "kind": "value"
+          },
+          {
+            "name": "PageHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderRootProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderCoverProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderAvatarProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderRowProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderContentProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderMetaProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderStatsProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderStatProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderActionsProps",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderVariant",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderAlign",
+            "kind": "type"
+          },
+          {
+            "name": "PageHeaderStatsLayout",
             "kind": "type"
           }
         ]

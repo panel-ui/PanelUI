@@ -638,6 +638,22 @@ export {
   type PaginationItemValue,
 } from './components/pagination';
 export {
+  PageHeader,
+  type PageHeaderProps,
+  type PageHeaderRootProps,
+  type PageHeaderCoverProps,
+  type PageHeaderAvatarProps,
+  type PageHeaderRowProps,
+  type PageHeaderContentProps,
+  type PageHeaderMetaProps,
+  type PageHeaderStatsProps,
+  type PageHeaderStatProps,
+  type PageHeaderActionsProps,
+  type PageHeaderVariant,
+  type PageHeaderAlign,
+  type PageHeaderStatsLayout,
+} from './components/page-header';
+export {
   PieChart,
   usePieChart,
   type PieChartProps,

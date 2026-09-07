@@ -1224,5 +1224,14 @@
       "visualization": true,
       "accessibilityMode": "shared-data"
     }
+  ],
+  "page-header": [
+    "PageHeader",
+    "Cover, face and actions at the top of a profile.",
+    "react native profile page header",
+    {
+      "addedIn": "0.93.0",
+      "category": "layout"
+    }
   ]
 }

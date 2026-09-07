@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View, type LayoutChangeEvent } from "react-native";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, Card, ChevronLeftIcon, Frame, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, LinkIcon, PageHeader, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import type { ComponentEntry } from '../component-types';
@@ -812,6 +812,124 @@ function SplitViewControlledDemo() {
   );
 }
 
+/** A face and a banner for the profile headers. */
+const PROFILE_FACE = 'https://i.pravatar.cc/150?img=12';
+const PROFILE_COVER =
+  'https://images.unsplash.com/photo-1554080353-a576cf803bda?w=900&q=60';
+
+/**
+ * The screen header: a banner to the edges, the face at the leading edge, and
+ * everything about the account under it.
+ */
+function PageHeaderProfileVersion() {
+  const insets = useSafeAreaInsets();
+  return (
+    <ScrollView
+      className="flex-1 bg-background"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
+      <PageHeader variant="page" align="start">
+        <PageHeader.Cover
+          source={{ uri: PROFILE_COVER }}
+          height={150}
+          alt="A stretch of coastline at dusk"
+        />
+        <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
+        <PageHeader.Content>
+          <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+          <PageHeader.Description>@khaliddevlog</PageHeader.Description>
+          <Text className="pt-2">
+            Building high-performance React Native components for Expo. Open source,
+            shipping in public.
+          </Text>
+          <View className="flex-row flex-wrap gap-x-4 pt-2">
+            <PageHeader.Meta icon={<LinkIcon size={14} />}>panelui.dev</PageHeader.Meta>
+            <PageHeader.Meta icon={<CalendarIcon size={14} />}>
+              Joined February 2022
+            </PageHeader.Meta>
+          </View>
+          <PageHeader.Stats layout="inline" className="pt-2">
+            <PageHeader.Stat value="188" label="Following" onPress={() => {}} />
+            <PageHeader.Stat value="533" label="Followers" onPress={() => {}} />
+          </PageHeader.Stats>
+        </PageHeader.Content>
+        <PageHeader.Actions>
+          <Button variant="secondary" className="flex-1">
+            Share profile
+          </Button>
+          <Button className="flex-1">Edit profile</Button>
+        </PageHeader.Actions>
+      </PageHeader>
+      <Frame variant="plain" className="px-4 pt-2">
+        <Frame.Panel>
+          {['Posts', 'Replies', 'Media'].map((label) => (
+            <Frame.Row key={label} chevron onPress={() => {}}>
+              <Text size="sm" className="flex-1">
+                {label}
+              </Text>
+            </Frame.Row>
+          ))}
+        </Frame.Panel>
+      </Frame>
+    </ScrollView>
+  );
+}
+
+/**
+ * The counts beside the face rather than under the name. No banner, so the
+ * avatar has nothing to overlap and does not lift.
+ */
+function PageHeaderStatsVersion() {
+  const insets = useSafeAreaInsets();
+  return (
+    <ScrollView
+      className="flex-1 bg-background"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
+      <PageHeader variant="page" align="start" className="pt-4">
+        <PageHeader.Row>
+          <PageHeader.Avatar
+            size="lg"
+            source={{ uri: PROFILE_FACE }}
+            fallback="KA"
+            badge={
+              <View className="h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-foreground">
+                <PlusIcon size={12} />
+              </View>
+            }
+          />
+          <PageHeader.Stats className="flex-1">
+            <PageHeader.Stat value="3" label="Posts" />
+            <PageHeader.Stat value="788" label="Followers" onPress={() => {}} />
+            <PageHeader.Stat value="1,882" label="Following" onPress={() => {}} />
+          </PageHeader.Stats>
+        </PageHeader.Row>
+        <PageHeader.Content>
+          <PageHeader.Title>Khalid Abdi</PageHeader.Title>
+          <PageHeader.Description>Science &amp; Technology</PageHeader.Description>
+          <Text size="sm" className="pt-1">
+            Components, clips and the odd screen recording. Live well, sleep well.
+          </Text>
+          <PageHeader.Meta icon={<LinkIcon size={14} />} className="pt-1">
+            panelui.dev
+          </PageHeader.Meta>
+        </PageHeader.Content>
+        <PageHeader.Actions>
+          <Button variant="secondary" className="flex-1">
+            Edit profile
+          </Button>
+          <Button variant="secondary" className="flex-1">
+            Share profile
+          </Button>
+          <Button variant="secondary" size="icon">
+            <EllipsisIcon size={18} />
+          </Button>
+        </PageHeader.Actions>
+      </PageHeader>
+    </ScrollView>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
 {
     slug: 'section-progress',
@@ -1296,6 +1414,83 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
     ],
-  }
+  },
+  {
+    slug: 'page-header',
+    name: 'PageHeader',
+    summary: 'Cover, face and actions at the top of a profile',
+    demos: [
+      {
+        label: 'Profile screen',
+        id: 'profile',
+        fullPage: true,
+        description:
+          'The banner to the screen edges, the face at the leading edge, and the account under it.',
+        render: () => <PageHeaderProfileVersion />,
+      },
+      {
+        label: 'Counts beside the face',
+        id: 'stats',
+        fullPage: true,
+        description:
+          'No banner, so the face does not lift, and the counts sit next to it instead of under the name.',
+        render: () => <PageHeaderStatsVersion />,
+      },
+      {
+        label: 'Profile card',
+        render: () => (
+          // The cover is held off the card's edges and rounded on its top
+          // corners only, so its bottom edge meets the content rather than
+          // floating above it. The face lifts over that edge on its own — the
+          // card can see the cover among its children.
+          <PageHeader className="w-full">
+            <PageHeader.Cover />
+            <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="OR" verified />
+            <PageHeader.Content>
+              <PageHeader.Title>Olivia Rhye</PageHeader.Title>
+              <PageHeader.Description>olivia@panelui.dev</PageHeader.Description>
+            </PageHeader.Content>
+            <PageHeader.Actions>
+              <Button variant="secondary" className="flex-1">
+                Message
+              </Button>
+              <Button className="flex-1">Follow</Button>
+            </PageHeader.Actions>
+          </PageHeader>
+        ),
+      },
+      {
+        label: 'Card, face at the leading edge',
+        render: () => (
+          // The same card and the same cover; `align="start"` moves the face
+          // and the text to the leading edge and leaves the actions full width
+          // underneath.
+          <PageHeader align="start" className="w-full">
+            <PageHeader.Cover source={{ uri: PROFILE_COVER }} alt="A stretch of coastline at dusk" />
+            <PageHeader.Avatar
+              size="lg"
+              source={{ uri: PROFILE_FACE }}
+              fallback="OR"
+              verified
+            />
+            <PageHeader.Content>
+              <PageHeader.Title>Olivia Rhye</PageHeader.Title>
+              <PageHeader.Description>Product designer, Berlin</PageHeader.Description>
+              <PageHeader.Stats layout="inline" divided className="pt-2">
+                <PageHeader.Stat value="128" label="Projects" />
+                <PageHeader.Stat value="4.2K" label="Followers" />
+              </PageHeader.Stats>
+            </PageHeader.Content>
+            <PageHeader.Actions>
+              <Button className="flex-1">Follow</Button>
+              <Button variant="secondary" size="icon">
+                <ShareNodesIcon size={18} />
+              </Button>
+            </PageHeader.Actions>
+          </PageHeader>
+        ),
+      },
+    ],
+  },
 ];
 export const ENTRIES_BY_SLUG = Object.fromEntries(ENTRIES.map((entry) => [entry.slug, entry]));

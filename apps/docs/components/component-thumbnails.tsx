@@ -922,6 +922,26 @@ const frame = (
   </Plate>
 );
 
+const pageHeader = (
+  <Plate className="w-44 overflow-hidden p-1.5">
+    {/* The cover, held off the card's edges and rounded on its top corners. */}
+    <Fill className="h-12 rounded-t-lg" />
+    <Stack className="-mt-4 items-center gap-1.5 px-3 pb-2">
+      <div className="size-8 rounded-full border-2 border-fd-card bg-fd-muted-foreground/25" />
+      <Bar className="w-16" />
+      <Bar className="w-20" faint />
+      <Row className="gap-1.5 pt-1">
+        <Fill className="flex h-5 w-14 items-center justify-center rounded-md">
+          <Bar className="w-6" faint />
+        </Fill>
+        <Accent className="grid h-5 w-14 place-items-center rounded-md">
+          <AccentBar className="w-6" />
+        </Accent>
+      </Row>
+    </Stack>
+  </Plate>
+);
+
 const gridItem = (
   <div className="grid w-40 grid-cols-2 gap-2">
     <Fill className="col-span-2 h-10 rounded-lg" />
@@ -2118,6 +2138,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   frame,
   'grid-item': gridItem,
   item,
+  'page-header': pageHeader,
   'scroll-canvas': scrollCanvas,
   'scroll-blur': scrollBlur,
   'scroll-fade': scrollFade,

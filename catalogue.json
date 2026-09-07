@@ -63,6 +63,7 @@
     "meter",
     "number-input",
     "otp-input",
+    "page-header",
     "pagination",
     "panelside",
     "pie-chart",
@@ -203,16 +204,16 @@
     }
   ],
   "counts": {
-    "componentModules": 126,
-    "packageComponentExports": 126,
-    "documentedComponents": 126,
-    "exampleEntries": 126,
+    "componentModules": 127,
+    "packageComponentExports": 127,
+    "documentedComponents": 127,
+    "exampleEntries": 127,
     "registry": {
-      "componentItems": 126,
+      "componentItems": 127,
       "supportItems": 36,
-      "totalItems": 162,
+      "totalItems": 163,
       "byType": {
-        "registry:ui": 141,
+        "registry:ui": 142,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

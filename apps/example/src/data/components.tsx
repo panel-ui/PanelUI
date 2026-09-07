@@ -180,6 +180,8 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   spinner: () => load12().then((module) => module.ENTRIES_BY_SLUG['spinner']),
   'section-progress': () =>
     load14().then((module) => module.ENTRIES_BY_SLUG['section-progress']),
+  'page-header': () =>
+    load14().then((module) => module.ENTRIES_BY_SLUG['page-header']),
   splitter: () => load14().then((module) => module.ENTRIES_BY_SLUG['splitter']),
   'split-view': () =>
     load14().then((module) => module.ENTRIES_BY_SLUG['split-view']),

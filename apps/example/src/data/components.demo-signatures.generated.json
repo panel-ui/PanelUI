@@ -155,7 +155,7 @@
     },
     {
       "slug": "frame",
-      "signature": "c64fdb732a2db47af46ad0b78866a9e5f9ad13469dcde7b12c60e492fb24e349"
+      "signature": "2d2219a45befea7b1f809e92aecaba672a7f11290880d36ef0cd94f1fb0d0541"
     },
     {
       "slug": "funnel-chart",
@@ -248,6 +248,10 @@
     {
       "slug": "otp-input",
       "signature": "58b7cc72540e614b710f256baae8556464062a44f37ea9c65e7a2f0206b327db"
+    },
+    {
+      "slug": "page-header",
+      "signature": "7c6b4a2b68541507849d22c98779ee44224d1ab75680320ae4994816d4331de5"
     },
     {
       "slug": "pagination",

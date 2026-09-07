@@ -50,6 +50,17 @@
  * </Frame>
  * ```
  *
+ * `inset` is the other way to nest the two. The panel floats clear of the
+ * shell on all four sides rather than sitting flush against three, and the band
+ * left around it carries `Frame.Footer`. The band is a recess: the shell is the
+ * popover surface with `--color-inset` laid over it rather than a colour of its
+ * own, so it always comes out darker than the panel it holds. The surface
+ * ladder cannot do that job — it runs darker in a light theme and lighter in a
+ * dark one, and a recess has to read the same way in both.
+ *
+ * There is no shadow under it. A recessed band and a drop shadow are opposite
+ * claims about where a surface sits, and this one is set into the page.
+ *
  * The panel draws the hairlines between its own rows. React Native has no
  * `:first-child`, so the alternative is every caller writing
  * `divided={index > 0}` on every row and getting it wrong once.
@@ -83,27 +94,61 @@ import { ChevronRightIcon } from '../../icons';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 
+/**
+ * The `inset` shell's geometry. Numbers rather than classes, because an
+ * arbitrary Tailwind value a running dev server has not already compiled turns
+ * into nothing at all — no error, no warning, the corner simply squares off.
+ *
+ * The panel's radius is the shell's less the shell's padding, so the two curves
+ * are concentric. A panel radius that ignored the band would leave a crescent
+ * of shell thicker at the corners than along the sides.
+ */
+const SHELL_PADDING = 8;
+const SHELL_RADIUS = 38;
+const PANEL_RADIUS = SHELL_RADIUS - SHELL_PADDING;
+const FOOTER_INSET = 26;
+const FOOTER_GAP = 16;
+
 const frameVariants = tv({
   slots: {
     root: '',
-    // Flush left, right and bottom: no side or bottom border, because the
-    // shell's own edge is already there, and no bottom radius, because the
-    // shell clips it. Only the top corners and the rule under the header are
-    // the panel's to draw.
-    panel: 'overflow-hidden rounded-t-2xl border-t border-border bg-card',
+    recess: 'absolute inset-0 bg-inset',
+    panel: 'overflow-hidden bg-card',
+    header: 'flex-row items-center justify-between gap-3 px-4 pb-3 pt-2.5',
+    footer: 'flex-row items-center gap-2 px-4 pb-3.5 pt-3',
   },
   variants: {
     variant: {
       // `overflow-hidden` is load-bearing — it is what makes the panel's
       // bottom corners take the shell's radius instead of squaring off
       // against it.
+      //
+      // The panel is flush left, right and bottom: no side or bottom border,
+      // because the shell's own edge is already there, and no bottom radius,
+      // because the shell clips it. Only the top corners and the rule under
+      // the header are the panel's to draw.
       default: {
         root: 'overflow-hidden rounded-3xl border border-border bg-surface',
+        panel: 'rounded-t-2xl border-t border-border',
       },
       // No shell: the panel is the whole widget. For a Frame nested inside a
       // card that already draws a border, where the shell's own edge sitting
       // just inside it reads as a double line.
-      plain: { root: '', panel: 'rounded-3xl border border-border' },
+      plain: {
+        root: '',
+        panel: 'rounded-3xl border border-border',
+        // Nothing to be held in from — the footer lines up with the panel.
+        footer: 'px-0',
+      },
+      // The panel floats inside the shell on all four sides instead of sitting
+      // flush against three of them, and the band around it is a recess rather
+      // than a lighter tray.
+      inset: {
+        root: 'overflow-hidden bg-popover',
+        panel: 'bg-popover',
+        header: 'px-3 pb-2.5 pt-1',
+        footer: 'gap-3.5 p-0',
+      },
     },
   },
   defaultVariants: {
@@ -111,7 +156,7 @@ const frameVariants = tv({
   },
 });
 
-export type FrameVariant = 'default' | 'plain';
+export type FrameVariant = 'default' | 'plain' | 'inset';
 
 /**
  * True inside a `Frame.Content`. The header's caption and a row's title are the
@@ -121,6 +166,14 @@ export type FrameVariant = 'default' | 'plain';
  */
 const FrameSlotContext = createContext(false);
 
+/**
+ * The root's variant, for the parts that draw differently under each one. The
+ * panel, the header and the footer all need it, and none of them can be told
+ * directly — a caller writes `<Frame variant="inset">` once and expects the
+ * shape to follow.
+ */
+const FrameVariantContext = createContext<FrameVariant>('default');
+
 export interface FrameProps extends ViewProps {
   className?: string;
 }
@@ -128,15 +181,35 @@ export interface FrameProps extends ViewProps {
 export interface FrameRootProps extends FrameProps {
   /**
    * `plain` drops the outer shell so the panel is the widget — for a Frame
-   * inside a container that already draws its own border.
+   * inside a container that already draws its own border. `inset` sets the
+   * panel into a recessed band on all four sides instead, and gives
+   * `Frame.Footer` somewhere to sit.
    */
   variant?: FrameVariant;
 }
 
 const FrameRoot = forwardRef<View, FrameRootProps>(
-  ({ className, variant, ...props }, ref) => (
-    <View ref={ref} className={frameVariants({ variant }).root({ className })} {...props} />
-  )
+  ({ className, variant = 'default', children, style, ...props }, ref) => {
+    const slots = frameVariants({ variant });
+    const inset = variant === 'inset';
+    return (
+      <View
+        {...props}
+        ref={ref}
+        className={slots.root({ className })}
+        style={
+          inset
+            ? [{ borderRadius: SHELL_RADIUS, padding: SHELL_PADDING }, style]
+            : style
+        }
+      >
+        {inset ? <View pointerEvents="none" className={slots.recess()} /> : null}
+        <FrameVariantContext.Provider value={variant}>
+          {children}
+        </FrameVariantContext.Provider>
+      </View>
+    );
+  }
 );
 FrameRoot.displayName = 'Frame';
 
@@ -150,18 +223,22 @@ export interface FrameHeaderProps extends FrameProps {
  * when you want a description underneath.
  */
 const FrameHeader = forwardRef<View, FrameHeaderProps>(
-  ({ className, ...props }, ref) => (
-    <View
-      ref={ref}
-      className={cn(
-        // `min-w-0` on nothing here — the title itself takes the flexible side,
-        // so a long one truncates instead of shoving the action off the edge.
-        'flex-row items-center justify-between gap-3 px-4 pb-3 pt-2.5',
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, ...props }, ref) => {
+    // `min-w-0` on nothing here — the title itself takes the flexible side, so
+    // a long one truncates instead of shoving the action off the edge.
+    //
+    // The padding follows the variant: under `inset` the shell already holds
+    // everything in by its own padding, so repeating the full inset here would
+    // set the title further from the edge than the panel below it.
+    const variant = useContext(FrameVariantContext);
+    return (
+      <View
+        {...props}
+        ref={ref}
+        className={frameVariants({ variant }).header({ className })}
+      />
+    );
+  }
 );
 FrameHeader.displayName = 'Frame.Header';
 
@@ -336,14 +413,23 @@ export interface FramePanelProps extends FrameProps {
 
 /**
  * The card holding the frame's content — flush to the shell on three sides,
- * with the header strip above it.
+ * with the header strip above it. Under `inset` it floats clear of all four
+ * instead, at the radius that keeps it concentric with the shell.
  */
 const FramePanel = forwardRef<View, FramePanelProps>(
-  ({ className, dividers = true, children, ...props }, ref) => (
-    <View ref={ref} className={frameVariants().panel({ className })} {...props}>
-      {dividers ? divideChildren(children) : children}
-    </View>
-  )
+  ({ className, dividers = true, children, style, ...props }, ref) => {
+    const variant = useContext(FrameVariantContext);
+    return (
+      <View
+        {...props}
+        ref={ref}
+        className={frameVariants({ variant }).panel({ className })}
+        style={variant === 'inset' ? [{ borderRadius: PANEL_RADIUS }, style] : style}
+      >
+        {dividers ? divideChildren(children) : children}
+      </View>
+    );
+  }
 );
 FramePanel.displayName = 'Frame.Panel';
 
@@ -455,6 +541,44 @@ const FrameSection = forwardRef<View, FrameSectionProps>(
 );
 FrameSection.displayName = 'Frame.Section';
 
+export interface FrameFooterProps extends FrameProps {
+  children?: ReactNode;
+}
+
+/**
+ * The row of actions under the panel — what somebody does with the widget,
+ * rather than more of what it says.
+ *
+ * Under `inset` it sits in the band, held further in than the panel is. A row
+ * running the full width of the shell reads as another edge of it rather than
+ * as things to press. Under the other two variants the panel stops being flush
+ * at the bottom, which is what having a footer means there.
+ */
+const FrameFooter = forwardRef<View, FrameFooterProps>(
+  ({ className, style, ...props }, ref) => {
+    const variant = useContext(FrameVariantContext);
+    return (
+      <View
+        {...props}
+        ref={ref}
+        className={frameVariants({ variant }).footer({ className })}
+        style={
+          variant === 'inset'
+            ? [
+                {
+                  marginTop: FOOTER_GAP,
+                  marginHorizontal: FOOTER_INSET - SHELL_PADDING,
+                },
+                style,
+              ]
+            : style
+        }
+      />
+    );
+  }
+);
+FrameFooter.displayName = 'Frame.Footer';
+
 /** Parts the panel divides. Declared after them, since it holds references. */
 const DIVIDABLE = new Set<unknown>([FrameRow, FrameSection]);
 
@@ -464,6 +588,7 @@ export const Frame = Object.assign(FrameRoot, {
   Action: FrameAction,
   Description: FrameDescription,
   Panel: FramePanel,
+  Footer: FrameFooter,
   Section: FrameSection,
   Row: FrameRow,
   Media: FrameMedia,

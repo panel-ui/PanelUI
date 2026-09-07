@@ -2375,6 +2375,46 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       {
+        label: 'Inset, with actions',
+        render: () => (
+          // The panel floats clear of the shell on all four sides, and the band
+          // left around it carries the footer. The recess is `--color-inset`
+          // over the popover surface rather than a step down the surface
+          // ladder, so the band reads darker than the panel in every theme.
+          <Frame variant="inset" className="w-full">
+            <Frame.Header>
+              <Frame.Title>Pending invites</Frame.Title>
+              <Frame.Action>2</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              {[
+                ['JD', 'Jamie Doe', 'jamie@example.com', 'Editor'],
+                ['SM', 'Sam Miller', 'sam@example.com', 'Viewer'],
+              ].map(([initials, name, email, role]) => (
+                <Frame.Row key={email}>
+                  <Frame.Media>
+                    <Avatar size="sm" fallback={initials} />
+                  </Frame.Media>
+                  <Frame.Content>
+                    <Frame.Title>{name}</Frame.Title>
+                    <Frame.Description>{email}</Frame.Description>
+                  </Frame.Content>
+                  <Frame.Actions>
+                    <Badge variant="outline">{role}</Badge>
+                  </Frame.Actions>
+                </Frame.Row>
+              ))}
+            </Frame.Panel>
+            <Frame.Footer>
+              <Button variant="secondary" className="flex-1">
+                Decline all
+              </Button>
+              <Button className="flex-1">Accept all</Button>
+            </Frame.Footer>
+          </Frame>
+        ),
+      },
+      {
         label: 'Plain, inside a card',
         render: () => (
           // The card already draws a border; the default shell would put a

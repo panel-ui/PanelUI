@@ -311,7 +311,7 @@
     "Widget shell — a card of rows sitting in a titled tray.",
     "react native list section",
     {
-      "updatedIn": "0.19.0",
+      "updatedIn": "0.93.0",
       "category": "layout"
     }
   ],

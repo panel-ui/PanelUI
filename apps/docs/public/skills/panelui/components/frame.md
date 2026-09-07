@@ -28,12 +28,13 @@ import { Frame } from 'panelui-native';
       </Frame.Row>
     </Frame.Section>
   </Frame.Panel>
+  <Frame.Footer>…</Frame.Footer>
 </Frame>
 ```
 
 ### Variants
 
-- **variant** — `default` *(default)*, `plain`
+- **variant** — `default` *(default)*, `plain`, `inset`
 
 ### Parts
 
@@ -42,6 +43,7 @@ import { Frame } from 'panelui-native';
 - `Frame.Action` — Trailing slot on the header — a label, a button, a badge. Strings render muted.
 - `Frame.Description` — Secondary line under a title, in a column-wrapped header or inside a `Frame.Content`.
 - `Frame.Panel` — The card holding the rows. Divides them for you.
+- `Frame.Footer` — The row of actions under the panel — what somebody does with the widget rather than more of what it says. Under `inset` it sits in the band, held further in than the panel so it reads as things to press rather than as another edge of the shell. Under `default` and `plain` it is a padded row below the panel, which stops the panel being flush at the bottom.
 - `Frame.Section` — A labelled cluster of rows, for a panel holding more than one group.
 - `Frame.Row` — A row inside the panel. Give it an `onPress` and it becomes a pressable.
 - `Frame.Media` — Leading slot on a row — an icon, an avatar, a status dot. Holds its size.
@@ -64,7 +66,7 @@ Extends `FrameProps`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `variant` | `FrameVariant` | `default` | `plain` drops the outer shell so the panel is the widget — for a Frame inside a container that already draws its own border. |
+| `variant` | `FrameVariant` | `default` | `plain` drops the outer shell so the panel is the widget — for a Frame inside a container that already draws its own border. `inset` sets the panel into a recessed band on all four sides instead, and gives `Frame.Footer` somewhere to sit. |
 
 #### `FrameHeaderProps`
 
@@ -138,6 +140,14 @@ Extends `FrameProps, Dividable`.
 | `divided` | `boolean` | — | — |
 | `children` | `ReactNode` | — | — |
 
+#### `FrameFooterProps`
+
+Extends `FrameProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | — | — |
+
 ### Example — A settings panel
 
 Nothing has to say where the hairlines go — the panel puts one above every row but the first.
@@ -200,6 +210,20 @@ Yoga defaults `flexShrink` to `0`, the opposite of the web. A child that is not 
 For a row that genuinely has too much in it — a handful of chips, say — `wrap` lets it take a second line instead. `align="start"` is for a row two or three lines tall, where centring an icon against a tall text column leaves it floating in the middle.
 
 `Frame.Row` forwards ordinary view or Pressable props for the branch it renders, while retaining ownership of its row classes and—when interactive—its button role and primary press handler.
+
+### Where the recess comes from
+
+Under `inset` the shell is the popover surface with `--color-inset` laid over it rather than a colour of its own. That token is a translucent black in every theme, so the band always comes out darker than the panel it holds.
+
+The surface ladder cannot do this job: it runs darker in a light theme and lighter in a dark one, and the recess has to read the same way in both.
+
+There is no shadow under an `inset` frame. A recessed band and a drop shadow are opposite claims about where a surface sits, and this one is set into the page.
+
+### The corners are concentric
+
+The panel's radius is the shell's less the shell's padding. Both are fixed numbers rather than classes, because an arbitrary Tailwind value a running dev server has not already compiled turns into nothing at all — no error, no warning, the corner simply squares off.
+
+The consequence is that `inset` does not follow the theme's radius scale the way `default` and `plain` do. Restyle it with `className` and give `Frame.Panel` the matching radius yourself: the shell's, less the shell's padding.
 
 ---
 

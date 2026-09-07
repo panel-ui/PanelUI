@@ -1,11 +1,14 @@
 ---
 title: Frame
 description: Widget shell — a card of rows sitting in a titled tray.
+status: updated
 ---
 
 A card of rows sitting in a titled tray — the shell a widget sits in.
 
 The tray shows along one edge only; the strip left above the card is the header. The card is flush to its left, right and bottom, and draws the hairlines between its own rows.
+
+`variant="inset"` nests the two the other way: the card floats clear of the tray on all four sides, and the band left around it carries `Frame.Footer`.
 
 ## Installation
 
@@ -63,6 +66,7 @@ npx panelui-cli@latest add frame
       </Frame.Row>
     </Frame.Section>
   </Frame.Panel>
+  <Frame.Footer>…</Frame.Footer>
 </Frame>
 ```
 
@@ -71,6 +75,7 @@ npx panelui-cli@latest add frame
 - **`Frame.Action`** — Trailing slot on the header — a label, a button, a badge. Strings render muted.
 - **`Frame.Description`** — Secondary line under a title, in a column-wrapped header or inside a `Frame.Content`.
 - **`Frame.Panel`** — The card holding the rows. Divides them for you.
+- **`Frame.Footer`** — The row of actions under the panel — what somebody does with the widget rather than more of what it says. Under `inset` it sits in the band, held further in than the panel so it reads as things to press rather than as another edge of the shell. Under `default` and `plain` it is a padded row below the panel, which stops the panel being flush at the bottom.
 - **`Frame.Section`** — A labelled cluster of rows, for a panel holding more than one group.
 - **`Frame.Row`** — A row inside the panel. Give it an `onPress` and it becomes a pressable.
 - **`Frame.Media`** — Leading slot on a row — an icon, an avatar, a status dot. Holds its size.
@@ -206,12 +211,54 @@ For a widget with more than one cluster of rows. Each section labels its group a
 </Frame.Panel>
 ```
 
+### A widget that asks for something
+
+`inset` is for a widget with a decision at the bottom of it. The panel is set into a recessed band on all four sides and `Frame.Footer` puts the actions in that band, so what the widget says and what you do about it are on two surfaces rather than one.
+
+The footer is held in further than the panel. A row running the full width of the shell reads as another edge of it.
+
+For a widget that only reports, keep the default — a band with nothing in it is a margin.
+
+```tsx
+<Frame variant="inset">
+  <Frame.Header>
+    <Frame.Title>Pending invites</Frame.Title>
+    <Frame.Action>2</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {invites.map((invite) => (
+      <Frame.Row key={invite.id}>
+        <Frame.Media>
+          <Avatar size="sm" fallback={invite.initials} />
+        </Frame.Media>
+        <Frame.Content>
+          <Frame.Title>{invite.name}</Frame.Title>
+          <Frame.Description>{invite.email}</Frame.Description>
+        </Frame.Content>
+        <Frame.Actions>
+          <Badge variant="outline">{invite.role}</Badge>
+        </Frame.Actions>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+  <Frame.Footer>
+    <Button variant="secondary" className="flex-1" onPress={declineAll}>
+      Decline all
+    </Button>
+    <Button className="flex-1" onPress={acceptAll}>
+      Accept all
+    </Button>
+  </Frame.Footer>
+</Frame>
+```
+
 ## Variants
 
 ### `variant`
 
 - `default` *(default)*
 - `plain`
+- `inset`
 
 ```tsx
 {/* The default: a card flush inside a shell, with the header in the strip above it. */}
@@ -226,6 +273,16 @@ For a widget with more than one cluster of rows. Each section labels its group a
     </Frame>
   </Card.Content>
 </Card>
+
+{/* The panel set into a recessed band on all four sides, with the
+    actions in the band under it. */}
+<Frame variant="inset">
+  <Frame.Panel>…</Frame.Panel>
+  <Frame.Footer>
+    <Button variant="secondary" className="flex-1">Not now</Button>
+    <Button className="flex-1">Review</Button>
+  </Frame.Footer>
+</Frame>
 ```
 
 ## API Reference
@@ -240,7 +297,7 @@ For a widget with more than one cluster of rows. Each section labels its group a
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `variant` | `FrameVariant` | `default` | `plain` drops the outer shell so the panel is the widget — for a Frame inside a container that already draws its own border. |
+| `variant` | `FrameVariant` | `default` | `plain` drops the outer shell so the panel is the widget — for a Frame inside a container that already draws its own border. `inset` sets the panel into a recessed band on all four sides instead, and gives `Frame.Footer` somewhere to sit. |
 
 ### Frame.Panel
 
@@ -303,10 +360,24 @@ For a row that genuinely has too much in it — a handful of chips, say — `wra
 
 `Frame.Row` forwards ordinary view or Pressable props for the branch it renders, while retaining ownership of its row classes and—when interactive—its button role and primary press handler.
 
+### Where the recess comes from
+
+Under `inset` the shell is the popover surface with `--color-inset` laid over it rather than a colour of its own. That token is a translucent black in every theme, so the band always comes out darker than the panel it holds.
+
+The surface ladder cannot do this job: it runs darker in a light theme and lighter in a dark one, and the recess has to read the same way in both.
+
+There is no shadow under an `inset` frame. A recessed band and a drop shadow are opposite claims about where a surface sits, and this one is set into the page.
+
+### The corners are concentric
+
+The panel's radius is the shell's less the shell's padding. Both are fixed numbers rather than classes, because an arbitrary Tailwind value a running dev server has not already compiled turns into nothing at all — no error, no warning, the corner simply squares off.
+
+The consequence is that `inset` does not follow the theme's radius scale the way `default` and `plain` do. Restyle it with `className` and give `Frame.Panel` the matching radius yourself: the shell's, less the shell's padding.
+
 ## Public exports
 
 {/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
 
 **Values:** `Frame`
 
-**Types:** `FrameProps`, `FrameRootProps`, `FramePanelProps`, `FrameRowProps`, `FrameSectionProps`, `FrameHeaderProps`, `FrameActionProps`, `FrameMediaProps`, `FrameContentProps`, `FrameActionsProps`, `FrameVariant`
+**Types:** `FrameProps`, `FrameRootProps`, `FramePanelProps`, `FrameFooterProps`, `FrameRowProps`, `FrameSectionProps`, `FrameHeaderProps`, `FrameActionProps`, `FrameMediaProps`, `FrameContentProps`, `FrameActionsProps`, `FrameVariant`

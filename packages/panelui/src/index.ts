@@ -281,6 +281,7 @@ export {
   type FrameProps,
   type FrameRootProps,
   type FramePanelProps,
+  type FrameFooterProps,
   type FrameRowProps,
   type FrameSectionProps,
   type FrameHeaderProps,

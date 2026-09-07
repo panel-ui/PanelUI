@@ -64,14 +64,16 @@ export default function ComponentVersionScreen() {
   // A full-bleed demo gets the screen and nothing else — no header, no
   // description, no padding. It draws its own way back.
   //
-  // The native back-swipe goes with it. iOS claims the left screen edge for
-  // popping the stack, and it wins over anything JavaScript puts there, so a
-  // demo whose own gesture starts at that edge never sees a touch. Turning it
-  // off is why these demos have to draw their own way out.
+  // The native back-swipe goes with it by default. iOS claims the left screen
+  // edge for popping the stack, and it wins over anything JavaScript puts
+  // there, so a demo whose own gesture starts at that edge never sees a touch.
+  //
+  // A demo that does not own the edge asks for the swipe back with
+  // `backSwipe`, and then has two ways out rather than one.
   if (demo.fullBleed) {
     return (
       <View className="flex-1">
-        <Stack.Screen options={{ gestureEnabled: false }} />
+        <Stack.Screen options={{ gestureEnabled: demo.backSwipe ?? false }} />
         {demo.render()}
       </View>
     );

@@ -50,6 +50,7 @@ import {
 } from 'react';
 import {
   Image,
+  StyleSheet,
   View,
   type ImageSourcePropType,
   type PressableProps,
@@ -258,7 +259,7 @@ const PageHeaderCover = forwardRef<View, PageHeaderCoverProps>(
           <Image
             source={source}
             resizeMode="cover"
-            className="h-full w-full"
+            style={StyleSheet.absoluteFill}
             accessible={!!alt}
             accessibilityRole={alt ? 'image' : undefined}
             accessibilityLabel={alt}
@@ -268,7 +269,11 @@ const PageHeaderCover = forwardRef<View, PageHeaderCoverProps>(
             colors={ramp}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            className="h-full w-full"
+            // Filled by style rather than by class. `className` on a component
+            // from another package is only as good as that package's style
+            // forwarding, and a gradient that silently measures zero is a
+            // banner that is simply not there.
+            style={StyleSheet.absoluteFill}
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
           />
@@ -284,6 +289,11 @@ export interface PageHeaderAvatarProps extends Omit<AvatarProps, 'size' | 'child
   className?: string;
   /** How big the face is. */
   size?: AvatarSizeName;
+  /**
+   * What goes in the ring instead of a face — a logo, a monogram, a live
+   * thumbnail. It fills the ring, so give it its own background and padding.
+   */
+  children?: ReactNode;
   /** Draws the verification rosette in the face's bottom corner. */
   verified?: boolean;
   /**
@@ -307,7 +317,19 @@ export interface PageHeaderAvatarProps extends Omit<AvatarProps, 'size' | 'child
  */
 const PageHeaderAvatar = forwardRef<View, PageHeaderAvatarProps>(
   (
-    { className, size = 'xl', verified, badge, overlap, source, fallback, imageProps, style, ...props },
+    {
+      className,
+      size = 'xl',
+      verified,
+      badge,
+      overlap,
+      source,
+      fallback,
+      imageProps,
+      children,
+      style,
+      ...props
+    },
     ref
   ) => {
     const { variant, align, hasCover } = usePageHeader('PageHeader.Avatar');
@@ -339,14 +361,30 @@ const PageHeaderAvatar = forwardRef<View, PageHeaderAvatarProps>(
           Two views, because the ring clips. A badge hung on the clipping one
           would be cut in half by the circle it is meant to sit against.
         */}
-        <View className={slots.ring()} style={{ borderWidth: AVATAR_RING }}>
-          <Avatar
-            size={size}
-            source={source}
-            fallback={fallback}
-            imageProps={imageProps}
-            className="border-0"
-          />
+        <View
+          className={slots.ring()}
+          style={
+            // With a face inside, the ring is the face plus its own border.
+            // With anything else there is nothing to measure, so the ring is
+            // given the size the face would have made.
+            children
+              ? {
+                  borderWidth: AVATAR_RING,
+                  width: diameter + AVATAR_RING * 2,
+                  height: diameter + AVATAR_RING * 2,
+                }
+              : { borderWidth: AVATAR_RING }
+          }
+        >
+          {children ?? (
+            <Avatar
+              size={size}
+              source={source}
+              fallback={fallback}
+              imageProps={imageProps}
+              className="border-0"
+            />
+          )}
         </View>
         {mark ? <View className="absolute bottom-0.5 end-0.5">{mark}</View> : null}
       </View>
@@ -470,31 +508,48 @@ export interface PageHeaderStatsProps extends PageHeaderProps {
 }
 
 /**
- * The row of counts. `stacked` spreads them evenly, because a row of figures
- * that are read against each other has to be measured against each other.
+ * The row of counts.
+ *
+ * Centred and stacked, the counts take equal widths across the full row. Left
+ * to their content they are centred as a block but not as figures: "Followers"
+ * is twice the width of "Posts", so the middle count sits off the centre line
+ * the name and the buttons are on, and the row reads as very slightly wrong
+ * without it being obvious why.
  */
 const PageHeaderStats = forwardRef<View, PageHeaderStatsProps>(
   ({ className, layout = 'stacked', divided, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Stats');
-    const spread = layout === 'stacked';
+    const stacked = layout === 'stacked';
+    const measured = stacked && align === 'center';
 
     // React Native has no `:first-child`, so the rule between two counts
     // cannot be a style rule. Place it on every count but the first.
-    const items = divided
-      ? Children.map(children, (child, index) => {
-          if (!isValidElement<PageHeaderStatProps>(child)) return child;
-          if (child.type !== PageHeaderStat) return child;
-          if (child.props.divided !== undefined) return child;
-          return cloneElement(child, { divided: index > 0 });
-        })
-      : children;
+    const items =
+      divided || measured
+        ? Children.map(children, (child, index) => {
+            if (!isValidElement<PageHeaderStatProps>(child)) return child;
+            if (child.type !== PageHeaderStat) return child;
+            const next: Partial<PageHeaderStatProps> = {};
+            if (divided && child.props.divided === undefined) {
+              next.divided = index > 0;
+            }
+            if (measured) {
+              next.className = cn('flex-1', child.props.className);
+            }
+            return cloneElement(child, next);
+          })
+        : children;
 
     return (
       <View
         {...props}
         ref={ref}
         className={pageHeaderVariants({ variant, align }).stats({
-          className: cn(spread ? 'gap-6' : 'gap-4', className),
+          className: cn(
+            stacked ? 'gap-6' : 'gap-4',
+            measured && 'w-full',
+            className
+          ),
         })}
       >
         <PageHeaderStatsContext.Provider value={layout}>

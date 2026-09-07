@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScrollView, View, type LayoutChangeEvent } from "react-native";
+import { Image, RefreshControl, ScrollView, View, type LayoutChangeEvent } from "react-native";
 import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
@@ -128,11 +128,7 @@ function SectionProgressVersion({
           glyph: this sits over moving content, and an icon with nothing under
           it is invisible against half of what scrolls past. At the start edge,
           clear of a centred pill. */}
-      <View className="absolute start-4" style={{ top: insets.top + 4 }}>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={20} />
-        </CircleButton>
-      </View>
+      <VersionBack />
     </View>
   );
 }
@@ -816,9 +812,44 @@ function SplitViewControlledDemo() {
 /** The maintainer's own face, so the demo profile is somebody real. */
 const PROFILE_FACE = 'https://avatars.githubusercontent.com/u/127331761?v=4';
 
-/** A banner for the versions that want a photograph rather than the gradient. */
-const PROFILE_COVER =
-  'https://images.unsplash.com/photo-1554080353-a576cf803bda?w=900&q=60';
+/**
+ * A ramp per version. `PageHeader.Cover` draws the default pair when it is
+ * given none — which the profile version keeps — and `colors` takes anything
+ * else, so no two headers in the gallery open on the same banner.
+ */
+const COVER_RAMPS = {
+  centred: ['#22d3ee', '#3b82f6'],
+  hero: ['#f472b6', '#8b5cf6', '#312e81'],
+  brand: ['#fbbf24', '#f97316', '#db2777'],
+  leading: ['#34d399', '#0ea5e9'],
+} as const;
+
+/**
+ * Pull-to-refresh, the way a profile screen has one.
+ *
+ * A header is the top of a scroll somebody pulls on, and the versions are
+ * short enough that the pull is the first thing a reader tries. Without it the
+ * screen just stretches and springs back, which reads as the demo being inert.
+ */
+function useProfileRefresh() {
+  const [refreshing, setRefreshing] = useState(false);
+  const tint = useCSSVariable('--color-muted-foreground');
+
+  const control = (
+    <RefreshControl
+      refreshing={refreshing}
+      tintColor={typeof tint === 'string' ? tint : undefined}
+      onRefresh={() => {
+        setRefreshing(true);
+        // A demo has nothing to fetch. The delay is what a request would have
+        // cost, so the spinner is on screen long enough to be seen.
+        setTimeout(() => setRefreshing(false), 1400);
+      }}
+    />
+  );
+
+  return control;
+}
 
 /**
  * The way out of a full-bleed version. Over the cover at the start edge, in
@@ -828,10 +859,16 @@ const PROFILE_COVER =
 function VersionBack() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  // The chevron is tinted, not left to its default. An icon with no colour
+  // falls back to a fixed grey, which reads as disabled on a dark screen.
+  const foreground = useCSSVariable('--color-foreground');
   return (
     <View className="absolute z-10 start-4" style={{ top: insets.top + 4 }}>
       <CircleButton onPress={() => router.back()} label="Go back">
-        <ChevronLeftIcon size={20} />
+        <ChevronLeftIcon
+          size={20}
+          color={typeof foreground === 'string' ? foreground : undefined}
+        />
       </CircleButton>
     </View>
   );
@@ -860,10 +897,14 @@ function StoryBadge() {
  */
 function PageHeaderProfileVersion() {
   const insets = useSafeAreaInsets();
+  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+      <ScrollView
+        refreshControl={refresh}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      >
         <PageHeader variant="page" align="start">
           <PageHeader.Cover height={insets.top + 120} />
           <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
@@ -903,10 +944,12 @@ function PageHeaderProfileVersion() {
  */
 function PageHeaderStatsVersion() {
   const insets = useSafeAreaInsets();
+  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
       <ScrollView
+        refreshControl={refresh}
         contentContainerStyle={{
           paddingTop: insets.top + 52,
           paddingBottom: insets.bottom + 24,
@@ -959,17 +1002,23 @@ function PageHeaderStatsVersion() {
  */
 function PageHeaderHeroVersion() {
   const insets = useSafeAreaInsets();
+  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+      <ScrollView
+        refreshControl={refresh}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      >
         <PageHeader variant="page" align="start">
+          {/* A ramp of its own rather than the default pair, which is what
+              `colors` is for — two real colour strings, because a gradient is
+              painted rather than classed. */}
           <PageHeader.Cover
-            source={{ uri: PROFILE_COVER }}
             height={insets.top + 300}
-            alt="A stretch of coastline at dusk"
+            colors={COVER_RAMPS.hero}
           />
-          {/* No avatar. The picture is the account, so a face over it would be
+          {/* No avatar. The banner is the account, so a face over it would be
               a second subject on the same screen. */}
           <PageHeader.Content className="pt-4">
             <View className="flex-row items-center gap-3">
@@ -1003,12 +1052,16 @@ function PageHeaderHeroVersion() {
  */
 function PageHeaderCenteredVersion() {
   const insets = useSafeAreaInsets();
+  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+      <ScrollView
+        refreshControl={refresh}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      >
         <PageHeader variant="page">
-          <PageHeader.Cover height={insets.top + 140} />
+          <PageHeader.Cover height={insets.top + 140} colors={COVER_RAMPS.centred} />
           <PageHeader.Avatar source={{ uri: PROFILE_FACE }} fallback="KA" verified />
           <PageHeader.Content>
             <PageHeader.Title>Khalid Abdi</PageHeader.Title>
@@ -1041,22 +1094,34 @@ function PageHeaderCenteredVersion() {
  */
 function PageHeaderBrandVersion() {
   const insets = useSafeAreaInsets();
+  const refresh = useProfileRefresh();
   const { mode } = useThemeMode();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+      <ScrollView
+        refreshControl={refresh}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      >
         <PageHeader variant="page" align="start">
-          <PageHeader.Cover height={insets.top + 120} />
-          <PageHeader.Avatar
-            source={
-              mode === 'dark'
-                ? require('../../../assets/logo-dark.png')
-                : require('../../../assets/logo-light.png')
-            }
-            fallback="PU"
-            imageProps={{ resizeMode: 'contain', className: 'p-3' }}
-          />
+          <PageHeader.Cover height={insets.top + 120} colors={COVER_RAMPS.brand} />
+          {/* The mark goes in the ring itself rather than through the face,
+              which crops to fill. A logo cropped to a circle is a logo with
+              its corners cut off, so it is contained and padded instead. */}
+          <PageHeader.Avatar>
+            <View className="h-full w-full items-center justify-center bg-card">
+              <Image
+                source={
+                  mode === 'dark'
+                    ? require('../../../assets/logo-dark.png')
+                    : require('../../../assets/logo-light.png')
+                }
+                style={{ width: 46, height: 46 }}
+                resizeMode="contain"
+                accessibilityLabel="PanelUI"
+              />
+            </View>
+          </PageHeader.Avatar>
           <PageHeader.Content>
             <View className="flex-row items-center gap-2">
               <PageHeader.Title>PanelUI</PageHeader.Title>
@@ -1581,6 +1646,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'profile',
         fullPage: true,
         fullBleed: true,
+        backSwipe: true,
         description:
           'The gradient to the screen edges, the face at the leading edge, and the account under it.',
         render: () => <PageHeaderProfileVersion />,
@@ -1590,6 +1656,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'stats',
         fullPage: true,
         fullBleed: true,
+        backSwipe: true,
         description:
           'No banner, so the face does not lift, and the counts sit next to it instead of under the name.',
         render: () => <PageHeaderStatsVersion />,
@@ -1599,6 +1666,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'centred',
         fullPage: true,
         fullBleed: true,
+        backSwipe: true,
         description:
           'The face centred over the gradient, with the counts and the actions on the same line under it.',
         render: () => <PageHeaderCenteredVersion />,
@@ -1608,6 +1676,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'hero',
         fullPage: true,
         fullBleed: true,
+        backSwipe: true,
         description:
           'The picture is the account, so there is no avatar over it — and the counts are ruled apart.',
         render: () => <PageHeaderHeroVersion />,
@@ -1617,6 +1686,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'brand',
         fullPage: true,
         fullBleed: true,
+        backSwipe: true,
         description:
           'A mark rather than a face, with the square corner a logo needs, and the counts run inline.',
         render: () => <PageHeaderBrandVersion />,
@@ -1651,7 +1721,7 @@ export const ENTRIES: ComponentEntry[] = [
           // and the text to the leading edge and leaves the actions full width
           // underneath.
           <PageHeader align="start" className="w-full">
-            <PageHeader.Cover source={{ uri: PROFILE_COVER }} alt="A stretch of coastline at dusk" />
+            <PageHeader.Cover colors={COVER_RAMPS.leading} />
             <PageHeader.Avatar
               size="lg"
               source={{ uri: PROFILE_FACE }}

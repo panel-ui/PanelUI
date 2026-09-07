@@ -4,6 +4,14 @@ description: Cover, face and actions at the top of a profile.
 status: new
 ---
 
+<Preview
+  src="/previews/page-header.jpg"
+  alt="A profile screen on a dark phone: a blue-to-violet gradient banner, a round photograph overlapping its bottom edge with a verification rosette, the name Khalid Abdi, the handle @Khalidabdi1, a two-line bio, a link and a joined date, the counts 188 Following and 533 Followers, and two buttons reading Share profile and Edit profile."
+  width={1206}
+  height={2622}
+  caption="The profile screen version, running in the example app."
+/>
+
 The top of a profile screen: a banner, the face over it, who the page belongs to, and what you can do about them.
 
 Two variants, for the two places it lives. `card` is a surface of its own, for a profile that appears inside a scroll of other cards. `page` drops the surface and lets the banner run to the screen's edges, for the screen the profile *is*.
@@ -17,8 +25,8 @@ For a name and avatar inside a feed row rather than at the top of a screen, use 
 PageHeader ships with the library — no separate install.
 
 ```tsx
-import { PageHeader, Button, Badge, Text, LinkIcon, CameraIcon, CalendarIcon, GlobeIcon, EllipsisIcon, ShareNodesIcon, PencilIcon, PlusIcon } from 'panelui-native';
-import { View, ScrollView } from 'react-native';
+import { PageHeader, Button, Badge, Text, RefreshControl, LinkIcon, CameraIcon, CalendarIcon, GlobeIcon, EllipsisIcon, ShareNodesIcon, PencilIcon, PlusIcon } from 'panelui-native';
+import { View, Image, ScrollView } from 'react-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -65,13 +73,15 @@ npx panelui-cli@latest add page-header
 ```
 
 - **`PageHeader.Cover`** — The banner. Give it a `source` for an image; without one it draws a gradient, because a header with no banner still has to read as a header. `height` sets the band, `alt` describes the picture — left out, it is treated as decoration.
-- **`PageHeader.Avatar`** — The face, in a ring of whatever surface is behind it. It lifts over the cover's bottom edge on its own: the root looks for a `PageHeader.Cover` among its children, so a header without one leaves the face where it is. `overlap` overrides that either way.
+- **`PageHeader.Avatar`** — The face, in a ring of whatever surface is behind it. It lifts over the cover's bottom edge on its own: the root looks for a `PageHeader.Cover` among its children, so a header without one leaves the face where it is. `overlap` overrides that either way. Pass `children` to put something else in the ring — a logo, a monogram, a live thumbnail.
 - **`PageHeader.Row`** — The face, and whatever sits beside it — for the profile that puts its counts next to the picture rather than under the name. Leave it out when the face stands alone; `PageHeader.Avatar` carries its own inset then.
 - **`PageHeader.Content`** — The text block. Everything in it takes the header's alignment.
 - **`PageHeader.Title`** — Whose page it is. Announces itself as a heading.
 - **`PageHeader.Description`** — The handle, the email, the one quiet line under the name.
 - **`PageHeader.Meta`** — One fact about the account — a link, a location, the month it was opened. The `icon` takes the muted colour without being told.
 - **`PageHeader.Stats`** — The row of counts. `layout="stacked"` puts the label under the figure, for counts read as a set; `inline` runs them together — "533 Followers" — for counts read as part of a sentence. `divided` rules between them.
+
+Centred and stacked, the counts take equal widths across the row, so the middle one lands on the same centre line as the name and the buttons.
 - **`PageHeader.Stat`** — One count. Announced as a single thing — "533 Followers" — because a figure and its label read apart are two pieces of nothing. Give it an `onPress` and it becomes a real button.
 - **`PageHeader.Actions`** — What you can do about the account. Give the buttons `className="flex-1"` for the pair that splits the width evenly.
 
@@ -82,6 +92,13 @@ npx panelui-cli@latest add page-header
 The default. The cover is held off the card's edges and rounded on its top corners only, so its bottom edge meets the content rather than floating above it.
 
 Nothing here says the face should lift over the cover — the card can see the cover among its children and works it out.
+
+<Preview
+  src="/previews/page-header-the-profile-card.jpg"
+  alt="A profile card on a dark screen: a blue-to-violet gradient held off the card's edges and rounded on its top corners only, its bottom edge meeting the content, a round photograph centred over that edge with a verification rosette, the name Khalid Abdi, the email khalid@panelui.dev, and the buttons Message and Follow."
+  width={1206}
+  height={2622}
+/>
 
 ```tsx
 <PageHeader>
@@ -102,9 +119,16 @@ Nothing here says the face should lift over the cover — the card can see the c
 
 `align="start"` moves the face, the text and the actions to the leading edge. Use it where the name is the first thing on the line rather than the middle of it — a card in a list of them, where a column of centred names is harder to scan than a column of left-aligned ones.
 
+<Preview
+  src="/previews/page-header-the-face-at-the-leading-edge.jpg"
+  alt="The same profile card with everything on the leading edge: an emerald-to-sky gradient cover, a photograph overlapping its bottom-left corner with a verification rosette, the name Khalid Abdi, the line Building in public, Nairobi, the counts 127 Components and 4.2K Followers ruled apart, and a full-width Follow button beside a share button."
+  width={1206}
+  height={2622}
+/>
+
 ```tsx
 <PageHeader align="start">
-  <PageHeader.Cover source={{ uri: banner }} alt="A stretch of coastline at dusk" />
+  <PageHeader.Cover colors={['#34d399', '#0ea5e9']} />
   <PageHeader.Avatar size="lg" source={{ uri: face }} fallback="KA" verified />
   <PageHeader.Content>
     <PageHeader.Title>Khalid Abdi</PageHeader.Title>
@@ -157,6 +181,58 @@ A count with an `onPress` is a real button — press feedback and a button role 
 </PageHeader.Stats>
 ```
 
+### Pull to refresh
+
+A profile header is the top of a scroll somebody pulls on, so give the scroll a `RefreshControl`. The spinner appears above the cover, the content holds its place, and both settle back when the refresh resolves — the gesture every social app has trained people to try first.
+
+Tint it from a token rather than leaving it to the platform default, which is a mid grey that disappears against a dark cover.
+
+```tsx
+const [refreshing, setRefreshing] = useState(false);
+const tint = useCSSVariable('--color-muted-foreground');
+
+async function refresh() {
+  setRefreshing(true);
+  try {
+    await reloadProfile();
+  } finally {
+    setRefreshing(false);
+  }
+}
+
+<ScrollView
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={refresh}
+      tintColor={typeof tint === 'string' ? tint : undefined}
+    />
+  }
+>
+  <PageHeader variant="page" align="start">…</PageHeader>
+  {/* the feed under it */}
+</ScrollView>
+```
+
+### A mark instead of a face
+
+`PageHeader.Avatar` takes `children`, which fill the ring in place of the face. Use it for a logo: the face crops to fill, and a logo cropped to a circle is a logo with its corners cut off.
+
+What you put there fills the ring edge to edge, so give it its own background and hold the mark clear of the edge yourself.
+
+```tsx
+<PageHeader.Avatar>
+  <View className="h-full w-full items-center justify-center bg-card">
+    <Image
+      source={mark}
+      style={{ width: 46, height: 46 }}
+      resizeMode="contain"
+      accessibilityLabel="PanelUI"
+    />
+  </View>
+</PageHeader.Avatar>
+```
+
 ## Versions
 
 ### Profile screen
@@ -164,6 +240,13 @@ A count with an `onPress` is a real button — press feedback and a button role 
 `variant="page"` drops the card and lets the cover run to the screen's edges. Give it the status-bar inset on top of the band you want, so the gradient reaches the top of the screen rather than stopping under the clock.
 
 The counts are `inline` here because they read as part of a sentence rather than as a set to compare.
+
+<Preview
+  src="/previews/page-header-profile-screen.jpg"
+  alt="A profile screen on a dark phone: a blue-to-violet gradient banner, a round photograph overlapping its bottom edge with a verification rosette, the name, the handle, a bio, a link and a joined date, the counts 188 Following and 533 Followers, and the buttons Share profile and Edit profile."
+  width={1206}
+  height={2622}
+/>
 
 ```tsx
 const insets = useSafeAreaInsets();
@@ -200,6 +283,13 @@ const insets = useSafeAreaInsets();
 No cover, so the face has nothing to overlap and does not lift. `PageHeader.Row` puts the counts next to the picture instead of under the name, which is the shape that fits three of them on a phone.
 
 `badge` takes the corner the rosette would have had. Resolve the glyph's colour against the surface you fill the badge with — a circle filled in the foreground colour with an icon that inherited the foreground colour is invisible in a light theme.
+
+<Preview
+  src="/previews/page-header-counts-beside-the-face.jpg"
+  alt="A dark profile screen with no banner: a round photograph at the leading edge carrying a plus button in its lower corner, and beside it the counts 3 Posts, 788 Followers and 1,882 Following, then the name, a category, a bio, a link, and the buttons Edit profile, Share profile and an overflow button."
+  width={1206}
+  height={2622}
+/>
 
 ```tsx
 <PageHeader variant="page" align="start">
@@ -244,6 +334,13 @@ function StoryBadge() {
 
 The default alignment, at full screen. The face is centred over the cover and the counts sit under the name rather than beside it, which is the arrangement that reads when the name is the first thing on the screen rather than one row of many.
 
+<Preview
+  src="/previews/page-header-everything-centred.jpg"
+  alt="A dark profile screen with a cyan-to-blue gradient banner, a round photograph centred over its bottom edge with a verification rosette, and centred under it the name, an email, a location line, three evenly spaced counts reading 127 Components, 533 Followers and 0.92 Version, and the buttons Message and Follow."
+  width={1206}
+  height={2622}
+/>
+
 ```tsx
 <PageHeader variant="page">
   <PageHeader.Cover height={insets.top + 140} />
@@ -269,16 +366,24 @@ The default alignment, at full screen. The face is centred over the cover and th
 
 ### A hero, and no face
 
-Every part is optional, and this is what leaving the avatar out buys: a tall picture that is the account itself. A face over it would be a second subject on the same screen.
+Every part is optional, and this is what leaving the avatar out buys: a tall banner that is the account itself. A face over it would be a second subject on the same screen.
+
+`colors` takes a ramp of your own — real colour strings, because a gradient is painted rather than classed. Resolve tokens with `useCSSVariable` if that is where they come from.
 
 `divided` rules the counts apart. Use it where each figure is a different kind of thing — karma, posts, an age — rather than three of one kind, which read fine on their own spacing.
+
+<Preview
+  src="/previews/page-header-a-hero-and-no-face.jpg"
+  alt="A dark screen with a tall pink-to-indigo gradient filling the top half and no avatar over it, then the title Coastline Weekly with an Edit button opposite, a handle and follower line, three counts ruled apart reading 73 Karma, 33 Posts and 2mo Age, and a full-width Follow button beside a share button."
+  width={1206}
+  height={2622}
+/>
 
 ```tsx
 <PageHeader variant="page" align="start">
   <PageHeader.Cover
-    source={{ uri: banner }}
     height={insets.top + 300}
-    alt="A stretch of coastline at dusk"
+    colors={['#f472b6', '#8b5cf6', '#312e81']}
   />
   <PageHeader.Content className="pt-4">
     <View className="flex-row items-center gap-3">
@@ -301,18 +406,25 @@ Every part is optional, and this is what leaving the avatar out buys: a tall pic
 
 ### An organisation
 
-A mark rather than a face. Pass `resizeMode: 'contain'` and some padding through `imageProps` so the logo is held clear of the circle's edge — a logo cropped to a circle is a logo with its corners cut off.
+A mark rather than a face. It goes in `PageHeader.Avatar`'s children, which fill the ring in place of the face — the face crops to fill, and a logo cropped to a circle is a logo with its corners cut off.
 
 `Title` takes children, so a badge goes beside the name on the same line.
+
+<Preview
+  src="/previews/page-header-an-organisation.jpg"
+  alt="A dark screen with an amber-to-pink gradient banner and the PanelUI mark in a round ring overlapping its bottom edge, then the name PanelUI with an Open source badge beside it, a description, a link and a since date, the counts 127 Components and 6 Themes ruled apart, and a full-width Install button beside an edit button."
+  width={1206}
+  height={2622}
+/>
 
 ```tsx
 <PageHeader variant="page" align="start">
   <PageHeader.Cover height={insets.top + 120} />
-  <PageHeader.Avatar
-    source={mark}
-    fallback="PU"
-    imageProps={{ resizeMode: 'contain', className: 'p-3' }}
-  />
+  <PageHeader.Avatar>
+    <View className="h-full w-full items-center justify-center bg-card">
+      <Image source={mark} style={{ width: 46, height: 46 }} resizeMode="contain" />
+    </View>
+  </PageHeader.Avatar>
   <PageHeader.Content>
     <View className="flex-row items-center gap-2">
       <PageHeader.Title>PanelUI</PageHeader.Title>
@@ -394,7 +506,7 @@ A mark rather than a face. Pass `resizeMode: 'contain'` and some padding through
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `size` | `AvatarSizeName` | — | How big the face is. |
+| `size` | `AvatarSizeName` | `'xl'` | How big the face is. |
 | `verified` | `boolean` | — | Draws the verification rosette in the face's bottom corner. |
 | `badge` | `ReactNode` | — | Anything else for that corner — a camera button, a presence dot, a "+". Wins over `verified`. |
 | `overlap` | `boolean` | — | Whether the face lifts over the cover's bottom edge. Set by the presence of a `PageHeader.Cover`; pass it to override that either way. |
@@ -455,13 +567,29 @@ That is also why the badge hangs off a second view rather than off the ring: the
 
 A cover with no `source` draws a gradient between `--color-chart-2` and `--color-chart-5`. They are series tokens rather than a pair of hexes, so an app that puts its charts on brand puts this on brand with them.
 
-Pass `colors` for a gradient of your own. It is painted rather than classed, so those are real colour strings — resolve tokens with `useCSSVariable` if that is where they come from.
+Pass `colors` for a gradient of your own — two or more real colour strings, because a gradient is painted rather than classed. Resolve tokens with `useCSSVariable` if that is where they come from.
+
+Give each header in an app its own ramp. A gallery of profiles that all open on the same banner reads as one page that failed to change.
 
 ### At full screen, the cover needs the status bar
 
 `variant="page"` runs the cover to the screen's edges, top included. Give `height` the safe-area inset on top of the band you want — `insets.top + 120` — or the gradient stops under the clock and the header opens with a strip of page above it.
 
 The header draws nothing over the cover, so a full-screen profile needs its own way back. Put it in `PageHeader.Cover`'s children, or absolutely over the whole thing.
+
+### It is the top of a scroll, so let people pull on it
+
+A profile header is the first thing under the status bar and the thing people pull down on to see whether anything is new. Give the scroll it sits in a `RefreshControl` — the spinner appears above the cover, the header holds its place, and both settle back when the refresh resolves.
+
+Tint the spinner from a token. The platform default is a mid grey that disappears against a dark cover.
+
+The header does not own the scroll, so this is yours to wire — which is also what lets the same refresh cover the feed under it.
+
+### Centred counts are measured, not just centred
+
+A stacked row of counts under a centred name takes equal widths across the row rather than sitting at its content width.
+
+Left to their content, the counts are centred as a block but not as figures: "Followers" is twice the width of "Posts", so the middle count sits off the centre line the name and the buttons are on. The row reads as very slightly wrong without it being obvious why.
 
 ## Public exports
 

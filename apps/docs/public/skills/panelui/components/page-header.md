@@ -36,13 +36,13 @@ import { PageHeader } from 'panelui-native';
 ### Parts
 
 - `PageHeader.Cover` — The banner. Give it a `source` for an image; without one it draws a gradient, because a header with no banner still has to read as a header. `height` sets the band, `alt` describes the picture — left out, it is treated as decoration.
-- `PageHeader.Avatar` — The face, in a ring of whatever surface is behind it. It lifts over the cover's bottom edge on its own: the root looks for a `PageHeader.Cover` among its children, so a header without one leaves the face where it is. `overlap` overrides that either way.
+- `PageHeader.Avatar` — The face, in a ring of whatever surface is behind it. It lifts over the cover's bottom edge on its own: the root looks for a `PageHeader.Cover` among its children, so a header without one leaves the face where it is. `overlap` overrides that either way. Pass `children` to put something else in the ring — a logo, a monogram, a live thumbnail.
 - `PageHeader.Row` — The face, and whatever sits beside it — for the profile that puts its counts next to the picture rather than under the name. Leave it out when the face stands alone; `PageHeader.Avatar` carries its own inset then.
 - `PageHeader.Content` — The text block. Everything in it takes the header's alignment.
 - `PageHeader.Title` — Whose page it is. Announces itself as a heading.
 - `PageHeader.Description` — The handle, the email, the one quiet line under the name.
 - `PageHeader.Meta` — One fact about the account — a link, a location, the month it was opened. The `icon` takes the muted colour without being told.
-- `PageHeader.Stats` — The row of counts. `layout="stacked"` puts the label under the figure, for counts read as a set; `inline` runs them together — "533 Followers" — for counts read as part of a sentence. `divided` rules between them.
+- `PageHeader.Stats` — The row of counts. `layout="stacked"` puts the label under the figure, for counts read as a set; `inline` runs them together — "533 Followers" — for counts read as part of a sentence. `divided` rules between them. Centred and stacked, the counts take equal widths across the row, so the middle one lands on the same centre line as the name and the buttons.
 - `PageHeader.Stat` — One count. Announced as a single thing — "533 Followers" — because a figure and its label read apart are two pieces of nothing. Give it an `onPress` and it becomes a real button.
 - `PageHeader.Actions` — What you can do about the account. Give the buttons `className="flex-1"` for the pair that splits the width evenly.
 
@@ -86,7 +86,8 @@ Extends `Omit<AvatarProps, 'size' \| 'children'>`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
-| `size` | `AvatarSizeName` | — | How big the face is. |
+| `size` | `AvatarSizeName` | `xl` | How big the face is. |
+| `children` | `ReactNode` | — | What goes in the ring instead of a face — a logo, a monogram, a live thumbnail. It fills the ring, so give it its own background and padding. |
 | `verified` | `boolean` | — | Draws the verification rosette in the face's bottom corner. |
 | `badge` | `ReactNode` | — | Anything else for that corner — a camera button, a presence dot, a "+". Wins over `verified`. |
 | `overlap` | `boolean` | — | Whether the face lifts over the cover's bottom edge. Set by the presence of a `PageHeader.Cover`; pass it to override that either way. |
@@ -198,13 +199,29 @@ That is also why the badge hangs off a second view rather than off the ring: the
 
 A cover with no `source` draws a gradient between `--color-chart-2` and `--color-chart-5`. They are series tokens rather than a pair of hexes, so an app that puts its charts on brand puts this on brand with them.
 
-Pass `colors` for a gradient of your own. It is painted rather than classed, so those are real colour strings — resolve tokens with `useCSSVariable` if that is where they come from.
+Pass `colors` for a gradient of your own — two or more real colour strings, because a gradient is painted rather than classed. Resolve tokens with `useCSSVariable` if that is where they come from.
+
+Give each header in an app its own ramp. A gallery of profiles that all open on the same banner reads as one page that failed to change.
 
 ### At full screen, the cover needs the status bar
 
 `variant="page"` runs the cover to the screen's edges, top included. Give `height` the safe-area inset on top of the band you want — `insets.top + 120` — or the gradient stops under the clock and the header opens with a strip of page above it.
 
 The header draws nothing over the cover, so a full-screen profile needs its own way back. Put it in `PageHeader.Cover`'s children, or absolutely over the whole thing.
+
+### It is the top of a scroll, so let people pull on it
+
+A profile header is the first thing under the status bar and the thing people pull down on to see whether anything is new. Give the scroll it sits in a `RefreshControl` — the spinner appears above the cover, the header holds its place, and both settle back when the refresh resolves.
+
+Tint the spinner from a token. The platform default is a mid grey that disappears against a dark cover.
+
+The header does not own the scroll, so this is yours to wire — which is also what lets the same refresh cover the feed under it.
+
+### Centred counts are measured, not just centred
+
+A stacked row of counts under a centred name takes equal widths across the row rather than sitting at its content width.
+
+Left to their content, the counts are centred as a block but not as figures: "Followers" is twice the width of "Posts", so the middle count sits off the centre line the name and the buttons are on. The row reads as very slightly wrong without it being obvious why.
 
 ---
 

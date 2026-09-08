@@ -57,5 +57,73 @@
       "code": "<BubbleChart\n  data={TEAMS}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  status={status}\n>\n  <BubbleChart.Grid />\n  <BubbleChart.Skeleton />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n</BubbleChart>"
     }
   ],
+  "versions": [
+    {
+      "title": "Basic",
+      "description": "The whole chart in one pass: two measured axes, a third quantity on each circle's area, and every circle carrying its own name. `onActivePointChange` puts whichever one is under the finger into the header, so the readout is a line of text rather than a box drawn over the field.",
+      "preview": {
+        "src": "/previews/bubble-chart-basic.jpg",
+        "alt": "BubbleChart — eight named teams on two axes, sized by headcount.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "const [active, setActive] = useState<{ label: string; size: number | null } | null>(null);\n\n<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  aspectRatio={1.4}\n  onActivePointChange={(point) =>\n    setActive(point ? { label: point.label, size: point.size } : null)\n  }\n>\n  <BubbleChart.Header\n    value={active ? `Team ${active.label}` : '8 teams'}\n    caption={\n      active && active.size !== null ? `${active.size} people` : 'Circle area is team size'\n    }\n  />\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+    },
+    {
+      "title": "Named beside",
+      "description": "A smaller `sizeRange` makes circles too small to hold a name. `BubbleChart.Legend` names them alongside instead of inside, and `Labels` comes out — a name that does not fit is a name cropped to two letters.",
+      "preview": {
+        "src": "/previews/bubble-chart-named-beside.jpg",
+        "alt": "BubbleChart — five small circles named by a legend under the plot.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "<BubbleChart\n  data={teams.slice(0, 5)}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[8, 22]}\n  aspectRatio={1.4}\n>\n  <BubbleChart.Header value=\"5 teams\" caption=\"Too small to hold their own names\" />\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles opacity={0.7} />\n  <BubbleChart.Legend />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+    },
+    {
+      "title": "Four quadrants",
+      "description": "`BubbleChart.Quadrants` splits the plot at the average of each axis and names the corner each split makes. The four captions are the point of it: a crosshair on its own says where the middle is, and the names say what being in one corner rather than another means.",
+      "preview": {
+        "src": "/previews/bubble-chart-four-quadrants.jpg",
+        "alt": "BubbleChart — a crosshair at both averages with a caption in each corner.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  aspectRatio={1.2}\n>\n  <BubbleChart.Header value=\"8 teams\" caption=\"Both averages, drawn as one line each\" />\n  <BubbleChart.Grid />\n  <BubbleChart.Quadrants\n    labels={{\n      topLeft: 'Effective, costly',\n      topRight: 'Doing both',\n      bottomLeft: 'Neither yet',\n      bottomRight: 'Lean, quiet',\n    }}\n  />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+    },
+    {
+      "title": "What the area means",
+      "description": "Area is the one quantity the chart has no axis for, so nothing on screen says what a circle is worth until `BubbleChart.SizeKey` does. Three nested circles — largest, middle, smallest — sharing a bottom edge and a centre line, so the areas are laid over one another rather than stacked.",
+      "preview": {
+        "src": "/previews/bubble-chart-what-the-area-means.jpg",
+        "alt": "BubbleChart — three nested key circles labelled with the values they stand for.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[10, 34]}\n  aspectRatio={1.2}\n>\n  <BubbleChart.Header value=\"6 to 22\" caption=\"People per team, read off the key\" />\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles opacity={0.75} />\n  <BubbleChart.Labels />\n  <BubbleChart.SizeKey placement=\"top-left\" label=\"People\" />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+    },
+    {
+      "title": "The line through it",
+      "description": "`BubbleChart.Trend` fits a least-squares line through the circles and reports the fit through `onFit`, so how tightly they sit on it can be said in words above the plot. The line alone claims a relationship; the coefficient is what says whether there is one.",
+      "preview": {
+        "src": "/previews/bubble-chart-the-line-through-it.jpg",
+        "alt": "BubbleChart — a dashed least-squares line through the field, with its coefficient above.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "const [fit, setFit] = useState<{ slope: number; r: number } | null>(null);\n\n<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  aspectRatio={1.2}\n>\n  <BubbleChart.Header\n    value={fit ? `r ${fit.r.toFixed(2)}` : '—'}\n    caption={\n      fit && fit.r < 0.3 ? 'Barely a relationship' : 'How tightly the teams sit on the line'\n    }\n  />\n  <BubbleChart.Grid />\n  <BubbleChart.Trend onFit={setFit} />\n  <BubbleChart.Bubbles opacity={0.8} />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+    },
+    {
+      "title": "Loading",
+      "description": "`status=\"loading\"` draws `BubbleChart.Skeleton` — a still field of muted circles in the plot's own geometry — and dissolves it as the real circles land. The axes and the grid stay put throughout, so the chart does not resize under the reader at the moment the data arrives.",
+      "preview": {
+        "src": "/previews/bubble-chart-loading.jpg",
+        "alt": "BubbleChart — the skeleton's muted circles standing in while the data loads.",
+        "width": 1179,
+        "height": 2563
+      },
+      "code": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  status={status}\n  aspectRatio={1.4}\n>\n  <BubbleChart.Grid />\n  <BubbleChart.Skeleton />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n</BubbleChart>"
+    }
+  ],
   "notes": "### Area, not radius\n\n`sizeKey` maps to a circle's *area*. Doubling a radius quadruples the ink, so a chart that scaled the radius would show a doubled value as four times the size and the reader would believe the picture. `sizeRange` is the smallest and largest radius the scale runs between, and the scale runs over the whole data set so one bubble's size means the same thing as another's. Its upper end is also what the plot holds back at every edge — a circle is drawn about its centre, so without that the bubble carrying the largest value is the one cropped in half.\n\nWithout a `sizeKey` every bubble is drawn at the middle of `sizeRange`, which is a scatter plot with names on it — and an honest one.\n\n### The grid, and the numbers on it\n\nThe grid draws eight rules each way and each axis prints five numbers, so every second gridline carries one. That relationship is the point of both defaults: a number beside every line of a grid fine enough to read against is a column of numbers, and a grid coarse enough for that reads as blocks laid behind the circles.\n\nThe domain is rounded out to the same four steps the axes are divided into, so the numbers come out round rather than ending wherever the data happened to end.\n\n`rows`, `columns` and `ticks` all move independently if a chart wants a different rhythm — keep the grid a whole multiple of the ticks, or the numbers stop landing on lines.\n\n### Naming the axes\n\n`label` on `XAxis` and `YAxis` says what each one measures. The chart reserves the room before it lays the plot out, so adding one moves the plot rather than writing over it. The y label is turned on its side, which is the only way a word fits a gutter sized for numbers.\n\n### Colour\n\nThe ramp cycles by row. Pass `colorKey` to name a colour per row: either a CSS colour, or a number from 1 to 5 selecting a `--color-chart-*` token. `BubbleChart.Bubbles` also takes a single `color` for every circle, which is what a chart with a legend usually wants.\n\n### Selection\n\nThe readout clears the *edge* of the bubble rather than its centre, and drops below it where there is no room above — lifted by a constant it landed on the larger circles, which are exactly the ones a finger is most likely to be resting on.\n\nA touch picks the nearest bubble whose own circle — or the `hitRadius` floor, whichever is larger — reaches the finger. Nearest rather than topmost, because where bubbles overlap the one drawn last is not the one being aimed at.\n\n## Accessible data\n\nThe chart exposes one screen-reader summary and one semantic entry per data row; its SVG circles, axes and labels stay decorative. Set `accessibilityLabel` for the summary, `accessibilityLabelForDatum` to phrase a row in your own words, and `onAccessibilityDatumPress` to make each row activatable. Pass `accessible={false}` to drop the semantic layer entirely."
 }

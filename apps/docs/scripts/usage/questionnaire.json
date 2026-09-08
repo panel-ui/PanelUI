@@ -34,12 +34,11 @@
       "title": "One answer at a time",
       "description": "The default shape: a required question, an optional one, and a footer that shows only the actions that apply to the question on screen.",
       "code": "const questions = [\n  { name: 'direction', required: true },\n  { name: 'detail' },\n] as const;\n\nfunction Prototype() {\n  const [answers, setAnswers] = useState<QuestionnaireAnswers>({});\n\n  return (\n    <Questionnaire items={questions} onAnswersChange={setAnswers} onSubmit={save}>\n      <Questionnaire.Title>Prototype</Questionnaire.Title>\n      <Questionnaire.Progress />\n\n      <Questionnaire.Item name=\"direction\" required>\n        <Questionnaire.Question>What should we build next?</Questionnaire.Question>\n        <Questionnaire.Description>Choose the direction you want to see first.</Questionnaire.Description>\n        <Questionnaire.Choices>\n          <Questionnaire.Choice\n            value=\"delegation\"\n            label=\"Delegation\"\n            description=\"Show how work moves to a specialist.\"\n          />\n          <Questionnaire.Choice value=\"prompts\" label=\"Question prompts\" />\n          <Questionnaire.Choice value=\"both\" label=\"Both together\" />\n        </Questionnaire.Choices>\n        <Questionnaire.Error />\n      </Questionnaire.Item>\n\n      <Questionnaire.Item name=\"detail\">\n        <Questionnaire.Question>How much detail?</Questionnaire.Question>\n        <Questionnaire.Description>Skip this one if you have not decided.</Questionnaire.Description>\n        <Questionnaire.Choices>\n          <Questionnaire.Choice value=\"focused\" label=\"Focused\" />\n          <Questionnaire.Choice value=\"complete\" label=\"The complete flow\" />\n        </Questionnaire.Choices>\n      </Questionnaire.Item>\n\n      <Questionnaire.Footer>\n        <Questionnaire.Back />\n        <Questionnaire.Spacer />\n            <Questionnaire.Next />\n        <Questionnaire.Submit />\n      </Questionnaire.Footer>\n    </Questionnaire>\n  );\n}",
-      "previewVideo": {
-        "src": "/previews/questionnaire-one-answer-at-a-time.mp4",
-        "poster": "/previews/questionnaire-one-answer-at-a-time-poster.jpg",
-        "alt": "Questionnaire — One answer at a time.",
-        "width": 720,
-        "height": 1560
+      "preview": {
+        "src": "/previews/questionnaire-one-answer-at-a-time.jpg",
+        "alt": "Questionnaire — one question, an answer chosen, and only the actions that apply to it.",
+        "width": 1179,
+        "height": 2563
       }
     },
     {
@@ -48,9 +47,9 @@
       "code": "<Questionnaire onAnswersChange={setAnswers}>\n  <Questionnaire.Progress />\n  <Questionnaire.Item name=\"signals\" required multiple>\n    <Questionnaire.Question>What should every update include?</Questionnaire.Question>\n    <Questionnaire.Description>Select all that apply.</Questionnaire.Description>\n    <Questionnaire.Choices>\n      <Questionnaire.Choice value=\"progress\" label=\"Progress\" />\n      <Questionnaire.Choice value=\"decisions\" label=\"Decisions\" />\n      <Questionnaire.Choice value=\"risks\" label=\"Risks\" />\n    </Questionnaire.Choices>\n    <Questionnaire.Error />\n  </Questionnaire.Item>\n  <Questionnaire.Footer>\n    <Questionnaire.Spacer />\n    <Questionnaire.Submit />\n  </Questionnaire.Footer>\n</Questionnaire>\n\n// answers.signals -> ['progress', 'risks']",
       "preview": {
         "src": "/previews/questionnaire-selecting-more-than-one.jpg",
-        "alt": "Questionnaire — Selecting more than one.",
+        "alt": "Questionnaire — a multiple-answer question, its choices drawn as squares.",
         "width": 1179,
-        "height": 1266
+        "height": 2563
       }
     },
     {
@@ -59,9 +58,9 @@
       "code": "<Questionnaire.Item name=\"tool\" required>\n  <Questionnaire.Question>Where do you keep your notes?</Questionnaire.Question>\n  <Questionnaire.Choices>\n    <Questionnaire.Choice value=\"files\" label=\"Plain files\" />\n    <Questionnaire.Choice value=\"issues\" label=\"Issue tracker\" />\n    <Questionnaire.Input placeholder=\"Somewhere else…\" />\n  </Questionnaire.Choices>\n  <Questionnaire.Error />\n</Questionnaire.Item>",
       "preview": {
         "src": "/previews/questionnaire-an-answer-that-is-not-listed.jpg",
-        "alt": "Questionnaire — An answer that is not listed.",
+        "alt": "Questionnaire — fixed choices with a text field under them for anything they do not offer.",
         "width": 1179,
-        "height": 1083
+        "height": 2563
       }
     },
     {
@@ -75,15 +74,21 @@
       "code": "<Questionnaire shortcuts=\"letters\">\n  <Questionnaire.Progress />\n  <Questionnaire.Item name=\"review\" required>\n    <Questionnaire.Question>What should be reviewed first?</Questionnaire.Question>\n    <Questionnaire.Choices>\n      <Questionnaire.Choice value=\"api\" label=\"The public API\" />\n      <Questionnaire.Choice value=\"tests\" label=\"Test coverage\" />\n      <Questionnaire.Choice value=\"perf\" label=\"Performance\" disabled />\n      <Questionnaire.Choice value=\"docs\" label=\"The documentation\" />\n    </Questionnaire.Choices>\n  </Questionnaire.Item>\n</Questionnaire>\n\n// shortcuts=\"numbers\" badges them 1, 2, 3 instead.",
       "preview": {
         "src": "/previews/questionnaire-a-letter-beside-every-answer.jpg",
-        "alt": "Questionnaire — A letter beside every answer.",
+        "alt": "Questionnaire — every answer badged with a letter, the disabled one skipped.",
         "width": 1179,
-        "height": 1282
+        "height": 2563
       }
     },
     {
       "title": "Checking an answer against a schema",
-      "description": "The built-in rule is only that a required question has an answer. For anything more, keep the answers yourself and pass `invalid` back down — the question then reads as at fault and its `Questionnaire.Error` shows your message.",
-      "code": "function Contact() {\n  const [answers, setAnswers] = useState<QuestionnaireAnswers>({});\n\n  const email = typeof answers.email === 'string' ? answers.email : '';\n  const malformed = email.length > 0 && !email.includes('@');\n\n  return (\n    <Questionnaire answers={answers} onAnswersChange={setAnswers} onSubmit={save}>\n      <Questionnaire.Item name=\"email\" required invalid={malformed}>\n        <Questionnaire.Question>Where should we reply?</Questionnaire.Question>\n        <Questionnaire.Choices>\n          <Questionnaire.Input placeholder=\"you@example.com\" keyboardType=\"email-address\" />\n        </Questionnaire.Choices>\n        <Questionnaire.Error>That does not look like an email address.</Questionnaire.Error>\n      </Questionnaire.Item>\n      <Questionnaire.Footer>\n        <Questionnaire.Spacer />\n        <Questionnaire.Submit disabled={malformed} />\n      </Questionnaire.Footer>\n    </Questionnaire>\n  );\n}"
+      "description": "The built-in rule is only that a required question has an answer. For anything more, keep the answers yourself and pass `invalid` back down — the question then reads as at fault and its `Questionnaire.Error` shows your message.\n\nThat is what the shot below is: every choice outlined, the message under them, and the way forward still there to be pressed. `Questionnaire.Next` dims rather than disabling itself, because a button that refuses without saying why leaves the reader nothing to act on.",
+      "code": "function Contact() {\n  const [answers, setAnswers] = useState<QuestionnaireAnswers>({});\n\n  const email = typeof answers.email === 'string' ? answers.email : '';\n  const malformed = email.length > 0 && !email.includes('@');\n\n  return (\n    <Questionnaire answers={answers} onAnswersChange={setAnswers} onSubmit={save}>\n      <Questionnaire.Item name=\"email\" required invalid={malformed}>\n        <Questionnaire.Question>Where should we reply?</Questionnaire.Question>\n        <Questionnaire.Choices>\n          <Questionnaire.Input placeholder=\"you@example.com\" keyboardType=\"email-address\" />\n        </Questionnaire.Choices>\n        <Questionnaire.Error>That does not look like an email address.</Questionnaire.Error>\n      </Questionnaire.Item>\n      <Questionnaire.Footer>\n        <Questionnaire.Spacer />\n        <Questionnaire.Submit disabled={malformed} />\n      </Questionnaire.Footer>\n    </Questionnaire>\n  );\n}",
+      "preview": {
+        "src": "/previews/questionnaire-checking-an-answer-against-a-schema.jpg",
+        "alt": "Questionnaire — a question marked invalid: every choice outlined and the error under them.",
+        "width": 1179,
+        "height": 2563
+      }
     },
     {
       "title": "Driving the current question from outside",
@@ -116,9 +121,9 @@
       "code": "<Card>\n  <Card.Content className=\"pt-6\">\n    <Questionnaire frame={false}>\n      <Questionnaire.Title>Timing</Questionnaire.Title>\n      <Questionnaire.Progress />\n      <Questionnaire.Item name=\"timing\" required>\n        <Questionnaire.Question>When should this ship?</Questionnaire.Question>\n        <Questionnaire.Choices>\n          <Questionnaire.Choice value=\"week\" label=\"This week\" />\n          <Questionnaire.Choice value=\"cycle\" label=\"Next cycle\" />\n        </Questionnaire.Choices>\n      </Questionnaire.Item>\n      <Questionnaire.Footer>\n        <Questionnaire.Spacer />\n        <Questionnaire.Submit />\n      </Questionnaire.Footer>\n    </Questionnaire>\n  </Card.Content>\n</Card>",
       "preview": {
         "src": "/previews/questionnaire-without-the-frame.jpg",
-        "alt": "Questionnaire — Without the frame.",
+        "alt": "Questionnaire with frame={false}, inside a card that draws its own boundary.",
         "width": 1179,
-        "height": 1031
+        "height": 2563
       }
     },
     {

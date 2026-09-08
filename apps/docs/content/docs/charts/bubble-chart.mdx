@@ -247,6 +247,221 @@ return (
 </BubbleChart>
 ```
 
+## Versions
+
+### Basic
+
+The whole chart in one pass: two measured axes, a third quantity on each circle's area, and every circle carrying its own name. `onActivePointChange` puts whichever one is under the finger into the header, so the readout is a line of text rather than a box drawn over the field.
+
+<Preview
+  src="/previews/bubble-chart-basic.jpg"
+  alt="BubbleChart — eight named teams on two axes, sized by headcount."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+const [active, setActive] = useState<{ label: string; size: number | null } | null>(null);
+
+<BubbleChart
+  data={teams}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[14, 30]}
+  aspectRatio={1.4}
+  onActivePointChange={(point) =>
+    setActive(point ? { label: point.label, size: point.size } : null)
+  }
+>
+  <BubbleChart.Header
+    value={active ? `Team ${active.label}` : '8 teams'}
+    caption={
+      active && active.size !== null ? `${active.size} people` : 'Circle area is team size'
+    }
+  />
+  <BubbleChart.Grid />
+  <BubbleChart.Bubbles />
+  <BubbleChart.Labels />
+  <BubbleChart.XAxis />
+  <BubbleChart.YAxis />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+### Named beside
+
+A smaller `sizeRange` makes circles too small to hold a name. `BubbleChart.Legend` names them alongside instead of inside, and `Labels` comes out — a name that does not fit is a name cropped to two letters.
+
+<Preview
+  src="/previews/bubble-chart-named-beside.jpg"
+  alt="BubbleChart — five small circles named by a legend under the plot."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+<BubbleChart
+  data={teams.slice(0, 5)}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[8, 22]}
+  aspectRatio={1.4}
+>
+  <BubbleChart.Header value="5 teams" caption="Too small to hold their own names" />
+  <BubbleChart.Grid />
+  <BubbleChart.Bubbles opacity={0.7} />
+  <BubbleChart.Legend />
+  <BubbleChart.XAxis />
+  <BubbleChart.YAxis />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+### Four quadrants
+
+`BubbleChart.Quadrants` splits the plot at the average of each axis and names the corner each split makes. The four captions are the point of it: a crosshair on its own says where the middle is, and the names say what being in one corner rather than another means.
+
+<Preview
+  src="/previews/bubble-chart-four-quadrants.jpg"
+  alt="BubbleChart — a crosshair at both averages with a caption in each corner."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+<BubbleChart
+  data={teams}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[14, 30]}
+  aspectRatio={1.2}
+>
+  <BubbleChart.Header value="8 teams" caption="Both averages, drawn as one line each" />
+  <BubbleChart.Grid />
+  <BubbleChart.Quadrants
+    labels={{
+      topLeft: 'Effective, costly',
+      topRight: 'Doing both',
+      bottomLeft: 'Neither yet',
+      bottomRight: 'Lean, quiet',
+    }}
+  />
+  <BubbleChart.Bubbles />
+  <BubbleChart.Labels />
+  <BubbleChart.XAxis label="Efficiency" />
+  <BubbleChart.YAxis label="Performance" />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+### What the area means
+
+Area is the one quantity the chart has no axis for, so nothing on screen says what a circle is worth until `BubbleChart.SizeKey` does. Three nested circles — largest, middle, smallest — sharing a bottom edge and a centre line, so the areas are laid over one another rather than stacked.
+
+<Preview
+  src="/previews/bubble-chart-what-the-area-means.jpg"
+  alt="BubbleChart — three nested key circles labelled with the values they stand for."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+<BubbleChart
+  data={teams}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[10, 34]}
+  aspectRatio={1.2}
+>
+  <BubbleChart.Header value="6 to 22" caption="People per team, read off the key" />
+  <BubbleChart.Grid />
+  <BubbleChart.Bubbles opacity={0.75} />
+  <BubbleChart.Labels />
+  <BubbleChart.SizeKey placement="top-left" label="People" />
+  <BubbleChart.XAxis label="Efficiency" />
+  <BubbleChart.YAxis label="Performance" />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+### The line through it
+
+`BubbleChart.Trend` fits a least-squares line through the circles and reports the fit through `onFit`, so how tightly they sit on it can be said in words above the plot. The line alone claims a relationship; the coefficient is what says whether there is one.
+
+<Preview
+  src="/previews/bubble-chart-the-line-through-it.jpg"
+  alt="BubbleChart — a dashed least-squares line through the field, with its coefficient above."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+const [fit, setFit] = useState<{ slope: number; r: number } | null>(null);
+
+<BubbleChart
+  data={teams}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[14, 30]}
+  aspectRatio={1.2}
+>
+  <BubbleChart.Header
+    value={fit ? `r ${fit.r.toFixed(2)}` : '—'}
+    caption={
+      fit && fit.r < 0.3 ? 'Barely a relationship' : 'How tightly the teams sit on the line'
+    }
+  />
+  <BubbleChart.Grid />
+  <BubbleChart.Trend onFit={setFit} />
+  <BubbleChart.Bubbles opacity={0.8} />
+  <BubbleChart.Labels />
+  <BubbleChart.XAxis label="Efficiency" />
+  <BubbleChart.YAxis label="Performance" />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+### Loading
+
+`status="loading"` draws `BubbleChart.Skeleton` — a still field of muted circles in the plot's own geometry — and dissolves it as the real circles land. The axes and the grid stay put throughout, so the chart does not resize under the reader at the moment the data arrives.
+
+<Preview
+  src="/previews/bubble-chart-loading.jpg"
+  alt="BubbleChart — the skeleton's muted circles standing in while the data loads."
+  width={1179}
+  height={2563}
+/>
+
+```tsx
+<BubbleChart
+  data={teams}
+  xDataKey="efficiency"
+  yDataKey="performance"
+  sizeKey="people"
+  labelKey="team"
+  sizeRange={[14, 30]}
+  status={status}
+  aspectRatio={1.4}
+>
+  <BubbleChart.Grid />
+  <BubbleChart.Skeleton />
+  <BubbleChart.Bubbles />
+  <BubbleChart.Labels />
+  <BubbleChart.XAxis />
+  <BubbleChart.YAxis />
+</BubbleChart>
+```
+
 ## API Reference
 
 ### BubbleChart

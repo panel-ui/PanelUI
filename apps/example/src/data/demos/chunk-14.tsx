@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image, RefreshControl, ScrollView, View, type LayoutChangeEvent } from "react-native";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections } from "panelui-native";
+import { Image, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import { useCSSVariable } from "uniwind";
@@ -824,31 +830,112 @@ const COVER_RAMPS = {
   leading: ['#34d399', '#0ea5e9'],
 } as const;
 
+/** How far the screen has to be pulled before letting go starts a refresh. */
+const PULL_THRESHOLD = 90;
+
+/** What a request would have cost, so the spinner is on screen long enough to see. */
+const REFRESH_DURATION = 1400;
+
+/** How long the indicator takes to fade in once the refresh has started, and out after. */
+const INDICATOR_FADE = 180;
+
 /**
- * Pull-to-refresh, the way a profile screen has one.
+ * A profile screen and the pull that reloads it.
  *
- * A header is the top of a scroll somebody pulls on, and the versions are
- * short enough that the pull is the first thing a reader tries. Without it the
- * screen just stretches and springs back, which reads as the demo being inert.
+ * The indicator is drawn here rather than handed to `RefreshControl`, because
+ * the platform's own one does not appear on these screens: it reserves its
+ * height, pushes the content down and never draws the spinner into the gap it
+ * made — a pull that opens a space, waits, and closes again with nothing in
+ * it, which is indistinguishable from the screen being inert.
+ *
+ * So the bounce is read instead of intercepted. iOS already stretches the
+ * scroll past its top; how far past is the pull, and the indicator is bound to
+ * it. Nothing takes the touch away from the scroll view, which is what keeps
+ * the flick and the drag feeling exactly as they did.
+ *
+ * It floats over the cover rather than opening a gap above it. A gap has to be
+ * held open for as long as the refresh runs, and holding one open means
+ * fighting the content inset the safe area is already using.
  */
-function useProfileRefresh() {
+function ProfileScroll({
+  contentContainerStyle,
+  children,
+}: {
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}) {
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  const tint = useCSSVariable('--color-muted-foreground');
+  const pull = useSharedValue(0);
+  const busy = useSharedValue(0);
 
-  const control = (
-    <RefreshControl
-      refreshing={refreshing}
-      tintColor={typeof tint === 'string' ? tint : undefined}
-      onRefresh={() => {
-        setRefreshing(true);
-        // A demo has nothing to fetch. The delay is what a request would have
-        // cost, so the spinner is on screen long enough to be seen.
-        setTimeout(() => setRefreshing(false), 1400);
-      }}
-    />
+  useEffect(() => {
+    busy.value = withTiming(refreshing ? 1 : 0, { duration: INDICATOR_FADE });
+  }, [refreshing, busy]);
+
+  useEffect(() => {
+    if (!refreshing) return;
+    const timer = setTimeout(() => setRefreshing(false), REFRESH_DURATION);
+    return () => clearTimeout(timer);
+  }, [refreshing]);
+
+  const onScroll = useAnimatedScrollHandler((event) => {
+    const over = -event.contentOffset.y;
+    pull.value = over > 0 ? over : 0;
+  });
+
+  /*
+   * The release is read on the JavaScript thread rather than in the scroll
+   * worklet: starting a refresh is a state change either way, so a worklet
+   * would only add a hop back across to make it.
+   */
+  const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (refreshing) return;
+    if (-event.nativeEvent.contentOffset.y >= PULL_THRESHOLD) setRefreshing(true);
+  };
+
+  const indicatorStyle = useAnimatedStyle(() => {
+    // Whichever is further along: the finger while it is pulling, the refresh
+    // once it has started. Without the max the indicator blinks out at the
+    // moment of release, which is the moment it is meant to take over.
+    const drawn = Math.min(pull.value / PULL_THRESHOLD, 1);
+    const shown = drawn > busy.value ? drawn : busy.value;
+    return {
+      opacity: shown,
+      transform: [{ scale: 0.7 + shown * 0.3 }, { translateY: (shown - 1) * 10 }],
+    };
+  });
+
+  return (
+    <>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        onScrollEndDrag={onScrollEndDrag}
+        scrollEventThrottle={16}
+        contentContainerStyle={contentContainerStyle}
+      >
+        {children}
+      </Animated.ScrollView>
+      <Animated.View
+        pointerEvents="none"
+        /*
+         * Announced only once the refresh is actually running. While the
+         * finger is still pulling this is a shape following it, and a screen
+         * reader has no finger to follow — it would be told something is
+         * loading before anything is.
+         */
+        accessibilityElementsHidden={!refreshing}
+        importantForAccessibility={refreshing ? 'yes' : 'no-hide-descendants'}
+        // Level with the back button, which sits at the same offset. Two round
+        // controls on one line read as a pair; four points apart they read as a
+        // mistake.
+        style={[{ position: 'absolute', top: insets.top + 4, alignSelf: 'center' }, indicatorStyle]}
+        className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
+      >
+        <Spinner size="sm" label={refreshing ? 'Refreshing' : undefined} />
+      </Animated.View>
+    </>
   );
-
-  return control;
 }
 
 /**
@@ -897,12 +984,10 @@ function StoryBadge() {
  */
 function PageHeaderProfileVersion() {
   const insets = useSafeAreaInsets();
-  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView
-        refreshControl={refresh}
+      <ProfileScroll
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
         <PageHeader variant="page" align="start">
@@ -933,7 +1018,7 @@ function PageHeaderProfileVersion() {
             <Button className="flex-1">Edit profile</Button>
           </PageHeader.Actions>
         </PageHeader>
-      </ScrollView>
+      </ProfileScroll>
     </View>
   );
 }
@@ -944,12 +1029,10 @@ function PageHeaderProfileVersion() {
  */
 function PageHeaderStatsVersion() {
   const insets = useSafeAreaInsets();
-  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView
-        refreshControl={refresh}
+      <ProfileScroll
         contentContainerStyle={{
           paddingTop: insets.top + 52,
           paddingBottom: insets.bottom + 24,
@@ -991,7 +1074,7 @@ function PageHeaderStatsVersion() {
             </Button>
           </PageHeader.Actions>
         </PageHeader>
-      </ScrollView>
+      </ProfileScroll>
     </View>
   );
 }
@@ -1002,12 +1085,10 @@ function PageHeaderStatsVersion() {
  */
 function PageHeaderHeroVersion() {
   const insets = useSafeAreaInsets();
-  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView
-        refreshControl={refresh}
+      <ProfileScroll
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
         <PageHeader variant="page" align="start">
@@ -1041,7 +1122,7 @@ function PageHeaderHeroVersion() {
             </Button>
           </PageHeader.Actions>
         </PageHeader>
-      </ScrollView>
+      </ProfileScroll>
     </View>
   );
 }
@@ -1052,12 +1133,10 @@ function PageHeaderHeroVersion() {
  */
 function PageHeaderCenteredVersion() {
   const insets = useSafeAreaInsets();
-  const refresh = useProfileRefresh();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView
-        refreshControl={refresh}
+      <ProfileScroll
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
         <PageHeader variant="page">
@@ -1082,7 +1161,7 @@ function PageHeaderCenteredVersion() {
             <Button className="flex-1">Follow</Button>
           </PageHeader.Actions>
         </PageHeader>
-      </ScrollView>
+      </ProfileScroll>
     </View>
   );
 }
@@ -1094,13 +1173,11 @@ function PageHeaderCenteredVersion() {
  */
 function PageHeaderBrandVersion() {
   const insets = useSafeAreaInsets();
-  const refresh = useProfileRefresh();
   const { mode } = useThemeMode();
   return (
     <View className="flex-1 bg-background">
       <VersionBack />
-      <ScrollView
-        refreshControl={refresh}
+      <ProfileScroll
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
       >
         <PageHeader variant="page" align="start">
@@ -1146,7 +1223,7 @@ function PageHeaderBrandVersion() {
             </Button>
           </PageHeader.Actions>
         </PageHeader>
-      </ScrollView>
+      </ProfileScroll>
     </View>
   );
 }

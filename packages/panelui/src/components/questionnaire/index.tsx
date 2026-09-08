@@ -346,14 +346,48 @@ function isAnswered(value: string | string[] | undefined): boolean {
  *
  * The spacer goes at the same time. It exists to push the actions apart in a
  * row that lays them out at their own widths; in a band where every action is
- * already an equal share it would take a share of its own, and the buttons
+ * already a share of the row it would take a share of its own, and the buttons
  * would come out narrower the more carefully the caller had spaced them.
+ *
+ * The band's own rule is equal widths, and it is the wrong one here. A row of
+ * equal pills says these are equal decisions; Back and Skip are ways off the
+ * path and Next is the path, so they are sized to their labels and the primary
+ * action takes what is left. Equal thirds also truncate it — "Continue" does
+ * not fit in a third of the band, and the button that carries the flow is the
+ * worst one to lose the end of.
+ *
+ * `flex-none` and nothing else on those two: the button's own padding is what
+ * a label needs either side of it, and anything added here comes off the
+ * primary action, which has the longest label and the least room to lose.
+ *
+ * The primary action goes up one size instead — `lg`, not the default. It is
+ * the only thing on the band anybody is aiming for: the whole widget is one
+ * decision repeated, and this is the button that takes the reader to the next
+ * one, so it carries a larger label and a taller box than the way back beside
+ * it. One size and no more; `xl` is for a button that is the whole of a
+ * screen, and this one shares its row. The band's fixed height comes off with
+ * it, or the taller box would be clamped back to the row's.
  */
 function bandActions(footer: ReactNode): ReactNode {
   if (!isValidElement<QuestionnaireFooterProps>(footer)) return footer;
-  return Children.toArray(footer.props.children).filter(
-    (child) => !(isValidElement(child) && child.type === QuestionnaireSpacer)
-  );
+  return Children.toArray(footer.props.children).flatMap((child) => {
+    if (!isValidElement<QuestionnaireActionProps>(child)) return [child];
+    if (child.type === QuestionnaireSpacer) return [];
+
+    // Merged after the band's own classes rather than before, so what is set
+    // here is what survives.
+    if (child.type === QuestionnaireBack || child.type === QuestionnaireSkip) {
+      return [cloneElement(child, { className: cn('flex-none', child.props.className) })];
+    }
+
+    return [
+      cloneElement(child, {
+        // A caller who asked for a size meant it.
+        size: child.props.size ?? 'lg',
+        className: cn('h-auto', child.props.className),
+      }),
+    ];
+  });
 }
 
 /** The letter or number an answer at this position is badged with. */
@@ -753,7 +787,12 @@ function QuestionnaireRoot({
         <Frame variant="inset" className={className} {...props}>
           {header}
           <Frame.Panel dividers={false}>{body}</Frame.Panel>
-          {footerNode ? <Frame.Footer>{bandActions(footerNode)}</Frame.Footer> : null}
+          {footerNode ? (
+            // Tighter than the band's own gap. That one is set for two or
+            // three equal pills; this row is three actions of three different
+            // widths, and every point between them comes off the longest label.
+            <Frame.Footer className="gap-2">{bandActions(footerNode)}</Frame.Footer>
+          ) : null}
         </Frame>
       ) : (
         <View className={cn('w-full', className)} {...props}>

@@ -89,7 +89,6 @@ const questions = [
   <Questionnaire.Footer>
     <Questionnaire.Back />
     <Questionnaire.Spacer />
-    <Questionnaire.Skip />
     <Questionnaire.Next />
     <Questionnaire.Submit />
   </Questionnaire.Footer>
@@ -155,8 +154,7 @@ function Prototype() {
       <Questionnaire.Footer>
         <Questionnaire.Back />
         <Questionnaire.Spacer />
-        <Questionnaire.Skip />
-        <Questionnaire.Next />
+            <Questionnaire.Next />
         <Questionnaire.Submit />
       </Questionnaire.Footer>
     </Questionnaire>
@@ -223,6 +221,8 @@ Put a `Questionnaire.Input` among the choices. It holds whatever the question is
 ### Leaving one out on purpose
 
 Skip records the decision rather than unblocking anything — an optional question never blocks. `onStatusChange` is how you tell a question that was skipped from one that was never answered.
+
+It goes beside the primary action, in place of Back rather than alongside it. Three actions in the band come out narrow enough to truncate the one carrying the flow, and a row of three reads as three equal decisions when only one of them is the way forward.
 
 ```tsx
 const [timing, setTiming] = useState<QuestionnaireItemStatus>('unanswered');
@@ -580,8 +580,7 @@ function Onboarding() {
       <Questionnaire.Footer>
         <Questionnaire.Back />
         <Questionnaire.Spacer />
-        <Questionnaire.Skip />
-        <Questionnaire.Next />
+            <Questionnaire.Next />
         <Questionnaire.Submit>Finish</Questionnaire.Submit>
       </Questionnaire.Footer>
     </Questionnaire>
@@ -633,8 +632,7 @@ function Feedback() {
             <Questionnaire.Footer>
               <Questionnaire.Back />
               <Questionnaire.Spacer />
-              <Questionnaire.Skip />
-              <Questionnaire.Next />
+                        <Questionnaire.Next />
               <Questionnaire.Submit>Send</Questionnaire.Submit>
             </Questionnaire.Footer>
           </Questionnaire>

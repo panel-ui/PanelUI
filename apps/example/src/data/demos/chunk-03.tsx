@@ -859,7 +859,7 @@ const PROTOTYPE_QUESTIONS = [
   { name: 'detail' },
 ] as const;
 
-/** One answer to each of two questions, the second of which can be skipped. */
+/** One answer to each of two questions, the second of which is optional. */
 function QuestionnaireDemo() {
   const [answers, setAnswers] = useState<QuestionnaireAnswers>({});
 
@@ -895,7 +895,7 @@ function QuestionnaireDemo() {
         <Questionnaire.Item name="detail">
           <Questionnaire.Question>How much detail?</Questionnaire.Question>
           <Questionnaire.Description>
-            Skip this one if you have not decided.
+            Leave it if you have not decided.
           </Questionnaire.Description>
           <Questionnaire.Choices>
             <Questionnaire.Choice value="focused" label="Focused" />
@@ -905,7 +905,6 @@ function QuestionnaireDemo() {
         <Questionnaire.Footer>
           <Questionnaire.Back />
           <Questionnaire.Spacer />
-          <Questionnaire.Skip />
           <Questionnaire.Next />
           <Questionnaire.Submit />
         </Questionnaire.Footer>
@@ -1034,7 +1033,6 @@ function QuestionnaireNumbersDemo() {
         <Questionnaire.Footer>
           <Questionnaire.Back />
           <Questionnaire.Spacer />
-          <Questionnaire.Skip />
           <Questionnaire.Next />
           <Questionnaire.Submit />
         </Questionnaire.Footer>
@@ -1171,7 +1169,7 @@ function QuestionnaireOnboardingVersion() {
         <Questionnaire.Item name="timeline">
           <Questionnaire.Question>When are you shipping?</Questionnaire.Question>
           <Questionnaire.Description>
-            Skip this if it is not decided.
+            Leave it if it is not decided.
           </Questionnaire.Description>
           <Questionnaire.Choices>
             <Questionnaire.Choice value="month" label="Within a month" />
@@ -1191,7 +1189,6 @@ function QuestionnaireOnboardingVersion() {
         <Questionnaire.Footer>
           <Questionnaire.Back />
           <Questionnaire.Spacer />
-          <Questionnaire.Skip />
           <Questionnaire.Next />
           <Questionnaire.Submit>Finish</Questionnaire.Submit>
         </Questionnaire.Footer>
@@ -1199,8 +1196,8 @@ function QuestionnaireOnboardingVersion() {
 
       <Text size="sm" muted>
         Swipe across the questions, or use the buttons. The first, second and
-        last are required; the stack takes several answers and the timeline can
-        be skipped.
+        last are required; the stack takes several answers and the timeline is
+        optional.
       </Text>
     </ScrollView>
   );
@@ -1231,8 +1228,8 @@ function QuestionnaireSheetVersion() {
         `showClose={false}` matters: the sheet's close button is absolutely
         placed in its top-right corner, which is exactly where the progress
         sits. Two things in one corner is one of them unreachable — and a
-        questionnaire that already has Back, Skip and Send does not need a
-        third way out. The sheet still dismisses by drag and by backdrop.
+        questionnaire that already has Back and Send does not need a third way
+        out. The sheet still dismisses by drag and by backdrop.
 
         Pips rather than the ring for the same reason the frame is off: the
         sheet is short, its corner is contested, and a row of marks lies flat
@@ -1267,8 +1264,7 @@ function QuestionnaireSheetVersion() {
             <Questionnaire.Footer>
               <Questionnaire.Back />
               <Questionnaire.Spacer />
-              <Questionnaire.Skip />
-              <Questionnaire.Next />
+                  <Questionnaire.Next />
               <Questionnaire.Submit>Send</Questionnaire.Submit>
             </Questionnaire.Footer>
           </Questionnaire>

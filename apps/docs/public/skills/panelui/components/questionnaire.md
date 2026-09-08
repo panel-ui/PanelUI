@@ -26,7 +26,6 @@ import { Questionnaire } from 'panelui-native';
   <Questionnaire.Footer>
     <Questionnaire.Back />
     <Questionnaire.Spacer />
-    <Questionnaire.Skip />
     <Questionnaire.Next />
     <Questionnaire.Submit />
   </Questionnaire.Footer>
@@ -51,7 +50,7 @@ import { Questionnaire } from 'panelui-native';
 - `Questionnaire.Footer` — The action row, in its own section at the foot of the panel.
 - `Questionnaire.Spacer` — A flexible gap, so the trailing buttons stay against the trailing edge.
 - `Questionnaire.Back` — To the previous question. Absent on the first.
-- `Questionnaire.Skip` — Records that an optional question was deliberately left out.
+- `Questionnaire.Skip` — Records that the active question was deliberately left out and moves on. Pair it with the primary action rather than adding it to a Back/Next row — three actions in the band is a row nobody reads.
 - `Questionnaire.Next` — On to the next question. Dims while a required question is unanswered, and is absent on the last.
 - `Questionnaire.Submit` — Hands over every answer. Only on the last question, and dims the same way.
 
@@ -226,8 +225,7 @@ function Prototype() {
       <Questionnaire.Footer>
         <Questionnaire.Back />
         <Questionnaire.Spacer />
-        <Questionnaire.Skip />
-        <Questionnaire.Next />
+            <Questionnaire.Next />
         <Questionnaire.Submit />
       </Questionnaire.Footer>
     </Questionnaire>

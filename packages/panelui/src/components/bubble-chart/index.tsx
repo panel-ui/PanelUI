@@ -165,6 +165,20 @@ const AXIS_TITLE_HEIGHT = 18;
 /** Gap between a quadrant's caption and the corner it is written in. */
 const QUADRANT_LABEL_INSET = 6;
 
+/**
+ * How strongly the overlays draw: the quadrant crosshair, and the size key's
+ * rings.
+ *
+ * Both are furniture rather than data, and both were faint enough to be missed
+ * — the crosshair at 0.4 and the rings at 0.6, on a token that is already a
+ * mid-grey chosen to stay behind the circles. The restraint has to come from
+ * the token, not from a second reduction on top of it, or the mark is one
+ * nobody finds. `Trend` has drawn at 0.7 all along and reads correctly in both
+ * themes, so that is the number.
+ */
+const CROSSHAIR_OPACITY = 0.7;
+const KEY_RING_OPACITY = 0.85;
+
 /** Column the size key's values are written in, beside its circles. */
 const SIZE_KEY_LABEL_WIDTH = 44;
 
@@ -1307,6 +1321,12 @@ function BubbleChartQuadrants({
           />
         </>
       ) : null}
+      {/*
+        The same weight `Trend` draws at, because it is the same kind of mark:
+        a reference laid over the field rather than a reading taken from it.
+        At 0.4 of a mid-grey the split was a line you had to already know was
+        there, which leaves four labelled corners and nothing dividing them.
+      */}
       <Animated.View
         style={[
           {
@@ -1315,7 +1335,7 @@ function BubbleChartQuadrants({
             height: plot.height,
             width: 1,
             backgroundColor: stroke,
-            opacity: 0.4,
+            opacity: CROSSHAIR_OPACITY,
           },
           verticalStyle,
         ]}
@@ -1328,7 +1348,7 @@ function BubbleChartQuadrants({
             width: plot.width,
             height: 1,
             backgroundColor: stroke,
-            opacity: 0.4,
+            opacity: CROSSHAIR_OPACITY,
           },
           horizontalStyle,
         ]}
@@ -1341,7 +1361,7 @@ function BubbleChartQuadrants({
       {labels?.topLeft ? (
         <Text
           size="xs"
-          muted
+          weight="medium"
           numberOfLines={1}
           style={{
             ...corner,
@@ -1355,7 +1375,7 @@ function BubbleChartQuadrants({
       {labels?.topRight ? (
         <Text
           size="xs"
-          muted
+          weight="medium"
           numberOfLines={1}
           style={{
             ...corner,
@@ -1370,7 +1390,7 @@ function BubbleChartQuadrants({
       {labels?.bottomLeft ? (
         <Text
           size="xs"
-          muted
+          weight="medium"
           numberOfLines={1}
           style={{
             ...corner,
@@ -1384,7 +1404,7 @@ function BubbleChartQuadrants({
       {labels?.bottomRight ? (
         <Text
           size="xs"
-          muted
+          weight="medium"
           numberOfLines={1}
           style={{
             ...corner,
@@ -1467,7 +1487,7 @@ function BubbleChartSizeKey({
       className={cn(className)}
     >
       {label ? (
-        <Text size="xs" muted numberOfLines={1}>
+        <Text size="xs" weight="medium" numberOfLines={1}>
           {label}
         </Text>
       ) : null}
@@ -1486,7 +1506,7 @@ function BubbleChartSizeKey({
               borderRadius: step.r,
               borderWidth: 1,
               borderColor: stroke,
-              opacity: 0.6,
+              opacity: KEY_RING_OPACITY,
             }}
           />
         ))}
@@ -1494,7 +1514,7 @@ function BubbleChartSizeKey({
           <Text
             key={`v${step.value}`}
             size="xs"
-            muted
+            weight="medium"
             numberOfLines={1}
             style={{
               position: 'absolute',

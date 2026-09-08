@@ -294,6 +294,11 @@ interface QuestionnaireContextValue {
   shortcuts: QuestionnaireShortcutMode | null;
   /** Whether the root drew the frame, which decides who owns the insets. */
   framed: boolean;
+  /**
+   * The question is drawn on the header strip rather than in the panel, so
+   * `Questionnaire.Question` renders nothing where it stands.
+   */
+  questionOnStrip: boolean;
   /** The active question is required and has no answer, so the way on is shut. */
   blocked: boolean;
 }
@@ -388,6 +393,26 @@ function bandActions(footer: ReactNode): ReactNode {
       }),
     ];
   });
+}
+
+/**
+ * The text of a question's `Questionnaire.Question`, for the header strip.
+ *
+ * Read off the element rather than reported up by the mounted question: only
+ * the active one is mounted, and the strip has to be drawn in the same render
+ * as the pane it labels — a value arriving from below would land one frame
+ * late, which on a question change is a header still naming the question that
+ * has just left.
+ */
+function questionOf(item: ReactElement<QuestionnaireItemProps> | undefined): ReactNode {
+  if (!item) return null;
+  let found: ReactNode = null;
+  Children.forEach(item.props.children, (child) => {
+    if (found != null) return;
+    if (!isValidElement<QuestionnaireQuestionProps>(child)) return;
+    if (child.type === QuestionnaireQuestion) found = child.props.children;
+  });
+  return found;
 }
 
 /** The letter or number an answer at this position is badged with. */
@@ -697,6 +722,29 @@ function QuestionnaireRoot({
    */
   const blocked = !!activeItem?.required && !isAnswered(answers[activeItem.name]);
 
+  /*
+   * With no title the header strip has nothing on it but the ring, and a ring
+   * centred on an empty strip is a widget that will not say what it is asking.
+   * The question stands in for the title instead — it is the only line that
+   * names the thing, and a questionnaire that has not been given a title is
+   * one where the question is the title.
+   *
+   * It takes the title's place exactly, at the leading edge with the ring
+   * still at the trailing one, so a titled questionnaire and an untitled one
+   * draw the same strip. Two arrangements of the same two things would make
+   * the header look like it meant something different in each.
+   *
+   * The trade is that the question no longer travels with the pane: the strip
+   * stays put while the answers slide under it. That is the right way round
+   * for a label, and the wrong way round for a question that is meant to
+   * arrive with its answers — which is why giving it a title turns this off.
+   */
+  const questionOnStrip = frame && !titleNode;
+  const stripQuestion = useMemo(
+    () => (questionOnStrip ? questionOf(activeItem?.element) : null),
+    [questionOnStrip, activeItem]
+  );
+
   const context = useMemo<QuestionnaireContextValue>(
     () => ({
       current,
@@ -716,6 +764,7 @@ function QuestionnaireRoot({
       submit,
       shortcuts: shortcuts ?? null,
       framed: frame,
+      questionOnStrip,
       blocked,
     }),
     [
@@ -736,6 +785,7 @@ function QuestionnaireRoot({
       submit,
       shortcuts,
       frame,
+      questionOnStrip,
       blocked,
     ]
   );
@@ -767,8 +817,17 @@ function QuestionnaireRoot({
    * rather than as the strip's subject.
    */
   const header = (
-    <Frame.Header className={cn('pb-3 pt-1.5', !titleNode && 'justify-center')}>
-      {titleNode}
+    <Frame.Header className="pb-3 pt-1.5">
+      {titleNode ??
+        textChildren(stripQuestion, (text) => (
+          // One line, and it truncates rather than wrapping: the strip is a
+          // label for the panel under it, and a label that grows to two lines
+          // pushes the answers down the screen every time a longer question
+          // comes round.
+          <Text size="sm" weight="medium" numberOfLines={1} className="min-w-0 shrink">
+            {text}
+          </Text>
+        ))}
       {progressNode ? <Frame.Action>{progressNode}</Frame.Action> : null}
     </Frame.Header>
   );
@@ -1362,6 +1421,12 @@ export interface QuestionnaireQuestionProps extends ViewProps {
 
 /** The question being asked. */
 function QuestionnaireQuestion({ className, children, ...props }: QuestionnaireQuestionProps) {
+  const { questionOnStrip } = useQuestionnaire('Questionnaire.Question');
+
+  // Drawn on the header strip instead, where an untitled questionnaire uses it
+  // as its label. Rendering here as well would ask the same thing twice.
+  if (questionOnStrip) return null;
+
   return (
     <View className={className} {...props}>
       {textChildren(children, (text) => (

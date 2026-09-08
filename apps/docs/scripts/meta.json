@@ -583,6 +583,7 @@
     "react native questionnaire survey form",
     {
       "addedIn": "0.47.0",
+      "updatedIn": "0.94.0",
       "category": "forms"
     }
   ],

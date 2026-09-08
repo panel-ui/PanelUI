@@ -9,6 +9,61 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.94.0] — 2026-09-08
+
+### Changed
+
+- **`Questionnaire` is drawn in a well.** The shell moved to `Frame`'s `inset` variant: the
+  panel the question is written on floats in a recessed band rather than sitting flush in a
+  tray, and the footer's actions moved out of a section under the question and into the band
+  around it. The separation is the point — the question changes and the row under it does not,
+  and a row drawn on the band is visibly not part of the card that keeps being replaced.
+
+  `Questionnaire.Spacer` is dropped on the way into the band. It exists to push actions apart
+  in a row that lays them out at their own widths; where every action is already a share of the
+  row it would take a share of its own. The primary action goes up one size and takes what the
+  others leave, so the label the reader is aiming for is the largest thing on the band.
+
+- **`Questionnaire.Progress` gains `ring`, and takes it as its default.** An arc that sweeps
+  from twelve o'clock as the reader advances. It says how far through the set they are without
+  saying how many questions there are, which is what lets one indicator stand for three
+  questions or thirty — where `pips` and `numbers` stop being countable around eight and fall
+  back to the plain count. All three of those are still there, and the progressbar role and its
+  value are unchanged, so nothing moves for a screen reader.
+
+- **An untitled `Questionnaire` puts the question on its header strip.** Given no title the
+  strip had nothing on it but the ring, and nothing anywhere named the thing being asked. The
+  question now stands in for the title, in the title's own place, so a titled questionnaire and
+  an untitled one draw the same strip. The trade is that the question stops travelling with the
+  pane — which is what giving it a title turns off.
+
+### Fixed
+
+- **A `BottomSheet` with `dismissible={false}` no longer takes the drag.** The lock gated the
+  backdrop press and the Android back gesture and nothing else, so the sheet still followed the
+  finger and flung itself away. The close that followed went to the caller, and a controlled
+  caller declining it was left with a mounted, open sheet parked off the bottom of the screen —
+  invisible behind a backdrop that reads as fully transparent there, and still taking every
+  touch on the screen. Two guards go in: the gesture is disabled, and the dismiss branch is
+  checked again on release, since disabling a gesture does not cancel a touch already in
+  flight. Reported in [#213](https://github.com/panel-ui/PanelUI/issues/213).
+
+- **`BubbleChart`'s quadrant and size-key marks read against the plot.** Both are furniture laid
+  over the field, and both were drawn at a fraction of a token already chosen to stay behind the
+  circles — the crosshair at 0.4 of muted-foreground, the key's rings at 0.6, every caption on
+  either of them muted on top of that. In the dark themes that is a split nobody finds and a key
+  of three circles that reads as one. The restraint belongs to the token, not to a second
+  reduction under it. The grid and the axis ticks are untouched, since every chart shares them.
+
+### Docs
+
+- **The Questionnaire page is re-shot.** Every still on it was of a shell and an indicator that
+  no longer exist, and two states it never showed are now there: a question with an answer
+  chosen, and one marked invalid, where every choice is outlined and the message sits under them.
+
+- **BubbleChart gains a Versions section.** Five of its six demos existed only in the example
+  app; all six are now written out with the code they run and a shot of each.
+
 ## [0.93.0] — 2026-09-07
 
 ### Added

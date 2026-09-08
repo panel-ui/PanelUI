@@ -40,7 +40,7 @@ import { Questionnaire } from 'panelui-native';
 ### Parts
 
 - `Questionnaire.Title` — Names the questionnaire as a whole, in the frame’s header strip. Leave it out and the progress centres on the strip instead of sitting at its trailing edge.
-- `Questionnaire.Progress` — Where the reader is in the set — a bar per question by default, `numbers` to count them out, `count` for plain text. Give it a function for anything else.
+- `Questionnaire.Progress` — Where the reader is in the set — an arc that sweeps round as they advance, by default. `pips` draws a bar per question, `numbers` counts them out, `count` is plain text. Give it a function for anything else.
 - `Questionnaire.Item` — One question. Only the active one is mounted.
 - `Questionnaire.Question` — The question being asked.
 - `Questionnaire.Description` — A line under it — what to consider, or that it can be skipped.
@@ -91,7 +91,7 @@ Extends `ViewProps`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
-| `variant` | `QuestionnaireProgressVariant` | `pips` | `pips` is a bar per question, filled up to the one being asked and widened on it. `numbers` counts them out instead, which is what you want when the reader will be sent back to a particular question. `count` is the plain `Question 2 of 5`. `pips` and `numbers` fall back to `count` past eight questions, where neither is countable at a glance any more. |
+| `variant` | `QuestionnaireProgressVariant` | `ring` | `ring` is an arc that sweeps round as the reader advances — how far through the set they are, without saying how many questions there are. It is the only one that holds its size and its meaning at any length, which is why it is the default. `pips` is a bar per question, filled up to the one being asked and widened on it. `numbers` counts them out instead, which is what you want when the reader will be sent back to a particular question. `count` is the plain `Question 2 of 5`. `pips` and `numbers` fall back to `count` past eight questions, where neither is countable at a glance any more. `ring` never does. |
 | `children` | `ReactNode \| ((state: QuestionnaireProgressState) => ReactNode)` | — | Replace the indicator entirely. Given a function, it is called with the position — for a bar, a row of dots, or a percentage. |
 
 #### `QuestionnaireItemProps`
@@ -249,9 +249,9 @@ A **freeform answer lands under the same name** as the fixed ones, because it is
 
 `shortcuts` badges each answer with a letter or a number, skipping disabled ones so they do not take a letter out of the sequence. The badge is an affordance, not a binding: React Native surfaces hardware key events only to a focused text field, so nothing here can listen for the key itself.
 
-Placing an unframed questionnaire in a container with chrome of its own means checking the corners: `BottomSheet` puts its close button in the top-right, which is where `Questionnaire.Progress` sits, so pass `showClose={false}` there.
+Placing an unframed questionnaire in a container with chrome of its own means checking the corners: `BottomSheet` puts its close button in the top-right, which is where `Questionnaire.Progress` sits, so pass `showClose={false}` there. A sheet is also short, and `variant="pips"` lies flat along the strip where the ring stands up off it.
 
-The surrounding `Frame` is drawn by the component. Pass `frame={false}` to drop it — for a questionnaire in a `BottomSheet`, a `Dialog`, or a card that already draws its own boundary. With the frame off the questionnaire keeps only its vertical rhythm, because the container it was placed in is already holding it off the edges.
+The surrounding `Frame` is drawn by the component: the panel the question is written on floats in a recessed band, with the title and the progress on the strip above it and the footer's actions as equal pills in the band below. Pass `frame={false}` to drop it — for a questionnaire in a `BottomSheet`, a `Dialog`, or a card that already draws its own boundary. With the frame off the questionnaire keeps only its vertical rhythm, because the container it was placed in is already holding it off the edges.
 
 ---
 

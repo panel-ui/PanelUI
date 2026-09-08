@@ -39,6 +39,15 @@
  * question needs, for free. Pass `frame={false}` to drop it — for a
  * questionnaire inside a `BottomSheet` or a card that already draws a border.
  *
+ * It is the `inset` variant, so the panel the question is written on floats in
+ * a recessed band rather than sitting flush in a tray, and the actions go in
+ * the band rather than in a section under the question. That separation is the
+ * point: the question changes and the row under it does not, and a row drawn
+ * on the band is visibly not part of the card that keeps being replaced.
+ *
+ * The band shapes its actions into equal pills, which is why
+ * `Questionnaire.Spacer` is dropped on the way in — see `bandActions`.
+ *
  * ## Why the root reads its children instead of collecting registrations
  *
  * Only the active question is mounted, so an unmounted one cannot report that
@@ -50,8 +59,8 @@
  * which makes the whole set knowable without mounting any of it.
  *
  * That same pass sorts the parts into the shell: the title and progress go to
- * the header strip, the footer to a section at the bottom of the panel, and
- * everything else is a question.
+ * the header strip above the panel, the footer's actions to the band around
+ * it, and everything else is a question.
  *
  * ## Answers are one record, the way a form would submit them
  *
@@ -101,12 +110,15 @@ import Animated, {
   Easing,
   FadeOut,
   runOnJS,
+  useAnimatedProps,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
   type EntryExitAnimationFunction,
 } from 'react-native-reanimated';
+import Svg, { Circle } from 'react-native-svg';
 import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from '../../icons';
@@ -130,6 +142,16 @@ const EXIT_DURATION = 140;
 
 /** How long a progress pip takes to fill once its question has been reached. */
 const PIP_DURATION = 260;
+
+/**
+ * The progress ring: its diameter, and the weight of the arc drawn round it.
+ *
+ * Sized against the title beside it rather than against the strip it sits on.
+ * A ring the height of a line of text reads as the trailing half of a pair;
+ * one much larger reads as the header's subject, which it is not.
+ */
+const RING_SIZE = 22;
+const RING_STROKE = 2.5;
 
 /** How far across the body a swipe has to travel before it commits. */
 const SWIPE_FRACTION = 0.25;
@@ -312,6 +334,26 @@ const ShortcutContext = createContext<string | null>(null);
 function isAnswered(value: string | string[] | undefined): boolean {
   if (Array.isArray(value)) return value.length > 0;
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * The footer's actions, on their way into the band.
+ *
+ * `Frame.Footer` shapes its *direct* children into the band's pills, so the
+ * row itself has to be unwrapped — handed the `Questionnaire.Footer` element
+ * whole it would be the wrapper that came out a pill, with the buttons
+ * untouched inside it.
+ *
+ * The spacer goes at the same time. It exists to push the actions apart in a
+ * row that lays them out at their own widths; in a band where every action is
+ * already an equal share it would take a share of its own, and the buttons
+ * would come out narrower the more carefully the caller had spaced them.
+ */
+function bandActions(footer: ReactNode): ReactNode {
+  if (!isValidElement<QuestionnaireFooterProps>(footer)) return footer;
+  return Children.toArray(footer.props.children).filter(
+    (child) => !(isValidElement(child) && child.type === QuestionnaireSpacer)
+  );
 }
 
 /** The letter or number an answer at this position is badged with. */
@@ -679,10 +721,11 @@ function QuestionnaireRoot({
   );
 
   /*
-   * More room above and below than a Frame header takes by default. That
-   * default is set for a line of text, and the progress indicator is a 4px
-   * bar — against the same padding it reads as pinned to the top edge rather
-   * than sitting on the strip.
+   * A little more room under the strip than the `inset` header takes by
+   * default. That default is set for a line of text; the ring is a shape whose
+   * stroke reaches the edge of its box, with none of the leading a line of
+   * text has, so against the same padding it sits closer to the panel than the
+   * title beside it does.
    *
    * With no title, the progress centres rather than staying hard right. Right
    * is where it belongs when it is the trailing half of a pair; on its own at
@@ -690,7 +733,7 @@ function QuestionnaireRoot({
    * rather than as the strip's subject.
    */
   const header = (
-    <Frame.Header className={cn('pb-3.5 pt-3', !titleNode && 'justify-center')}>
+    <Frame.Header className={cn('pb-3 pt-1.5', !titleNode && 'justify-center')}>
       {titleNode}
       {progressNode ? <Frame.Action>{progressNode}</Frame.Action> : null}
     </Frame.Header>
@@ -699,12 +742,18 @@ function QuestionnaireRoot({
   return (
     <QuestionnaireContext.Provider value={context}>
       {frame ? (
-        <Frame className={className} {...props}>
+        /*
+         * The panel floats in a recessed band rather than sitting flush in a
+         * tray, and the band is where the actions go. A questionnaire is a
+         * screen's worth of one decision repeated — answer, then move — and
+         * the band draws that row as equal pills clear of the card the
+         * question is written on, which is the distinction the old footer
+         * section inside the panel did not make.
+         */
+        <Frame variant="inset" className={className} {...props}>
           {header}
-          <Frame.Panel dividers={false}>
-            {body}
-            {footerNode ? <Frame.Section divided>{footerNode}</Frame.Section> : null}
-          </Frame.Panel>
+          <Frame.Panel dividers={false}>{body}</Frame.Panel>
+          {footerNode ? <Frame.Footer>{bandActions(footerNode)}</Frame.Footer> : null}
         </Frame>
       ) : (
         <View className={cn('w-full', className)} {...props}>
@@ -964,18 +1013,23 @@ export interface QuestionnaireProgressState {
 }
 
 /** How the position is drawn. */
-export type QuestionnaireProgressVariant = 'pips' | 'numbers' | 'count';
+export type QuestionnaireProgressVariant = 'ring' | 'pips' | 'numbers' | 'count';
 
 export interface QuestionnaireProgressProps {
   className?: string;
   /**
+   * `ring` is an arc that sweeps round as the reader advances — how far
+   * through the set they are, without saying how many questions there are.
+   * It is the only one that holds its size and its meaning at any length,
+   * which is why it is the default.
+   *
    * `pips` is a bar per question, filled up to the one being asked and widened
    * on it. `numbers` counts them out instead, which is what you want when the
    * reader will be sent back to a particular question. `count` is the plain
    * `Question 2 of 5`.
    *
    * `pips` and `numbers` fall back to `count` past eight questions, where
-   * neither is countable at a glance any more.
+   * neither is countable at a glance any more. `ring` never does.
    */
   variant?: QuestionnaireProgressVariant;
   /**
@@ -983,6 +1037,74 @@ export interface QuestionnaireProgressProps {
    * position — for a bar, a row of dots, or a percentage.
    */
   children?: ReactNode | ((state: QuestionnaireProgressState) => ReactNode);
+}
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+/**
+ * How far through the set, as an arc.
+ *
+ * A fraction rather than a count, which is what lets one ring stand for three
+ * questions or thirty: the marks that name each question individually stop
+ * being countable somewhere around eight, and this never has that problem.
+ * What it gives up is any answer to "how many left" — reach for `numbers`
+ * where that matters.
+ *
+ * Drawn with `strokeDasharray` rather than `strokeDashoffset`: a dash the
+ * length of the filled arc and a gap the length of the rest leaves exactly one
+ * visible stroke, and its length is the only number that has to be animated.
+ * The circle is turned back a quarter because a stroke starts at three
+ * o'clock, and an arc that begins there reads as a gauge already part-way
+ * along.
+ */
+function ProgressRing({ current, total }: { current: number; total: number }) {
+  const reduceMotion = useReducedMotion();
+  const tokens = useCSSVariable(['--color-primary', '--color-border']);
+  // Narrowed on the way out because `useCSSVariable` resolves to a number for
+  // any token that happens to be one.
+  const fillColor = typeof tokens[0] === 'string' ? tokens[0] : 'rgb(120,120,255)';
+  const trackColor = typeof tokens[1] === 'string' ? tokens[1] : 'rgba(128,128,128,0.2)';
+
+  const radius = (RING_SIZE - RING_STROKE) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const centre = RING_SIZE / 2;
+
+  const fraction = total > 0 ? Math.min(Math.max(current / total, 0), 1) : 0;
+  const filled = useSharedValue(fraction);
+
+  useEffect(() => {
+    filled.value = reduceMotion
+      ? fraction
+      : withTiming(fraction, { duration: PIP_DURATION, easing: EASE });
+  }, [fraction, reduceMotion, filled]);
+
+  const arc = useAnimatedProps(() => ({
+    strokeDasharray: [circumference * filled.value, circumference],
+  }));
+
+  return (
+    <Svg width={RING_SIZE} height={RING_SIZE}>
+      <Circle
+        cx={centre}
+        cy={centre}
+        r={radius}
+        stroke={trackColor}
+        strokeWidth={RING_STROKE}
+        fill="none"
+      />
+      <AnimatedCircle
+        animatedProps={arc}
+        cx={centre}
+        cy={centre}
+        r={radius}
+        stroke={fillColor}
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        fill="none"
+        transform={`rotate(-90 ${centre} ${centre})`}
+      />
+    </Svg>
+  );
 }
 
 /**
@@ -1055,7 +1177,7 @@ function ProgressNumber({
 /** Where the reader is in the set, announced as a progress bar. */
 function QuestionnaireProgress({
   className,
-  variant = 'pips',
+  variant = 'ring',
   children,
 }: QuestionnaireProgressProps) {
   const { current, total, first, last } = useQuestionnaire('Questionnaire.Progress');
@@ -1064,11 +1186,15 @@ function QuestionnaireProgress({
   /*
    * Marks while they can still be counted, the count itself once they cannot.
    * Twenty of either is a texture rather than a number, and the text says the
-   * same thing in less room.
+   * same thing in less room. The ring is exempt: it never claimed to be
+   * countable, so there is nothing for a long set to take away from it.
    */
-  const drawable = variant !== 'count' && total > 0 && total <= MAX_PIPS;
+  const drawable =
+    variant !== 'count' && variant !== 'ring' && total > 0 && total <= MAX_PIPS;
 
-  const fallback = drawable ? (
+  const fallback = variant === 'ring' ? (
+    <ProgressRing current={current} total={total} />
+  ) : drawable ? (
     <View className={cn('flex-row items-center', variant === 'numbers' ? 'gap-1.5' : 'gap-1')}>
       {Array.from({ length: total }, (_, index) =>
         variant === 'numbers' ? (

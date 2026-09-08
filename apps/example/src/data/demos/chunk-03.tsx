@@ -1040,7 +1040,7 @@ function QuestionnaireNumbersDemo() {
         </Questionnaire.Footer>
       </Questionnaire>
       <Text size="sm" muted>
-        A number says which question this is, which a bar cannot — worth it
+        A number says which question this is, which an arc cannot — worth it
         where somebody is going to be sent back to one of them.
       </Text>
     </View>
@@ -1233,6 +1233,10 @@ function QuestionnaireSheetVersion() {
         sits. Two things in one corner is one of them unreachable — and a
         questionnaire that already has Back, Skip and Send does not need a
         third way out. The sheet still dismisses by drag and by backdrop.
+
+        Pips rather than the ring for the same reason the frame is off: the
+        sheet is short, its corner is contested, and a row of marks lies flat
+        along the strip where a ring stands up off it.
       */}
       <BottomSheet open={open} onOpenChange={setOpen}>
         <BottomSheet.Content showClose={false}>
@@ -1244,7 +1248,7 @@ function QuestionnaireSheetVersion() {
             }}
           >
             <Questionnaire.Title>Feedback</Questionnaire.Title>
-            <Questionnaire.Progress />
+            <Questionnaire.Progress variant="pips" />
             <Questionnaire.Item name="mood" required>
               <Questionnaire.Question>How did that go?</Questionnaire.Question>
               <Questionnaire.Choices>
@@ -2073,7 +2077,7 @@ export const ENTRIES: ComponentEntry[] = [
       { label: 'Selecting more than one', render: () => <QuestionnaireMultipleDemo /> },
       { label: 'An answer that is not listed', render: () => <QuestionnaireFreeformDemo /> },
       { label: 'A letter beside every answer', render: () => <QuestionnaireShortcutsDemo /> },
-      { label: 'Numbers instead of pips', render: () => <QuestionnaireNumbersDemo /> },
+      { label: 'Numbers instead of the ring', render: () => <QuestionnaireNumbersDemo /> },
       { label: 'Without the frame', render: () => <QuestionnaireBareDemo /> },
       {
         label: 'Getting set up',

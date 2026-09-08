@@ -587,6 +587,17 @@ function BottomSheetContent({
     () =>
       Gesture.Pan()
         /*
+         * A locked sheet does not take the drag at all.
+         *
+         * Refusing the close is not enough on its own: the drag still moves
+         * the sheet, and a controlled caller that declines `onOpenChange`
+         * leaves it parked off the bottom of the screen — open as far as the
+         * caller is concerned, invisible, and still taking every touch behind
+         * a fully transparent backdrop. The backdrop press and the back
+         * gesture were already gated; this is the third way out.
+         */
+        .enabled(dismissible)
+        /*
          * A drag has to travel before it takes the touch. This detector wraps
          * the whole sheet, close button included, and an unqualified Pan
          * activates on a few pixels of drift — cancelling the press the button
@@ -626,9 +637,16 @@ function BottomSheetContent({
            * your hand from one that merely goes where you put it.
            */
           const projected = translateY.value + project(event.velocityY);
+          /*
+           * `dismissible` again, behind `.enabled()` rather than instead of
+           * it. Disabling a gesture does not cancel a touch already in flight,
+           * so a sheet locked mid-drag still arrives here — and without this
+           * it would fling itself away on the strength of a decision the
+           * caller has since revoked. Falling through snaps it back instead.
+           */
           if (
-            projected > DISMISS_DISTANCE ||
-            event.velocityY > DISMISS_VELOCITY
+            dismissible &&
+            (projected > DISMISS_DISTANCE || event.velocityY > DISMISS_VELOCITY)
           ) {
             translateY.value = withSpring(
               screenHeight,
@@ -647,7 +665,15 @@ function BottomSheetContent({
     // Rebuilt only when one of these changes. Built inline it would be a new
     // gesture on every render — and the sheet re-renders while it is being
     // used, each time re-attaching the handler and dropping the live touch.
-    [close, screenHeight, translateY, scrollGesture, scrollOffset, hasScrollable]
+    [
+      close,
+      dismissible,
+      screenHeight,
+      translateY,
+      scrollGesture,
+      scrollOffset,
+      hasScrollable,
+    ]
   );
 
   const sheetStyle = useAnimatedStyle(() => ({

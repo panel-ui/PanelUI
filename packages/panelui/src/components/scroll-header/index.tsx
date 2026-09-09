@@ -377,9 +377,8 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
     // not rebuilt on every render of the child.
     const forwardScroll = useCallback(
       (native: NativeScrollEvent) => {
-        // Only the scroll geometry survives the crossing. It is what a scroll
-        // callback reads, and the rest of a synthetic event is a live object
-        // that cannot be sent.
+        // The `nativeEvent` crosses whole; the synthetic wrapper around it does
+        // not, because the rest of one is a live object with methods on it.
         plainOnScroll?.({ nativeEvent: native } as NativeSyntheticEvent<NativeScrollEvent>);
       },
       [plainOnScroll]
@@ -391,12 +390,19 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
         onScroll: (event) => {
           offset.value = event.contentOffset.y;
           if (forwards) {
+            // Every field React Native puts on a scroll event, so a callback
+            // reading `velocity` for a direction, or `targetContentOffset` for
+            // where a fling is going, finds what it would have without the
+            // header. Listed rather than spread: the event carries Reanimated's
+            // own `eventName` too, and that is not part of the contract.
             runOnJS(forwardScroll)({
+              contentInset: event.contentInset,
               contentOffset: event.contentOffset,
               contentSize: event.contentSize,
               layoutMeasurement: event.layoutMeasurement,
-              contentInset: event.contentInset,
+              velocity: event.velocity,
               zoomScale: event.zoomScale,
+              targetContentOffset: event.targetContentOffset,
             } as NativeScrollEvent);
           }
         },

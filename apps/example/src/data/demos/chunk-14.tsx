@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from "react-native";
+import { FlatList, Image, ScrollView, SectionList, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from "react-native";
 import Animated, {
+  interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, Item, PageHeader, PencilIcon, PlusIcon, ScrollHeader, SearchBar, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, Item, PageHeader, PencilIcon, PlusIcon, ScrollHeader, SearchBar, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Tabs, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import { useCSSVariable } from "uniwind";
@@ -1414,6 +1415,253 @@ function ScrollHeaderBarOnlyVersion() {
   );
 }
 
+/**
+ * The same rows, grouped, so a section list has something to lay out. Derived
+ * from the flat list rather than written out again, so the two stay in step.
+ */
+const LIBRARY_SECTIONS = [
+  { title: 'Actions', ids: ['button', 'select', 'slider', 'switch'] },
+  { title: 'Surfaces', ids: ['card', 'item', 'table', 'tabs'] },
+  { title: 'Overlays', ids: ['dialog', 'drawer', 'menu', 'popover', 'toast', 'tooltip'] },
+  { title: 'Forms', ids: ['field', 'input'] },
+].map((section) => ({
+  title: section.title,
+  data: LIBRARY_ROWS.filter((row) => section.ids.includes(row.id)),
+}));
+
+/** A virtualised list: the child is cloned whatever kind of scroller it is. */
+function ScrollHeaderListVersion() {
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Bar>
+        <ScrollHeader.Title>Components</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <Button variant="ghost" size="icon" accessibilityLabel="Search">
+            <SearchIcon size={18} />
+          </Button>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Components</ScrollHeader.Title>
+        <ScrollHeader.Description>{LIBRARY_ROWS.length} in the library</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <FlatList
+        data={LIBRARY_ROWS}
+        keyExtractor={(row) => row.id}
+        showsVerticalScrollIndicator={false}
+        // No `paddingTop` of our own: the header sets one, and an explicit top
+        // padding here would replace it rather than be added to it.
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 40 }}
+        renderItem={({ item }) => (
+          <Item variant="outline">
+            <Item.Content>
+              <Item.Title>{item.name}</Item.Title>
+              <Item.Description>{item.summary}</Item.Description>
+            </Item.Content>
+            <ChevronRightIcon size={16} />
+          </Item>
+        )}
+      />
+    </ScrollHeader>
+  );
+}
+
+/** A grouped list, under a bar drawn on the card token rather than the page. */
+function ScrollHeaderGroupedVersion() {
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Bar surface="muted" divider={false}>
+        <ScrollHeader.Title>Catalogue</ScrollHeader.Title>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Catalogue</ScrollHeader.Title>
+        <ScrollHeader.Description>{LIBRARY_SECTIONS.length} groups</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <SectionList
+        sections={LIBRARY_SECTIONS}
+        keyExtractor={(row) => row.id}
+        showsVerticalScrollIndicator={false}
+        // A sticky section header pins to the top of the scroller, which is
+        // behind the band — so these travel with the rows instead.
+        stickySectionHeadersEnabled={false}
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 40 }}
+        renderSectionHeader={({ section }) => (
+          <Text size="sm" weight="semibold" muted className="pt-3">
+            {section.title}
+          </Text>
+        )}
+        renderItem={({ item }) => (
+          <Item variant="outline">
+            <Item.Content>
+              <Item.Title>{item.name}</Item.Title>
+              <Item.Description>{item.summary}</Item.Description>
+            </Item.Content>
+          </Item>
+        )}
+      />
+    </ScrollHeader>
+  );
+}
+
+/** The collapse, mirrored out of the header and spent on something else. */
+function ScrollHeaderBorrowedVersion() {
+  const collapse = useSharedValue(0);
+
+  const pill = useAnimatedStyle(() => ({
+    opacity: collapse.value,
+    transform: [{ translateY: interpolate(collapse.value, [0, 1], [16, 0], 'clamp') }],
+  }));
+
+  return (
+    <View className="flex-1">
+      <ScrollHeader className="flex-1 bg-background" progress={collapse}>
+        <ScrollHeader.Bar>
+          <ScrollHeader.Title>Drafts</ScrollHeader.Title>
+        </ScrollHeader.Bar>
+
+        <ScrollHeader.Large>
+          <ScrollHeader.Title>Drafts</ScrollHeader.Title>
+          <ScrollHeader.Description>{LIBRARY_ROWS.length} unsent</ScrollHeader.Description>
+        </ScrollHeader.Large>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <LibraryRows />
+        </ScrollView>
+      </ScrollHeader>
+
+      {/* Outside the header entirely, driven by the shared value the header
+          writes: it arrives at exactly the pace the large title leaves at. */}
+      <Animated.View pointerEvents="box-none" style={pill} className="absolute bottom-8 end-4">
+        <Button size="sm" onPress={() => {}}>
+          New draft
+        </Button>
+      </Animated.View>
+    </View>
+  );
+}
+
+/** A gradient where a picture would go, mixed from the theme's own tokens. */
+function ScrollHeaderGradientVersion() {
+  const seriesThree = useCSSVariable('--color-chart-3');
+  const seriesFour = useCSSVariable('--color-chart-4');
+  const ramp: [string, string] | undefined =
+    typeof seriesThree === 'string' && typeof seriesFour === 'string'
+      ? [seriesThree, seriesFour]
+      : undefined;
+
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Cover colors={ramp} scrim={false} />
+
+      <ScrollHeader.Bar surface="none" divider={false}>
+        <ScrollHeader.Title className="text-white">Playlists</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <Button variant="ghost" size="icon" accessibilityLabel="More">
+            <EllipsisIcon size={18} />
+          </Button>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large className="pb-5">
+        <ScrollHeader.Title className="text-white">Playlists</ScrollHeader.Title>
+        <ScrollHeader.Description className="text-white/80">Made for you</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/** Nothing settles the band: it is left exactly where the finger let go. */
+function ScrollHeaderLooseVersion() {
+  return (
+    <ScrollHeader className="flex-1 bg-background" snap={false}>
+      <ScrollHeader.Bar>
+        <ScrollHeader.Title>Archive</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <Button variant="ghost" size="icon" accessibilityLabel="Filter">
+            <EllipsisIcon size={18} />
+          </Button>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Archive</ScrollHeader.Title>
+        <ScrollHeader.Description>{LIBRARY_ROWS.length} kept</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/**
+ * A bar with two rows in it: the identity and its actions, and the navigation
+ * under them. Both survive the collapse, because everything in the bar is
+ * pinned — `barHeight` is what makes room for the second row.
+ */
+function ScrollHeaderTabsVersion() {
+  const [tab, setTab] = useState('posts');
+  const rows = tab === 'posts' ? LIBRARY_ROWS : LIBRARY_ROWS.slice(0, 5);
+
+  return (
+    <ScrollHeader className="flex-1 bg-background" barHeight={94}>
+      <ScrollHeader.Bar className="flex-col items-stretch gap-0 px-0">
+        <View className="h-12 flex-row items-center gap-3 px-4">
+          <ScrollHeader.Title>u/economist</ScrollHeader.Title>
+          {/* Grouped on one surface rather than spaced across the bar: four
+              glyphs in a row read as one control, not four decisions. */}
+          <ScrollHeader.Actions className="rounded-full bg-card px-1">
+            <Button variant="ghost" size="icon" accessibilityLabel="Create">
+              <PlusIcon size={18} />
+            </Button>
+            <Button variant="ghost" size="icon" accessibilityLabel="Search">
+              <SearchIcon size={18} />
+            </Button>
+            <Button variant="ghost" size="icon" accessibilityLabel="Share">
+              <ShareNodesIcon size={18} />
+            </Button>
+          </ScrollHeader.Actions>
+        </View>
+
+        <Tabs value={tab} onValueChange={setTab} defaultValue="posts" variant="underline">
+          <Tabs.List className="px-4">
+            <Tabs.Trigger value="posts">Posts</Tabs.Trigger>
+            <Tabs.Trigger value="comments">Comments</Tabs.Trigger>
+            <Tabs.Trigger value="saved">Saved</Tabs.Trigger>
+          </Tabs.List>
+        </Tabs>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Economist</ScrollHeader.Title>
+        <ScrollHeader.Description>{rows.length} in {tab}</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View className="gap-2 px-4 pb-10 pt-4">
+          {rows.map((row) => (
+            <Item key={row.id} variant="outline">
+              <Item.Content>
+                <Item.Title>{row.name}</Item.Title>
+                <Item.Description>{row.summary}</Item.Description>
+              </Item.Content>
+            </Item>
+          ))}
+        </View>
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
 {
     slug: 'section-progress',
@@ -2064,6 +2312,66 @@ export const ENTRIES: ComponentEntry[] = [
         description:
           'With no block to cross, the surface and its hairline arrive on the first point of scroll.',
         render: () => <ScrollHeaderBarOnlyVersion />,
+      },
+      {
+        label: 'Navigation that survives the collapse',
+        id: 'tabs',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'A taller bar holding an identity row and a tab row. Everything in the bar is pinned, so the tabs are still there once the title has gone.',
+        render: () => <ScrollHeaderTabsVersion />,
+      },
+      {
+        label: 'A list that recycles',
+        id: 'list',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'A `FlatList` rather than a `ScrollView`. The child is cloned whatever kind it is, and this is where the snap is worth watching.',
+        render: () => <ScrollHeaderListVersion />,
+      },
+      {
+        label: 'A grouped list',
+        id: 'grouped',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'A `SectionList` under a bar drawn on the card token. Section headers travel with the rows — a sticky one would pin behind the band.',
+        render: () => <ScrollHeaderGroupedVersion />,
+      },
+      {
+        label: 'The collapse, borrowed',
+        id: 'borrowed',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          '`progress` mirrors the transition into a shared value, so something outside the header can move at the pace the title leaves at.',
+        render: () => <ScrollHeaderBorrowedVersion />,
+      },
+      {
+        label: 'A gradient instead of a picture',
+        id: 'gradient',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'A cover with no image: the ramp is mixed from the theme\'s own series tokens, so it moves with the palette.',
+        render: () => <ScrollHeaderGradientVersion />,
+      },
+      {
+        label: 'Left where you let go',
+        id: 'loose',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'With `snap={false}` a part-scrolled band stays half-collapsed instead of settling at whichever end is nearer.',
+        render: () => <ScrollHeaderLooseVersion />,
       },
     ],
   },

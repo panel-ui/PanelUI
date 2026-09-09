@@ -122,3 +122,26 @@ export function isCrossing(next: boolean, previous: boolean | null): boolean {
   'worklet';
   return previous !== null && next !== previous;
 }
+
+/**
+ * The content inset the scrollable needs: the band's resting height, plus any
+ * top padding the caller asked for.
+ *
+ * A style array does not add, it overrides — so a caller who writes
+ * `contentContainerStyle={{ padding: 16 }}` on the child would otherwise lose
+ * the inset and start their content underneath the header. They cannot write
+ * the sum themselves either, because the band's height is measured rather than
+ * known. So their padding is read and added here, and the total is what goes
+ * on the child.
+ *
+ * Only a real number can be added to. A percentage is left out of the sum
+ * rather than guessed at, and the inset alone is used.
+ */
+export function contentInset(band: number, ownTopPadding: unknown): number {
+  'worklet';
+  const own =
+    typeof ownTopPadding === 'number' && Number.isFinite(ownTopPadding) && ownTopPadding > 0
+      ? ownTopPadding
+      : 0;
+  return band + own;
+}

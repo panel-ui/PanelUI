@@ -143,3 +143,30 @@ test('the hand-over is ordered, so nothing is ever legible on top of anything el
     'the bar title waits for the large title to leave'
   );
 });
+
+test('the content inset carries the caller\'s own top padding as well as the band', async () => {
+  const { contentInset } = await import(
+    '../src/components/scroll-header/scroll-header-math.ts'
+  );
+  // Nothing asked for: the inset is the band, exactly.
+  assert.equal(contentInset(BAR + LARGE, undefined), BAR + LARGE);
+  assert.equal(contentInset(BAR, null), BAR);
+
+  // A style array overrides rather than adds, so the sum has to be made here
+  // or one of the two is lost.
+  assert.equal(contentInset(BAR + LARGE, 16), BAR + LARGE + 16);
+  assert.equal(contentInset(BAR, 0), BAR);
+});
+
+test('padding that cannot be added to leaves the inset alone rather than being guessed at', async () => {
+  const { contentInset } = await import(
+    '../src/components/scroll-header/scroll-header-math.ts'
+  );
+  // A percentage is a real thing to write and not a number to add.
+  assert.equal(contentInset(BAR, '10%'), BAR);
+  assert.equal(contentInset(BAR, Number.NaN), BAR);
+  assert.equal(contentInset(BAR, Number.POSITIVE_INFINITY), BAR);
+  // Padding is never negative, and an inset shorter than the band would put
+  // content under the bar.
+  assert.equal(contentInset(BAR, -40), BAR);
+});

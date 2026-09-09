@@ -116,6 +116,7 @@ import {
   SURFACE_ARRIVE,
   bandHeight,
   collapseProgress,
+  contentInset,
   hasSpan,
   isCrossing,
   snapTarget,
@@ -414,7 +415,21 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
       (workletOnScroll as typeof scrollHandler | null) ?? null,
     ]);
 
-    const headerHeight = barBand + largeSize;
+    /*
+     * The band's resting height, plus whatever top padding the child asked
+     * for. A style array overrides rather than adds, so composing ours after
+     * theirs would drop their padding and composing theirs after ours would
+     * drop the inset — and they cannot write the sum themselves, because the
+     * band's height is measured. Reading it and adding is the only
+     * arrangement where both survive.
+     */
+    const childContentStyle = StyleSheet.flatten(childProps.contentContainerStyle) ?? {};
+    const headerHeight = contentInset(
+      barBand + largeSize,
+      childContentStyle.paddingTop ??
+        childContentStyle.paddingVertical ??
+        childContentStyle.padding
+    );
 
     const bandStyle = useAnimatedStyle(
       () => ({
@@ -452,8 +467,8 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
                 childProps.contentInsetAdjustmentBehavior ?? 'never'
               }
               contentContainerStyle={[
-                { paddingTop: headerHeight },
                 childProps.contentContainerStyle,
+                { paddingTop: headerHeight },
               ]}
               scrollIndicatorInsets={{ top: barBand, ...childProps.scrollIndicatorInsets }}
             />

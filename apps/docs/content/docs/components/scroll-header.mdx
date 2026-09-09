@@ -289,7 +289,7 @@ Every part also accepts the underlying React Native props (`ViewProps` or `TextP
 
 **An `onScroll` of your own is kept, either kind.** A handler from `useAnimatedScrollHandler` composes onto the header's and stays on the UI thread. A plain function is called across the bridge instead, once for every scroll event the child delivers — which `scrollEventThrottle` decides, and which is every frame at the default of 16 — and receives `{ nativeEvent }` carrying the scroll geometry — `contentOffset`, `contentSize`, `layoutMeasurement`, `contentInset` and `zoomScale` — rather than a whole synthetic event, which cannot be sent. Prefer the animated handler where the work can be done in a worklet.
 
-**The content inset is applied for you**, as `paddingTop` on the child's content container, and it is the band's full resting height. A `contentContainerStyle` of your own is composed after it, so padding you set is added to the inset rather than replacing it.
+**The content inset is applied for you**, as `paddingTop` on the child's content container, and it is the band's full resting height. Top padding of your own is read off `contentContainerStyle` and added to it, because a style array overrides rather than adds — and you could not write the sum yourself in any case, since the band's height is measured rather than known. A percentage is left out of the sum rather than guessed at, and the inset alone is used.
 
 The two titles are both in the tree the whole time, and only the one being shown is exposed to a screen reader — the other is hidden as the header crosses. Nothing else about the bar is gated: a back button and the `Actions` stay reachable at every scroll position.
 

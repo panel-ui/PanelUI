@@ -1510,6 +1510,7 @@ function ScrollHeaderGroupedVersion() {
 /** The collapse, mirrored out of the header and spent on something else. */
 function ScrollHeaderBorrowedVersion() {
   const collapse = useSharedValue(0);
+  const [collapsed, setCollapsed] = useState(false);
 
   const pill = useAnimatedStyle(() => ({
     opacity: collapse.value,
@@ -1518,7 +1519,11 @@ function ScrollHeaderBorrowedVersion() {
 
   return (
     <View className="flex-1">
-      <ScrollHeader className="flex-1 bg-background" progress={collapse}>
+      <ScrollHeader
+        className="flex-1 bg-background"
+        progress={collapse}
+        onCollapsedChange={setCollapsed}
+      >
         <ScrollHeader.Bar>
           <ScrollHeader.Title>Drafts</ScrollHeader.Title>
         </ScrollHeader.Bar>
@@ -1533,9 +1538,23 @@ function ScrollHeaderBorrowedVersion() {
         </ScrollView>
       </ScrollHeader>
 
-      {/* Outside the header entirely, driven by the shared value the header
-          writes: it arrives at exactly the pace the large title leaves at. */}
-      <Animated.View pointerEvents="box-none" style={pill} className="absolute bottom-8 end-4">
+      {/*
+        Outside the header entirely, and driven by both of the header's
+        signals, which is the difference between them: `progress` is the
+        per-frame value the pill moves and fades on, and `onCollapsedChange`
+        is the crossing that says it has arrived.
+
+        Both are needed. Opacity only decides what is drawn — a pill faded to
+        nothing still takes touches and is still read out — so the arrival is
+        what gates the button rather than the fade.
+      */}
+      <Animated.View
+        pointerEvents={collapsed ? 'box-none' : 'none'}
+        accessibilityElementsHidden={!collapsed}
+        importantForAccessibility={collapsed ? 'auto' : 'no-hide-descendants'}
+        style={pill}
+        className="absolute bottom-8 end-4"
+      >
         <Button size="sm" onPress={() => {}}>
           New draft
         </Button>

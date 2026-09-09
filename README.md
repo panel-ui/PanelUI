@@ -165,7 +165,8 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
 - **AI components** — Message, MessageScroller, Response, Reasoning, Plan, Task, Sources,
   CodeBlock, Shimmer, ThinkingOrb, Soundwave
 - **Social** — Post, Avatar, Attachment
-- **Scroll & motion** — ScrollFade, ScrollText, ScrollCanvas, TextAnimation, Marquee, Direction
+- **Scroll & motion** — ScrollHeader, ScrollFade, ScrollText, ScrollCanvas, TextAnimation, Marquee,
+  Direction
 
 Plus the primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme`, `useThemeMode`,
 `useToast`, `cn`.

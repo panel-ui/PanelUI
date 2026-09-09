@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image, ScrollView, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from "react-native";
+import { FlatList, Image, ScrollView, SectionList, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from "react-native";
 import Animated, {
+  interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, Item, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import { useCSSVariable } from "uniwind";

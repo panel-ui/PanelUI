@@ -961,6 +961,29 @@ const item = (
   </Plate>
 );
 
+/*
+ * Both states at once, which is the only way one still frame can say what this
+ * does: the small title pinned on a ruled bar, and the large one still under
+ * it with the list sliding up past both.
+ */
+const scrollHeader = (
+  <Plate className="w-44 overflow-hidden p-0">
+    <Row className="justify-between border-b border-fd-border px-3 py-2">
+      <Bar className="w-12" />
+      <Glyph icon={SearchIcon} className="size-3" />
+    </Row>
+    <Stack className="gap-1.5 px-3 pb-2 pt-2.5">
+      <Bar className="h-2.5 w-24" />
+      <Bar className="w-14" faint />
+    </Stack>
+    <Stack className="gap-2 px-3 pb-3 opacity-60">
+      <Bar className="w-full" faint />
+      <Bar className="w-32" faint />
+      <Bar className="w-36" faint />
+    </Stack>
+  </Plate>
+);
+
 const scrollCanvas = (
   <div className="relative h-24 w-40 overflow-hidden rounded-xl border-2 border-dashed border-fd-muted-foreground/30 p-1.5">
     {/*
@@ -2142,6 +2165,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'scroll-canvas': scrollCanvas,
   'scroll-blur': scrollBlur,
   'scroll-fade': scrollFade,
+  'scroll-header': scrollHeader,
   separator,
   'split-view': splitView,
   splitter,

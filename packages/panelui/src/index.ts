@@ -1086,6 +1086,15 @@ export {
   ScrollFade,
   type ScrollFadeProps,
 } from './components/scroll-fade';
+export {
+  ScrollHeader,
+  type ScrollHeaderProps,
+  type ScrollHeaderBarProps,
+  type ScrollHeaderLargeProps,
+  type ScrollHeaderActionsProps,
+  type ScrollHeaderCoverProps,
+  type ScrollHeaderSurface,
+} from './components/scroll-header';
 export { Separator, type SeparatorProps } from './components/separator';
 export {
   Signature,

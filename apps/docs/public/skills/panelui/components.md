@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-127 component modules. The **Reference** column links to a file in this skill holding that
+128 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -99,6 +99,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `ScrollBlur` | Blurs the edges of a scroll container. | [scroll-blur](./components/scroll-blur.md) |
 | `ScrollCanvas` | Image frame whose contents move as you scroll. | [scroll-canvas](./components/scroll-canvas.md) |
 | `ScrollFade` | Fades the edges of a scroll container. | [scroll-fade](./components/scroll-fade.md) |
+| `ScrollHeader` | A screen title that hands over to a compact bar as the page scrolls. | [scroll-header](./components/scroll-header.md) |
 | `Separator` | Horizontal or vertical rule between content, optionally labelled. | [separator](./components/separator.md) |
 | `Splitter` | Panes that share a container, with a seam between them you can drag. | [splitter](./components/splitter.md) |
 | `SplitView` | Two resizable stacked panes that settle on one of a few named heights. | [split-view](./components/split-view.md) |

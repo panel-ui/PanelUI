@@ -283,6 +283,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `ScatterChart` | Two quantities against each other, to show how they relate |
 | `ScrollCanvas` | Image frame whose contents move as you scroll |
 | `ScrollFade` | Fades the edges of a scroll container |
+| `ScrollHeader` | A screen title that hands over to a compact bar as the page scrolls |
 | `ScrollText` | Text that resolves word by word as you scroll |
 | `SearchBar` | Search field with a clear button, a Cancel button and a panel of results |
 | `SectionRail` | Floating section navigator for a long screen |

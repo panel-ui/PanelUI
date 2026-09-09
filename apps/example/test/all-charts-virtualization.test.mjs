@@ -56,7 +56,7 @@ test('every declared chart remains sourced from the catalogue', () => {
 test('demo modules are bounded, lazy, and retain exact generated catalogue parity', async () => {
   const directory = new URL('../src/data/demos/', import.meta.url);
   const chunks = (await readdir(directory)).filter((file) => file.endsWith('.tsx')).sort();
-  assert.equal(chunks.length, 14);
+  assert.equal(chunks.length, 15);
   assert.doesNotMatch(catalogue, /from ['"]\.\/demos\//);
   assert.equal([...catalogue.matchAll(/\(\) => import\('\.\/demos\/chunk-\d+'\)/g)].length, chunks.length);
 

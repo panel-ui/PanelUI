@@ -651,6 +651,15 @@
       "category": "layout"
     }
   ],
+  "scroll-header": [
+    "ScrollHeader",
+    "A screen title that hands over to a compact bar as the page scrolls.",
+    "react native collapsing header large title",
+    {
+      "addedIn": "0.95.0",
+      "category": "layout"
+    }
+  ],
   "scroll-blur": [
     "ScrollBlur",
     "Blurs the edges of a scroll container.",

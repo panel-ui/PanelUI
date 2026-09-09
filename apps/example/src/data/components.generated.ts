@@ -88,6 +88,7 @@ export const COMPONENTS = [
   {"slug":"scroll-blur","name":"ScrollBlur","summary":"Blurs the edges of a scroll container"},
   {"slug":"scroll-canvas","name":"ScrollCanvas","summary":"Image frame whose contents move as you scroll"},
   {"slug":"scroll-fade","name":"ScrollFade","summary":"Fades the edges of a scroll container"},
+  {"slug":"scroll-header","name":"ScrollHeader","summary":"A screen title that hands over to a compact bar as the page scrolls"},
   {"slug":"scroll-text","name":"ScrollText","summary":"Text that resolves word by word as you scroll"},
   {"slug":"search-bar","name":"SearchBar","summary":"Search field with a clear button, a Cancel button and a panel of results"},
   {"slug":"section-progress","name":"SectionProgress","summary":"Floating pill with a scroll ring and the section being read"},

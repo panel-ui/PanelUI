@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, PageHeader, PencilIcon, PlusIcon, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
+import { Avatar, Badge, BookmarkIcon, BellIcon, Button, CalendarIcon, Card, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, Frame, IconColorProvider, LinkIcon, GlobeIcon, Item, PageHeader, PencilIcon, PlusIcon, ScrollHeader, SearchBar, SearchIcon, SectionProgress, type SectionProgressColor, type SectionProgressPlacement, ShareNodesIcon, Skeleton, SplitView, Splitter, Switch, Text, Tooltip, Tour, Typography, useThemeMode, WaterfallChart, type WaterfallDatum, waterfallSteps, useScrollSections, Spinner } from "panelui-native";
 import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import { useCSSVariable } from "uniwind";
@@ -1228,6 +1228,212 @@ function PageHeaderBrandVersion() {
   );
 }
 
+/* ------------------------------------------------------------------ *
+ * ScrollHeader
+ * ------------------------------------------------------------------ */
+
+/** Enough rows that the header has somewhere to collapse to. */
+const LIBRARY_ROWS = [
+  { id: 'button', name: 'Button', summary: 'Pressable action with variants and loading' },
+  { id: 'card', name: 'Card', summary: 'Grouped content surface' },
+  { id: 'dialog', name: 'Dialog', summary: 'Modal dialog with a backdrop' },
+  { id: 'drawer', name: 'Drawer', summary: 'A panel in from the edge of the screen' },
+  { id: 'field', name: 'Field', summary: 'Layout and validation state for a control' },
+  { id: 'input', name: 'Input', summary: 'Text field with label and error' },
+  { id: 'item', name: 'Item', summary: 'Row of media, text and actions' },
+  { id: 'menu', name: 'Menu', summary: 'The list of things you can do' },
+  { id: 'popover', name: 'Popover', summary: 'Panel anchored to what opened it' },
+  { id: 'select', name: 'Select', summary: 'Picker shown in a bottom sheet' },
+  { id: 'slider', name: 'Slider', summary: 'Pick a value by dragging a thumb' },
+  { id: 'switch', name: 'Switch', summary: 'Animated on/off toggle' },
+  { id: 'table', name: 'Table', summary: 'Rows and columns that stay lined up' },
+  { id: 'tabs', name: 'Tabs', summary: 'Segmented navigation with an indicator' },
+  { id: 'toast', name: 'Toast', summary: 'Transient notification queue' },
+  { id: 'tooltip', name: 'Tooltip', summary: 'A label for the control under your finger' },
+];
+
+/** A landscape, so the cover version has something worth stretching. */
+const SCROLL_HEADER_COVER =
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=70';
+
+function LibraryRows() {
+  return (
+    <View className="gap-2 px-4 pb-10 pt-4">
+      {LIBRARY_ROWS.map((row) => (
+        <Item key={row.id} variant="outline">
+          <Item.Content>
+            <Item.Title>{row.name}</Item.Title>
+            <Item.Description>{row.summary}</Item.Description>
+          </Item.Content>
+          <ChevronRightIcon size={16} />
+        </Item>
+      ))}
+    </View>
+  );
+}
+
+/** The plain arrangement, and the one most screens want. */
+function ScrollHeaderPlainVersion() {
+  const router = useRouter();
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Bar>
+        <CircleButton onPress={() => router.back()} label="Go back">
+          <ChevronLeftIcon size={18} />
+        </CircleButton>
+        <ScrollHeader.Title>Library</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <Button variant="ghost" size="icon" accessibilityLabel="Search">
+            <SearchIcon size={18} />
+          </Button>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Library</ScrollHeader.Title>
+        <ScrollHeader.Description>{LIBRARY_ROWS.length} components</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/** A picture in the band: pulling down stretches it rather than opening a gap. */
+function ScrollHeaderCoverVersion() {
+  const router = useRouter();
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Cover source={{ uri: SCROLL_HEADER_COVER }} />
+
+      <ScrollHeader.Bar surface="none" divider={false}>
+        <CircleButton onPress={() => router.back()} label="Go back">
+          <ChevronLeftIcon size={18} />
+        </CircleButton>
+        <ScrollHeader.Title className="text-white">Sierra Nevada</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <CircleButton onPress={() => {}} label="Share">
+            <ShareNodesIcon size={18} />
+          </CircleButton>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large className="pb-5">
+        <ScrollHeader.Title className="text-white">Sierra Nevada</ScrollHeader.Title>
+        <ScrollHeader.Description className="text-white/80">
+          14 photographs · September
+        </ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/** A block with a field in it, and a crossing that finishes before it empties. */
+function ScrollHeaderSearchVersion() {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const rows = LIBRARY_ROWS.filter((row) =>
+    row.name.toLowerCase().includes(query.trim().toLowerCase())
+  );
+
+  return (
+    <ScrollHeader className="flex-1 bg-background" threshold={0.6}>
+      <ScrollHeader.Bar>
+        <CircleButton onPress={() => router.back()} label="Go back">
+          <ChevronLeftIcon size={18} />
+        </CircleButton>
+        <ScrollHeader.Title>Inbox</ScrollHeader.Title>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large className="pb-4">
+        <ScrollHeader.Title>Inbox</ScrollHeader.Title>
+        <ScrollHeader.Description>{rows.length} of {LIBRARY_ROWS.length}</ScrollHeader.Description>
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search components"
+          className="mt-2"
+        />
+      </ScrollHeader.Large>
+
+      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <View className="gap-2 px-4 pb-10 pt-4">
+          {rows.map((row) => (
+            <Item key={row.id} variant="outline">
+              <Item.Content>
+                <Item.Title>{row.name}</Item.Title>
+                <Item.Description>{row.summary}</Item.Description>
+              </Item.Content>
+            </Item>
+          ))}
+        </View>
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/** The crossing, used for something: a reading that only belongs on the bar. */
+function ScrollHeaderCrossingVersion() {
+  const router = useRouter();
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <ScrollHeader
+      className="flex-1 bg-background"
+      onCollapsedChange={setCollapsed}
+    >
+      <ScrollHeader.Bar>
+        <CircleButton onPress={() => router.back()} label="Go back">
+          <ChevronLeftIcon size={18} />
+        </CircleButton>
+        <ScrollHeader.Title>Portfolio</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          {collapsed ? <Badge variant="success">+2.4%</Badge> : null}
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollHeader.Large>
+        <ScrollHeader.Title>Portfolio</ScrollHeader.Title>
+        <ScrollHeader.Description>$48,210.55 · +2.4% today</ScrollHeader.Description>
+      </ScrollHeader.Large>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
+/** No large block, so the bar's surface arrives on the first point of scroll. */
+function ScrollHeaderBarOnlyVersion() {
+  const router = useRouter();
+  return (
+    <ScrollHeader className="flex-1 bg-background">
+      <ScrollHeader.Bar>
+        <CircleButton onPress={() => router.back()} label="Go back">
+          <ChevronLeftIcon size={18} />
+        </CircleButton>
+        <ScrollHeader.Title>Settings</ScrollHeader.Title>
+        <ScrollHeader.Actions>
+          <Button variant="ghost" size="icon" accessibilityLabel="More">
+            <EllipsisIcon size={18} />
+          </Button>
+        </ScrollHeader.Actions>
+      </ScrollHeader.Bar>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LibraryRows />
+      </ScrollView>
+    </ScrollHeader>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
 {
     slug: 'section-progress',
@@ -1821,6 +2027,63 @@ export const ENTRIES: ComponentEntry[] = [
             </PageHeader.Actions>
           </PageHeader>
         ),
+      },
+    ],
+  },
+  {
+    slug: 'scroll-header',
+    name: 'ScrollHeader',
+    summary: 'A screen title that hands over to a compact bar as the page scrolls',
+    demos: [
+      {
+        label: 'Large title over a list',
+        id: 'title',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'The title large at rest, and the same title on the pinned bar once the list is moving.',
+        render: () => <ScrollHeaderPlainVersion />,
+      },
+      {
+        label: 'A cover behind the title',
+        id: 'cover',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'The picture fills the band, so pulling the list down stretches it instead of opening a gap.',
+        render: () => <ScrollHeaderCoverVersion />,
+      },
+      {
+        label: 'A field in the block',
+        id: 'search',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'The block is as tall as what is in it, and `threshold` finishes the crossing before it empties.',
+        render: () => <ScrollHeaderSearchVersion />,
+      },
+      {
+        label: 'Something only the bar carries',
+        id: 'crossing',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'The crossing is reported to React once each way, so a reading can appear with the bar.',
+        render: () => <ScrollHeaderCrossingVersion />,
+      },
+      {
+        label: 'A bar on its own',
+        id: 'bar',
+        fullPage: true,
+        fullBleed: true,
+        backSwipe: true,
+        description:
+          'With no block to cross, the surface and its hairline arrive on the first point of scroll.',
+        render: () => <ScrollHeaderBarOnlyVersion />,
       },
     ],
   },

@@ -26,6 +26,24 @@ export const MINIMUM_SPAN = 1;
  */
 export const HANDOVER_DURATION = 200;
 
+/**
+ * The hand-over runs in three steps rather than one crossfade, and these are
+ * where each step starts and ends along the collapse.
+ *
+ * A single linear crossfade puts both titles on the screen at once, and the
+ * large block travels to exactly where the bar's title sits — so the two words
+ * land on the same pixels, half-opaque, and the screen reads as a printing
+ * error. Worse, a bar whose surface is still arriving is see-through, so the
+ * block slides up *through* whatever else the bar is carrying.
+ *
+ * Ordering them fixes both: the block is gone before it reaches the bar, the
+ * surface closes behind it, and only then does the bar's own title arrive.
+ * Nothing is ever legible on top of anything else.
+ */
+export const LARGE_EXIT: readonly [number, number] = [0, 0.45];
+export const SURFACE_ARRIVE: readonly [number, number] = [0.35, 0.75];
+export const BAR_TITLE_ARRIVE: readonly [number, number] = [0.6, 1];
+
 /** Whether a header has a large block to cross at all. */
 export function hasSpan(largeHeight: number): boolean {
   'worklet';

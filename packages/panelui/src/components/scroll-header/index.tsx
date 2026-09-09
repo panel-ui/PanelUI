@@ -110,7 +110,10 @@ import { useCSSVariable } from 'uniwind';
 import { Text, textChildren, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import {
+  BAR_TITLE_ARRIVE,
   HANDOVER_DURATION,
+  LARGE_EXIT,
+  SURFACE_ARRIVE,
   bandHeight,
   collapseProgress,
   hasSpan,
@@ -178,6 +181,8 @@ interface ScrollHeaderContextValue {
   largeHeight: SharedValue<number>;
   /** The crossing point, published to React for accessibility. */
   collapsed: boolean;
+  /** Whether there is a large block at all. A bar-only header has no crossing. */
+  hasLarge: boolean;
   measureLarge: (event: LayoutChangeEvent) => void;
 }
 
@@ -423,9 +428,11 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
       [barBand, insetTop]
     );
 
+    const hasLarge = largeSize >= 1;
+
     const context = useMemo<ScrollHeaderContextValue>(
-      () => ({ progress, offset, largeHeight, collapsed, measureLarge }),
-      [progress, offset, largeHeight, collapsed, measureLarge]
+      () => ({ progress, offset, largeHeight, collapsed, hasLarge, measureLarge }),
+      [progress, offset, largeHeight, collapsed, hasLarge, measureLarge]
     );
 
     const { root, band } = scrollHeaderVariants();
@@ -516,7 +523,11 @@ const ScrollHeaderBar = forwardRef<View, ScrollHeaderBarProps>(
     const { barBand, insetTop } = useContext(BandMetricsContext);
     const { bar, barSurface } = scrollHeaderVariants({ surface, divider });
 
-    const surfaceStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
+    // Closed by the time the block has gone, so the block is never seen through
+    // it — and never on top of whatever else the bar is carrying.
+    const surfaceStyle = useAnimatedStyle(() => ({
+      opacity: interpolate(progress.value, SURFACE_ARRIVE, [0, 1], 'clamp'),
+    }));
 
     return (
       <View
@@ -557,7 +568,7 @@ const ScrollHeaderLarge = forwardRef<View, ScrollHeaderLargeProps>(
     const { large } = scrollHeaderVariants();
 
     const style = useAnimatedStyle(() => ({
-      opacity: interpolate(progress.value, [0, 1], [1, 0], 'clamp'),
+      opacity: interpolate(progress.value, LARGE_EXIT, [1, 0], 'clamp'),
     }));
 
     // The measurement is this block's whole job, so it is taken first and a
@@ -597,10 +608,18 @@ ScrollHeaderLarge.displayName = 'ScrollHeader.Large';
  * in: large and at rest in the block, compact and fading in on the bar.
  */
 const ScrollHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
-  const { progress, collapsed } = useScrollHeader('ScrollHeader.Title');
+  const { progress, largeHeight, collapsed, hasLarge } = useScrollHeader('ScrollHeader.Title');
   const slot = useContext(ScrollHeaderSlotContext);
 
-  const style = useAnimatedStyle(() => ({ opacity: progress.value }));
+  // A bar with no block above it is not handing over from anything: it is the
+  // only title the screen has, and it is wanted from the first frame. Fading it
+  // in with the collapse would leave that screen untitled until somebody
+  // scrolled it.
+  const style = useAnimatedStyle(() => ({
+    opacity: hasSpan(largeHeight.value)
+      ? interpolate(progress.value, BAR_TITLE_ARRIVE, [0, 1], 'clamp')
+      : 1,
+  }));
 
   if (slot === 'large') {
     return (
@@ -619,9 +638,10 @@ const ScrollHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }
     <Animated.View
       style={style}
       // The large title is the one being read until the bar has taken over.
-      // Both are in the tree the whole time, and only one of them should be.
-      accessibilityElementsHidden={!collapsed}
-      importantForAccessibility={collapsed ? 'auto' : 'no-hide-descendants'}
+      // Both are in the tree the whole time, and only one of them should be —
+      // unless there is no large title, in which case this one always is.
+      accessibilityElementsHidden={hasLarge ? !collapsed : false}
+      importantForAccessibility={!hasLarge || collapsed ? 'auto' : 'no-hide-descendants'}
       className="flex-1"
     >
       <Text

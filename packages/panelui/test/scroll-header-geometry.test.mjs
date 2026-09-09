@@ -115,3 +115,31 @@ test('a mount is not a crossing, and neither is a value that did not change', as
   assert.equal(isCrossing(true, false), true);
   assert.equal(isCrossing(false, true), true);
 });
+
+test('the hand-over is ordered, so nothing is ever legible on top of anything else', async () => {
+  const { LARGE_EXIT, SURFACE_ARRIVE, BAR_TITLE_ARRIVE } = await import(
+    '../src/components/scroll-header/scroll-header-math.ts'
+  );
+
+  // Each step runs forwards over a real distance. A zero-width step is a jump
+  // cut, and a reversed one animates backwards.
+  for (const step of [LARGE_EXIT, SURFACE_ARRIVE, BAR_TITLE_ARRIVE]) {
+    assert.equal(step.length, 2);
+    assert.ok(step[0] >= 0 && step[1] <= 1, 'a step stays inside the collapse');
+    assert.ok(step[1] > step[0], 'a step runs forwards');
+  }
+
+  // The block is gone before the bar's surface has finished closing, so it is
+  // never seen through a half-transparent bar.
+  assert.ok(
+    LARGE_EXIT[1] <= SURFACE_ARRIVE[1],
+    'the large block leaves before the surface has closed'
+  );
+
+  // And the bar's title only starts once the block has gone, so the two titles
+  // are never both legible — the defect this ordering exists to prevent.
+  assert.ok(
+    BAR_TITLE_ARRIVE[0] >= LARGE_EXIT[1],
+    'the bar title waits for the large title to leave'
+  );
+});

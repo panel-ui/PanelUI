@@ -1274,13 +1274,9 @@ function LibraryRows() {
 
 /** The plain arrangement, and the one most screens want. */
 function ScrollHeaderPlainVersion() {
-  const router = useRouter();
   return (
     <ScrollHeader className="flex-1 bg-background">
       <ScrollHeader.Bar>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={18} />
-        </CircleButton>
         <ScrollHeader.Title>Library</ScrollHeader.Title>
         <ScrollHeader.Actions>
           <Button variant="ghost" size="icon" accessibilityLabel="Search">
@@ -1303,15 +1299,11 @@ function ScrollHeaderPlainVersion() {
 
 /** A picture in the band: pulling down stretches it rather than opening a gap. */
 function ScrollHeaderCoverVersion() {
-  const router = useRouter();
   return (
     <ScrollHeader className="flex-1 bg-background">
       <ScrollHeader.Cover source={{ uri: SCROLL_HEADER_COVER }} />
 
       <ScrollHeader.Bar surface="none" divider={false}>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={18} />
-        </CircleButton>
         <ScrollHeader.Title className="text-white">Sierra Nevada</ScrollHeader.Title>
         <ScrollHeader.Actions>
           <CircleButton onPress={() => {}} label="Share">
@@ -1336,7 +1328,6 @@ function ScrollHeaderCoverVersion() {
 
 /** A block with a field in it, and a crossing that finishes before it empties. */
 function ScrollHeaderSearchVersion() {
-  const router = useRouter();
   const [query, setQuery] = useState('');
   const rows = LIBRARY_ROWS.filter((row) =>
     row.name.toLowerCase().includes(query.trim().toLowerCase())
@@ -1345,9 +1336,6 @@ function ScrollHeaderSearchVersion() {
   return (
     <ScrollHeader className="flex-1 bg-background" threshold={0.6}>
       <ScrollHeader.Bar>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={18} />
-        </CircleButton>
         <ScrollHeader.Title>Inbox</ScrollHeader.Title>
       </ScrollHeader.Bar>
 
@@ -1380,7 +1368,6 @@ function ScrollHeaderSearchVersion() {
 
 /** The crossing, used for something: a reading that only belongs on the bar. */
 function ScrollHeaderCrossingVersion() {
-  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -1389,9 +1376,6 @@ function ScrollHeaderCrossingVersion() {
       onCollapsedChange={setCollapsed}
     >
       <ScrollHeader.Bar>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={18} />
-        </CircleButton>
         <ScrollHeader.Title>Portfolio</ScrollHeader.Title>
         <ScrollHeader.Actions>
           {collapsed ? <Badge variant="success">+2.4%</Badge> : null}
@@ -1412,13 +1396,9 @@ function ScrollHeaderCrossingVersion() {
 
 /** No large block, so the bar's surface arrives on the first point of scroll. */
 function ScrollHeaderBarOnlyVersion() {
-  const router = useRouter();
   return (
     <ScrollHeader className="flex-1 bg-background">
       <ScrollHeader.Bar>
-        <CircleButton onPress={() => router.back()} label="Go back">
-          <ChevronLeftIcon size={18} />
-        </CircleButton>
         <ScrollHeader.Title>Settings</ScrollHeader.Title>
         <ScrollHeader.Actions>
           <Button variant="ghost" size="icon" accessibilityLabel="More">

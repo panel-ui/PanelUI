@@ -88,6 +88,7 @@
     "scroll-blur",
     "scroll-canvas",
     "scroll-fade",
+    "scroll-header",
     "scroll-text",
     "search-bar",
     "section-progress",
@@ -204,16 +205,16 @@
     }
   ],
   "counts": {
-    "componentModules": 127,
-    "packageComponentExports": 127,
-    "documentedComponents": 127,
-    "exampleEntries": 127,
+    "componentModules": 128,
+    "packageComponentExports": 128,
+    "documentedComponents": 128,
+    "exampleEntries": 128,
     "registry": {
-      "componentItems": 127,
+      "componentItems": 128,
       "supportItems": 36,
-      "totalItems": 163,
+      "totalItems": 164,
       "byType": {
-        "registry:ui": 142,
+        "registry:ui": 143,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

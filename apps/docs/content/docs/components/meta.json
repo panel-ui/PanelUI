@@ -65,6 +65,7 @@
     "scroll-blur",
     "scroll-canvas",
     "scroll-fade",
+    "scroll-header",
     "scroll-text",
     "search-bar",
     "section-progress",

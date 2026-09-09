@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1288,
-    "values": 329,
-    "types": 959,
-    "modules": 154,
-    "components": 127,
+    "exports": 1295,
+    "values": 330,
+    "types": 965,
+    "modules": 155,
+    "components": 128,
     "hooks": 13
   },
   "groups": {
@@ -3959,6 +3959,41 @@
           },
           {
             "name": "ScrollFadeProps",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/scroll-header/index.tsx",
+        "slug": "scroll-header",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "ScrollHeader",
+            "kind": "value"
+          },
+          {
+            "name": "ScrollHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderBarProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderLargeProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderActionsProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderCoverProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderSurface",
             "kind": "type"
           }
         ]

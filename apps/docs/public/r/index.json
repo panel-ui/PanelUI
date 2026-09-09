@@ -1514,6 +1514,19 @@
     "docsPath": "components/scroll-fade"
   },
   {
+    "name": "scroll-header",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "A screen title that hands over to a compact bar as the page scrolls.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ],
+    "docsPath": "components/scroll-header"
+  },
+  {
     "name": "scroll-progress",
     "type": "registry:ui",
     "kind": "ui",

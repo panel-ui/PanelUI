@@ -360,7 +360,9 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
      * and composes onto ours, staying on the UI thread. A plain function
      * cannot — `useComposedEventHandler` keeps only worklet handlers and drops
      * anything else without a word — so it is called across the bridge
-     * instead, which is the cost of asking for JavaScript on every frame.
+     * instead, once per scroll event the child delivers. How often that is, is
+     * `scrollEventThrottle`'s answer rather than this component's: every frame
+     * at the default of 16, and as rare as the caller asks for above it.
      */
     const workletOnScroll = typeof childOnScroll === 'function' ? null : childOnScroll ?? null;
     const plainOnScroll = typeof childOnScroll === 'function' ? childOnScroll : null;

@@ -15,6 +15,7 @@ const load11 = () => import('./demos/chunk-11');
 const load12 = () => import('./demos/chunk-12');
 const load13 = () => import('./demos/chunk-13');
 const load14 = () => import('./demos/chunk-14');
+const load15 = () => import('./demos/chunk-15');
 
 const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   'ai-input': () =>
@@ -171,7 +172,7 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   'scroll-fade': () =>
     load11().then((module) => module.ENTRIES_BY_SLUG['scroll-fade']),
   'scroll-header': () =>
-    load14().then((module) => module.ENTRIES_BY_SLUG['scroll-header']),
+    load15().then((module) => module.ENTRIES_BY_SLUG['scroll-header']),
   separator: () =>
     load11().then((module) => module.ENTRIES_BY_SLUG['separator']),
   signature: () =>

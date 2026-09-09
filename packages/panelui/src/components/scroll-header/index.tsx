@@ -80,6 +80,8 @@ import {
   View,
   type ImageSourcePropType,
   type LayoutChangeEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type StyleProp,
   type Text as RNText,
   type ViewProps,
@@ -112,6 +114,7 @@ import {
   bandHeight,
   collapseProgress,
   hasSpan,
+  isCrossing,
   snapTarget,
 } from './scroll-header-math';
 
@@ -121,6 +124,14 @@ import {
  * rest of the library holds compact controls to, and it sits between them.
  */
 const BAR_HEIGHT = 48;
+
+/**
+ * The scrollables Reanimated already animates. Its animated components are
+ * ordinary function components carrying the *inner* component's name, so there
+ * is nothing on one to test — but these two are module-level constants, and
+ * identity is exact.
+ */
+const ANIMATED_SCROLLABLES = new Set<unknown>([Animated.ScrollView, Animated.FlatList]);
 
 const scrollHeaderVariants = tv({
   slots: {
@@ -303,7 +314,7 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
     useAnimatedReaction(
       () => progress.value >= 1,
       (isCollapsed, was) => {
-        if (was !== null && isCollapsed === was) return;
+        if (!isCrossing(isCollapsed, was)) return;
         runOnJS(cross)(isCollapsed);
       },
       [cross]
@@ -320,10 +331,66 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
       [snap, largeHeight, offset, scrollRef]
     );
 
+    const { parts, scrollable } = useMemo(() => splitChildren(children), [children]);
+
+    const childType = isValidElement(scrollable)
+      ? (scrollable.type as ComponentType<ScrollableProps>)
+      : null;
+    // Keyed on the element type rather than the element: rebuilding the
+    // wrapper would remount the list and lose its scroll position. A child
+    // that is animated already is used as it stands — wrapping one twice is
+    // unsupported, and there is no marker on them to test for, so the two
+    // that exist are recognised by identity.
+    const AnimatedScrollable = useMemo(() => {
+      if (!childType) return null;
+      if (ANIMATED_SCROLLABLES.has(childType)) return childType;
+      return Animated.createAnimatedComponent(childType);
+    }, [childType]);
+
+    const childProps = (isValidElement(scrollable) ? scrollable.props : {}) as ScrollableProps;
+    const childOnScroll = childProps.onScroll;
+
+    /*
+     * A consumer's own `onScroll` is kept, whichever of the two kinds it is,
+     * because silently dropping one looks like a bug in the scrolling rather
+     * than in the call site.
+     *
+     * `useEvent` returns an object wearing a function's type, so the two are
+     * told apart by what they actually are: an object is a Reanimated handler
+     * and composes onto ours, staying on the UI thread. A plain function
+     * cannot — `useComposedEventHandler` keeps only worklet handlers and drops
+     * anything else without a word — so it is called across the bridge
+     * instead, which is the cost of asking for JavaScript on every frame.
+     */
+    const workletOnScroll = typeof childOnScroll === 'function' ? null : childOnScroll ?? null;
+    const plainOnScroll = typeof childOnScroll === 'function' ? childOnScroll : null;
+
+    // Rebuilt only when the callback itself changes, so the worklet below is
+    // not rebuilt on every render of the child.
+    const forwardScroll = useCallback(
+      (native: NativeScrollEvent) => {
+        // Only the scroll geometry survives the crossing. It is what a scroll
+        // callback reads, and the rest of a synthetic event is a live object
+        // that cannot be sent.
+        plainOnScroll?.({ nativeEvent: native } as NativeSyntheticEvent<NativeScrollEvent>);
+      },
+      [plainOnScroll]
+    );
+    const forwards = plainOnScroll !== null;
+
     const scrollHandler = useAnimatedScrollHandler(
       {
         onScroll: (event) => {
           offset.value = event.contentOffset.y;
+          if (forwards) {
+            runOnJS(forwardScroll)({
+              contentOffset: event.contentOffset,
+              contentSize: event.contentSize,
+              layoutMeasurement: event.layoutMeasurement,
+              contentInset: event.contentInset,
+              zoomScale: event.zoomScale,
+            } as NativeScrollEvent);
+          }
         },
         onEndDrag: (event) => {
           settle(event.velocity?.y ?? 0);
@@ -332,25 +399,12 @@ const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
           settle(0);
         },
       },
-      [settle]
+      [settle, forwards, forwardScroll]
     );
 
-    const { parts, scrollable } = useMemo(() => splitChildren(children), [children]);
-
-    const childType = isValidElement(scrollable)
-      ? (scrollable.type as ComponentType<ScrollableProps>)
-      : null;
-    // Keyed on the element type rather than the element: rebuilding the
-    // wrapper would remount the list and lose its scroll position.
-    const AnimatedScrollable = useMemo(
-      () => (childType ? Animated.createAnimatedComponent(childType) : null),
-      [childType]
-    );
-
-    const childProps = (isValidElement(scrollable) ? scrollable.props : {}) as ScrollableProps;
     const onScroll = useComposedEventHandler([
       scrollHandler,
-      (childProps.onScroll as typeof scrollHandler | undefined) ?? null,
+      (workletOnScroll as typeof scrollHandler | null) ?? null,
     ]);
 
     const headerHeight = barBand + largeSize;
@@ -496,7 +550,7 @@ export interface ScrollHeaderLargeProps extends ViewProps {
  * chips — sets the scroll distance rather than a prop having to agree with it.
  */
 const ScrollHeaderLarge = forwardRef<View, ScrollHeaderLargeProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, onLayout, children, ...props }, ref) => {
     const { progress, measureLarge, collapsed } = useScrollHeader('ScrollHeader.Large');
     const { large } = scrollHeaderVariants();
 
@@ -504,11 +558,21 @@ const ScrollHeaderLarge = forwardRef<View, ScrollHeaderLargeProps>(
       opacity: interpolate(progress.value, [0, 1], [1, 0], 'clamp'),
     }));
 
+    // The measurement is this block's whole job, so it is taken first and a
+    // consumer's own `onLayout` runs after it rather than instead of it.
+    const measure = useCallback(
+      (event: LayoutChangeEvent) => {
+        measureLarge(event);
+        onLayout?.(event);
+      },
+      [measureLarge, onLayout]
+    );
+
     return (
       <Animated.View
         {...props}
         ref={ref}
-        onLayout={measureLarge}
+        onLayout={measure}
         // Behind the bar and faded out by the time it gets there, so it must
         // not keep taking touches that belong to the content underneath.
         pointerEvents={collapsed ? 'none' : 'box-none'}

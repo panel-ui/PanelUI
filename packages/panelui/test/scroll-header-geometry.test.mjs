@@ -97,3 +97,21 @@ test('a header knows whether it has a block to cross', async () => {
     assert.equal(collapseProgress(1, height, 1), 1);
   }
 });
+
+test('a mount is not a crossing, and neither is a value that did not change', async () => {
+  const { isCrossing } = await import(
+    '../src/components/scroll-header/scroll-header-math.ts'
+  );
+  // The reaction's first run carries null, and a header that has never been
+  // anywhere else has not crossed anything.
+  assert.equal(isCrossing(false, null), false);
+  assert.equal(isCrossing(true, null), false);
+
+  assert.equal(isCrossing(false, false), false);
+  assert.equal(isCrossing(true, true), false);
+
+  // Both directions are reported, so a header coming back is as much a
+  // crossing as one going.
+  assert.equal(isCrossing(true, false), true);
+  assert.equal(isCrossing(false, true), true);
+});

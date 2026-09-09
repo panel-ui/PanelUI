@@ -92,3 +92,15 @@ export function snapTarget(
   if (offset <= SNAP_EPSILON || offset >= largeHeight - SNAP_EPSILON) return null;
   return offset >= largeHeight / 2 ? largeHeight : 0;
 }
+
+/**
+ * Whether a reaction's new value is a crossing worth reporting.
+ *
+ * A reaction's first run carries `null` as the previous value, and a mount is
+ * not a crossing: reporting it would hand `onCollapsedChange` a `false` for a
+ * header that has never been anywhere else. After that, only a change counts.
+ */
+export function isCrossing(next: boolean, previous: boolean | null): boolean {
+  'worklet';
+  return previous !== null && next !== previous;
+}

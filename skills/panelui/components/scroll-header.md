@@ -138,7 +138,9 @@ The plain arrangement: a title and a count at rest, and a pinned bar carrying th
 
 **Give the root a height.** It fills its parent, and inside a container with no height of its own it collapses to nothing. `className="flex-1"` on a screen is the usual answer.
 
-**Exactly one scrollable child.** Anything that is not a `Bar`, a `Large` or a `Cover` is taken to be the scroller, and the first such child wins. A `ScrollView`, a `FlatList` and a `SectionList` all work; the child is cloned as a Reanimated animated component, so an `onScroll` of your own has to come from `useAnimatedScrollHandler` — a plain function will not run.
+**Exactly one scrollable child.** Anything that is not a `Bar`, a `Large` or a `Cover` is taken to be the scroller, and the first such child wins. A `ScrollView`, a `FlatList` and a `SectionList` all work, and so does an `Animated.ScrollView` or `Animated.FlatList` you have already animated yourself — that one is used as it stands rather than wrapped again.
+
+**An `onScroll` of your own is kept, either kind.** A handler from `useAnimatedScrollHandler` composes onto the header's and stays on the UI thread. A plain function is called across the bridge instead, once per frame, and receives `{ nativeEvent }` carrying the scroll geometry — `contentOffset`, `contentSize`, `layoutMeasurement`, `contentInset` and `zoomScale` — rather than a whole synthetic event, which cannot be sent. Prefer the animated handler where the work can be done in a worklet.
 
 **The content inset is applied for you**, as `paddingTop` on the child's content container, and it is the band's full resting height. A `contentContainerStyle` of your own is composed after it, so padding you set is added to the inset rather than replacing it.
 

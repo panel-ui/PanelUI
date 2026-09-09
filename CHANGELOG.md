@@ -9,6 +9,36 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.95.0] — 2026-09-09
+
+### Added
+
+- **ScrollHeader** — a screen header whose large title hands over to a compact pinned bar as the
+  page scrolls, with an optional cover that stretches when the scroller is pulled down. It wraps
+  one scrollable child, so an existing `ScrollView`, `FlatList` or `SectionList` adopts it
+  unchanged. `snap` settles a part-scrolled band, `threshold` lets a tall block finish handing
+  over early, `onCollapsedChange` reports the crossing and `progress` mirrors the transition into
+  a shared value for animating something outside the header.
+
+### Fixed
+
+- **ScrollHeader:** the hand-over is ordered rather than a single crossfade. All three opacity
+  curves ran linearly off the same value, so mid-scroll both titles were half-opaque on the same
+  pixels and the screen read its title twice; a bar carrying anything else had the block slide up
+  *through* it while its surface was still arriving. The block now leaves before it reaches the
+  bar, the surface closes behind it, and the bar's title arrives last.
+- **ScrollHeader:** a bar with no large block above it is no longer untitled until you scroll. Its
+  title faded in with a collapse that never came, so the one title such a screen has was invisible
+  at rest — and hidden from screen readers with it.
+- **ScrollHeader:** top padding set on the child's `contentContainerStyle` is added to the content
+  inset instead of replacing it. A style array overrides rather than adds, so `padding: 16` on the
+  child had been starting the content underneath the band — and the sum was not something a caller
+  could write, since the band's height is measured.
+- **ScrollHeader:** a plain `onScroll` passed to the child receives the whole scroll event rather
+  than five fields of it.
+- **ScrollHeader:** callbacks a consumer passes are kept rather than replaced — `onLayout` on the
+  large block, and `onScroll` of either kind on the child.
+
 ## [0.94.0] — 2026-09-08
 
 ### Changed

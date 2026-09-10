@@ -1,4 +1,4 @@
-import { Fragment, type ComponentType, type ReactNode } from 'react';
+import { type ComponentType, type ReactNode } from 'react';
 import { Platform, StyleSheet, TurboModuleRegistry, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -33,17 +33,35 @@ import { cn } from '../utils/cn';
  * afterwards. The result is cached so the component type is stable: swapping it
  * between renders would unmount and rebuild everything below it.
  */
-let keyboardProvider: ComponentType<{ children?: ReactNode }> | undefined;
+interface KeyboardHostProps {
+  children?: ReactNode;
+  statusBarTranslucent?: boolean;
+  navigationBarTranslucent?: boolean;
+}
 
-function resolveKeyboardProvider(): ComponentType<{ children?: ReactNode }> {
+/**
+ * The pass-through, which has to be a component rather than `Fragment`.
+ *
+ * `Fragment` accepts `key` and `children` and warns about anything else, so
+ * once the window flags below are forwarded it would warn in every project
+ * that does not have the controller installed — which is the one case the
+ * pass-through exists to keep quiet.
+ */
+function KeyboardPassthrough({ children }: KeyboardHostProps) {
+  return <>{children}</>;
+}
+
+let keyboardProvider: ComponentType<KeyboardHostProps> | undefined;
+
+function resolveKeyboardProvider(): ComponentType<KeyboardHostProps> {
   if (keyboardProvider) return keyboardProvider;
 
-  let resolved: ComponentType<{ children?: ReactNode }> = Fragment;
+  let resolved: ComponentType<KeyboardHostProps> = KeyboardPassthrough;
   try {
     if (TurboModuleRegistry.get('KeyboardController') !== null) {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const controller = require('react-native-keyboard-controller');
-      resolved = controller?.KeyboardProvider ?? Fragment;
+      resolved = controller?.KeyboardProvider ?? KeyboardPassthrough;
     }
   } catch {
     // Not installed, or installed without its native half. Either way the
@@ -66,6 +84,25 @@ export interface PanelUIProviderProps {
    * if you paint the app background yourself.
    */
   background?: boolean;
+  /**
+   * Tell the keyboard controller that the Android status bar is translucent,
+   * so it measures the keyboard against the right window inset.
+   *
+   * Reach for it only where the app draws under the status bar without being
+   * edge-to-edge. Under edge-to-edge — the default from Expo SDK 54 — the
+   * controller detects that for itself and this is ignored, so leave it unset
+   * there rather than passing `false`: a value it has to ignore is a warning
+   * in development.
+   *
+   * Android only, and inert without `react-native-keyboard-controller`.
+   */
+  statusBarTranslucent?: boolean;
+  /**
+   * The same, for a translucent Android navigation bar.
+   *
+   * Android only, and inert without `react-native-keyboard-controller`.
+   */
+  navigationBarTranslucent?: boolean;
 }
 
 /**
@@ -84,6 +121,8 @@ export function PanelUIProvider({
   children,
   className,
   background = true,
+  statusBarTranslucent,
+  navigationBarTranslucent,
 }: PanelUIProviderProps) {
   // Resolved once, on the first render of the first provider in the app, and
   // cached from there. See {@link resolveKeyboardProvider}.
@@ -92,8 +131,13 @@ export function PanelUIProvider({
   return (
     <GestureHandlerRootView style={styles.root}>
       {/* Outermost of ours, so every field below it can avoid the keyboard.
-          A no-op Fragment when the controller is not installed. */}
-      <KeyboardProvider>
+          A pass-through when the controller is not installed. */}
+      {/* Passed through rather than defaulted: the controller warns about a
+          value it has to ignore, and under edge-to-edge it ignores both. */}
+      <KeyboardProvider
+        statusBarTranslucent={statusBarTranslucent}
+        navigationBarTranslucent={navigationBarTranslucent}
+      >
         <PortalProvider>
           <ProviderSurface
             background={background}

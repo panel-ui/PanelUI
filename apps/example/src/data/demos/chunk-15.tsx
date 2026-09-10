@@ -53,9 +53,21 @@ function repeat<T, U>(
   );
 }
 
-/** A stable pseudo-random step, so a fixture never changes between renders. */
-function drift(index: number, span: number) {
-  return ((index * 37) % span) - Math.floor(span / 2);
+/**
+ * A stable scatter over `[0, span)`.
+ *
+ * Derived fields have to look like data rather than like a formula, and
+ * `(index * k) % span` cannot: it is an arithmetic progression whatever `k`
+ * is, so a column of prices comes out climbing in even steps. This mixes the
+ * bits instead. It is a pure function of the index, so a fixture never changes
+ * between renders and a screenshot taken twice is the same screenshot.
+ */
+function scatter(index: number, span: number) {
+  let h = Math.imul(index + 1, 2654435761);
+  h ^= h >>> 15;
+  h = Math.imul(h, 2246822519);
+  h ^= h >>> 13;
+  return Math.abs(h) % span;
 }
 
 const TRACK_SEED = [
@@ -75,7 +87,7 @@ const TRACKS = repeat(TRACK_SEED, 40, (row, index, pass) => ({
   ...row,
   id: `t${index}`,
   name: pass === 0 ? row.name : `${row.name} (${['Live', 'Reprise', 'Demo'][pass - 1]})`,
-  time: `${3 + (index % 4)}:${String(10 + drift(index, 40) + 20).padStart(2, '0')}`,
+  time: `${2 + scatter(index, 5)}:${String(scatter(index + 11, 60)).padStart(2, '0')}`,
 }));
 
 /**
@@ -157,14 +169,16 @@ function ScrollHeaderCoverVersion() {
     <ScrollHeader className="flex-1 bg-background">
       <ScrollHeader.Cover source={{ uri: SCROLL_HEADER_COVER }} />
 
+      {/* Over a photograph the glyphs need the title's colour too — a token
+          foreground is near-black, which is invisible on a dark cover. */}
       <ScrollHeader.Bar surface="none" divider={false}>
         <Button variant="ghost" size="icon" accessibilityLabel="Back">
-          <ChevronLeftIcon size={20} />
+          <ChevronLeftIcon size={20} color="#fff" />
         </Button>
         <ScrollHeader.Title className="text-white">Sierra Nevada</ScrollHeader.Title>
         <ScrollHeader.Actions>
           <Button variant="ghost" size="icon" accessibilityLabel="Share">
-            <ShareNodesIcon size={18} />
+            <ShareNodesIcon size={18} color="#fff" />
           </Button>
         </ScrollHeader.Actions>
       </ScrollHeader.Bar>
@@ -288,12 +302,12 @@ const HOLDING_SEED = [
 ];
 
 const HOLDINGS = repeat(HOLDING_SEED, 40, (row, index, pass) => {
-  const move = drift(index, 90) / 10;
+  const move = (scatter(index + 7, 90) - 45) / 10;
   return {
     ...row,
     id: `h${index}`,
     ticker: pass === 0 ? row.ticker : `${row.ticker}.${['L', 'DE', 'PA'][pass - 1]}`,
-    price: (40 + ((index * 53) % 1800) / 10).toFixed(2),
+    price: (40 + scatter(index, 1800) / 10).toFixed(2),
     change: `${move >= 0 ? '+' : ''}${move.toFixed(1)}%`,
     up: move >= 0,
   };
@@ -421,8 +435,8 @@ const POST_SEED = [
 const POSTS = repeat(POST_SEED, 24, (row, index) => ({
   ...row,
   id: `p${index}`,
-  votes: `${(1 + ((index * 7) % 45) / 10).toFixed(1)}k`,
-  comments: 40 + ((index * 29) % 300),
+  votes: `${(0.4 + scatter(index, 52) / 10).toFixed(1)}k`,
+  comments: 18 + scatter(index + 3, 420),
 }));
 
 /**
@@ -502,7 +516,7 @@ const RELEASES = repeat(RELEASE_SEED, 40, (row, index, pass) => ({
   ...row,
   id: `r${index}`,
   name: pass === 0 ? row.name : `${row.name} — ${['Remastered', 'Deluxe', 'Live', 'Instrumental'][pass - 1]}`,
-  tracks: 8 + ((index * 13) % 9),
+  tracks: 7 + scatter(index, 12),
 }));
 
 /**
@@ -817,7 +831,7 @@ const PLAYLIST_SEED = [
 const PLAYLISTS = repeat(PLAYLIST_SEED, 36, (name, index, pass) => ({
   id: `l${index}`,
   name: pass === 0 ? name : `${name} ${pass + 1}`,
-  count: 15 + ((index * 41) % 120),
+  count: 14 + scatter(index, 148),
 }));
 
 const PLAYLIST_VIEWS = ['Recent', 'A–Z', 'Length'] as const;
@@ -901,7 +915,7 @@ const MONTHS = ['Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar'];
 const ARCHIVE = repeat(ARCHIVE_SEED, 40, (label, index, pass) => ({
   id: `a${index}`,
   label: pass === 0 ? label : `${label}, rev ${pass}`,
-  date: `${String(1 + ((index * 13) % 28)).padStart(2, '0')} ${MONTHS[Math.floor(index / 7) % MONTHS.length]}`,
+  date: `${String(1 + scatter(index, 28)).padStart(2, '0')} ${MONTHS[Math.floor(index / 7) % MONTHS.length]}`,
 }));
 
 /**

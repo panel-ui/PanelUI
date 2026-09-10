@@ -9,6 +9,25 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.96.0] — 2026-09-10
+
+### Added
+
+- **ScrollHeader** — `ScrollHeader.Bar` gains `surface="blur"`, drawing the bar as a real material
+  rather than a fill, so the rows passing under it stay legible as shape and colour while losing
+  the detail that competes with the title. `intensity` sets the depth and `material` the tint,
+  which follows the app's theme rather than the device's. The frost needs `expo-blur`, which is
+  optional, and Reduce Transparency replaces it with an opaque bar; both fall back to `plain`, so
+  nothing has to be guarded at the call site.
+
+### Docs
+
+- **BubbleChart** — a preview of the component running, at the top of the page.
+- **ScrollHeader** — the example gallery's twelve versions are rebuilt. Every one now has enough
+  content to collapse and keep going — several previously could not scroll at all, so the version
+  demonstrating the crossing never crossed — and every one has a header that differs from the rest
+  rather than the same bar over a different list.
+
 ## [0.95.0] — 2026-09-09
 
 ### Added

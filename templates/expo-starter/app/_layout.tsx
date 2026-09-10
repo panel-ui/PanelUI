@@ -2,8 +2,10 @@
 // the theme tokens every class name below resolves through.
 import '../global.css';
 
+import { useEffect } from 'react';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useCSSVariable } from 'uniwind';
 import { PanelUIProvider, useThemeMode } from 'panelui-native';
@@ -26,6 +28,19 @@ function ThemedNavigation() {
     '--color-border',
     '--color-primary',
   ]) as (string | undefined)[];
+
+  /*
+   * The window itself, which is behind everything React draws and is not
+   * something a class name can reach. It matters because this theme is
+   * PanelUI's rather than the device's: someone can be in a dark PanelUI theme
+   * on a phone set to light, and then every strip the app is not painting —
+   * behind the status bar, under the navigation bar, the gap a screen
+   * transition opens — stays the light window colour. Telling the window the
+   * token is what closes that gap.
+   */
+  useEffect(() => {
+    if (background) void SystemUI.setBackgroundColorAsync(background);
+  }, [background]);
 
   const base = mode === 'dark' ? DarkTheme : DefaultTheme;
   const navigationTheme = {

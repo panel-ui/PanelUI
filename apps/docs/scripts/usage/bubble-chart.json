@@ -1,6 +1,13 @@
 {
   "slug": "bubble-chart",
-  "intro": "One circle per row, placed on two measured axes, with a third quantity on each circle's area and its name written inside it.\n\nIt is for a handful of named things — eight teams, twelve products, six regions — where the reader wants to find one of them and see where it sits. For a *series* of observations, where the shape of the cloud is the finding and no single point needs a name, [ScatterChart](/docs/charts/scatter-chart) does the same area mapping through `sizeKey`.\n\nColours come from the `--color-chart-1` … `--color-chart-5` tokens, cycling by row.",
+  "intro": "One circle per row, placed on two measured axes, with a third quantity on each circle's area and its name written inside it.\n\nIt is for a handful of named things \u2014 eight teams, twelve products, six regions \u2014 where the reader wants to find one of them and see where it sits. For a *series* of observations, where the shape of the cloud is the finding and no single point needs a name, [ScatterChart](/docs/charts/scatter-chart) does the same area mapping through `sizeKey`.\n\nColours come from the `--color-chart-1` \u2026 `--color-chart-5` tokens, cycling by row.",
+  "previewVideo": {
+    "src": "/previews/bubble-chart.mp4",
+    "poster": "/previews/bubble-chart-poster.jpg",
+    "alt": "The BubbleChart component, running in the example app.",
+    "width": 720,
+    "height": 1560
+  },
   "usage": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"headcount\"\n  labelKey=\"team\"\n>\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n</BubbleChart>",
   "extraImports": [
     "Frame",
@@ -17,38 +24,38 @@
     "Tooltip": "The touch target, the nearest-bubble selection it drives, and the readout that follows it.",
     "Legend": "A swatch and a name per bubble, drawn under the plot. Use it instead of `BubbleChart.Labels` when the circles are too small to carry their own names.",
     "Quadrants": "A crosshair splitting the plot into four, with a word for each corner. It stands at the mean of each axis by default; pass `x` and `y` for a threshold somebody decided rather than one the data produced. The tint marks the two corners a reading usually ends at.",
-    "Trend": "The least-squares line through the cloud, dashed and drawn under the circles because it is a summary of the data rather than data. `onFit` hands back the slope, the intercept and `r` — 1 is every bubble on the line, 0 is a cloud with no direction at all.",
+    "Trend": "The least-squares line through the cloud, dashed and drawn under the circles because it is a summary of the data rather than data. `onFit` hands back the slope, the intercept and `r` \u2014 1 is every bubble on the line, 0 is a cloud with no direction at all.",
     "SizeKey": "Three nested circles saying what a bubble's area is worth. Area is the one quantity the chart has no axis for, so without this the reader can see that one circle is bigger than another and has no way to know by how much. Needs a `sizeKey` on the chart."
   },
   "examples": [
     {
       "title": "Three quantities on one chart",
-      "description": "Two of them are the axes and the third is the area. Say what the area means in the header — a reader who is not told has no way to work it out from the picture.",
+      "description": "Two of them are the axes and the third is the area. Say what the area means in the header \u2014 a reader who is not told has no way to work it out from the picture.",
       "code": "<Frame className=\"w-full\">\n  <Frame.Header>\n    <Frame.Title>Performance vs efficiency</Frame.Title>\n    <Frame.Action>Drag to inspect</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <BubbleChart\n      data={TEAMS}\n      xDataKey=\"efficiency\"\n      yDataKey=\"performance\"\n      sizeKey=\"people\"\n      labelKey=\"team\"\n    >\n      <BubbleChart.Header value=\"8 teams\" caption=\"Circle area is team size\" />\n      <BubbleChart.Grid />\n      <BubbleChart.Bubbles />\n      <BubbleChart.Labels />\n      <BubbleChart.XAxis />\n      <BubbleChart.YAxis />\n      <BubbleChart.Tooltip />\n    </BubbleChart>\n  </Frame.Panel>\n</Frame>"
     },
     {
       "title": "Named beside, not inside",
-      "description": "Smaller circles cannot hold their names. Use `BubbleChart.Legend` instead of `BubbleChart.Labels` — not beside it, since the same names twice is the legend telling the reader what the plot already says. It is drawn under the plot rather than floating in a corner of it: a key over the drawing area competes with the bubbles for the space they are plotted in, and on a square chart no corner is reliably empty.",
+      "description": "Smaller circles cannot hold their names. Use `BubbleChart.Legend` instead of `BubbleChart.Labels` \u2014 not beside it, since the same names twice is the legend telling the reader what the plot already says. It is drawn under the plot rather than floating in a corner of it: a key over the drawing area competes with the bubbles for the space they are plotted in, and on a square chart no corner is reliably empty.",
       "code": "<BubbleChart\n  data={TEAMS}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[8, 22]}\n>\n  <BubbleChart.Grid rows={2} columns={2} />\n  <BubbleChart.Bubbles opacity={0.7} />\n  <BubbleChart.Legend />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
     },
     {
       "title": "Four corners, not one cloud",
-      "description": "A field of bubbles is usually read as four groups — which of these is doing well on both counts, which on neither. Without a divider the reader draws that line by eye, in a different place each time.\n\n`BubbleChart.Quadrants` stands at the mean of each axis by default. Pass `x` and `y` for a target or a budget instead: a threshold somebody decided rather than one the data produced.",
+      "description": "A field of bubbles is usually read as four groups \u2014 which of these is doing well on both counts, which on neither. Without a divider the reader draws that line by eye, in a different place each time.\n\n`BubbleChart.Quadrants` stands at the mean of each axis by default. Pass `x` and `y` for a target or a budget instead: a threshold somebody decided rather than one the data produced.",
       "code": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n>\n  <BubbleChart.Grid />\n  <BubbleChart.Quadrants\n    labels={{\n      topLeft: 'Effective, costly',\n      topRight: 'Doing both',\n      bottomLeft: 'Neither yet',\n      bottomRight: 'Lean, quiet',\n    }}\n  />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
     },
     {
       "title": "What the area is worth",
-      "description": "Position can be read off the axes. Area has no axis, so a reader can see that one circle is bigger than another and has no way to know by how much.\n\n`BubbleChart.SizeKey` is the only part that answers that. The circles nest and share a baseline — three circles in a row are three sizes, three circles inside one another are one scale.\n\nPick the corner the data leaves free — the key is drawn over the plot, so a corner with bubbles in it puts the scale on top of the thing it is explaining.",
-      "code": "<BubbleChart data={teams} sizeKey=\"people\" sizeRange={[10, 34]} …>\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles opacity={0.75} />\n  <BubbleChart.Labels />\n  <BubbleChart.SizeKey placement=\"top-left\" label=\"People\" />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n</BubbleChart>"
+      "description": "Position can be read off the axes. Area has no axis, so a reader can see that one circle is bigger than another and has no way to know by how much.\n\n`BubbleChart.SizeKey` is the only part that answers that. The circles nest and share a baseline \u2014 three circles in a row are three sizes, three circles inside one another are one scale.\n\nPick the corner the data leaves free \u2014 the key is drawn over the plot, so a corner with bubbles in it puts the scale on top of the thing it is explaining.",
+      "code": "<BubbleChart data={teams} sizeKey=\"people\" sizeRange={[10, 34]} \u2026>\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles opacity={0.75} />\n  <BubbleChart.Labels />\n  <BubbleChart.SizeKey placement=\"top-left\" label=\"People\" />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n</BubbleChart>"
     },
     {
       "title": "The line through the cloud",
       "description": "`BubbleChart.Trend` fits a straight line by least squares and hands the fit back through `onFit`, so a header can say how tightly the cloud sits on it.\n\nIt is dashed and drawn under the circles on purpose. A solid rule through a field of bubbles reads as a value somebody plotted, and this is a summary of the data rather than part of it.",
-      "code": "const [fit, setFit] = useState(null);\n\n<BubbleChart data={teams} …>\n  <BubbleChart.Header value={fit ? `r ${fit.r.toFixed(2)}` : '—'} />\n  <BubbleChart.Grid />\n  <BubbleChart.Trend onFit={setFit} />\n  <BubbleChart.Bubbles opacity={0.8} />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n</BubbleChart>"
+      "code": "const [fit, setFit] = useState(null);\n\n<BubbleChart data={teams} \u2026>\n  <BubbleChart.Header value={fit ? `r ${fit.r.toFixed(2)}` : '\u2014'} />\n  <BubbleChart.Grid />\n  <BubbleChart.Trend onFit={setFit} />\n  <BubbleChart.Bubbles opacity={0.8} />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n</BubbleChart>"
     },
     {
       "title": "A readout outside the chart",
-      "description": "`onActivePointChange` hands back the whole bubble — its label, both coordinates and the value behind its area — when the selection changes, so a header or a panel elsewhere on the screen can follow the finger.",
+      "description": "`onActivePointChange` hands back the whole bubble \u2014 its label, both coordinates and the value behind its area \u2014 when the selection changes, so a header or a panel elsewhere on the screen can follow the finger.",
       "code": "const [active, setActive] = useState(null);\n\nreturn (\n  <BubbleChart\n    data={TEAMS}\n    xDataKey=\"efficiency\"\n    yDataKey=\"performance\"\n    sizeKey=\"people\"\n    labelKey=\"team\"\n    onActivePointChange={setActive}\n  >\n    <BubbleChart.Header\n      value={active ? `Team ${active.label}` : '8 teams'}\n      caption={active ? `${active.size} people` : 'Circle area is team size'}\n    />\n    <BubbleChart.Grid />\n    <BubbleChart.Bubbles />\n    <BubbleChart.Labels />\n    <BubbleChart.Tooltip />\n  </BubbleChart>\n);"
     },
     {
@@ -63,7 +70,7 @@
       "description": "The whole chart in one pass: two measured axes, a third quantity on each circle's area, and every circle carrying its own name. `onActivePointChange` puts whichever one is under the finger into the header, so the readout is a line of text rather than a box drawn over the field.",
       "preview": {
         "src": "/previews/bubble-chart-basic.jpg",
-        "alt": "BubbleChart — eight named teams on two axes, sized by headcount.",
+        "alt": "BubbleChart \u2014 eight named teams on two axes, sized by headcount.",
         "width": 1179,
         "height": 2563
       },
@@ -71,10 +78,10 @@
     },
     {
       "title": "Named beside",
-      "description": "A smaller `sizeRange` makes circles too small to hold a name. `BubbleChart.Legend` names them alongside instead of inside, and `Labels` comes out — a name that does not fit is a name cropped to two letters.",
+      "description": "A smaller `sizeRange` makes circles too small to hold a name. `BubbleChart.Legend` names them alongside instead of inside, and `Labels` comes out \u2014 a name that does not fit is a name cropped to two letters.",
       "preview": {
         "src": "/previews/bubble-chart-named-beside.jpg",
-        "alt": "BubbleChart — five small circles named by a legend under the plot.",
+        "alt": "BubbleChart \u2014 five small circles named by a legend under the plot.",
         "width": 1179,
         "height": 2563
       },
@@ -85,7 +92,7 @@
       "description": "`BubbleChart.Quadrants` splits the plot at the average of each axis and names the corner each split makes. The four captions are the point of it: a crosshair on its own says where the middle is, and the names say what being in one corner rather than another means.",
       "preview": {
         "src": "/previews/bubble-chart-four-quadrants.jpg",
-        "alt": "BubbleChart — a crosshair at both averages with a caption in each corner.",
+        "alt": "BubbleChart \u2014 a crosshair at both averages with a caption in each corner.",
         "width": 1179,
         "height": 2563
       },
@@ -93,10 +100,10 @@
     },
     {
       "title": "What the area means",
-      "description": "Area is the one quantity the chart has no axis for, so nothing on screen says what a circle is worth until `BubbleChart.SizeKey` does. Three nested circles — largest, middle, smallest — sharing a bottom edge and a centre line, so the areas are laid over one another rather than stacked.",
+      "description": "Area is the one quantity the chart has no axis for, so nothing on screen says what a circle is worth until `BubbleChart.SizeKey` does. Three nested circles \u2014 largest, middle, smallest \u2014 sharing a bottom edge and a centre line, so the areas are laid over one another rather than stacked.",
       "preview": {
         "src": "/previews/bubble-chart-what-the-area-means.jpg",
-        "alt": "BubbleChart — three nested key circles labelled with the values they stand for.",
+        "alt": "BubbleChart \u2014 three nested key circles labelled with the values they stand for.",
         "width": 1179,
         "height": 2563
       },
@@ -107,23 +114,23 @@
       "description": "`BubbleChart.Trend` fits a least-squares line through the circles and reports the fit through `onFit`, so how tightly they sit on it can be said in words above the plot. The line alone claims a relationship; the coefficient is what says whether there is one.",
       "preview": {
         "src": "/previews/bubble-chart-the-line-through-it.jpg",
-        "alt": "BubbleChart — a dashed least-squares line through the field, with its coefficient above.",
+        "alt": "BubbleChart \u2014 a dashed least-squares line through the field, with its coefficient above.",
         "width": 1179,
         "height": 2563
       },
-      "code": "const [fit, setFit] = useState<{ slope: number; r: number } | null>(null);\n\n<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  aspectRatio={1.2}\n>\n  <BubbleChart.Header\n    value={fit ? `r ${fit.r.toFixed(2)}` : '—'}\n    caption={\n      fit && fit.r < 0.3 ? 'Barely a relationship' : 'How tightly the teams sit on the line'\n    }\n  />\n  <BubbleChart.Grid />\n  <BubbleChart.Trend onFit={setFit} />\n  <BubbleChart.Bubbles opacity={0.8} />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
+      "code": "const [fit, setFit] = useState<{ slope: number; r: number } | null>(null);\n\n<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  aspectRatio={1.2}\n>\n  <BubbleChart.Header\n    value={fit ? `r ${fit.r.toFixed(2)}` : '\u2014'}\n    caption={\n      fit && fit.r < 0.3 ? 'Barely a relationship' : 'How tightly the teams sit on the line'\n    }\n  />\n  <BubbleChart.Grid />\n  <BubbleChart.Trend onFit={setFit} />\n  <BubbleChart.Bubbles opacity={0.8} />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis label=\"Efficiency\" />\n  <BubbleChart.YAxis label=\"Performance\" />\n  <BubbleChart.Tooltip />\n</BubbleChart>"
     },
     {
       "title": "Loading",
-      "description": "`status=\"loading\"` draws `BubbleChart.Skeleton` — a still field of muted circles in the plot's own geometry — and dissolves it as the real circles land. The axes and the grid stay put throughout, so the chart does not resize under the reader at the moment the data arrives.",
+      "description": "`status=\"loading\"` draws `BubbleChart.Skeleton` \u2014 a still field of muted circles in the plot's own geometry \u2014 and dissolves it as the real circles land. The axes and the grid stay put throughout, so the chart does not resize under the reader at the moment the data arrives.",
       "preview": {
         "src": "/previews/bubble-chart-loading.jpg",
-        "alt": "BubbleChart — the skeleton's muted circles standing in while the data loads.",
+        "alt": "BubbleChart \u2014 the skeleton's muted circles standing in while the data loads.",
         "width": 1179,
         "height": 2563
       },
       "code": "<BubbleChart\n  data={teams}\n  xDataKey=\"efficiency\"\n  yDataKey=\"performance\"\n  sizeKey=\"people\"\n  labelKey=\"team\"\n  sizeRange={[14, 30]}\n  status={status}\n  aspectRatio={1.4}\n>\n  <BubbleChart.Grid />\n  <BubbleChart.Skeleton />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n</BubbleChart>"
     }
   ],
-  "notes": "### Area, not radius\n\n`sizeKey` maps to a circle's *area*. Doubling a radius quadruples the ink, so a chart that scaled the radius would show a doubled value as four times the size and the reader would believe the picture. `sizeRange` is the smallest and largest radius the scale runs between, and the scale runs over the whole data set so one bubble's size means the same thing as another's. Its upper end is also what the plot holds back at every edge — a circle is drawn about its centre, so without that the bubble carrying the largest value is the one cropped in half.\n\nWithout a `sizeKey` every bubble is drawn at the middle of `sizeRange`, which is a scatter plot with names on it — and an honest one.\n\n### The grid, and the numbers on it\n\nThe grid draws eight rules each way and each axis prints five numbers, so every second gridline carries one. That relationship is the point of both defaults: a number beside every line of a grid fine enough to read against is a column of numbers, and a grid coarse enough for that reads as blocks laid behind the circles.\n\nThe domain is rounded out to the same four steps the axes are divided into, so the numbers come out round rather than ending wherever the data happened to end.\n\n`rows`, `columns` and `ticks` all move independently if a chart wants a different rhythm — keep the grid a whole multiple of the ticks, or the numbers stop landing on lines.\n\n### Naming the axes\n\n`label` on `XAxis` and `YAxis` says what each one measures. The chart reserves the room before it lays the plot out, so adding one moves the plot rather than writing over it. The y label is turned on its side, which is the only way a word fits a gutter sized for numbers.\n\n### Colour\n\nThe ramp cycles by row. Pass `colorKey` to name a colour per row: either a CSS colour, or a number from 1 to 5 selecting a `--color-chart-*` token. `BubbleChart.Bubbles` also takes a single `color` for every circle, which is what a chart with a legend usually wants.\n\n### Selection\n\nThe readout clears the *edge* of the bubble rather than its centre, and drops below it where there is no room above — lifted by a constant it landed on the larger circles, which are exactly the ones a finger is most likely to be resting on.\n\nA touch picks the nearest bubble whose own circle — or the `hitRadius` floor, whichever is larger — reaches the finger. Nearest rather than topmost, because where bubbles overlap the one drawn last is not the one being aimed at.\n\n## Accessible data\n\nThe chart exposes one screen-reader summary and one semantic entry per data row; its SVG circles, axes and labels stay decorative. Set `accessibilityLabel` for the summary, `accessibilityLabelForDatum` to phrase a row in your own words, and `onAccessibilityDatumPress` to make each row activatable. Pass `accessible={false}` to drop the semantic layer entirely."
+  "notes": "### Area, not radius\n\n`sizeKey` maps to a circle's *area*. Doubling a radius quadruples the ink, so a chart that scaled the radius would show a doubled value as four times the size and the reader would believe the picture. `sizeRange` is the smallest and largest radius the scale runs between, and the scale runs over the whole data set so one bubble's size means the same thing as another's. Its upper end is also what the plot holds back at every edge \u2014 a circle is drawn about its centre, so without that the bubble carrying the largest value is the one cropped in half.\n\nWithout a `sizeKey` every bubble is drawn at the middle of `sizeRange`, which is a scatter plot with names on it \u2014 and an honest one.\n\n### The grid, and the numbers on it\n\nThe grid draws eight rules each way and each axis prints five numbers, so every second gridline carries one. That relationship is the point of both defaults: a number beside every line of a grid fine enough to read against is a column of numbers, and a grid coarse enough for that reads as blocks laid behind the circles.\n\nThe domain is rounded out to the same four steps the axes are divided into, so the numbers come out round rather than ending wherever the data happened to end.\n\n`rows`, `columns` and `ticks` all move independently if a chart wants a different rhythm \u2014 keep the grid a whole multiple of the ticks, or the numbers stop landing on lines.\n\n### Naming the axes\n\n`label` on `XAxis` and `YAxis` says what each one measures. The chart reserves the room before it lays the plot out, so adding one moves the plot rather than writing over it. The y label is turned on its side, which is the only way a word fits a gutter sized for numbers.\n\n### Colour\n\nThe ramp cycles by row. Pass `colorKey` to name a colour per row: either a CSS colour, or a number from 1 to 5 selecting a `--color-chart-*` token. `BubbleChart.Bubbles` also takes a single `color` for every circle, which is what a chart with a legend usually wants.\n\n### Selection\n\nThe readout clears the *edge* of the bubble rather than its centre, and drops below it where there is no room above \u2014 lifted by a constant it landed on the larger circles, which are exactly the ones a finger is most likely to be resting on.\n\nA touch picks the nearest bubble whose own circle \u2014 or the `hitRadius` floor, whichever is larger \u2014 reaches the finger. Nearest rather than topmost, because where bubbles overlap the one drawn last is not the one being aimed at.\n\n## Accessible data\n\nThe chart exposes one screen-reader summary and one semantic entry per data row; its SVG circles, axes and labels stay decorative. Set `accessibilityLabel` for the summary, `accessibilityLabelForDatum` to phrase a row in your own words, and `onAccessibilityDatumPress` to make each row activatable. Pass `accessible={false}` to drop the semantic layer entirely."
 }

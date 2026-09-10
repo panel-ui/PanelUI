@@ -359,23 +359,41 @@ function ScrollHeaderCrossingVersion() {
   );
 }
 
-const SETTINGS_SEED = [
-  { label: 'Notifications', value: 'On', icon: <BellIcon size={16} /> },
-  { label: 'Appearance', value: 'Dark', icon: <GlobeIcon size={16} /> },
-  { label: 'Calendar', value: '3 accounts', icon: <CalendarIcon size={16} /> },
-  { label: 'Saved items', value: '128', icon: <BookmarkIcon size={16} /> },
-  { label: 'Linked apps', value: '6', icon: <LinkIcon size={16} /> },
-  { label: 'Signature', value: 'Edited', icon: <PencilIcon size={16} /> },
-  { label: 'Downloads', value: 'Wi-Fi only', icon: <BookmarkIcon size={16} /> },
-  { label: 'Language', value: 'English (UK)', icon: <GlobeIcon size={16} /> },
+const SETTINGS_ICONS = [
+  <BellIcon size={16} />,
+  <GlobeIcon size={16} />,
+  <CalendarIcon size={16} />,
+  <BookmarkIcon size={16} />,
+  <LinkIcon size={16} />,
+  <PencilIcon size={16} />,
 ];
 
-const SECTION_NAMES = ['General', 'Content', 'Privacy', 'Sync', 'Advanced'];
-
-const SETTINGS_ROWS = repeat(SETTINGS_SEED, 40, (row, index, pass) => ({
-  ...row,
+/*
+ * Written out rather than repeated. A settings screen genuinely has forty rows
+ * in it, and the repeat helper is for lists where a second pass is invisible —
+ * here it produced "Notifications · Content", which is not a setting anyone
+ * has.
+ */
+const SETTINGS_ROWS = [
+  ['Notifications', 'On'], ['Sounds', 'Default'], ['Badges', 'Unread only'],
+  ['Appearance', 'Dark'], ['Text size', 'Large'], ['Bold text', 'Off'],
+  ['Reduce motion', 'Off'], ['Language', 'English (UK)'], ['Region', 'United Kingdom'],
+  ['Calendar', '3 accounts'], ['Default calendar', 'Work'], ['Week starts', 'Monday'],
+  ['Saved items', '128'], ['Reading list', '41'], ['Highlights', 'On'],
+  ['Downloads', 'Wi-Fi only'], ['Storage', '2.4 GB'], ['Offline maps', '3 areas'],
+  ['Linked apps', '6'], ['Sign-in method', 'Passkey'], ['Two-factor', 'On'],
+  ['Signature', 'Edited'], ['Autocorrect', 'On'], ['Dictation', 'Off'],
+  ['Location', 'While using'], ['Analytics', 'Off'], ['Personalisation', 'Limited'],
+  ['Blocked accounts', '2'], ['Muted words', '17'], ['Content filters', 'Strict'],
+  ['Backups', 'Nightly'], ['Sync', 'All devices'], ['Handoff', 'On'],
+  ['Keyboard shortcuts', '24'], ['Gestures', 'Default'], ['Haptics', 'On'],
+  ['Beta updates', 'Off'], ['Diagnostics', 'Share'], ['Reset', ''],
+  ['About', 'Version 4.2'],
+].map(([label, value], index) => ({
   id: `s${index}`,
-  label: pass === 0 ? row.label : `${row.label} · ${SECTION_NAMES[pass]}`,
+  label,
+  value,
+  icon: SETTINGS_ICONS[index % SETTINGS_ICONS.length],
 }));
 
 /**
@@ -421,6 +439,7 @@ function ScrollHeaderBarOnlyVersion() {
   );
 }
 
+/* Twenty-four, written out: a headline is the one thing a repeat cannot hide. */
 const POST_SEED = [
   { title: 'The bridge reopened after eleven years', group: 'r/infrastructure' },
   { title: 'A field guide to reading a tide table', group: 'r/sailing' },
@@ -430,6 +449,22 @@ const POST_SEED = [
   { title: 'Mapping every public staircase in the city', group: 'r/urbanism' },
   { title: 'Why the harbour clock is four minutes fast', group: 'r/horology' },
   { title: 'Twelve years of rainfall, one chart', group: 'r/dataisbeautiful' },
+  { title: 'The last manual telephone exchange in the county', group: 'r/telecom' },
+  { title: 'Somebody has been repainting the mile markers', group: 'r/cycling' },
+  { title: 'How the night ferry timetable actually works', group: 'r/sailing' },
+  { title: 'A tram line that was never finished', group: 'r/urbanism' },
+  { title: 'Reading a runway from the wrong end', group: 'r/aviation' },
+  { title: 'Proofing in a cold kitchen: what changed', group: 'r/baking' },
+  { title: 'The signal box nobody has entered since 1998', group: 'r/trains' },
+  { title: 'Counting swifts from a fourth-floor window', group: 'r/birding' },
+  { title: 'Every level crossing, ranked by wait', group: 'r/dataisbeautiful' },
+  { title: 'The bakery that opens at three in the morning', group: 'r/baking' },
+  { title: 'Why the new bridge has no footpath', group: 'r/infrastructure' },
+  { title: 'Tide tables and the myth of the twelfths rule', group: 'r/sailing' },
+  { title: 'A clock that has been wrong in the same way for decades', group: 'r/horology' },
+  { title: 'The stairs behind the station car park', group: 'r/urbanism' },
+  { title: 'Cross-country by the slowest possible route', group: 'r/trains' },
+  { title: 'What the airport does with a diverted flight', group: 'r/aviation' },
 ];
 
 const POSTS = repeat(POST_SEED, 24, (row, index) => ({
@@ -658,25 +693,33 @@ function ScrollHeaderListVersion() {
   );
 }
 
-const GROUP_SEED = [
-  { label: 'Profile', value: 'Public', icon: <GlobeIcon size={16} /> },
-  { label: 'Notifications', value: 'On', icon: <BellIcon size={16} /> },
-  { label: 'Saved', value: '128', icon: <BookmarkIcon size={16} /> },
-  { label: 'Drafts', value: '4', icon: <PencilIcon size={16} /> },
-  { label: 'Calendar', value: '3 accounts', icon: <CalendarIcon size={16} /> },
-  { label: 'Linked apps', value: '6', icon: <LinkIcon size={16} /> },
-  { label: 'Shared with', value: '12 people', icon: <ShareNodesIcon size={16} /> },
-];
-
-const SETTINGS_SECTIONS = ['Account', 'Content', 'Connections', 'Privacy', 'Sync', 'Advanced'].map(
-  (title, section) => ({
-    title,
-    data: GROUP_SEED.map((row, index) => ({
-      ...row,
-      id: `g${section}-${index}`,
-    })),
-  })
-);
+/*
+ * Each section has its own rows. Repeating one seed under six headings put the
+ * same seven labels on the screen six times, which is a list that looks like a
+ * placeholder rather than a settings screen.
+ */
+const SETTINGS_SECTIONS = [
+  ['Account', [['Profile', 'Public'], ['Display name', 'Economist'], ['Email', 'Verified'],
+    ['Password', 'Changed in June'], ['Passkeys', '2 devices'], ['Delete account', '']]],
+  ['Content', [['Saved', '128'], ['Drafts', '4'], ['Highlights', 'On'],
+    ['Reading history', '30 days'], ['Downloads', 'Wi-Fi only'], ['Autoplay', 'Never']]],
+  ['Notifications', [['Push', 'On'], ['Email digest', 'Weekly'], ['Mentions', 'Everyone'],
+    ['Replies', 'People I follow'], ['Quiet hours', '22:00 – 07:00'], ['Sounds', 'Default']]],
+  ['Privacy', [['Discoverability', 'By handle'], ['Blocked', '2'], ['Muted words', '17'],
+    ['Read receipts', 'Off'], ['Analytics', 'Off'], ['Ad personalisation', 'Limited']]],
+  ['Connections', [['Linked apps', '6'], ['Shared with', '12 people'], ['Calendar', '3 accounts'],
+    ['Contacts', 'Not synced'], ['Photos', 'Selected only'], ['Wallet', 'Connected']]],
+  ['Advanced', [['Sync', 'All devices'], ['Backups', 'Nightly'], ['Storage', '2.4 GB'],
+    ['Beta updates', 'Off'], ['Diagnostics', 'Share'], ['Reset preferences', '']]],
+].map(([title, rows], section) => ({
+  title: title as string,
+  data: (rows as string[][]).map(([label, value], index) => ({
+    id: `g${section}-${index}`,
+    label,
+    value,
+    icon: SETTINGS_ICONS[(section + index) % SETTINGS_ICONS.length],
+  })),
+}));
 
 /**
  * The grouped-preferences look: the bar drawn on the card token with no

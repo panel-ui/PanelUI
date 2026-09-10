@@ -359,42 +359,36 @@ function ScrollHeaderCrossingVersion() {
   );
 }
 
-const SETTINGS_ICONS = [
-  <BellIcon size={16} />,
-  <GlobeIcon size={16} />,
-  <CalendarIcon size={16} />,
-  <BookmarkIcon size={16} />,
-  <LinkIcon size={16} />,
-  <PencilIcon size={16} />,
-];
-
 /*
- * Written out rather than repeated. A settings screen genuinely has forty rows
- * in it, and the repeat helper is for lists where a second pass is invisible —
- * here it produced "Notifications · Content", which is not a setting anyone
- * has.
+ * Written out rather than repeated, and grouped so the glyph means something.
+ * The repeat helper is for lists where a second pass is invisible; a settings
+ * screen genuinely has forty rows, and cycling six icons across them puts a
+ * bell beside "Region".
  */
 const SETTINGS_ROWS = [
-  ['Notifications', 'On'], ['Sounds', 'Default'], ['Badges', 'Unread only'],
-  ['Appearance', 'Dark'], ['Text size', 'Large'], ['Bold text', 'Off'],
-  ['Reduce motion', 'Off'], ['Language', 'English (UK)'], ['Region', 'United Kingdom'],
-  ['Calendar', '3 accounts'], ['Default calendar', 'Work'], ['Week starts', 'Monday'],
-  ['Saved items', '128'], ['Reading list', '41'], ['Highlights', 'On'],
-  ['Downloads', 'Wi-Fi only'], ['Storage', '2.4 GB'], ['Offline maps', '3 areas'],
-  ['Linked apps', '6'], ['Sign-in method', 'Passkey'], ['Two-factor', 'On'],
-  ['Signature', 'Edited'], ['Autocorrect', 'On'], ['Dictation', 'Off'],
-  ['Location', 'While using'], ['Analytics', 'Off'], ['Personalisation', 'Limited'],
-  ['Blocked accounts', '2'], ['Muted words', '17'], ['Content filters', 'Strict'],
-  ['Backups', 'Nightly'], ['Sync', 'All devices'], ['Handoff', 'On'],
-  ['Keyboard shortcuts', '24'], ['Gestures', 'Default'], ['Haptics', 'On'],
-  ['Beta updates', 'Off'], ['Diagnostics', 'Share'], ['Reset', ''],
-  ['About', 'Version 4.2'],
-].map(([label, value], index) => ({
-  id: `s${index}`,
-  label,
-  value,
-  icon: SETTINGS_ICONS[index % SETTINGS_ICONS.length],
-}));
+  [<BellIcon size={16} />, [['Notifications', 'On'], ['Sounds', 'Default'], ['Badges', 'Unread only'],
+    ['Quiet hours', '22:00 – 07:00'], ['Mentions', 'Everyone'], ['Replies', 'People I follow']]],
+  [<GlobeIcon size={16} />, [['Appearance', 'Dark'], ['Text size', 'Large'], ['Bold text', 'Off'],
+    ['Reduce motion', 'Off'], ['Language', 'English (UK)'], ['Region', 'United Kingdom']]],
+  [<CalendarIcon size={16} />, [['Calendar', '3 accounts'], ['Default calendar', 'Work'],
+    ['Week starts', 'Monday'], ['Time zone', 'Automatic'], ['Alerts', '15 minutes before'],
+    ['Travel time', 'On']]],
+  [<BookmarkIcon size={16} />, [['Saved items', '128'], ['Reading list', '41'], ['Highlights', 'On'],
+    ['Downloads', 'Wi-Fi only'], ['Storage', '2.4 GB'], ['Offline maps', '3 areas']]],
+  [<LinkIcon size={16} />, [['Linked apps', '6'], ['Sign-in method', 'Passkey'], ['Two-factor', 'On'],
+    ['Blocked accounts', '2'], ['Muted words', '17'], ['Content filters', 'Strict']]],
+  [<PencilIcon size={16} />, [['Signature', 'Edited'], ['Autocorrect', 'On'], ['Dictation', 'Off'],
+    ['Keyboard shortcuts', '24'], ['Gestures', 'Default'], ['Haptics', 'On']]],
+  [<GlobeIcon size={16} />, [['Backups', 'Nightly'], ['Sync', 'All devices'], ['Diagnostics', 'Share'],
+    ['About', 'Version 4.2']]],
+].flatMap(([icon, rows], run) =>
+  (rows as string[][]).map(([label, value], index) => ({
+    id: `s${run}-${index}`,
+    label,
+    value,
+    icon: icon as React.ReactElement,
+  }))
+);
 
 /**
  * No block at all, so there is no handover to make: the bar is the only title
@@ -717,7 +711,6 @@ const SETTINGS_SECTIONS = [
     id: `g${section}-${index}`,
     label,
     value,
-    icon: SETTINGS_ICONS[(section + index) % SETTINGS_ICONS.length],
   })),
 }));
 
@@ -752,9 +745,6 @@ function ScrollHeaderGroupedVersion() {
         )}
         renderItem={({ item }) => (
           <Item size="sm" variant="muted" className="mb-1">
-            <Item.Media variant="icon" className="h-8 w-8 items-center justify-center">
-              {item.icon}
-            </Item.Media>
             <Item.Content>
               <Item.Title>{item.label}</Item.Title>
             </Item.Content>
@@ -953,12 +943,24 @@ const ARCHIVE_SEED = [
   'Asbestos survey', 'Boundary agreement',
 ];
 
-const MONTHS = ['Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar'];
+/*
+ * The one place a progression is the honest shape: an archive is in date
+ * order, so these walk backwards from a fixed day rather than scattering. The
+ * gap between them is what varies.
+ */
+const ARCHIVE_FROM = new Date(2026, 7, 28);
+
+function archiveDate(index: number) {
+  const when = new Date(ARCHIVE_FROM);
+  when.setDate(when.getDate() - (index * 4 + scatter(index, 4)));
+  const day = String(when.getDate()).padStart(2, '0');
+  return `${day} ${when.toLocaleDateString('en-GB', { month: 'short' })}`;
+}
 
 const ARCHIVE = repeat(ARCHIVE_SEED, 40, (label, index, pass) => ({
   id: `a${index}`,
   label: pass === 0 ? label : `${label}, rev ${pass}`,
-  date: `${String(1 + scatter(index, 28)).padStart(2, '0')} ${MONTHS[Math.floor(index / 7) % MONTHS.length]}`,
+  date: archiveDate(index),
 }));
 
 /**

@@ -274,6 +274,9 @@ export default function App() {
 portal host used by overlays (Dialog, BottomSheet, Select), and the toast viewport. One at the
 root of the app is enough — do not nest a second one.
 
+It does not own the system bars. Drive those from the theme yourself — see
+[Using Expo Router](#using-expo-router) for the two lines that do it.
+
 You do **not** need a `babel.config.js`. Expo's default preset already wires up the worklets
 plugin that Reanimated needs. If you have one for other reasons, keep `babel-preset-expo` in it.
 
@@ -401,6 +404,39 @@ export default function RootLayout() {
 `useCSSVariable` subscribes to Uniwind's theme changes, so this re-runs on every switch —
 including the named themes, which the OS `Appearance` API knows nothing about. For the same
 reason, drive `<StatusBar>` from `mode` rather than `style="auto"`.
+
+### Paint the window too, on Android
+
+The theme reaches everything React draws. It does not reach the window behind that, and on
+Android that window is what shows in every strip the app is not painting — behind the status
+bar, under the navigation bar, and in the gap a screen transition opens. Left alone it stays
+the device's colour, so a dark PanelUI theme on a phone set to light has light bands at both
+ends.
+
+Set it from the same token, with [`expo-system-ui`](https://docs.expo.dev/versions/latest/sdk/system-ui/):
+
+```tsx
+import * as SystemUI from 'expo-system-ui';
+
+useEffect(() => {
+  if (background) void SystemUI.setBackgroundColorAsync(background);
+}, [background]);
+```
+
+### If the keyboard measures against the wrong inset
+
+`PanelUIProvider` takes `statusBarTranslucent` and `navigationBarTranslucent` and hands them
+to the keyboard controller, which needs them to know how much of the window the system bars
+are covering.
+
+Reach for them only where the app draws under a system bar without being edge-to-edge. Under
+edge-to-edge — the default from Expo SDK 54 — the controller works this out for itself and
+ignores both, so leave them unset there rather than passing `false`: a value it has to ignore
+is a warning in development.
+
+```tsx
+<PanelUIProvider statusBarTranslucent navigationBarTranslucent>
+```
 
 ## TypeScript
 

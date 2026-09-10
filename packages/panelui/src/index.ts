@@ -1093,6 +1093,7 @@ export {
   type ScrollHeaderLargeProps,
   type ScrollHeaderActionsProps,
   type ScrollHeaderCoverProps,
+  type ScrollHeaderMaterial,
   type ScrollHeaderSurface,
 } from './components/scroll-header';
 export { Separator, type SeparatorProps } from './components/separator';

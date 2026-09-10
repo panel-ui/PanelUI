@@ -30,12 +30,12 @@ import { ScrollHeader } from 'panelui-native';
 
 ### Variants
 
-- **surface** — `plain` *(default)*, `muted`, `none`
+- **surface** — `plain` *(default)*, `muted`, `none`, `blur`
 - **divider** — `true` *(default)*, `false`
 
 ### Parts
 
-- `ScrollHeader.Bar` — The pinned bar. Its contents never move — only its surface fades in, which is what makes the change read as one crossfade rather than two things happening at once. `surface` picks what it is drawn on and `divider` puts a hairline under it.
+- `ScrollHeader.Bar` — The pinned bar. Its contents never move — only its surface fades in, which is what makes the change read as one crossfade rather than two things happening at once. `surface` picks what it is drawn on, `divider` puts a hairline under it, and `surface="blur"` frosts it rather than filling it, so the content passing underneath stays legible as shape and colour.
 - `ScrollHeader.Large` — The block that scrolls away. Its measured height is the distance the header collapses over, so it can hold anything and the transition follows. Once the bar has taken over it is faded out, hidden from screen readers, and stops taking touches meant for the content behind it.
 - `ScrollHeader.Title` — The screen's title. Write it in both halves: in `Large` it is large and at rest, in `Bar` it is compact and fades in. The part reads which half it is in and styles itself accordingly, so the two are one element written twice rather than two components to keep in step.
 - `ScrollHeader.Description` — The quiet line under the title — a count, a byline, a date.
@@ -67,8 +67,10 @@ Extends `ViewProps`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
-| `surface` | `ScrollHeaderSurface` | `plain` | What the bar is drawn on once it has taken over. `none` leaves it clear, for a bar over a cover that should stay visible. |
+| `surface` | `ScrollHeaderSurface` | `plain` | What the bar is drawn on once it has taken over. `none` leaves it clear, for a bar over a cover that should stay visible. `blur` frosts it, so the content passing under the bar stays legible as shape and colour. `blur` needs `expo-blur`, which is optional, and it is replaced by an opaque bar under Reduce Transparency. Both fall back to `plain` — a bar whose title cannot be read is a worse answer than one that is not frosted. |
 | `divider` | `boolean` | `true` | A hairline under the bar, drawn with its surface. |
+| `intensity` | `number` | `40` | Depth of the frost, on `expo-blur`'s 0–100 scale. Defaults to 40 — heavier than a scrim's, because a scrim covers a whole screen and this is a thin band read against content moving under it. Ignored unless `surface` is `blur`. |
+| `material` | `ScrollHeaderMaterial` | `default` | Which way the frost tints. Defaults to the app's theme rather than the device's, so an app running light inside a dark OS frosts light. Ignored unless `surface` is `blur`. |
 | `children` | `ReactNode` | — | — |
 
 #### `ScrollHeaderLargeProps`
@@ -153,6 +155,8 @@ Under Reduce Motion the band stops growing past its resting height, so an over-s
 With no `Large` block there is no distance to interpolate over, so the bar's surface is timed in over 200ms rather than appearing between one frame and the next. With a block, the hand-over is scroll-linked and moves only as far as the finger does.
 
 On Android the band carries a small elevation so it draws over the scroller, which orders by elevation before z-order. That is also what draws its shadow, so `surface="none"` still lifts very slightly.
+
+**A frosted bar is optional twice over.** `surface="blur"` needs `expo-blur`, which is an optional dependency reached through a lazy require, and Reduce Transparency is a preference that outranks the design. Where either says no the bar draws `plain` instead, so nothing has to be guarded at the call site — but pick the rest of the screen so it still works with a solid bar, because for some readers that is the only bar there is.
 
 ---
 

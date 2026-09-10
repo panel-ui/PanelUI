@@ -53,6 +53,19 @@
  * being shown is hidden from accessibility. That is one re-render per crossing
  * and no more: everything that runs per frame stays in shared values.
  *
+ * ## The bar's surface is a fill, or a frost
+ *
+ * `surface` says what the bar is drawn on once it has taken over: a token
+ * fill, nothing at all over a cover, or `blur` — a real material, so the rows
+ * passing under the bar stay legible as shape and colour while losing the
+ * detail that would compete with the title on top.
+ *
+ * The frost needs a native view, and there are two ways it cannot be drawn:
+ * `expo-blur` is optional and may not be installed, and Reduce Transparency is
+ * a preference that outranks the design. Both fall back to the plain
+ * background token rather than to nothing, because a bar you cannot read is a
+ * worse answer than a bar that is not frosted.
+ *
  * ## What it needs
  *
  * A height to fill, and exactly one scrollable child. The child is cloned with
@@ -107,7 +120,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
+import { hasBlur, useReduceTransparency } from '../../primitives/scrim';
 import { Text, textChildren, type TextProps } from '../../primitives/text';
+import { useThemeMode } from '../../theme/use-theme';
 import { cn } from '../../utils/cn';
 import {
   BAR_TITLE_ARRIVE,
@@ -135,6 +150,34 @@ const BAR_HEIGHT = 48;
  * is nothing on one to test — but these two are module-level constants, and
  * identity is exact.
  */
+/** Which way the frost tints. `default` follows the app's theme. */
+export type ScrollHeaderMaterial = 'light' | 'dark' | 'default';
+
+/**
+ * `expo-blur`'s BlurView, or null when it is not installed. Resolved once at
+ * module load — the require is cheap and caching it avoids a try/catch on
+ * every render.
+ */
+const BlurView: ComponentType<{
+  intensity?: number;
+  tint?: ScrollHeaderMaterial;
+  style?: unknown;
+}> | null = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('expo-blur');
+    return (mod?.BlurView as ComponentType<{ intensity?: number }>) ?? null;
+  } catch {
+    return null;
+  }
+})();
+
+/**
+ * Depth of the frost. Heavier than a scrim's, because a scrim covers a whole
+ * screen and this is a thin band read against content that is moving under it.
+ */
+const DEFAULT_BLUR_INTENSITY = 40;
+
 const ANIMATED_SCROLLABLES = new Set<unknown>([Animated.ScrollView, Animated.FlatList]);
 
 const scrollHeaderVariants = tv({
@@ -153,6 +196,10 @@ const scrollHeaderVariants = tv({
       plain: { barSurface: 'bg-background' },
       muted: { barSurface: 'bg-card' },
       none: { barSurface: 'bg-transparent' },
+      // No fill of its own: an opaque colour behind the material is part of
+      // what the material samples, so a frost over one is a flat bar that has
+      // paid for a native view.
+      blur: { barSurface: 'bg-transparent' },
     },
     divider: {
       true: { barSurface: 'border-b border-border' },
@@ -516,11 +563,29 @@ export interface ScrollHeaderBarProps extends ViewProps {
   className?: string;
   /**
    * What the bar is drawn on once it has taken over. `none` leaves it clear,
-   * for a bar over a cover that should stay visible.
+   * for a bar over a cover that should stay visible. `blur` frosts it, so the
+   * content passing under the bar stays legible as shape and colour.
+   *
+   * `blur` needs `expo-blur`, which is optional, and it is replaced by an
+   * opaque bar under Reduce Transparency. Both fall back to `plain` — a bar
+   * whose title cannot be read is a worse answer than one that is not frosted.
    */
   surface?: ScrollHeaderSurface;
   /** A hairline under the bar, drawn with its surface. */
   divider?: boolean;
+  /**
+   * Depth of the frost, on `expo-blur`'s 0–100 scale. Defaults to 40 — heavier
+   * than a scrim's, because a scrim covers a whole screen and this is a thin
+   * band read against content moving under it. Ignored unless `surface` is
+   * `blur`.
+   */
+  intensity?: number;
+  /**
+   * Which way the frost tints. Defaults to the app's theme rather than the
+   * device's, so an app running light inside a dark OS frosts light. Ignored
+   * unless `surface` is `blur`.
+   */
+  material?: ScrollHeaderMaterial;
   children?: ReactNode;
 }
 
@@ -535,6 +600,8 @@ const ScrollHeaderBar = forwardRef<View, ScrollHeaderBarProps>(
       className,
       surface = 'plain',
       divider = true,
+      intensity = DEFAULT_BLUR_INTENSITY,
+      material = 'default',
       children,
       ...props
     },
@@ -542,7 +609,15 @@ const ScrollHeaderBar = forwardRef<View, ScrollHeaderBarProps>(
   ) => {
     const { progress } = useScrollHeader('ScrollHeader.Bar');
     const { barBand, insetTop } = useContext(BandMetricsContext);
-    const { bar, barSurface } = scrollHeaderVariants({ surface, divider });
+    const { mode } = useThemeMode();
+    const reduceTransparency = useReduceTransparency();
+
+    // Three gates, and a preference that has not been answered yet counts as
+    // switched on: the case worth being careful about is the one where it is.
+    const blurring =
+      surface === 'blur' && hasBlur && BlurView !== null && reduceTransparency === false;
+    const fill = surface === 'blur' && !blurring ? 'plain' : surface;
+    const { bar, barSurface } = scrollHeaderVariants({ surface: fill, divider });
 
     // Closed by the time the block has gone, so the block is never seen through
     // it — and never on top of whatever else the bar is carrying.
@@ -559,11 +634,25 @@ const ScrollHeaderBar = forwardRef<View, ScrollHeaderBarProps>(
         style={{ height: barBand, paddingTop: insetTop }}
         className={bar({ className })}
       >
+        {/*
+          The material is a child of the surface rather than a sibling of it,
+          so there is one opacity driving both and the frost cannot arrive on a
+          different curve from the fill it replaces. It sits inside the
+          divider's border box, so the hairline stays on top of it.
+        */}
         <Animated.View
           pointerEvents="none"
           style={surfaceStyle}
           className={barSurface()}
-        />
+        >
+          {blurring && BlurView ? (
+            <BlurView
+              intensity={intensity}
+              tint={material === 'default' ? mode : material}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : null}
+        </Animated.View>
         <ScrollHeaderSlotContext.Provider value="bar">
           {textChildren(children)}
         </ScrollHeaderSlotContext.Provider>

@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1295,
+    "exports": 1296,
     "values": 330,
-    "types": 965,
+    "types": 966,
     "modules": 155,
     "components": 128,
     "hooks": 13
@@ -3990,6 +3990,10 @@
           },
           {
             "name": "ScrollHeaderCoverProps",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollHeaderMaterial",
             "kind": "type"
           },
           {

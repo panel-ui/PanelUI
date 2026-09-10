@@ -1522,7 +1522,9 @@
     "description": "A screen title that hands over to a compact bar as the page scrolls.",
     "registryDependencies": [
       "cn",
-      "text"
+      "scrim",
+      "text",
+      "use-theme"
     ],
     "docsPath": "components/scroll-header"
   },

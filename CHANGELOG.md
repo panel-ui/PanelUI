@@ -9,6 +9,30 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.97.0] — 2026-09-10
+
+### Added
+
+- **PanelUIProvider** — `statusBarTranslucent` and `navigationBarTranslucent`, forwarded to the
+  keyboard controller so it measures the keyboard against the right window inset on Android.
+  They were previously unreachable: the provider mounted the controller with children and
+  nothing else. Reach for them only where the app draws under a system bar without being
+  edge-to-edge; under edge-to-edge the controller works it out for itself and ignores both, so
+  leave them unset there rather than passing `false`.
+
+### Fixed
+
+- **Generated projects** now paint the window from `--color-background`. The theme reaches
+  everything React draws and not the window behind it, so a dark PanelUI theme on a device set
+  to light left a light strip wherever the app was not painting — behind the status bar, under
+  the navigation bar, and in the band beneath the tab bar. Templates are fetched from `main`, so
+  this reaches a new project without waiting for a release. ([#215](https://github.com/panel-ui/PanelUI/issues/215))
+
+### Docs
+
+- **Installation** — how to set the window background from the theme, and when the two new
+  provider props are the answer.
+
 ## [0.96.0] — 2026-09-10
 
 ### Added

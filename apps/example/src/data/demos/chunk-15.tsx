@@ -977,7 +977,7 @@ function ScrollHeaderLooseVersion() {
         <ScrollHeader.Actions>
           {/* A count rather than a control: the bar says how much is below it
               the whole way down, which is the reason to leave it part-open. */}
-          <Badge variant="secondary">{ARCHIVE.length}</Badge>
+          <Badge variant="secondary" className="self-center">{ARCHIVE.length}</Badge>
           <Button variant="ghost" size="icon" accessibilityLabel="Filter">
             <EllipsisIcon size={18} />
           </Button>

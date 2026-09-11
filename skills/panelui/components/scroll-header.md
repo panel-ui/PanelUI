@@ -39,7 +39,7 @@ import { ScrollHeader } from 'panelui-native';
 - `ScrollHeader.Large` — The block that scrolls away. Its measured height is the distance the header collapses over, so it can hold anything and the transition follows. Once the bar has taken over it is faded out, hidden from screen readers, and stops taking touches meant for the content behind it.
 - `ScrollHeader.Title` — The screen's title. Write it in both halves: in `Large` it is large and at rest, in `Bar` it is compact and fades in. The part reads which half it is in and styles itself accordingly, so the two are one element written twice rather than two components to keep in step.
 - `ScrollHeader.Description` — The quiet line under the title — a count, a byline, a date.
-- `ScrollHeader.Actions` — The controls at the trailing end of the bar. They stay put and stay reachable throughout: only the bar's surface and title are part of the transition.
+- `ScrollHeader.Actions` — The controls at the trailing end of the bar. They stay put and stay reachable throughout: only the bar's surface and title are part of the transition. A `Badge` aligns to the top of the row rather than its centre, so give it `self-center` where it sits beside a taller control like a button.
 - `ScrollHeader.Cover` — A picture or a gradient filling the band. It has no height of its own, so an over-scroll stretches it by laying it out taller rather than by scaling it up — a photograph stretches without going soft. `scrim` washes it down so a title stays legible over a bright picture.
 
 ### Props

@@ -4,6 +4,14 @@ description: A screen title that hands over to a compact bar as the page scrolls
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/scroll-header.mp4"
+  poster="/previews/scroll-header-poster.jpg"
+  alt="The ScrollHeader component, running in the example app."
+  width={720}
+  height={1560}
+/>
+
 Use it for the top of a screen whose content scrolls: the title sits large and unhurried at rest, and hands over to a compact pinned bar once the reader is into the page.
 
 It needs a height to fill and exactly one scrollable child. Give the root `flex-1`, or a fixed height, and put the `ScrollView` or `FlatList` inside it — the child is cloned with the scroll handler and the content inset composed onto it, so nothing about the list has to change.
@@ -17,7 +25,8 @@ For a profile's cover, face and actions, which do not collapse, use [PageHeader]
 ScrollHeader ships with the library — no separate install.
 
 ```tsx
-import { ScrollHeader, Button, Item, SearchBar, SearchIcon, ChevronLeftIcon, EllipsisIcon, Badge } from 'panelui-native';
+import { ScrollHeader, Button, Item, Text, SearchBar, Chip, Avatar, Tabs, ButtonGroup, Badge, SearchIcon, ChevronLeftIcon, PlusIcon, ShareNodesIcon, EllipsisIcon } from 'panelui-native';
+import { View, ScrollView, FlatList, SectionList } from 'react-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -90,6 +99,14 @@ npx panelui-cli@latest add scroll-header
 
 The plain arrangement: a title and a count at rest, and a pinned bar carrying the same title once the list is moving.
 
+<PreviewVideo
+  src="/previews/scroll-header-a-large-title-over-a-list.mp4"
+  poster="/previews/scroll-header-a-large-title-over-a-list-poster.jpg"
+  alt="ScrollHeader — A large title over a list."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ScrollHeader className="flex-1">
   <ScrollHeader.Bar>
@@ -123,6 +140,14 @@ The plain arrangement: a title and a count at rest, and a pinned bar carrying th
 
 `Cover` fills the band, so pulling the list down stretches the picture instead of opening a gap above it. `surface="none"` keeps the bar clear over the picture until the title has gone.
 
+<PreviewVideo
+  src="/previews/scroll-header.mp4"
+  poster="/previews/scroll-header-poster.jpg"
+  alt="ScrollHeader — A cover behind the title."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ScrollHeader className="flex-1">
   <ScrollHeader.Cover source={{ uri: cover }} />
@@ -149,6 +174,14 @@ The plain arrangement: a title and a count at rest, and a pinned bar carrying th
 
 A tall block whose last few points are not worth waiting for. `threshold={0.6}` finishes the crossfade six tenths of the way down; the block still travels its whole height.
 
+<PreviewVideo
+  src="/previews/scroll-header-handing-over-early.mp4"
+  poster="/previews/scroll-header-handing-over-early-poster.jpg"
+  alt="ScrollHeader — Handing over early."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ScrollHeader className="flex-1" threshold={0.6}>
   <ScrollHeader.Bar>
@@ -168,6 +201,14 @@ A tall block whose last few points are not worth waiting for. `threshold={0.6}` 
 ### Reacting to the crossing
 
 `onCollapsedChange` fires once each way, on the crossing rather than every frame — and not on mount, which is not a crossing — enough to swap a status bar style or reveal a control that only belongs on the bar.
+
+<PreviewVideo
+  src="/previews/scroll-header-reacting-to-the-crossing.mp4"
+  poster="/previews/scroll-header-reacting-to-the-crossing-poster.jpg"
+  alt="ScrollHeader — Reacting to the crossing."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 const [collapsed, setCollapsed] = useState(false);
@@ -192,6 +233,14 @@ const [collapsed, setCollapsed] = useState(false);
 ### A bar on its own
 
 With no `Large` block there is no distance to cross, so the bar's surface appears as soon as the content has moved at all. Use it for a screen that wants the hairline but not the large title.
+
+<PreviewVideo
+  src="/previews/scroll-header-a-bar-on-its-own.mp4"
+  poster="/previews/scroll-header-a-bar-on-its-own-poster.jpg"
+  alt="ScrollHeader — A bar on its own."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <ScrollHeader className="flex-1">
@@ -219,6 +268,14 @@ It needs `expo-blur`, which is an optional dependency, and Reduce Transparency r
 
 `intensity` tunes the depth and `material` the tint, which follows the app's theme rather than the device's.
 
+<PreviewVideo
+  src="/previews/scroll-header-a-bar-you-can-see-through.mp4"
+  poster="/previews/scroll-header-a-bar-you-can-see-through-poster.jpg"
+  alt="ScrollHeader — A bar you can see through."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ScrollHeader className="flex-1">
   <ScrollHeader.Bar surface="blur" divider={false}>
@@ -231,6 +288,268 @@ It needs `expo-blur`, which is an optional dependency, and Reduce Transparency r
   </ScrollHeader.Large>
 
   <ScrollView>{artwork}</ScrollView>
+</ScrollHeader>
+```
+
+### Navigation that survives the collapse
+
+Everything in the bar is pinned, so a tab row written there is still on screen once the title has gone. Give `barHeight` the full height of what the bar carries — the band is that tall and the content inset follows it, so the two cannot fall out of step.
+
+<PreviewVideo
+  src="/previews/scroll-header-navigation-that-survives-the-collapse.mp4"
+  poster="/previews/scroll-header-navigation-that-survives-the-collapse-poster.jpg"
+  alt="ScrollHeader — Navigation that survives the collapse."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<ScrollHeader className="flex-1" barHeight={94}>
+  <ScrollHeader.Bar className="flex-col items-stretch gap-0 px-0">
+    <View className="h-12 flex-row items-center gap-3 px-4">
+      <ScrollHeader.Title>u/economist</ScrollHeader.Title>
+      <ScrollHeader.Actions>
+        <Button variant="ghost" size="icon">
+          <ShareNodesIcon size={18} />
+        </Button>
+      </ScrollHeader.Actions>
+    </View>
+
+    <Tabs value={tab} onValueChange={setTab} variant="underline">
+      <Tabs.List className="px-4">
+        <Tabs.Trigger value="posts">Posts</Tabs.Trigger>
+        <Tabs.Trigger value="comments">Comments</Tabs.Trigger>
+      </Tabs.List>
+    </Tabs>
+  </ScrollHeader.Bar>
+
+  <ScrollHeader.Large>
+    <ScrollHeader.Title>Economist</ScrollHeader.Title>
+    <ScrollHeader.Description>Joined 2019 · 12.4k karma</ScrollHeader.Description>
+  </ScrollHeader.Large>
+
+  <ScrollView>{posts}</ScrollView>
+</ScrollHeader>
+```
+
+### A list that recycles
+
+The single scrollable child is cloned whatever kind it is, so a `FlatList` takes the scroll handler and the content inset the same way a `ScrollView` does. Padding of your own is added to the header's inset rather than replacing it, so `paddingTop` here is the gap under the band and nothing else.
+
+<PreviewVideo
+  src="/previews/scroll-header-a-list-that-recycles.mp4"
+  poster="/previews/scroll-header-a-list-that-recycles-poster.jpg"
+  alt="ScrollHeader — A list that recycles."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<ScrollHeader className="flex-1">
+  <ScrollHeader.Bar>
+    <Button variant="ghost" size="icon">
+      <ChevronLeftIcon size={20} />
+    </Button>
+    <ScrollHeader.Title className="text-center">Contacts</ScrollHeader.Title>
+    <ScrollHeader.Actions>
+      <Button variant="ghost" size="icon">
+        <PlusIcon size={18} />
+      </Button>
+    </ScrollHeader.Actions>
+  </ScrollHeader.Bar>
+
+  <ScrollHeader.Large className="pb-3">
+    <ScrollHeader.Title>Contacts</ScrollHeader.Title>
+    <View className="mt-1 flex-row gap-2">
+      {groups.map((name) => (
+        <Chip key={name} selected={group === name} onPress={() => setGroup(name)}>
+          {name}
+        </Chip>
+      ))}
+    </View>
+  </ScrollHeader.Large>
+
+  <FlatList
+    data={contacts}
+    keyExtractor={(row) => row.id}
+    contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 64 }}
+    renderItem={({ item }) => (
+      <Item size="sm">
+        <Item.Media>
+          <Avatar size="sm" fallback={item.initials} />
+        </Item.Media>
+        <Item.Content>
+          <Item.Title>{item.name}</Item.Title>
+        </Item.Content>
+      </Item>
+    )}
+  />
+</ScrollHeader>
+```
+
+### A grouped list
+
+A `SectionList` under a bar drawn on the card token with no hairline, so the header and the rows read as one surface. Leave `stickySectionHeadersEnabled` off: a sticky header pins to the top of the scroller, which is behind the band, so it would disappear under the bar rather than sit below it.
+
+<PreviewVideo
+  src="/previews/scroll-header-a-grouped-list.mp4"
+  poster="/previews/scroll-header-a-grouped-list-poster.jpg"
+  alt="ScrollHeader — A grouped list."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<ScrollHeader className="flex-1">
+  <ScrollHeader.Bar surface="muted" divider={false}>
+    <ScrollHeader.Title>Preferences</ScrollHeader.Title>
+  </ScrollHeader.Bar>
+
+  <ScrollHeader.Large>
+    <ScrollHeader.Title>Preferences</ScrollHeader.Title>
+    <ScrollHeader.Description>{sections.length} groups</ScrollHeader.Description>
+  </ScrollHeader.Large>
+
+  <SectionList
+    sections={sections}
+    keyExtractor={(row) => row.id}
+    stickySectionHeadersEnabled={false}
+    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64 }}
+    renderSectionHeader={({ section }) => (
+      <Text size="xs" weight="semibold" muted className="pb-1 pt-4 uppercase">
+        {section.title}
+      </Text>
+    )}
+    renderItem={({ item }) => (
+      <Item size="sm" variant="muted" className="mb-1">
+        <Item.Content>
+          <Item.Title>{item.label}</Item.Title>
+        </Item.Content>
+      </Item>
+    )}
+  />
+</ScrollHeader>
+```
+
+### The collapse, borrowed
+
+`progress` mirrors the transition into a shared value you own, so something outside the header can move at the pace the title leaves at. Drive what is *drawn* from `progress` and what is *reachable* from `onCollapsedChange`: a control faded to nothing still takes touches and is still read out, so the crossing is what gates it.
+
+<PreviewVideo
+  src="/previews/scroll-header-the-collapse-borrowed.mp4"
+  poster="/previews/scroll-header-the-collapse-borrowed-poster.jpg"
+  alt="ScrollHeader — The collapse, borrowed."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+const collapse = useSharedValue(0);
+const [collapsed, setCollapsed] = useState(false);
+
+const pill = useAnimatedStyle(() => ({
+  opacity: collapse.value,
+  transform: [{ translateY: interpolate(collapse.value, [0, 1], [16, 0], 'clamp') }],
+}));
+
+<View className="flex-1">
+  <ScrollHeader className="flex-1" progress={collapse} onCollapsedChange={setCollapsed}>
+    <ScrollHeader.Bar divider={false}>
+      <ScrollHeader.Title>Drafts</ScrollHeader.Title>
+    </ScrollHeader.Bar>
+
+    <ScrollHeader.Large>
+      <ScrollHeader.Title>Drafts</ScrollHeader.Title>
+      <ScrollHeader.Description>{drafts.length} unsent</ScrollHeader.Description>
+    </ScrollHeader.Large>
+
+    <ScrollView>{rows}</ScrollView>
+  </ScrollHeader>
+
+  <Animated.View
+    pointerEvents={collapsed ? 'box-none' : 'none'}
+    accessibilityElementsHidden={!collapsed}
+    style={pill}
+    className="absolute bottom-8 end-4"
+  >
+    <Button size="sm">New draft</Button>
+  </Animated.View>
+</View>
+```
+
+### A gradient instead of a picture
+
+`Cover` takes `colors` instead of a `source` for a ramp mixed from the theme's own tokens. `stretch={false}` holds the band at its resting height, which is what a gradient wants — a photograph gains from being pulled taller and a two-stop ramp has nothing to gain. With the block's title gone the bar still has something worth pinning, so a segmented control stands where the bar title would.
+
+<PreviewVideo
+  src="/previews/scroll-header-a-gradient-instead-of-a-picture.mp4"
+  poster="/previews/scroll-header-a-gradient-instead-of-a-picture-poster.jpg"
+  alt="ScrollHeader — A gradient instead of a picture."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<ScrollHeader className="flex-1" stretch={false}>
+  <ScrollHeader.Cover colors={[ramp[2], ramp[3]]} scrim={false} />
+
+  <ScrollHeader.Bar surface="none" divider={false}>
+    <ButtonGroup size="sm" className="mx-auto">
+      {views.map((name) => (
+        <Button
+          key={name}
+          variant={view === name ? 'secondary' : 'ghost'}
+          onPress={() => setView(name)}
+        >
+          {name}
+        </Button>
+      ))}
+    </ButtonGroup>
+  </ScrollHeader.Bar>
+
+  <ScrollHeader.Large className="h-40 justify-end pb-5">
+    <ScrollHeader.Title className="text-white">Playlists</ScrollHeader.Title>
+    <ScrollHeader.Description className="text-white/80">
+      Made for you
+    </ScrollHeader.Description>
+  </ScrollHeader.Large>
+
+  <ScrollView>{playlists}</ScrollView>
+</ScrollHeader>
+```
+
+### Left where you let go
+
+`snap={false}` leaves a part-scrolled band exactly where the finger lifted, instead of settling it at whichever end is nearer. Reach for it where the block is reference material rather than a title, so a half-open header is a state worth being left in.
+
+<PreviewVideo
+  src="/previews/scroll-header-left-where-you-let-go.mp4"
+  poster="/previews/scroll-header-left-where-you-let-go-poster.jpg"
+  alt="ScrollHeader — Left where you let go."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<ScrollHeader className="flex-1" snap={false}>
+  <ScrollHeader.Bar>
+    <ScrollHeader.Title>Archive</ScrollHeader.Title>
+    <ScrollHeader.Actions>
+      <Badge variant="secondary" className="self-center">
+        {archive.length}
+      </Badge>
+      <Button variant="ghost" size="icon">
+        <EllipsisIcon size={18} />
+      </Button>
+    </ScrollHeader.Actions>
+  </ScrollHeader.Bar>
+
+  <ScrollHeader.Large>
+    <ScrollHeader.Title>Archive</ScrollHeader.Title>
+    <ScrollHeader.Description>Last synced 11 minutes ago</ScrollHeader.Description>
+  </ScrollHeader.Large>
+
+  <ScrollView>{documents}</ScrollView>
 </ScrollHeader>
 ```
 

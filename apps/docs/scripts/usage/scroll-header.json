@@ -1,15 +1,33 @@
 {
   "slug": "scroll-header",
+  "previewVideo": {
+    "src": "/previews/scroll-header.mp4",
+    "poster": "/previews/scroll-header-poster.jpg",
+    "alt": "The ScrollHeader component, running in the example app.",
+    "width": 720,
+    "height": 1560
+  },
   "intro": "Use it for the top of a screen whose content scrolls: the title sits large and unhurried at rest, and hands over to a compact pinned bar once the reader is into the page.\n\nIt needs a height to fill and exactly one scrollable child. Give the root `flex-1`, or a fixed height, and put the `ScrollView` or `FlatList` inside it \u2014 the child is cloned with the scroll handler and the content inset composed onto it, so nothing about the list has to change.\n\nThe distance the header collapses over is the measured height of `ScrollHeader.Large`. Whatever goes in that block \u2014 a title, a description, a search field, a row of chips \u2014 sets the distance, so there is no height prop that has to be kept in agreement with the contents.\n\nFor a profile's cover, face and actions, which do not collapse, use [PageHeader](/docs/components/page-header). For an indicator of how far down a long page you are, use [SectionProgress](/docs/components/section-progress).",
   "usage": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar>\n    <ScrollHeader.Title>Library</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      <Button variant=\"ghost\" size=\"icon\">\n        <SearchIcon size={18} />\n      </Button>\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Library</ScrollHeader.Title>\n    <ScrollHeader.Description>128 components</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>\n    {components.map((component) => (\n      <Item key={component.id}>\n        <Item.Content>\n          <Item.Title>{component.name}</Item.Title>\n          <Item.Description>{component.summary}</Item.Description>\n        </Item.Content>\n      </Item>\n    ))}\n  </ScrollView>\n</ScrollHeader>",
   "extraImports": [
     "Button",
     "Item",
+    "Text",
     "SearchBar",
+    "Chip",
+    "Avatar",
+    "Tabs",
+    "ButtonGroup",
+    "Badge",
     "SearchIcon",
     "ChevronLeftIcon",
+    "PlusIcon",
+    "ShareNodesIcon",
     "EllipsisIcon",
-    "Badge"
+    "View",
+    "ScrollView",
+    "FlatList",
+    "SectionList"
   ],
   "anatomy": "<ScrollHeader>\n  <ScrollHeader.Bar>          {/* pinned; its surface fades in */}\n    <ScrollHeader.Title>\u2026</ScrollHeader.Title>\n    <ScrollHeader.Actions>\u2026</ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Cover />      {/* optional; fills the band and stretches with it */}\n\n  <ScrollHeader.Large>        {/* scrolls away; its height is the distance */}\n    <ScrollHeader.Title>\u2026</ScrollHeader.Title>\n    <ScrollHeader.Description>\u2026</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>\u2026</ScrollView>  {/* exactly one scrollable */}\n</ScrollHeader>",
   "parts": {
@@ -27,33 +45,147 @@
   "examples": [
     {
       "title": "A large title over a list",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-large-title-over-a-list.mp4",
+        "poster": "/previews/scroll-header-a-large-title-over-a-list-poster.jpg",
+        "alt": "ScrollHeader \u2014 A large title over a list.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "The plain arrangement: a title and a count at rest, and a pinned bar carrying the same title once the list is moving.",
       "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar>\n    <ScrollHeader.Title>Library</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      <Button variant=\"ghost\" size=\"icon\">\n        <SearchIcon size={18} />\n      </Button>\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Library</ScrollHeader.Title>\n    <ScrollHeader.Description>128 components</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>\n    {components.map((component) => (\n      <Item key={component.id} variant=\"outline\">\n        <Item.Content>\n          <Item.Title>{component.name}</Item.Title>\n          <Item.Description>{component.summary}</Item.Description>\n        </Item.Content>\n      </Item>\n    ))}\n  </ScrollView>\n</ScrollHeader>"
     },
     {
       "title": "A cover behind the title",
+      "previewVideo": {
+        "src": "/previews/scroll-header.mp4",
+        "poster": "/previews/scroll-header-poster.jpg",
+        "alt": "ScrollHeader \u2014 A cover behind the title.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "`Cover` fills the band, so pulling the list down stretches the picture instead of opening a gap above it. `surface=\"none\"` keeps the bar clear over the picture until the title has gone.",
       "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Cover source={{ uri: cover }} />\n\n  <ScrollHeader.Bar surface=\"none\" divider={false}>\n    <Button variant=\"ghost\" size=\"icon\">\n      <ChevronLeftIcon size={20} />\n    </Button>\n    <ScrollHeader.Title>Sierra Nevada</ScrollHeader.Title>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large className=\"pb-5\">\n    <ScrollHeader.Title className=\"text-white\">Sierra Nevada</ScrollHeader.Title>\n    <ScrollHeader.Description className=\"text-white/80\">\n      14 photographs\n    </ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>{rows}</ScrollView>\n</ScrollHeader>"
     },
     {
       "title": "Handing over early",
+      "previewVideo": {
+        "src": "/previews/scroll-header-handing-over-early.mp4",
+        "poster": "/previews/scroll-header-handing-over-early-poster.jpg",
+        "alt": "ScrollHeader \u2014 Handing over early.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "A tall block whose last few points are not worth waiting for. `threshold={0.6}` finishes the crossfade six tenths of the way down; the block still travels its whole height.",
       "code": "<ScrollHeader className=\"flex-1\" threshold={0.6}>\n  <ScrollHeader.Bar>\n    <ScrollHeader.Title>Inbox</ScrollHeader.Title>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large className=\"pb-4\">\n    <ScrollHeader.Title>Inbox</ScrollHeader.Title>\n    <ScrollHeader.Description>3 unread</ScrollHeader.Description>\n    <SearchBar placeholder=\"Search mail\" className=\"mt-2\" />\n  </ScrollHeader.Large>\n\n  <FlatList data={messages} renderItem={renderMessage} keyExtractor={(m) => m.id} />\n</ScrollHeader>"
     },
     {
       "title": "Reacting to the crossing",
+      "previewVideo": {
+        "src": "/previews/scroll-header-reacting-to-the-crossing.mp4",
+        "poster": "/previews/scroll-header-reacting-to-the-crossing-poster.jpg",
+        "alt": "ScrollHeader \u2014 Reacting to the crossing.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "`onCollapsedChange` fires once each way, on the crossing rather than every frame \u2014 and not on mount, which is not a crossing \u2014 enough to swap a status bar style or reveal a control that only belongs on the bar.",
       "code": "const [collapsed, setCollapsed] = useState(false);\n\n<ScrollHeader className=\"flex-1\" onCollapsedChange={setCollapsed}>\n  <ScrollHeader.Bar>\n    <ScrollHeader.Title>Portfolio</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      {collapsed ? <Badge variant=\"success\">+2.4%</Badge> : null}\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Portfolio</ScrollHeader.Title>\n    <ScrollHeader.Description>$48,210.55 \u00b7 +2.4% today</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>{holdings}</ScrollView>\n</ScrollHeader>"
     },
     {
       "title": "A bar on its own",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-bar-on-its-own.mp4",
+        "poster": "/previews/scroll-header-a-bar-on-its-own-poster.jpg",
+        "alt": "ScrollHeader \u2014 A bar on its own.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "With no `Large` block there is no distance to cross, so the bar's surface appears as soon as the content has moved at all. Use it for a screen that wants the hairline but not the large title.",
       "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar>\n    <Button variant=\"ghost\" size=\"icon\">\n      <ChevronLeftIcon size={20} />\n    </Button>\n    <ScrollHeader.Title>Settings</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      <Button variant=\"ghost\" size=\"icon\">\n        <EllipsisIcon size={18} />\n      </Button>\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>{panels}</ScrollView>\n</ScrollHeader>"
     },
     {
       "title": "A bar you can see through",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-bar-you-can-see-through.mp4",
+        "poster": "/previews/scroll-header-a-bar-you-can-see-through-poster.jpg",
+        "alt": "ScrollHeader \u2014 A bar you can see through.",
+        "width": 720,
+        "height": 1560
+      },
       "description": "A frosted bar keeps the rows visible as they pass under it, which is worth having where the content is pictures or colour rather than text.\n\nIt needs `expo-blur`, which is an optional dependency, and Reduce Transparency replaces a blur with an opaque surface. Both cases fall back to `plain` \u2014 a bar whose title cannot be read is a worse outcome than one that is not frosted, so there is nothing to guard here.\n\n`intensity` tunes the depth and `material` the tint, which follows the app's theme rather than the device's.",
       "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar surface=\"blur\" divider={false}>\n    <ScrollHeader.Title>Releases</ScrollHeader.Title>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Releases</ScrollHeader.Title>\n    <ScrollHeader.Description>40 albums</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>{artwork}</ScrollView>\n</ScrollHeader>"
+    },
+    {
+      "title": "Navigation that survives the collapse",
+      "previewVideo": {
+        "src": "/previews/scroll-header-navigation-that-survives-the-collapse.mp4",
+        "poster": "/previews/scroll-header-navigation-that-survives-the-collapse-poster.jpg",
+        "alt": "ScrollHeader \u2014 Navigation that survives the collapse.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "Everything in the bar is pinned, so a tab row written there is still on screen once the title has gone. Give `barHeight` the full height of what the bar carries \u2014 the band is that tall and the content inset follows it, so the two cannot fall out of step.",
+      "code": "<ScrollHeader className=\"flex-1\" barHeight={94}>\n  <ScrollHeader.Bar className=\"flex-col items-stretch gap-0 px-0\">\n    <View className=\"h-12 flex-row items-center gap-3 px-4\">\n      <ScrollHeader.Title>u/economist</ScrollHeader.Title>\n      <ScrollHeader.Actions>\n        <Button variant=\"ghost\" size=\"icon\">\n          <ShareNodesIcon size={18} />\n        </Button>\n      </ScrollHeader.Actions>\n    </View>\n\n    <Tabs value={tab} onValueChange={setTab} variant=\"underline\">\n      <Tabs.List className=\"px-4\">\n        <Tabs.Trigger value=\"posts\">Posts</Tabs.Trigger>\n        <Tabs.Trigger value=\"comments\">Comments</Tabs.Trigger>\n      </Tabs.List>\n    </Tabs>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Economist</ScrollHeader.Title>\n    <ScrollHeader.Description>Joined 2019 \u00b7 12.4k karma</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>{posts}</ScrollView>\n</ScrollHeader>"
+    },
+    {
+      "title": "A list that recycles",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-list-that-recycles.mp4",
+        "poster": "/previews/scroll-header-a-list-that-recycles-poster.jpg",
+        "alt": "ScrollHeader \u2014 A list that recycles.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "The single scrollable child is cloned whatever kind it is, so a `FlatList` takes the scroll handler and the content inset the same way a `ScrollView` does. Padding of your own is added to the header's inset rather than replacing it, so `paddingTop` here is the gap under the band and nothing else.",
+      "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar>\n    <Button variant=\"ghost\" size=\"icon\">\n      <ChevronLeftIcon size={20} />\n    </Button>\n    <ScrollHeader.Title className=\"text-center\">Contacts</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      <Button variant=\"ghost\" size=\"icon\">\n        <PlusIcon size={18} />\n      </Button>\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large className=\"pb-3\">\n    <ScrollHeader.Title>Contacts</ScrollHeader.Title>\n    <View className=\"mt-1 flex-row gap-2\">\n      {groups.map((name) => (\n        <Chip key={name} selected={group === name} onPress={() => setGroup(name)}>\n          {name}\n        </Chip>\n      ))}\n    </View>\n  </ScrollHeader.Large>\n\n  <FlatList\n    data={contacts}\n    keyExtractor={(row) => row.id}\n    contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 64 }}\n    renderItem={({ item }) => (\n      <Item size=\"sm\">\n        <Item.Media>\n          <Avatar size=\"sm\" fallback={item.initials} />\n        </Item.Media>\n        <Item.Content>\n          <Item.Title>{item.name}</Item.Title>\n        </Item.Content>\n      </Item>\n    )}\n  />\n</ScrollHeader>"
+    },
+    {
+      "title": "A grouped list",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-grouped-list.mp4",
+        "poster": "/previews/scroll-header-a-grouped-list-poster.jpg",
+        "alt": "ScrollHeader \u2014 A grouped list.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "A `SectionList` under a bar drawn on the card token with no hairline, so the header and the rows read as one surface. Leave `stickySectionHeadersEnabled` off: a sticky header pins to the top of the scroller, which is behind the band, so it would disappear under the bar rather than sit below it.",
+      "code": "<ScrollHeader className=\"flex-1\">\n  <ScrollHeader.Bar surface=\"muted\" divider={false}>\n    <ScrollHeader.Title>Preferences</ScrollHeader.Title>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Preferences</ScrollHeader.Title>\n    <ScrollHeader.Description>{sections.length} groups</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <SectionList\n    sections={sections}\n    keyExtractor={(row) => row.id}\n    stickySectionHeadersEnabled={false}\n    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 64 }}\n    renderSectionHeader={({ section }) => (\n      <Text size=\"xs\" weight=\"semibold\" muted className=\"pb-1 pt-4 uppercase\">\n        {section.title}\n      </Text>\n    )}\n    renderItem={({ item }) => (\n      <Item size=\"sm\" variant=\"muted\" className=\"mb-1\">\n        <Item.Content>\n          <Item.Title>{item.label}</Item.Title>\n        </Item.Content>\n      </Item>\n    )}\n  />\n</ScrollHeader>"
+    },
+    {
+      "title": "The collapse, borrowed",
+      "previewVideo": {
+        "src": "/previews/scroll-header-the-collapse-borrowed.mp4",
+        "poster": "/previews/scroll-header-the-collapse-borrowed-poster.jpg",
+        "alt": "ScrollHeader \u2014 The collapse, borrowed.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "`progress` mirrors the transition into a shared value you own, so something outside the header can move at the pace the title leaves at. Drive what is *drawn* from `progress` and what is *reachable* from `onCollapsedChange`: a control faded to nothing still takes touches and is still read out, so the crossing is what gates it.",
+      "code": "const collapse = useSharedValue(0);\nconst [collapsed, setCollapsed] = useState(false);\n\nconst pill = useAnimatedStyle(() => ({\n  opacity: collapse.value,\n  transform: [{ translateY: interpolate(collapse.value, [0, 1], [16, 0], 'clamp') }],\n}));\n\n<View className=\"flex-1\">\n  <ScrollHeader className=\"flex-1\" progress={collapse} onCollapsedChange={setCollapsed}>\n    <ScrollHeader.Bar divider={false}>\n      <ScrollHeader.Title>Drafts</ScrollHeader.Title>\n    </ScrollHeader.Bar>\n\n    <ScrollHeader.Large>\n      <ScrollHeader.Title>Drafts</ScrollHeader.Title>\n      <ScrollHeader.Description>{drafts.length} unsent</ScrollHeader.Description>\n    </ScrollHeader.Large>\n\n    <ScrollView>{rows}</ScrollView>\n  </ScrollHeader>\n\n  <Animated.View\n    pointerEvents={collapsed ? 'box-none' : 'none'}\n    accessibilityElementsHidden={!collapsed}\n    style={pill}\n    className=\"absolute bottom-8 end-4\"\n  >\n    <Button size=\"sm\">New draft</Button>\n  </Animated.View>\n</View>"
+    },
+    {
+      "title": "A gradient instead of a picture",
+      "previewVideo": {
+        "src": "/previews/scroll-header-a-gradient-instead-of-a-picture.mp4",
+        "poster": "/previews/scroll-header-a-gradient-instead-of-a-picture-poster.jpg",
+        "alt": "ScrollHeader \u2014 A gradient instead of a picture.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "`Cover` takes `colors` instead of a `source` for a ramp mixed from the theme's own tokens. `stretch={false}` holds the band at its resting height, which is what a gradient wants \u2014 a photograph gains from being pulled taller and a two-stop ramp has nothing to gain. With the block's title gone the bar still has something worth pinning, so a segmented control stands where the bar title would.",
+      "code": "<ScrollHeader className=\"flex-1\" stretch={false}>\n  <ScrollHeader.Cover colors={[ramp[2], ramp[3]]} scrim={false} />\n\n  <ScrollHeader.Bar surface=\"none\" divider={false}>\n    <ButtonGroup size=\"sm\" className=\"mx-auto\">\n      {views.map((name) => (\n        <Button\n          key={name}\n          variant={view === name ? 'secondary' : 'ghost'}\n          onPress={() => setView(name)}\n        >\n          {name}\n        </Button>\n      ))}\n    </ButtonGroup>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large className=\"h-40 justify-end pb-5\">\n    <ScrollHeader.Title className=\"text-white\">Playlists</ScrollHeader.Title>\n    <ScrollHeader.Description className=\"text-white/80\">\n      Made for you\n    </ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>{playlists}</ScrollView>\n</ScrollHeader>"
+    },
+    {
+      "title": "Left where you let go",
+      "previewVideo": {
+        "src": "/previews/scroll-header-left-where-you-let-go.mp4",
+        "poster": "/previews/scroll-header-left-where-you-let-go-poster.jpg",
+        "alt": "ScrollHeader \u2014 Left where you let go.",
+        "width": 720,
+        "height": 1560
+      },
+      "description": "`snap={false}` leaves a part-scrolled band exactly where the finger lifted, instead of settling it at whichever end is nearer. Reach for it where the block is reference material rather than a title, so a half-open header is a state worth being left in.",
+      "code": "<ScrollHeader className=\"flex-1\" snap={false}>\n  <ScrollHeader.Bar>\n    <ScrollHeader.Title>Archive</ScrollHeader.Title>\n    <ScrollHeader.Actions>\n      <Badge variant=\"secondary\" className=\"self-center\">\n        {archive.length}\n      </Badge>\n      <Button variant=\"ghost\" size=\"icon\">\n        <EllipsisIcon size={18} />\n      </Button>\n    </ScrollHeader.Actions>\n  </ScrollHeader.Bar>\n\n  <ScrollHeader.Large>\n    <ScrollHeader.Title>Archive</ScrollHeader.Title>\n    <ScrollHeader.Description>Last synced 11 minutes ago</ScrollHeader.Description>\n  </ScrollHeader.Large>\n\n  <ScrollView>{documents}</ScrollView>\n</ScrollHeader>"
     }
   ],
   "notes": "**Give the root a height.** It fills its parent, and inside a container with no height of its own it collapses to nothing. `className=\"flex-1\"` on a screen is the usual answer.\n\n**Exactly one scrollable child.** Anything that is not a `Bar`, a `Large` or a `Cover` is taken to be the scroller, and the first such child wins. A `ScrollView`, a `FlatList` and a `SectionList` all work, and so does an `Animated.ScrollView` or `Animated.FlatList` you have already animated yourself \u2014 that one is used as it stands rather than wrapped again.\n\n**An `onScroll` of your own is kept, either kind.** A handler from `useAnimatedScrollHandler` composes onto the header's and stays on the UI thread. A plain function is called across the bridge instead, once for every scroll event the child delivers \u2014 which `scrollEventThrottle` decides, and which is every frame at the default of 16 \u2014 and receives a `{ nativeEvent }` carrying every field React Native puts on a scroll event, `velocity` and `targetContentOffset` included. What it does not carry is the synthetic wrapper around it, which is a live object with methods on it and cannot cross. Prefer the animated handler where the work can be done in a worklet.\n\n**The content inset is applied for you**, as `paddingTop` on the child's content container, and it is the band's full resting height. Top padding of your own is read off `contentContainerStyle` and added to it, because a style array overrides rather than adds \u2014 and you could not write the sum yourself in any case, since the band's height is measured rather than known. A percentage is left out of the sum rather than guessed at, and the inset alone is used.\n\nThe two titles are both in the tree the whole time, and only the one being shown is exposed to a screen reader \u2014 the other is hidden as the header crosses. Nothing else about the bar is gated: a back button and the `Actions` stay reachable at every scroll position.\n\n`snap` settles a part-scrolled band at whichever end is nearer once the finger lifts and nothing else is going to move it. A fling is left alone, because settling under momentum fights the gesture rather than finishing it.\n\nUnder Reduce Motion the band stops growing past its resting height, so an over-scroll no longer stretches the cover. The crossfade itself is scroll-linked rather than autonomous and is left as it is \u2014 it moves only as far as the finger does.\n\nWith no `Large` block there is no distance to interpolate over, so the bar's surface is timed in over 200ms rather than appearing between one frame and the next. With a block, the hand-over is scroll-linked and moves only as far as the finger does.\n\nOn Android the band carries a small elevation so it draws over the scroller, which orders by elevation before z-order. That is also what draws its shadow, so `surface=\"none\"` still lifts very slightly.\n\n**A frosted bar is optional twice over.** `surface=\"blur\"` needs `expo-blur`, which is an optional dependency reached through a lazy require, and Reduce Transparency is a preference that outranks the design. Where either says no the bar draws `plain` instead, so nothing has to be guarded at the call site \u2014 but pick the rest of the screen so it still works with a solid bar, because for some readers that is the only bar there is."

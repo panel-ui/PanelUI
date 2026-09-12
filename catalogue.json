@@ -107,6 +107,7 @@
     "spinner",
     "split-view",
     "splitter",
+    "stack-card",
     "steps",
     "surface",
     "swipe",
@@ -205,16 +206,16 @@
     }
   ],
   "counts": {
-    "componentModules": 128,
-    "packageComponentExports": 128,
-    "documentedComponents": 128,
-    "exampleEntries": 128,
+    "componentModules": 129,
+    "packageComponentExports": 129,
+    "documentedComponents": 129,
+    "exampleEntries": 129,
     "registry": {
-      "componentItems": 128,
+      "componentItems": 129,
       "supportItems": 36,
-      "totalItems": 164,
+      "totalItems": 165,
       "byType": {
-        "registry:ui": 143,
+        "registry:ui": 144,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

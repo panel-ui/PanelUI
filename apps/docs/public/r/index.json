@@ -1799,6 +1799,23 @@
     "docsPath": "components/splitter"
   },
   {
+    "name": "stack-card",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "A pile of cards, taken one at a time by throwing the top one off.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "controllable-state",
+      "haptics",
+      "icons",
+      "text"
+    ],
+    "docsPath": "components/stack-card"
+  },
+  {
     "name": "steps",
     "type": "registry:ui",
     "kind": "ui",

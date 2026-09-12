@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1296,
-    "values": 330,
-    "types": 966,
-    "modules": 155,
-    "components": 128,
+    "exports": 1308,
+    "values": 332,
+    "types": 976,
+    "modules": 156,
+    "components": 129,
     "hooks": 13
   },
   "groups": {
@@ -4512,6 +4512,61 @@
           },
           {
             "name": "SplitterConstraint",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/stack-card/index.tsx",
+        "slug": "stack-card",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "StackCard",
+            "kind": "value"
+          },
+          {
+            "name": "useStackCard",
+            "kind": "value"
+          },
+          {
+            "name": "StackCardProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardHandle",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardCardProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardStampProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardEmptyProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardActionsProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardActionProps",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardDirection",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardLayout",
+            "kind": "type"
+          },
+          {
+            "name": "StackCardStampColor",
             "kind": "type"
           }
         ]

@@ -1252,6 +1252,20 @@ export {
   type SplitViewVariant,
 } from './components/split-view';
 export {
+  StackCard,
+  useStackCard,
+  type StackCardProps,
+  type StackCardHandle,
+  type StackCardCardProps,
+  type StackCardStampProps,
+  type StackCardEmptyProps,
+  type StackCardActionsProps,
+  type StackCardActionProps,
+  type StackCardDirection,
+  type StackCardLayout,
+  type StackCardStampColor,
+} from './components/stack-card';
+export {
   Steps,
   type StepsProps,
   type StepsItemProps,

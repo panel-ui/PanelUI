@@ -173,6 +173,8 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
     load11().then((module) => module.ENTRIES_BY_SLUG['scroll-fade']),
   'scroll-header': () =>
     load15().then((module) => module.ENTRIES_BY_SLUG['scroll-header']),
+  'stack-card': () =>
+    load15().then((module) => module.ENTRIES_BY_SLUG['stack-card']),
   separator: () =>
     load11().then((module) => module.ENTRIES_BY_SLUG['separator']),
   signature: () =>

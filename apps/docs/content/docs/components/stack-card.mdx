@@ -15,7 +15,7 @@ For a run of slides the reader browses rather than disposes of, use [Carousel](/
 StackCard ships with the library — no separate install.
 
 ```tsx
-import { StackCard, Avatar, Badge, Button, CheckIcon, Chip, Dialog, RotateCcwIcon, RotateCwIcon, Text, TrashIcon, XIcon, useRef, useState, useStackCard } from 'panelui-native';
+import { StackCard, Avatar, Badge, Button, CheckIcon, Chip, Dialog, RotateCcwIcon, RotateCwIcon, StackCardHandle, Text, TrashIcon, XIcon, useStackCard } from 'panelui-native';
 import { View } from 'react-native';
 ```
 
@@ -29,8 +29,8 @@ npx panelui-cli@latest add stack-card
 
 ```tsx
 <StackCard className="h-[460px]" onSwipe={(direction, index) => decide(people[index], direction)}>
-  <StackCard.Stamp action="right" color="success">Yes</StackCard.Stamp>
-  <StackCard.Stamp action="left" color="destructive">No</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Yes</StackCard.Stamp>
+  <StackCard.Stamp direction="left" color="destructive">No</StackCard.Stamp>
 
   {people.map((person) => (
     <StackCard.Card key={person.id} className="justify-between p-6">
@@ -55,8 +55,8 @@ npx panelui-cli@latest add stack-card
 
 ```tsx
 <StackCard>
-  <StackCard.Stamp action="right" />
-  <StackCard.Stamp action="left" />
+  <StackCard.Stamp direction="right" />
+  <StackCard.Stamp direction="left" />
 
   <StackCard.Card />
   <StackCard.Card />
@@ -190,8 +190,8 @@ const [shortlist, setShortlist] = useState([]);
     if (direction === 'right') setShortlist((current) => [...current, candidates[index].name]);
   }}
 >
-  <StackCard.Stamp action="right" color="success">Shortlist</StackCard.Stamp>
-  <StackCard.Stamp action="left" color="destructive">Pass</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Shortlist</StackCard.Stamp>
+  <StackCard.Stamp direction="left" color="destructive">Pass</StackCard.Stamp>
 
   {candidates.map((candidate) => (
     <StackCard.Card key={candidate.name} className="justify-between p-6">
@@ -246,8 +246,8 @@ A direction left out of `directions` still follows the finger a little and sprin
   directions={['up', 'down']}
   directionLabels={{ up: 'Knew it', down: 'Show me again' }}
 >
-  <StackCard.Stamp action="up" color="success">Knew it</StackCard.Stamp>
-  <StackCard.Stamp action="down" color="warning">Again</StackCard.Stamp>
+  <StackCard.Stamp direction="up" color="success">Knew it</StackCard.Stamp>
+  <StackCard.Stamp direction="down" color="warning">Again</StackCard.Stamp>
 
   {deck.map((card) => (
     <StackCard.Card key={card.term} className="items-center justify-center gap-4 p-8">
@@ -275,8 +275,8 @@ The side a card leans is fixed to its position in the run rather than to its dep
 
 ```tsx
 <StackCard className="h-[440px]" layout="fan" depth={3}>
-  <StackCard.Stamp action="right" color="primary">Save</StackCard.Stamp>
-  <StackCard.Stamp action="left">Skip</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="primary">Save</StackCard.Stamp>
+  <StackCard.Stamp direction="left">Skip</StackCard.Stamp>
 
   {places.map((place) => (
     <StackCard.Card key={place.name} className="justify-between p-6">
@@ -307,10 +307,10 @@ Four answers is the practical ceiling. Past that the gesture stops being one dec
   directions={['left', 'right', 'up', 'down']}
   directionLabels={{ left: 'Archive', right: 'Keep', up: 'Pin', down: 'Snooze' }}
 >
-  <StackCard.Stamp action="left">Archive</StackCard.Stamp>
-  <StackCard.Stamp action="right" color="success">Keep</StackCard.Stamp>
-  <StackCard.Stamp action="up" color="primary">Pin</StackCard.Stamp>
-  <StackCard.Stamp action="down" color="warning">Snooze</StackCard.Stamp>
+  <StackCard.Stamp direction="left">Archive</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Keep</StackCard.Stamp>
+  <StackCard.Stamp direction="up" color="primary">Pin</StackCard.Stamp>
+  <StackCard.Stamp direction="down" color="warning">Snooze</StackCard.Stamp>
 
   {inbox.map((mail) => (
     <StackCard.Card key={mail.subject} className="justify-between p-6">
@@ -355,8 +355,8 @@ const [pending, setPending] = useState(null);
     if (next > index && pending === null) setIndex(next);
   }}
 >
-  <StackCard.Stamp action="left" color="destructive">Cancel</StackCard.Stamp>
-  <StackCard.Stamp action="right" color="success">Keep</StackCard.Stamp>
+  <StackCard.Stamp direction="left" color="destructive">Cancel</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Keep</StackCard.Stamp>
 
   {subscriptions.map((item) => (
     <StackCard.Card key={item.name} className="justify-between p-6">
@@ -403,8 +403,8 @@ const [pending, setPending] = useState(null);
     status colours at full strength: a stamp is only on the screen for the
     moment it appears, and a tint of it over a card is a smudge. */}
 <StackCard className="h-[420px]">
-  <StackCard.Stamp action="right" color="success">Keep</StackCard.Stamp>
-  <StackCard.Stamp action="left" color="destructive">Delete</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Keep</StackCard.Stamp>
+  <StackCard.Stamp direction="left" color="destructive">Delete</StackCard.Stamp>
 
   {items.map((item) => (
     <StackCard.Card key={item.id} className="justify-center p-6">
@@ -419,7 +419,7 @@ const [pending, setPending] = useState(null);
 </StackCard>
 ```
 
-### `action`
+### `direction`
 
 - `left`
 - `right` *(default)*
@@ -427,14 +427,14 @@ const [pending, setPending] = useState(null);
 - `down`
 
 ```tsx
-{/* `action` says which direction a stamp answers for, and puts it in the
-    corner the card is being pulled away from — which is also the corner the
-    thumb is not over. On a button it says what pressing it does. */}
+{/* `direction` says which answer a stamp is for, and puts it in the corner
+    the card is being pulled away from — which is also the corner the thumb is
+    not over. The buttons take `action`, which also accepts `undo`. */}
 <StackCard className="h-[420px]" directions={['left', 'right', 'up', 'down']}>
-  <StackCard.Stamp action="left">Archive</StackCard.Stamp>
-  <StackCard.Stamp action="right" color="success">Keep</StackCard.Stamp>
-  <StackCard.Stamp action="up" color="primary">Pin</StackCard.Stamp>
-  <StackCard.Stamp action="down" color="warning">Snooze</StackCard.Stamp>
+  <StackCard.Stamp direction="left">Archive</StackCard.Stamp>
+  <StackCard.Stamp direction="right" color="success">Keep</StackCard.Stamp>
+  <StackCard.Stamp direction="up" color="primary">Pin</StackCard.Stamp>
+  <StackCard.Stamp direction="down" color="warning">Snooze</StackCard.Stamp>
   {mail.map((item) => <StackCard.Card key={item.id}>{/* … */}</StackCard.Card>)}
 </StackCard>
 ```
@@ -466,7 +466,7 @@ const [pending, setPending] = useState(null);
 | `onIndexChange` | `(index: number) => void` | — | Fires whenever the deck asks to move, with the index it is asking for. |
 | `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. Not called by `undo` — the index going back is what reports that. |
 | `onEmpty` | `() => void` | — | Fires once when the last card leaves. |
-| `directions` | `readonly StackCardDirection[]` | — | Which ways a card may be thrown. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
+| `directions` | `readonly StackCardDirection[]` | — | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
 | `layout` | `StackCardLayout` | `'stack'` | How the cards behind the top one are arranged. `stack` steps them down and back; `fan` turns them alternately, like a hand of cards; `flat` hides them entirely, for full-bleed cards where a peeking edge is only clutter. |
 | `depth` | `number` | `2` | How many cards are drawn behind the top one. Two is a pile; five is a mess. |
 | `threshold` | `number` | `0.3` | How far a card has to be taken for a release to send it away, as a fraction of the card. Momentum counts toward it, so a flick clears it without travelling. |
@@ -487,7 +487,7 @@ const [pending, setPending] = useState(null);
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `action` | `StackCardDirection` | `right` | Which direction the stamp answers for. Also where on the card it goes. |
+| `direction` | `StackCardDirection` | `right` | Which direction the stamp answers for. Also where on the card it goes. |
 | `labelClassName` | `string` | — | Extra classes for the label, when the stamp is given a string. |
 
 ### StackCard.Empty
@@ -507,7 +507,7 @@ const [pending, setPending] = useState(null);
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
-| `action` | `StackCardDirection \| 'undo'` | `right` | What pressing it does: send the top card that way, or bring the last one back. |
+| `action` | `StackCardDirection \| 'undo'` | — | What pressing it does: send the top card that way, or bring the last one back. |
 | `icon` | `ReactNode` | — | The glyph. Sized and tinted by the button — pass neither. |
 | `label` | `string` | — | What a screen reader is offered. Falls back to "Undo", or to the plain name of the direction. |
 | `onPress` | `() => void` | — | Run after the deck has been told, for a sound or a log. |

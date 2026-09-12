@@ -3,8 +3,8 @@
  *
  * ```tsx
  * <StackCard className="h-[460px]" onSwipe={(direction, index) => decide(people[index], direction)}>
- *   <StackCard.Stamp action="right" color="success">Yes</StackCard.Stamp>
- *   <StackCard.Stamp action="left" color="destructive">No</StackCard.Stamp>
+ *   <StackCard.Stamp direction="right" color="success">Yes</StackCard.Stamp>
+ *   <StackCard.Stamp direction="left" color="destructive">No</StackCard.Stamp>
  *   {people.map((person) => (
  *     <StackCard.Card key={person.id}>
  *       <Text>{person.name}</Text>
@@ -287,9 +287,11 @@ export interface StackCardProps extends Omit<ViewProps, 'children'> {
   /** Fires once when the last card leaves. */
   onEmpty?: () => void;
   /**
-   * Which ways a card may be thrown. A direction left out still follows the
-   * finger a little and then comes back, rather than refusing to move at all —
-   * a card that does not budge reads as a frozen screen.
+   * Which ways a card may be thrown. Left and right by default.
+   *
+   * A direction left out still follows the finger a little and then comes
+   * back, rather than refusing to move at all — a card that does not budge
+   * reads as a frozen screen.
    */
   directions?: readonly StackCardDirection[];
   /**
@@ -890,7 +892,7 @@ const stampVariants = tv({
         label: 'text-destructive-solid-foreground',
       },
     },
-    action: {
+    direction: {
       left: { root: 'top-6 items-end', pill: 'rotate-12' },
       right: { root: 'top-6 items-start', pill: '-rotate-12' },
       up: { root: 'bottom-6 items-center' },
@@ -899,7 +901,7 @@ const stampVariants = tv({
   },
   defaultVariants: {
     color: 'default',
-    action: 'right',
+    direction: 'right',
   },
 });
 
@@ -918,7 +920,7 @@ export interface StackCardStampProps
   /** The word, or anything else to draw on the stamp. */
   children?: ReactNode;
   /** Which direction the stamp answers for. Also where on the card it goes. */
-  action?: StackCardDirection;
+  direction?: StackCardDirection;
   /** Extra classes for the label, when the stamp is given a string. */
   labelClassName?: string;
 }
@@ -934,15 +936,15 @@ export interface StackCardStampProps
  */
 const StackCardStamp = forwardRef<View, StackCardStampProps>(
   (
-    { className, labelClassName, color = 'default', action = 'right', children, ...props },
+    { className, labelClassName, color = 'default', direction = 'right', children, ...props },
     ref
   ) => {
     const { x, y, width, height, threshold } = useStackCardContext('StackCard.Stamp');
-    const slots = stampVariants({ color, action });
+    const slots = stampVariants({ color, direction });
 
     const style = useAnimatedStyle(() => {
       const progress = directionProgress(
-        action,
+        direction,
         x.value,
         y.value,
         width.value,

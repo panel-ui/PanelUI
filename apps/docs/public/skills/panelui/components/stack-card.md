@@ -12,8 +12,8 @@ import { StackCard } from 'panelui-native';
 
 ```tsx
 <StackCard>
-  <StackCard.Stamp action="right" />
-  <StackCard.Stamp action="left" />
+  <StackCard.Stamp direction="right" />
+  <StackCard.Stamp direction="left" />
 
   <StackCard.Card />
   <StackCard.Card />
@@ -31,7 +31,7 @@ import { StackCard } from 'panelui-native';
 ### Variants
 
 - **color** — `default` *(default)*, `primary`, `success`, `warning`, `info`, `destructive`
-- **action** — `left`, `right` *(default)*, `up`, `down`
+- **direction** — `left`, `right` *(default)*, `up`, `down`
 
 ### Parts
 
@@ -55,7 +55,7 @@ Extends `Omit<ViewProps, 'children'>`.
 | `onIndexChange` | `(index: number) => void` | — | Fires whenever the deck asks to move, with the index it is asking for. |
 | `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. Not called by `undo` — the index going back is what reports that. |
 | `onEmpty` | `() => void` | — | Fires once when the last card leaves. |
-| `directions` | `readonly StackCardDirection[]` | — | Which ways a card may be thrown. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
+| `directions` | `readonly StackCardDirection[]` | — | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
 | `layout` | `StackCardLayout` | `stack` | How the cards behind the top one are arranged. `stack` steps them down and back; `fan` turns them alternately, like a hand of cards; `flat` hides them entirely, for full-bleed cards where a peeking edge is only clutter. |
 | `depth` | `number` | `2` | How many cards are drawn behind the top one. Two is a pile; five is a mess. |
 | `threshold` | `number` | `0.3` | How far a card has to be taken for a release to send it away, as a fraction of the card. Momentum counts toward it, so a flick clears it without travelling. |
@@ -82,7 +82,7 @@ Extends `Omit<ViewProps, 'children'>, VariantProps<typeof stampVariants>`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 | `children` | `ReactNode` | — | The word, or anything else to draw on the stamp. |
-| `action` | `StackCardDirection` | `right` | Which direction the stamp answers for. Also where on the card it goes. |
+| `direction` | `StackCardDirection` | `right` | Which direction the stamp answers for. Also where on the card it goes. |
 | `labelClassName` | `string` | — | Extra classes for the label, when the stamp is given a string. |
 
 #### `StackCardEmptyProps`
@@ -110,7 +110,7 @@ Extends `Omit<ViewProps, 'children'>, VariantProps<typeof actionVariants>`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
-| `action` | `StackCardDirection \| 'undo'` | `right` | What pressing it does: send the top card that way, or bring the last one back. |
+| `action` | `StackCardDirection \| 'undo'` | **required** | What pressing it does: send the top card that way, or bring the last one back. |
 | `icon` | `ReactNode` | — | The glyph. Sized and tinted by the button — pass neither. |
 | `label` | `string` | — | What a screen reader is offered. Falls back to "Undo", or to the plain name of the direction. |
 | `onPress` | `() => void` | — | Run after the deck has been told, for a sound or a log. |

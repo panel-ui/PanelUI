@@ -1096,10 +1096,10 @@ function StackCardHiringVersion() {
           }
         }}
       >
-        <StackCard.Stamp action="right" color="success">
+        <StackCard.Stamp direction="right" color="success">
           Shortlist
         </StackCard.Stamp>
-        <StackCard.Stamp action="left" color="destructive">
+        <StackCard.Stamp direction="left" color="destructive">
           Pass
         </StackCard.Stamp>
 
@@ -1183,10 +1183,10 @@ function StackCardFlashcardsVersion() {
         directions={['up', 'down']}
         directionLabels={{ up: 'Knew it', down: 'Show me again' }}
       >
-        <StackCard.Stamp action="up" color="success">
+        <StackCard.Stamp direction="up" color="success">
           Knew it
         </StackCard.Stamp>
-        <StackCard.Stamp action="down" color="warning">
+        <StackCard.Stamp direction="down" color="warning">
           Again
         </StackCard.Stamp>
 
@@ -1232,10 +1232,10 @@ function StackCardFanVersion() {
   return (
     <View className="flex-1 justify-center px-5">
       <StackCard className="h-[440px]" layout="fan" depth={3}>
-        <StackCard.Stamp action="right" color="primary">
+        <StackCard.Stamp direction="right" color="primary">
           Save
         </StackCard.Stamp>
-        <StackCard.Stamp action="left" color="default">
+        <StackCard.Stamp direction="left" color="default">
           Skip
         </StackCard.Stamp>
 
@@ -1289,16 +1289,16 @@ function StackCardTriageVersion() {
         directions={['left', 'right', 'up', 'down']}
         directionLabels={{ left: 'Archive', right: 'Keep', up: 'Pin', down: 'Snooze' }}
       >
-        <StackCard.Stamp action="left" color="default">
+        <StackCard.Stamp direction="left" color="default">
           Archive
         </StackCard.Stamp>
-        <StackCard.Stamp action="right" color="success">
+        <StackCard.Stamp direction="right" color="success">
           Keep
         </StackCard.Stamp>
-        <StackCard.Stamp action="up" color="primary">
+        <StackCard.Stamp direction="up" color="primary">
           Pin
         </StackCard.Stamp>
-        <StackCard.Stamp action="down" color="warning">
+        <StackCard.Stamp direction="down" color="warning">
           Snooze
         </StackCard.Stamp>
 
@@ -1372,10 +1372,10 @@ function StackCardConfirmVersion() {
           if (next > index && pending === null) setIndex(next);
         }}
       >
-        <StackCard.Stamp action="left" color="destructive">
+        <StackCard.Stamp direction="left" color="destructive">
           Cancel
         </StackCard.Stamp>
-        <StackCard.Stamp action="right" color="success">
+        <StackCard.Stamp direction="right" color="success">
           Keep
         </StackCard.Stamp>
 

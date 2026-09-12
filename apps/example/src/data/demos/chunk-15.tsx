@@ -1084,9 +1084,9 @@ function StackCardHiringVersion() {
   const [shortlist, setShortlist] = useState<string[]>([]);
 
   return (
-    <View className="flex-1 px-5 py-4">
+    <View className="flex-1 justify-center px-5 py-4">
       <StackCard
-        className="flex-1"
+        className="max-h-[560px] flex-1"
         directions={['left', 'right']}
         directionLabels={{ left: 'Pass', right: 'Shortlist' }}
         onSwipe={(direction, index) => {
@@ -1176,9 +1176,9 @@ const CARDS_TO_LEARN = [
 
 function StackCardFlashcardsVersion() {
   return (
-    <View className="flex-1 px-5 py-4">
+    <View className="flex-1 justify-center px-5 py-4">
       <StackCard
-        className="flex-1"
+        className="max-h-[560px] flex-1"
         layout="flat"
         directions={['up', 'down']}
         directionLabels={{ up: 'Knew it', down: 'Show me again' }}
@@ -1230,8 +1230,8 @@ const PLACES = [
 
 function StackCardFanVersion() {
   return (
-    <View className="flex-1 px-5 py-4">
-      <StackCard className="flex-1" layout="fan" depth={3}>
+    <View className="flex-1 justify-center px-5 py-4">
+      <StackCard className="max-h-[560px] flex-1" layout="fan" depth={3}>
         <StackCard.Stamp direction="right" color="primary">
           Save
         </StackCard.Stamp>
@@ -1283,9 +1283,9 @@ const INBOX = [
 
 function StackCardTriageVersion() {
   return (
-    <View className="flex-1 px-5 py-4">
+    <View className="flex-1 justify-center px-5 py-4">
       <StackCard
-        className="flex-1"
+        className="max-h-[560px] flex-1"
         directions={['left', 'right', 'up', 'down']}
         directionLabels={{ left: 'Archive', right: 'Keep', up: 'Pin', down: 'Snooze' }}
       >
@@ -1358,9 +1358,9 @@ function StackCardConfirmVersion() {
   const [cancelled, setCancelled] = useState<string[]>([]);
 
   return (
-    <View className="flex-1 px-5 py-4">
+    <View className="flex-1 justify-center px-5 py-4">
       <StackCard
-        className="flex-1"
+        className="max-h-[560px] flex-1"
         index={index}
         directionLabels={{ left: 'Cancel it', right: 'Keep it' }}
         onSwipe={(direction, at) => {

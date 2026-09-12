@@ -564,29 +564,23 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     const takesUpright = directions.includes('up') || directions.includes('down');
 
     const gesture = useMemo(() => {
-      const pan = Gesture.Pan();
-
       /*
-       * A pan with no declared axis inside a scrolling screen wins every
-       * scroll that starts on the card, and the screen reads as broken in a
-       * way that looks like a scrolling bug rather than a gesture one. So a
-       * deck that answers to one axis says which, and a deck that answers to
-       * both declares nothing — it has no scroll to give way to that it would
-       * not also have to take a card from.
-       *
-       * Declaring a 1px threshold is not the same as declaring nothing: it
-       * activates on almost any movement and still beats the scroll.
+       * Built as one chain from `Gesture.Pan()`, and each handler says
+       * `'worklet'` for itself. Both matter: the callbacks are only compiled
+       * for the UI thread when they can be recognised as a gesture's, and a
+       * handler that quietly stays on the JS thread is not an error anywhere
+       * — it is a drag that reports a frame late and writes shared values from
+       * the wrong side.
        */
-      if (takesSideways && !takesUpright) pan.activeOffsetX([-10, 10]);
-      else if (takesUpright && !takesSideways) pan.activeOffsetY([-10, 10]);
-
-      return pan
+      const pan = Gesture.Pan()
         .onBegin((event) => {
+          'worklet';
           cancelAnimation(x);
           cancelAnimation(y);
           pivot.value = lever(event.y, height.value);
         })
         .onUpdate((event) => {
+          'worklet';
           const ways = allowed.value;
           const sideways = ways.indexOf('left') >= 0 || ways.indexOf('right') >= 0;
           const upright = ways.indexOf('up') >= 0 || ways.indexOf('down') >= 0;
@@ -598,6 +592,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
             : resist(event.translationY, height.value, LOCKED_AXIS_GIVE);
         })
         .onEnd((event) => {
+          'worklet';
           const direction = releasedDirection(
             allowed.value,
             x.value,
@@ -617,6 +612,21 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
           x.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityX });
           y.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityY });
         });
+
+      /*
+       * The axis constraint goes on last, after the chain the plugin had to
+       * see. A pan with no declared axis inside a scrolling screen wins every
+       * scroll that starts on the card, and the screen reads as broken in a
+       * way that looks like a scrolling bug rather than a gesture one. So a
+       * deck that answers to one axis says which, and a deck that answers to
+       * both declares nothing — it has no scroll to give way to that it would
+       * not also have to take a card from. Declaring a 1px threshold is not
+       * the same as declaring nothing: it activates on almost any movement and
+       * still takes the scroll.
+       */
+      if (takesSideways && !takesUpright) return pan.activeOffsetX([-10, 10]);
+      if (takesUpright && !takesSideways) return pan.activeOffsetY([-10, 10]);
+      return pan;
     }, [allowed, dispatch, height, pivot, reach, takesSideways, takesUpright, width, x, y]);
 
     const context = useMemo<StackCardContextValue>(

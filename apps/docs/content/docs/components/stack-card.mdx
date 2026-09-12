@@ -466,7 +466,7 @@ const [pending, setPending] = useState(null);
 | `onIndexChange` | `(index: number) => void` | — | Fires whenever the deck asks to move, with the index it is asking for. |
 | `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. Not called by `undo` — the index going back is what reports that. |
 | `onEmpty` | `() => void` | — | Fires once when the last card leaves. |
-| `directions` | `readonly StackCardDirection[]` | — | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
+| `directions` | `readonly StackCardDirection[]` | `['left', 'right']` | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
 | `layout` | `StackCardLayout` | `'stack'` | How the cards behind the top one are arranged. `stack` steps them down and back; `fan` turns them alternately, like a hand of cards; `flat` hides them entirely, for full-bleed cards where a peeking edge is only clutter. |
 | `depth` | `number` | `2` | How many cards are drawn behind the top one. Two is a pile; five is a mess. |
 | `threshold` | `number` | `0.3` | How far a card has to be taken for a release to send it away, as a fraction of the card. Momentum counts toward it, so a flick clears it without travelling. |

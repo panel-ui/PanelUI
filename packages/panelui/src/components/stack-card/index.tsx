@@ -149,6 +149,14 @@ const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 /** How far a finger gets on an axis the deck does not accept, at most. */
 const LOCKED_AXIS_GIVE = 0.18;
 
+/*
+ * The default, out here rather than in the destructure. A literal in the
+ * parameter list is a new array on every render, and this one is a dependency
+ * of the pan gesture — so it would rebuild the gesture, and re-attach the
+ * handler, while a finger was still down on it.
+ */
+const SIDEWAYS: StackCardDirection[] = ['left', 'right'];
+
 /** Degrees the top card turns through at most. */
 const MAX_TILT = 14;
 
@@ -332,7 +340,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
       onIndexChange,
       onSwipe,
       onEmpty,
-      directions = ['left', 'right'],
+      directions = SIDEWAYS,
       layout = 'stack',
       depth = 2,
       threshold = 0.3,
@@ -519,6 +527,19 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     useImperativeHandle(ref, () => ({ swipe: send, undo, reset }), [send, undo, reset]);
 
     /*
+     * `send` closes over the current index and the caller's `onSwipe`, so it is
+     * a new function on nearly every render — and an owner passing an inline
+     * arrow makes that every render. Reached through a ref it stops being a
+     * dependency of the gesture, which can then be built once and keep the
+     * touch it already has. Whoever the ref holds is the latest one either way.
+     */
+    const latestSend = useRef(send);
+    latestSend.current = send;
+    const dispatch = useCallback((direction: StackCardDirection) => {
+      latestSend.current(direction);
+    }, []);
+
+    /*
      * One tick, when the drag first reaches the point where letting go would
      * send the card. Latched on the reaction's own previous value, so dragging
      * back and forth across the line does not rattle — and fired at the
@@ -542,56 +563,61 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     const takesSideways = directions.includes('left') || directions.includes('right');
     const takesUpright = directions.includes('up') || directions.includes('down');
 
-    const gesture = useMemo(
-      () =>
-        Gesture.Pan()
-          /*
-           * A pan with no declared axis inside a scrolling screen wins every
-           * scroll that starts on the card, and the screen reads as broken in
-           * a way that looks like a scrolling bug rather than a gesture one.
-           * A deck that takes both axes has nothing to give up and declares
-           * neither.
-           */
-          .activeOffsetX(takesSideways && !takesUpright ? [-10, 10] : [-1, 1])
-          .activeOffsetY(takesUpright && !takesSideways ? [-10, 10] : [-1, 1])
-          .onBegin((event) => {
-            cancelAnimation(x);
-            cancelAnimation(y);
-            pivot.value = lever(event.y, height.value);
-          })
-          .onUpdate((event) => {
-            const ways = allowed.value;
-            const sideways = ways.indexOf('left') >= 0 || ways.indexOf('right') >= 0;
-            const upright = ways.indexOf('up') >= 0 || ways.indexOf('down') >= 0;
-            x.value = sideways
-              ? event.translationX
-              : resist(event.translationX, width.value, LOCKED_AXIS_GIVE);
-            y.value = upright
-              ? event.translationY
-              : resist(event.translationY, height.value, LOCKED_AXIS_GIVE);
-          })
-          .onEnd((event) => {
-            const direction = releasedDirection(
-              allowed.value,
-              x.value,
-              y.value,
-              event.velocityX,
-              event.velocityY,
-              width.value,
-              height.value,
-              reach.value
-            );
-            if (direction) {
-              runOnJS(send)(direction);
-              return;
-            }
-            // The velocity goes into the spring, so there is no seam between
-            // the finger letting go and the card carrying on.
-            x.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityX });
-            y.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityY });
-          }),
-      [allowed, height, pivot, reach, send, takesSideways, takesUpright, width, x, y]
-    );
+    const gesture = useMemo(() => {
+      const pan = Gesture.Pan();
+
+      /*
+       * A pan with no declared axis inside a scrolling screen wins every
+       * scroll that starts on the card, and the screen reads as broken in a
+       * way that looks like a scrolling bug rather than a gesture one. So a
+       * deck that answers to one axis says which, and a deck that answers to
+       * both declares nothing — it has no scroll to give way to that it would
+       * not also have to take a card from.
+       *
+       * Declaring a 1px threshold is not the same as declaring nothing: it
+       * activates on almost any movement and still beats the scroll.
+       */
+      if (takesSideways && !takesUpright) pan.activeOffsetX([-10, 10]);
+      else if (takesUpright && !takesSideways) pan.activeOffsetY([-10, 10]);
+
+      return pan
+        .onBegin((event) => {
+          cancelAnimation(x);
+          cancelAnimation(y);
+          pivot.value = lever(event.y, height.value);
+        })
+        .onUpdate((event) => {
+          const ways = allowed.value;
+          const sideways = ways.indexOf('left') >= 0 || ways.indexOf('right') >= 0;
+          const upright = ways.indexOf('up') >= 0 || ways.indexOf('down') >= 0;
+          x.value = sideways
+            ? event.translationX
+            : resist(event.translationX, width.value, LOCKED_AXIS_GIVE);
+          y.value = upright
+            ? event.translationY
+            : resist(event.translationY, height.value, LOCKED_AXIS_GIVE);
+        })
+        .onEnd((event) => {
+          const direction = releasedDirection(
+            allowed.value,
+            x.value,
+            y.value,
+            event.velocityX,
+            event.velocityY,
+            width.value,
+            height.value,
+            reach.value
+          );
+          if (direction) {
+            runOnJS(dispatch)(direction);
+            return;
+          }
+          // The velocity goes into the spring, so there is no seam between
+          // the finger letting go and the card carrying on.
+          x.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityX });
+          y.value = withSpring(0, { ...RETURN_SPRING, velocity: event.velocityY });
+        });
+    }, [allowed, dispatch, height, pivot, reach, takesSideways, takesUpright, width, x, y]);
 
     const context = useMemo<StackCardContextValue>(
       () => ({
@@ -739,6 +765,13 @@ interface StackCardSlotProps {
   children: ReactNode;
   accessibilityActions?: { name: string; label: string }[];
   onAccessibilityAction?: (event: AccessibilityActionEvent) => void;
+  /*
+   * Set by the gesture detector above, which clones its child to ask for it.
+   * It has to reach a real view: a detector attaches to the native view under
+   * it, and a view with nothing but a style of its own is a candidate for
+   * being flattened away — leaving the gesture attached to whatever is left.
+   */
+  collapsable?: boolean;
 }
 
 /**
@@ -758,12 +791,20 @@ function StackCardSlot({
   children,
   accessibilityActions,
   onAccessibilityAction,
+  collapsable,
 }: StackCardSlotProps) {
   const { x, y, fade, pivot, release, active, width } = useStackCardContext('StackCard.Card');
   const { card } = stackCardVariants();
   /** Fixed per card, so a fan does not re-deal itself as the deck advances. */
   const side = cardIndex % 2 === 0 ? 1 : -1;
 
+  /*
+   * Every branch returns the same four transforms in the same order, and says
+   * what it does not use with an identity value rather than by leaving the
+   * entry out. A card crosses between these branches as the deck advances, and
+   * a transform list that changes length or order between two commits is read
+   * natively as a different list — which is a crash, not a jump.
+   */
   const style = useAnimatedStyle(() => {
     const distance = cardIndex - active.value;
 
@@ -771,7 +812,13 @@ function StackCardSlot({
      * Answered, and still mounted only so `undo` has something to bring back.
      * Drawn nowhere until it is asked for.
      */
-    if (distance < 0) return { opacity: 0, zIndex: 0, transform: [{ scale: 1 }] };
+    if (distance < 0) {
+      return {
+        opacity: 0,
+        zIndex: 0,
+        transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }, { scale: 1 }],
+      };
+    }
 
     if (distance === 0) {
       return {
@@ -781,6 +828,7 @@ function StackCardSlot({
           { translateX: x.value },
           { translateY: y.value },
           { rotate: `${tiltAngle(x.value, width.value, MAX_TILT, pivot.value)}deg` },
+          { scale: 1 },
         ],
       };
     }
@@ -792,7 +840,11 @@ function StackCardSlot({
     if (layout === 'flat') {
       // Nothing is drawn behind the top card, so the next one waits exactly
       // where the top card is and is simply uncovered as that one leaves.
-      return { opacity: behind < 1 ? opacity : 0, zIndex, transform: [{ scale: 1 }] };
+      return {
+        opacity: behind < 1 ? opacity : 0,
+        zIndex,
+        transform: [{ translateX: 0 }, { translateY: 0 }, { rotate: '0deg' }, { scale: 1 }],
+      };
     }
 
     if (layout === 'fan') {
@@ -811,7 +863,12 @@ function StackCardSlot({
     return {
       opacity,
       zIndex,
-      transform: [{ translateY: behind * PEEK }, { scale: 1 - behind * SHRINK }],
+      transform: [
+        { translateX: 0 },
+        { translateY: behind * PEEK },
+        { rotate: '0deg' },
+        { scale: 1 - behind * SHRINK },
+      ],
     };
   });
 
@@ -819,6 +876,7 @@ function StackCardSlot({
     <Animated.View
       style={[style, { pointerEvents: live ? 'auto' : 'none' }]}
       className={card()}
+      collapsable={collapsable}
       // Every card but the top one is out of the reading order. A pile is one
       // card as far as a reader is concerned, and the rest are its shadow.
       accessibilityElementsHidden={!top}

@@ -25,9 +25,20 @@ export const DECELERATION = 0.998;
  * The exponential-decay form the platform uses, not the `v² / 2a` from
  * physics: the two disagree most at exactly the speeds a thumb produces.
  */
-export function project(velocity: number, deceleration: number = DECELERATION): number {
+export function project(velocity: number, deceleration?: number): number {
   'worklet';
-  return ((velocity / 1000) * deceleration) / (1 - deceleration);
+  /*
+   * The fallback is read here and not written as a default parameter.
+   *
+   * A worklet carries copies of the outside names it uses, and they are
+   * collected from its body — a default in the signature is not part of that
+   * body, so the constant never travels and the name is simply absent on the
+   * UI thread. That throws a ReferenceError inside a gesture handler, where
+   * nothing catches it: it leaves the worklet runtime as a C++ exception and
+   * aborts the process, with no JavaScript frames and no red screen.
+   */
+  const rate = deceleration ?? DECELERATION;
+  return ((velocity / 1000) * rate) / (1 - rate);
 }
 
 /**

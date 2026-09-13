@@ -1458,7 +1458,7 @@ function initials(name: string) {
 
 function StackCardDepthDemo() {
   return (
-    <View className="gap-6">
+    <View className="w-full gap-6">
       {(['stack', 'fan', 'flat'] as const).map((layout) => (
         <View key={layout} className="gap-2">
           <Text size="sm" weight="medium" className="capitalize">
@@ -1489,7 +1489,7 @@ function StackCardHandleDemo() {
   const deck = useRef<StackCardHandle>(null);
 
   return (
-    <View className="gap-3">
+    <View className="w-full gap-3">
       <StackCard ref={deck} className="h-[140px]" disabled>
         {PLACES.map((place) => (
           <StackCard.Card key={place.name} className="justify-center gap-1 p-4">

@@ -382,24 +382,28 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     const reduceMotion = useReducedMotion();
 
     /*
-     * The gesture's own copies of the two props it reads.
+     * The accepted directions as one stable array, keyed on what is in it
+     * rather than on the identity of the prop.
      *
-     * A pan handler is built once and then runs on the UI thread, so a prop it
-     * captured is the prop as it was when the handler was made. Reading them
-     * from shared values instead means a deck whose accepted directions or
-     * threshold change behaves as it is configured now, including mid-touch.
+     * A caller writing `directions={['left', 'right']}` hands over a new array
+     * on every render, and the whole drag path hangs off this value: the
+     * gesture that reads it, the axis constraint built from it, and the
+     * accessibility actions published from it. Keyed on contents, all three
+     * are rebuilt when the directions genuinely change and at no other time.
+     *
+     * A plain array rather than a shared value, because a worklet may capture
+     * one directly — which is how every other gesture in the library reaches
+     * its configuration, and it costs no per-frame allocation across the
+     * bridge. The gesture is rebuilt when the contents change, which is also
+     * exactly when the axis constraint below has to be rebuilt anyway.
      */
-    const allowed = useSharedValue<StackCardDirection[]>([...directions]);
-    const reach = useSharedValue(threshold);
-    useEffect(() => {
-      allowed.value = [...directions];
-    }, [allowed, directions]);
-    useEffect(() => {
-      reach.value = threshold;
-    }, [reach, threshold]);
+    const directionKey = directions.join(' ');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const allowed = useMemo(() => [...directions], [directionKey]);
 
-    const release = useDerivedValue(() =>
-      releaseProgress(allowed.value, x.value, y.value, width.value, height.value, reach.value)
+    const release = useDerivedValue(
+      () => releaseProgress(allowed, x.value, y.value, width.value, height.value, threshold),
+      [allowed, threshold]
     );
 
     /*
@@ -488,6 +492,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
           // The throw is the part that moves, and moving is the part the
           // setting is about. The card still goes; it goes by fading.
           fade.value = withTiming(0, { duration: FADE_DURATION }, (finished) => {
+            'worklet';
             if (finished) runOnJS(requestNext)(direction, from);
           });
           return;
@@ -503,6 +508,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         const timing = { duration: EXIT_DURATION, easing: EASE_OUT };
         y.value = withTiming(target.y, timing);
         x.value = withTiming(target.x, timing, (finished) => {
+          'worklet';
           if (finished) runOnJS(requestNext)(direction, from);
         });
       },
@@ -555,15 +561,22 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
       [haptics]
     );
 
-    /*
-     * Which axes the deck answers to, read at build time rather than from the
-     * shared value: an activation constraint is part of how the gesture is
-     * constructed, so it cannot be changed from inside a handler.
+    /**
+     * Whether a finger can take a card at all. A boolean, so it changes at
+     * most twice in a deck's life and the gesture keeps its identity across
+     * every advance.
      */
-    const takesSideways = directions.includes('left') || directions.includes('right');
-    const takesUpright = directions.includes('up') || directions.includes('down');
+    const enabled = !disabled && index < count;
 
     const gesture = useMemo(() => {
+      /*
+       * Which axes the deck answers to. An activation constraint is part of
+       * how a gesture is constructed rather than something a handler can
+       * decide, so both are read here, from the array this memo is keyed on.
+       */
+      const sideways = allowed.indexOf('left') >= 0 || allowed.indexOf('right') >= 0;
+      const upright = allowed.indexOf('up') >= 0 || allowed.indexOf('down') >= 0;
+
       /*
        * Built as one chain from `Gesture.Pan()`, and each handler says
        * `'worklet'` for itself. Both matter: the callbacks are only compiled
@@ -573,6 +586,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
        * the wrong side.
        */
       const pan = Gesture.Pan()
+        .enabled(enabled)
         .onBegin((event) => {
           'worklet';
           cancelAnimation(x);
@@ -581,9 +595,6 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         })
         .onUpdate((event) => {
           'worklet';
-          const ways = allowed.value;
-          const sideways = ways.indexOf('left') >= 0 || ways.indexOf('right') >= 0;
-          const upright = ways.indexOf('up') >= 0 || ways.indexOf('down') >= 0;
           x.value = sideways
             ? event.translationX
             : resist(event.translationX, width.value, LOCKED_AXIS_GIVE);
@@ -594,14 +605,14 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         .onEnd((event) => {
           'worklet';
           const direction = releasedDirection(
-            allowed.value,
+            allowed,
             x.value,
             y.value,
             event.velocityX,
             event.velocityY,
             width.value,
             height.value,
-            reach.value
+            threshold
           );
           if (direction) {
             runOnJS(dispatch)(direction);
@@ -624,10 +635,10 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
        * the same as declaring nothing: it activates on almost any movement and
        * still takes the scroll.
        */
-      if (takesSideways && !takesUpright) return pan.activeOffsetX([-10, 10]);
-      if (takesUpright && !takesSideways) return pan.activeOffsetY([-10, 10]);
+      if (sideways && !upright) return pan.activeOffsetX([-10, 10]);
+      if (upright && !sideways) return pan.activeOffsetY([-10, 10]);
       return pan;
-    }, [allowed, dispatch, height, pivot, reach, takesSideways, takesUpright, width, x, y]);
+    }, [allowed, dispatch, enabled, height, pivot, threshold, width, x, y]);
 
     const context = useMemo<StackCardContextValue>(
       () => ({
@@ -677,66 +688,79 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     const first = Math.max(0, index - 1);
     const last = Math.min(count - 1, index + depth + 1);
 
+    /*
+     * Keyed on the labels themselves, for the same reason `allowed` is: a
+     * caller writing the labels inline hands over a new object every render,
+     * and this array is a prop of the card the drag is moving.
+     */
+    const labelKey = directions.map((direction) => directionLabels?.[direction] ?? '').join(' ');
     const accessibilityActions = useMemo(
       () =>
-        directions.map((direction) => ({
+        allowed.map((direction) => ({
           name: direction,
           label: directionLabels?.[direction] ?? DEFAULT_DIRECTION_LABELS[direction],
         })),
-      [directionLabels, directions]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [allowed, labelKey]
+    );
+
+    /** Stable for the life of the deck: `dispatch` closes over nothing. */
+    const onAccessibilityAction = useCallback(
+      (event: AccessibilityActionEvent) =>
+        dispatch(event.nativeEvent.actionName as StackCardDirection),
+      [dispatch]
     );
 
     return (
       <StackCardContext.Provider value={context}>
         <View {...props} className={slots.root({ className })}>
-          <View
-            onLayout={(event: LayoutChangeEvent) => {
-              width.value = event.nativeEvent.layout.width;
-              height.value = event.nativeEvent.layout.height;
-            }}
-            className={slots.pile({ className: pileClassName })}
-          >
-            {index >= count ? empty : null}
-            {cards.map((card, cardIndex) => {
-              if (cardIndex < first || cardIndex > last) return null;
-              const top = cardIndex === index;
-              const live = top && !disabled;
-              const slot = (
-                <StackCardSlot
-                  key={cardIndex}
-                  cardIndex={cardIndex}
-                  depth={depth}
-                  layout={layout}
-                  top={top}
-                  live={live}
-                  accessibilityActions={live ? accessibilityActions : undefined}
-                  onAccessibilityAction={
-                    live
-                      ? (event: AccessibilityActionEvent) =>
-                          send(event.nativeEvent.actionName as StackCardDirection)
-                      : undefined
-                  }
-                >
-                  {card}
-                  {top ? stamps : null}
-                </StackCardSlot>
-              );
-
-              /*
-               * Only the top card is wrapped in a detector. Gesture-handler
-               * resolves overlapping pans by the view tree rather than by
-               * z-order, so a live detector on a card underneath would take
-               * touches meant for the one in front of it.
-               */
-              return live ? (
-                <GestureDetector key={cardIndex} gesture={gesture}>
-                  {slot}
-                </GestureDetector>
-              ) : (
-                slot
-              );
-            })}
-          </View>
+          {/*
+           * One detector, on the pile, for the life of the deck.
+           *
+           * Not on the top card, which is the arrangement that reads as
+           * natural and is the one thing in this file that nothing else in the
+           * library does. A detector mounted per card moves as the deck
+           * advances, and a gesture object carries a single mutable handler
+           * tag that the detector registers on attach and reads back on
+           * cleanup — so the detector being unmounted can drop the tag the
+           * newly mounted one has just claimed, leaving a live detector
+           * pointing at a destroyed native handler. The next touch reaches
+           * freed memory, which is a crash with no JavaScript frames in it.
+           *
+           * On the pile it never moves, and the gesture has no reason to: it
+           * writes one offset that only the top card's style reads.
+           */}
+          <GestureDetector gesture={gesture}>
+            <View
+              onLayout={(event: LayoutChangeEvent) => {
+                width.value = event.nativeEvent.layout.width;
+                height.value = event.nativeEvent.layout.height;
+              }}
+              className={slots.pile({ className: pileClassName })}
+            >
+              {index >= count ? empty : null}
+              {cards.map((card, cardIndex) => {
+                if (cardIndex < first || cardIndex > last) return null;
+                const top = cardIndex === index;
+                const live = top && !disabled;
+                return (
+                  <StackCardSlot
+                    key={cardIndex}
+                    cardIndex={cardIndex}
+                    depth={depth}
+                    layout={layout}
+                    top={top}
+                    live={live}
+                    accessibilityActions={live ? accessibilityActions : undefined}
+                    onAccessibilityAction={live ? onAccessibilityAction : undefined}
+                  >
+                    {card}
+                    {top ? stamps : null}
+                  </StackCardSlot>
+                );
+              })}
+            </View>
+          </GestureDetector>
           {below}
         </View>
       </StackCardContext.Provider>
@@ -775,13 +799,6 @@ interface StackCardSlotProps {
   children: ReactNode;
   accessibilityActions?: { name: string; label: string }[];
   onAccessibilityAction?: (event: AccessibilityActionEvent) => void;
-  /*
-   * Set by the gesture detector above, which clones its child to ask for it.
-   * It has to reach a real view: a detector attaches to the native view under
-   * it, and a view with nothing but a style of its own is a candidate for
-   * being flattened away — leaving the gesture attached to whatever is left.
-   */
-  collapsable?: boolean;
 }
 
 /**
@@ -801,7 +818,6 @@ function StackCardSlot({
   children,
   accessibilityActions,
   onAccessibilityAction,
-  collapsable,
 }: StackCardSlotProps) {
   const { x, y, fade, pivot, release, active, width } = useStackCardContext('StackCard.Card');
   const { card } = stackCardVariants();
@@ -884,9 +900,9 @@ function StackCardSlot({
 
   return (
     <Animated.View
-      style={[style, { pointerEvents: live ? 'auto' : 'none' }]}
+      style={style}
+      pointerEvents={live ? 'auto' : 'none'}
       className={card()}
-      collapsable={collapsable}
       // Every card but the top one is out of the reading order. A pile is one
       // card as far as a reader is concerned, and the rest are its shadow.
       accessibilityElementsHidden={!top}

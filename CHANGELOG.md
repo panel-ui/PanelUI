@@ -9,6 +9,44 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.98.0] — 2026-09-14
+
+### Added
+
+- **StackCard** — a pile of cards answered one at a time by throwing the top one off, for review
+  queues, flashcards and triage: anything where each item gets one decision and is then gone.
+  A card can go left, right, up or down, chosen with `directions`. A diagonal throw goes where
+  it was thrown hardest.
+  - `StackCard.Stamp` names an answer as the card is carried toward it.
+  - `StackCard.Action` offers the same decisions as buttons, which is also how the deck is
+    reached with a screen reader. Name the actions with `directionLabels`.
+  - `layout` puts the cards behind the top one in a `stack`, a `fan` or nothing (`flat`), and
+    `depth` sets how many show.
+  - A `ref` gives `swipe`, `undo` and `reset`, and `useStackCard()` reads the deck from anything
+    inside it.
+  - Hold `index` to confirm a decision before it is taken. A request the owner declines brings
+    the card back.
+
+  A throw runs on the UI thread and leaves at the speed the finger let go, so a busy JavaScript
+  thread does not stall it. The deck has no size of its own: give it a height.
+  ([#216](https://github.com/panel-ui/PanelUI/pull/216))
+
+### Changed
+
+- **Peer dependencies** — `react-native-worklets` is declared as an optional peer, `>=0.10.0`.
+  Reanimated 4 requires it and it was missing from the manifest entirely. It is optional because
+  the Reanimated range still admits version 3, which does not use it.
+
+### Docs
+
+- **OTP Input, Number Input** — the installation snippet imports `useState` from `react`. It was
+  listed among `panelui-native`'s exports, where the import does not resolve.
+- **ScrollHeader** — a recording for each of the twelve versions, six new examples to go with
+  them, and a note that a `Badge` beside an icon button in `ScrollHeader.Actions` needs
+  `self-center`: a badge aligns itself to the top of the row and otherwise sits above the button.
+- **Example app** — a component with more than four versions lists them four to a page, so the
+  list no longer runs under the section rail.
+
 ## [0.97.0] — 2026-09-10
 
 ### Added

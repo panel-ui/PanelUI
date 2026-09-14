@@ -1081,7 +1081,17 @@ function DeckProgress() {
 }
 
 function StackCardHiringVersion() {
-  const [shortlist, setShortlist] = useState<string[]>([]);
+  /*
+   * Keyed by card, not appended to. `undo` puts a card back without an
+   * `onSwipe`, so a list would keep the old answer and add the new one beside
+   * it; a map lets the second answer replace the first.
+   */
+  const [decisions, setDecisions] = useState<Record<number, string>>({});
+  const shortlist = Object.keys(decisions)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map((at) => decisions[at])
+    .filter((name): name is string => Boolean(name));
 
   return (
     <View className="flex-1 justify-center px-5 py-4">
@@ -1091,9 +1101,12 @@ function StackCardHiringVersion() {
         directionLabels={{ left: 'Pass', right: 'Shortlist' }}
         onSwipe={(direction, index) => {
           const candidate = CANDIDATES[index];
-          if (direction === 'right' && candidate) {
-            setShortlist((current) => [...current, candidate.name]);
-          }
+          setDecisions((current) => {
+            const next = { ...current };
+            if (direction === 'right' && candidate) next[index] = candidate.name;
+            else delete next[index];
+            return next;
+          });
         }}
       >
         <StackCard.Stamp direction="right" color="success">

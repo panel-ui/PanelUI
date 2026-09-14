@@ -699,7 +699,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
      * most twice in a deck's life and the gesture keeps its identity across
      * every advance.
      */
-    const enabled = !disabled && index < count;
+    const enabled = !disabled && index < count && allowed.length > 0;
 
     const gesture = useMemo(() => {
       /*
@@ -739,6 +739,10 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
            */
           cancelAnimation(x);
           cancelAnimation(y);
+          // Under reduce motion a leaving card fades rather than flies, and a
+          // card caught while it fades has to stop going as well as moving.
+          cancelAnimation(fade);
+          fade.value = 1;
           originX.value = x.value - event.translationX;
           originY.value = y.value - event.translationY;
         })
@@ -788,6 +792,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     }, [
       allowed,
       enabled,
+      fade,
       height,
       launch,
       originX,
@@ -1066,6 +1071,10 @@ function StackCardSlot({
       // card as far as a reader is concerned, and the rest are its shadow.
       accessibilityElementsHidden={!top}
       importantForAccessibility={top ? 'auto' : 'no-hide-descendants'}
+      // A view's custom actions are only offered when the view itself is an
+      // element a reader can focus, and a view full of text is not one. So the
+      // top card is: it is read as one card, with a direction for each action.
+      accessible={top}
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
     >
@@ -1179,7 +1188,15 @@ export interface StackCardStampProps
  */
 const StackCardStamp = forwardRef<View, StackCardStampProps>(
   (
-    { className, labelClassName, color = 'default', direction = 'right', children, ...props },
+    {
+      className,
+      labelClassName,
+      color = 'default',
+      direction = 'right',
+      children,
+      style: styleProp,
+      ...props
+    },
     ref
   ) => {
     const { x, y, width, height, threshold, active } = useStackCardContext('StackCard.Stamp');
@@ -1201,7 +1218,14 @@ const StackCardStamp = forwardRef<View, StackCardStampProps>(
     });
 
     return (
-      <Animated.View ref={ref} style={style} {...props} className={slots.root({ className })}>
+      <Animated.View
+        ref={ref}
+        {...props}
+        // The animation last, so a caller's style adds to it rather than
+        // replacing the opacity and scale that make it a stamp.
+        style={[styleProp, style]}
+        className={slots.root({ className })}
+      >
         <View className={slots.pill()}>
           {typeof children === 'string' || typeof children === 'number' ? (
             <Text className={slots.label({ className: labelClassName })}>{children}</Text>

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { FlatList, Image, ScrollView, SectionList, View } from "react-native";
 import Animated, { interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-import { Avatar, Badge, BellIcon, BookmarkIcon, Button, ButtonGroup, CalendarIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, Chip, Dialog, EllipsisIcon, GlobeIcon, Item, LinkIcon, PencilIcon, PlusIcon, RotateCcwIcon, RotateCwIcon, ScrollHeader, SearchBar, SearchIcon, ShareNodesIcon, StackCard, Tabs, Text, TrashIcon, XIcon, useStackCard, type StackCardHandle } from "panelui-native";
+import { Avatar, Badge, BellIcon, BookmarkIcon, Button, ButtonGroup, CalendarIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, Chip, Dialog, EllipsisIcon, GlobeIcon, Item, LinkIcon, PencilIcon, PlusIcon, RotateCcwIcon, RotateCwIcon, ScrollHeader, SearchBar, SearchIcon, ShareNodesIcon, StackCard, Tabs, Text, TrashIcon, XIcon, useStackCard, type StackCardDirection, type StackCardHandle } from "panelui-native";
 import { useCSSVariable } from "uniwind";
 import type { ComponentEntry } from '../component-types';
 
@@ -1348,28 +1348,39 @@ const SUBSCRIPTIONS = [
  * The version the controlled `index` exists for.
  *
  * Cancelling is a decision with a bill attached, so the deck asks before it
- * takes it: the left throw calls `onIndexChange`, the owner does not move the
- * index, and the card springs back and waits behind the dialog. Nothing was
- * drawn on the strength of the request, so declining it costs no animation.
+ * takes it: a left throw opens the dialog, the owner does not move the index,
+ * and the card comes back to wait behind it. Confirming throws it out again.
  */
 function StackCardConfirmVersion() {
+  const deck = useRef<StackCardHandle>(null);
   const [index, setIndex] = useState(0);
   const [pending, setPending] = useState<number | null>(null);
   const [cancelled, setCancelled] = useState<string[]>([]);
+  /*
+   * Refs, not state. `onSwipe` and `onIndexChange` fire in the same tick, so a
+   * `pending` set in the first is not in the second's closure yet — reading it
+   * there accepts every request, and the card goes before the dialog opens.
+   */
+  const thrown = useRef<StackCardDirection | null>(null);
+  const confirmed = useRef(false);
 
   return (
     <View className="flex-1 justify-center px-5 py-4">
       <StackCard
+        ref={deck}
         className="max-h-[560px] flex-1"
         index={index}
         directionLabels={{ left: 'Cancel it', right: 'Keep it' }}
         onSwipe={(direction, at) => {
-          if (direction === 'left') setPending(at);
+          thrown.current = direction;
+          if (direction === 'left' && !confirmed.current) setPending(at);
         }}
         onIndexChange={(next) => {
           // Only a keep advances the deck on its own. A cancel waits for the
           // dialog, which is what holding `index` is for.
-          if (next > index && pending === null) setIndex(next);
+          if (thrown.current === 'left' && !confirmed.current) return;
+          confirmed.current = false;
+          setIndex(next);
         }}
       >
         <StackCard.Stamp direction="left" color="destructive">
@@ -1435,7 +1446,9 @@ function StackCardConfirmVersion() {
                 const name = pending === null ? null : SUBSCRIPTIONS[pending]?.name;
                 if (name) setCancelled((current) => [...current, name]);
                 setPending(null);
-                setIndex((current) => current + 1);
+                // The same throw, this time with the answer already given.
+                confirmed.current = true;
+                deck.current?.swipe('left');
               }}
             >
               Cancel it
@@ -1690,7 +1703,7 @@ export const ENTRIES: ComponentEntry[] = [
         id: 'confirm',
         fullPage: true,
         description:
-          'A controlled deck. Cancelling a subscription opens a dialog, and the index only moves once the dialog says so — until then the card springs back, because nothing was drawn on the strength of the request.',
+          'A controlled deck. Cancelling a subscription opens a dialog and the deck waits: the card comes back until the dialog confirms it, and then it goes.',
         render: () => <StackCardConfirmVersion />,
       },
       { label: 'How the pile is arranged', render: () => <StackCardDepthDemo /> },

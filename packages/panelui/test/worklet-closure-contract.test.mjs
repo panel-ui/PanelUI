@@ -50,12 +50,34 @@ function workletParameters(source) {
     /function\s+(\w+)\s*\(([^)]*)\)[^{]*\{\s*['"]worklet['"]/g,
     // const resolve = (…) => { 'worklet';
     /(?:const|let|var)\s+(\w+)\s*=\s*\(([^)]*)\)\s*(?::[^=]*?)?=>\s*\{\s*['"]worklet['"]/g,
-    // .onUpdate((event) => { 'worklet';   and useAnimatedStyle(() => { 'worklet';
+    // .onUpdate((event) => { 'worklet';
     /\.(\w+)\(\s*\(([^)]*)\)\s*=>\s*\{\s*['"]worklet['"]/g,
   ];
   for (const shape of shapes) {
     for (const match of source.matchAll(shape)) {
       found.push({ name: match[1], parameters: match[2] });
+    }
+  }
+
+  /*
+   * Callbacks handed straight to a Reanimated hook are worklets whether or not
+   * they say so — the plugin marks them itself — and a hook can take more than
+   * one: `useAnimatedReaction`'s reaction is its second argument. So every arrow
+   * inside the call counts, found by walking the call's own parentheses.
+   */
+  const hooks =
+    /\b(use(?:AnimatedStyle|AnimatedProps|DerivedValue|AnimatedReaction|AnimatedScrollHandler|FrameCallback))\(/g;
+  for (const match of source.matchAll(hooks)) {
+    let depth = 1;
+    let end = match.index + match[0].length;
+    while (end < source.length && depth > 0) {
+      if (source[end] === '(') depth += 1;
+      else if (source[end] === ')') depth -= 1;
+      end += 1;
+    }
+    const call = source.slice(match.index + match[0].length, end - 1);
+    for (const arrow of call.matchAll(/\(([^()]*)\)\s*(?::[^=]*?)?=>/g)) {
+      found.push({ name: match[1], parameters: arrow[1] });
     }
   }
   return found;
@@ -102,6 +124,23 @@ test('the check recognises the shape that shipped', () => {
   const [found] = workletParameters(crashed);
   assert.equal(found.name, 'project');
   assert.deepEqual(identifierDefaults(found.parameters), ['DECELERATION']);
+
+  // A callback given straight to a Reanimated hook is a worklet without saying
+  // so, and is checked all the same.
+  const reaction = `
+    useAnimatedReaction(
+      () => progress.value,
+      (current, previous = RESTING) => {
+        if (current !== previous) runOnJS(report)(current);
+      }
+    );
+  `;
+  assert.ok(
+    workletParameters(reaction).some(
+      (found) => identifierDefaults(found.parameters).includes('RESTING')
+    ),
+    'a default in a hook callback is caught'
+  );
 
   // And that a literal default is left alone.
   const fine = `

@@ -1469,27 +1469,62 @@ function initials(name: string) {
     .join('');
 }
 
-function StackCardDepthDemo() {
+/** What each arrangement does with the cards behind the top one, in a line. */
+const ARRANGEMENTS = [
+  { layout: 'stack', note: 'Each card behind sits lower and smaller' },
+  { layout: 'fan', note: 'Each card behind turns out to one side' },
+  { layout: 'flat', note: 'Nothing behind until the top card goes' },
+] as const;
+
+/** Inside the deck, so it reads the deck it resets. */
+function DealAgain() {
+  const { reset } = useStackCard();
   return (
-    <View className="w-full gap-6">
-      {(['stack', 'fan', 'flat'] as const).map((layout) => (
-        <View key={layout} className="gap-2">
-          <Text size="sm" weight="medium" className="capitalize">
-            {layout}
-          </Text>
-          <StackCard className="h-[140px]" layout={layout}>
-            {PLACES.slice(0, 4).map((place) => (
-              <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
-                <Text weight="semibold">{place.name}</Text>
-                <Text size="sm" muted>
+    <Button variant="outline" size="sm" onPress={reset}>
+      Deal again
+    </Button>
+  );
+}
+
+/**
+ * The three `layout` values side by side, each a deck of the same five cards,
+ * so the pile behind the top card is the only thing that differs between them.
+ * Each deck is live: throwing a card is how the difference shows, because the
+ * arrangements only really part company while a card is on its way out.
+ */
+function StackCardArrangementVersion() {
+  return (
+    <View className="flex-1 gap-4 px-6 pb-10 pt-2">
+      {ARRANGEMENTS.map(({ layout, note }) => (
+        // The padding is the room the pile needs outside the card's own box: a
+        // stacked pile peeks out below it, and a fanned card's corners turn up
+        // past its top edge — so the deck is also inset from the heading's
+        // width, where those corners would otherwise land on the words.
+        <View key={layout} className="flex-1 gap-4 pb-6">
+          <View className="flex-row items-baseline justify-between gap-3">
+            <Text weight="semibold" className="capitalize">
+              {layout}
+            </Text>
+            <Text size="xs" muted>
+              {note}
+            </Text>
+          </View>
+          <StackCard className="mx-3 flex-1" layout={layout}>
+            {PLACES.map((place) => (
+              <StackCard.Card key={place.name} className="justify-center gap-1 px-5">
+                <Text size="xs" muted className="uppercase tracking-wider">
+                  {place.kind}
+                </Text>
+                <Text size="lg" weight="semibold">
+                  {place.name}
+                </Text>
+                <Text size="sm" muted numberOfLines={1}>
                   {place.detail}
                 </Text>
               </StackCard.Card>
             ))}
             <StackCard.Empty>
-              <Text size="sm" muted>
-                Empty
-              </Text>
+              <DealAgain />
             </StackCard.Empty>
           </StackCard>
         </View>
@@ -1503,7 +1538,7 @@ function StackCardHandleDemo() {
 
   return (
     <View className="w-full gap-3">
-      <StackCard ref={deck} className="h-[140px]" disabled>
+      <StackCard ref={deck} className="mb-7 h-[140px]" disabled>
         {PLACES.map((place) => (
           <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
             <Text weight="semibold">{place.name}</Text>
@@ -1706,7 +1741,14 @@ export const ENTRIES: ComponentEntry[] = [
           'A controlled deck. Cancelling a subscription opens a dialog and the deck waits: the card comes back until the dialog confirms it, and then it goes.',
         render: () => <StackCardConfirmVersion />,
       },
-      { label: 'How the pile is arranged', render: () => <StackCardDepthDemo /> },
+      {
+        label: 'How the pile is arranged',
+        id: 'arranged',
+        fullPage: true,
+        description:
+          'The three `layout` values on decks of the same five cards, so the cards behind the top one are the only difference. Throw a card on each to see how the pile follows it.',
+        render: () => <StackCardArrangementVersion />,
+      },
       { label: 'Driven from outside', render: () => <StackCardHandleDemo /> },
     ],
   },

@@ -172,6 +172,26 @@ const swipe = (
   </Row>
 );
 
+const stackCard = (
+  /*
+   * Two cards stepped out from under a third, and the third tilted the way a
+   * throw takes it. A pile drawn square-on is a single rounded rectangle at
+   * this size, and the tilt is the only part of the silhouette that says the
+   * top card comes off rather than turns over.
+   */
+  <div className="relative h-[74px] w-40">
+    <Plate className="absolute inset-x-6 top-4 h-14 scale-90 opacity-40" />
+    <Plate className="absolute inset-x-3 top-2 h-14 scale-95 opacity-70" />
+    <Plate className="absolute inset-x-0 top-0 h-14 -rotate-6 justify-center gap-2 p-3">
+      <Bar className="w-16" />
+      <Bar className="w-10" faint />
+    </Plate>
+    <Accent className="absolute right-1 top-1 rounded px-1.5 py-0.5">
+      <CheckIcon className="size-2.5 text-fd-primary-foreground" />
+    </Accent>
+  </div>
+);
+
 const toggleButton = (
   <Row>
     <Accent className="grid size-10 place-items-center rounded-lg">
@@ -2102,6 +2122,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'slide-button': slideButton,
   'selection-mode': selectionMode,
   swipe,
+  'stack-card': stackCard,
   'toggle-button': toggleButton,
 
   // Forms and input

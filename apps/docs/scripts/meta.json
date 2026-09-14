@@ -854,6 +854,15 @@
       "category": "layout"
     }
   ],
+  "stack-card": [
+    "StackCard",
+    "A pile of cards, taken one at a time by throwing the top one off.",
+    "react native swipe card stack deck tinder",
+    {
+      "addedIn": "0.98.0",
+      "category": "actions"
+    }
+  ],
   "swipe": [
     "Swipe",
     "A row that slides aside to reveal the things you can do to it.",

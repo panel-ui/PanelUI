@@ -45,7 +45,7 @@
 ---
 
 **PanelUI is an open-source React Native UI component library for Expo apps**, styled with
-Tailwind CSS v4 and animated with Reanimated 4. **128 accessible, typed component modules** — buttons,
+Tailwind CSS v4 and animated with Reanimated 4. **129 accessible, typed component modules** — buttons,
 inputs, forms, dialogs, bottom sheets, charts, calendars, maps and a set of AI chat components —
 in one coherent visual language, with light and dark themes out of the box.
 
@@ -146,7 +146,7 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
 
 ## Components
 
-**128 component modules**, documented with live examples and full props tables at
+**129 component modules**, documented with live examples and full props tables at
 **[panelui.dev/docs](https://panelui.dev/docs)**.
 
 - **Layout & content** — Card, Frame, PageHeader, Surface, Item, GridItem, Separator, Splitter, Typography,
@@ -156,7 +156,8 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
   Select, Combobox, TagInput, Checkbox, RadioGroup, Switch, Slider, Rating, Signature, ColorPicker,
   DatePicker, TimePicker, DateTimePicker, Calendar, Label, MarkdownEditor, Questionnaire
 - **Actions & navigation** — Button, ButtonGroup, ToggleButton, Fab, Menu, ContextMenu, Swipe,
-  SelectionMode, Sortable, Tabs, Breadcrumb, Pagination, SectionRail, Panelside, Tree, Chip, Badge
+  StackCard, SelectionMode, Sortable, Tabs, Breadcrumb, Pagination, SectionRail, Panelside, Tree,
+  Chip, Badge
 - **Overlays & feedback** — Dialog, BottomSheet, Drawer, Popover, Tooltip, Toast, Alert, Tour,
   Progress, Meter, Spinner, Loader
 - **Data visualisation** — Plot, LineChart, LiveLineChart, AreaChart, BarChart, WaterfallChart,

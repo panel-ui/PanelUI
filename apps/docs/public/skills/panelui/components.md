@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-128 component modules. The **Reference** column links to a file in this skill holding that
+129 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -23,6 +23,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `ProgressButton` | Press and hold to confirm, with the wait drawn on the button. | [progress-button](./components/progress-button.md) |
 | `SelectionMode` *(alpha)* | Pick several things at once, on a screen or in a sheet. | [selection-mode](./components/selection-mode.md) |
 | `SlideButton` | Drag across to confirm, with the distance drawn on the button. | [slide-button](./components/slide-button.md) |
+| `StackCard` | A pile of cards, taken one at a time by throwing the top one off. | [stack-card](./components/stack-card.md) |
 | `Swipe` | A row that slides aside to reveal the things you can do to it. | [swipe](./components/swipe.md) |
 | `ToggleButton` | A button that stays down, on its own or in a group. | [toggle-button](./components/toggle-button.md) |
 

@@ -107,6 +107,7 @@ export const COMPONENTS = [
   {"slug":"spinner","name":"Spinner","summary":"Indeterminate loading indicator"},
   {"slug":"splitter","name":"Splitter","summary":"Panes sharing a container, with a seam you can drag"},
   {"slug":"split-view","name":"SplitView","summary":"Two resizable stacked panes that settle on a named height"},
+  {"slug":"stack-card","name":"StackCard","summary":"A pile of cards, taken one at a time by throwing the top one off"},
   {"slug":"steps","name":"Steps","summary":"Stepper for multi-step flows"},
   {"slug":"surface","name":"Surface","summary":"Elevated container with a variant ladder"},
   {"slug":"swipe","name":"Swipe","summary":"A row that slides aside to reveal its actions"},

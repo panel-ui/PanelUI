@@ -300,6 +300,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `Spinner` | Indeterminate loading indicator |
 | `SplitView` | Two stacked panes whose seam settles on one of a few named heights |
 | `Splitter` | Panes that share a container, with a seam between them you can drag |
+| `StackCard` | A pile of cards, taken one at a time by throwing the top one off |
 | `Steps` | Stepper for multi-step flows |
 | `Surface` | Elevated container with a variant ladder |
 | `Swipe` | A row that slides aside to reveal the things you can do to it |

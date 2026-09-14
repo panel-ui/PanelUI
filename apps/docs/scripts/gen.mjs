@@ -249,9 +249,29 @@ for (const [slug, entry] of Object.entries(meta)) {
   // `Alert` is ours as well as React Native's, and where the page is about it
   // the component is the one being imported.
   const fromReactNative = extra.filter((item) => RN_EXPORTS.has(item) && item !== name);
-  const imports = [name, ...extra.filter((item) => !fromReactNative.includes(item))];
+  /*
+   * React's own hooks, for the same reason. An example that holds state names
+   * `useState`, and in the `panelui-native` line that is an import that does
+   * not resolve — so they go in a line of their own, above the rest.
+   */
+  const REACT_EXPORTS = new Set([
+    'useCallback',
+    'useEffect',
+    'useMemo',
+    'useReducer',
+    'useRef',
+    'useState',
+  ]);
+  const fromReact = extra.filter((item) => REACT_EXPORTS.has(item));
+  const imports = [
+    name,
+    ...extra.filter((item) => !fromReactNative.includes(item) && !fromReact.includes(item)),
+  ];
   const reactNativeImport = fromReactNative.length
     ? `\nimport { ${fromReactNative.join(', ')} } from 'react-native';`
+    : '';
+  const reactImport = fromReact.length
+    ? `import { ${fromReact.join(', ')} } from 'react';\n`
     : '';
 
   const sections = [];
@@ -307,7 +327,7 @@ ${lede}
 ${name} ships with the library — no separate install.
 
 \`\`\`tsx
-import { ${imports.join(', ')} } from 'panelui-native';${reactNativeImport}
+${reactImport}import { ${imports.join(', ')} } from 'panelui-native';${reactNativeImport}
 \`\`\`
 
 Or copy the source into your project, to own and edit it:

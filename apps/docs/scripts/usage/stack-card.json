@@ -23,7 +23,9 @@
     "TrashIcon",
     "View",
     "XIcon",
-    "useStackCard"
+    "useStackCard",
+    "useRef",
+    "useState"
   ],
   "anatomy": "<StackCard>\n  <StackCard.Stamp direction=\"right\" />\n  <StackCard.Stamp direction=\"left\" />\n\n  <StackCard.Card />\n  <StackCard.Card />\n\n  <StackCard.Empty />\n\n  <StackCard.Actions>\n    <StackCard.Action action=\"left\" />\n    <StackCard.Action action=\"undo\" />\n    <StackCard.Action action=\"right\" />\n  </StackCard.Actions>\n</StackCard>",
   "parts": {

@@ -4,6 +4,14 @@ description: A pile of cards, taken one at a time by throwing the top one off.
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/stack-card.mp4"
+  poster="/previews/stack-card-poster.jpg"
+  alt="The StackCard component, running in the example app."
+  width={720}
+  height={1560}
+/>
+
 For a queue of things each answered with one decision and then gone — a review queue, a set of flashcards, an inbox of suggestions. The gesture is the answer, which is what makes it quicker than a list of rows with buttons on them.
 
 It shows one card and hides the rest, so it is the wrong shape for anything the reader has to compare, skim or come back to. **Give the deck a height.** The cards are laid over each other and have no height of their own; the pile takes what is left of the root after anything laid out under it.
@@ -79,30 +87,19 @@ Stamps are declared on the deck rather than inside a card. There is one set of t
 
 ## Examples
 
-### How the pile is arranged
-
-`layout` decides what the cards behind the top one do. `stack` steps them down and shrinks them; `fan` turns them alternately and splays them sideways; `flat` hides them entirely.
-
-All three keep the same rule underneath: a card behind climbs toward the top position as the card in front of it is carried away, so by the time the top card commits the next one has already arrived. That is why advancing the deck moves nothing on the screen.
-
-```tsx
-{(['stack', 'fan', 'flat']).map((layout) => (
-  <StackCard key={layout} className="h-[140px]" layout={layout}>
-    {places.map((place) => (
-      <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
-        <Text weight="semibold">{place.name}</Text>
-        <Text size="sm" muted>{place.detail}</Text>
-      </StackCard.Card>
-    ))}
-  </StackCard>
-))}
-```
-
 ### Driven from outside
 
 A `ref` gives you `swipe`, `undo` and `reset`, for a deck answered from a toolbar rather than from the card.
 
 A programmatic swipe is the same animation as a thrown one, so the two are indistinguishable on the screen. Pair it with `disabled` where the card itself should not take a gesture at all — the deck still looks and animates exactly the same, it simply does not answer a finger.
+
+<PreviewVideo
+  src="/previews/stack-card-driven-from-outside.mp4"
+  poster="/previews/stack-card-driven-from-outside-poster.jpg"
+  alt="StackCard — Driven from outside."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 const deck = useRef<StackCardHandle>(null);
@@ -179,6 +176,14 @@ The stamps name the two answers before either is committed, and each reaches ful
 
 The buttons are not a fallback. They are how the deck is reachable with a screen reader, and they are what people reach for on the card they are unsure about, because a throw looks irreversible in a way a tap does not.
 
+<PreviewVideo
+  src="/previews/stack-card-a-hiring-queue.mp4"
+  poster="/previews/stack-card-a-hiring-queue-poster.jpg"
+  alt="StackCard — A hiring queue."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 const [shortlist, setShortlist] = useState([]);
 
@@ -239,6 +244,14 @@ Up and down instead of left and right, set with `directions`.
 
 A direction left out of `directions` still follows the finger a little and springs back, rather than refusing to move — a card that does not budge reads as a frozen screen rather than as an axis that is not offered.
 
+<PreviewVideo
+  src="/previews/stack-card-flashcards.mp4"
+  poster="/previews/stack-card-flashcards-poster.jpg"
+  alt="StackCard — Flashcards."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <StackCard
   className="h-[420px]"
@@ -273,6 +286,14 @@ The side a card leans is fixed to its position in the run rather than to its dep
 
 `depth` is how many are drawn behind the top one. Two is a pile and five is a mess; three is about as far as a fan goes before the cards at the back stop being distinguishable from the edge of the one in front.
 
+<PreviewVideo
+  src="/previews/stack-card-a-hand-of-cards.mp4"
+  poster="/previews/stack-card-a-hand-of-cards-poster.jpg"
+  alt="StackCard — A hand of cards."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <StackCard className="h-[440px]" layout="fan" depth={3}>
   <StackCard.Stamp direction="right" color="primary">Save</StackCard.Stamp>
@@ -300,6 +321,14 @@ A card can go four ways, each with its own stamp and its own label for a screen 
 A diagonal throw goes where it was thrown hardest, not to whichever direction happens to be checked first: every accepted direction is measured against the reach on its own axis, and the furthest one wins.
 
 Four answers is the practical ceiling. Past that the gesture stops being one decision and becomes a menu the reader has to aim at.
+
+<PreviewVideo
+  src="/previews/stack-card-four-ways-out.mp4"
+  poster="/previews/stack-card-four-ways-out-poster.jpg"
+  alt="StackCard — Four ways out."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <StackCard
@@ -340,6 +369,14 @@ A left throw opens the dialog and the owner leaves `index` where it is. The card
 `onSwipe` fires before `onIndexChange`, so read which way the card went from a ref rather than from state. Both fire in the same tick, and state set in `onSwipe` is not in `onIndexChange`'s closure yet — checking it there accepts every request.
 
 Use it wherever a decision has a consequence worth confirming — a cancellation, a deletion, anything that spends money. For decisions that do not, let the deck keep its own index; a confirmation on every card turns a fast queue into a slow one.
+
+<PreviewVideo
+  src="/previews/stack-card-asking-before-it-goes.mp4"
+  poster="/previews/stack-card-asking-before-it-goes-poster.jpg"
+  alt="StackCard — Asking before it goes."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 const deck = useRef(null);
@@ -395,6 +432,33 @@ const confirmed = useRef(false);
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog>
+```
+
+### How the pile is arranged
+
+`layout` decides what the cards behind the top one do. `stack` steps them down and shrinks them; `fan` turns them alternately and splays them sideways; `flat` hides them entirely.
+
+All three keep the same rule underneath: a card behind climbs toward the top position as the card in front of it is carried away, so by the time the top card commits the next one has already arrived. That is why advancing the deck moves nothing on the screen.
+
+<PreviewVideo
+  src="/previews/stack-card.mp4"
+  poster="/previews/stack-card-poster.jpg"
+  alt="StackCard — How the pile is arranged."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+{(['stack', 'fan', 'flat']).map((layout) => (
+  <StackCard key={layout} className="h-[140px]" layout={layout}>
+    {places.map((place) => (
+      <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
+        <Text weight="semibold">{place.name}</Text>
+        <Text size="sm" muted>{place.detail}</Text>
+      </StackCard.Card>
+    ))}
+  </StackCard>
+))}
 ```
 
 ## Variants

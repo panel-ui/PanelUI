@@ -115,23 +115,32 @@ Extends `Omit<ViewProps, 'children'>, VariantProps<typeof actionVariants>`.
 | `label` | `string` | — | What a screen reader is offered. Falls back to "Undo", or to the plain name of the direction. |
 | `onPress` | `() => void` | — | Run after the deck has been told, for a sound or a log. |
 
-### Example — How the pile is arranged
+### Example — Driven from outside
 
-`layout` decides what the cards behind the top one do. `stack` steps them down and shrinks them; `fan` turns them alternately and splays them sideways; `flat` hides them entirely.
+A `ref` gives you `swipe`, `undo` and `reset`, for a deck answered from a toolbar rather than from the card.
 
-All three keep the same rule underneath: a card behind climbs toward the top position as the card in front of it is carried away, so by the time the top card commits the next one has already arrived. That is why advancing the deck moves nothing on the screen.
+A programmatic swipe is the same animation as a thrown one, so the two are indistinguishable on the screen. Pair it with `disabled` where the card itself should not take a gesture at all — the deck still looks and animates exactly the same, it simply does not answer a finger.
 
 ```tsx
-{(['stack', 'fan', 'flat']).map((layout) => (
-  <StackCard key={layout} className="h-[140px]" layout={layout}>
-    {places.map((place) => (
-      <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
-        <Text weight="semibold">{place.name}</Text>
-        <Text size="sm" muted>{place.detail}</Text>
-      </StackCard.Card>
-    ))}
-  </StackCard>
-))}
+const deck = useRef<StackCardHandle>(null);
+
+<StackCard ref={deck} className="h-[140px]" disabled>
+  {places.map((place) => (
+    <StackCard.Card key={place.name} className="justify-center gap-1 p-4">
+      <Text weight="semibold">{place.name}</Text>
+      <Text size="sm" muted>{place.kind}</Text>
+    </StackCard.Card>
+  ))}
+  <StackCard.Empty>
+    <Text size="sm" muted>Nothing left — put them back.</Text>
+  </StackCard.Empty>
+</StackCard>
+
+<View className="flex-row gap-2">
+  <Button variant="outline" className="flex-1" onPress={() => deck.current?.swipe('left')}>Send left</Button>
+  <Button variant="outline" className="flex-1" onPress={() => deck.current?.undo()}>Undo</Button>
+  <Button variant="outline" className="flex-1" onPress={() => deck.current?.reset()}>Reset</Button>
+</View>
 ```
 
 ### Notes

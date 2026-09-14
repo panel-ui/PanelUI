@@ -54,16 +54,43 @@ function DemoLabel({ children }: { children: string }) {
   );
 }
 
-function VersionList({ entry, versions }: { entry: ComponentEntry; versions: Demo[] }) {
+function VersionList({
+  entry,
+  versions,
+  start = 0,
+}: {
+  entry: ComponentEntry;
+  versions: Demo[];
+  /** Where this list's numbering picks up, when the versions span pages. */
+  start?: number;
+}) {
   return (
     // Gaps, not hairlines: each row is its own filled surface, and a separator
     // between two cards reads as a mistake.
     <Item.Group className="gap-2">
       {versions.map((demo, index) => (
-        <VersionRow key={demo.id} slug={entry.slug} demo={demo} index={index} />
+        <VersionRow key={demo.id} slug={entry.slug} demo={demo} index={start + index} />
       ))}
     </Item.Group>
   );
+}
+
+/*
+ * How many version rows a page holds.
+ *
+ * A row carries a title and a description of two or three lines, so five of
+ * them run past the bottom of a phone-sized page — into the rail, which sits
+ * in the corner over whatever is there. Four leave room below the last one.
+ */
+const VERSIONS_PER_PAGE = 4;
+
+/** The versions in runs of `VERSIONS_PER_PAGE`, one run per page. */
+function versionPages(versions: Demo[]) {
+  const runs: { start: number; versions: Demo[] }[] = [];
+  for (let start = 0; start < versions.length; start += VERSIONS_PER_PAGE) {
+    runs.push({ start, versions: versions.slice(start, start + VERSIONS_PER_PAGE) });
+  }
+  return runs;
 }
 
 /** Every variant down one scroll, divided by hairlines. */
@@ -149,9 +176,26 @@ function PagerLayout({
   const { isVisible: keyboardVisible } = useKeyboard();
 
   // The versions list leads, where there is one to show: it is the index to
-  // the screens that are not pages themselves.
-  const pages: { id: string; label: string; demo?: Demo }[] = [
-    ...(showIndex ? [{ id: 'versions', label: 'Versions' }] : []),
+  // the screens that are not pages themselves. Past four it takes more than
+  // one page, and each is labelled with the range it holds so the rail can
+  // tell them apart.
+  const runs = showIndex ? versionPages(versions) : [];
+  const pages: {
+    id: string;
+    label: string;
+    demo?: Demo;
+    run?: { start: number; versions: Demo[] };
+  }[] = [
+    ...runs.map((run) => ({
+      id: run.start === 0 ? 'versions' : `versions-${run.start}`,
+      label:
+        runs.length === 1
+          ? 'Versions'
+          : run.versions.length === 1
+            ? `Version ${run.start + 1}`
+            : `Versions ${run.start + 1}–${run.start + run.versions.length}`,
+      run,
+    })),
     ...demos.map((demo) => ({ id: demo.id ?? demo.label, label: demo.label, demo })),
   ];
 
@@ -213,9 +257,13 @@ function PagerLayout({
                   {entryPage.demo.render()}
                 </View>
               </>
-            ) : (
-              <VersionList entry={entry} versions={versions} />
-            )}
+            ) : entryPage.run ? (
+              <VersionList
+                entry={entry}
+                versions={entryPage.run.versions}
+                start={entryPage.run.start}
+              />
+            ) : null}
           </View>
         ))}
       </ScrollView>
@@ -311,8 +359,13 @@ export default function ComponentDetailScreen() {
   const pageable = pagingVersions ? versions.filter((demo) => !demo.fullBleed) : inline;
 
   // One page and a rail that does nothing is the sections layout with extra
-  // steps, so a single demo falls back however the entry is marked.
-  const paged = entry.layout !== 'sections' && pageable.length > 1;
+  // steps, so a single demo falls back however the entry is marked — unless
+  // the versions alone run to more than one page, which is what the pager is
+  // for.
+  const index = !pagingVersions && versions.length > 0;
+  const paged =
+    entry.layout !== 'sections' &&
+    (pageable.length > 1 || (index && versions.length > VERSIONS_PER_PAGE));
 
   return (
     <View className="flex-1">
@@ -325,7 +378,7 @@ export default function ComponentDetailScreen() {
           // Only when the pages are the inline demos and the versions are
           // somewhere else. When the versions *are* the pages, a list of links
           // to them in front is a table of contents for the next swipe.
-          index={!pagingVersions && versions.length > 0}
+          index={index}
           // A demo marked full-page was written to own a screen, and a page is
           // one — so it gets the height rather than being centred in it.
           fills={pagingVersions}

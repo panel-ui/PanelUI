@@ -50,10 +50,10 @@ Extends `Omit<ViewProps, 'children'>`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | — | A `StackCard.Card` for each card, plus any of `StackCard.Stamp`, `StackCard.Empty` and `StackCard.Actions`, in any order. Anything else is laid out under the pile. |
-| `index` | `number` | — | Which card is on top, when the caller holds it. Leave unset to let the deck keep its own. A controlled deck that declines a request stays where it is, so this is also how a decision is confirmed before it is taken. |
+| `index` | `number` | — | Which card is on top, when the caller holds it. Leave unset to let the deck keep its own. A controlled deck that declines a request stays where it is and the thrown card comes back, so this is also how a decision is confirmed before it is taken. |
 | `defaultIndex` | `number` | `0` | Which card an uncontrolled deck starts on. |
 | `onIndexChange` | `(index: number) => void` | — | Fires whenever the deck asks to move, with the index it is asking for. |
-| `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. Not called by `undo` — the index going back is what reports that. |
+| `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. It fires before `onIndexChange` asks for the next index. Not called by `undo` — the index going back is what reports that. |
 | `onEmpty` | `() => void` | — | Fires once when the last card leaves. |
 | `directions` | `readonly StackCardDirection[]` | `['left', 'right']` | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
 | `layout` | `StackCardLayout` | `stack` | How the cards behind the top one are arranged. `stack` steps them down and back; `fan` turns them alternately, like a hand of cards; `flat` hides them entirely, for full-bleed cards where a peeking edge is only clutter. |

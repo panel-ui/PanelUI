@@ -335,24 +335,33 @@ Four answers is the practical ceiling. Past that the gesture stops being one dec
 
 Hold `index` and the deck only moves when you say so.
 
-The left throw calls `onIndexChange`, the owner declines it while the dialog is open, and the card stays where it was. Nothing is drawn on the strength of a request, so declining one costs no animation and leaves nothing half-moved.
+A left throw opens the dialog and the owner leaves `index` where it is. The card has already gone by the time the request arrives, so declining it brings the card back, flown in from the side it left by. Confirming throws it out again with `swipe`.
+
+`onSwipe` fires before `onIndexChange`, so read which way the card went from a ref rather than from state. Both fire in the same tick, and state set in `onSwipe` is not in `onIndexChange`'s closure yet — checking it there accepts every request.
 
 Use it wherever a decision has a consequence worth confirming — a cancellation, a deletion, anything that spends money. For decisions that do not, let the deck keep its own index; a confirmation on every card turns a fast queue into a slow one.
 
 ```tsx
+const deck = useRef(null);
 const [index, setIndex] = useState(0);
 const [pending, setPending] = useState(null);
+const thrown = useRef(null);
+const confirmed = useRef(false);
 
 <StackCard
+  ref={deck}
   className="h-[420px]"
   index={index}
   directionLabels={{ left: 'Cancel it', right: 'Keep it' }}
   onSwipe={(direction, at) => {
-    if (direction === 'left') setPending(at);
+    thrown.current = direction;
+    if (direction === 'left' && !confirmed.current) setPending(at);
   }}
   onIndexChange={(next) => {
     // Only a keep advances the deck on its own.
-    if (next > index && pending === null) setIndex(next);
+    if (thrown.current === 'left' && !confirmed.current) return;
+    confirmed.current = false;
+    setIndex(next);
   }}
 >
   <StackCard.Stamp direction="left" color="destructive">Cancel</StackCard.Stamp>
@@ -377,7 +386,8 @@ const [pending, setPending] = useState(null);
         variant="destructive"
         onPress={() => {
           setPending(null);
-          setIndex((current) => current + 1);
+          confirmed.current = true;
+          deck.current?.swipe('left');
         }}
       >
         Cancel it
@@ -461,10 +471,10 @@ const [pending, setPending] = useState(null);
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `index` | `number` | — | Which card is on top, when the caller holds it. Leave unset to let the deck keep its own. A controlled deck that declines a request stays where it is, so this is also how a decision is confirmed before it is taken. |
+| `index` | `number` | — | Which card is on top, when the caller holds it. Leave unset to let the deck keep its own. A controlled deck that declines a request stays where it is and the thrown card comes back, so this is also how a decision is confirmed before it is taken. |
 | `defaultIndex` | `number` | `0` | Which card an uncontrolled deck starts on. |
 | `onIndexChange` | `(index: number) => void` | — | Fires whenever the deck asks to move, with the index it is asking for. |
-| `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. Not called by `undo` — the index going back is what reports that. |
+| `onSwipe` | `(direction: StackCardDirection, index: number) => void` | — | Fires when a card leaves, with the way it went and the index it was at. It fires before `onIndexChange` asks for the next index. Not called by `undo` — the index going back is what reports that. |
 | `onEmpty` | `() => void` | — | Fires once when the last card leaves. |
 | `directions` | `readonly StackCardDirection[]` | `['left', 'right']` | Which ways a card may be thrown. Left and right by default. A direction left out still follows the finger a little and then comes back, rather than refusing to move at all — a card that does not budge reads as a frozen screen. |
 | `layout` | `StackCardLayout` | `'stack'` | How the cards behind the top one are arranged. `stack` steps them down and back; `fan` turns them alternately, like a hand of cards; `flat` hides them entirely, for full-bleed cards where a peeking edge is only clutter. |

@@ -37,19 +37,22 @@
  * exactly where the top card sits — so when the deck advances there is nothing
  * left for it to move, and no frame in which the pile re-arranges itself.
  *
- * ## The deck advances after React has accepted it
+ * ## The deck moves on the UI thread, and React catches up
  *
  * Which card is on top is held twice: as React state, for what is mounted and
- * for the callbacks, and as a shared value, for what is drawn. The card flies
- * off, the new index is *requested*, and the shared value only moves once a
- * render comes back carrying it — at which point the offset is reset in the
- * same breath.
+ * for the callbacks, and as a shared value, for what is drawn. A throw is
+ * handled entirely on the UI thread — the card leaves on the frame the finger
+ * lets go, and once it is off the screen the top card, the offset and the fade
+ * all move in one step — and only then is the new index requested from React.
  *
- * Doing it in that order is what keeps a controlled deck honest. An owner that
- * declines the new index has a deck that stays where it was, because nothing
- * moved on the strength of the request alone; and because the second card was
- * already at the top position when the first left, accepting it moves nothing
- * on the screen either.
+ * Nothing on the screen waits for a render, so a busy JavaScript thread cannot
+ * stall a throw or leave a frame where the two halves disagree. What React
+ * renders afterwards is kept from showing before the UI thread agrees with it:
+ * a stamp is only drawn on the card the UI thread has on top.
+ *
+ * A controlled deck is still the owner's to decide. An owner that declines the
+ * new index gets the card back, flown in from the way it went; one that
+ * accepts it sees nothing move at all, because it already has.
  *
  * One card behind the pile's stated depth stays mounted so it can fade in as
  * it takes the last visible place, and one card ahead of the top stays mounted
@@ -75,6 +78,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useReducer,
   useRef,
   type ReactElement,
   type ReactNode,
@@ -91,6 +95,7 @@ import Animated, {
   Easing,
   interpolate,
   runOnJS,
+  runOnUI,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -133,7 +138,15 @@ const RETURN_SPRING = { damping: 20, stiffness: 220, mass: 0.7 } as const;
  */
 const ARRIVE_SPRING = { damping: 22, stiffness: 160, mass: 0.9 } as const;
 
-/** How long a card takes to leave, in milliseconds. */
+/**
+ * Carries a thrown card off the screen at the speed the finger let go of it.
+ *
+ * Clamped, so it ends the moment it reaches the edge instead of settling out
+ * there, which is what lets the deck move on as soon as the card is gone.
+ */
+const THROW_SPRING = { duration: 400, dampingRatio: 0.8, overshootClamping: true } as const;
+
+/** How long a card sent by a button takes to leave, in milliseconds. */
 const EXIT_DURATION = 240;
 
 /** How long a fade stands in for a throw under reduce motion. */
@@ -206,6 +219,16 @@ interface StackCardContextValue {
 }
 
 const StackCardContext = createContext<StackCardContextValue | null>(null);
+
+/*
+ * Which card a stamp is drawn on.
+ *
+ * Stamps are handed to whichever card React has on top, and straight after a
+ * throw React is a render behind the UI thread — so for that render they sit
+ * on the next card while the offset still says the last one went all the way.
+ * A stamp reads it to show only on the card the UI thread is drawing on top.
+ */
+const StackCardSlotIndex = createContext<number | null>(null);
 
 function useStackCardContext(component: string) {
   const context = useContext(StackCardContext);
@@ -280,7 +303,8 @@ export interface StackCardProps extends Omit<ViewProps, 'children'> {
   /**
    * Which card is on top, when the caller holds it. Leave unset to let the
    * deck keep its own. A controlled deck that declines a request stays where
-   * it is, so this is also how a decision is confirmed before it is taken.
+   * it is and the thrown card comes back, so this is also how a decision is
+   * confirmed before it is taken.
    */
   index?: number;
   /** Which card an uncontrolled deck starts on. */
@@ -289,7 +313,8 @@ export interface StackCardProps extends Omit<ViewProps, 'children'> {
   onIndexChange?: (index: number) => void;
   /**
    * Fires when a card leaves, with the way it went and the index it was at.
-   * Not called by `undo` — the index going back is what reports that.
+   * It fires before `onIndexChange` asks for the next index. Not called by
+   * `undo` — the index going back is what reports that.
    */
   onSwipe?: (direction: StackCardDirection, index: number) => void;
   /** Fires once when the last card leaves. */
@@ -417,6 +442,25 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     const arriving = useRef<StackCardDirection | null>(null);
     const reportedEmpty = useRef(false);
 
+    /**
+     * The card the UI thread is drawing on top, as far as this side knows. It
+     * runs ahead of `index` for the length of one render after every throw.
+     */
+    const drawn = useRef(index);
+    /** The throw React has been asked to accept, until the next render answers. */
+    const requested = useRef<{ from: number; direction: StackCardDirection } | null>(null);
+    /*
+     * Guarantees that render. An owner declining a request need not render at
+     * all, and without one the deck would never find out it had been declined.
+     */
+    const [, answer] = useReducer((renders: number) => renders + 1, 0);
+
+    /** A card is on its way out. One at a time, whoever asked. */
+    const leaving = useSharedValue(false);
+    /** Where the drag picked the card up, so it carries on from there. */
+    const originX = useSharedValue(0);
+    const originY = useSharedValue(0);
+
     useEffect(
       () => () => {
         cancelAnimation(x);
@@ -427,26 +471,61 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
     );
 
     /*
-     * The one place the drawn deck is moved, and it runs after every render
-     * rather than on a change of `index`.
+     * Puts the deck at `next` in a single step on the UI thread: which card is
+     * on top, where the offset is, and whether it is showing.
      *
-     * Everything else only ever *asks* for an index. Nothing is drawn on the
-     * strength of a request, so a controlled owner that declines one has a
-     * deck that has not moved, and one that accepts gets the move and the
-     * reset of the outgoing card's offset inside a single commit — which is
-     * what stops the incoming card being drawn for a frame at the position the
-     * outgoing one flew to.
+     * All of it in one worklet, because these are three shared values that
+     * the pile reads together. Written one at a time from React, each lands
+     * whenever the UI thread picks it up — and a frame that has the offset
+     * back at the middle while the old card is still the top one draws that
+     * card back in the middle of the screen, for as long as the gap lasts.
+     */
+    const settle = useCallback(
+      (next: number, fromX: number, fromY: number, arrive: boolean) => {
+        'worklet';
+        cancelAnimation(x);
+        cancelAnimation(y);
+        cancelAnimation(fade);
+        leaving.value = false;
+        active.value = next;
+        fade.value = 1;
+        if (!arrive) {
+          x.value = 0;
+          y.value = 0;
+          return;
+        }
+        x.value = fromX;
+        y.value = fromY;
+        x.value = withSpring(0, ARRIVE_SPRING);
+        y.value = withSpring(0, ARRIVE_SPRING);
+      },
+      [active, fade, leaving, x, y]
+    );
+
+    /*
+     * React catching up with the deck, after every render.
+     *
+     * A thrown card moves the deck on the UI thread before React hears about
+     * it, so by the time this runs an accepted throw has nothing left to do.
+     * What it handles is everything that did not start as a throw — `undo`,
+     * `reset`, an owner moving `index` — and a throw that was declined, which
+     * is already off the screen and has to be brought back the way it went.
      */
     useEffect(() => {
-      if (active.value === index) return;
-      active.value = index;
-      fade.value = 1;
+      const asked = requested.current;
+      requested.current = null;
+      if (asked && index === asked.from) {
+        history.current.pop();
+        arriving.current = asked.direction;
+      }
+
+      if (drawn.current === index) return;
+      drawn.current = index;
 
       const entrance = arriving.current;
       arriving.current = null;
       if (!entrance || reduceMotion) {
-        x.value = 0;
-        y.value = 0;
+        runOnUI(settle)(index, 0, 0, false);
         return;
       }
 
@@ -457,10 +536,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         0,
         0
       );
-      x.value = from.x;
-      y.value = from.y;
-      x.value = withSpring(0, ARRIVE_SPRING);
-      y.value = withSpring(0, ARRIVE_SPRING);
+      runOnUI(settle)(index, from.x, from.y, true);
     });
 
     useEffect(() => {
@@ -472,29 +548,72 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
       if (index < count) reportedEmpty.current = false;
     }, [count, index, onEmpty]);
 
-    /** Runs once the outgoing card is off the screen. */
+    /*
+     * Runs once the outgoing card is off the screen, and the deck has already
+     * moved on. `onSwipe` goes first, so an owner deciding whether to accept
+     * the index has already heard which way the card went.
+     */
     const requestNext = useCallback(
       (direction: StackCardDirection, from: number) => {
+        drawn.current = from + 1;
+        requested.current = { from, direction };
         history.current.push(direction);
-        setIndex(from + 1);
         onSwipe?.(direction, from);
+        setIndex(from + 1);
+        answer();
         if (haptics) impactKnock();
       },
       [haptics, onSwipe, setIndex]
     );
 
-    const send = useCallback(
-      (direction: StackCardDirection) => {
-        if (index >= count) return;
-        const from = index;
+    /*
+     * `requestNext` closes over the caller's `onSwipe`, which an owner passing
+     * an inline arrow makes a new function on every render. The throw below is
+     * part of the gesture, so reaching it through a ref is what lets the
+     * gesture be built once and keep the touch it already has.
+     */
+    const latestRequestNext = useRef(requestNext);
+    latestRequestNext.current = requestNext;
+    const reportGone = useCallback((direction: StackCardDirection, from: number) => {
+      latestRequestNext.current(direction, from);
+    }, []);
+
+    /*
+     * Sends the top card off, on the UI thread, whoever asked.
+     *
+     * A release calls this from inside the gesture, so the card keeps moving
+     * on the frame the finger lets go rather than waiting for the JavaScript
+     * thread to hear about it — which, in a development build or on a busy
+     * screen, was long enough to see the card stop and set off again, and
+     * long enough for a second finger to catch the card that had just left.
+     *
+     * A thrown card carries the finger's velocity into a spring, clamped so it
+     * finishes the moment it is off the screen instead of settling there. A
+     * card sent by a button has no velocity to carry, and a spring from rest
+     * starts slowly — so that one gets the ease-out, which starts at speed.
+     */
+    const launch = useCallback(
+      (direction: StackCardDirection, velocityX: number, velocityY: number) => {
+        'worklet';
+        const from = active.value;
+        if (leaving.value || from >= count) return;
+        leaving.value = true;
+
+        const gone = (finished?: boolean) => {
+          'worklet';
+          // Caught mid-flight: the finger has it now, and the deck has not moved.
+          if (!finished) {
+            leaving.value = false;
+            return;
+          }
+          settle(from + 1, 0, 0, false);
+          runOnJS(reportGone)(direction, from);
+        };
 
         if (reduceMotion) {
           // The throw is the part that moves, and moving is the part the
           // setting is about. The card still goes; it goes by fading.
-          fade.value = withTiming(0, { duration: FADE_DURATION }, (finished) => {
-            'worklet';
-            if (finished) runOnJS(requestNext)(direction, from);
-          });
+          fade.value = withTiming(0, { duration: FADE_DURATION }, gone);
           return;
         }
 
@@ -505,40 +624,58 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
           x.value,
           y.value
         );
+        // The axis the card leaves along decides when it has left.
+        const sideways = direction === 'left' || direction === 'right';
+
+        if (velocityX !== 0 || velocityY !== 0) {
+          x.value = withSpring(
+            target.x,
+            { ...THROW_SPRING, velocity: velocityX },
+            sideways ? gone : undefined
+          );
+          y.value = withSpring(
+            target.y,
+            { ...THROW_SPRING, velocity: velocityY },
+            sideways ? undefined : gone
+          );
+          return;
+        }
+
         const timing = { duration: EXIT_DURATION, easing: EASE_OUT };
-        y.value = withTiming(target.y, timing);
-        x.value = withTiming(target.x, timing, (finished) => {
-          'worklet';
-          if (finished) runOnJS(requestNext)(direction, from);
-        });
+        x.value = withTiming(target.x, timing, sideways ? gone : undefined);
+        y.value = withTiming(target.y, timing, sideways ? undefined : gone);
       },
-      [count, fade, height, index, reduceMotion, requestNext, width, x, y]
+      [active, count, fade, height, leaving, reduceMotion, reportGone, settle, width, x, y]
+    );
+
+    const send = useCallback(
+      (direction: StackCardDirection) => {
+        runOnUI(launch)(direction, 0, 0);
+      },
+      [launch]
     );
 
     const undo = useCallback(() => {
-      if (index <= 0) return;
+      // `drawn`, not `index`: straight after a throw React is a render behind.
+      const current = drawn.current;
+      if (current <= 0) return;
       arriving.current = history.current.pop() ?? 'left';
-      setIndex(index - 1);
-    }, [index, setIndex]);
+      setIndex(current - 1);
+    }, [setIndex]);
 
     const reset = useCallback(() => {
       history.current = [];
       arriving.current = null;
-      cancelAnimation(x);
-      cancelAnimation(y);
-      cancelAnimation(fade);
+      requested.current = null;
+      drawn.current = 0;
+      runOnUI(settle)(0, 0, 0, false);
       setIndex(0);
-    }, [fade, setIndex, x, y]);
+      answer();
+    }, [setIndex, settle]);
 
     useImperativeHandle(ref, () => ({ swipe: send, undo, reset }), [send, undo, reset]);
 
-    /*
-     * `send` closes over the current index and the caller's `onSwipe`, so it is
-     * a new function on nearly every render — and an owner passing an inline
-     * arrow makes that every render. Reached through a ref it stops being a
-     * dependency of the gesture, which can then be built once and keep the
-     * touch it already has. Whoever the ref holds is the latest one either way.
-     */
+    /** Stable for the life of the deck, for the accessibility actions below. */
     const latestSend = useRef(send);
     latestSend.current = send;
     const dispatch = useCallback((direction: StackCardDirection) => {
@@ -589,18 +726,32 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         .enabled(enabled)
         .onBegin((event) => {
           'worklet';
+          pivot.value = lever(event.y, height.value);
+        })
+        .onStart((event) => {
+          'worklet';
+          /*
+           * Taken hold of here, when the pan activates, and not on touch-down.
+           * A finger that lands and lifts without moving is not a drag, and
+           * stopping the card on contact would leave a card that was on its
+           * way back frozen wherever the tap caught it.
+           *
+           * The origin is where the card is now, less the distance the finger
+           * travelled to activate the pan. Without it the card jumps by that
+           * distance on the first frame of every drag, and a card caught in
+           * flight jumps back under the finger's starting point.
+           */
           cancelAnimation(x);
           cancelAnimation(y);
-          pivot.value = lever(event.y, height.value);
+          originX.value = x.value - event.translationX;
+          originY.value = y.value - event.translationY;
         })
         .onUpdate((event) => {
           'worklet';
-          x.value = sideways
-            ? event.translationX
-            : resist(event.translationX, width.value, LOCKED_AXIS_GIVE);
-          y.value = upright
-            ? event.translationY
-            : resist(event.translationY, height.value, LOCKED_AXIS_GIVE);
+          const nextX = originX.value + event.translationX;
+          const nextY = originY.value + event.translationY;
+          x.value = sideways ? nextX : resist(nextX, width.value, LOCKED_AXIS_GIVE);
+          y.value = upright ? nextY : resist(nextY, height.value, LOCKED_AXIS_GIVE);
         })
         .onEnd((event) => {
           'worklet';
@@ -615,7 +766,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
             threshold
           );
           if (direction) {
-            runOnJS(dispatch)(direction);
+            launch(direction, event.velocityX, event.velocityY);
             return;
           }
           // The velocity goes into the spring, so there is no seam between
@@ -638,7 +789,19 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
       if (sideways && !upright) return pan.activeOffsetX([-10, 10]);
       if (upright && !sideways) return pan.activeOffsetY([-10, 10]);
       return pan;
-    }, [allowed, dispatch, enabled, height, pivot, threshold, width, x, y]);
+    }, [
+      allowed,
+      enabled,
+      height,
+      launch,
+      originX,
+      originY,
+      pivot,
+      threshold,
+      width,
+      x,
+      y,
+    ]);
 
     const context = useMemo<StackCardContextValue>(
       () => ({
@@ -910,7 +1073,7 @@ function StackCardSlot({
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
     >
-      {children}
+      <StackCardSlotIndex.Provider value={cardIndex}>{children}</StackCardSlotIndex.Provider>
     </Animated.View>
   );
 }
@@ -1023,18 +1186,17 @@ const StackCardStamp = forwardRef<View, StackCardStampProps>(
     { className, labelClassName, color = 'default', direction = 'right', children, ...props },
     ref
   ) => {
-    const { x, y, width, height, threshold } = useStackCardContext('StackCard.Stamp');
+    const { x, y, width, height, threshold, active } = useStackCardContext('StackCard.Stamp');
+    const slotIndex = useContext(StackCardSlotIndex);
     const slots = stampVariants({ color, direction });
 
     const style = useAnimatedStyle(() => {
-      const progress = directionProgress(
-        direction,
-        x.value,
-        y.value,
-        width.value,
-        height.value,
-        threshold
-      );
+      // Not on a card the UI thread has not put on top yet. Outside a slot
+      // there is no card to disagree with, so it follows the drag as before.
+      const onTop = slotIndex === null || slotIndex === active.value;
+      const progress = onTop
+        ? directionProgress(direction, x.value, y.value, width.value, height.value, threshold)
+        : 0;
       return {
         opacity: progress,
         // Landing rather than appearing: it is stamped on as the card commits.

@@ -117,6 +117,7 @@ import {
   depthOpacity,
   directionProgress,
   effectiveDepth,
+  exitDuration,
   exitTarget,
   lever,
   releaseProgress,
@@ -138,26 +139,30 @@ const RETURN_SPRING = { damping: 20, stiffness: 220, mass: 0.7 } as const;
  */
 const ARRIVE_SPRING = { damping: 22, stiffness: 160, mass: 0.9 } as const;
 
-/**
- * Carries a thrown card off the screen at the speed the finger let go of it.
+/*
+ * How a card leaves: a gentle ease-out that starts twice as fast as its
+ * average, timed so that start is the finger's speed.
  *
- * Clamped, so it ends the moment it reaches the edge instead of settling out
- * there, which is what lets the deck move on as soon as the card is gone.
+ * Not a spring. A spring pulls in proportion to how far it has to go, and a
+ * card's destination is off the screen, so it accelerated away from the finger
+ * and was gone in about 100ms — a throw that read as the card being snatched.
+ *
+ * Gentle, because only the first part of the curve is seen. The card is aimed
+ * well past the edge so it clears it tilted, and it is out of sight about two
+ * thirds of the way there; a steeper curve spends most of its time on the
+ * part nobody sees. The durations are set for what is visible — roughly a
+ * quarter of a second of card crossing the screen.
  */
-const THROW_SPRING = { duration: 400, dampingRatio: 0.8, overshootClamping: true } as const;
-
-/** How long a card sent by a button takes to leave, in milliseconds. */
-const EXIT_DURATION = 240;
+const EXIT_EASE = Easing.bezier(0.33, 0.66, 0.4, 1);
+/** `EXIT_EASE`'s speed at its start, as a multiple of its average. */
+const EXIT_SLOPE = 2;
+/** The quickest a card may leave, however hard it was thrown, in milliseconds. */
+const EXIT_SHORTEST = 420;
+/** The longest a card takes to leave, and what a button's card takes. */
+const EXIT_LONGEST = 540;
 
 /** How long a fade stands in for a throw under reduce motion. */
 const FADE_DURATION = 160;
-
-/**
- * The strong ease-out. A card leaving is already travelling when the animation
- * takes over from the finger, so it has to start at speed — an ease-in here is
- * a card that stops at the moment of release and then sets off again.
- */
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
 /** How far a finger gets on an axis the deck does not accept, at most. */
 const LOCKED_AXIS_GIVE = 0.18;
@@ -587,10 +592,9 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
      * screen, was long enough to see the card stop and set off again, and
      * long enough for a second finger to catch the card that had just left.
      *
-     * A thrown card carries the finger's velocity into a spring, clamped so it
-     * finishes the moment it is off the screen instead of settling there. A
-     * card sent by a button has no velocity to carry, and a spring from rest
-     * starts slowly — so that one gets the ease-out, which starts at speed.
+     * A thrown card leaves at the speed the finger let go of it, and a card
+     * sent by a button at the pace of an unhurried throw. Both finish with the
+     * card clear of the screen, and the axis it leaves along decides when.
      */
     const launch = useCallback(
       (direction: StackCardDirection, velocityX: number, velocityY: number) => {
@@ -624,24 +628,16 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
           x.value,
           y.value
         );
-        // The axis the card leaves along decides when it has left.
         const sideways = direction === 'left' || direction === 'right';
-
-        if (velocityX !== 0 || velocityY !== 0) {
-          x.value = withSpring(
-            target.x,
-            { ...THROW_SPRING, velocity: velocityX },
-            sideways ? gone : undefined
-          );
-          y.value = withSpring(
-            target.y,
-            { ...THROW_SPRING, velocity: velocityY },
-            sideways ? undefined : gone
-          );
-          return;
-        }
-
-        const timing = { duration: EXIT_DURATION, easing: EASE_OUT };
+        const distance = sideways ? target.x - x.value : target.y - y.value;
+        const along = sideways ? velocityX : velocityY;
+        // Only speed toward the way out counts; a card flicked back the other
+        // way and sent on by distance is leaving from a standstill.
+        const speed = along * distance > 0 ? Math.abs(along) : 0;
+        const timing = {
+          duration: exitDuration(distance, speed, EXIT_SLOPE, EXIT_SHORTEST, EXIT_LONGEST),
+          easing: EXIT_EASE,
+        };
         x.value = withTiming(target.x, timing, sideways ? gone : undefined);
         y.value = withTiming(target.y, timing, sideways ? undefined : gone);
       },

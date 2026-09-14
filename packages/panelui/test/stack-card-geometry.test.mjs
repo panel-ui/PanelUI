@@ -5,6 +5,7 @@ import {
   depthOpacity,
   directionProgress,
   effectiveDepth,
+  exitDuration,
   exitTarget,
   lever,
   project,
@@ -141,4 +142,13 @@ test('the pile shows the depth it states, and fades the next one in', () => {
   assert.equal(depthOpacity(3, 2), 0, 'one further back is not drawn at all');
   assert.equal(depthOpacity(2.5, 2), 0.5, 'and it arrives by fading, not by appearing');
   assert.equal(depthOpacity(1, 0), 0, 'a pile with no depth shows one card');
+});
+
+test('a card leaves at the speed it was thrown, within limits', () => {
+  // 400pt from 2000pt/s with a slope of 3: 600ms to start at the finger's speed.
+  assert.equal(exitDuration(400, 2000, 3, 320, 440), 440, 'a moderate throw takes the longest');
+  assert.equal(exitDuration(400, 3000, 3, 200, 600), 400, 'matched exactly when within limits');
+  assert.equal(exitDuration(-400, 3000, 3, 200, 600), 400, 'whichever way it goes');
+  assert.equal(exitDuration(400, 20000, 3, 320, 440), 320, 'a hard flick is not gone in a frame');
+  assert.equal(exitDuration(400, 0, 3, 320, 440), 440, 'a button has no speed to match');
 });

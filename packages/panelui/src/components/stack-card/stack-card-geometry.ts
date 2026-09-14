@@ -193,6 +193,34 @@ export function exitTarget(
 }
 
 /**
+ * How long a card takes to leave, in milliseconds.
+ *
+ * Long enough that the card starts out at the speed the finger let go of it.
+ * An ease-out starts `slope` times faster than its average, so covering
+ * `distance` from `speed` takes `slope × distance / speed`. Faster than that
+ * and the card leaps ahead of the finger; slower, and it drags as though it
+ * had caught on something.
+ *
+ * Clamped both ways. A hard flick would otherwise be gone in a frame or two,
+ * which reads as the card vanishing rather than being thrown; and a card
+ * released barely moving would drift off for a second. `speed` is only what
+ * was travelling toward the way out — none at all, for a card sent by a
+ * button, gives the longest.
+ */
+export function exitDuration(
+  distance: number,
+  speed: number,
+  slope: number,
+  shortest: number,
+  longest: number
+): number {
+  'worklet';
+  if (speed <= 0) return longest;
+  const matched = ((slope * Math.abs(distance)) / speed) * 1000;
+  return Math.min(Math.max(matched, shortest), longest);
+}
+
+/**
  * Which way the card pivots, from where it was taken hold of.
  *
  * A card pulled by its top corner turns one way and one pulled by its bottom

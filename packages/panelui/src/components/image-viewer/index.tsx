@@ -1106,18 +1106,9 @@ function ViewerOverlay({
           className="absolute inset-x-4 flex-row items-center justify-between"
           style={{ top: insets.top + 8 }}
         >
-          <View className="h-10 w-10" />
-          {count > 1 ? (
-            <View
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              className="rounded-full bg-background/80 px-3 py-1.5"
-            >
-              <Text size="sm" weight="medium" className="tabular-nums text-foreground">
-                {`${page + 1} of ${count}`}
-              </Text>
-            </View>
-          ) : null}
+          {/* Close at the leading edge, where the platform puts the way out of
+              a full-screen view — and clear of the trailing corner, where an
+              app's own floating controls tend to live. */}
           {showClose ? (
             <Pressable
               accessibilityRole="button"
@@ -1131,6 +1122,18 @@ function ViewerOverlay({
           ) : (
             <View className="h-10 w-10" />
           )}
+          {count > 1 ? (
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              className="rounded-full bg-background/80 px-3 py-1.5"
+            >
+              <Text size="sm" weight="medium" className="tabular-nums text-foreground">
+                {`${page + 1} of ${count}`}
+              </Text>
+            </View>
+          ) : null}
+          <View className="h-10 w-10" />
         </View>
 
         {caption !== undefined && caption !== null ? (

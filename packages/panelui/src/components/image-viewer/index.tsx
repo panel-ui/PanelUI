@@ -106,7 +106,7 @@ import {
   coverSize,
   dragFade,
   dragScale,
-  fitContain,
+  fitWithin,
   focalTranslation,
   hitsRect,
   lerp,
@@ -137,6 +137,16 @@ const CLOSE_SPRING = { damping: 32, stiffness: 300, mass: 1, overshootClamping: 
 
 /** Zoom settling and page turns. Firm, so a flick lands without drifting. */
 const SETTLE_SPRING = { damping: 34, stiffness: 320, mass: 1 } as const;
+
+/**
+ * Margin between the open picture and the screen, in points. Enough to show the
+ * blur on all four sides, so the picture reads as held up over the page rather
+ * than as a new screen that happens to be a photograph.
+ */
+const DEFAULT_INSET = 16;
+
+/** Corners of the open picture, matching the library's large surfaces. */
+const DEFAULT_CORNER_RADIUS = 16;
 
 /** How strongly the blur comes up behind the picture. */
 const BLUR_INTENSITY = 50;
@@ -259,6 +269,17 @@ export interface ImageViewerProps {
   showClose?: boolean;
   /** Read out for the close button. */
   closeLabel?: string;
+  /**
+   * Space kept between the open picture and the edges of the screen, in points.
+   * Measured from the safe area at the top and bottom, and the larger of the
+   * two is used for both, so the picture stays centred. `0` fills the screen.
+   */
+  inset?: number;
+  /**
+   * Corner radius of the open picture, in points. The corners stay this size on
+   * screen while the picture is zoomed or dragged. `0` squares them.
+   */
+  cornerRadius?: number;
 }
 
 function ImageViewerRoot({
@@ -275,6 +296,8 @@ function ImageViewerRoot({
   haptics = true,
   showClose = true,
   closeLabel = 'Close',
+  inset = DEFAULT_INSET,
+  cornerRadius = DEFAULT_CORNER_RADIUS,
 }: ImageViewerProps) {
   const storeRef = useRef<ViewerStore | null>(null);
   storeRef.current ??= new ViewerStore();
@@ -339,6 +362,8 @@ function ImageViewerRoot({
             haptics={haptics}
             showClose={showClose}
             closeLabel={closeLabel}
+            inset={inset}
+            cornerRadius={cornerRadius}
           />
         </ModalPortal>
       ) : null}
@@ -557,6 +582,8 @@ interface ViewerOverlayProps {
   haptics: boolean;
   showClose: boolean;
   closeLabel: string;
+  inset: number;
+  cornerRadius: number;
 }
 
 function ViewerOverlay({
@@ -573,6 +600,8 @@ function ViewerOverlay({
   haptics,
   showClose,
   closeLabel,
+  inset,
+  cornerRadius,
 }: ViewerOverlayProps) {
   const version = useSyncExternalStore(store.subscribe, store.getSnapshot);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,9 +617,24 @@ function ViewerOverlay({
   const foreground = useCSSVariable('--color-foreground');
   const pageWidth = W + PAGE_GAP;
 
+  /*
+   * The area the picture is fitted into. The same margin on both sides of each
+   * axis, so the fitted picture is centred on the screen — the zoom and pan
+   * arithmetic is measured from the screen's centre and relies on that.
+   */
+  const box = useMemo<Rect>(() => {
+    const vertical = Math.max(insets.top, insets.bottom) + inset;
+    return {
+      x: inset,
+      y: vertical,
+      width: Math.max(W - inset * 2, 1),
+      height: Math.max(H - vertical * 2, 1),
+    };
+  }, [H, W, inset, insets.bottom, insets.top]);
+
   const fit = useMemo(
-    () => fitContain(item?.size ?? { width: W, height: H }, { width: W, height: H }),
-    [item?.size, W, H]
+    () => fitWithin(item?.size ?? box, box),
+    [item?.size, box]
   );
 
   // The flight, 0 in the page and 1 on the screen.
@@ -598,7 +642,6 @@ function ViewerOverlay({
   const phase = useSharedValue(PHASE_OPENING);
   const origin = useSharedValue<Rect | null>(null);
   const radius = useSharedValue(0);
-  const imageSize = useSharedValue<Size>(item?.size ?? { width: W, height: H });
 
   // Zoom of the current page, measured from the screen's centre.
   const scale = useSharedValue(1);
@@ -629,10 +672,6 @@ function ViewerOverlay({
   const chromeOn = useSharedValue(true);
 
   const backdrop = useDerivedValue(() => clamp(t.value, 0, 1) * fade.value);
-
-  useEffect(() => {
-    if (item?.size) imageSize.value = item.size;
-  }, [item?.size, imageSize]);
 
   const itemRef = useRef(item);
   itemRef.current = item;
@@ -1080,6 +1119,8 @@ function ViewerOverlay({
                 at={at}
                 left={at * pageWidth}
                 viewport={{ width: W, height: H }}
+                box={box}
+                cornerRadius={cornerRadius}
                 reduced={reduced}
                 activePage={activePage}
                 t={t}
@@ -1159,6 +1200,8 @@ interface ViewerPageProps {
   at: number;
   left: number;
   viewport: Size;
+  box: Rect;
+  cornerRadius: number;
   reduced: boolean;
   activePage: SharedValue<number>;
   t: SharedValue<number>;
@@ -1184,6 +1227,8 @@ function ViewerPage({
   at,
   left,
   viewport,
+  box,
+  cornerRadius,
   reduced,
   activePage,
   t,
@@ -1196,8 +1241,8 @@ function ViewerPage({
   dragY,
   shrink,
 }: ViewerPageProps) {
-  const size = item.size ?? viewport;
-  const fit = fitContain(size, viewport);
+  const size = item.size ?? box;
+  const fit = fitWithin(size, box);
   const [fullLoaded, setFullLoaded] = useState(false);
 
   const frameStyle = useAnimatedStyle(() => {
@@ -1207,7 +1252,7 @@ function ViewerPage({
         top: fit.y,
         width: fit.width,
         height: fit.height,
-        borderRadius: 0,
+        borderRadius: cornerRadius,
         opacity: 1,
         transform: [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }],
       };
@@ -1217,17 +1262,22 @@ function ViewerPage({
     const flies = from !== null && !reduced;
     const rect = flies ? lerpRect(from, fit, progress) : fit;
     const settled = clamp(progress, 0, 1);
+    const visualScale = scale.value * shrink.value * (flies ? 1 : lerp(0.92, 1, settled));
+    // The radius is drawn inside the scale, so it is divided back out: a
+    // picture zoomed to four times keeps corners the size they were, rather
+    // than rounding into a pill.
+    const corner = flies ? lerp(radius.value, cornerRadius, progress) : cornerRadius;
     return {
       left: rect.x,
       top: rect.y,
       width: Math.max(rect.width, 1),
       height: Math.max(rect.height, 1),
-      borderRadius: flies ? Math.max(0, lerp(radius.value, 0, progress)) : 0,
+      borderRadius: Math.max(0, corner) / Math.max(visualScale, 0.01),
       opacity: flies ? 1 : settled,
       transform: [
         { translateX: tx.value + dragX.value },
         { translateY: ty.value + dragY.value },
-        { scale: scale.value * shrink.value * (flies ? 1 : lerp(0.92, 1, settled)) },
+        { scale: visualScale },
       ],
     };
   });

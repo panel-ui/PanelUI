@@ -54,6 +54,13 @@ export function fitContain(image: Size, box: Size): Rect {
   return { x: (box.width - width) / 2, y: (box.height - height) / 2, width, height };
 }
 
+/** `fitContain` inside a rect that does not start at the origin. */
+export function fitWithin(image: Size, box: Rect): Rect {
+  'worklet';
+  const fitted = fitContain(image, box);
+  return { ...fitted, x: box.x + fitted.x, y: box.y + fitted.y };
+}
+
 /**
  * The smallest size with the image's proportions that covers the frame.
  *

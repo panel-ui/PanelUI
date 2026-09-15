@@ -40,6 +40,8 @@ import { ImageViewer } from 'panelui-native';
 | `haptics` | `boolean` | `true` | Tick as a drag to dismiss begins. Needs the optional `expo-haptics`. |
 | `showClose` | `boolean` | `true` | Draw the close button. Tapping outside the picture and dragging it away still close it. |
 | `closeLabel` | `string` | `Close` | Read out for the close button. |
+| `inset` | `number` | `16` | Space kept between the open picture and the edges of the screen, in points. Measured from the safe area at the top and bottom, and the larger of the two is used for both, so the picture stays centred. `0` fills the screen. |
+| `cornerRadius` | `number` | `16` | Corner radius of the open picture, in points. The corners stay this size on screen while the picture is zoomed or dragged. `0` squares them. |
 
 #### `ImageViewerTriggerProps`
 
@@ -78,7 +80,7 @@ The trigger draws the image cropped to fill its box, so it needs a size. `radius
 
 Zooming and paging do not mix: a zoomed picture pans inside its own edges, and the page only turns once it is back at its fitted size. Double-tap to get there quickly.
 
-The viewer takes the whole window and ignores the safe area for the picture itself, so a tall image reaches the top and bottom edges. The close button, page count and caption sit inside the safe area.
+The open picture keeps `inset` points clear of the screen edges — measured from the safe area at the top and bottom — and is rounded to `cornerRadius`, so the blur shows on every side of it. Pass `inset={0}` and `cornerRadius={0}` for a picture that fills the screen edge to edge. Zooming in lets it grow past the margin either way.
 
 The Android back button and the accessibility escape gesture both close it. With a screen reader, the open picture is announced with its `alt`, and in a gallery swiping up or down turns the page.
 

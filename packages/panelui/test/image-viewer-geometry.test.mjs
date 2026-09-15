@@ -8,6 +8,7 @@ import {
   dragFade,
   dragScale,
   fitContain,
+  fitWithin,
   focalTranslation,
   hitsRect,
   lerpRect,
@@ -34,6 +35,18 @@ test('ImageViewer fits a picture inside the screen, centred, keeping its proport
   });
   // An image whose size is not known yet fills the screen rather than vanishing.
   assert.deepEqual(fitContain({ width: 0, height: 0 }, screen), { x: 0, y: 0, ...screen });
+});
+
+test('ImageViewer fits the open picture inside its margins, still centred on the screen', () => {
+  const box = { x: 16, y: 78, width: 370, height: 718 };
+  const fitted = fitWithin({ width: 1600, height: 900 }, box);
+  assert.equal(fitted.x, 16);
+  assert.equal(fitted.width, 370);
+  assert.equal(fitted.y + fitted.height / 2, 78 + 718 / 2);
+  const tall = fitWithin({ width: 1000, height: 4000 }, box);
+  assert.equal(tall.y, 78);
+  assert.equal(tall.height, 718);
+  assert.equal(tall.x + tall.width / 2, 16 + 370 / 2);
 });
 
 test('ImageViewer draws the picture at the size that covers its frame, so a crop opens out', () => {

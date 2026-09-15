@@ -45,6 +45,7 @@ export const COMPONENTS = [
   {"slug":"heatmap-chart","name":"HeatmapChart","summary":"Contribution grid with a themed colour ramp"},
   {"slug":"hex-chart","name":"HexChart","summary":"A whole broken into parts, counted out in cells"},
   {"slug":"image-generation","name":"ImageGeneration","summary":"The place an image will be, while it is being made"},
+  {"slug":"image-viewer","name":"ImageViewer","summary":"An image that opens out of the page over a blur, to zoom into and swipe through"},
   {"slug":"input","name":"Input","summary":"Text field with label and validation"},
   {"slug":"input-group","name":"InputGroup","summary":"Input with prefix and suffix decorators"},
   {"slug":"item","name":"Item","summary":"Row of media, text and actions"},

@@ -1818,6 +1818,23 @@ const messageScroller = (
   </div>
 );
 
+const imageViewer = (
+  <Screen>
+    <div className="grid grid-cols-3 gap-1 p-2 blur-[1.5px]">
+      {Array.from({ length: 12 }, (_, i) => (
+        <Fill key={i} className="aspect-square rounded-[3px]" />
+      ))}
+    </div>
+    <div className="absolute inset-0 bg-fd-background/45" />
+    <div className="absolute end-1.5 top-1.5 grid size-3.5 place-items-center rounded-full border border-fd-border bg-fd-card">
+      <Glyph icon={XIcon} className="size-2" />
+    </div>
+    <Accent className="absolute inset-x-0 top-1/2 grid h-16 -translate-y-1/2 place-items-center rounded-none">
+      <Glyph icon={ImageIcon} className="size-4 text-fd-primary-foreground" />
+    </Accent>
+  </Screen>
+);
+
 const post = (
   <Plate className="w-44 gap-2.5 p-3">
     <Row>
@@ -2242,6 +2259,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   message,
   'message-scroller': messageScroller,
   post,
+  'image-viewer': imageViewer,
   'qr-code': qrCode,
   'scroll-text': scrollText,
   'text-animation': textAnimation,

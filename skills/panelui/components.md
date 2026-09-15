@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-129 component modules. The **Reference** column links to a file in this skill holding that
+130 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -95,6 +95,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `Direction` | Reading direction for everything below it. | [direction](./components/direction.md) |
 | `Frame` | Widget shell — a card of rows sitting in a titled tray. | [frame](./components/frame.md) |
 | `GridItem` | Bento tiles, and the grid that places them. | [grid-item](./components/grid-item.md) |
+| `ImageViewer` | An image that opens out of the page over a blur, to zoom into and swipe through. | [image-viewer](./components/image-viewer.md) |
 | `Item` | Row of media, text and actions for lists and settings. | [item](./components/item.md) |
 | `PageHeader` | Cover, face and actions at the top of a profile. | [page-header](./components/page-header.md) |
 | `ScrollBlur` | Blurs the edges of a scroll container. | [scroll-blur](./components/scroll-blur.md) |

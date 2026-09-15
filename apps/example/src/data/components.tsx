@@ -171,6 +171,8 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
     load11().then((module) => module.ENTRIES_BY_SLUG['scroll-blur']),
   'scroll-fade': () =>
     load11().then((module) => module.ENTRIES_BY_SLUG['scroll-fade']),
+  'image-viewer': () =>
+    load15().then((module) => module.ENTRIES_BY_SLUG['image-viewer']),
   'scroll-header': () =>
     load15().then((module) => module.ENTRIES_BY_SLUG['scroll-header']),
   'stack-card': () =>

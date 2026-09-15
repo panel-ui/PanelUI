@@ -1,0 +1,55 @@
+{
+  "slug": "image-viewer",
+  "intro": "Pressing a trigger moves its picture from where it sits in the page to the middle of the screen, shown whole, and blurs everything behind it. Once it is open, pinch or double-tap to zoom, swipe sideways to the other images under the same `ImageViewer`, and drag the picture up or down — or tap outside it — to send it back to its place.\n\nThe flight starts from the trigger's rectangle and corner radius, so pass `radius` to match the `rounded-*` class the trigger has. A class cannot be read back, and without it the picture starts square.\n\nThe viewer opens in a portal, so it needs the `PanelUIProvider` at the root of the app. The blur needs the optional `expo-blur`; without it the page dims instead, and anyone with Reduce Transparency switched on gets an opaque backdrop.\n\nFor anything that is not a picture — a form, a confirmation — use [Dialog](/docs/components/dialog). To hold content up while offering actions on it, use [ContextMenu](/docs/components/context-menu) with a preview.",
+  "usage": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo }}\n    alt=\"A harbour at dusk\"\n    radius={16}\n    className=\"h-56 w-full rounded-2xl\"\n  />\n</ImageViewer>",
+  "extraImports": [
+    "Button",
+    "Post",
+    "Text"
+  ],
+  "anatomy": "<ImageViewer>\n  <ImageViewer.Trigger />\n  <ImageViewer.Trigger />\n</ImageViewer>",
+  "parts": {
+    "Trigger": "The thing pressed to open the viewer. It draws `source` to fill its box, or whatever you pass as `children`, and registers the picture as one page of the gallery."
+  },
+  "partNotes": "Every `ImageViewer.Trigger` under one root is a page, in render order. Pass `index` when the render order is not the page order — a masonry grid laid out in columns, for instance.\n\nWhile its picture is out on the screen a trigger is drawn transparent rather than removed, so the page does not reflow under the blur and the picture has somewhere to fly back to. Swiping to another page shows the first thumbnail again and hides the new one.\n\nA trigger without a known image size uses its own box's proportions until the image loads. For a remote image in a box of a different shape, pass `width` and `height` so the first flight lands on the right rectangle.",
+  "examples": [
+    {
+      "title": "One image",
+      "description": "The trigger draws the image cropped to fill its box, so it needs a size. `radius` matches `rounded-2xl`, which is 16 points.",
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo }}\n    alt=\"A harbour at dusk\"\n    radius={16}\n    className=\"h-56 w-full rounded-2xl\"\n  />\n</ImageViewer>"
+    },
+    {
+      "title": "A gallery",
+      "description": "Several triggers under one root. Opening any of them opens at its page, and swiping moves through the rest. `onIndexChange` reports the page, and `index` makes it controlled.",
+      "code": "<ImageViewer onIndexChange={setPage}>\n  <View className=\"flex-row flex-wrap gap-1\">\n    {photos.map((photo) => (\n      <ImageViewer.Trigger\n        key={photo.id}\n        source={{ uri: photo.thumb }}\n        alt={photo.alt}\n        radius={6}\n        className=\"aspect-square w-[32%] rounded-md\"\n      />\n    ))}\n  </View>\n</ImageViewer>"
+    },
+    {
+      "title": "Captions and a larger copy",
+      "description": "`caption` is shown under the picture while it is open; a single tap on the picture hides it along with the close button. `fullSource` loads when the viewer opens and replaces `source` once it arrives, so the page can carry small thumbnails.",
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo.thumb }}\n    fullSource={{ uri: photo.full }}\n    width={3024}\n    height={4032}\n    alt=\"Cliffs above the bay\"\n    caption=\"Porthcurno, early on a Sunday\"\n    radius={12}\n    className=\"h-72 w-full rounded-xl\"\n  />\n</ImageViewer>"
+    },
+    {
+      "title": "Your own thumbnail",
+      "description": "Pass `children` to draw the picture yourself. They should show the same image cropped to fill, the way the flight begins. Here the media of a post opens the viewer; `Post.Media` has `rounded-xl`, so `radius` is 12.",
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger source={{ uri: photo }} alt=\"A coin going into a piggy bank\" radius={12} className=\"mx-4\">\n    <Post.Media source={{ uri: photo }} className=\"mx-0\" />\n  </ImageViewer.Trigger>\n</ImageViewer>"
+    },
+    {
+      "title": "Opening it from code",
+      "description": "`open` and `onOpenChange` make it controlled. The picture still flies from the trigger on the current page, so the triggers have to be mounted.",
+      "code": "const [open, setOpen] = useState(false);\n\n<Button onPress={() => setOpen(true)}>View the photo</Button>\n\n<ImageViewer open={open} onOpenChange={setOpen}>\n  <ImageViewer.Trigger source={{ uri: photo }} alt=\"A harbour at dusk\" className=\"h-40 w-40\" />\n</ImageViewer>"
+    }
+  ],
+  "versions": [
+    {
+      "title": "Photo journal",
+      "description": "A week of photographs in one long scroll, one gallery across all of them, so swiping crosses from one day into the next.",
+      "code": "<ScrollView>\n  <ImageViewer>\n    {days.map((day) => (\n      <View key={day.title} className=\"gap-1.5\">\n        <Text weight=\"semibold\">{day.title}</Text>\n        {day.rows.map((row, i) => (\n          <View key={i} className=\"flex-row gap-1.5\">\n            {row.map((photo) => (\n              <ImageViewer.Trigger\n                key={photo.id}\n                source={{ uri: photo.uri }}\n                alt={photo.alt}\n                caption={photo.caption}\n                radius={8}\n                className=\"aspect-square flex-1 rounded-lg\"\n              />\n            ))}\n          </View>\n        ))}\n      </View>\n    ))}\n  </ImageViewer>\n</ScrollView>"
+    },
+    {
+      "title": "Tall and wide",
+      "description": "A portrait, a landscape and a panorama, each fitted whole to the screen from a thumbnail of a different shape.",
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger source={portrait} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={landscape} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={panorama} alt=\"…\" radius={12} className=\"h-32 w-full rounded-xl\" />\n</ImageViewer>"
+    }
+  ],
+  "notes": "Zooming and paging do not mix: a zoomed picture pans inside its own edges, and the page only turns once it is back at its fitted size. Double-tap to get there quickly.\n\nThe viewer takes the whole window and ignores the safe area for the picture itself, so a tall image reaches the top and bottom edges. The close button, page count and caption sit inside the safe area.\n\nThe Android back button and the accessibility escape gesture both close it. With a screen reader, the open picture is announced with its `alt`, and in a gallery swiping up or down turns the page."
+}

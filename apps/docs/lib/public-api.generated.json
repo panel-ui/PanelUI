@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1308,
-    "values": 332,
-    "types": 976,
-    "modules": 156,
-    "components": 129,
+    "exports": 1311,
+    "values": 333,
+    "types": 978,
+    "modules": 157,
+    "components": 130,
     "hooks": 13
   },
   "groups": {
@@ -1818,6 +1818,25 @@
           },
           {
             "name": "ImageGenerationStatus",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/image-viewer/index.tsx",
+        "slug": "image-viewer",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "ImageViewer",
+            "kind": "value"
+          },
+          {
+            "name": "ImageViewerProps",
+            "kind": "type"
+          },
+          {
+            "name": "ImageViewerTriggerProps",
             "kind": "type"
           }
         ]

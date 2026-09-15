@@ -797,6 +797,26 @@
     "docsPath": "ai-components/image-generation"
   },
   {
+    "name": "image-viewer",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "An image that opens out of the page over a blur, to zoom into and swipe through.",
+    "registryDependencies": [
+      "cn",
+      "controllable-state",
+      "haptics",
+      "icons",
+      "portal",
+      "scrim",
+      "text",
+      "use-back-handler",
+      "use-theme"
+    ],
+    "docsPath": "components/image-viewer"
+  },
+  {
     "name": "input",
     "type": "registry:ui",
     "kind": "ui",

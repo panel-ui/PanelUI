@@ -569,6 +569,11 @@ export {
   type ImageGenerationFieldProps,
   type ImageGenerationStatus,
 } from './components/image-generation';
+export {
+  ImageViewer,
+  type ImageViewerProps,
+  type ImageViewerTriggerProps,
+} from './components/image-viewer';
 export { Input, type InputProps } from './components/input';
 export {
   InputGroup,

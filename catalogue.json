@@ -45,6 +45,7 @@
     "heatmap-chart",
     "hex-chart",
     "image-generation",
+    "image-viewer",
     "input",
     "input-group",
     "item",
@@ -206,16 +207,16 @@
     }
   ],
   "counts": {
-    "componentModules": 129,
-    "packageComponentExports": 129,
-    "documentedComponents": 129,
-    "exampleEntries": 129,
+    "componentModules": 130,
+    "packageComponentExports": 130,
+    "documentedComponents": 130,
+    "exampleEntries": 130,
     "registry": {
-      "componentItems": 129,
+      "componentItems": 130,
       "supportItems": 36,
-      "totalItems": 165,
+      "totalItems": 166,
       "byType": {
-        "registry:ui": 144,
+        "registry:ui": 145,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

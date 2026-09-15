@@ -9,6 +9,37 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.99.0] — 2026-09-15
+
+### Added
+
+- **ImageViewer** — a picture that opens out of the page to the middle of the screen over a
+  blur, for photos in a feed, a gallery grid or a post. Wrap each image in an
+  `ImageViewer.Trigger`, or wrap content that already draws it, such as `Post.Media`.
+  - Every trigger under one root is a page of the same gallery. Swipe sideways between them,
+    and the thumbnail hidden underneath follows the page.
+  - Pinch or double-tap to zoom. Drag the picture up or down, tap outside it, use the close
+    button or press Android's back button to send it back into its thumbnail.
+  - `caption` shows under the open picture. `fullSource` loads a larger copy once the viewer
+    opens, so the page can carry small thumbnails.
+  - `inset` and `cornerRadius` set the open picture's margin and corners, 16 points each by
+    default. Pass `0` for both to fill the screen.
+  - `open`, `index` and their `onOpenChange` / `onIndexChange` callbacks make it controlled.
+
+  The picture moves from the thumbnail's own rectangle and corner radius to the whole image,
+  so the crop opens out rather than a second copy fading in. Pass `radius` on a trigger to
+  match its `rounded-*` class, because a class cannot be read back. The blur needs the
+  optional `expo-blur` and falls back to a dim without it.
+- **Scrim** — `progress`, a shared value from `0` to `1` that drives the backdrop instead of
+  its own fade. The blur's radius tracks it, so an overlay dragged partway out can bring the
+  page back into focus as it goes.
+
+### Docs
+
+- **Post** — a "Photos that open" version and example: a single photo, a grid of four that is
+  one gallery, and a media-first card, each opening in an `ImageViewer`.
+- **Home page** — the heading and introduction above the component showcase are centred.
+
 ## [0.98.0] — 2026-09-14
 
 ### Added

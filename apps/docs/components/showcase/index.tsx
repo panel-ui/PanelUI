@@ -38,11 +38,11 @@ export function Showcase(): React.ReactElement {
           the page's reading width leaves each one narrower than a phone, and
           every label in them wraps or truncates. */}
       <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="font-heading text-3xl font-semibold tracking-tight">
             One import, and it already looks like this
           </h2>
-          <p className="max-w-2xl text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-balance text-muted-foreground">
             Every component reads the same tokens, so a theme is one setting rather than a
             hundred overrides. Switch families below — the corners move too, because a theme
             is a shape as well as a palette.

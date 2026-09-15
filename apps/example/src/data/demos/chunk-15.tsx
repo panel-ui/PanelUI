@@ -1583,10 +1583,18 @@ function StackCardHandleDemo() {
 
 /* ImageViewer */
 
-/** An Unsplash photograph at a width worth zooming into. */
+/**
+ * An Unsplash photograph, as a thumbnail for the page and a copy large enough to
+ * zoom into. The large one only loads once the viewer opens.
+ */
 function photo(id: string, crop?: { width: number; height: number }) {
-  const size = crop ? `w=${crop.width}&h=${crop.height}&fit=crop` : 'w=1400';
-  return { uri: `https://images.unsplash.com/photo-${id}?${size}&q=70` };
+  const url = (width: number) => {
+    const size = crop
+      ? `w=${width}&h=${Math.round((width * crop.height) / crop.width)}&fit=crop`
+      : `w=${width}`;
+    return { uri: `https://images.unsplash.com/photo-${id}?${size}&q=70` };
+  };
+  return { source: url(480), fullSource: url(1600) };
 }
 
 /** One photo, opened from a rounded card. */
@@ -1594,7 +1602,7 @@ function ImageViewerSingleDemo() {
   return (
     <ImageViewer>
       <ImageViewer.Trigger
-        source={photo('1501785888041-af3ef285b470')}
+        {...photo('1501785888041-af3ef285b470')}
         alt="A rowing boat on a turquoise lake under limestone peaks"
         caption="Rented a boat for an hour and stayed for three."
         radius={16}
@@ -1630,7 +1638,7 @@ function ImageViewerRowDemo() {
         {ROW_OF_THREE.map((entry) => (
           <ImageViewer.Trigger
             key={entry.id}
-            source={photo(entry.id)}
+            {...photo(entry.id)}
             alt={entry.alt}
             caption={entry.caption}
             radius={10}
@@ -1873,7 +1881,7 @@ function ImageViewerJournalVersion() {
                     {row.map((entry) => (
                       <ImageViewer.Trigger
                         key={entry.id}
-                        source={photo(entry.id)}
+                        {...photo(entry.id)}
                         alt={entry.alt}
                         caption={entry.caption}
                         radius={row.length === 1 ? 14 : 8}
@@ -1901,14 +1909,14 @@ const SHAPES = [
     id: '1433086966358-54859d0ed716',
     crop: { width: 900, height: 1400 },
     alt: 'A tall waterfall with a stone bridge across it',
-    className: 'aspect-square flex-1 rounded-xl',
+    className: 'aspect-square w-full rounded-xl',
   },
   {
     label: 'A landscape in a portrait',
     id: '1464822759023-fed622ff2c3b',
     crop: { width: 1500, height: 1000 },
     alt: 'A wide valley between snowy mountains, pines in the foreground',
-    className: 'aspect-[3/4] flex-1 rounded-xl',
+    className: 'aspect-[3/4] w-full rounded-xl',
   },
 ];
 
@@ -1933,7 +1941,7 @@ function ImageViewerShapesVersion() {
             {SHAPES.map((shape) => (
               <View key={shape.id} className="flex-1 gap-2">
                 <ImageViewer.Trigger
-                  source={photo(shape.id, shape.crop)}
+                  {...photo(shape.id, shape.crop)}
                   width={shape.crop.width}
                   height={shape.crop.height}
                   alt={shape.alt}
@@ -1950,7 +1958,7 @@ function ImageViewerShapesVersion() {
 
           <View className="gap-2">
             <ImageViewer.Trigger
-              source={photo('1506905925346-21bda4d32df4', { width: 2400, height: 800 })}
+              {...photo('1506905925346-21bda4d32df4', { width: 2400, height: 800 })}
               width={2400}
               height={800}
               alt="Mountain peaks above a sea of cloud at sunrise"
@@ -1965,7 +1973,7 @@ function ImageViewerShapesVersion() {
 
           <View className="gap-2">
             <ImageViewer.Trigger
-              source={photo('1519681393784-d120267933ba', { width: 1200, height: 1200 })}
+              {...photo('1519681393784-d120267933ba', { width: 1200, height: 1200 })}
               width={1200}
               height={1200}
               alt="The Milky Way over snowy mountains"

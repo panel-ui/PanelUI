@@ -1160,9 +1160,15 @@ function MediaPostDemo() {
   );
 }
 
-/** Unsplash photographs for the photo posts, large enough to zoom into. */
+/**
+ * An Unsplash photograph for the photo posts: a card-sized copy for the feed, and
+ * one large enough to zoom into that only loads once the viewer opens.
+ */
 function postPhoto(id: string) {
-  return { uri: `https://images.unsplash.com/photo-${id}?w=1400&q=70` };
+  const url = (width: number) => ({
+    uri: `https://images.unsplash.com/photo-${id}?w=${width}&q=70`,
+  });
+  return { source: url(800), fullSource: url(1600) };
 }
 
 const HIKE_PHOTOS = [
@@ -1213,12 +1219,12 @@ function SinglePhotoPost() {
           out of exactly the shape the card drew it in. */}
       <ImageViewer>
         <ImageViewer.Trigger
-          source={photo}
+          {...photo}
           alt="An empty road running between red rock formations"
           radius={12}
           className="mx-4 rounded-xl"
         >
-          <Post.Media source={photo} className="mx-0" />
+          <Post.Media source={photo.source} className="mx-0" />
         </ImageViewer.Trigger>
       </ImageViewer>
 
@@ -1267,7 +1273,7 @@ function PhotoGridPost() {
               {row.map((entry) => (
                 <ImageViewer.Trigger
                   key={entry.id}
-                  source={postPhoto(entry.id)}
+                  {...postPhoto(entry.id)}
                   alt={entry.alt}
                   caption={entry.caption}
                   radius={8}
@@ -1309,11 +1315,11 @@ function MediaFirstPhotoPost() {
     <Post variant="media" className="w-full">
       <ImageViewer>
         <ImageViewer.Trigger
-          source={photo}
+          {...photo}
           alt="Red peaks reflected in a still lake at dusk"
           caption="Eleven minutes of light, and we nearly left at ten."
         >
-          <Post.Media source={photo} aspectRatio={4 / 5} />
+          <Post.Media source={photo.source} aspectRatio={4 / 5} />
         </ImageViewer.Trigger>
       </ImageViewer>
       <Post.Header>

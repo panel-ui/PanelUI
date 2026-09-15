@@ -9,7 +9,8 @@
     "MessageCircleIcon",
     "BookmarkIcon",
     "RepeatIcon",
-    "ShareNodesIcon"
+    "ShareNodesIcon",
+    "ImageViewer"
   ],
   "anatomy": "<Post>\n  <Post.Header>\n    <Post.Author />\n    <Post.Community />\n    <Post.Action />\n  </Post.Header>\n  <Post.Title />\n  <Post.Body />\n  <Post.Media />\n  <Post.Footer>\n    <Post.Votes />\n    <Post.Stat />\n  </Post.Footer>\n</Post>",
   "parts": {
@@ -75,6 +76,11 @@
       "title": "Hashtags and mentions",
       "description": "A string body is tokenised: `#tag` and `@handle` are coloured, and pressable when you supply a handler. They are found in the text rather than declared, because a body arrives as one string from wherever it was typed — asking every caller to pre-split it would mean every caller writing the same tokeniser. A non-string child is left entirely alone.",
       "code": "<Post.Body onTagPress={(tag) => router.push(`/tag/${tag}`)} onMentionPress={openProfile}>\n  Shipped it. #FinancialFreedom #DebtSnowball — thanks @ada for the review.\n</Post.Body>"
+    },
+    {
+      "title": "Photos that open",
+      "description": "Wrap the media in an [ImageViewer](/docs/components/image-viewer) trigger to open it full screen over a blur. The trigger takes the media's margin and corners — `mx-4 rounded-xl`, so `radius={12}` — and `Post.Media` drops its own margin, so the picture flies out of the exact shape the card drew it in. Several triggers under one root are one gallery, which suits a grid of photos in a single post.",
+      "code": "<Post variant=\"feed\">\n  <Post.Header>\n    <Post.Author name=\"Priya Raman\" handle=\"@priyaroams\" timestamp=\"2h ago\" avatar={face} />\n  </Post.Header>\n\n  <Post.Body>Four hundred kilometres and one petrol station. #roadtrip</Post.Body>\n\n  <ImageViewer>\n    <ImageViewer.Trigger source={photo} alt=\"An empty road between red rocks\" radius={12} className=\"mx-4 rounded-xl\">\n      <Post.Media source={photo} className=\"mx-0\" />\n    </ImageViewer.Trigger>\n  </ImageViewer>\n\n  <Post.Footer>\n    <Post.Stat icon={HeartIcon} tone=\"like\" active={liked} value={liked ? 489 : 488} onPress={like} />\n  </Post.Footer>\n</Post>\n\n// Four photos, one gallery\n<ImageViewer>\n  <View className=\"mx-4 flex-row flex-wrap gap-1\">\n    {photos.map((p) => (\n      <ImageViewer.Trigger key={p.id} source={p.source} alt={p.alt} caption={p.caption} radius={8} className=\"aspect-square w-[49%] rounded-lg\" />\n    ))}\n  </View>\n</ImageViewer>"
     }
   ],
   "notes": "### The number is the point\n\nEvery control in the footer is a toggle over a count, and a like that lights up while `215` sits there has not told you it counted. So a value that changes animates: the new number arrives from the direction the count travelled — rising into place when it went up, dropping in when it came down — while the old one fades.\n\nOnly the arriving half carries the direction. The number leaving was rendered before anyone knew which way the count would go, so asking it to animate knowingly would mean knowing the future.\n\nA value that is not a number cross-fades instead, since there is no direction for the word \"Save\" to travel in. All of it is skipped under Reduce Motion, where the value simply changes.\n\n### State stays with you\n\nNothing here keeps a count. `active`, `value`, `vote` and `score` are all yours, because the moment a like is optimistic — and it always is — the component's copy and the server's answer are two different things and only you know how to reconcile them. What the component owns is what a press *looks* like.\n\n### Toggles fill rather than swap\n\nThe like, save, repost and vote icons take a `filled` prop and are the same shape in both states. Drawn as two different icons they would change shape under the finger; drawn as one that fills, the shape stays put and only the inside changes.\n\n### Media has a fixed aspect ratio\n\n`Post.Media` crops to `aspectRatio` — `16 / 10` by default — rather than following the image's own proportions. A feed whose card heights are decided by whatever was uploaded scrolls like a broken staircase, and a reader who has learnt where the like button sits loses it on every card.\n\nKeep it wide. A portrait ratio makes one card most of a screen, and a feed you can only see one item of is a feed nobody scrolls — `4 / 3` is about as tall as a card should get before the next one stops hinting that it exists.\n\n### The scrim is a gradient, not a panel\n\n`scrim` darkens an edge of the image so type laid over it stays legible. It is on by default in the `media` variant, where the author sits over the picture, and off everywhere else.\n\nIt is a gradient over a fixed 112 points rather than a flat rectangle, and rather than a fraction of the image. A flat panel has an edge of its own, and that edge reads as a bar covering the photograph rather than as shading; a fraction of a tall portrait shades half the picture to do a job that needs its top inch.\n\n### The overflow menu sits on the name\n\n`Post.Action` is as tall as the name's own line box and the author block is top-aligned, so the menu lands on the username's line in all four variants rather than drifting between the two lines of the author block as the variant changes what is underneath the name.\n\n### Accessibility\n\nEach stat is a button carrying its selected state, and every target has `hitSlop` around it — the footer is dense enough that spacing the controls far enough apart to be hit reliably would make it twice as wide as the numbers in it. `Post.Votes` announces itself as adjustable with the score as its value, and each arrow is a button of its own. `Post.Media` is only described to a screen reader when you pass `alt`; an image with nothing to say is decorative and better skipped.\n\n`Post` and `Post.Media` forward props for the branch they render, while retaining ownership of their computed classes/layout and—when interactive—the link or image-button role and primary press handler.",
@@ -84,5 +90,17 @@
     "width": 720,
     "height": 1560,
     "alt": "The Post component, running in the example app."
-  }
+  },
+  "versions": [
+    {
+      "title": "A feed",
+      "description": "All four shapes in a scroll, which is where a card is really judged.",
+      "code": "<ScrollView contentContainerClassName=\"gap-4 px-4 pb-12\">\n  <Post variant=\"feed\">…</Post>\n  <Post variant=\"vote\">…</Post>\n  <Post variant=\"compact\">…</Post>\n  <Post variant=\"media\">…</Post>\n</ScrollView>"
+    },
+    {
+      "title": "Photos that open",
+      "description": "A feed whose photos open full screen over a blur: a single photo, a grid of four that is one gallery, and a media-first card whose whole picture is the trigger.",
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger source={photo} alt=\"…\" radius={12} className=\"mx-4 rounded-xl\">\n    <Post.Media source={photo} className=\"mx-0\" />\n  </ImageViewer.Trigger>\n</ImageViewer>"
+    }
+  ]
 }

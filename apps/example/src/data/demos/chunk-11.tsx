@@ -4,7 +4,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Pressable, ScrollView, View } from "react-native";
-import { Alert, Avatar, Badge, BookmarkIcon, BottomSheet, Button, Card, CheckIcon, ChevronLeftIcon, EllipsisIcon, EyeIcon, Frame, HeartIcon, Item, ListChecksIcon, MaximizeIcon, Message, MessageCircleIcon, MessageScroller, Plan, MicIcon, MoonIcon, PackageIcon, PauseIcon, PencilIcon, PlayIcon, Post, type PostVote, Portal, Progress, RepeatIcon, Scrim, SendIcon, ShareNodesIcon, ScrollBlur, ScrollFade, Separator, Signature, type SignatureHandle, Skeleton, Sortable, reorderItems, useSortableItem, Soundwave, Steps, SunIcon, Surface, Task, Text, XIcon, ToggleButton, ToggleButtonGroup, useThemeMode } from "panelui-native";
+import { Alert, Avatar, Badge, BookmarkIcon, BottomSheet, Button, Card, CheckIcon, ChevronLeftIcon, EllipsisIcon, EyeIcon, Frame, HeartIcon, ImageViewer, Item, ListChecksIcon, MaximizeIcon, Message, MessageCircleIcon, MessageScroller, Plan, MicIcon, MoonIcon, PackageIcon, PauseIcon, PencilIcon, PlayIcon, Post, type PostVote, Portal, Progress, RepeatIcon, Scrim, SendIcon, ShareNodesIcon, ScrollBlur, ScrollFade, Separator, Signature, type SignatureHandle, Skeleton, Sortable, reorderItems, useSortableItem, Soundwave, Steps, SunIcon, Surface, Task, Text, XIcon, ToggleButton, ToggleButtonGroup, useThemeMode } from "panelui-native";
 import { formatClock, useVoiceRecorder, VoiceControls } from "../../components/voice";
 import { useCSSVariable } from 'uniwind';
 import type { ComponentEntry } from '../component-types';
@@ -1160,6 +1160,202 @@ function MediaPostDemo() {
   );
 }
 
+/** Unsplash photographs for the photo posts, large enough to zoom into. */
+function postPhoto(id: string) {
+  return { uri: `https://images.unsplash.com/photo-${id}?w=1400&q=70` };
+}
+
+const HIKE_PHOTOS = [
+  {
+    id: '1506905925346-21bda4d32df4',
+    alt: 'Mountain peaks above a sea of cloud at sunrise',
+    caption: 'Twenty to six, from the top of the pass.',
+  },
+  {
+    id: '1469474968028-56623f02e42e',
+    alt: 'A hiker standing on a boulder above a misty valley',
+    caption: 'Tom, refusing to come down off that rock.',
+  },
+  {
+    id: '1501785888041-af3ef285b470',
+    alt: 'A rowing boat on a turquoise lake under limestone peaks',
+    caption: 'The lake at the bottom of the descent.',
+  },
+  {
+    id: '1519681393784-d120267933ba',
+    alt: 'The Milky Way over snowy mountains',
+    caption: 'The one clear night.',
+  },
+];
+
+/** A post whose single photo opens full screen. */
+function SinglePhotoPost() {
+  const [liked, setLiked] = useState(false);
+  const photo = postPhoto('1500530855697-b586d89ba3ee');
+
+  return (
+    <Post variant="feed" className="w-full">
+      <Post.Header>
+        <Post.Author
+          name="Priya Raman"
+          handle="@priyaroams"
+          timestamp="2h ago"
+          avatar={{ uri: AVATARS[2] }}
+        />
+        <Post.Action>
+          <EllipsisIcon size={18} />
+        </Post.Action>
+      </Post.Header>
+
+      <Post.Body>Four hundred kilometres and one petrol station. #roadtrip</Post.Body>
+
+      {/* The trigger takes the media's margin and corners, so the picture flies
+          out of exactly the shape the card drew it in. */}
+      <ImageViewer>
+        <ImageViewer.Trigger
+          source={photo}
+          alt="An empty road running between red rock formations"
+          radius={12}
+          className="mx-4 rounded-xl"
+        >
+          <Post.Media source={photo} className="mx-0" />
+        </ImageViewer.Trigger>
+      </ImageViewer>
+
+      <Post.Footer>
+        <Post.Stat
+          icon={HeartIcon}
+          tone="like"
+          active={liked}
+          value={liked ? 489 : 488}
+          onPress={() => setLiked((on) => !on)}
+        />
+        <Post.Stat icon={MessageCircleIcon} value="32" onPress={() => {}} />
+        <Post.Stat icon={ShareNodesIcon} value="Share" align="end" onPress={() => {}} />
+      </Post.Footer>
+    </Post>
+  );
+}
+
+/** Four photos in a grid, one gallery: open any and swipe through the rest. */
+function PhotoGridPost() {
+  const [liked, setLiked] = useState(true);
+  const [saved, setSaved] = useState(false);
+
+  return (
+    <Post variant="feed" className="w-full">
+      <Post.Header>
+        <Post.Author
+          name="Jonas Reuter"
+          verified
+          timestamp="Yesterday"
+          avatar={{ uri: AVATARS[0] }}
+        />
+        <Post.Action>
+          <EllipsisIcon size={18} />
+        </Post.Action>
+      </Post.Header>
+
+      <Post.Body>
+        Three days over the pass. Fog for most of it, then this. #hiking #nofilter
+      </Post.Body>
+
+      <ImageViewer>
+        <View className="mx-4 gap-1">
+          {[HIKE_PHOTOS.slice(0, 2), HIKE_PHOTOS.slice(2)].map((row, rowIndex) => (
+            <View key={rowIndex} className="flex-row gap-1">
+              {row.map((entry) => (
+                <ImageViewer.Trigger
+                  key={entry.id}
+                  source={postPhoto(entry.id)}
+                  alt={entry.alt}
+                  caption={entry.caption}
+                  radius={8}
+                  className="aspect-square flex-1 rounded-lg bg-muted"
+                />
+              ))}
+            </View>
+          ))}
+        </View>
+      </ImageViewer>
+
+      <Post.Footer>
+        <Post.Stat
+          icon={HeartIcon}
+          tone="like"
+          active={liked}
+          value={liked ? '1,204' : '1,203'}
+          onPress={() => setLiked((on) => !on)}
+        />
+        <Post.Stat icon={MessageCircleIcon} value="87" onPress={() => {}} />
+        <Post.Stat
+          icon={BookmarkIcon}
+          tone="save"
+          align="end"
+          active={saved}
+          onPress={() => setSaved((on) => !on)}
+        />
+      </Post.Footer>
+    </Post>
+  );
+}
+
+/** The media-first card, where the whole photograph is the thing to press. */
+function MediaFirstPhotoPost() {
+  const [liked, setLiked] = useState(false);
+  const photo = postPhoto('1493246507139-91e8fad9978e');
+
+  return (
+    <Post variant="media" className="w-full">
+      <ImageViewer>
+        <ImageViewer.Trigger
+          source={photo}
+          alt="Red peaks reflected in a still lake at dusk"
+          caption="Eleven minutes of light, and we nearly left at ten."
+        >
+          <Post.Media source={photo} aspectRatio={4 / 5} />
+        </ImageViewer.Trigger>
+      </ImageViewer>
+      <Post.Header>
+        <Post.Author
+          name="Marta Lindqvist"
+          verified
+          timestamp="3d ago"
+          avatar={{ uri: AVATARS[1] }}
+        />
+      </Post.Header>
+
+      <Post.Body>Four hours of walking for eleven minutes of light. #goldenhour</Post.Body>
+
+      <Post.Footer>
+        <Post.Stat
+          icon={HeartIcon}
+          tone="like"
+          active={liked}
+          value={liked ? '2,041' : '2,040'}
+          onPress={() => setLiked((on) => !on)}
+        />
+        <Post.Stat icon={MessageCircleIcon} value="63" onPress={() => {}} />
+      </Post.Footer>
+    </Post>
+  );
+}
+
+/** A feed whose photos open in an ImageViewer. */
+function PostPhotosVersion() {
+  return (
+    <ScrollView
+      contentContainerClassName="gap-4 px-4 pb-12 pt-1"
+      showsVerticalScrollIndicator={false}
+    >
+      <SinglePhotoPost />
+      <CompactPostDemo />
+      <PhotoGridPost />
+      <MediaFirstPhotoPost />
+    </ScrollView>
+  );
+}
+
 /**
  * All four in a scroll, which is the only place a feed card is really judged.
  *
@@ -1745,6 +1941,14 @@ export const ENTRIES: ComponentEntry[] = [
         description: 'All four in a scroll, which is where a card is really judged.',
         fullPage: true,
         render: () => <PostFeedDemo />,
+      },
+      {
+        label: 'Photos that open',
+        id: 'photos',
+        description:
+          'A feed whose photos open full screen over a blur. The grid of four is one gallery, so swipe between them once one is open.',
+        fullPage: true,
+        render: () => <PostPhotosVersion />,
       },
     ],
   },

@@ -22,7 +22,7 @@ The same parts appear in every variant, so moving between them is a prop rather 
 Post ships with the library — no separate install.
 
 ```tsx
-import { Post, EllipsisIcon, EyeIcon, HeartIcon, MessageCircleIcon, BookmarkIcon, RepeatIcon, ShareNodesIcon } from 'panelui-native';
+import { Post, EllipsisIcon, EyeIcon, HeartIcon, MessageCircleIcon, BookmarkIcon, RepeatIcon, ShareNodesIcon, ImageViewer } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -240,6 +240,66 @@ A string body is tokenised: `#tag` and `@handle` are coloured, and pressable whe
 <Post.Body onTagPress={(tag) => router.push(`/tag/${tag}`)} onMentionPress={openProfile}>
   Shipped it. #FinancialFreedom #DebtSnowball — thanks @ada for the review.
 </Post.Body>
+```
+
+### Photos that open
+
+Wrap the media in an [ImageViewer](/docs/components/image-viewer) trigger to open it full screen over a blur. The trigger takes the media's margin and corners — `mx-4 rounded-xl`, so `radius={12}` — and `Post.Media` drops its own margin, so the picture flies out of the exact shape the card drew it in. Several triggers under one root are one gallery, which suits a grid of photos in a single post.
+
+```tsx
+<Post variant="feed">
+  <Post.Header>
+    <Post.Author name="Priya Raman" handle="@priyaroams" timestamp="2h ago" avatar={face} />
+  </Post.Header>
+
+  <Post.Body>Four hundred kilometres and one petrol station. #roadtrip</Post.Body>
+
+  <ImageViewer>
+    <ImageViewer.Trigger source={photo} alt="An empty road between red rocks" radius={12} className="mx-4 rounded-xl">
+      <Post.Media source={photo} className="mx-0" />
+    </ImageViewer.Trigger>
+  </ImageViewer>
+
+  <Post.Footer>
+    <Post.Stat icon={HeartIcon} tone="like" active={liked} value={liked ? 489 : 488} onPress={like} />
+  </Post.Footer>
+</Post>
+
+// Four photos, one gallery
+<ImageViewer>
+  <View className="mx-4 flex-row flex-wrap gap-1">
+    {photos.map((p) => (
+      <ImageViewer.Trigger key={p.id} source={p.source} alt={p.alt} caption={p.caption} radius={8} className="aspect-square w-[49%] rounded-lg" />
+    ))}
+  </View>
+</ImageViewer>
+```
+
+## Versions
+
+### A feed
+
+All four shapes in a scroll, which is where a card is really judged.
+
+```tsx
+<ScrollView contentContainerClassName="gap-4 px-4 pb-12">
+  <Post variant="feed">…</Post>
+  <Post variant="vote">…</Post>
+  <Post variant="compact">…</Post>
+  <Post variant="media">…</Post>
+</ScrollView>
+```
+
+### Photos that open
+
+A feed whose photos open full screen over a blur: a single photo, a grid of four that is one gallery, and a media-first card whose whole picture is the trigger.
+
+```tsx
+<ImageViewer>
+  <ImageViewer.Trigger source={photo} alt="…" radius={12} className="mx-4 rounded-xl">
+    <Post.Media source={photo} className="mx-0" />
+  </ImageViewer.Trigger>
+</ImageViewer>
 ```
 
 ## Variants

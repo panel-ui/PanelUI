@@ -4,6 +4,14 @@ description: An image that opens out of the page over a blur, to zoom into and s
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/image-viewer.mp4"
+  poster="/previews/image-viewer-poster.jpg"
+  alt="ImageViewer — a photo opens out of a journal over a blur, pages to the next, zooms, and is dragged back into place."
+  width={720}
+  height={1566}
+/>
+
 Pressing a trigger moves its picture from where it sits in the page to the middle of the screen, shown whole, and blurs everything behind it. Once it is open, pinch or double-tap to zoom, swipe sideways to the other images under the same `ImageViewer`, and drag the picture up or down — or tap outside it — to send it back to its place.
 
 The flight starts from the trigger's rectangle and corner radius, so pass `radius` to match the `rounded-*` class the trigger has. A class cannot be read back, and without it the picture starts square.

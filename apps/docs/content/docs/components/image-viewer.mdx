@@ -7,9 +7,9 @@ status: new
 <PreviewVideo
   src="/previews/image-viewer.mp4"
   poster="/previews/image-viewer-poster.jpg"
-  alt="ImageViewer — a photo opens out of a journal over a blur, pages to the next, zooms, and is dragged back into place."
+  alt="ImageViewer — three photographs in a row; one opens out over a blur, swipes to the next, zooms, and is dragged back into its place."
   width={720}
-  height={1566}
+  height={1560}
 />
 
 Pressing a trigger moves its picture from where it sits in the page to the middle of the screen, shown whole, and blurs everything behind it. Once it is open, pinch or double-tap to zoom, swipe sideways to the other images under the same `ImageViewer`, and drag the picture up or down — or tap outside it — to send it back to its place.
@@ -68,6 +68,14 @@ A trigger without a known image size uses its own box's proportions until the im
 
 The trigger draws the image cropped to fill its box, so it needs a size. `radius` matches `rounded-2xl`, which is 16 points.
 
+<PreviewVideo
+  src="/previews/image-viewer-one-image.mp4"
+  poster="/previews/image-viewer-one-image-poster.jpg"
+  alt="ImageViewer — One image."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ImageViewer>
   <ImageViewer.Trigger
@@ -82,6 +90,14 @@ The trigger draws the image cropped to fill its box, so it needs a size. `radius
 ### A gallery
 
 Several triggers under one root. Opening any of them opens at its page, and swiping moves through the rest. `onIndexChange` reports the page, and `index` makes it controlled.
+
+<PreviewVideo
+  src="/previews/image-viewer.mp4"
+  poster="/previews/image-viewer-poster.jpg"
+  alt="ImageViewer — A gallery."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <ImageViewer onIndexChange={setPage}>
@@ -150,6 +166,14 @@ const [open, setOpen] = useState(false);
 
 A week of photographs in one long scroll, one gallery across all of them, so swiping crosses from one day into the next.
 
+<PreviewVideo
+  src="/previews/image-viewer-photo-journal.mp4"
+  poster="/previews/image-viewer-photo-journal-poster.jpg"
+  alt="ImageViewer — Photo journal."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <ScrollView>
   <ImageViewer>
@@ -179,6 +203,14 @@ A week of photographs in one long scroll, one gallery across all of them, so swi
 ### Tall and wide
 
 A portrait, a landscape and a panorama, each fitted whole to the screen from a thumbnail of a different shape.
+
+<PreviewVideo
+  src="/previews/image-viewer-tall-and-wide.mp4"
+  poster="/previews/image-viewer-tall-and-wide-poster.jpg"
+  alt="ImageViewer — Tall and wide."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <ImageViewer>

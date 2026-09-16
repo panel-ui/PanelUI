@@ -4,8 +4,8 @@
     "src": "/previews/image-viewer.mp4",
     "poster": "/previews/image-viewer-poster.jpg",
     "width": 720,
-    "height": 1566,
-    "alt": "ImageViewer — a photo opens out of a journal over a blur, pages to the next, zooms, and is dragged back into place."
+    "height": 1560,
+    "alt": "ImageViewer — three photographs in a row; one opens out over a blur, swipes to the next, zooms, and is dragged back into its place."
   },
   "intro": "Pressing a trigger moves its picture from where it sits in the page to the middle of the screen, shown whole, and blurs everything behind it. Once it is open, pinch or double-tap to zoom, swipe sideways to the other images under the same `ImageViewer`, and drag the picture up or down — or tap outside it — to send it back to its place.\n\nThe flight starts from the trigger's rectangle and corner radius, so pass `radius` to match the `rounded-*` class the trigger has. A class cannot be read back, and without it the picture starts square.\n\nThe viewer opens in a portal, so it needs the `PanelUIProvider` at the root of the app. The blur needs the optional `expo-blur`; without it the page dims instead, and anyone with Reduce Transparency switched on gets an opaque backdrop.\n\nFor anything that is not a picture — a form, a confirmation — use [Dialog](/docs/components/dialog). To hold content up while offering actions on it, use [ContextMenu](/docs/components/context-menu) with a preview.",
   "usage": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo }}\n    alt=\"A harbour at dusk\"\n    radius={16}\n    className=\"h-56 w-full rounded-2xl\"\n  />\n</ImageViewer>",
@@ -23,12 +23,26 @@
     {
       "title": "One image",
       "description": "The trigger draws the image cropped to fill its box, so it needs a size. `radius` matches `rounded-2xl`, which is 16 points.",
-      "code": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo }}\n    alt=\"A harbour at dusk\"\n    radius={16}\n    className=\"h-56 w-full rounded-2xl\"\n  />\n</ImageViewer>"
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger\n    source={{ uri: photo }}\n    alt=\"A harbour at dusk\"\n    radius={16}\n    className=\"h-56 w-full rounded-2xl\"\n  />\n</ImageViewer>",
+      "previewVideo": {
+        "src": "/previews/image-viewer-one-image.mp4",
+        "poster": "/previews/image-viewer-one-image-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "ImageViewer — One image."
+      }
     },
     {
       "title": "A gallery",
       "description": "Several triggers under one root. Opening any of them opens at its page, and swiping moves through the rest. `onIndexChange` reports the page, and `index` makes it controlled.",
-      "code": "<ImageViewer onIndexChange={setPage}>\n  <View className=\"flex-row flex-wrap gap-1\">\n    {photos.map((photo) => (\n      <ImageViewer.Trigger\n        key={photo.id}\n        source={{ uri: photo.thumb }}\n        alt={photo.alt}\n        radius={6}\n        className=\"aspect-square w-[32%] rounded-md\"\n      />\n    ))}\n  </View>\n</ImageViewer>"
+      "code": "<ImageViewer onIndexChange={setPage}>\n  <View className=\"flex-row flex-wrap gap-1\">\n    {photos.map((photo) => (\n      <ImageViewer.Trigger\n        key={photo.id}\n        source={{ uri: photo.thumb }}\n        alt={photo.alt}\n        radius={6}\n        className=\"aspect-square w-[32%] rounded-md\"\n      />\n    ))}\n  </View>\n</ImageViewer>",
+      "previewVideo": {
+        "src": "/previews/image-viewer.mp4",
+        "poster": "/previews/image-viewer-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "ImageViewer — A gallery."
+      }
     },
     {
       "title": "Captions and a larger copy",
@@ -50,12 +64,26 @@
     {
       "title": "Photo journal",
       "description": "A week of photographs in one long scroll, one gallery across all of them, so swiping crosses from one day into the next.",
-      "code": "<ScrollView>\n  <ImageViewer>\n    {days.map((day) => (\n      <View key={day.title} className=\"gap-1.5\">\n        <Text weight=\"semibold\">{day.title}</Text>\n        {day.rows.map((row, i) => (\n          <View key={i} className=\"flex-row gap-1.5\">\n            {row.map((photo) => (\n              <ImageViewer.Trigger\n                key={photo.id}\n                source={{ uri: photo.uri }}\n                alt={photo.alt}\n                caption={photo.caption}\n                radius={8}\n                className=\"aspect-square flex-1 rounded-lg\"\n              />\n            ))}\n          </View>\n        ))}\n      </View>\n    ))}\n  </ImageViewer>\n</ScrollView>"
+      "code": "<ScrollView>\n  <ImageViewer>\n    {days.map((day) => (\n      <View key={day.title} className=\"gap-1.5\">\n        <Text weight=\"semibold\">{day.title}</Text>\n        {day.rows.map((row, i) => (\n          <View key={i} className=\"flex-row gap-1.5\">\n            {row.map((photo) => (\n              <ImageViewer.Trigger\n                key={photo.id}\n                source={{ uri: photo.uri }}\n                alt={photo.alt}\n                caption={photo.caption}\n                radius={8}\n                className=\"aspect-square flex-1 rounded-lg\"\n              />\n            ))}\n          </View>\n        ))}\n      </View>\n    ))}\n  </ImageViewer>\n</ScrollView>",
+      "previewVideo": {
+        "src": "/previews/image-viewer-photo-journal.mp4",
+        "poster": "/previews/image-viewer-photo-journal-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "ImageViewer — Photo journal."
+      }
     },
     {
       "title": "Tall and wide",
       "description": "A portrait, a landscape and a panorama, each fitted whole to the screen from a thumbnail of a different shape.",
-      "code": "<ImageViewer>\n  <ImageViewer.Trigger source={portrait} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={landscape} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={panorama} alt=\"…\" radius={12} className=\"h-32 w-full rounded-xl\" />\n</ImageViewer>"
+      "code": "<ImageViewer>\n  <ImageViewer.Trigger source={portrait} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={landscape} alt=\"…\" radius={12} className=\"h-64 flex-1 rounded-xl\" />\n  <ImageViewer.Trigger source={panorama} alt=\"…\" radius={12} className=\"h-32 w-full rounded-xl\" />\n</ImageViewer>",
+      "previewVideo": {
+        "src": "/previews/image-viewer-tall-and-wide.mp4",
+        "poster": "/previews/image-viewer-tall-and-wide-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "ImageViewer — Tall and wide."
+      }
     }
   ],
   "notes": "Zooming and paging do not mix: a zoomed picture pans inside its own edges, and the page only turns once it is back at its fitted size. Double-tap to get there quickly.\n\nThe open picture keeps `inset` points clear of the screen edges — measured from the safe area at the top and bottom — and is rounded to `cornerRadius`, so the blur shows on every side of it. Pass `inset={0}` and `cornerRadius={0}` for a picture that fills the screen edge to edge. Zooming in lets it grow past the margin either way.\n\nThe Android back button and the accessibility escape gesture both close it. With a screen reader, the open picture is announced with its `alt`, and in a gallery swiping up or down turns the page."

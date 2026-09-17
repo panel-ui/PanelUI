@@ -1,0 +1,104 @@
+---
+title: panelwind
+description: An ESLint plugin that checks how a screen uses the design system — and catches the classes that compile and then do nothing on a device.
+---
+
+A PanelUI app is styled with classes, and a class can be wrong in a way nothing
+tells you about. `space-x-2` compiles, `hover:bg-primary` compiles, `p-[13px]`
+compiles — and on a phone the first two do nothing and the third does nothing
+until the bundler is restarted. There is no error, no warning, and no style.
+
+**panelwind** is an ESLint plugin that reads your project — its stylesheet, its
+components and their variants — and reports those, with an error that names the
+fix in terms of what the project already has.
+
+It is a separate package, not part of `panelui-native`. A project with a
+`panelui.json` needs no configuration: that file already says where the theme
+and the components are.
+
+## Install
+
+<InstallTabs kind="add" packages="-D panelwind eslint" />
+
+Then `eslint.config.mjs`:
+
+```js
+import panelwind from 'panelwind';
+
+export default [
+  ...panelwind.configs.recommended,
+  {
+    // A component styles its own parts; that is not restyling.
+    files: ['src/components/ui/**'],
+    rules: { 'panelwind/no-restyle': 'off' },
+  },
+];
+```
+
+```bash
+npx eslint .
+```
+
+The preset configures the parser, so it works on a `.tsx` project with nothing
+else set up. Needs Node 20.19 or later and ESLint 9.30 or later.
+
+## What it reports
+
+| Rule | What it catches |
+| --- | --- |
+| `no-web-only-classes` | Classes React Native drops: `space-x-2`, `float-right`, `grid`, `hover:`, `first:` |
+| `no-unknown-classes` | Classes your Tailwind generates nothing for, with the nearest real one named |
+| `require-static-classes` | ``className={`p-${size}`}`` — a class the bundler never sees, so no style exists |
+| `no-restyle` | A class on a component its contract does not allow, answered with the component's own variants |
+| `no-raw-colors` | A colour that is not a theme token, with the nearest token named |
+| `no-arbitrary-values` | A size that is not on the scale, with the matching step named |
+| `no-inline-styles` | A static `style` object a class could express |
+
+The first three are errors in `configs.recommended`, because they are provable:
+the class produces no style. The rest are warnings, so an app that already
+exists can adopt the plugin without a wall of red. `configs.strict` errors on
+everything.
+
+## Why a linter knows what a device does
+
+The two rules above that rely on knowing React Native do not guess. A class is
+compiled by **your** Tailwind against **your** CSS entry — which is the only way
+`ios:`, `native:` and the safe-area utilities resolve at all — and what it
+generates is checked against a table built from React Native's own type
+definitions.
+
+That is also why `cursor-pointer` and `select-none` are **not** reported: both
+properties are real in React Native, where a hand-written list would have
+guessed otherwise.
+
+## Errors an agent can act on
+
+The messages are written to be the fix, not the complaint:
+
+```text
+"bg-destructive" is not allowed on <Button>: <Button> owns its color.
+Use a variant: primary, secondary, destructive. Add a new variant in
+src/components/ui/button.tsx only if the design calls for a treatment none of
+them provides.
+```
+
+The variants in that sentence were read out of your component. You can replace
+the wording per rule and per category, and `settings.panelwind.note` appends a
+standing instruction to every diagnostic — which is how a project puts its own
+rules in front of whatever is reading the error.
+
+Put the command where your agent will find it:
+
+```md
+After making changes, run `npm run lint` and fix everything it reports.
+```
+
+## Adopting it on an app that exists
+
+Most apps put spacing and width on components, so `no-restyle` has the most to
+say on the first run. Start from `configs.recommended`, clear the errors, then
+decide per component what the screen is allowed to change — with contracts,
+rather than by turning the rule off.
+
+Full documentation, every rule and its options:
+[github.com/panel-ui/panelwind](https://github.com/panel-ui/panelwind).

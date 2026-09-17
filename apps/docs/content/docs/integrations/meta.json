@@ -3,6 +3,7 @@
   "icon": "neon",
   "pages": [
     "neon",
-    "logo-maker"
+    "logo-maker",
+    "panelwind"
   ]
 }

@@ -63,6 +63,7 @@
     "message",
     "message-scroller",
     "meter",
+    "mirror-area-chart",
     "number-input",
     "otp-input",
     "page-header",
@@ -175,6 +176,10 @@
       "accessibilityMode": "summary"
     },
     {
+      "name": "mirror-area-chart",
+      "accessibilityMode": "shared-data"
+    },
+    {
       "name": "pie-chart",
       "accessibilityMode": "interactive-items"
     },
@@ -212,24 +217,24 @@
     }
   ],
   "counts": {
-    "componentModules": 131,
-    "packageComponentExports": 131,
-    "documentedComponents": 131,
-    "exampleEntries": 131,
+    "componentModules": 132,
+    "packageComponentExports": 132,
+    "documentedComponents": 132,
+    "exampleEntries": 132,
     "registry": {
-      "componentItems": 131,
+      "componentItems": 132,
       "supportItems": 36,
-      "totalItems": 167,
+      "totalItems": 168,
       "byType": {
-        "registry:ui": 146,
+        "registry:ui": 147,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1
       }
     },
     "visualizations": {
-      "total": 19,
-      "sharedData": 12,
+      "total": 20,
+      "sharedData": 13,
       "summaries": 1,
       "interactiveItems": 6
     },

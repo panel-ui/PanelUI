@@ -49,7 +49,7 @@ test('semantic data keeps visual geometry decorative and activation opt-in', asy
 
 test('all confirmed chart families use the shared semantic sibling', async () => {
   const readFile = (await import('node:fs/promises')).readFile;
-  for (const name of ['area', 'bar', 'bubble', 'bump', 'candlestick', 'heatmap', 'line', 'pyramid', 'radar', 'scatter']) {
+  for (const name of ['area', 'bar', 'bubble', 'bump', 'candlestick', 'heatmap', 'line', 'mirror-area', 'pyramid', 'radar', 'scatter']) {
     const source = await readFile(new URL(`../src/components/${name}-chart/index.tsx`, import.meta.url), 'utf8');
     assert.match(source, /<ChartAccessibilityData/);
     assert.match(source, /importantForAccessibility="no-hide-descendants"/);

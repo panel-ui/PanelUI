@@ -1083,6 +1083,22 @@
     "docsPath": "components/meter"
   },
   {
+    "name": "mirror-area-chart",
+    "type": "registry:ui",
+    "kind": "chart",
+    "group": "charts",
+    "stability": "stable",
+    "description": "Two readings of one timeline, one above a baseline and one below it.",
+    "registryDependencies": [
+      "chart",
+      "chart-accessibility",
+      "cn",
+      "finite-chart",
+      "text"
+    ],
+    "docsPath": "charts/mirror-area-chart"
+  },
+  {
     "name": "modal-isolation-store",
     "type": "registry:ui",
     "kind": "ui",

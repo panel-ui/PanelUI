@@ -1570,6 +1570,15 @@ const bumpChart = (
   </Chartlet>
 );
 
+const mirrorAreaChart = (
+  <Chartlet>
+    <path d="M4 32 20 26 36 28 52 18 60 8 68 18 84 24 100 26 116 28V32Z" fill="currentColor" opacity="0.3" />
+    <path d="M4 32 20 29 36 30 52 24 60 16 68 24 84 28 100 29 116 30V32Z" className="fill-fd-primary" opacity="0.5" />
+    <path d="M4 32 20 35 36 34 52 42 60 54 68 42 84 36 100 35 116 34V32Z" className="fill-fd-primary" opacity="0.85" />
+    <path d="M4 32H116" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+  </Chartlet>
+);
+
 const waterfallChart = (
   <Chartlet>
     {[
@@ -2263,6 +2272,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'pyramid-chart': pyramidChart,
   'scatter-chart': scatterChart,
   'treemap-chart': treemapChart,
+  'mirror-area-chart': mirrorAreaChart,
   'waterfall-chart': waterfallChart,
 
   // Feedback and status

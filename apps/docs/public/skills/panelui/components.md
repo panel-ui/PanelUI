@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-131 component modules. The **Reference** column links to a file in this skill holding that
+132 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -133,6 +133,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `HexChart` | A whole broken into parts, counted out in cells. | [hex-chart](./components/hex-chart.md) |
 | `LineChart` | Animated time series, drawn on the UI thread. | [line-chart](./components/line-chart.md) |
 | `LiveLineChart` | A reading that keeps arriving, against a window that keeps moving. | [live-line-chart](./components/live-line-chart.md) |
+| `MirrorAreaChart` | Two readings of one timeline, one above a baseline and one below it. | [mirror-area-chart](./components/mirror-area-chart.md) |
 | `PieChart` | One whole, divided between its parts. | [pie-chart](./components/pie-chart.md) |
 | `Plot` *(alpha)* | A chart you assemble out of its marks. | [plot](./components/plot.md) |
 | `PolarAreaChart` | Several readings on one scale, compared as wedges. | [polar-area-chart](./components/polar-area-chart.md) |

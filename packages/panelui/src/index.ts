@@ -947,6 +947,24 @@ export {
   type MessageScrollerPosition,
 } from './components/message-scroller';
 export {
+  MirrorAreaChart,
+  useMirrorAreaChart,
+  type MirrorAreaChartProps,
+  type MirrorAreaChartHandle,
+  type MirrorAreaChartHeaderProps,
+  type MirrorAreaChartGridProps,
+  type MirrorAreaChartBaselineProps,
+  type MirrorAreaChartAreaProps,
+  type MirrorAreaChartSkeletonProps,
+  type MirrorAreaChartXAxisProps,
+  type MirrorAreaChartYAxisProps,
+  type MirrorAreaChartTooltipProps,
+  type MirrorAreaChartLegendProps,
+  type MirrorAreaChartStatus,
+  type MirrorAreaChartSide,
+  type MirrorAreaChartDatum,
+} from './components/mirror-area-chart';
+export {
   Message,
   type MessageProps,
   type MessageGroupProps,

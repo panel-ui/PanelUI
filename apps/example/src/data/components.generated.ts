@@ -63,6 +63,7 @@ export const COMPONENTS = [
   {"slug":"message","name":"Message","summary":"Chat turn with avatar, bubble and metadata"},
   {"slug":"message-scroller","name":"MessageScroller","summary":"Scroll behaviour a chat transcript needs"},
   {"slug":"meter","name":"Meter","summary":"A measurement on a fixed scale, coloured by where it falls"},
+  {"slug":"mirror-area-chart","name":"MirrorAreaChart","summary":"Two readings of one timeline, one above a baseline and one below it"},
   {"slug":"number-input","name":"NumberInput","summary":"Numeric field stepped by buttons or typed"},
   {"slug":"otp-input","name":"OtpInput","summary":"One-time-code field, one cell per digit"},
   {"slug":"page-header","name":"PageHeader","summary":"Cover, face and actions at the top of a profile"},
@@ -136,4 +137,4 @@ export const COMPONENTS = [
 
 export type ComponentMetadata = (typeof COMPONENTS)[number];
 export const COMPONENT_COUNT = COMPONENTS.length;
-export const CHART_COUNT = 17;
+export const CHART_COUNT = 18;

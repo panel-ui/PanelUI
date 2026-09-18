@@ -20,6 +20,8 @@ const load15 = () => import('./demos/chunk-15');
 const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   'bump-chart': () =>
     load12().then((module) => module.ENTRIES_BY_SLUG['bump-chart']),
+  'mirror-area-chart': () =>
+    load12().then((module) => module.ENTRIES_BY_SLUG['mirror-area-chart']),
   'ai-input': () =>
     load10().then((module) => module.ENTRIES_BY_SLUG['ai-input']),
   accordion: () =>
@@ -245,6 +247,7 @@ export const CHART_SLUGS = [
   'pyramid-chart',
   'bubble-chart',
   'bump-chart',
+  'mirror-area-chart',
 ] as const;
 
 export async function loadChartShowcase() {

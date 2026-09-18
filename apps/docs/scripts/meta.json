@@ -369,6 +369,17 @@
       "updatedIn": "0.75.0"
     }
   ],
+  "mirror-area-chart": [
+    "MirrorAreaChart",
+    "Two readings of one timeline, one above a baseline and one below it.",
+    "react native mirror area chart diverging",
+    {
+      "addedIn": "0.100.0",
+      "group": "charts",
+      "visualization": true,
+      "accessibilityMode": "shared-data"
+    }
+  ],
   "number-input": [
     "NumberInput",
     "Numeric field stepped by buttons or typed by hand.",

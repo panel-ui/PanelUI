@@ -1,0 +1,66 @@
+{
+  "slug": "mirror-area-chart",
+  "intro": "One series or more grows up from a baseline, and another grows down from it, over the same x-axis. Use it to read two related measures at the same moment: load and the share of it that is urgent, requests and the ones that failed, arrivals and departures.\n\nEach half has its own scale, because the two measures are usually in different units. The heights of a top band and a bottom band cannot be compared with each other, only with the rest of their own half. Add `YAxis` to label both scales.\n\nFor several series in one unit, use an [AreaChart](/docs/charts/area-chart). For values above and below zero on a single scale, use a [BarChart](/docs/charts/bar-chart) or a [LineChart](/docs/charts/line-chart).",
+  "usage": "<MirrorAreaChart data={queue} xDataKey=\"time\">\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"high priority\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" fillOpacity={0.7} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip\n    formatSummary={(d) => `${d.jobs.toLocaleString()} jobs · ${d.share}% high`}\n  />\n</MirrorAreaChart>",
+  "extraImports": [
+    "type MirrorAreaChartDatum",
+    "Frame"
+  ],
+  "anatomy": "<MirrorAreaChart data={…}>\n  <MirrorAreaChart.Header />    {/* the strip above the plot */}\n  <MirrorAreaChart.Grid />      {/* dots, or ruled lines */}\n  <MirrorAreaChart.Skeleton />  {/* a band along the baseline while loading */}\n  <MirrorAreaChart.Area />      {/* one per series, side=\"top\" or \"bottom\" */}\n  <MirrorAreaChart.Baseline />  {/* the line both halves grow from */}\n  <MirrorAreaChart.XAxis />     {/* labels along the bottom */}\n  <MirrorAreaChart.YAxis />     {/* each half's maximum, and zero */}\n  <MirrorAreaChart.Tooltip />   {/* the crosshair, the dot and the readout */}\n  <MirrorAreaChart.Legend />    {/* a swatch and a name per area */}\n</MirrorAreaChart>",
+  "parts": {
+    "Header": "The strip above the plot: a title, a value, a caption and an optional legend or control. Pass the value yourself; follow `onActiveIndexChange` if it should track the finger.",
+    "Grid": "The texture behind the bands. `variant=\"dots\"` (the default) is a field of points with one row on the baseline; `variant=\"lines\"` draws dashed rules across each half. `spacing` is the distance between dots, or the number of rules per half.",
+    "Area": "One band. `side` picks the half. Areas on the same side overlay in declaration order, so declare a total before the part of it. `muted` draws it in the muted foreground colour, for a total the coloured areas are parts of.",
+    "Baseline": "The line both halves grow away from. Declare it after the areas so it is drawn over their bases.",
+    "XAxis": "Labels along the bottom. `ticks` sets how many are shown.",
+    "YAxis": "Three labels in a gutter the chart reserves on the left: the top half's maximum, zero on the baseline and the bottom half's maximum. `formatTop` and `formatBottom` format each half.",
+    "Tooltip": "The drag across the plot, a dashed crosshair, a dot on the outer edge of the top half, and a readout beside them. The readout lists every series; `formatSummary` replaces the list with one line.",
+    "Legend": "A swatch and a name per area, top half first, floated over the top corner of the plot. On a chart with a header, prefer `Header legend`.",
+    "Skeleton": "The loading state: a band either side of the baseline with a sweep across it, shown while `status=\"loading\"`."
+  },
+  "examples": [
+    {
+      "title": "The data",
+      "description": "One row per point on the x-axis, with a key for each series. A missing or non-numeric value leaves a gap in that band. A negative value is drawn on the baseline, because each half only grows away from it.",
+      "code": "const queue: MirrorAreaChartDatum[] = [\n  { time: '14:00', jobs: 947, high: 653, share: 69 },\n  { time: '14:30', jobs: 1120, high: 874, share: 78 },\n  { time: '15:00', jobs: 982, high: 697, share: 71 },\n  // …\n];"
+    },
+    {
+      "title": "Labelling both scales",
+      "description": "`YAxis` labels the top of each half with its maximum, and the baseline with zero. Each half's maximum is the largest value on that side plus 8%, so a peak does not touch the edge of the plot. Fix it with `topDomain` or `bottomDomain`; only the upper end is used.\n\nWithout a `formatSummary`, the readout lists every series, and `formatValue` receives each series' key so the two halves can be formatted differently.",
+      "code": "<MirrorAreaChart data={queue} xDataKey=\"time\">\n  <MirrorAreaChart.Header title=\"Peak\" value=\"1,120 jobs\" legend />\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"Jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"High\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" colorIndex={2} fillOpacity={0.6} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.YAxis formatBottom={(value) => `${Math.round(value)}%`} />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip\n    formatValue={(value, key) => (key === 'share' ? `${value}%` : value.toLocaleString())}\n  />\n</MirrorAreaChart>"
+    },
+    {
+      "title": "Giving one half more room",
+      "description": "`split` is the fraction of the plot's height above the baseline, `0.55` by default. Give the larger share to the measure the reader should look at first. Here errors take less room than traffic.",
+      "code": "const [active, setActive] = useState(-1);\nconst row = active >= 0 ? traffic[active] : null;\n\n<MirrorAreaChart data={traffic} xDataKey=\"hour\" split={0.7} onActiveIndexChange={setActive}>\n  <MirrorAreaChart.Header\n    title={row ? `${row.hour}:00` : 'Requests today'}\n    value={row ? row.requests.toLocaleString() : '873,500'}\n    caption={row ? `${row.errors} failed` : '1,808 failed, 0.21%'}\n  />\n  <MirrorAreaChart.Grid variant=\"lines\" />\n  <MirrorAreaChart.Area dataKey=\"requests\" label=\"requests\" gradientToOpacity={0.04} />\n  <MirrorAreaChart.Area dataKey=\"errors\" label=\"failed\" side=\"bottom\" colorIndex={5} fillOpacity={0.55} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis ticks={5} format={(d) => `${d.hour}:00`} />\n  <MirrorAreaChart.Tooltip />\n</MirrorAreaChart>"
+    },
+    {
+      "title": "Loading, and then data",
+      "description": "`status=\"loading\"` holds the bands flat on the baseline. Add a `Skeleton` to show a band there meanwhile. The bands grow out from the baseline when it turns `ready`.",
+      "code": "<MirrorAreaChart data={queue} xDataKey=\"time\" status={status}>\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Skeleton />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"high priority\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" fillOpacity={0.7} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip />\n</MirrorAreaChart>"
+    }
+  ],
+  "versions": [
+    {
+      "title": "Basic",
+      "description": "Queued jobs above the line, the high-priority share below it.",
+      "code": "<MirrorAreaChart data={queue} xDataKey=\"time\">\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"high priority\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" fillOpacity={0.7} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip\n    formatSummary={(d) => `${d.jobs.toLocaleString()} jobs · ${d.share}% high`}\n  />\n</MirrorAreaChart>"
+    },
+    {
+      "title": "Two scales",
+      "description": "Both scales labelled, and every series in the readout.",
+      "code": "<MirrorAreaChart data={queue} xDataKey=\"time\">\n  <MirrorAreaChart.Header title=\"Peak\" value=\"1,120 jobs\" legend />\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"Jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"High\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" colorIndex={2} fillOpacity={0.6} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.YAxis formatBottom={(value) => `${Math.round(value)}%`} />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip\n    formatValue={(value, key) => (key === 'share' ? `${value}%` : value.toLocaleString())}\n  />\n</MirrorAreaChart>"
+    },
+    {
+      "title": "Errors under traffic",
+      "description": "A smaller bottom half, ruled lines, and a header that follows the finger.",
+      "code": "const [active, setActive] = useState(-1);\nconst row = active >= 0 ? traffic[active] : null;\n\n<MirrorAreaChart data={traffic} xDataKey=\"hour\" split={0.7} onActiveIndexChange={setActive}>\n  <MirrorAreaChart.Header\n    title={row ? `${row.hour}:00` : 'Requests today'}\n    value={row ? row.requests.toLocaleString() : '873,500'}\n    caption={row ? `${row.errors} failed` : '1,808 failed, 0.21%'}\n  />\n  <MirrorAreaChart.Grid variant=\"lines\" />\n  <MirrorAreaChart.Area dataKey=\"requests\" label=\"requests\" gradientToOpacity={0.04} />\n  <MirrorAreaChart.Area dataKey=\"errors\" label=\"failed\" side=\"bottom\" colorIndex={5} fillOpacity={0.55} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis ticks={5} format={(d) => `${d.hour}:00`} />\n  <MirrorAreaChart.Tooltip />\n</MirrorAreaChart>"
+    },
+    {
+      "title": "Loading",
+      "description": "A band along the baseline while the data loads.",
+      "code": "<MirrorAreaChart data={queue} xDataKey=\"time\" status={status}>\n  <MirrorAreaChart.Grid />\n  <MirrorAreaChart.Skeleton />\n  <MirrorAreaChart.Area dataKey=\"jobs\" label=\"jobs\" muted />\n  <MirrorAreaChart.Area dataKey=\"high\" label=\"high priority\" />\n  <MirrorAreaChart.Area dataKey=\"share\" label=\"% high\" side=\"bottom\" fillOpacity={0.7} />\n  <MirrorAreaChart.Baseline />\n  <MirrorAreaChart.XAxis />\n  <MirrorAreaChart.Tooltip />\n</MirrorAreaChart>"
+    }
+  ],
+  "notes": "An explicit `topDomain` or `bottomDomain` is used only when both ends are finite. The baseline is always zero on both halves.\n\n### Reduced motion\n\nThe bands are drawn straight to their final shape, and a change of scale is not animated.\n\n**`aspectRatio` measures the plot, not the whole chart.** The header sits above the drawing area, so a chart with one is taller than the ratio alone suggests.\n\n### Accessibility\n\nThe SVG drawing is decorative. `MirrorAreaChart` exposes one summary and one entry per row, with every series' value under its `label`. Use `accessibilityLabel` and `accessibilityHint` for context, `accessibilityLabelForDatum` to replace a row's spoken text, and `onAccessibilityDatumPress` when a row has an equivalent action."
+}

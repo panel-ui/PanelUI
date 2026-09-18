@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1328,
-    "values": 336,
-    "types": 992,
-    "modules": 158,
-    "components": 131,
+    "exports": 1344,
+    "values": 338,
+    "types": 1006,
+    "modules": 159,
+    "components": 132,
     "hooks": 13
   },
   "groups": {
@@ -2648,6 +2648,77 @@
           },
           {
             "name": "MeterThreshold",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/mirror-area-chart/index.tsx",
+        "slug": "mirror-area-chart",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "MirrorAreaChart",
+            "kind": "value"
+          },
+          {
+            "name": "useMirrorAreaChart",
+            "kind": "value"
+          },
+          {
+            "name": "MirrorAreaChartProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartHandle",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartGridProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartBaselineProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartAreaProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartSkeletonProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartXAxisProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartYAxisProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartTooltipProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartLegendProps",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartStatus",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartSide",
+            "kind": "type"
+          },
+          {
+            "name": "MirrorAreaChartDatum",
             "kind": "type"
           }
         ]

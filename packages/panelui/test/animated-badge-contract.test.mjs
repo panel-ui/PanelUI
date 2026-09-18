@@ -77,3 +77,20 @@ test('a roll interrupted by a change back is sent home', () => {
     /if \(settled\) \{[\s\S]{0,400}if \(phase\.value !== 0\) phase\.value = withSpring\(0, ROLL_IN\)/
   );
 });
+
+test('a status outside the six is drawn as neutral rather than crashing', () => {
+  /*
+   * Every lookup is keyed on the status, so `status={item.synced}` found no
+   * icon and rendered `undefined` as a component — "Element type is invalid",
+   * with nothing naming the prop that caused it. Reported in #218.
+   */
+  assert.match(source, /status: statusProp = 'neutral'/);
+  assert.match(source, /const status: AnimatedBadgeStatus = isStatus\(statusProp\) \? statusProp : 'neutral'/);
+  assert.match(source, /hasOwnProperty\.call\(STATUS_ICON, value\)/);
+  assert.match(source, /if \(__DEV__ && !isStatus\(statusProp\)\)/);
+});
+
+test('a boolean label gets no slot', () => {
+  // `{flag && 'Label'}` leaves `true` or `false`, which React draws as nothing.
+  assert.match(source, /children != null && typeof children !== 'boolean'/);
+});

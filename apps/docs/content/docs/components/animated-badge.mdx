@@ -308,7 +308,7 @@ Punctuation goes in an ungapped row with the badge it follows. Left as a sibling
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `status` | `AnimatedBadgeStatus` | `neutral` |  |
+| `status` | `AnimatedBadgeStatus` | `neutral` | Which state the badge shows. Anything other than the six statuses is drawn as `neutral`, with a warning in development — map a boolean or a state of your own onto one first, as in `status={synced ? 'success' : 'neutral'}`. |
 | `size` | `AnimatedBadgeSize` | `md` |  |
 | `icon` | `ReactNode` | — | A glyph of your own, in place of the status's. |
 | `showIcon` | `boolean` | `true` | Whether a glyph is drawn at all. |

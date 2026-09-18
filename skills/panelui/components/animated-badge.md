@@ -27,7 +27,7 @@ Extends `ViewProps, VariantProps<typeof animatedBadgeVariants>`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `status` | `AnimatedBadgeStatus` | `neutral` | — |
+| `status` | `AnimatedBadgeStatus` | `neutral` | Which state the badge shows. Anything other than the six statuses is drawn as `neutral`, with a warning in development — map a boolean or a state of your own onto one first, as in `status={synced ? 'success' : 'neutral'}`. |
 | `size` | `AnimatedBadgeSize` | `md` | — |
 | `children` | `ReactNode` | — | The word. Changing it rolls the old one out and the new one in. |
 | `icon` | `ReactNode` | — | A glyph of your own, in place of the status's. |

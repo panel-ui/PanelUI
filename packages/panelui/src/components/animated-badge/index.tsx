@@ -188,9 +188,22 @@ const ICON_SIZE: Record<AnimatedBadgeSize, number> = { sm: 12, md: 14 };
 /** Milliseconds for one full turn of the loading ring. */
 const SPIN_DURATION = 800;
 
+/** Whether a value is one of the statuses the badge knows how to draw. */
+function isStatus(value: unknown): value is AnimatedBadgeStatus {
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(STATUS_ICON, value);
+}
+
+/** Values already warned about, so a list of badges does not warn once per row. */
+const warnedStatuses = new Set<string>();
+
 export interface AnimatedBadgeProps
   extends ViewProps,
     VariantProps<typeof animatedBadgeVariants> {
+  /**
+   * Which state the badge shows. Anything other than the six statuses is drawn
+   * as `neutral`, with a warning in development — map a boolean or a state of
+   * your own onto one first, as in `status={synced ? 'success' : 'neutral'}`.
+   */
   status?: AnimatedBadgeStatus;
   size?: AnimatedBadgeSize;
   /** The word. Changing it rolls the old one out and the new one in. */
@@ -232,7 +245,7 @@ export interface AnimatedBadgeProps
 export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
   (
     {
-      status = 'neutral',
+      status: statusProp = 'neutral',
       size = 'md',
       children,
       icon,
@@ -247,6 +260,24 @@ export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
     ref
   ) => {
     const reducedMotion = useReducedMotion();
+
+    /*
+     * Every lookup below is keyed on the status, so a value outside the six
+     * finds no icon and the badge renders `undefined` as a component. That
+     * crash names the badge but not the prop, so resolve it here instead.
+     */
+    const status: AnimatedBadgeStatus = isStatus(statusProp) ? statusProp : 'neutral';
+    if (__DEV__ && !isStatus(statusProp)) {
+      const received = String(statusProp);
+      if (!warnedStatuses.has(received)) {
+        warnedStatuses.add(received);
+        console.warn(
+          `AnimatedBadge: status must be one of ${Object.keys(STATUS_ICON).join(', ')}; ` +
+            `received ${JSON.stringify(statusProp) ?? received}. Drawing it as neutral.`
+        );
+      }
+    }
+
     const slots = animatedBadgeVariants({ status, size });
 
     const themeColor = useCSSVariable(STATUS_COLOR_VAR[status]);
@@ -363,7 +394,9 @@ export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
           </View>
         ) : null}
 
-        {children != null ? (
+        {/* `{flag && 'Label'}` leaves a boolean here, which React draws as
+            nothing — so it gets no slot either, rather than an empty gap. */}
+        {children != null && typeof children !== 'boolean' ? (
           <View className={slots.slot()}>
             <Roll contentKey={labelKey} reducedMotion={reducedMotion}>
               {textChildren(children, (text) => (

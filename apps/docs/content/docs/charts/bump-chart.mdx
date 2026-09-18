@@ -4,6 +4,14 @@ description: How a set of things ranked against each other over time.
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/bump-chart.mp4"
+  poster="/previews/bump-chart-poster.jpg"
+  alt="BumpChart — five clubs ranked over seven weeks, with Harbour picked out in green against the rest of the table."
+  width={720}
+  height={1560}
+/>
+
 Each series is drawn at its rank in every column, with an S-curve wherever it changes places. Use it for league tables, leaderboards, search positions or any ranking that is tracked over time.
 
 The rows are evenly spaced whatever the gap between the scores behind them, so the chart shows order and not distance. When how far apart the series are matters, use a [LineChart](/docs/charts/line-chart) of the scores instead.
@@ -162,6 +170,14 @@ New data moves every line from where it is drawn to its new places, over `morphD
 
 Five clubs over seven weeks, with one picked out against the rest.
 
+<PreviewVideo
+  src="/previews/bump-chart-basic.mp4"
+  poster="/previews/bump-chart-basic-poster.jpg"
+  alt="BumpChart — Basic."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <BumpChart data={league} xDataKey="week" defaultHighlight="harbour">
   <BumpChart.Grid />
@@ -180,6 +196,14 @@ Five clubs over seven weeks, with one picked out against the rest.
 ### Ranked from scores
 
 Monthly takings passed as money; the chart ranks each month itself.
+
+<PreviewVideo
+  src="/previews/bump-chart-ranked-from-scores.mp4"
+  poster="/previews/bump-chart-ranked-from-scores-poster.jpg"
+  alt="BumpChart — Ranked from scores."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <BumpChart data={takings} xDataKey="month" values="score" aspectRatio={1.8}>
@@ -200,6 +224,13 @@ Monthly takings passed as money; the chart ranks each month itself.
 
 Tap a name to pick it out; the header reads the club you picked.
 
+<Preview
+  src="/previews/bump-chart-picking-a-line.jpg"
+  alt="BumpChart — Picking a line."
+  width={1179}
+  height={1165}
+/>
+
 ```tsx
 const [picked, setPicked] = useState<string | null>('kestrel');
 
@@ -219,6 +250,14 @@ const [picked, setPicked] = useState<string | null>('kestrel');
 
 Switch seasons and every line moves to its new places.
 
+<PreviewVideo
+  src="/previews/bump-chart-changing-data.mp4"
+  poster="/previews/bump-chart-changing-data-poster.jpg"
+  alt="BumpChart — Changing data."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <BumpChart data={season === 'this' ? league : lastSeason} xDataKey="week" defaultHighlight="harbour">
   <BumpChart.Grid />
@@ -233,6 +272,14 @@ Switch seasons and every line moves to its new places.
 ### Loading
 
 A bar on every row while the table loads.
+
+<PreviewVideo
+  src="/previews/bump-chart-loading.mp4"
+  poster="/previews/bump-chart-loading-poster.jpg"
+  alt="BumpChart — Loading."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <BumpChart data={league} xDataKey="week" status={status} defaultHighlight="harbour">

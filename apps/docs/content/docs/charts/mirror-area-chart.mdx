@@ -4,6 +4,14 @@ description: Two readings of one timeline, one above a baseline and one below it
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/mirror-area-chart.mp4"
+  poster="/previews/mirror-area-chart-poster.jpg"
+  alt="MirrorAreaChart — queued jobs and their high-priority part above a baseline, with the high-priority share mirrored below it."
+  width={720}
+  height={1560}
+/>
+
 One series or more grows up from a baseline, and another grows down from it, over the same x-axis. Use it to read two related measures at the same moment: load and the share of it that is urgent, requests and the ones that failed, arrivals and departures.
 
 Each half has its own scale, because the two measures are usually in different units. The heights of a top band and a bottom band cannot be compared with each other, only with the rest of their own half. Add `YAxis` to label both scales.
@@ -149,6 +157,14 @@ const row = active >= 0 ? traffic[active] : null;
 
 Queued jobs above the line, the high-priority share below it.
 
+<PreviewVideo
+  src="/previews/mirror-area-chart-basic.mp4"
+  poster="/previews/mirror-area-chart-basic-poster.jpg"
+  alt="MirrorAreaChart — Basic."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <MirrorAreaChart data={queue} xDataKey="time">
   <MirrorAreaChart.Grid />
@@ -166,6 +182,14 @@ Queued jobs above the line, the high-priority share below it.
 ### Two scales
 
 Both scales labelled, and every series in the readout.
+
+<PreviewVideo
+  src="/previews/mirror-area-chart-two-scales.mp4"
+  poster="/previews/mirror-area-chart-two-scales-poster.jpg"
+  alt="MirrorAreaChart — Two scales."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <MirrorAreaChart data={queue} xDataKey="time">
@@ -186,6 +210,14 @@ Both scales labelled, and every series in the readout.
 ### Errors under traffic
 
 A smaller bottom half, ruled lines, and a header that follows the finger.
+
+<PreviewVideo
+  src="/previews/mirror-area-chart-errors-under-traffic.mp4"
+  poster="/previews/mirror-area-chart-errors-under-traffic-poster.jpg"
+  alt="MirrorAreaChart — Errors under traffic."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 const [active, setActive] = useState(-1);
@@ -209,6 +241,14 @@ const row = active >= 0 ? traffic[active] : null;
 ### Loading
 
 A band along the baseline while the data loads.
+
+<PreviewVideo
+  src="/previews/mirror-area-chart-loading.mp4"
+  poster="/previews/mirror-area-chart-loading-poster.jpg"
+  alt="MirrorAreaChart — Loading."
+  width={720}
+  height={1560}
+/>
 
 ```tsx
 <MirrorAreaChart data={queue} xDataKey="time" status={status}>

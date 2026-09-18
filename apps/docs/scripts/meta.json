@@ -1242,6 +1242,17 @@
       "updatedIn": "0.88.0"
     }
   ],
+  "bump-chart": [
+    "BumpChart",
+    "How a set of things ranked against each other over time.",
+    "react native bump chart ranking",
+    {
+      "addedIn": "0.100.0",
+      "group": "charts",
+      "visualization": true,
+      "accessibilityMode": "shared-data"
+    }
+  ],
   "pyramid-chart": [
     "PyramidChart",
     "Two series mirrored about a centre, on one shared scale.",

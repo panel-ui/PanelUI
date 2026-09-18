@@ -45,7 +45,7 @@ test('every declared chart remains sourced from the catalogue', () => {
   assert.ok(declaration, 'CHART_SLUGS declaration is present');
   const slugs = [...declaration[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
 
-  assert.equal(slugs.length, 16);
+  assert.equal(slugs.length, 17);
   assert.equal(new Set(slugs).size, slugs.length);
   for (const slug of slugs) {
     assert.match(catalogue, new RegExp(`ENTRIES_BY_SLUG\\['${slug}'\\]`));

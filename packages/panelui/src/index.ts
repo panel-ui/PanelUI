@@ -712,6 +712,25 @@ export {
   type BubbleChartStatus,
 } from './components/bubble-chart';
 export {
+  BumpChart,
+  useBumpChart,
+  bumpRanks,
+  type BumpChartProps,
+  type BumpChartHandle,
+  type BumpChartHeaderProps,
+  type BumpChartGridProps,
+  type BumpChartLineProps,
+  type BumpChartSkeletonProps,
+  type BumpChartXAxisProps,
+  type BumpChartYAxisProps,
+  type BumpChartLabelsProps,
+  type BumpChartTooltipProps,
+  type BumpChartLegendProps,
+  type BumpChartStatus,
+  type BumpChartDatum,
+  type BumpRanks,
+} from './components/bump-chart';
+export {
   PyramidChart,
   usePyramidChart,
   type PyramidChartProps,

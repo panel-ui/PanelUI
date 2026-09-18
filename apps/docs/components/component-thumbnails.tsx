@@ -1544,6 +1544,32 @@ const treemapChart = (
   </Chartlet>
 );
 
+const bumpChart = (
+  <Chartlet>
+    <path
+      d="M8 16C24 16 24 48 40 48S56 32 72 32 88 16 112 16"
+      stroke="currentColor"
+      strokeWidth="2"
+      opacity="0.35"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8 48C24 48 24 16 40 16S56 48 72 48 88 48 112 48"
+      stroke="currentColor"
+      strokeWidth="2"
+      opacity="0.35"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8 32C24 32 24 32 40 32S56 16 72 16 88 32 112 32"
+      className="stroke-fd-primary"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    />
+    <circle cx="112" cy="32" r="3.5" className="fill-fd-primary" />
+  </Chartlet>
+);
+
 const waterfallChart = (
   <Chartlet>
     {[
@@ -2233,6 +2259,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'radar-chart': radarChart,
   'ring-chart': ringChart,
   'bubble-chart': bubbleChart,
+  'bump-chart': bumpChart,
   'pyramid-chart': pyramidChart,
   'scatter-chart': scatterChart,
   'treemap-chart': treemapChart,

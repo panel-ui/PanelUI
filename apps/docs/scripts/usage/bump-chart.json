@@ -1,0 +1,77 @@
+{
+  "slug": "bump-chart",
+  "intro": "Each series is drawn at its rank in every column, with an S-curve wherever it changes places. Use it for league tables, leaderboards, search positions or any ranking that is tracked over time.\n\nThe rows are evenly spaced whatever the gap between the scores behind them, so the chart shows order and not distance. When how far apart the series are matters, use a [LineChart](/docs/charts/line-chart) of the scores instead.\n\nMore than three or four lines in their own colours are hard to follow through the crossings. Pick one out with `highlight`: it is drawn in its colour and on top, and the rest are drawn in a muted grey.",
+  "usage": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>",
+  "extraImports": [
+    "type BumpChartDatum",
+    "bumpRanks",
+    "Frame"
+  ],
+  "anatomy": "<BumpChart data={…}>\n  <BumpChart.Header />    {/* the strip above the plot */}\n  <BumpChart.Grid />      {/* a guide down every column */}\n  <BumpChart.Skeleton />  {/* a bar on every row while loading */}\n  <BumpChart.Line />      {/* one per series */}\n  <BumpChart.YAxis />     {/* #1, #2… down the side */}\n  <BumpChart.XAxis />     {/* column labels along the bottom */}\n  <BumpChart.Labels />    {/* each name beside its last point */}\n  <BumpChart.Tooltip />   {/* the scrub, and the standings it opens */}\n  <BumpChart.Legend />    {/* a swatch and a name per series */}\n</BumpChart>",
+  "parts": {
+    "Header": "The strip above the plot: a title, a value, a caption and an optional legend or control. Pass the value yourself; follow `onHighlightChange` or `onActiveIndexChange` if it should track the chart.",
+    "Grid": "Dashed guides down every column, and optionally across every rank with `horizontal`.",
+    "Line": "One series. It registers its colour and label with the chart; the lines are drawn together so the picked-out one can sit on top of every crossing.",
+    "YAxis": "The ranks down the side, one on every row. The chart keeps a gutter for them. `format` changes `#1` to anything else.",
+    "XAxis": "Column labels along the bottom. `ticks` sets how many are shown.",
+    "Labels": "Each series' name level with its last point, in a column the chart reserves on the right. The names move with their lines when the data changes. Tapping one picks that line out, and tapping it again clears it; pass `pressable={false}` to turn that off.",
+    "Tooltip": "The scrub across the columns, with a card listing every series in the order it stood at the column under the finger. The card sits beside the crosshair, on whichever side has room.",
+    "Legend": "A swatch and a name per series, floated over the top corner of the plot. On a chart with a header, prefer `Header legend`.",
+    "Skeleton": "The loading state: a thin bar on every rank row with a sweep across them, shown while `status=\"loading\"`."
+  },
+  "examples": [
+    {
+      "title": "The data",
+      "description": "One row per column. Each series is a key holding its rank in that column, with `1` at the top. A missing or non-numeric value leaves a gap in that line rather than dropping it to the bottom.",
+      "code": "const league: BumpChartDatum[] = [\n  { week: 'w32', harbour: 3, northside: 2, kestrel: 1, oldMill: 4, riverside: 5 },\n  { week: 'w33', harbour: 3, northside: 2, kestrel: 1, oldMill: 5, riverside: 4 },\n  { week: 'w34', harbour: 2, northside: 3, kestrel: 1, oldMill: 4, riverside: 5 },\n  // …\n  { week: 'Now', harbour: 1, northside: 2, kestrel: 3, oldMill: 4, riverside: 5 },\n];"
+    },
+    {
+      "title": "Ranking from scores",
+      "description": "Pass the scores themselves with `values=\"score\"` and the chart ranks every column, highest first. Two equal scores keep the order the lines are declared in, so they never draw on top of each other.\n\n`bumpRanks(data, keys, { values: 'score' })` runs the same ranking outside the chart, for a header or a table that has to agree with it.",
+      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" legend />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    },
+    {
+      "title": "Picking a line out",
+      "description": "`highlight` is the series drawn in colour; the others are drawn muted and underneath it. `null` picks none, and every line keeps its own colour.\n\nPass `defaultHighlight` to start with one picked out and let `Labels` handle taps. Pass `highlight` with `onHighlightChange` when something else on the screen has to follow it.",
+      "code": "const [picked, setPicked] = useState<string | null>('kestrel');\n\n<BumpChart data={league} xDataKey=\"week\" highlight={picked} onHighlightChange={setPicked}>\n  <BumpChart.Header title={picked ?? 'No club picked'} value={picked ? `#${placeNow}` : '—'} />\n  <BumpChart.Grid />\n  {clubs.map((club, index) => (\n    <BumpChart.Line key={club.key} dataKey={club.key} label={club.label} colorIndex={index + 1} />\n  ))}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n</BumpChart>"
+    },
+    {
+      "title": "When the data changes",
+      "description": "New data moves every line from where it is drawn to its new places, over `morphDuration` milliseconds. A change that arrives mid-move starts from the lines' current positions.",
+      "code": "<BumpChart data={season === 'this' ? league : lastSeason} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  {/* …the same five lines… */}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    },
+    {
+      "title": "Loading, and then data",
+      "description": "`status=\"loading\"` hides the lines and names. Add a `Skeleton` to show a bar on every row meanwhile. The lines are drawn in from the left when it turns `ready`.",
+      "code": "<BumpChart data={league} xDataKey=\"week\" status={status} defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Skeleton />\n  {/* …lines… */}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    }
+  ],
+  "versions": [
+    {
+      "title": "Basic",
+      "description": "Five clubs over seven weeks, with one picked out against the rest.",
+      "code": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    },
+    {
+      "title": "Ranked from scores",
+      "description": "Monthly takings passed as money; the chart ranks each month itself.",
+      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" legend />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    },
+    {
+      "title": "Picking a line",
+      "description": "Tap a name to pick it out; the header reads the club you picked.",
+      "code": "const [picked, setPicked] = useState<string | null>('kestrel');\n\n<BumpChart data={league} xDataKey=\"week\" highlight={picked} onHighlightChange={setPicked}>\n  <BumpChart.Header title={picked ?? 'No club picked'} value={picked ? `#${placeNow}` : '—'} />\n  <BumpChart.Grid />\n  {clubs.map((club, index) => (\n    <BumpChart.Line key={club.key} dataKey={club.key} label={club.label} colorIndex={index + 1} />\n  ))}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n</BumpChart>"
+    },
+    {
+      "title": "Changing data",
+      "description": "Switch seasons and every line moves to its new places.",
+      "code": "<BumpChart data={season === 'this' ? league : lastSeason} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  {/* …the same five lines… */}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    },
+    {
+      "title": "Loading",
+      "description": "A bar on every row while the table loads.",
+      "code": "<BumpChart data={league} xDataKey=\"week\" status={status} defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Skeleton />\n  {/* …lines… */}\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+    }
+  ],
+  "notes": "With `values=\"rank\"` a rank must be a finite number of at least `1`; anything else is a gap. The number of rows is the lowest rank any series holds, so a table of five with one series missing still keeps five rows.\n\n### Room at the sides\n\n`YAxis` and `Labels` each reserve room beside the plot before it is laid out. `Labels` takes 84 points by default; set its `width` for longer or shorter names. A name that does not fit is cut short.\n\n### Reduced motion\n\nThe reveal and the move between data sets are both skipped, and the chart draws straight to its final shape.\n\n**`aspectRatio` measures the plot, not the whole chart.** The header sits above the drawing area, so a chart with one is taller than the ratio alone suggests.\n\n### Accessibility\n\nThe SVG drawing is decorative. `BumpChart` exposes one summary and one entry per column, listing each series' rank there. The names in `Labels` are buttons with a selected state. Use `accessibilityLabel` and `accessibilityHint` for context, `accessibilityLabelForDatum` to replace a column's spoken text, and `onAccessibilityDatumPress` when a column has an equivalent action."
+}

@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1311,
-    "values": 333,
-    "types": 978,
-    "modules": 157,
-    "components": 130,
+    "exports": 1328,
+    "values": 336,
+    "types": 992,
+    "modules": 158,
+    "components": 131,
     "hooks": 13
   },
   "groups": {
@@ -522,6 +522,81 @@
           },
           {
             "name": "BubbleChartStatus",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/bump-chart/index.tsx",
+        "slug": "bump-chart",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "BumpChart",
+            "kind": "value"
+          },
+          {
+            "name": "useBumpChart",
+            "kind": "value"
+          },
+          {
+            "name": "bumpRanks",
+            "kind": "value"
+          },
+          {
+            "name": "BumpChartProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartHandle",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartGridProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartLineProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartSkeletonProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartXAxisProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartYAxisProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartLabelsProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartTooltipProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartLegendProps",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartStatus",
+            "kind": "type"
+          },
+          {
+            "name": "BumpChartDatum",
+            "kind": "type"
+          },
+          {
+            "name": "BumpRanks",
             "kind": "type"
           }
         ]

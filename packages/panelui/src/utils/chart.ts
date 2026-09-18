@@ -561,6 +561,39 @@ export function areaPath(
 }
 
 /**
+ * One unbroken run of points joined by S-curves, for a chart of positions.
+ *
+ * Each join leaves one point level and arrives at the next one level, with
+ * both control points at the midpoint between them. A line that holds its
+ * position stays flat, and a line that changes position crosses over in the
+ * middle of the gap. The monotone curve suits values, not places: it bends
+ * through every point, so a series holding its rank would still look like it
+ * was moving.
+ */
+export function bumpSegment(points: ChartPoint[]): string {
+  'worklet';
+  if (!points.length) return '';
+  let d = `M${points[0]!.x},${points[0]!.y}`;
+  for (let i = 1; i < points.length; i += 1) {
+    const from = points[i - 1]!;
+    const to = points[i]!;
+    const mid = (from.x + to.x) / 2;
+    d += ` C${mid},${from.y} ${mid},${to.y} ${to.x},${to.y}`;
+  }
+  return d;
+}
+
+/** A dot at every point, as one path, so a series' markers cost one node. */
+export function dotsPath(points: ChartPoint[], radius: number): string {
+  'worklet';
+  let d = '';
+  for (const point of points) {
+    d += `M${point.x - radius},${point.y} a${radius},${radius} 0 1,0 ${radius * 2},0 a${radius},${radius} 0 1,0 ${-radius * 2},0 `;
+  }
+  return d;
+}
+
+/**
  * A rounded rectangle, built as a path rather than drawn as a `Rect`.
  *
  * A bar is rounded on the end it grows towards and square on the end it grows

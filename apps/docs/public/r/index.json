@@ -193,6 +193,23 @@
     "docsPath": "charts/bubble-chart"
   },
   {
+    "name": "bump-chart",
+    "type": "registry:ui",
+    "kind": "chart",
+    "group": "charts",
+    "stability": "stable",
+    "description": "How a set of things ranked against each other over time.",
+    "registryDependencies": [
+      "chart",
+      "chart-accessibility",
+      "cn",
+      "controllable-state",
+      "finite-chart",
+      "text"
+    ],
+    "docsPath": "charts/bump-chart"
+  },
+  {
     "name": "button",
     "type": "registry:ui",
     "kind": "ui",

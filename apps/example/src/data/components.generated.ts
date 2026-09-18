@@ -13,6 +13,7 @@ export const COMPONENTS = [
   {"slug":"bottom-sheet","name":"BottomSheet","summary":"Draggable sheet anchored to the bottom"},
   {"slug":"breadcrumb","name":"Breadcrumb","summary":"The trail back up to the current page"},
   {"slug":"bubble-chart","name":"BubbleChart","summary":"Named circles on two axes, with a third quantity on their area"},
+  {"slug":"bump-chart","name":"BumpChart","summary":"How a set of things ranked against each other over time"},
   {"slug":"button","name":"Button","summary":"Pressable action with variants and loading"},
   {"slug":"button-group","name":"ButtonGroup","summary":"Several buttons drawn as one control"},
   {"slug":"calendar","name":"Calendar","summary":"A month of days, for picking one, several, or a range"},
@@ -135,4 +136,4 @@ export const COMPONENTS = [
 
 export type ComponentMetadata = (typeof COMPONENTS)[number];
 export const COMPONENT_COUNT = COMPONENTS.length;
-export const CHART_COUNT = 16;
+export const CHART_COUNT = 17;

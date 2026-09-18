@@ -27,7 +27,7 @@ const read = (slug) =>
   readFile(new URL(`../src/components/${slug}/index.tsx`, import.meta.url), 'utf8');
 
 /** Charts that uncover their marks with a view clip. */
-const VIEW_CLIPPED = ['plot', 'line-chart', 'area-chart', 'heatmap-chart'];
+const VIEW_CLIPPED = ['plot', 'line-chart', 'area-chart', 'heatmap-chart', 'bump-chart'];
 
 /** Charts that keep an SVG clip, and so owe a static fallback. */
 const SVG_CLIPPED = ['hex-chart'];

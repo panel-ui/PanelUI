@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-130 component modules. The **Reference** column links to a file in this skill holding that
+131 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -126,6 +126,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `AreaChart` | Filled bands over time, stacked or overlaid. | [area-chart](./components/area-chart.md) |
 | `BarChart` | Categories compared by length, grouped or stacked. | [bar-chart](./components/bar-chart.md) |
 | `BubbleChart` | Named circles on two axes, with a third quantity on their area. | [bubble-chart](./components/bubble-chart.md) |
+| `BumpChart` | How a set of things ranked against each other over time. | [bump-chart](./components/bump-chart.md) |
 | `CandlestickChart` | Open, high, low and close for a period, drawn as one mark. | [candlestick-chart](./components/candlestick-chart.md) |
 | `FunnelChart` | Where a population drained away, one step at a time. | [funnel-chart](./components/funnel-chart.md) |
 | `HeatmapChart` | Contribution grid with a themed colour ramp and a readout. | [heatmap-chart](./components/heatmap-chart.md) |

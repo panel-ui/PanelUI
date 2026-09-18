@@ -13,6 +13,7 @@
     "bottom-sheet",
     "breadcrumb",
     "bubble-chart",
+    "bump-chart",
     "button",
     "button-group",
     "calendar",
@@ -146,6 +147,10 @@
       "accessibilityMode": "shared-data"
     },
     {
+      "name": "bump-chart",
+      "accessibilityMode": "shared-data"
+    },
+    {
       "name": "candlestick-chart",
       "accessibilityMode": "shared-data"
     },
@@ -207,24 +212,24 @@
     }
   ],
   "counts": {
-    "componentModules": 130,
-    "packageComponentExports": 130,
-    "documentedComponents": 130,
-    "exampleEntries": 130,
+    "componentModules": 131,
+    "packageComponentExports": 131,
+    "documentedComponents": 131,
+    "exampleEntries": 131,
     "registry": {
-      "componentItems": 130,
+      "componentItems": 131,
       "supportItems": 36,
-      "totalItems": 166,
+      "totalItems": 167,
       "byType": {
-        "registry:ui": 145,
+        "registry:ui": 146,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1
       }
     },
     "visualizations": {
-      "total": 18,
-      "sharedData": 11,
+      "total": 19,
+      "sharedData": 12,
       "summaries": 1,
       "interactiveItems": 6
     },

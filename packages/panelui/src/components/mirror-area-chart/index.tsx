@@ -67,6 +67,7 @@ import { Text } from '../../primitives/text';
 import { ChartAccessibilityData, type ChartAccessibilityProps } from '../../primitives/chart-accessibility';
 import { finiteChartDomain } from '../../primitives/finite-chart';
 import {
+  colorStop,
   columnValues,
   compactNumber,
   dotsPath,
@@ -860,9 +861,9 @@ function MirrorAreaChartSkeleton({ duration = 1400, color }: MirrorAreaChartSkel
     <G>
       <Defs>
         <AnimatedLinearGradient id={gradientId} animatedProps={animatedProps} y1="0" y2="0">
-          <Stop offset="0" stopColor={base} />
-          <Stop offset="0.5" stopColor={highlight} stopOpacity={0.55} />
-          <Stop offset="1" stopColor={base} />
+          <Stop offset="0" {...colorStop(base)} />
+          <Stop offset="0.5" stopColor={highlight} stopOpacity={0.3} />
+          <Stop offset="1" {...colorStop(base)} />
         </AnimatedLinearGradient>
       </Defs>
       <Rect

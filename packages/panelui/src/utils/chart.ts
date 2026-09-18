@@ -561,6 +561,43 @@ export function areaPath(
 }
 
 /**
+ * A colour as a gradient stop: the colour without its alpha, and the alpha as
+ * the stop's opacity. A `<Stop>` given `rgba(255,255,255,0.13)` as its colour
+ * draws it opaque on native, so a translucent token such as `--color-skeleton`
+ * comes out solid white in a dark theme.
+ */
+export function colorStop(color: string): { stopColor: string; stopOpacity: number } {
+  const value = color.trim();
+  const clamp = (alpha: number) => (Number.isFinite(alpha) ? Math.min(Math.max(alpha, 0), 1) : 1);
+
+  // #rgba and #rrggbbaa
+  if (/^#([0-9a-f]{4}|[0-9a-f]{8})$/i.test(value)) {
+    const body =
+      value.length === 5
+        ? value
+            .slice(1)
+            .split('')
+            .map((digit) => digit + digit)
+            .join('')
+        : value.slice(1);
+    return {
+      stopColor: `#${body.slice(0, 6)}`,
+      stopOpacity: clamp(parseInt(body.slice(6, 8), 16) / 255),
+    };
+  }
+
+  // rgba(r, g, b, a) and rgb(r g b / a)
+  const match = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)\s*[,/]\s*([\d.]+%?)\s*\)$/i.exec(value);
+  if (match) {
+    const raw = match[4]!;
+    const alpha = raw.endsWith('%') ? Number(raw.slice(0, -1)) / 100 : Number(raw);
+    return { stopColor: `rgb(${match[1]}, ${match[2]}, ${match[3]})`, stopOpacity: clamp(alpha) };
+  }
+
+  return { stopColor: value, stopOpacity: 1 };
+}
+
+/**
  * One unbroken run of points joined by S-curves, for a chart of positions.
  *
  * Each join leaves one point level and arrives at the next one level, with

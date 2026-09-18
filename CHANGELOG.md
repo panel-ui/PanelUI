@@ -9,6 +9,42 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.100.0] — 2026-09-18
+
+### Added
+
+- **BumpChart** — how a set of things ranked against each other over time: league tables,
+  leaderboards, search positions. Each series is drawn at its rank in every column, with an
+  S-curve wherever it changes places, so a series holding its place stays flat.
+  - `values="score"` ranks every column for you, highest first; `bumpRanks` runs the same
+    ranking outside the chart, for a header or a table that has to agree with it.
+  - `highlight` draws one line in its colour and on top of every crossing, with the rest
+    muted. Tapping a name in `BumpChart.Labels` picks that line out.
+  - New data moves each line from where it is drawn to its new places.
+  - Parts: Header, Grid, Line, Skeleton, XAxis, YAxis, Labels, Tooltip, Legend.
+- **MirrorAreaChart** — two related measures on one timeline, one growing up from a baseline
+  and one growing down from it: queue load and its high-priority share, requests and the ones
+  that failed. Each half has its own scale, because the two are usually in different units.
+  - `split` sets how much of the height sits above the baseline.
+  - Areas on one side overlay in declaration order, so declare a total before the part of it.
+    `muted` draws the total in the muted foreground colour.
+  - The tooltip draws a dashed crosshair, a dot on the top edge and a readout;
+    `formatSummary` reduces the readout to one line.
+  - Parts: Header, Grid (dots or lines), Area, Baseline, Skeleton, XAxis, YAxis, Tooltip,
+    Legend.
+
+### Fixed
+
+- **AnimatedBadge** — a `status` outside the six no longer crashes the app with "Element type
+  is invalid". It is drawn as `neutral`, and a development warning names the value that was
+  passed. A boolean label, such as the leftover of `{flag && 'Label'}`, no longer leaves an
+  empty slot in the pill. Reported in #218.
+
+### Docs
+
+- **Integrations** — a page for panelwind.
+- **ImageViewer** — preview recordings at the top of the page and on every version.
+
 ## [0.99.0] — 2026-09-15
 
 ### Added

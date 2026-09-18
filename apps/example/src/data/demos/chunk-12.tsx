@@ -1436,8 +1436,8 @@ function MirrorBasicVersion() {
           <MirrorAreaChart data={QUEUE_LOAD} xDataKey="time" className="px-2 pb-4 pt-3">
             <MirrorAreaChart.Grid />
             <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-            <MirrorAreaChart.Area dataKey="high" label="high priority" />
-            <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+            <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+            <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
             <MirrorAreaChart.Baseline />
             <MirrorAreaChart.XAxis />
             <MirrorAreaChart.Tooltip
@@ -1471,7 +1471,7 @@ function MirrorScalesVersion() {
             />
             <MirrorAreaChart.Grid />
             <MirrorAreaChart.Area dataKey="jobs" label="Jobs" muted />
-            <MirrorAreaChart.Area dataKey="high" label="High" />
+            <MirrorAreaChart.Area dataKey="high" label="High" colorIndex={3} />
             <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={2} fillOpacity={0.6} />
             <MirrorAreaChart.Baseline />
             <MirrorAreaChart.YAxis formatBottom={(value) => `${Math.round(value)}%`} />
@@ -1513,11 +1513,11 @@ function MirrorErrorsVersion() {
               caption={row ? `${row.errors} failed` : '1,808 failed, 0.21%'}
             />
             <MirrorAreaChart.Grid variant="lines" />
-            <MirrorAreaChart.Area dataKey="requests" label="requests" colorIndex={1} gradientToOpacity={0.04} />
+            <MirrorAreaChart.Area dataKey="requests" label="requests" colorIndex={2} gradientToOpacity={0.04} />
             <MirrorAreaChart.Area dataKey="errors" label="failed" side="bottom" colorIndex={5} fillOpacity={0.55} />
             <MirrorAreaChart.Baseline />
-            <MirrorAreaChart.XAxis ticks={5} format={(datum) => `${datum.hour}:00`} />
-            <MirrorAreaChart.Tooltip />
+            <MirrorAreaChart.XAxis ticks={3} format={(datum) => `${datum.hour}:00`} />
+            <MirrorAreaChart.Tooltip formatX={(datum) => `${datum.hour}:00`} />
           </MirrorAreaChart>
         </Frame.Panel>
       </Frame>
@@ -1547,8 +1547,8 @@ function MirrorLoadingVersion() {
             <MirrorAreaChart.Grid />
             <MirrorAreaChart.Skeleton />
             <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-            <MirrorAreaChart.Area dataKey="high" label="high priority" />
-            <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+            <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+            <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
             <MirrorAreaChart.Baseline />
             <MirrorAreaChart.XAxis />
             <MirrorAreaChart.Tooltip formatSummary={queueSummary} />

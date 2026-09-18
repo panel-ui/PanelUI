@@ -30,8 +30,8 @@ npx panelui-cli@latest add mirror-area-chart
 <MirrorAreaChart data={queue} xDataKey="time">
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="high priority" />
-  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+  <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.XAxis />
   <MirrorAreaChart.Tooltip
@@ -92,7 +92,7 @@ Without a `formatSummary`, the readout lists every series, and `formatValue` rec
   <MirrorAreaChart.Header title="Peak" value="1,120 jobs" legend />
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Area dataKey="jobs" label="Jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="High" />
+  <MirrorAreaChart.Area dataKey="high" label="High" colorIndex={3} />
   <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={2} fillOpacity={0.6} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.YAxis formatBottom={(value) => `${Math.round(value)}%`} />
@@ -118,11 +118,11 @@ const row = active >= 0 ? traffic[active] : null;
     caption={row ? `${row.errors} failed` : '1,808 failed, 0.21%'}
   />
   <MirrorAreaChart.Grid variant="lines" />
-  <MirrorAreaChart.Area dataKey="requests" label="requests" gradientToOpacity={0.04} />
+  <MirrorAreaChart.Area dataKey="requests" label="requests" colorIndex={2} gradientToOpacity={0.04} />
   <MirrorAreaChart.Area dataKey="errors" label="failed" side="bottom" colorIndex={5} fillOpacity={0.55} />
   <MirrorAreaChart.Baseline />
-  <MirrorAreaChart.XAxis ticks={5} format={(d) => `${d.hour}:00`} />
-  <MirrorAreaChart.Tooltip />
+  <MirrorAreaChart.XAxis ticks={3} format={(d) => `${d.hour}:00`} />
+  <MirrorAreaChart.Tooltip formatX={(d) => `${d.hour}:00`} />
 </MirrorAreaChart>
 ```
 
@@ -135,8 +135,8 @@ const row = active >= 0 ? traffic[active] : null;
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Skeleton />
   <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="high priority" />
-  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+  <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.XAxis />
   <MirrorAreaChart.Tooltip />
@@ -153,8 +153,8 @@ Queued jobs above the line, the high-priority share below it.
 <MirrorAreaChart data={queue} xDataKey="time">
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="high priority" />
-  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+  <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.XAxis />
   <MirrorAreaChart.Tooltip
@@ -172,7 +172,7 @@ Both scales labelled, and every series in the readout.
   <MirrorAreaChart.Header title="Peak" value="1,120 jobs" legend />
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Area dataKey="jobs" label="Jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="High" />
+  <MirrorAreaChart.Area dataKey="high" label="High" colorIndex={3} />
   <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={2} fillOpacity={0.6} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.YAxis formatBottom={(value) => `${Math.round(value)}%`} />
@@ -198,11 +198,11 @@ const row = active >= 0 ? traffic[active] : null;
     caption={row ? `${row.errors} failed` : '1,808 failed, 0.21%'}
   />
   <MirrorAreaChart.Grid variant="lines" />
-  <MirrorAreaChart.Area dataKey="requests" label="requests" gradientToOpacity={0.04} />
+  <MirrorAreaChart.Area dataKey="requests" label="requests" colorIndex={2} gradientToOpacity={0.04} />
   <MirrorAreaChart.Area dataKey="errors" label="failed" side="bottom" colorIndex={5} fillOpacity={0.55} />
   <MirrorAreaChart.Baseline />
-  <MirrorAreaChart.XAxis ticks={5} format={(d) => `${d.hour}:00`} />
-  <MirrorAreaChart.Tooltip />
+  <MirrorAreaChart.XAxis ticks={3} format={(d) => `${d.hour}:00`} />
+  <MirrorAreaChart.Tooltip formatX={(d) => `${d.hour}:00`} />
 </MirrorAreaChart>
 ```
 
@@ -215,8 +215,8 @@ A band along the baseline while the data loads.
   <MirrorAreaChart.Grid />
   <MirrorAreaChart.Skeleton />
   <MirrorAreaChart.Area dataKey="jobs" label="jobs" muted />
-  <MirrorAreaChart.Area dataKey="high" label="high priority" />
-  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" fillOpacity={0.7} />
+  <MirrorAreaChart.Area dataKey="high" label="high priority" colorIndex={3} />
+  <MirrorAreaChart.Area dataKey="share" label="% high" side="bottom" colorIndex={3} fillOpacity={0.7} />
   <MirrorAreaChart.Baseline />
   <MirrorAreaChart.XAxis />
   <MirrorAreaChart.Tooltip />

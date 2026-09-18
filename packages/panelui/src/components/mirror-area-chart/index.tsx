@@ -86,7 +86,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedLine = Animated.createAnimatedComponent(SvgLine);
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const PADDING = { top: 12, right: 10, bottom: 22, left: 10 };
+const PADDING = { top: 12, right: 10, bottom: 30, left: 10 };
 
 /** Left gutter reserved when a `YAxis` is present. */
 const Y_AXIS_WIDTH = 40;
@@ -782,7 +782,9 @@ function MirrorAreaChartArea({
       grow.value,
       top ? -1 : 1
     );
-    return { d: edgePath(runs, curve) };
+    // Hidden while the band is flat, or the edge lines of every area are
+    // drawn along the baseline over the skeleton while the chart waits.
+    return { d: edgePath(runs, curve), opacity: grow.value > 0.001 ? 1 : 0 };
   });
 
   return (
@@ -1119,7 +1121,8 @@ function MirrorAreaChartTooltip({
     const index = activeIndex.value;
     if (index < 0) return { opacity: 0 };
     const x = xOf(index, total, plot);
-    const gap = 10;
+    // Clear of the dot's radius and its ring, not only of the crosshair.
+    const gap = DOT / 2 + 10;
     const fitsLeft = x - gap - READOUT_WIDTH >= plot.left;
     const at = fitsLeft ? x - gap - READOUT_WIDTH : Math.min(x + gap, plot.left + plot.width - READOUT_WIDTH);
     return { opacity: 1, transform: [{ translateX: at }] };

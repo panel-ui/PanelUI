@@ -29,7 +29,7 @@ npx panelui-cli@latest add bump-chart
 ```tsx
 <BumpChart data={league} xDataKey="week" defaultHighlight="harbour">
   <BumpChart.Grid />
-  <BumpChart.Line dataKey="harbour" label="Harbour" />
+  <BumpChart.Line dataKey="harbour" label="Harbour" colorIndex={3} />
   <BumpChart.Line dataKey="northside" label="Northside" />
   <BumpChart.Line dataKey="kestrel" label="Kestrel" />
   <BumpChart.Line dataKey="oldMill" label="Old Mill" />
@@ -91,7 +91,7 @@ Pass the scores themselves with `values="score"` and the chart ranks every colum
 
 ```tsx
 <BumpChart data={takings} xDataKey="month" values="score" aspectRatio={1.8}>
-  <BumpChart.Header title="Top shop in June" value="Quay" legend />
+  <BumpChart.Header title="Top shop in June" value="Quay" />
   <BumpChart.Grid />
   <BumpChart.Line dataKey="quay" label="Quay" colorIndex={1} strokeWidth={2} />
   <BumpChart.Line dataKey="market" label="Market" colorIndex={2} strokeWidth={2} />
@@ -99,6 +99,7 @@ Pass the scores themselves with `values="score"` and the chart ranks every colum
   <BumpChart.Line dataKey="college" label="College" colorIndex={4} strokeWidth={2} />
   <BumpChart.YAxis />
   <BumpChart.XAxis ticks={6} />
+  <BumpChart.Labels pressable={false} />
   <BumpChart.Tooltip />
 </BumpChart>
 ```
@@ -164,7 +165,7 @@ Five clubs over seven weeks, with one picked out against the rest.
 ```tsx
 <BumpChart data={league} xDataKey="week" defaultHighlight="harbour">
   <BumpChart.Grid />
-  <BumpChart.Line dataKey="harbour" label="Harbour" />
+  <BumpChart.Line dataKey="harbour" label="Harbour" colorIndex={3} />
   <BumpChart.Line dataKey="northside" label="Northside" />
   <BumpChart.Line dataKey="kestrel" label="Kestrel" />
   <BumpChart.Line dataKey="oldMill" label="Old Mill" />
@@ -182,7 +183,7 @@ Monthly takings passed as money; the chart ranks each month itself.
 
 ```tsx
 <BumpChart data={takings} xDataKey="month" values="score" aspectRatio={1.8}>
-  <BumpChart.Header title="Top shop in June" value="Quay" legend />
+  <BumpChart.Header title="Top shop in June" value="Quay" />
   <BumpChart.Grid />
   <BumpChart.Line dataKey="quay" label="Quay" colorIndex={1} strokeWidth={2} />
   <BumpChart.Line dataKey="market" label="Market" colorIndex={2} strokeWidth={2} />
@@ -190,6 +191,7 @@ Monthly takings passed as money; the chart ranks each month itself.
   <BumpChart.Line dataKey="college" label="College" colorIndex={4} strokeWidth={2} />
   <BumpChart.YAxis />
   <BumpChart.XAxis ticks={6} />
+  <BumpChart.Labels pressable={false} />
   <BumpChart.Tooltip />
 </BumpChart>
 ```

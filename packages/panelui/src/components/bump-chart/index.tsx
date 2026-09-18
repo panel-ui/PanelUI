@@ -73,6 +73,7 @@ import { useControllableState } from '../../primitives/controllable-state';
 import { finiteChartNumber } from '../../primitives/finite-chart';
 import {
   bumpSegment,
+  colorStop,
   dotsPath,
   useSeriesColor,
   xOf,
@@ -85,7 +86,7 @@ import { cn } from '../../utils/cn';
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const PADDING = { top: 8, right: 10, bottom: 24, left: 10 };
+const PADDING = { top: 8, right: 10, bottom: 32, left: 10 };
 
 /** Left gutter reserved when a `YAxis` is present, for `#1`…`#12`. */
 const Y_AXIS_WIDTH = 34;
@@ -917,9 +918,9 @@ function BumpChartSkeleton({ duration = 1400, color, rows: rowsProp }: BumpChart
     <G>
       <Defs>
         <AnimatedLinearGradient id={gradientId} animatedProps={animatedProps} y1="0" y2="0">
-          <Stop offset="0" stopColor={base} />
-          <Stop offset="0.5" stopColor={highlight} stopOpacity={0.55} />
-          <Stop offset="1" stopColor={base} />
+          <Stop offset="0" {...colorStop(base)} />
+          <Stop offset="0.5" stopColor={highlight} stopOpacity={0.3} />
+          <Stop offset="1" {...colorStop(base)} />
         </AnimatedLinearGradient>
       </Defs>
       {Array.from({ length: rows }, (_unused, index) => {
@@ -1143,7 +1144,9 @@ function BumpLabel({
           weight={picked ? 'semibold' : undefined}
           muted={!picked}
           numberOfLines={1}
-          style={dimmed ? { opacity: 0.8 } : undefined}
+          // With nothing picked out, each name takes its line's colour, which
+          // is the only thing tying it to that line across the crossings.
+          style={dimmed ? { opacity: 0.8 } : picked ? undefined : { color: series.color }}
           className={className}
         >
           {series.label}
@@ -1185,6 +1188,8 @@ function BumpChartTooltip({ color, formatRank, formatX, className }: BumpChartTo
 
   const token = useCSSVariable('--color-foreground');
   const stroke = color ?? (typeof token === 'string' ? token : '#888888');
+  const muted = useCSSVariable('--color-muted-foreground');
+  const mutedColor = typeof muted === 'string' ? muted : '#737373';
 
   const total = data.length;
   const left = plot.left;
@@ -1298,8 +1303,16 @@ function BumpChartTooltip({ color, formatRank, formatX, className }: BumpChartTo
                   <Text size="xs" muted style={{ minWidth: 20 }}>
                     {fmtRank(rank)}
                   </Text>
+                  {/* The colour the line is drawn in, so a muted line has a
+                      muted swatch rather than its unused series colour. */}
                   <View
-                    style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: item.color }}
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor:
+                        highlight !== null && highlight !== item.key ? mutedColor : item.color,
+                    }}
                   />
                   <Text
                     size="xs"

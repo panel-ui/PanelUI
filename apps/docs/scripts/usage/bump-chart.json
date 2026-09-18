@@ -1,7 +1,7 @@
 {
   "slug": "bump-chart",
   "intro": "Each series is drawn at its rank in every column, with an S-curve wherever it changes places. Use it for league tables, leaderboards, search positions or any ranking that is tracked over time.\n\nThe rows are evenly spaced whatever the gap between the scores behind them, so the chart shows order and not distance. When how far apart the series are matters, use a [LineChart](/docs/charts/line-chart) of the scores instead.\n\nMore than three or four lines in their own colours are hard to follow through the crossings. Pick one out with `highlight`: it is drawn in its colour and on top, and the rest are drawn in a muted grey.",
-  "usage": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>",
+  "usage": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" colorIndex={3} />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>",
   "extraImports": [
     "type BumpChartDatum",
     "bumpRanks",
@@ -28,7 +28,7 @@
     {
       "title": "Ranking from scores",
       "description": "Pass the scores themselves with `values=\"score\"` and the chart ranks every column, highest first. Two equal scores keep the order the lines are declared in, so they never draw on top of each other.\n\n`bumpRanks(data, keys, { values: 'score' })` runs the same ranking outside the chart, for a header or a table that has to agree with it.",
-      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" legend />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Tooltip />\n</BumpChart>"
+      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Labels pressable={false} />\n  <BumpChart.Tooltip />\n</BumpChart>"
     },
     {
       "title": "Picking a line out",
@@ -50,12 +50,12 @@
     {
       "title": "Basic",
       "description": "Five clubs over seven weeks, with one picked out against the rest.",
-      "code": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
+      "code": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" colorIndex={3} />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.Line dataKey=\"kestrel\" label=\"Kestrel\" />\n  <BumpChart.Line dataKey=\"oldMill\" label=\"Old Mill\" />\n  <BumpChart.Line dataKey=\"riverside\" label=\"Riverside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>"
     },
     {
       "title": "Ranked from scores",
       "description": "Monthly takings passed as money; the chart ranks each month itself.",
-      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" legend />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Tooltip />\n</BumpChart>"
+      "code": "<BumpChart data={takings} xDataKey=\"month\" values=\"score\" aspectRatio={1.8}>\n  <BumpChart.Header title=\"Top shop in June\" value=\"Quay\" />\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"quay\" label=\"Quay\" colorIndex={1} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"market\" label=\"Market\" colorIndex={2} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"station\" label=\"Station\" colorIndex={3} strokeWidth={2} />\n  <BumpChart.Line dataKey=\"college\" label=\"College\" colorIndex={4} strokeWidth={2} />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis ticks={6} />\n  <BumpChart.Labels pressable={false} />\n  <BumpChart.Tooltip />\n</BumpChart>"
     },
     {
       "title": "Picking a line",

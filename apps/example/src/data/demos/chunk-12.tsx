@@ -1160,7 +1160,12 @@ function LeagueLines() {
   return (
     <>
       {CLUBS.map((club) => (
-        <BumpChart.Line key={club.key} dataKey={club.key} label={club.label} />
+        <BumpChart.Line
+          key={club.key}
+          dataKey={club.key}
+          label={club.label}
+          colorIndex={club.key === 'harbour' ? 3 : 1}
+        />
       ))}
     </>
   );
@@ -1178,7 +1183,7 @@ function BumpBasicVersion() {
         <Frame.Panel>
           <BumpChart data={LEAGUE} xDataKey="week" defaultHighlight="harbour" className="px-2 pb-4 pt-3">
             <BumpChart.Grid />
-            <BumpChart.Line dataKey="harbour" label="Harbour" />
+            <BumpChart.Line dataKey="harbour" label="Harbour" colorIndex={3} />
             <BumpChart.Line dataKey="northside" label="Northside" />
             <BumpChart.Line dataKey="kestrel" label="Kestrel" />
             <BumpChart.Line dataKey="oldMill" label="Old Mill" />
@@ -1210,7 +1215,6 @@ function BumpScoresVersion() {
               title="Top shop in June"
               value="Quay"
               caption="Ranked by takings each month"
-              legend
             />
             <BumpChart.Grid />
             <BumpChart.Line dataKey="quay" label="Quay" colorIndex={1} strokeWidth={2} />
@@ -1219,6 +1223,7 @@ function BumpScoresVersion() {
             <BumpChart.Line dataKey="college" label="College" colorIndex={4} strokeWidth={2} />
             <BumpChart.YAxis />
             <BumpChart.XAxis ticks={6} />
+            <BumpChart.Labels pressable={false} />
             <BumpChart.Tooltip />
           </BumpChart>
         </Frame.Panel>

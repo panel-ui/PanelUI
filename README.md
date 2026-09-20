@@ -162,11 +162,11 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
   Progress, Meter, Spinner, Loader
 - **Data visualisation** — Plot, LineChart, LiveLineChart, AreaChart, MirrorAreaChart, BarChart,
   WaterfallChart, PyramidChart, ScatterChart, BubbleChart, BumpChart, CandlestickChart, PieChart,
-  PolarAreaChart, FunnelChart, TreemapChart, RingChart, RadarChart, HeatmapChart, HexChart, Kpi, Map,
-  Marker, Flow, QRCode
+  PolarAreaChart, FunnelChart, TreemapChart, SankeyChart, RingChart, RadarChart, HeatmapChart,
+  HexChart, Kpi, Map, Marker, Flow, QRCode
 - **AI components** — Message, MessageScroller, Response, Reasoning, Plan, Task, Sources,
   CodeBlock, Shimmer, ThinkingOrb, Soundwave
-- **Social** — Post, ImageViewer, Avatar, Attachment
+- **Social** — Post, ImageViewer, Compare, Avatar, Attachment
 - **Scroll & motion** — ScrollHeader, ScrollFade, ScrollText, ScrollCanvas, TextAnimation, Marquee,
   Direction
 

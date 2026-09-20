@@ -21,6 +21,7 @@ const load16 = () => import('./demos/chunk-16');
 const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   'sankey-chart': () =>
     load16().then((module) => module.ENTRIES_BY_SLUG['sankey-chart']),
+  compare: () => load16().then((module) => module.ENTRIES_BY_SLUG['compare']),
   'bump-chart': () =>
     load12().then((module) => module.ENTRIES_BY_SLUG['bump-chart']),
   'mirror-area-chart': () =>

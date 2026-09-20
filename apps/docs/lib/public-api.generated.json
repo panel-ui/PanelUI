@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1358,
-    "values": 340,
-    "types": 1018,
-    "modules": 160,
-    "components": 133,
+    "exports": 1365,
+    "values": 341,
+    "types": 1024,
+    "modules": 161,
+    "components": 134,
     "hooks": 13
   },
   "groups": {
@@ -1064,6 +1064,41 @@
           },
           {
             "name": "ComboboxPresentation",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/compare/index.tsx",
+        "slug": "compare",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "Compare",
+            "kind": "value"
+          },
+          {
+            "name": "CompareProps",
+            "kind": "type"
+          },
+          {
+            "name": "CompareBeforeProps",
+            "kind": "type"
+          },
+          {
+            "name": "CompareAfterProps",
+            "kind": "type"
+          },
+          {
+            "name": "CompareHandleProps",
+            "kind": "type"
+          },
+          {
+            "name": "CompareLabelProps",
+            "kind": "type"
+          },
+          {
+            "name": "CompareOrientation",
             "kind": "type"
           }
         ]

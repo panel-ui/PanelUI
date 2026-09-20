@@ -27,6 +27,7 @@
     "collapsible",
     "color-picker",
     "combobox",
+    "compare",
     "context-menu",
     "date-picker",
     "date-time-picker",
@@ -222,16 +223,16 @@
     }
   ],
   "counts": {
-    "componentModules": 133,
-    "packageComponentExports": 133,
-    "documentedComponents": 133,
-    "exampleEntries": 133,
+    "componentModules": 134,
+    "packageComponentExports": 134,
+    "documentedComponents": 134,
+    "exampleEntries": 134,
     "registry": {
-      "componentItems": 133,
+      "componentItems": 134,
       "supportItems": 36,
-      "totalItems": 169,
+      "totalItems": 170,
       "byType": {
-        "registry:ui": 148,
+        "registry:ui": 149,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

@@ -27,6 +27,7 @@ export const COMPONENTS = [
   {"slug":"collapsible","name":"Collapsible","summary":"One section, shown and hidden by its own header"},
   {"slug":"color-picker","name":"ColorPicker","summary":"A colour chosen by dragging, not by typing"},
   {"slug":"combobox","name":"Combobox","summary":"A text field that filters a list as you type"},
+  {"slug":"compare","name":"Compare","summary":"Two versions of one picture, with a seam you drag across it"},
   {"slug":"context-menu","name":"ContextMenu","summary":"Actions for a piece of content, opened by holding it"},
   {"slug":"date-picker","name":"DatePicker","summary":"A calendar behind a button"},
   {"slug":"date-time-picker","name":"DateTimePicker","summary":"A day and a time, picked in one panel"},

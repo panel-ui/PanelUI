@@ -1304,6 +1304,16 @@ const sankeyChart = (
   </Chartlet>
 );
 
+const compare = (
+  <div className="relative h-24 w-44 overflow-hidden rounded-xl border border-fd-border">
+    {/* The two tones are the two versions; where they meet is the seam. */}
+    <Fill className="absolute inset-0 rounded-none" />
+    <Fill className="absolute inset-y-0 left-0 w-1/2 rounded-none bg-fd-muted-foreground/35" />
+    <div className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-fd-card" />
+    <Accent className="absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full" />
+  </div>
+);
+
 const funnelChart = (
   <Chartlet>
     {[
@@ -2273,6 +2283,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'candlestick-chart': candlestickChart,
   'funnel-chart': funnelChart,
   'sankey-chart': sankeyChart,
+  compare,
   'heatmap-chart': heatmapChart,
   'hex-chart': hexChart,
   'line-chart': lineChart,

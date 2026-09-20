@@ -454,6 +454,21 @@
     "docsPath": "components/combobox"
   },
   {
+    "name": "compare",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Two versions of one picture, with a seam you drag across it.",
+    "registryDependencies": [
+      "cn",
+      "haptics",
+      "text",
+      "use-direction"
+    ],
+    "docsPath": "components/compare"
+  },
+  {
     "name": "context-menu",
     "type": "registry:ui",
     "kind": "ui",

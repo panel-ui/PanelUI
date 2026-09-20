@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { Button, Card, Frame, SankeyChart, type SankeyLink, type SankeyNode, Text } from "panelui-native";
+import { Button, Card, Compare, Frame, SankeyChart, type SankeyLink, type SankeyNode, Text } from "panelui-native";
 import type { ComponentEntry } from '../component-types';
 
 /* -------------------------------------------------------------------------- */
@@ -237,6 +237,150 @@ function SankeyCurveDemo() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Compare                                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Two renderings of one card rather than two photographs.
+ *
+ * The example app ships no image pairs, and a pair downloaded at runtime would
+ * make the demo depend on the network to show anything at all. Two views of the
+ * same size make the same point — the seam reveals one over the other, in place.
+ */
+function CompareCard({ tone, title, caption }: { tone: string; title: string; caption: string }) {
+  return (
+    <View className={`flex-1 items-center justify-center gap-2 ${tone}`}>
+      <Text size="xl" weight="bold">
+        {title}
+      </Text>
+      <Text size="sm" muted>
+        {caption}
+      </Text>
+    </View>
+  );
+}
+
+function CompareBasicVersion() {
+  return (
+    <View className="flex-1 justify-center p-4">
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Drag the seam</Frame.Title>
+          <Frame.Action>Anywhere</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel className="p-4">
+          <Compare height={280}>
+            <Compare.After>
+              <CompareCard tone="bg-muted" title="After" caption="The edited version" />
+            </Compare.After>
+            <Compare.Before>
+              <CompareCard tone="bg-accent" title="Before" caption="The original" />
+            </Compare.Before>
+            <Compare.Handle />
+            <Compare.Label side="start">Before</Compare.Label>
+            <Compare.Label side="end">After</Compare.Label>
+          </Compare>
+        </Frame.Panel>
+      </Frame>
+    </View>
+  );
+}
+
+function CompareControlledVersion() {
+  const [split, setSplit] = useState(0.5);
+
+  return (
+    <View className="flex-1 justify-center gap-3 p-4">
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Driven from outside</Frame.Title>
+          <Frame.Action>{`${Math.round(split * 100)}%`}</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel className="p-4">
+          <Compare height={260} value={split} onValueChange={setSplit}>
+            <Compare.After>
+              <CompareCard tone="bg-muted" title="After" caption="Tap a button" />
+            </Compare.After>
+            <Compare.Before>
+              <CompareCard tone="bg-accent" title="Before" caption="Or drag it" />
+            </Compare.Before>
+            <Compare.Handle />
+          </Compare>
+        </Frame.Panel>
+      </Frame>
+      <View className="flex-row gap-2">
+        <Button variant="outline" onPress={() => setSplit(0)} className="flex-1">
+          After
+        </Button>
+        <Button variant="outline" onPress={() => setSplit(0.5)} className="flex-1">
+          Half
+        </Button>
+        <Button variant="outline" onPress={() => setSplit(1)} className="flex-1">
+          Before
+        </Button>
+      </View>
+    </View>
+  );
+}
+
+function CompareVerticalDemo() {
+  return (
+    <Card className="w-full">
+      <Card.Content className="p-4">
+        <Compare height={180} orientation="vertical">
+          <Compare.After>
+            <CompareCard tone="bg-muted" title="After" caption="Below the seam" />
+          </Compare.After>
+          <Compare.Before>
+            <CompareCard tone="bg-accent" title="Before" caption="Above it" />
+          </Compare.Before>
+          <Compare.Handle />
+        </Compare>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function CompareStartDemo() {
+  return (
+    <Card className="w-full">
+      <Card.Content className="p-4">
+        <Compare height={180} defaultValue={0.15}>
+          <Compare.After>
+            <CompareCard tone="bg-muted" title="After" caption="Mostly on show" />
+          </Compare.After>
+          <Compare.Before>
+            <CompareCard tone="bg-accent" title="Before" caption="A sliver" />
+          </Compare.Before>
+          <Compare.Handle />
+        </Compare>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function CompareFrozenDemo() {
+  return (
+    <Card className="w-full">
+      <Card.Content className="gap-3 p-4">
+        <Compare height={160} defaultValue={0.5} disabled>
+          <Compare.After>
+            <CompareCard tone="bg-muted" title="After" caption="Frozen" />
+          </Compare.After>
+          <Compare.Before>
+            <CompareCard tone="bg-accent" title="Before" caption="Frozen" />
+          </Compare.Before>
+          <Compare.Handle />
+        </Compare>
+        <Text size="xs" muted>
+          `disabled` freezes the seam and takes it out of the accessibility tree.
+        </Text>
+      </Card.Content>
+    </Card>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
   {
     slug: 'sankey-chart',
@@ -278,6 +422,33 @@ export const ENTRIES: ComponentEntry[] = [
       },
       { label: 'Rows that cannot be drawn', render: () => <SankeyDroppedDemo /> },
       { label: 'How far the ribbons bend', render: () => <SankeyCurveDemo /> },
+    ],
+  },
+  {
+    slug: 'compare',
+    name: 'Compare',
+    summary: 'Two versions of one picture, with a seam you drag across it',
+    layout: 'pager',
+    demos: [
+      {
+        label: 'Basic',
+        id: 'basic',
+        fullPage: true,
+        description:
+          'Drag anywhere on the frame, not just the knob. The two sides stay in place under the seam rather than scaling with it.',
+        render: () => <CompareBasicVersion />,
+      },
+      {
+        label: 'Driven from outside',
+        id: 'controlled',
+        fullPage: true,
+        description:
+          'A controlled seam. The buttons set it, dragging still moves it, and the prop stands back while a finger is down.',
+        render: () => <CompareControlledVersion />,
+      },
+      { label: 'A seam that runs the other way', render: () => <CompareVerticalDemo /> },
+      { label: 'Where the seam starts', render: () => <CompareStartDemo /> },
+      { label: 'Frozen', render: () => <CompareFrozenDemo /> },
     ],
   },
 ];

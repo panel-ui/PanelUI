@@ -1286,6 +1286,15 @@
       "accessibilityMode": "interactive-items"
     }
   ],
+  "compare": [
+    "Compare",
+    "Two versions of one picture, with a seam you drag across it.",
+    "react native before after image comparison slider",
+    {
+      "addedIn": "0.101.0",
+      "category": "media"
+    }
+  ],
   "page-header": [
     "PageHeader",
     "Cover, face and actions at the top of a profile.",

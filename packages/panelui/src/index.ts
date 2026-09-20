@@ -505,6 +505,15 @@ export {
   type ComboboxPresentation,
 } from './components/combobox';
 export {
+  Compare,
+  type CompareProps,
+  type CompareBeforeProps,
+  type CompareAfterProps,
+  type CompareHandleProps,
+  type CompareLabelProps,
+  type CompareOrientation,
+} from './components/compare';
+export {
   ContextMenu,
   type ContextMenuProps,
   type ContextMenuTriggerProps,

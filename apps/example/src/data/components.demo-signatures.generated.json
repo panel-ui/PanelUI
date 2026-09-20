@@ -346,6 +346,10 @@
       "signature": "5a1f6087d05807a2005b94e106057e0cdd2331fbd515d3dc9b2ebf5e03a7f4b6"
     },
     {
+      "slug": "sankey-chart",
+      "signature": "f7bf6bbbcc01f308764e432a95faefce9956584f39106fa0a7d71ea4b1d86214"
+    },
+    {
       "slug": "scatter-chart",
       "signature": "6f0e3ba37701165ffe2bb0eeb621f08a52a83e1a505b50aeb9ac8796e8b79701"
     },

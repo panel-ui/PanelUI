@@ -1,0 +1,276 @@
+---
+title: SankeyChart
+description: Where a quantity came from and where it ended up.
+status: new
+---
+
+Use it for a routing question: which campaigns produced which signups, which budget lines paid for which departments, what the traffic that landed on a page went on to do. The answer has to need a source *and* a target — a quantity leaves one thing and arrives at another, and the size of each stream is the point.
+
+A ribbon's thickness is its value, on one scale shared by the whole diagram. Nothing else here is a quantity: how far a ribbon travels is just the number of columns between its ends, and the vertical order inside a column is chosen to keep the ribbons from crossing.
+
+**Columns come from the links, not from the order of your `nodes` array.** A node that receives from another has to be drawn after it, so the diagram works out the columns itself and `align` only settles what the flow leaves open.
+
+**It needs room.** Ribbons carry their value in their thickness, so a diagram of thirty nodes on a phone is thirty hairlines. Past a dozen or so nodes, give it a taller `height`, or aggregate the long tail before it arrives.
+
+For a total cut into its parts with no routing between them, use [TreemapChart](/docs/charts/treemap-chart). For what survived each step of one process, use [FunnelChart](/docs/charts/funnel-chart).
+
+**If the chart you need is not one of these**, [Plot](/docs/charts/plot) is the same drawing machinery with nothing decided: you compose the marks over one measured box and one shared scale.
+
+## Installation
+
+SankeyChart ships with the library — no separate install.
+
+```tsx
+import { SankeyChart, type SankeyNode, type SankeyLink } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add sankey-chart
+```
+
+## Usage
+
+```tsx
+<SankeyChart nodes={sources} links={flows} height={260}>
+  <SankeyChart.Header title="Sessions" value="128,400" />
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+## Composition
+
+```tsx
+<SankeyChart nodes={…} links={…}>
+  <SankeyChart.Header />    {/* the strip above the diagram */}
+  <SankeyChart.Skeleton />  {/* the plain shape it waits behind */}
+  <SankeyChart.Links />     {/* the ribbons */}
+  <SankeyChart.Nodes />     {/* the bars they run between */}
+  <SankeyChart.Labels />    {/* the names, and the press targets */}
+  <SankeyChart.Tooltip />   {/* what the selected node carries */}
+</SankeyChart>
+```
+
+- **`SankeyChart.Header`** — The strip above the diagram — what the flow is of, what it totals, and room for a control. The value is not derived, because the formatting is not the chart's to guess: 128400 is a count, a currency or a rate depending on what was routed.
+- **`SankeyChart.Links`** — The ribbons. Drawn before the bars, so a bar sits on top of the flows that meet it and keeps a clean edge. Translucent at rest, because ribbons cross and an opaque one hides whichever passes under it.
+- **`SankeyChart.Nodes`** — The bars the ribbons run between, drawn solid. A node is the one thing here that is not crossing anything else, and it reads as an edge only if nothing shows through it.
+- **`SankeyChart.Labels`** — The names, set beside the bars rather than on them — a bar is ten points thick and no name fits in ten points. Also the press targets: a node worth one percent of the flow is a sliver nobody can hit, so the row it sits in is the target, padded out where the sliver is smaller than one.
+- **`SankeyChart.Tooltip`** — What the selected node carries, anchored beside it and clamped to the plot. In and out are shown separately because they are only the same number when nothing was lost — and a node where they differ is the interesting one on the chart.
+- **`SankeyChart.Skeleton`** — The waiting state: a few plain bars and the ribbons between them, every one the same size. Varied thicknesses would be an invented routing, and nobody can tell an invented one from a real one until it changes under them.
+
+## Examples
+
+### The data
+
+Two arrays. Nodes carry an `id` the links name; links carry a `source`, a `target` and a `value`.
+
+A node's height is worked out for you — it is the larger of what arrives and what leaves. Set `value` on a node only where those two disagree and the difference matters, such as a step that loses some of what it received to somewhere the links do not describe.
+
+```tsx
+const sources: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'browse', label: 'Browsed' },
+  { id: 'left', label: 'Left' },
+];
+
+const flows: SankeyLink[] = [
+  { source: 'search', target: 'signup', value: 5200 },
+  { source: 'search', target: 'browse', value: 12400 },
+  { source: 'social', target: 'browse', value: 8100 },
+  { source: 'social', target: 'left', value: 9600 },
+  { source: 'direct', target: 'signup', value: 3100 },
+  { source: 'direct', target: 'left', value: 2800 },
+];
+```
+
+### How tall to draw it
+
+`height` is the one measurement the data cannot supply. The width is the card's, but a diagram of four nodes and one of forty are the same data at two heights — and which is right is a question about the screen rather than about the flow.
+
+It is also the setting that decides whether the small streams are legible. Every ribbon shares one scale, so raising the height thickens all of them together.
+
+```tsx
+<SankeyChart nodes={sources} links={flows} height={320}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+### Which column a node goes in
+
+`align` settles the cases the flow leaves open. `justify`, the default, pushes every node that feeds nothing into the last column, so the diagram ends on a straight edge of destinations instead of a ragged one. `left` reads the flow from where things start and lets the endings fall where their depth puts them; `right` does the opposite.
+
+Reach for `left` when the columns are stages of a process and a node that stops early genuinely stopped early — with `justify` it would be drawn against the far edge as though it had gone the distance.
+
+```tsx
+<SankeyChart nodes={sources} links={flows} align="left">
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+### Selecting a node
+
+Pressing a name keeps its ribbons and fades the rest, which is how you follow one stream through a diagram busy enough to need it. The chart tracks the selection itself; pass `activeId` and `onActiveIdChange` to drive it from elsewhere, and `null` to clear it.
+
+`Tooltip` reads the selected node and needs no wiring of its own.
+
+```tsx
+const [active, setActive] = useState<string | null>(null);
+
+<SankeyChart
+  nodes={sources}
+  links={flows}
+  activeId={active}
+  onActiveIdChange={setActive}
+>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+  <SankeyChart.Tooltip />
+</SankeyChart>
+```
+
+### Rows that cannot be drawn
+
+Flow data is usually joined together from somewhere nobody owns, and it arrives with rows naming a node that is not there, carrying a zero, or closing a loop. A loop has no left-to-right reading at all.
+
+The chart drops those rows and draws the rest rather than going blank. `onDropLinks` reports how many went, so the screen can say so — it fires with `0` after a clean render, so one signal both raises the warning and takes it away.
+
+```tsx
+const [dropped, setDropped] = useState(0);
+
+<SankeyChart nodes={sources} links={flows} onDropLinks={setDropped}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+
+{dropped > 0 ? (
+  <Text size="xs" muted>{`${dropped} rows could not be drawn`}</Text>
+) : null}
+```
+
+### How far the ribbons bend
+
+`curve` is how far a ribbon's control points reach towards the middle. The default puts both on the centre line, which makes the two halves mirror images and reads as one continuous flow. `0` draws straight diagonals instead — tighter, and easier to follow where many ribbons run between the same pair of columns.
+
+```tsx
+<SankeyChart nodes={sources} links={flows} curve={0}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+### Waiting for the data
+
+`status="loading"` draws a plain shape until the rows arrive, and it dissolves under the real diagram growing across it rather than being swapped out — so the card never has a blank frame in the middle of it.
+
+The placeholder's bars and ribbons are all the same size on purpose. Varied ones would be an invented routing, and a reader cannot tell an invented one from a real one until it changes under them.
+
+```tsx
+<SankeyChart nodes={[]} links={[]} status="loading">
+  <SankeyChart.Skeleton />
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+## API Reference
+
+### SankeyChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `nodes` | `SankeyNode[]` | — | The stages. Order does not decide position — the links do. |
+| `links` | `SankeyLink[]` | — | What travels between them. |
+| `height` | `number` | `240` | How tall the diagram is drawn, in points. The width is the card's, but nothing in a flow says how deep it should be: a diagram of four nodes and one of forty are the same data at two heights, and which of them is right is a question about the screen. |
+| `nodeWidth` | `number` | `10` | How thick a node's bar is, in points. |
+| `nodePadding` | `number` | `14` | The gap between two nodes in a column, in points. A maximum rather than a promise. A crowded column gives its spacing up before it gives up the height of its bars, because the bar is the reading. |
+| `align` | `SankeyAlign` | `'justify'` | Which column a node goes in where the flow leaves a choice. |
+| `iterations` | `number` | `6` | Relaxation rounds spent untangling the ribbons. |
+| `curve` | `number` | `0.5` | How far a ribbon bends, `0` for a straight diagonal and `0.5` for an S. |
+| `color` | `string` | — | The first hue. The rest of the palette follows from the theme's tokens. |
+| `animationDuration` | `number` | `620` | Milliseconds for one column to draw itself. |
+| `staggerDelay` | `number` | `110` | Milliseconds between one column starting and the next. `0` for all at once. |
+| `status` | `SankeyChartStatus` | `'ready'` | `loading` draws a plain placeholder until the data arrives. |
+| `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
+| `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the selected node's id, or `null` when the selection is cleared. |
+| `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn — ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render, so a banner can be shown and taken away from the same signal. |
+
+### SankeyChart.Links
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `opacity` | `number` | `0.4` | A ribbon's opacity at rest. |
+| `activeOpacity` | `number` | `0.78` | A ribbon's opacity when its node is selected. |
+| `dimOpacity` | `number` | `0.08` | And when something else is. |
+
+### SankeyChart.Nodes
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `radius` | `number` | — | Corner radius on a node's bar, in points. |
+| `dimOpacity` | `number` | `0.08` | A bar's opacity when something else is selected. |
+
+### SankeyChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `formatValue` | `(value: number, node: SankeyNode) => string` | — | Format the figure beside a name. Defaults to a compact number. |
+| `showValue` | `boolean` | `false` | Show the figure under the name. |
+| `minHeight` | `number` | `6` | Hide the name on a bar shorter than this, in points. A diagram of forty nodes has bars a few points tall, and forty names at that spacing overlap into a grey band that hides the flow behind it. The names that are dropped are the smallest ones, which is where the tooltip takes over. |
+
+### SankeyChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+
+### SankeyChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `string` | — |  |
+
+### SankeyChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | Small line above the value — what the flow is of. |
+| `value` | `string` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `string` | — | One muted line under the value — a period, a comparison, a caveat. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+The entrance runs column by column, so the flow arrives in the order it happens. `staggerDelay={0}` draws it all at once, and `animationDuration` sets how long one column takes. Both are ignored where the platform is set to reduce motion — the diagram is simply there.
+
+The imperative handle carries `replay`, for a control that re-runs the entrance.
+
+Colours come from the theme's five chart tokens, assigned by a node's position in your array and stepped once the palette runs out. A ribbon takes its source node's colour, so a stream is the colour of where it came from; set `color` on a link to override that, or on a node to fix the node and everything leaving it.
+
+Under a right-to-left layout the flow is mirrored, so it still reads from where it starts.
+
+## Public exports
+
+{/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
+
+**Values:** `SankeyChart`, `useSankeyChart`
+
+**Types:** `SankeyChartProps`, `SankeyChartHandle`, `SankeyChartHeaderProps`, `SankeyChartLinksProps`, `SankeyChartNodesProps`, `SankeyChartLabelsProps`, `SankeyChartTooltipProps`, `SankeyChartSkeletonProps`, `SankeyChartStatus`, `SankeyNode`, `SankeyLink`, `SankeyAlign`

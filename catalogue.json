@@ -87,6 +87,7 @@
     "reasoning",
     "response",
     "ring-chart",
+    "sankey-chart",
     "scatter-chart",
     "scroll-blur",
     "scroll-canvas",
@@ -204,6 +205,10 @@
       "accessibilityMode": "interactive-items"
     },
     {
+      "name": "sankey-chart",
+      "accessibilityMode": "interactive-items"
+    },
+    {
       "name": "scatter-chart",
       "accessibilityMode": "shared-data"
     },
@@ -217,26 +222,26 @@
     }
   ],
   "counts": {
-    "componentModules": 132,
-    "packageComponentExports": 132,
-    "documentedComponents": 132,
-    "exampleEntries": 132,
+    "componentModules": 133,
+    "packageComponentExports": 133,
+    "documentedComponents": 133,
+    "exampleEntries": 133,
     "registry": {
-      "componentItems": 132,
+      "componentItems": 133,
       "supportItems": 36,
-      "totalItems": 168,
+      "totalItems": 169,
       "byType": {
-        "registry:ui": 147,
+        "registry:ui": 148,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1
       }
     },
     "visualizations": {
-      "total": 20,
+      "total": 21,
       "sharedData": 13,
       "summaries": 1,
-      "interactiveItems": 6
+      "interactiveItems": 7
     },
     "registrySupport": {
       "primitives": 13,

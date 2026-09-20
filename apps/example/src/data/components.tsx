@@ -16,8 +16,11 @@ const load12 = () => import('./demos/chunk-12');
 const load13 = () => import('./demos/chunk-13');
 const load14 = () => import('./demos/chunk-14');
 const load15 = () => import('./demos/chunk-15');
+const load16 = () => import('./demos/chunk-16');
 
 const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
+  'sankey-chart': () =>
+    load16().then((module) => module.ENTRIES_BY_SLUG['sankey-chart']),
   'bump-chart': () =>
     load12().then((module) => module.ENTRIES_BY_SLUG['bump-chart']),
   'mirror-area-chart': () =>
@@ -248,6 +251,7 @@ export const CHART_SLUGS = [
   'bubble-chart',
   'bump-chart',
   'mirror-area-chart',
+  'sankey-chart',
 ] as const;
 
 export async function loadChartShowcase() {

@@ -1103,6 +1103,22 @@ export {
   type RingDatum,
 } from './components/ring-chart';
 export {
+  SankeyChart,
+  useSankeyChart,
+  type SankeyChartProps,
+  type SankeyChartHandle,
+  type SankeyChartHeaderProps,
+  type SankeyChartLinksProps,
+  type SankeyChartNodesProps,
+  type SankeyChartLabelsProps,
+  type SankeyChartTooltipProps,
+  type SankeyChartSkeletonProps,
+  type SankeyChartStatus,
+  type SankeyNode,
+  type SankeyLink,
+  type SankeyAlign,
+} from './components/sankey-chart';
+export {
   ScatterChart,
   useScatterChart,
   type ScatterChartProps,

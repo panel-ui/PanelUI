@@ -87,6 +87,7 @@ export const COMPONENTS = [
   {"slug":"reasoning","name":"Reasoning","summary":"The model's working, shown while it happens"},
   {"slug":"response","name":"Response","summary":"A model's answer, rendered as it arrives"},
   {"slug":"ring-chart","name":"RingChart","summary":"Concentric arcs, each against its own target"},
+  {"slug":"sankey-chart","name":"SankeyChart","summary":"Where a quantity came from and where it ended up"},
   {"slug":"scatter-chart","name":"ScatterChart","summary":"Two quantities against each other, to show how they relate"},
   {"slug":"scroll-blur","name":"ScrollBlur","summary":"Blurs the edges of a scroll container"},
   {"slug":"scroll-canvas","name":"ScrollCanvas","summary":"Image frame whose contents move as you scroll"},
@@ -137,4 +138,4 @@ export const COMPONENTS = [
 
 export type ComponentMetadata = (typeof COMPONENTS)[number];
 export const COMPONENT_COUNT = COMPONENTS.length;
-export const CHART_COUNT = 18;
+export const CHART_COUNT = 19;

@@ -1275,6 +1275,17 @@
       "accessibilityMode": "shared-data"
     }
   ],
+  "sankey-chart": [
+    "SankeyChart",
+    "Where a quantity came from and where it ended up.",
+    "react native sankey chart flow diagram",
+    {
+      "addedIn": "0.101.0",
+      "group": "charts",
+      "visualization": true,
+      "accessibilityMode": "interactive-items"
+    }
+  ],
   "page-header": [
     "PageHeader",
     "Cover, face and actions at the top of a profile.",

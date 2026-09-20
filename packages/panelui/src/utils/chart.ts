@@ -1157,3 +1157,49 @@ export function ribbonPath(
     `Z`
   );
 }
+
+/**
+ * One ribbon of a flow diagram: a band of constant thickness running from a
+ * centre at one end to a different centre at the other.
+ *
+ * Given by centres rather than edges because that is what the layout produces
+ * — a ribbon is stacked against its node's edge and then recorded by its
+ * middle, so that growing it in place thickens it about its own centre line
+ * instead of sliding it down the node.
+ *
+ * The ends stay vertical whatever the two centres are, so a ribbon meets the
+ * flat side of a node exactly rather than at the angle it happened to arrive.
+ * `curve` is how far the control points reach towards the middle, as a
+ * fraction of the horizontal run: `0.5` puts both on the halfway line, which
+ * is the S that reads as one continuous flow, and `0` gives a straight
+ * diagonal.
+ */
+export function flowPath(
+  x0: number,
+  cy0: number,
+  x1: number,
+  cy1: number,
+  thickness: number,
+  curve: number
+): string {
+  'worklet';
+  if (!(thickness > 0)) return '';
+
+  const half = thickness / 2;
+  const topStart = cy0 - half;
+  const topEnd = cy1 - half;
+  const bottomStart = cy0 + half;
+  const bottomEnd = cy1 + half;
+
+  const run = x1 - x0;
+  const near = x0 + run * curve;
+  const far = x1 - run * curve;
+
+  return (
+    `M${x0},${topStart}` +
+    `C${near},${topStart},${far},${topEnd},${x1},${topEnd}` +
+    `L${x1},${bottomEnd}` +
+    `C${far},${bottomEnd},${near},${bottomStart},${x0},${bottomStart}` +
+    `Z`
+  );
+}

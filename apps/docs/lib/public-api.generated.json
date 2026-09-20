@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1344,
-    "values": 338,
-    "types": 1006,
-    "modules": 159,
-    "components": 132,
+    "exports": 1358,
+    "values": 340,
+    "types": 1018,
+    "modules": 160,
+    "components": 133,
     "hooks": 13
   },
   "groups": {
@@ -4004,6 +4004,69 @@
           },
           {
             "name": "RingDatum",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/sankey-chart/index.tsx",
+        "slug": "sankey-chart",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "SankeyChart",
+            "kind": "value"
+          },
+          {
+            "name": "useSankeyChart",
+            "kind": "value"
+          },
+          {
+            "name": "SankeyChartProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartHandle",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartLinksProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartNodesProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartLabelsProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartTooltipProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartSkeletonProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartStatus",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyNode",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyLink",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyAlign",
             "kind": "type"
           }
         ]

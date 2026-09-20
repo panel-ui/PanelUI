@@ -45,7 +45,7 @@ test('every declared chart remains sourced from the catalogue', () => {
   assert.ok(declaration, 'CHART_SLUGS declaration is present');
   const slugs = [...declaration[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
 
-  assert.equal(slugs.length, 18);
+  assert.equal(slugs.length, 19);
   assert.equal(new Set(slugs).size, slugs.length);
   for (const slug of slugs) {
     assert.match(catalogue, new RegExp(`ENTRIES_BY_SLUG\\['${slug}'\\]`));
@@ -56,7 +56,7 @@ test('every declared chart remains sourced from the catalogue', () => {
 test('demo modules are bounded, lazy, and retain exact generated catalogue parity', async () => {
   const directory = new URL('../src/data/demos/', import.meta.url);
   const chunks = (await readdir(directory)).filter((file) => file.endsWith('.tsx')).sort();
-  assert.equal(chunks.length, 15);
+  assert.equal(chunks.length, 16);
   assert.doesNotMatch(catalogue, /from ['"]\.\/demos\//);
   assert.equal([...catalogue.matchAll(/\(\) => import\('\.\/demos\/chunk-\d+'\)/g)].length, chunks.length);
 

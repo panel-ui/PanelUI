@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-132 component modules. The **Reference** column links to a file in this skill holding that
+133 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -140,6 +140,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `PyramidChart` | Two series mirrored about a centre, on one shared scale. | [pyramid-chart](./components/pyramid-chart.md) |
 | `RadarChart` | Several measures of one thing, drawn as one shape. | [radar-chart](./components/radar-chart.md) |
 | `RingChart` | Concentric arcs, each measured against its own target. | [ring-chart](./components/ring-chart.md) |
+| `SankeyChart` | Where a quantity came from and where it ended up. | [sankey-chart](./components/sankey-chart.md) |
 | `ScatterChart` | Two quantities against each other, to show how they relate. | [scatter-chart](./components/scatter-chart.md) |
 | `TreemapChart` | A total, cut into the parts it is made of, sized by area. | [treemap-chart](./components/treemap-chart.md) |
 | `WaterfallChart` | How a run of changes carried one total to another. | [waterfall-chart](./components/waterfall-chart.md) |

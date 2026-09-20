@@ -1506,6 +1506,23 @@
     "docsPath": "charts/ring-chart"
   },
   {
+    "name": "sankey-chart",
+    "type": "registry:ui",
+    "kind": "chart",
+    "group": "charts",
+    "stability": "stable",
+    "description": "Where a quantity came from and where it ended up.",
+    "registryDependencies": [
+      "chart",
+      "chart-accessibility",
+      "cn",
+      "text",
+      "use-direction",
+      "use-skeleton-handoff"
+    ],
+    "docsPath": "charts/sankey-chart"
+  },
+  {
     "name": "scatter-chart",
     "type": "registry:ui",
     "kind": "chart",

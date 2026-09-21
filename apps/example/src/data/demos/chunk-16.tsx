@@ -338,8 +338,8 @@ function CompareBasicVersion() {
           <Frame.Title>Drag the seam</Frame.Title>
           <Frame.Action>Anywhere</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-4">
-          <Compare height={280}>
+        <Frame.Panel>
+          <Compare height={280} className="rounded-none">
             <Compare.After>
               <CompareScene grade="after" />
             </Compare.After>
@@ -366,8 +366,8 @@ function CompareControlledVersion() {
           <Frame.Title>Driven from outside</Frame.Title>
           <Frame.Action>{`${Math.round(split * 100)}%`}</Frame.Action>
         </Frame.Header>
-        <Frame.Panel className="p-4">
-          <Compare height={260} value={split} onValueChange={setSplit}>
+        <Frame.Panel>
+          <Compare height={260} value={split} onValueChange={setSplit} className="rounded-none">
             <Compare.After>
               <CompareScene grade="after" />
             </Compare.After>
@@ -375,8 +375,8 @@ function CompareControlledVersion() {
               <CompareScene grade="before" />
             </Compare.Before>
             <Compare.Handle />
-          <Compare.Label side="start">Before</Compare.Label>
-          <Compare.Label side="end">After</Compare.Label>
+            <Compare.Label side="start">Before</Compare.Label>
+            <Compare.Label side="end">After</Compare.Label>
           </Compare>
         </Frame.Panel>
       </Frame>
@@ -486,9 +486,9 @@ function CompareReadoutVersion() {
 
 function CompareVerticalDemo() {
   return (
-    <Card className="w-full">
-      <Card.Content className="p-4">
-        <Compare height={180} orientation="vertical">
+    <Card className="w-full overflow-hidden">
+      <Card.Content className="p-0">
+        <Compare height={180} orientation="vertical" className="rounded-none">
           <Compare.After>
             <CompareScene grade="after" />
           </Compare.After>
@@ -506,9 +506,9 @@ function CompareVerticalDemo() {
 
 function CompareStartDemo() {
   return (
-    <Card className="w-full">
-      <Card.Content className="p-4">
-        <Compare height={180} defaultValue={0.15}>
+    <Card className="w-full overflow-hidden">
+      <Card.Content className="p-0">
+        <Compare height={180} defaultValue={0.15} className="rounded-none">
           <Compare.After>
             <CompareScene grade="after" />
           </Compare.After>
@@ -526,9 +526,9 @@ function CompareStartDemo() {
 
 function CompareFrozenDemo() {
   return (
-    <Card className="w-full">
-      <Card.Content className="gap-3 p-4">
-        <Compare height={160} defaultValue={0.5} disabled>
+    <Card className="w-full overflow-hidden">
+      <Card.Content className="p-0">
+        <Compare height={160} defaultValue={0.5} disabled className="rounded-none">
           <Compare.After>
             <CompareScene grade="after" />
           </Compare.After>
@@ -539,7 +539,7 @@ function CompareFrozenDemo() {
           <Compare.Label side="start">Before</Compare.Label>
           <Compare.Label side="end">After</Compare.Label>
         </Compare>
-        <Text size="xs" muted>
+        <Text size="xs" muted className="px-4 pb-4 pt-3">
           `disabled` freezes the seam and takes it out of the accessibility tree.
         </Text>
       </Card.Content>

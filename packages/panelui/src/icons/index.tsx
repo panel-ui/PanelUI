@@ -50,7 +50,7 @@
  * outline could only ignore. All four are drawn here rather than mapped.
  */
 import { createContext, useContext, type ReactNode } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react-native';
 import Svg, { G, Path, type SvgProps } from 'react-native-svg';
 import { useDirection } from '../hooks/use-direction';
@@ -168,11 +168,25 @@ function useResolvedColor(explicit: string | undefined, fallback: string): strin
   return explicit ?? inherited ?? fallback;
 }
 
-/** Props for icons that must never be announced by a screen reader. */
-const decorative = {
-  accessibilityElementsHidden: true,
-  importantForAccessibility: 'no-hide-descendants',
-} as const;
+/**
+ * Props for icons that must never be announced by a screen reader.
+ *
+ * Two sets, because the two platforms take the instruction differently.
+ * `accessibilityElementsHidden` and `importantForAccessibility` are native
+ * props: on web they reach the DOM `<svg>` untranslated, where React warns
+ * about the casing of the second one and neither has any effect — so the glyph
+ * stays in the accessibility tree inside every button and field that already
+ * carries its own name, and every icon on the page logs an error while it does.
+ * `aria-hidden` is what says it there.
+ */
+const decorative = (
+  Platform.OS === 'web'
+    ? { 'aria-hidden': true }
+    : {
+        accessibilityElementsHidden: true,
+        importantForAccessibility: 'no-hide-descendants',
+      }
+) as Record<string, unknown>;
 
 /** The default line weight. See the note on weight above. */
 const STROKE = 2;

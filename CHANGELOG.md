@@ -9,6 +9,17 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.101.1] — 2026-09-21
+
+### Fixed
+
+- **Typography** — `Typography.Paragraph type="small"` set a line height equal to its font
+  size, leaving nothing below the baseline. Android clips what does not fit, so `g`, `j`,
+  `p`, `q` and `y` lost their tails; iOS drew them anyway, which is how it went unnoticed.
+  `small` is now a shade looser and still tighter than body. **Card.Title** and a
+  **Planner** entry's chip carried the same line height over words the caller supplies and
+  have the same fix. Thanks @MiddleKerb for the report and the screenshots. (#221)
+
 ## [0.101.0] — 2026-09-21
 
 ### Added

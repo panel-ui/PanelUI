@@ -1,9 +1,17 @@
 {
   "slug": "compare",
+  "previewVideo": {
+    "src": "/previews/compare.mp4",
+    "poster": "/previews/compare-poster.jpg",
+    "width": 720,
+    "height": 1560,
+    "alt": "Compare — one landscape at two colour grades, with the seam dragged across it to swap the grey version for the warm one."
+  },
   "intro": "Use it to show that two versions of one image differ, when the difference is spread across the frame rather than gathered in one place — retouching, a filter, a render at two quality settings, a map at two dates. A pair of thumbnails side by side will not carry that, because the eye cannot hold one image well enough to spot the change in the other.\n\nThe seam works because both versions are in the same place at the same scale. Every pixel being compared was just under the one beside it, so the difference arrives as movement rather than as something to remember.\n\n**It needs a height.** Both sides are positioned absolutely, so the frame has no content left to take a height from. `height` is what gives it one.\n\n**Both sides should be the same picture at the same framing.** Two images that differ in crop or aspect will slide against each other under the seam, and the reader reads that misalignment as the difference.\n\nFor two panes of arbitrary content that share the space between them, use [Splitter](/docs/components/splitter). For one image that opens out of the page, use [ImageViewer](/docs/components/image-viewer).",
   "usage": "<Compare height={260}>\n  <Compare.After>\n    <Image source={edited} style={{ width: '100%', height: '100%' }} />\n  </Compare.After>\n  <Compare.Before>\n    <Image source={original} style={{ width: '100%', height: '100%' }} />\n  </Compare.Before>\n  <Compare.Handle />\n</Compare>",
   "extraImports": [
-    "Text"
+    "Text",
+    "Button"
   ],
   "anatomy": "<Compare>\n  <Compare.After />   {/* the whole frame, underneath */}\n  <Compare.Before />  {/* the side the seam covers */}\n  <Compare.Handle />  {/* the seam, and the accessibility wiring */}\n  <Compare.Label />   {/* a caption pinned to one corner */}\n</Compare>",
   "partNotes": "Order in the source does not decide what is on top. `After` is always drawn first and `Before` laid over it, because the revealed side is a window onto the other — reversed, the window would be underneath and nothing would show through.",
@@ -17,7 +25,14 @@
     {
       "title": "Where the seam starts",
       "description": "`defaultValue` is a share of the frame, `0` to `1`, and the default is the middle so both sides are equally on show. Start it near an edge where one version is the subject and the other is the reference — the reader then drags to reveal rather than to hide.",
-      "code": "<Compare height={260} defaultValue={0.15}>\n  <Compare.After>\n    <Image source={edited} style={{ width: '100%', height: '100%' }} />\n  </Compare.After>\n  <Compare.Before>\n    <Image source={original} style={{ width: '100%', height: '100%' }} />\n  </Compare.Before>\n  <Compare.Handle />\n</Compare>"
+      "code": "<Compare height={260} defaultValue={0.15}>\n  <Compare.After>\n    <Image source={edited} style={{ width: '100%', height: '100%' }} />\n  </Compare.After>\n  <Compare.Before>\n    <Image source={original} style={{ width: '100%', height: '100%' }} />\n  </Compare.Before>\n  <Compare.Handle />\n</Compare>",
+      "previewVideo": {
+        "src": "/previews/compare-where-the-seam-starts.mp4",
+        "poster": "/previews/compare-where-the-seam-starts-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — Where the seam starts."
+      }
     },
     {
       "title": "Driving it from outside",
@@ -37,7 +52,14 @@
     {
       "title": "A seam that runs the other way",
       "description": "`orientation=\"vertical\"` moves the seam up and down instead, revealing the top of one version over the bottom of the other. It suits a wide frame, where a horizontal seam has very little distance to travel and the two halves are thin columns.\n\nIt also changes which way the gesture is claimed: a vertical seam answers to vertical movement, so it will take a drag that a surrounding scroll view would otherwise have had.",
-      "code": "<Compare height={200} orientation=\"vertical\">\n  <Compare.After>{/* … */}</Compare.After>\n  <Compare.Before>{/* … */}</Compare.Before>\n  <Compare.Handle />\n</Compare>"
+      "code": "<Compare height={200} orientation=\"vertical\">\n  <Compare.After>{/* … */}</Compare.After>\n  <Compare.Before>{/* … */}</Compare.Before>\n  <Compare.Handle />\n</Compare>",
+      "previewVideo": {
+        "src": "/previews/compare-a-seam-that-runs-the-other-way.mp4",
+        "poster": "/previews/compare-a-seam-that-runs-the-other-way-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — A seam that runs the other way."
+      }
     },
     {
       "title": "Comparing something that is not a picture",
@@ -48,7 +70,57 @@
       "title": "A knob of your own",
       "description": "Children on `Compare.Handle` replace the knob and keep the line behind it. The replacement is not the drag target — the whole frame is — so it can be any size without costing anyone a hit area.",
       "code": "<Compare.Handle>\n  <View className=\"size-9 items-center justify-center rounded-full bg-background\">\n    <ChevronsLeftRightIcon size={16} />\n  </View>\n</Compare.Handle>"
+    },
+    {
+      "title": "Frozen",
+      "description": "`disabled` holds the seam where it is and takes the handle out of the accessibility tree.\n\nIt is for a frame making one fixed point — a figure in a page, or a split that some other control owns. Nothing about the frame says it cannot be dragged, so put the split somewhere it reads as a chosen one rather than a starting one.",
+      "previewVideo": {
+        "src": "/previews/compare-frozen.mp4",
+        "poster": "/previews/compare-frozen-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — Frozen."
+      },
+      "code": "<Compare height={160} defaultValue={0.5} disabled>\n  <Compare.After>{/* … */}</Compare.After>\n  <Compare.Before>{/* … */}</Compare.Before>\n  <Compare.Handle />\n  <Compare.Label side=\"start\">Before</Compare.Label>\n  <Compare.Label side=\"end\">After</Compare.Label>\n</Compare>"
     }
   ],
-  "notes": "The drag is the whole frame, not the knob, and it only claims movement along its own axis — so a Compare inside a scrolling page still scrolls. The seam runs on the UI thread and never needs the JS thread to move.\n\nA drag is not available to everyone, so the handle is `adjustable`: a screen reader moves the seam a `step` at a time, which defaults to five percent of the frame. `disabled` freezes it and takes it out of the accessibility tree.\n\nThere is a tick when the seam reaches either end, where it stops following the finger — without it the stall reads as the gesture having been dropped. `haptics={false}` turns it off.\n\nUnder a right-to-left layout the whole frame is mirrored. The window opens from the right-hand edge, `Compare.Label side=\"start\"` sits on that edge too, and a drag towards the start of the line moves the seam towards the start."
+  "notes": "The drag is the whole frame, not the knob, and it only claims movement along its own axis — so a Compare inside a scrolling page still scrolls. The seam runs on the UI thread and never needs the JS thread to move.\n\nA drag is not available to everyone, so the handle is `adjustable`: a screen reader moves the seam a `step` at a time, which defaults to five percent of the frame. `disabled` freezes it and takes it out of the accessibility tree.\n\nThere is a tick when the seam reaches either end, where it stops following the finger — without it the stall reads as the gesture having been dropped. `haptics={false}` turns it off.\n\nUnder a right-to-left layout the whole frame is mirrored. The window opens from the right-hand edge, `Compare.Label side=\"start\"` sits on that edge too, and a drag towards the start of the line moves the seam towards the start.",
+  "versions": [
+    {
+      "title": "Basic",
+      "description": "One frame at two colour grades, with the seam starting in the middle. The drag is the whole picture rather than the knob, so a thumb anywhere on it moves the seam.",
+      "previewVideo": {
+        "src": "/previews/compare.mp4",
+        "poster": "/previews/compare-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — Basic."
+      },
+      "code": "<Compare height={280}>\n  <Compare.After>\n    <Image source={graded} style={{ width: '100%', height: '100%' }} />\n  </Compare.After>\n  <Compare.Before>\n    <Image source={original} style={{ width: '100%', height: '100%' }} />\n  </Compare.Before>\n  <Compare.Handle />\n  <Compare.Label side=\"start\">Before</Compare.Label>\n  <Compare.Label side=\"end\">After</Compare.Label>\n</Compare>"
+    },
+    {
+      "title": "Driven from outside",
+      "description": "Three buttons that snap the seam to an end or back to the middle. Dragging still moves it, and `value` stands back while a finger is down.",
+      "previewVideo": {
+        "src": "/previews/compare-driven-from-outside.mp4",
+        "poster": "/previews/compare-driven-from-outside-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — Driven from outside."
+      },
+      "code": "const [split, setSplit] = useState(0.5);\n\n<Compare height={260} value={split} onValueChange={setSplit}>\n  <Compare.After>{/* … */}</Compare.After>\n  <Compare.Before>{/* … */}</Compare.Before>\n  <Compare.Handle />\n  <Compare.Label side=\"start\">Before</Compare.Label>\n  <Compare.Label side=\"end\">After</Compare.Label>\n</Compare>\n\n<Button variant=\"outline\" onPress={() => setSplit(0)}>After</Button>\n<Button variant=\"outline\" onPress={() => setSplit(0.5)}>Half</Button>\n<Button variant=\"outline\" onPress={() => setSplit(1)}>Before</Button>"
+    },
+    {
+      "title": "A readout in the middle",
+      "description": "The frame fills the screen and a panel over the centre says how much of the grade is on show, as a number and as a word. Both change while the seam travels under them, so the picture and the caption never disagree.",
+      "previewVideo": {
+        "src": "/previews/compare-a-readout-in-the-middle.mp4",
+        "poster": "/previews/compare-a-readout-in-the-middle-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Compare — A readout in the middle."
+      },
+      "code": "const [split, setSplit] = useState(0.38);\nconst percent = Math.round((1 - split) * 100);\n\n<Compare height={screen} defaultValue={0.38} onValueChange={setSplit} className=\"rounded-none\">\n  <Compare.After>{/* … */}</Compare.After>\n  <Compare.Before>{/* … */}</Compare.Before>\n  <View pointerEvents=\"none\" className=\"absolute inset-0 items-center justify-center\">\n    <View className=\"items-center gap-1 rounded-2xl bg-foreground/80 px-6 py-4\">\n      <Text size=\"3xl\" weight=\"semibold\" className=\"text-background\">{`${percent}%`}</Text>\n      <Text size=\"sm\" className=\"text-background/70\">{stage(percent)}</Text>\n    </View>\n  </View>\n  <Compare.Handle>\n    <View className=\"h-12 w-1.5 rounded-full bg-background\" />\n  </Compare.Handle>\n</Compare>"
+    }
+  ]
 }

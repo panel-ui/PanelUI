@@ -71,7 +71,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { Pressable, View, type LayoutChangeEvent, type ViewProps } from 'react-native';
+import { Platform, Pressable, View, type LayoutChangeEvent, type ViewProps } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -147,6 +147,22 @@ const MIN_TARGET = 44;
 
 /** Columns the placeholder suggests while there is no data to count. */
 const SKELETON_COLUMNS = 3;
+
+/**
+ * What takes the geometry out of the accessibility tree, per platform.
+ *
+ * The two native props reach the DOM untranslated through react-native-svg, so
+ * on web they mean nothing and one of them draws a React warning for its
+ * casing. `aria-hidden` is what hides an `<svg>` there.
+ */
+const HIDDEN = (
+  Platform.OS === 'web'
+    ? { 'aria-hidden': true }
+    : {
+        accessibilityElementsHidden: true,
+        importantForAccessibility: 'no-hide-descendants',
+      }
+) as Record<string, unknown>;
 
 type Slot = 'svg' | 'overlay' | 'header' | 'footer';
 
@@ -529,12 +545,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
                  * semantic list below. Left in the tree it is a few hundred
                  * unlabelled paths to swipe through before reaching either.
                  */}
-                <Svg
-                  width={width}
-                  height={height}
-                  importantForAccessibility="no-hide-descendants"
-                  accessibilityElementsHidden
-                >
+                <Svg width={width} height={height} {...HIDDEN}>
                   {slots.svg}
                 </Svg>
                 {/*

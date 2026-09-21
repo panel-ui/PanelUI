@@ -542,9 +542,18 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
                  * and SVG text ignores the platform's text scaling and the
                  * theme's font.
                  */}
+                {/*
+                  * Laid out left to right whatever the reading direction, to
+                  * match the SVG underneath it. React Native swaps `left` and
+                  * `right` inside a right-to-left subtree, and the positions
+                  * here are already mirrored — so left alone they would be
+                  * mirrored a second time and every name would sit against the
+                  * wrong side of the plot. The glyphs still run the right way:
+                  * `Text` carries the writing direction of its own accord.
+                  */}
                 <View
                   pointerEvents="box-none"
-                  style={{ position: 'absolute', width, height }}
+                  style={{ position: 'absolute', width, height, direction: 'ltr' }}
                 >
                   {slots.overlay}
                 </View>
@@ -828,6 +837,28 @@ function SankeyChartLabels({
 
   const format = formatValue ?? ((value: number) => compactNumber(value));
 
+  /*
+   * Where the neighbouring columns sit, in points across the plot.
+   *
+   * A name's row needs a bound on both sides or it runs the width of the chart
+   * and covers every row it crosses — and since the rows are absolutely
+   * positioned siblings, the last one drawn takes the touch. That is a tap on
+   * one name selecting a node two columns away, which is worse than a small
+   * target because it is wrong rather than merely hard.
+   */
+  const edges: number[] = [];
+  for (const placed of layout.nodes) {
+    if (!edges.includes(placed.x0)) edges.push(placed.x0);
+    if (!edges.includes(placed.x1)) edges.push(placed.x1);
+  }
+  edges.sort((a, b) => a - b);
+  const nextEdge = (x: number) => edges.find((edge) => edge > x + 1e-6);
+  const previousEdge = (x: number) => {
+    let found: number | undefined;
+    for (const edge of edges) if (edge < x - 1e-6) found = edge;
+    return found;
+  };
+
   return (
     <>
       {layout.nodes.map((node) => {
@@ -837,7 +868,16 @@ function SankeyChartLabels({
         const extent = node.y1 - node.y0;
         if (extent < minHeight) return null;
 
-        const trailing = node.layer === layout.columns - 1;
+        /*
+         * Which side the name goes on is decided by where the bar actually is,
+         * not by which column it belongs to. Under a right-to-left layout the
+         * finished diagram is mirrored, so the last column is the one on the
+         * left — reading the side off the column number there puts every name
+         * in a box of zero width and the chart loses all of them.
+         */
+        const after = nextEdge(node.x1);
+        const before = previousEdge(node.x0);
+        const trailing = after === undefined;
         const name = labelFor(node.id);
         const value = format(node.value, datum);
         const selected = activeId === node.id;
@@ -863,17 +903,41 @@ function SankeyChartLabels({
               top,
               height: extent,
               justifyContent: 'center',
+              /*
+               * Each row takes the half of its gap nearest its own bar, so the
+               * name leaving one column and the name arriving at the next can
+               * share the space between them without sharing a touch target.
+               */
               ...(trailing
-                ? { left: 0, width: Math.max(0, node.x0 - LABEL_GAP), alignItems: 'flex-end' }
-                : { left: node.x1 + LABEL_GAP, width: Math.max(0, width - node.x1 - LABEL_GAP) }),
+                ? (() => {
+                    const from = before === undefined ? 0 : (before + node.x0) / 2;
+                    return {
+                      left: from,
+                      width: Math.max(0, node.x0 - LABEL_GAP - from),
+                      alignItems: 'flex-end' as const,
+                    };
+                  })()
+                : (() => {
+                    const from = node.x1 + LABEL_GAP;
+                    const to = after === undefined ? width : (node.x1 + after) / 2;
+                    return { left: from, width: Math.max(0, to - from) };
+                  })()),
             }}
             className={cn(className)}
           >
+            {/*
+              * Both alignments are stated rather than inherited. A paragraph's
+              * default alignment follows the reading direction, so under a
+              * right-to-left layout an unaligned name drifts to the far end of
+              * its row and ends up sitting in the middle of the plot instead of
+              * against the bar it belongs to. Which side the name hugs is a
+              * fact about where its bar is, not about the language.
+              */}
             <Text
               size="xs"
               weight={selected ? 'bold' : 'medium'}
               numberOfLines={1}
-              style={trailing ? { textAlign: 'right' } : undefined}
+              style={{ textAlign: trailing ? 'right' : 'left' }}
             >
               {name}
             </Text>
@@ -882,7 +946,7 @@ function SankeyChartLabels({
                 size="xs"
                 muted
                 numberOfLines={1}
-                style={trailing ? { textAlign: 'right' } : undefined}
+                style={{ textAlign: trailing ? 'right' : 'left' }}
               >
                 {value}
               </Text>

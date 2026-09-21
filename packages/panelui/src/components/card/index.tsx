@@ -77,7 +77,7 @@ const CardTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
       ref={ref}
       size="lg"
       weight="semibold"
-      className={cn('leading-none text-card-foreground', className)}
+      className={cn('leading-tight text-card-foreground', className)}
       {...props}
     />
   )

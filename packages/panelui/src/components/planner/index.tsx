@@ -202,6 +202,13 @@ const dayVariants = tv({
      * point; the variants below only colour it.
      */
     cell: 'mx-0.5 h-14 flex-1 rounded-xl border border-transparent px-1.5 pt-1.5',
+    /*
+     * `leading-none` is safe here and only here: these slots hold a day
+     * number, `•••` or `+3`, and none of those has anything below the
+     * baseline for Android to clip. Anywhere the caller's own words can
+     * appear it has to be `leading-tight` — a line height equal to the font
+     * size loses the tail of every `g` and `y` on that platform.
+     */
     number: 'text-xs leading-none',
     marker: 'absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full',
     body: 'flex-1 flex-row items-center justify-center gap-0.5 pb-1',
@@ -1180,7 +1187,7 @@ function PlannerChip({ entry, color }: { entry: PlannerEntry; color?: string }) 
       <Text
         size="xs"
         numberOfLines={1}
-        className={cn('leading-none', !color && 'text-foreground')}
+        className={cn('leading-tight', !color && 'text-foreground')}
         style={color ? { color: '#ffffff' } : undefined}
       >
         {entry.label}

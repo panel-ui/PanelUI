@@ -45,8 +45,16 @@ const typographyVariants = tv({
       'body-xs': 'text-xs font-normal',
       /** Body, one step up — for a number or a name that carries the row. */
       large: 'text-lg font-semibold',
-      /** Body, one step down and tighter — captions, footnotes, meta. */
-      small: 'text-sm font-medium leading-none',
+      /*
+       * Body, one step down and tighter — captions, footnotes, meta.
+       *
+       * Tight, but not tighter than the glyphs. A line height equal to the
+       * font size leaves nothing below the baseline, and Android clips what
+       * does not fit: `g`, `j`, `p`, `q` and `y` lose their tails. iOS draws
+       * them anyway, which is why this survived — it is a bug on both, and
+       * only one of them shows it.
+       */
+      small: 'text-sm font-medium leading-tight',
       blockquote: 'text-base font-normal italic',
       code: 'font-mono text-sm text-foreground',
     },

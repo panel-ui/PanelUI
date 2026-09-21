@@ -50,6 +50,34 @@ const BUDGET_LINKS: SankeyLink[] = [
   { source: 'ops', target: 'tooling', value: 70 },
 ];
 
+/*
+ * A flow with one stage that genuinely stops early: `reserve` takes money out
+ * of revenue and sends it nowhere. It is the only node `align` can move, and
+ * without one in the data the two settings draw the same picture — which is a
+ * demonstration of nothing.
+ */
+const ALIGN_NODES: SankeyNode[] = [
+  { id: 'revenue', label: 'Revenue' },
+  { id: 'grants', label: 'Grants' },
+  { id: 'reserve', label: 'Reserve' },
+  { id: 'product', label: 'Product' },
+  { id: 'ops', label: 'Ops' },
+  { id: 'salaries', label: 'Salaries' },
+  { id: 'tooling', label: 'Tooling' },
+];
+
+const ALIGN_LINKS: SankeyLink[] = [
+  { source: 'revenue', target: 'reserve', value: 180 },
+  { source: 'revenue', target: 'product', value: 420 },
+  { source: 'revenue', target: 'ops', value: 160 },
+  { source: 'grants', target: 'product', value: 120 },
+  { source: 'grants', target: 'ops', value: 70 },
+  { source: 'product', target: 'salaries', value: 390 },
+  { source: 'product', target: 'tooling', value: 150 },
+  { source: 'ops', target: 'salaries', value: 150 },
+  { source: 'ops', target: 'tooling', value: 80 },
+];
+
 function SankeyBasicVersion() {
   return (
     <View className="flex-1 justify-center p-4">
@@ -116,8 +144,8 @@ function SankeyAlignVersion() {
         </Frame.Header>
         <Frame.Panel>
           <SankeyChart
-            nodes={BUDGET_NODES}
-            links={BUDGET_LINKS}
+            nodes={ALIGN_NODES}
+            links={ALIGN_LINKS}
             align={align}
             height={320}
             className="px-3 pb-4 pt-3"
@@ -145,8 +173,9 @@ function SankeyAlignVersion() {
         </Button>
       </View>
       <Text size="xs" muted>
-        `justify` pushes everything that feeds nothing into the last column. `left` lets a node
-        that stops early be drawn where it stopped.
+        `justify` pushes everything that feeds nothing into the last column, so `Reserve` is drawn
+        against the far edge as though it had gone the distance. `left` leaves it in the column it
+        actually stopped in.
       </Text>
     </View>
   );
@@ -242,21 +271,55 @@ function SankeyCurveDemo() {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Two renderings of one card rather than two photographs.
+ * One scene at two colour grades.
  *
  * The example app ships no image pairs, and a pair downloaded at runtime would
- * make the demo depend on the network to show anything at all. Two views of the
- * same size make the same point — the seam reveals one over the other, in place.
+ * make the demo depend on the network to show anything at all — so the scene is
+ * drawn from views. What matters is that both grades put every shape in exactly
+ * the same place and change only its colour: that is the difference spread
+ * across a whole frame that this component exists for, and it is the one a pair
+ * of thumbnails side by side cannot carry.
+ *
+ * Nothing here is text. Two captions centred in the same box would meet at the
+ * seam and overlap into a smear, which reads as the component being broken
+ * rather than as two versions of a picture.
  */
-function CompareCard({ tone, title, caption }: { tone: string; title: string; caption: string }) {
+const GRADES = {
+  before: { sky: '#8794a3', sun: '#c9cdd2', far: '#6b7684', near: '#4a545f', field: '#39414a' },
+  after: { sky: '#f2a65a', sun: '#ffe9b0', far: '#b9683f', near: '#7d3f34', field: '#43231f' },
+} as const;
+
+function CompareScene({ grade }: { grade: keyof typeof GRADES }) {
+  const tone = GRADES[grade];
+
+  /*
+   * Bands that run the full width, so every edge in the picture crosses the
+   * seam. Wherever the reader puts it, the same horizon lines up on both sides
+   * and only the colour changes — which is what makes it read as one picture
+   * graded twice rather than as two pictures side by side.
+   */
   return (
-    <View className={`flex-1 items-center justify-center gap-2 ${tone}`}>
-      <Text size="xl" weight="bold">
-        {title}
-      </Text>
-      <Text size="sm" muted>
-        {caption}
-      </Text>
+    <View style={{ flex: 1, backgroundColor: tone.sky, overflow: 'hidden' }}>
+      <View
+        style={{
+          position: 'absolute',
+          top: '16%',
+          left: '42%',
+          width: 64,
+          height: 64,
+          borderRadius: 32,
+          backgroundColor: tone.sun,
+        }}
+      />
+      <View
+        style={{ position: 'absolute', left: 0, right: 0, top: '46%', bottom: '36%', backgroundColor: tone.far }}
+      />
+      <View
+        style={{ position: 'absolute', left: 0, right: 0, top: '64%', bottom: '22%', backgroundColor: tone.near }}
+      />
+      <View
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '22%', backgroundColor: tone.field }}
+      />
     </View>
   );
 }
@@ -272,10 +335,10 @@ function CompareBasicVersion() {
         <Frame.Panel className="p-4">
           <Compare height={280}>
             <Compare.After>
-              <CompareCard tone="bg-muted" title="After" caption="The edited version" />
+              <CompareScene grade="after" />
             </Compare.After>
             <Compare.Before>
-              <CompareCard tone="bg-accent" title="Before" caption="The original" />
+              <CompareScene grade="before" />
             </Compare.Before>
             <Compare.Handle />
             <Compare.Label side="start">Before</Compare.Label>
@@ -300,12 +363,14 @@ function CompareControlledVersion() {
         <Frame.Panel className="p-4">
           <Compare height={260} value={split} onValueChange={setSplit}>
             <Compare.After>
-              <CompareCard tone="bg-muted" title="After" caption="Tap a button" />
+              <CompareScene grade="after" />
             </Compare.After>
             <Compare.Before>
-              <CompareCard tone="bg-accent" title="Before" caption="Or drag it" />
+              <CompareScene grade="before" />
             </Compare.Before>
             <Compare.Handle />
+          <Compare.Label side="start">Before</Compare.Label>
+          <Compare.Label side="end">After</Compare.Label>
           </Compare>
         </Frame.Panel>
       </Frame>
@@ -330,12 +395,14 @@ function CompareVerticalDemo() {
       <Card.Content className="p-4">
         <Compare height={180} orientation="vertical">
           <Compare.After>
-            <CompareCard tone="bg-muted" title="After" caption="Below the seam" />
+            <CompareScene grade="after" />
           </Compare.After>
           <Compare.Before>
-            <CompareCard tone="bg-accent" title="Before" caption="Above it" />
+            <CompareScene grade="before" />
           </Compare.Before>
           <Compare.Handle />
+          <Compare.Label side="start">Before</Compare.Label>
+          <Compare.Label side="end">After</Compare.Label>
         </Compare>
       </Card.Content>
     </Card>
@@ -348,12 +415,14 @@ function CompareStartDemo() {
       <Card.Content className="p-4">
         <Compare height={180} defaultValue={0.15}>
           <Compare.After>
-            <CompareCard tone="bg-muted" title="After" caption="Mostly on show" />
+            <CompareScene grade="after" />
           </Compare.After>
           <Compare.Before>
-            <CompareCard tone="bg-accent" title="Before" caption="A sliver" />
+            <CompareScene grade="before" />
           </Compare.Before>
           <Compare.Handle />
+          <Compare.Label side="start">Before</Compare.Label>
+          <Compare.Label side="end">After</Compare.Label>
         </Compare>
       </Card.Content>
     </Card>
@@ -366,12 +435,14 @@ function CompareFrozenDemo() {
       <Card.Content className="gap-3 p-4">
         <Compare height={160} defaultValue={0.5} disabled>
           <Compare.After>
-            <CompareCard tone="bg-muted" title="After" caption="Frozen" />
+            <CompareScene grade="after" />
           </Compare.After>
           <Compare.Before>
-            <CompareCard tone="bg-accent" title="Before" caption="Frozen" />
+            <CompareScene grade="before" />
           </Compare.Before>
           <Compare.Handle />
+          <Compare.Label side="start">Before</Compare.Label>
+          <Compare.Label side="end">After</Compare.Label>
         </Compare>
         <Text size="xs" muted>
           `disabled` freezes the seam and takes it out of the accessibility tree.

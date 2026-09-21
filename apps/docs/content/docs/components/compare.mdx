@@ -107,6 +107,35 @@ A string child is set for you; pass elements instead where the caption needs a b
 </Compare>
 ```
 
+### A readout in the middle
+
+A child that is none of the parts lands on the top layer, so it stays where it is put while the seam travels underneath. That is what makes a caption in the middle of the frame possible: text put inside either side is clipped by the seam and meets the text behind it as a smear.
+
+`onValueChange` feeds it, a whole percent at a time rather than every frame — enough for a number, and short of laying both sides out again sixty times a second.
+
+Write the readout before `Compare.Handle` and the seam stays drawn over it. Written after, the seam disappears behind the readout half way along the travel, which is where a reader reaches for it.
+
+A knob wide enough to cover a digit is worth replacing while it is crossing text: a slim bar reads as the seam thickening rather than as something sitting on the number.
+
+```tsx
+const [split, setSplit] = useState(0.38);
+const percent = Math.round((1 - split) * 100);
+
+<Compare height={280} defaultValue={0.38} onValueChange={setSplit}>
+  <Compare.After>{/* … */}</Compare.After>
+  <Compare.Before>{/* … */}</Compare.Before>
+  <View pointerEvents="none" className="absolute inset-0 items-center justify-center">
+    <View className="items-center gap-1 rounded-2xl bg-foreground/80 px-6 py-4">
+      <Text size="3xl" weight="semibold" className="text-background">{`${percent}%`}</Text>
+      <Text size="sm" className="text-background/70">graded</Text>
+    </View>
+  </View>
+  <Compare.Handle>
+    <View className="h-12 w-1.5 rounded-full bg-background" />
+  </Compare.Handle>
+</Compare>
+```
+
 ### A seam that runs the other way
 
 `orientation="vertical"` moves the seam up and down instead, revealing the top of one version over the bottom of the other. It suits a wide frame, where a horizontal seam has very little distance to travel and the two halves are thin columns.

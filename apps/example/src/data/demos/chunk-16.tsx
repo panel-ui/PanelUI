@@ -289,6 +289,12 @@ const GRADES = {
   after: { sky: '#f2a65a', sun: '#ffe9b0', far: '#b9683f', near: '#7d3f34', field: '#43231f' },
 } as const;
 
+/**
+ * Where the seam starts in the readout version: off centre, so the knob is not
+ * sitting behind the panel in the middle before anybody has touched it.
+ */
+const READOUT_START = 0.38;
+
 function CompareScene({ grade }: { grade: keyof typeof GRADES }) {
   const tone = GRADES[grade];
 
@@ -385,6 +391,95 @@ function CompareControlledVersion() {
           Before
         </Button>
       </View>
+    </View>
+  );
+}
+
+/**
+ * What this much of the grade is called.
+ *
+ * A percentage on its own is a number nobody has a feel for. The word beside
+ * it says what that much of a grade looks like, and it is the word changing —
+ * not the digits ticking — that the reader catches out of the corner of an eye
+ * while dragging.
+ */
+function gradeStage(percent: number): string {
+  if (percent <= 0) return 'Straight off the sensor';
+  if (percent < 34) return 'A first pass';
+  if (percent < 67) return 'Half graded';
+  if (percent < 100) return 'Nearly the full grade';
+  return 'The full grade';
+}
+
+/**
+ * The seam with a readout centred over it.
+ *
+ * The readout is an ordinary child of `Compare`, so it lands on the top layer
+ * with the handle and stays put while the seam travels under it. That is what
+ * lets it be text: a caption inside either side would be clipped by the seam
+ * and smear into the one behind it, and a caption that moves with the seam is
+ * unreadable exactly when it is being read.
+ *
+ * `onValueChange` is what feeds it, and it reports a whole percent at a time
+ * rather than every frame — which is all a number anybody can read needs, and
+ * why the scene behind it is not re-laid-out sixty times a second.
+ */
+function CompareReadoutVersion() {
+  const [box, setBox] = useState(0);
+  const [split, setSplit] = useState(READOUT_START);
+
+  // The window opens over the graded frame, so the share of the grade left on
+  // screen is what the seam has *not* covered.
+  const percent = Math.round((1 - split) * 100);
+
+  return (
+    <View
+      className="flex-1"
+      onLayout={(event) => {
+        const next = Math.round(event.nativeEvent.layout.height);
+        if (next !== box) setBox(next);
+      }}
+    >
+      {box > 0 ? (
+        <Compare
+          height={box}
+          defaultValue={READOUT_START}
+          onValueChange={setSplit}
+          className="rounded-none"
+        >
+          <Compare.After>
+            <CompareScene grade="after" />
+          </Compare.After>
+          <Compare.Before>
+            <CompareScene grade="before" />
+          </Compare.Before>
+          {/*
+           * Written before the handle, so the seam is drawn over the panel
+           * rather than under it. The other way round the seam vanishes behind
+           * the readout half way along its travel, which is exactly where a
+           * reader reaches for it.
+           */}
+          <View pointerEvents="none" className="absolute inset-0 items-center justify-center">
+            <View className="items-center gap-1 rounded-2xl bg-foreground/80 px-6 py-4">
+              <Text size="3xl" weight="semibold" className="text-background">
+                {`${percent}%`}
+              </Text>
+              <Text size="sm" weight="medium" className="text-background/70">
+                {gradeStage(percent)}
+              </Text>
+            </View>
+          </View>
+          {/*
+           * A slim grip rather than the default knob. A 36-point circle
+           * crossing the panel covers a digit of the number for the middle
+           * third of the travel; a bar the width of the line reads as the seam
+           * thickening where the finger is.
+           */}
+          <Compare.Handle>
+            <View className="h-12 w-1.5 rounded-full bg-background" />
+          </Compare.Handle>
+        </Compare>
+      ) : null}
     </View>
   );
 }
@@ -516,6 +611,14 @@ export const ENTRIES: ComponentEntry[] = [
         description:
           'A controlled seam. The buttons set it, dragging still moves it, and the prop stands back while a finger is down.',
         render: () => <CompareControlledVersion />,
+      },
+      {
+        label: 'A readout in the middle',
+        id: 'readout',
+        fullPage: true,
+        description:
+          'The seam fills the screen and a panel over the middle of it names what is on show. It changes as the seam moves, so the number and the picture are never saying different things.',
+        render: () => <CompareReadoutVersion />,
       },
       { label: 'A seam that runs the other way', render: () => <CompareVerticalDemo /> },
       { label: 'Where the seam starts', render: () => <CompareStartDemo /> },

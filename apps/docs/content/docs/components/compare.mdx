@@ -1,0 +1,232 @@
+---
+title: Compare
+description: Two versions of one picture, with a seam you drag across it.
+status: new
+---
+
+Use it to show that two versions of one image differ, when the difference is spread across the frame rather than gathered in one place — retouching, a filter, a render at two quality settings, a map at two dates. A pair of thumbnails side by side will not carry that, because the eye cannot hold one image well enough to spot the change in the other.
+
+The seam works because both versions are in the same place at the same scale. Every pixel being compared was just under the one beside it, so the difference arrives as movement rather than as something to remember.
+
+**It needs a height.** Both sides are positioned absolutely, so the frame has no content left to take a height from. `height` is what gives it one.
+
+**Both sides should be the same picture at the same framing.** Two images that differ in crop or aspect will slide against each other under the seam, and the reader reads that misalignment as the difference.
+
+For two panes of arbitrary content that share the space between them, use [Splitter](/docs/components/splitter). For one image that opens out of the page, use [ImageViewer](/docs/components/image-viewer).
+
+## Installation
+
+Compare ships with the library — no separate install.
+
+```tsx
+import { Compare, Text } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add compare
+```
+
+## Usage
+
+```tsx
+<Compare height={260}>
+  <Compare.After>
+    <Image source={edited} style={{ width: '100%', height: '100%' }} />
+  </Compare.After>
+  <Compare.Before>
+    <Image source={original} style={{ width: '100%', height: '100%' }} />
+  </Compare.Before>
+  <Compare.Handle />
+</Compare>
+```
+
+## Composition
+
+```tsx
+<Compare>
+  <Compare.After />   {/* the whole frame, underneath */}
+  <Compare.Before />  {/* the side the seam covers */}
+  <Compare.Handle />  {/* the seam, and the accessibility wiring */}
+  <Compare.Label />   {/* a caption pinned to one corner */}
+</Compare>
+```
+
+Order in the source does not decide what is on top. `After` is always drawn first and `Before` laid over it, because the revealed side is a window onto the other — reversed, the window would be underneath and nothing would show through.
+
+## Examples
+
+### Where the seam starts
+
+`defaultValue` is a share of the frame, `0` to `1`, and the default is the middle so both sides are equally on show. Start it near an edge where one version is the subject and the other is the reference — the reader then drags to reveal rather than to hide.
+
+```tsx
+<Compare height={260} defaultValue={0.15}>
+  <Compare.After>
+    <Image source={edited} style={{ width: '100%', height: '100%' }} />
+  </Compare.After>
+  <Compare.Before>
+    <Image source={original} style={{ width: '100%', height: '100%' }} />
+  </Compare.Before>
+  <Compare.Handle />
+</Compare>
+```
+
+### Driving it from outside
+
+Pass `value` and the frame stops tracking the seam itself. Useful for a control that snaps to the ends, or for animating the reveal on screen entry.
+
+The prop stands back while a finger is down, so a drag is never fighting whatever last set `value`. `onValueChange` reports during the drag, a whole percent at a time rather than every frame; `onValueCommit` fires once, when the finger lifts — that is the one to persist.
+
+```tsx
+const [split, setSplit] = useState(0.5);
+
+<Compare height={260} value={split} onValueChange={setSplit}>
+  <Compare.After>{/* … */}</Compare.After>
+  <Compare.Before>{/* … */}</Compare.Before>
+  <Compare.Handle />
+</Compare>
+
+<Button onPress={() => setSplit(0)}>Show the edit</Button>
+```
+
+### Saying which side is which
+
+Two labels, one per corner. They sit above the seam and do not move with it, so they name the sides rather than the current split.
+
+A string child is set for you; pass elements instead where the caption needs a badge or an icon.
+
+```tsx
+<Compare height={260}>
+  <Compare.After>{/* … */}</Compare.After>
+  <Compare.Before>{/* … */}</Compare.Before>
+  <Compare.Handle />
+  <Compare.Label side="start">2019</Compare.Label>
+  <Compare.Label side="end">2026</Compare.Label>
+</Compare>
+```
+
+### A seam that runs the other way
+
+`orientation="vertical"` moves the seam up and down instead, revealing the top of one version over the bottom of the other. It suits a wide frame, where a horizontal seam has very little distance to travel and the two halves are thin columns.
+
+It also changes which way the gesture is claimed: a vertical seam answers to vertical movement, so it will take a drag that a surrounding scroll view would otherwise have had.
+
+```tsx
+<Compare height={200} orientation="vertical">
+  <Compare.After>{/* … */}</Compare.After>
+  <Compare.Before>{/* … */}</Compare.Before>
+  <Compare.Handle />
+</Compare>
+```
+
+### Comparing something that is not a picture
+
+Both sides take arbitrary children, so the same reveal works on two renderings of anything — a card at two themes, a chart at two data sets, text at two type scales.
+
+Whatever goes in has to fill the frame and be the same size on both sides. A child that sizes itself to its content will be the width of the window rather than the width of the frame, which is the one arrangement this cannot fix for you.
+
+```tsx
+<Compare height={180}>
+  <Compare.After className="bg-background">
+    <View className="flex-1 items-center justify-center">
+      <Text size="lg">After</Text>
+    </View>
+  </Compare.After>
+  <Compare.Before className="bg-foreground">
+    <View className="flex-1 items-center justify-center">
+      <Text size="lg" className="text-background">Before</Text>
+    </View>
+  </Compare.Before>
+  <Compare.Handle />
+</Compare>
+```
+
+### A knob of your own
+
+Children on `Compare.Handle` replace the knob and keep the line behind it. The replacement is not the drag target — the whole frame is — so it can be any size without costing anyone a hit area.
+
+```tsx
+<Compare.Handle>
+  <View className="size-9 items-center justify-center rounded-full bg-background">
+    <ChevronsLeftRightIcon size={16} />
+  </View>
+</Compare.Handle>
+```
+
+## Variants
+
+### `orientation`
+
+- `horizontal` *(default)*
+- `vertical`
+
+```tsx
+<Compare orientation="horizontal">…</Compare>
+<Compare orientation="vertical">…</Compare>
+```
+
+## API Reference
+
+### Compare
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `height` | `number` | `240` | How tall the frame is, in points. Required in practice rather than in the types: both sides are positioned absolutely, so there is no content left to give the box a height of its own. |
+| `value` | `number` | — | Where the seam sits, `0` to `1`. Leave unset to let the frame track it. |
+| `defaultValue` | `number` | `0.5` | Where it starts when the frame is tracking it itself. |
+| `onValueChange` | `(value: number) => void` | — | Fires while the seam moves, with its new position. |
+| `onValueCommit` | `(value: number) => void` | — | Fires once, when the finger is lifted. The one to persist. |
+| `orientation` | `CompareOrientation` | `'horizontal'` | Which way the seam runs. |
+| `disabled` | `boolean` | `false` | Freezes the seam where it is and takes it out of the accessibility tree. |
+| `step` | `number` | `0.05` | How far one screen-reader increment moves the seam, `0` to `1`. |
+| `haptics` | `boolean` | `true` | A tick when the seam reaches either end. |
+
+### Compare.After
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Compare.Before
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Compare.Handle
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `withGrip` | `boolean` | `true` | Hide the two grip bars inside the knob. |
+| `accessibilityLabel` | `string` | `'Compare'` | Spoken name. |
+
+### Compare.Label
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `side` | `'start' \| 'end'` | — | Which side of the frame it sits on. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+The drag is the whole frame, not the knob, and it only claims movement along its own axis — so a Compare inside a scrolling page still scrolls. The seam runs on the UI thread and never needs the JS thread to move.
+
+A drag is not available to everyone, so the handle is `adjustable`: a screen reader moves the seam a `step` at a time, which defaults to five percent of the frame. `disabled` freezes it and takes it out of the accessibility tree.
+
+There is a tick when the seam reaches either end, where it stops following the finger — without it the stall reads as the gesture having been dropped. `haptics={false}` turns it off.
+
+Under a right-to-left layout the whole frame is mirrored. The window opens from the right-hand edge, `Compare.Label side="start"` sits on that edge too, and a drag towards the start of the line moves the seam towards the start.
+
+## Public exports
+
+{/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
+
+**Values:** `Compare`
+
+**Types:** `CompareProps`, `CompareBeforeProps`, `CompareAfterProps`, `CompareHandleProps`, `CompareLabelProps`, `CompareOrientation`

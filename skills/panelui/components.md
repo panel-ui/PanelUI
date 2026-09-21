@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-132 component modules. The **Reference** column links to a file in this skill holding that
+134 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -140,6 +140,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `PyramidChart` | Two series mirrored about a centre, on one shared scale. | [pyramid-chart](./components/pyramid-chart.md) |
 | `RadarChart` | Several measures of one thing, drawn as one shape. | [radar-chart](./components/radar-chart.md) |
 | `RingChart` | Concentric arcs, each measured against its own target. | [ring-chart](./components/ring-chart.md) |
+| `SankeyChart` | Where a quantity came from and where it ended up. | [sankey-chart](./components/sankey-chart.md) |
 | `ScatterChart` | Two quantities against each other, to show how they relate. | [scatter-chart](./components/scatter-chart.md) |
 | `TreemapChart` | A total, cut into the parts it is made of, sized by area. | [treemap-chart](./components/treemap-chart.md) |
 | `WaterfallChart` | How a run of changes carried one total to another. | [waterfall-chart](./components/waterfall-chart.md) |
@@ -166,6 +167,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `Attachment` | File row with upload states, built on Item. | [attachment](./components/attachment.md) |
 | `Avatar` | User image with an initials fallback, a badge overlay, and a stack for a group of them. | [avatar](./components/avatar.md) |
 | `CircularText` | Text set around a circle, turning. | [circular-text](./components/circular-text.md) |
+| `Compare` | Two versions of one picture, with a seam you drag across it. | [compare](./components/compare.md) |
 | `FlipCard` | Two faces of one card, and a turn between them. | [flip-card](./components/flip-card.md) |
 | `Marquee` | Content that travels across its container on a loop. | [marquee](./components/marquee.md) |
 | `Message` | Chat turn with avatar, bubble, header and footer. | [message](./components/message.md) |

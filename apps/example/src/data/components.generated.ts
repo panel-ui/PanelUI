@@ -27,6 +27,7 @@ export const COMPONENTS = [
   {"slug":"collapsible","name":"Collapsible","summary":"One section, shown and hidden by its own header"},
   {"slug":"color-picker","name":"ColorPicker","summary":"A colour chosen by dragging, not by typing"},
   {"slug":"combobox","name":"Combobox","summary":"A text field that filters a list as you type"},
+  {"slug":"compare","name":"Compare","summary":"Two versions of one picture, with a seam you drag across it"},
   {"slug":"context-menu","name":"ContextMenu","summary":"Actions for a piece of content, opened by holding it"},
   {"slug":"date-picker","name":"DatePicker","summary":"A calendar behind a button"},
   {"slug":"date-time-picker","name":"DateTimePicker","summary":"A day and a time, picked in one panel"},
@@ -87,6 +88,7 @@ export const COMPONENTS = [
   {"slug":"reasoning","name":"Reasoning","summary":"The model's working, shown while it happens"},
   {"slug":"response","name":"Response","summary":"A model's answer, rendered as it arrives"},
   {"slug":"ring-chart","name":"RingChart","summary":"Concentric arcs, each against its own target"},
+  {"slug":"sankey-chart","name":"SankeyChart","summary":"Where a quantity came from and where it ended up"},
   {"slug":"scatter-chart","name":"ScatterChart","summary":"Two quantities against each other, to show how they relate"},
   {"slug":"scroll-blur","name":"ScrollBlur","summary":"Blurs the edges of a scroll container"},
   {"slug":"scroll-canvas","name":"ScrollCanvas","summary":"Image frame whose contents move as you scroll"},
@@ -137,4 +139,4 @@ export const COMPONENTS = [
 
 export type ComponentMetadata = (typeof COMPONENTS)[number];
 export const COMPONENT_COUNT = COMPONENTS.length;
-export const CHART_COUNT = 18;
+export const CHART_COUNT = 19;

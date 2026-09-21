@@ -1275,6 +1275,26 @@
       "accessibilityMode": "shared-data"
     }
   ],
+  "sankey-chart": [
+    "SankeyChart",
+    "Where a quantity came from and where it ended up.",
+    "react native sankey chart flow diagram",
+    {
+      "addedIn": "0.101.0",
+      "group": "charts",
+      "visualization": true,
+      "accessibilityMode": "interactive-items"
+    }
+  ],
+  "compare": [
+    "Compare",
+    "Two versions of one picture, with a seam you drag across it.",
+    "react native before after image comparison slider",
+    {
+      "addedIn": "0.101.0",
+      "category": "media"
+    }
+  ],
   "page-header": [
     "PageHeader",
     "Cover, face and actions at the top of a profile.",

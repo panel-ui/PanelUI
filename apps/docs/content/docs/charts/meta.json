@@ -18,6 +18,7 @@
     "pyramid-chart",
     "radar-chart",
     "ring-chart",
+    "sankey-chart",
     "scatter-chart",
     "treemap-chart",
     "waterfall-chart"

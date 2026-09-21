@@ -454,6 +454,21 @@
     "docsPath": "components/combobox"
   },
   {
+    "name": "compare",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Two versions of one picture, with a seam you drag across it.",
+    "registryDependencies": [
+      "cn",
+      "haptics",
+      "text",
+      "use-direction"
+    ],
+    "docsPath": "components/compare"
+  },
+  {
     "name": "context-menu",
     "type": "registry:ui",
     "kind": "ui",
@@ -1504,6 +1519,23 @@
       "text"
     ],
     "docsPath": "charts/ring-chart"
+  },
+  {
+    "name": "sankey-chart",
+    "type": "registry:ui",
+    "kind": "chart",
+    "group": "charts",
+    "stability": "stable",
+    "description": "Where a quantity came from and where it ended up.",
+    "registryDependencies": [
+      "chart",
+      "chart-accessibility",
+      "cn",
+      "text",
+      "use-direction",
+      "use-skeleton-handoff"
+    ],
+    "docsPath": "charts/sankey-chart"
   },
   {
     "name": "scatter-chart",

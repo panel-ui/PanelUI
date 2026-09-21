@@ -227,6 +227,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `Collapsible` | One section of content, shown and hidden by its own header |
 | `ColorPicker` | A colour chosen by dragging — a saturation square, a hue scale, and opacity |
 | `Combobox` | A text field that filters a list of options as you type |
+| `Compare` | Two versions of one picture, with a seam you drag across it |
 | `ContextMenu` | Actions for a piece of content, opened by holding it |
 | `DatePicker` | A calendar behind a button |
 | `DateTimePicker` | A day and a time of day, picked in one panel |
@@ -280,6 +281,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `Reasoning` | An agent’s thinking, collapsed until you want it |
 | `Response` | Streamed markdown rendered as native components |
 | `RingChart` | Concentric arcs, each measured against its own target |
+| `SankeyChart` | Where a quantity came from and where it ended up |
 | `ScatterChart` | Two quantities against each other, to show how they relate |
 | `ScrollCanvas` | Image frame whose contents move as you scroll |
 | `ScrollFade` | Fades the edges of a scroll container |

@@ -27,6 +27,7 @@
     "collapsible",
     "color-picker",
     "combobox",
+    "compare",
     "context-menu",
     "date-picker",
     "date-time-picker",
@@ -87,6 +88,7 @@
     "reasoning",
     "response",
     "ring-chart",
+    "sankey-chart",
     "scatter-chart",
     "scroll-blur",
     "scroll-canvas",
@@ -204,6 +206,10 @@
       "accessibilityMode": "interactive-items"
     },
     {
+      "name": "sankey-chart",
+      "accessibilityMode": "interactive-items"
+    },
+    {
       "name": "scatter-chart",
       "accessibilityMode": "shared-data"
     },
@@ -217,26 +223,26 @@
     }
   ],
   "counts": {
-    "componentModules": 132,
-    "packageComponentExports": 132,
-    "documentedComponents": 132,
-    "exampleEntries": 132,
+    "componentModules": 134,
+    "packageComponentExports": 134,
+    "documentedComponents": 134,
+    "exampleEntries": 134,
     "registry": {
-      "componentItems": 132,
+      "componentItems": 134,
       "supportItems": 36,
-      "totalItems": 168,
+      "totalItems": 170,
       "byType": {
-        "registry:ui": 147,
+        "registry:ui": 149,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1
       }
     },
     "visualizations": {
-      "total": 20,
+      "total": 21,
       "sharedData": 13,
       "summaries": 1,
-      "interactiveItems": 6
+      "interactiveItems": 7
     },
     "registrySupport": {
       "primitives": 13,

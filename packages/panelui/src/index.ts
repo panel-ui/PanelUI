@@ -505,6 +505,15 @@ export {
   type ComboboxPresentation,
 } from './components/combobox';
 export {
+  Compare,
+  type CompareProps,
+  type CompareBeforeProps,
+  type CompareAfterProps,
+  type CompareHandleProps,
+  type CompareLabelProps,
+  type CompareOrientation,
+} from './components/compare';
+export {
   ContextMenu,
   type ContextMenuProps,
   type ContextMenuTriggerProps,
@@ -1102,6 +1111,22 @@ export {
   type RingChartLegendProps,
   type RingDatum,
 } from './components/ring-chart';
+export {
+  SankeyChart,
+  useSankeyChart,
+  type SankeyChartProps,
+  type SankeyChartHandle,
+  type SankeyChartHeaderProps,
+  type SankeyChartLinksProps,
+  type SankeyChartNodesProps,
+  type SankeyChartLabelsProps,
+  type SankeyChartTooltipProps,
+  type SankeyChartSkeletonProps,
+  type SankeyChartStatus,
+  type SankeyNode,
+  type SankeyLink,
+  type SankeyAlign,
+} from './components/sankey-chart';
 export {
   ScatterChart,
   useScatterChart,

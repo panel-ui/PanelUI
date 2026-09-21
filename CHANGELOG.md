@@ -9,6 +9,29 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.101.0] — 2026-09-21
+
+### Added
+
+- **SankeyChart** — a flow diagram: how much of one thing became another, with a ribbon
+  whose thickness is its value on one scale shared by the whole picture. Columns come out
+  of the links rather than the order of your array, `align` settles the cases the flow
+  leaves open, and rows that name a missing node, carry nothing or close a loop are
+  dropped and counted through `onDropLinks` instead of taking the screen down with them.
+- **Compare** — two versions of one image behind a seam you drag across it, for a
+  difference spread over the whole frame rather than gathered in one place. It clips
+  rather than resizes, so both sides stay registered as the seam moves; the drag is the
+  whole frame, it only claims its own axis, and the handle is `adjustable` for anyone who
+  cannot drag.
+
+### Fixed
+
+- **Icons** no longer pass native-only accessibility props to the DOM on web. Every glyph
+  logged a React warning about `importantForAccessibility`, and because neither prop
+  means anything there, the icon stayed in the accessibility tree inside controls that
+  already carry their own name. On web they are now `aria-hidden`. Thanks @Carloss616 for
+  the report and the fix. (#220)
+
 ## [0.100.0] — 2026-09-18
 
 ### Added

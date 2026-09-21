@@ -144,6 +144,11 @@ interface CompareContextValue {
   width: number;
   height: number;
   orientation: CompareOrientation;
+  /**
+   * True where the frame reads right to left. A horizontal seam is anchored to
+   * the reading edge, so everything positioned along that axis flips with it.
+   */
+  mirrored: boolean;
   disabled: boolean;
   step: number;
   /** Moves the seam and reports it, for the paths that are not the drag. */
@@ -210,6 +215,7 @@ function CompareRoot({
   const [box, setBox] = useState({ width: 0, height: 0 });
   const [internal, setInternal] = useState(defaultValue);
   const sign = useDirectionSign();
+  const mirrored = sign === -1;
 
   const controlled = value !== undefined;
   const current = controlled ? value : internal;
@@ -350,11 +356,12 @@ function CompareRoot({
       width: box.width,
       height: box.height,
       orientation,
+      mirrored,
       disabled,
       step,
       nudge,
     }),
-    [ratio, box.width, box.height, orientation, disabled, step, nudge]
+    [ratio, box.width, box.height, orientation, mirrored, disabled, step, nudge]
   );
 
   const { root } = compareVariants({ orientation });
@@ -447,8 +454,16 @@ export interface CompareBeforeProps extends ViewProps {
  * the same picture in the same place.
  */
 function CompareBefore({ className, children, ...props }: CompareBeforeProps) {
-  const { ratio, width, height, orientation } = useCompare('Compare.Before');
+  const { ratio, width, height, orientation, mirrored } = useCompare('Compare.Before');
   const horizontal = orientation === 'horizontal';
+  /*
+   * A horizontal window opens from the edge the line starts at, which is the
+   * right-hand one under a right-to-left layout. Both the window and the copy
+   * inside it are pinned to that same edge — pinning only the window would
+   * slide the content along under the seam, which is the one thing the clip
+   * exists to prevent. Vertical is unaffected: down is down in both directions.
+   */
+  const anchor = horizontal && mirrored ? 'right' : 'left';
 
   const clip = useAnimatedStyle(() =>
     horizontal
@@ -459,11 +474,11 @@ function CompareBefore({ className, children, ...props }: CompareBeforeProps) {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[{ position: 'absolute', left: 0, top: 0, overflow: 'hidden' }, clip]}
+      style={[{ position: 'absolute', [anchor]: 0, top: 0, overflow: 'hidden' }, clip]}
     >
       <View
         {...props}
-        style={[{ position: 'absolute', left: 0, top: 0, width, height }, props.style]}
+        style={[{ position: 'absolute', [anchor]: 0, top: 0, width, height }, props.style]}
         className={cn(className)}
       >
         {children}
@@ -505,10 +520,13 @@ function CompareHandle({
   style,
   ...props
 }: CompareHandleProps) {
-  const { ratio, width, height, orientation, disabled, step, nudge } =
+  const { ratio, width, height, orientation, mirrored, disabled, step, nudge } =
     useCompare('Compare.Handle');
   const horizontal = orientation === 'horizontal';
   const { seam, line, knob, grip } = compareVariants({ orientation });
+  // Pinned to the same edge the window opens from, and travelling away from it.
+  const anchor = horizontal && mirrored ? 'right' : 'left';
+  const towards = horizontal && mirrored ? -1 : 1;
 
   const offset = useDerivedValue(() =>
     horizontal ? ratio.value * width : ratio.value * height
@@ -516,7 +534,7 @@ function CompareHandle({
 
   const animatedStyle = useAnimatedStyle(() =>
     horizontal
-      ? { transform: [{ translateX: offset.value - KNOB / 2 }] }
+      ? { transform: [{ translateX: (offset.value - KNOB / 2) * towards }] }
       : { transform: [{ translateY: offset.value - KNOB / 2 }] }
   );
 
@@ -551,7 +569,7 @@ function CompareHandle({
       onAccessibilityAction={disabled ? undefined : onAccessibilityAction}
       pointerEvents="box-none"
       style={[
-        horizontal ? { width: KNOB, left: 0 } : { height: KNOB, top: 0 },
+        horizontal ? { width: KNOB, [anchor]: 0 } : { height: KNOB, top: 0 },
         style,
         animatedStyle,
       ]}
@@ -589,9 +607,10 @@ export interface CompareLabelProps extends ViewProps {
  * thing over the picture and the picture is the point.
  */
 function CompareLabel({ className, side = 'start', children, ...props }: CompareLabelProps) {
-  const { orientation } = useCompare('Compare.Label');
+  const { orientation, mirrored } = useCompare('Compare.Label');
   const horizontal = orientation === 'horizontal';
-  const start = side === 'start';
+  // `start` is the edge the line begins at, which the layout direction decides.
+  const start = horizontal && mirrored ? side !== 'start' : side === 'start';
 
   return (
     <View

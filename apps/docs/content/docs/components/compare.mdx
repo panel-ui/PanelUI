@@ -221,7 +221,7 @@ A drag is not available to everyone, so the handle is `adjustable`: a screen rea
 
 There is a tick when the seam reaches either end, where it stops following the finger — without it the stall reads as the gesture having been dropped. `haptics={false}` turns it off.
 
-Under a right-to-left layout a horizontal drag is mirrored, so dragging towards the start of the line still moves the seam towards the start.
+Under a right-to-left layout the whole frame is mirrored. The window opens from the right-hand edge, `Compare.Label side="start"` sits on that edge too, and a drag towards the start of the line moves the seam towards the start.
 
 ## Public exports
 

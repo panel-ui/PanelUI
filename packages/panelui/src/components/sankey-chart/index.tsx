@@ -210,6 +210,16 @@ interface SankeyChartContextValue {
   activeId: string | null;
   setActiveId: (id: string | null) => void;
   labelFor: (id: string) => string;
+  /**
+   * How `SankeyChart.Labels` tells the chart which names it actually drew.
+   *
+   * The names are press targets, so a node that has one is already reachable
+   * and saying it again in the semantic list below is a duplicate. A node that
+   * does not — a bar too short to label — is reachable by nothing at all
+   * unless the list keeps it. Only `Labels` knows which is which, because
+   * only `Labels` has the threshold.
+   */
+  reportLabelled: (ids: string[] | null) => void;
 }
 
 const SankeyChartContext = createContext<SankeyChartContextValue | null>(null);
@@ -302,6 +312,15 @@ export interface SankeyChartProps
    * so a banner can be shown and taken away from the same signal.
    */
   onDropLinks?: (count: number) => void;
+  /**
+   * Overrides what a screen reader says for one ribbon.
+   *
+   * The ribbons are the reading — a node's total says how much passed through
+   * it, never where it went — so each one is spoken in its own right, as
+   * "source to target, value". Only the rows that could be drawn are offered;
+   * a dropped row is reported through `onDropLinks` instead.
+   */
+  accessibilityLabelForLink?: (link: SankeyLink, index: number) => string;
   children?: ReactNode;
 }
 
@@ -332,6 +351,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       accessibilityLabel,
       accessibilityHint,
       accessibilityLabelForDatum,
+      accessibilityLabelForLink,
       onAccessibilityDatumPress,
       children,
       ...props
@@ -475,6 +495,26 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       if (next !== width) setWidth(next);
     };
 
+    /*
+     * The ids `SankeyChart.Labels` drew a name for, or `null` while it has not
+     * said. Compared rather than replaced, because Labels reports on every
+     * layout change and a fresh array each time would re-render the chart
+     * forever.
+     */
+    const [labelledIds, setLabelledIds] = useState<string[] | null>(null);
+    const reportLabelled = useMemo(
+      () => (ids: string[] | null) =>
+        setLabelledIds((current) => {
+          if (current === ids) return current;
+          if (current === null || ids === null) return ids;
+          if (current.length === ids.length && current.every((id, i) => id === ids[i])) {
+            return current;
+          }
+          return ids;
+        }),
+      []
+    );
+
     const context = useMemo<SankeyChartContextValue>(
       () => ({
         nodes,
@@ -490,6 +530,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
         activeId: activeId ?? null,
         setActiveId,
         labelFor,
+        reportLabelled,
       }),
       [
         nodes,
@@ -505,6 +546,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
         activeId,
         setActiveId,
         labelFor,
+        reportLabelled,
       ]
     );
 
@@ -515,10 +557,14 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       footer: [],
     };
     /*
-     * Whether the names are on the chart decides how it is read out. With
-     * `Labels` there is a pressable row per node already, and the semantic
-     * list below would say all of it a second time; without them the diagram
-     * is pure geometry and the list is the only way through it.
+     * Whether the names are on the chart decides how it is read out. Without
+     * `Labels` the diagram is pure geometry and the semantic list is the only
+     * way through it. With them, most nodes are a pressable row already and
+     * the list would say it all a second time — but only most: a bar too short
+     * to label is left with no target and no entry, which is how the smallest
+     * nodes on a crowded diagram became unreachable by either route. So the
+     * list is narrowed to what `Labels` reports it dropped rather than turned
+     * off wholesale.
      */
     let labelled = false;
     Children.forEach(children, (child, index) => {
@@ -531,6 +577,21 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
         <ChildSlot key={index}>{child}</ChildSlot>
       );
     });
+
+    /*
+     * The nodes the semantic list still has to carry.
+     *
+     * With no `Labels` that is all of them. With `Labels` it is the ones it
+     * reported dropping — and until it has reported, none: a name that turns
+     * out to exist is a duplicate entry, which is worse for one render than a
+     * missing one, and the report lands on the render straight after.
+     */
+    const spoken = useMemo(() => {
+      if (!labelled) return nodes;
+      if (labelledIds === null) return [];
+      const drawn = new Set(labelledIds);
+      return nodes.filter((node) => !drawn.has(node.id));
+    }, [nodes, labelled, labelledIds]);
 
     return (
       <SankeyChartContext.Provider value={context}>
@@ -574,8 +635,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
           {slots.footer}
           <ChartAccessibilityData
             chart="Flow diagram"
-            data={nodes}
-            disabled={labelled || status === 'loading'}
+            data={spoken}
+            disabled={status === 'loading' || (labelled && spoken.length === 0)}
             valueOf={(node) => [
               ['Node', node.label ?? node.id],
               ['Value', placed.nodes.find((placedNode) => placedNode.id === node.id)?.value],
@@ -584,6 +645,13 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
             accessibilityHint={accessibilityHint}
             accessibilityLabelForDatum={accessibilityLabelForDatum}
             onAccessibilityDatumPress={onAccessibilityDatumPress}
+          />
+          <LinkAccessibilityData
+            disabled={status === 'loading'}
+            layout={placed}
+            links={links}
+            labelFor={labelFor}
+            labelForLink={accessibilityLabelForLink}
           />
         </View>
       </SankeyChartContext.Provider>
@@ -594,6 +662,55 @@ SankeyChartRoot.displayName = 'SankeyChart';
 
 function ChildSlot({ children }: { children: ReactNode }) {
   return <>{children}</>;
+}
+
+/**
+ * The ribbons, for a screen reader.
+ *
+ * Kept apart from the node list rather than folded into it, because the two
+ * are different readings and a caller overrides them separately: a node says
+ * how much passed through a stage, a ribbon says where it came from and where
+ * it went. A diagram read out as nodes alone is a list of totals with the
+ * routing — the thing the chart exists to show — missing from it.
+ *
+ * Offscreen rather than hidden, so the entries are reachable by swiping while
+ * nothing about the drawn diagram moves.
+ */
+function LinkAccessibilityData({
+  disabled,
+  layout,
+  links,
+  labelFor,
+  labelForLink,
+}: {
+  disabled: boolean;
+  layout: SankeyLayout;
+  links: SankeyLink[];
+  labelFor: (id: string) => string;
+  labelForLink?: (link: SankeyLink, index: number) => string;
+}) {
+  if (disabled || !layout.links.length) return null;
+
+  return (
+    <View style={{ position: 'absolute', left: -10_000, width: 1, height: 1 }}>
+      {layout.links.map((link) => {
+        // `input` points back at the caller's row; `index` is the drawn order,
+        // which has closed up behind every row that could not be drawn.
+        const datum = links[link.input];
+        const source = layout.nodes[link.source];
+        const target = layout.nodes[link.target];
+        if (!datum || !source || !target) return null;
+
+        const label =
+          labelForLink?.(datum, link.input) ??
+          `${labelFor(source.id)} to ${labelFor(target.id)}, ${compactNumber(link.value)}`;
+
+        return (
+          <View key={`${source.id}-${target.id}-${link.input}`} accessible accessibilityRole="text" accessibilityLabel={label} />
+        );
+      })}
+    </View>
+  );
 }
 
 /**
@@ -724,6 +841,14 @@ export interface SankeyChartNodesProps {
   radius?: number;
   /** A bar's opacity when something else is selected. */
   dimOpacity?: number;
+  /**
+   * Whether pressing a bar selects its node.
+   *
+   * On by default, because the names are not always there to press. A bar
+   * below `SankeyChart.Labels`' `minHeight` has no name and, without this, no
+   * way to be selected at all.
+   */
+  interactive?: boolean;
 }
 
 /**
@@ -733,8 +858,12 @@ export interface SankeyChartNodesProps {
  * the diagram that is not crossing anything else — it is the edge the flow
  * arrives at, and it reads as an edge only if nothing shows through it.
  */
-function SankeyChartNodes({ radius = 2, dimOpacity = 0.25 }: SankeyChartNodesProps) {
-  const { layout, colors, reveal, windows, status, activeId } =
+function SankeyChartNodes({
+  radius = 2,
+  dimOpacity = 0.25,
+  interactive = true,
+}: SankeyChartNodesProps) {
+  const { layout, colors, reveal, windows, status, activeId, setActiveId } =
     useChart('SankeyChart.Nodes');
 
   if (status === 'loading' || !layout.nodes.length) return null;
@@ -743,6 +872,7 @@ function SankeyChartNodes({ radius = 2, dimOpacity = 0.25 }: SankeyChartNodesPro
     <G>
       {layout.nodes.map((node, index) => {
         const window = windows[node.layer] ?? windows[0] ?? { from: 0, to: 1 };
+        const selected = activeId === node.id;
         return (
           <NodeBar
             key={node.id}
@@ -754,7 +884,10 @@ function SankeyChartNodes({ radius = 2, dimOpacity = 0.25 }: SankeyChartNodesPro
             fill={colors[index] ?? '#3b82f6'}
             reveal={reveal}
             window={window}
-            opacity={activeId === null || activeId === node.id ? 1 : dimOpacity}
+            opacity={activeId === null || selected ? 1 : dimOpacity}
+            onPress={
+              interactive ? () => setActiveId(selected ? null : node.id) : undefined
+            }
           />
         );
       })}
@@ -774,6 +907,7 @@ function NodeBar({
   reveal,
   window,
   opacity,
+  onPress,
 }: {
   x: number;
   width: number;
@@ -784,6 +918,7 @@ function NodeBar({
   reveal: SharedValue<number>;
   window: { from: number; to: number };
   opacity: number;
+  onPress?: () => void;
 }) {
   const { from, to } = window;
   const extent = y1 - y0;
@@ -798,7 +933,43 @@ function NodeBar({
     return { y: centre - grown / 2, height: grown, opacity: settled.value };
   });
 
-  return <AnimatedRect animatedProps={animatedProps} x={x} width={width} rx={radius} fill={fill} />;
+  const bar = (
+    <AnimatedRect
+      animatedProps={animatedProps}
+      x={x}
+      width={width}
+      rx={radius}
+      fill={fill}
+      onPress={onPress}
+    />
+  );
+
+  if (!onPress || extent >= MIN_TARGET) return bar;
+
+  /*
+   * A sliver gets a second, invisible rectangle to be pressed by, because the
+   * bar itself is two points tall and nobody can land on it. `transparent`
+   * rather than no fill: a shape with no fill is not hit-tested at all, so it
+   * would look identical and do nothing.
+   *
+   * It is drawn before the bar so the bar keeps the tap where the two overlap,
+   * and it grows about the same centre, which keeps the target over the bar
+   * rather than beside it.
+   */
+  const target = Math.max(extent, MIN_TARGET);
+  return (
+    <>
+      <Rect
+        x={x + width / 2 - MIN_TARGET / 2}
+        width={MIN_TARGET}
+        y={centre - target / 2}
+        height={target}
+        fill="transparent"
+        onPress={onPress}
+      />
+      {bar}
+    </>
+  );
 }
 
 export interface SankeyChartLabelsProps {
@@ -841,10 +1012,32 @@ function SankeyChartLabels({
   showValue = false,
   minHeight = 6,
 }: SankeyChartLabelsProps) {
-  const { layout, nodes, width, height, status, activeId, setActiveId, labelFor } =
+  const { layout, nodes, width, height, status, activeId, setActiveId, labelFor, reportLabelled } =
     useChart('SankeyChart.Labels');
 
-  if (status === 'loading' || !layout.nodes.length) return null;
+  const drawing = status !== 'loading' && layout.nodes.length > 0;
+
+  /*
+   * Which names are actually on the chart, told to the chart so its semantic
+   * list can carry the rest. A bar shorter than `minHeight` gets no name and
+   * therefore no press target, and it is the only thing left to reach it.
+   */
+  const drawn = useMemo(
+    () =>
+      drawing
+        ? layout.nodes
+            .filter((node) => node.y1 - node.y0 >= minHeight && nodes[node.index])
+            .map((node) => node.id)
+        : null,
+    [drawing, layout.nodes, nodes, minHeight]
+  );
+
+  useEffect(() => {
+    reportLabelled(drawn);
+    return () => reportLabelled(null);
+  }, [drawn, reportLabelled]);
+
+  if (!drawing) return null;
 
   const format = formatValue ?? ((value: number) => compactNumber(value));
 

@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Run by hand from the Actions tab. GitHub occasionally drops a push event
+  # and creates no run at all, and a missing run cannot be re-run.
+  workflow_dispatch:
 
 jobs:
   check:

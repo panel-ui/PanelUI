@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View } from "react-native";
@@ -690,116 +690,47 @@ function SankeyLegendDemo() {
   );
 }
 
-function SupportHomeVersion() {
+/** The people who answer, as photos — overlapping initials hide each other's second letter. */
+const TEAM = [
+  { name: 'Khalid Abdi', uri: 'https://github.com/Khalidabdi1.png', initials: 'KA' },
+  { name: 'Kofi Boateng', uri: 'https://i.pravatar.cc/150?img=12', initials: 'KB' },
+  { name: 'Jess Ruiz', uri: 'https://i.pravatar.cc/150?img=32', initials: 'JR' },
+];
+
+function TeamFaces() {
   return (
-    <ScrollView contentContainerClassName="p-4 pb-10">
-      <Support availability="online">
-        <Support.Header title="Support" description="We answer most things the same day">
-          <Avatar.Group size="sm" max={3}>
-            <Avatar fallback="MA" />
-            <Avatar fallback="KB" />
-            <Avatar fallback="JR" />
-          </Avatar.Group>
-        </Support.Header>
-
-        <Support.Status replyTime="Typically replies in under an hour" />
-
-        <Support.Channels title="Get in touch">
-          <Support.Channel
-            icon={<SparklesIcon />}
-            label="Ask the assistant"
-            description="Answers most questions straight away"
-          />
-          <Support.Channel
-            icon={<MessageCircleIcon />}
-            label="Message the team"
-            description="We pick these up through the day"
-            detail="~1h"
-          />
-          <Support.Channel
-            icon={<MailIcon />}
-            label="Email us"
-            description="support@panelui.dev"
-            detail="1 day"
-          />
-        </Support.Channels>
-
-        <Support.Conversations title="Your requests">
-          <Support.Conversation
-            title="Refund for order #4821"
-            preview="We've issued the refund — it should land in 3–5 days."
-            status="solved"
-            reference="#4821"
-            timestamp="2h"
-            unread
-          />
-          <Support.Conversation
-            title="Can't add a second device"
-            preview="Could you tell us which OS version it is running?"
-            status="pending"
-            reference="#4810"
-            timestamp="Yesterday"
-            updated
-          />
-        </Support.Conversations>
-      </Support>
-    </ScrollView>
+    <Avatar.Group size="sm" max={3}>
+      {TEAM.map((person) => (
+        <Avatar key={person.name} source={{ uri: person.uri }} fallback={person.initials} />
+      ))}
+    </Avatar.Group>
   );
 }
 
-function SupportTopicsVersion() {
-  const [topic, setTopic] = useState<string | null>('billing');
-
-  return (
-    <ScrollView contentContainerClassName="p-4 pb-10">
-      <Support>
-        <Support.Header
-          title="What do you need?"
-          description="Picking one gets you to the right team first time"
-        />
-
-        <Support.Topics title="What is it about?" value={topic} onValueChange={setTopic}>
-          <Support.Topic
-            value="billing"
-            icon={<CardIcon />}
-            label="Billing"
-            description="Invoices, refunds and plans"
-          />
-          <Support.Topic
-            value="account"
-            icon={<LockIcon />}
-            label="Account and sign-in"
-            description="Passwords, devices and two-factor"
-          />
-          <Support.Topic
-            value="bug"
-            icon={<BugIcon />}
-            label="Something is broken"
-            description="Send us what you were doing at the time"
-          />
-        </Support.Topics>
-
-        <Button disabled={!topic}>Start a conversation</Button>
-      </Support>
-    </ScrollView>
-  );
+function Face({ person }: { person: (typeof TEAM)[number] | 'assistant' }) {
+  if (person === 'assistant') {
+    return (
+      <Avatar size="sm" fallback="AI">
+        <Avatar.Badge>
+          <SparklesIcon size={10} />
+        </Avatar.Badge>
+      </Avatar>
+    );
+  }
+  return <Avatar size="sm" source={{ uri: person.uri }} fallback={person.initials} />;
 }
 
 /**
- * The way back out of a full-bleed demo.
- *
- * A chat screen wants the whole device, so it loses the example app's header
- * and has to carry its own. It sits inside the padded header row rather than
- * over the transcript, which keeps it off the left screen edge and leaves the
- * iOS back-swipe working as well.
+ * The way back out of a full-bleed demo, which has no screen header of its own.
+ * `onPress` lets a step inside the journey go back one step instead of leaving.
  */
-function DemoBack() {
+function DemoBack({ onPress }: { onPress?: () => void }) {
   const router = useRouter();
   return (
     <Button
       variant="ghost"
       size="sm"
-      onPress={() => router.back()}
+      onPress={onPress ?? (() => router.back())}
       accessibilityLabel="Go back"
       className="-ms-2 shrink-0"
     >
@@ -808,7 +739,108 @@ function DemoBack() {
   );
 }
 
-/** One turn of the thread, so the two conversation demos say the same thing. */
+function SupportHomeScreen({
+  onAssistant,
+  onTeam,
+}: {
+  onAssistant?: () => void;
+  onTeam?: () => void;
+}) {
+  return (
+    <Support availability="online">
+      <Support.Header title="Support" description="We answer most things the same day">
+        <TeamFaces />
+      </Support.Header>
+
+      <Support.Status replyTime="Typically replies in under an hour" />
+
+      <Support.Channels title="Get in touch">
+        <Support.Channel
+          icon={<SparklesIcon />}
+          label="Ask the assistant"
+          description="Answers most questions straight away"
+          onPress={onAssistant}
+        />
+        <Support.Channel
+          icon={<MessageCircleIcon />}
+          label="Message the team"
+          description="We pick these up through the day"
+          detail="~1h"
+          onPress={onTeam}
+        />
+        <Support.Channel
+          icon={<MailIcon />}
+          label="Email us"
+          description="support@panelui.dev"
+          detail="1 day"
+        />
+      </Support.Channels>
+
+      <Support.Conversations title="Your requests">
+        <Support.Conversation
+          title="Refund for order #4821"
+          preview="We've issued the refund — it should land in 3–5 days."
+          status="solved"
+          reference="#4821"
+          timestamp="2h"
+          unread
+        />
+        <Support.Conversation
+          title="Can't add a second device"
+          preview="Could you tell us which OS version it is running?"
+          status="pending"
+          reference="#4810"
+          timestamp="Yesterday"
+          updated
+        />
+      </Support.Conversations>
+    </Support>
+  );
+}
+
+function SupportTopicScreen({
+  topic,
+  onTopicChange,
+  onContinue,
+}: {
+  topic: string | null;
+  onTopicChange: (value: string) => void;
+  onContinue?: () => void;
+}) {
+  return (
+    <Support>
+      <Support.Header
+        title="What is it about?"
+        description="Picking one gets you to the right team first time"
+      />
+      <Support.Topics value={topic} onValueChange={onTopicChange}>
+        <Support.Topic
+          value="billing"
+          icon={<CardIcon />}
+          label="Billing"
+          description="Invoices, refunds and plans"
+        />
+        <Support.Topic
+          value="account"
+          icon={<LockIcon />}
+          label="Account and sign-in"
+          description="Passwords, devices and two-factor"
+        />
+        <Support.Topic
+          value="bug"
+          icon={<BugIcon />}
+          label="Something is broken"
+          description="Send us what you were doing at the time"
+        />
+      </Support.Topics>
+      <Button disabled={!topic} onPress={onContinue}>
+        Continue
+      </Button>
+    </Support>
+  );
+}
+
+/** One turn of the thread, so the conversation demos say the same thing. */
 type Turn = { id: string; from: 'them' | 'me'; body: string; at: string };
 
 const THREAD: Turn[] = [
@@ -816,7 +848,7 @@ const THREAD: Turn[] = [
     id: '1',
     from: 'them',
     at: '09:12',
-    body: "Thanks for getting in touch. I can see order #4821 — it was delivered on the 14th. What went wrong with it?",
+    body: 'Thanks for getting in touch. I can see order #4821 — it was delivered on the 14th. What went wrong with it?',
   },
   { id: '2', from: 'me', at: '09:14', body: 'Two of the four cups arrived cracked.' },
   {
@@ -827,10 +859,33 @@ const THREAD: Turn[] = [
   },
 ];
 
-function SupportThreadVersion() {
-  const [draft, setDraft] = useState('');
-  // Full-bleed, so the notch and the home indicator are this demo's to clear.
+/**
+ * A support thread filling the screen: who is answering and which request this
+ * is at the top, the transcript in the middle, the wait and the composer at the
+ * bottom. Full-bleed, so the notch and the home indicator are its to clear —
+ * and the composer is told how far above the bottom edge it already sits, or
+ * it lifts by the whole keyboard on top of that and leaves a gap.
+ */
+function SupportThreadScreen({
+  agent,
+  role,
+  ticket,
+  note,
+  placeholder,
+  onBack,
+  children,
+}: {
+  agent: (typeof TEAM)[number] | 'assistant';
+  role: string;
+  ticket?: boolean;
+  note: string;
+  placeholder: string;
+  onBack?: () => void;
+  children: ReactNode;
+}) {
   const insets = useSafeAreaInsets();
+  const [draft, setDraft] = useState('');
+  const below = insets.bottom + 8;
 
   return (
     <View className="flex-1">
@@ -838,55 +893,38 @@ function SupportThreadVersion() {
         className="gap-3 border-b border-border px-4 pb-3"
         style={{ paddingTop: insets.top + 8 }}
       >
-        <Support availability="online">
-          <View className="flex-row items-center gap-1">
-            <DemoBack />
-            <View className="grow">
+        <View className="flex-row items-center gap-1">
+          <DemoBack onPress={onBack} />
+          <View className="shrink grow">
+            <Support availability="online">
               <Support.Agent
-                name="Mia Aden"
-                role="Support"
-                avatar={<Avatar size="sm" fallback="MA" />}
+                name={agent === 'assistant' ? 'Assistant' : agent.name}
+                role={role}
+                avatar={<Face person={agent} />}
               />
-            </View>
+            </Support>
           </View>
+        </View>
+        {ticket ? (
           <Support.Ticket subject="Refund for order #4821" reference="#4821" status="open" />
-        </Support>
+        ) : null}
       </View>
 
       <MessageScroller autoScroll className="flex-1">
         <MessageScroller.Viewport>
-          <MessageScroller.Content className="gap-3 px-4 py-4">
-            <Support.Handoff icon={<HeadsetIcon />}>
-              You were passed to Mia, who can see everything you told the assistant.
-            </Support.Handoff>
-
-            {THREAD.map((turn) => (
-              <Message key={turn.id} align={turn.from === 'me' ? 'end' : 'start'}>
-                {turn.from === 'them' ? (
-                  <Message.Avatar>
-                    <Avatar size="sm" fallback="MA" />
-                  </Message.Avatar>
-                ) : null}
-                <Message.Content>
-                  <Message.Bubble>
-                    <Message.BubbleContent>{turn.body}</Message.BubbleContent>
-                  </Message.Bubble>
-                  <Message.Footer>{turn.at}</Message.Footer>
-                </Message.Content>
-              </Message>
-            ))}
-
-            <Support.Resolution>
-              <Rating defaultValue={0} max={5} />
-            </Support.Resolution>
-          </MessageScroller.Content>
+          <MessageScroller.Content className="gap-3 px-4 py-4">{children}</MessageScroller.Content>
         </MessageScroller.Viewport>
       </MessageScroller>
 
-      <View className="gap-2 px-4" style={{ paddingBottom: insets.bottom + 8 }}>
-        <Support.Note>Mia typically replies in under an hour</Support.Note>
-        <AIInput value={draft} onValueChange={setDraft} onSubmit={() => setDraft('')}>
-          <AIInput.Field placeholder="Write a reply" />
+      <View className="gap-2 px-4 pt-2" style={{ paddingBottom: below }}>
+        <Support.Note>{note}</Support.Note>
+        <AIInput
+          value={draft}
+          onValueChange={setDraft}
+          onSubmit={() => setDraft('')}
+          keyboardBottomInset={below}
+        >
+          <AIInput.Field placeholder={placeholder} />
           <AIInput.Toolbar>
             <AIInput.Action label="Attach" icon={<PaperclipIcon />} />
             <AIInput.Spacer />
@@ -898,213 +936,146 @@ function SupportThreadVersion() {
   );
 }
 
-/** The whole way through: pick a topic, ask the assistant, end up with a person. */
+function HumanTurns() {
+  const khalid = TEAM[0]!;
+  return (
+    <>
+      <Support.Handoff icon={<HeadsetIcon />}>
+        You were passed to Khalid, who can see everything you told the assistant.
+      </Support.Handoff>
+      {THREAD.map((turn) => (
+        <Message key={turn.id} align={turn.from === 'me' ? 'end' : 'start'}>
+          {turn.from === 'them' ? (
+            <Message.Avatar>
+              <Face person={khalid} />
+            </Message.Avatar>
+          ) : null}
+          <Message.Content>
+            <Message.Bubble>
+              <Message.BubbleContent>{turn.body}</Message.BubbleContent>
+            </Message.Bubble>
+            <Message.Footer>{turn.at}</Message.Footer>
+          </Message.Content>
+        </Message>
+      ))}
+      <Support.Resolution>
+        <Rating defaultValue={0} max={5} />
+      </Support.Resolution>
+    </>
+  );
+}
+
+function SupportHomeVersion() {
+  return (
+    <ScrollView contentContainerClassName="p-4 pb-10">
+      <SupportHomeScreen />
+    </ScrollView>
+  );
+}
+
+function SupportTopicsVersion() {
+  const [topic, setTopic] = useState<string | null>('billing');
+  return (
+    <ScrollView contentContainerClassName="p-4 pb-10">
+      <SupportTopicScreen topic={topic} onTopicChange={setTopic} />
+    </ScrollView>
+  );
+}
+
+function SupportThreadVersion() {
+  return (
+    <SupportThreadScreen
+      agent={TEAM[0]!}
+      role="Support"
+      ticket
+      note="Khalid typically replies in under an hour"
+      placeholder="Write a reply"
+    >
+      <HumanTurns />
+    </SupportThreadScreen>
+  );
+}
+
+/** The whole way through: the help screen, a topic, the assistant, then a person. */
 function SupportJourneyVersion() {
   const [step, setStep] = useState<'home' | 'topic' | 'assistant' | 'human'>('home');
   const [topic, setTopic] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
   const insets = useSafeAreaInsets();
-  const top = { paddingTop: insets.top + 8 };
-  const bottom = { paddingBottom: insets.bottom + 8 };
 
-  if (step === 'home') {
+  if (step === 'home' || step === 'topic') {
     return (
-      <ScrollView contentContainerClassName="px-4 pb-10" style={top}>
-        <Support availability="online">
-          <View className="flex-row items-center gap-1">
-            <DemoBack />
-            <Text size="xs" muted>Full-bleed demo</Text>
-          </View>
-          <Support.Header title="Support" description="Step 1 of 4 — where it starts">
-            <Avatar.Group size="sm" max={3}>
-              <Avatar fallback="MA" />
-              <Avatar fallback="KB" />
-              <Avatar fallback="JR" />
-            </Avatar.Group>
-          </Support.Header>
-          <Support.Status replyTime="Typically replies in under an hour" />
-          <Support.Channels title="Get in touch">
-            <Support.Channel
-              icon={<SparklesIcon />}
-              label="Ask the assistant"
-              description="Answers most questions straight away"
-              onPress={() => setStep('topic')}
-            />
-            <Support.Channel
-              icon={<MessageCircleIcon />}
-              label="Message the team"
-              description="We pick these up through the day"
-              detail="~1h"
-              onPress={() => setStep('human')}
-            />
-          </Support.Channels>
-          <Support.Conversations title="Your requests">
-            <Support.Conversation
-              title="Where is my order?"
-              preview="It left the depot this morning."
-              status="solved"
-              reference="#4772"
-              timestamp="3d"
-            />
-          </Support.Conversations>
-        </Support>
-      </ScrollView>
-    );
-  }
-
-  if (step === 'topic') {
-    return (
-      <ScrollView contentContainerClassName="grow justify-center px-4" style={top}>
-        <Support>
-          <Support.Header title="What is it about?" description="Step 2 of 4 — routing it" />
-          <Support.Topics value={topic} onValueChange={setTopic}>
-            <Support.Topic
-              value="billing"
-              icon={<CardIcon />}
-              label="Billing"
-              description="Invoices, refunds and plans"
-            />
-            <Support.Topic
-              value="account"
-              icon={<LockIcon />}
-              label="Account and sign-in"
-              description="Passwords, devices and two-factor"
-            />
-            <Support.Topic
-              value="bug"
-              icon={<BugIcon />}
-              label="Something is broken"
-              description="Send us what you were doing at the time"
-            />
-          </Support.Topics>
-          <Button disabled={!topic} onPress={() => setStep('assistant')}>
-            Continue
-          </Button>
-          <Button variant="ghost" onPress={() => setStep('home')}>
-            Back
-          </Button>
-        </Support>
+      <ScrollView
+        contentContainerClassName="gap-4 px-4"
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }}
+      >
+        <View className="flex-row items-center gap-1">
+          <DemoBack onPress={step === 'topic' ? () => setStep('home') : undefined} />
+          <Text size="xs" muted>
+            {step === 'home' ? 'Step 1 of 4' : 'Step 2 of 4'}
+          </Text>
+        </View>
+        {step === 'home' ? (
+          <SupportHomeScreen onAssistant={() => setStep('topic')} onTeam={() => setStep('human')} />
+        ) : (
+          <SupportTopicScreen
+            topic={topic}
+            onTopicChange={setTopic}
+            onContinue={() => setStep('assistant')}
+          />
+        )}
       </ScrollView>
     );
   }
 
   if (step === 'assistant') {
     return (
-      <View className="flex-1">
-        <View className="gap-3 border-b border-border px-4 pb-3 pt-2">
-          <Support availability="online">
-            <Support.Agent
-              name="Assistant"
-              role="Step 3 of 4 — the first answer"
-              avatar={<Avatar size="sm" fallback="AI" />}
-            />
-          </Support>
-        </View>
-        <MessageScroller autoScroll className="flex-1">
-          <MessageScroller.Viewport>
-            <MessageScroller.Content className="gap-3 px-4 py-4">
-              <Message align="end">
-                <Message.Content>
-                  <Message.Bubble>
-                    <Message.BubbleContent>
-                      Two of the cups in order #4821 arrived cracked.
-                    </Message.BubbleContent>
-                  </Message.Bubble>
-                </Message.Content>
-              </Message>
-              <Message>
-                <Message.Avatar>
-                  <Avatar size="sm" fallback="AI" />
-                </Message.Avatar>
-                <Message.Content>
-                  <Message.Bubble>
-                    <Response>
-                      {"Sorry about those. Damaged items are refunded rather than replaced, and you don't need to send them back.\n\nI can't issue the refund myself — a person has to approve it."}
-                    </Response>
-                  </Message.Bubble>
-                </Message.Content>
-              </Message>
-              <Support.Replies>
-                <Support.Reply label="Talk to a person" onPress={() => setStep('human')} />
-                <Support.Reply label="That's all, thanks" onPress={() => setStep('home')} />
-              </Support.Replies>
-            </MessageScroller.Content>
-          </MessageScroller.Viewport>
-        </MessageScroller>
-        <View className="gap-2 px-4" style={bottom}>
-          <Support.Note>The assistant answers straight away</Support.Note>
-          <AIInput value={draft} onValueChange={setDraft} onSubmit={() => setDraft('')}>
-            <AIInput.Field placeholder="Ask something else" />
-            <AIInput.Toolbar>
-              <AIInput.Action label="Attach" icon={<PaperclipIcon />} />
-              <AIInput.Spacer />
-              <AIInput.Submit />
-            </AIInput.Toolbar>
-          </AIInput>
-        </View>
-      </View>
+      <SupportThreadScreen
+        agent="assistant"
+        role="Step 3 of 4"
+        note="The assistant answers straight away"
+        placeholder="Ask something else"
+        onBack={() => setStep('topic')}
+      >
+        <Message align="end">
+          <Message.Content>
+            <Message.Bubble>
+              <Message.BubbleContent>
+                Two of the cups in order #4821 arrived cracked.
+              </Message.BubbleContent>
+            </Message.Bubble>
+          </Message.Content>
+        </Message>
+        <Message>
+          <Message.Avatar>
+            <Face person="assistant" />
+          </Message.Avatar>
+          <Message.Content>
+            <Message.Bubble>
+              <Response>
+                {"Sorry about those. Damaged items are refunded rather than replaced, and you don't need to send them back.\n\nI can't issue the refund myself — a person has to approve it."}
+              </Response>
+            </Message.Bubble>
+          </Message.Content>
+        </Message>
+        <Support.Replies>
+          <Support.Reply label="Talk to a person" onPress={() => setStep('human')} />
+          <Support.Reply label="That's all, thanks" onPress={() => setStep('home')} />
+        </Support.Replies>
+      </SupportThreadScreen>
     );
   }
 
   return (
-    <View className="flex-1">
-      <View className="gap-3 border-b border-border px-4 pb-3" style={top}>
-        <Support availability="online">
-          <View className="flex-row items-center gap-1">
-            <DemoBack />
-            <View className="grow">
-              <Support.Agent
-                name="Mia Aden"
-                role="Step 4 of 4 — a person"
-                avatar={<Avatar size="sm" fallback="MA" />}
-              />
-            </View>
-          </View>
-          <Support.Ticket subject="Refund for order #4821" reference="#4821" status="open" />
-        </Support>
-      </View>
-      <MessageScroller autoScroll className="flex-1">
-        <MessageScroller.Viewport>
-          <MessageScroller.Content className="gap-3 px-4 py-4">
-            <Support.Handoff icon={<HeadsetIcon />}>
-              You were passed to Mia, who can see everything you told the assistant.
-            </Support.Handoff>
-            {THREAD.map((turn) => (
-              <Message key={turn.id} align={turn.from === 'me' ? 'end' : 'start'}>
-                {turn.from === 'them' ? (
-                  <Message.Avatar>
-                    <Avatar size="sm" fallback="MA" />
-                  </Message.Avatar>
-                ) : null}
-                <Message.Content>
-                  <Message.Bubble>
-                    <Message.BubbleContent>{turn.body}</Message.BubbleContent>
-                  </Message.Bubble>
-                  <Message.Footer>{turn.at}</Message.Footer>
-                </Message.Content>
-              </Message>
-            ))}
-            <Support.Resolution>
-              <Rating defaultValue={0} max={5} />
-            </Support.Resolution>
-            <Button variant="ghost" size="sm" onPress={() => setStep('home')}>
-              Start again
-            </Button>
-          </MessageScroller.Content>
-        </MessageScroller.Viewport>
-      </MessageScroller>
-      <View className="gap-2 px-4" style={bottom}>
-        <Support.Note>Mia typically replies in under an hour</Support.Note>
-        <AIInput value={draft} onValueChange={setDraft} onSubmit={() => setDraft('')}>
-          <AIInput.Field placeholder="Write a reply" />
-          <AIInput.Toolbar>
-            <AIInput.Action label="Attach" icon={<PaperclipIcon />} />
-            <AIInput.Spacer />
-            <AIInput.Submit />
-          </AIInput.Toolbar>
-        </AIInput>
-      </View>
-    </View>
+    <SupportThreadScreen
+      agent={TEAM[0]!}
+      role="Step 4 of 4"
+      ticket
+      note="Khalid typically replies in under an hour"
+      placeholder="Write a reply"
+      onBack={() => setStep('assistant')}
+    >
+      <HumanTurns />
+    </SupportThreadScreen>
   );
 }
 

@@ -76,7 +76,7 @@ const supportVariants = tv({
     badge: 'rounded-full px-2 py-0.5',
     agent: 'w-full flex-row items-center gap-3',
     ticket: 'w-full flex-row items-center justify-between gap-2 rounded-lg bg-muted px-3 py-2',
-    note: 'w-full text-center text-xs text-muted-foreground',
+    note: 'w-full text-center',
     handoff: 'w-full flex-row items-center gap-2 rounded-xl bg-muted px-3 py-2.5',
     replies: 'w-full flex-row flex-wrap items-center gap-2',
     reply: 'rounded-full border border-border bg-card px-3 py-1.5',
@@ -723,8 +723,13 @@ const SupportHandoff = forwardRef<View, SupportHandoffProps>(function SupportHan
   return (
     <View ref={ref} accessibilityRole="alert" className={handoff({ className })} {...props}>
       {icon ? <View className="shrink-0">{icon}</View> : null}
+      {/*
+        * Children straight into the Text rather than through textChildren,
+        * which would wrap a bare string in a second Text of the default size
+        * and colour — and the inner one wins.
+        */}
       <Text size="xs" muted className="shrink">
-        {textChildren(children)}
+        {children}
       </Text>
     </View>
   );
@@ -750,7 +755,14 @@ const SupportNote = forwardRef<View, SupportNoteProps>(function SupportNote(
   const { note } = supportVariants();
   return (
     <View ref={ref} className="w-full" {...props}>
-      <Text className={note({ className })}>{textChildren(children)}</Text>
+      {/*
+        * Children straight into the Text rather than through textChildren,
+        * which would wrap a bare string in a second Text of the default size
+        * and colour — and the inner one wins.
+        */}
+      <Text size="xs" muted className={note({ className })}>
+        {children}
+      </Text>
     </View>
   );
 });

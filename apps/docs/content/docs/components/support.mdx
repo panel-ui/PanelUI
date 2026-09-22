@@ -203,9 +203,9 @@ The order is the order a reader needs it in: who is answering, which request thi
   <View className="gap-3 border-b border-border px-4 pb-3">
     <Support availability="online">
       <Support.Agent
-        name="Mia Aden"
+        name="Khalid Abdi"
         role="Support"
-        avatar={<Avatar size="sm" fallback="MA" />}
+        avatar={<Avatar size="sm" fallback="KA" />}
       />
       <Support.Ticket subject="Refund for order #4821" reference="#4821" status="open" />
     </Support>
@@ -215,7 +215,7 @@ The order is the order a reader needs it in: who is answering, which request thi
     <MessageScroller.Viewport>
       <MessageScroller.Content className="gap-3 px-4 py-4">
         <Support.Handoff icon={<HeadsetIcon />}>
-          You were passed to Mia, who can see everything you told the assistant.
+          You were passed to Khalid, who can see everything you told the assistant.
         </Support.Handoff>
 
         {turns.map((turn) => (
@@ -232,7 +232,7 @@ The order is the order a reader needs it in: who is answering, which request thi
   </MessageScroller>
 
   <View className="gap-2 px-4">
-    <Support.Note>Mia typically replies in under an hour</Support.Note>
+    <Support.Note>Khalid typically replies in under an hour</Support.Note>
     <AIInput value={draft} onValueChange={setDraft} onSubmit={send}>
       <AIInput.Field placeholder="Write a reply" />
       <AIInput.Toolbar>
@@ -259,7 +259,7 @@ The escalation is a suggested reply, and it is on screen from the first turn rat
 
 // …and once it has happened, in the transcript:
 <Support.Handoff icon={<HeadsetIcon />}>
-  You were passed to Mia, who can see everything you told the assistant.
+  You were passed to Khalid, who can see everything you told the assistant.
 </Support.Handoff>
 ```
 
@@ -275,7 +275,7 @@ function Help() {
     <Support availability="online">
       <Support.Header title="Support">
         <Avatar.Group size="sm" max={3}>
-          <Avatar fallback="MA" />
+          <Avatar fallback="KA" />
           <Avatar fallback="KB" />
           <Avatar fallback="JR" />
         </Avatar.Group>

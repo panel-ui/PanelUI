@@ -1720,6 +1720,21 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       {
+        label: 'In another colour',
+        render: () => (
+          <View className="w-full flex-row items-center justify-center gap-4">
+            <Spinner color="#E11D48" />
+            {/* A surface the theme did not choose, which is when the prop is needed. */}
+            <View className="rounded-xl p-4" style={{ backgroundColor: '#2563EB' }}>
+              <Spinner color="#FFFFFF" trackColor="rgba(255,255,255,0.25)" />
+            </View>
+            <View className="rounded-xl bg-muted p-4">
+              <Spinner size="lg" color="#16A34A" />
+            </View>
+          </View>
+        ),
+      },
+      {
         label: 'In context',
         render: () => (
           <Card className="w-full">

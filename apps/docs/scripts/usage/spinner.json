@@ -17,6 +17,11 @@
       "code": "<Button loading={saving}>Save</Button>"
     },
     {
+      "title": "In another colour",
+      "description": "`color` sets the turning arc and `trackColor` the faint ring behind it. Left unset they follow the theme's primary and muted colours.\n\nSet them where the spinner sits on a surface the theme did not choose for it — a filled button, a photo, a coloured banner. There it wants the colour of the text around it, and the track wants to fade into the surface rather than read as a second spinner.",
+      "code": "<Spinner color=\"#FFFFFF\" />\n\n// On a coloured surface, fade the track into it as well.\n<View className=\"rounded-xl p-4\" style={{ backgroundColor: brand }}>\n  <Spinner color=\"#FFFFFF\" trackColor=\"rgba(255,255,255,0.25)\" />\n</View>"
+    },
+    {
       "title": "Naming the wait",
       "description": "A spinner alone on a screen is the only thing announcing it, so give it words.",
       "code": "<View className=\"flex-1 items-center justify-center\">\n  <Spinner size=\"lg\" label=\"Loading your dashboard\" />\n</View>"

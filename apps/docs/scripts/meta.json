@@ -822,7 +822,7 @@
     "Indeterminate loading indicator.",
     "react native spinner",
     {
-      "updatedIn": "0.67.0",
+      "updatedIn": "0.102.0",
       "category": "feedback"
     }
   ],

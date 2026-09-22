@@ -44,6 +44,23 @@ export interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
    * the spinner is the only sign, or the wait passes in silence.
    */
   label?: string;
+  /**
+   * The colour of the turning arc. Any colour React Native accepts — a hex
+   * string, `rgb()`, a named colour. Leave it unset to follow the theme's
+   * primary colour.
+   *
+   * Set it where the spinner sits on a surface the theme did not choose for
+   * it: a spinner on a filled button, or over a photo, wants the colour of the
+   * text around it rather than the accent.
+   */
+  color?: string;
+  /**
+   * The colour of the faint ring the arc turns around. Leave it unset for the
+   * theme's muted colour. Worth setting alongside `color` on a dark or
+   * coloured surface, where the default ring can read as a second, fainter
+   * spinner rather than as a track.
+   */
+  trackColor?: string;
 }
 
 /**
@@ -64,6 +81,8 @@ export const Spinner = memo(function Spinner({
   className,
   size,
   label,
+  color,
+  trackColor,
 }: SpinnerProps) {
   const reducedMotion = useReducedMotion();
   const progress = useSharedValue(0);
@@ -113,7 +132,14 @@ export const Spinner = memo(function Spinner({
       accessibilityState={announced ? { busy: true } : undefined}
       accessibilityElementsHidden={!announced}
       importantForAccessibility={announced ? 'auto' : 'no-hide-descendants'}
-      style={animatedStyle}
+      // After the class, so a colour passed here wins over the theme's. The
+      // track goes on every side and the arc on the top, the same split the
+      // classes make, so setting one never repaints the other.
+      style={[
+        trackColor ? { borderColor: trackColor } : null,
+        color ? { borderTopColor: color } : null,
+        animatedStyle,
+      ]}
       className={spinnerVariants({ size, className })}
     />
   );

@@ -87,6 +87,7 @@ Extends `ViewProps, ChartAccessibilityProps<SankeyNode>`.
 | `formatValue` | `(value: number, node: SankeyNode) => string` | — | Format the figure beside a name. Defaults to a compact number. |
 | `showValue` | `boolean` | `false` | Show the figure under the name. |
 | `minHeight` | `number` | `6` | Hide the name on a bar shorter than this, in points. A diagram of forty nodes has bars a few points tall, and forty names at that spacing overlap into a grey band that hides the flow behind it. The names that are dropped are the smallest ones, which is where the tooltip takes over. |
+| `minWidth` | `number` | `54` | Hide the name where its box is narrower than this, in points. Only where the flow runs vertically, because only there is a name's width its value. Under a handful of characters every name truncates to the same `T…`, and a row of those says nothing while looking like it is saying something. The stages that lose their name are read from `SankeyChart.Legend` and `SankeyChart.Breakdown`, and their bars stay pressable. |
 
 #### `SankeyChartTooltipProps`
 

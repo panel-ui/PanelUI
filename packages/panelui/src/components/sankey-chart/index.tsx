@@ -1190,6 +1190,16 @@ export interface SankeyChartLabelsProps {
    * takes over.
    */
   minHeight?: number;
+  /**
+   * Hide the name where its box is narrower than this, in points. Only where
+   * the flow runs vertically, because only there is a name's width its value.
+   *
+   * Under a handful of characters every name truncates to the same `T…`, and a
+   * row of those says nothing while looking like it is saying something. The
+   * stages that lose their name are read from `SankeyChart.Legend` and
+   * `SankeyChart.Breakdown`, and their bars stay pressable.
+   */
+  minWidth?: number;
 }
 
 /**
@@ -1214,6 +1224,7 @@ function SankeyChartLabels({
   formatValue,
   showValue = false,
   minHeight = 6,
+  minWidth = 54,
 }: SankeyChartLabelsProps) {
   const {
     layout,
@@ -1232,25 +1243,116 @@ function SankeyChartLabels({
   const drawing = status !== 'loading' && layout.nodes.length > 0;
 
   /*
-   * The bar's size along the axis carrying the values. That is its height in
-   * an upright flow and its width in a vertical one, and it is what `minHeight`
-   * is measured against either way — the bar is the same bar, turned.
+   * Where every name goes, and which ones there is no room for, worked out
+   * once: the chart has to be told which names were drawn so its semantic list
+   * can carry the rest, and a second copy of the rule would be a second answer
+   * to the same question.
    */
-  const extentOf = (node: SankeyLayoutNode) =>
-    upright ? node.y1 - node.y0 : node.x1 - node.x0;
+  const placements = useMemo(() => {
+    if (!drawing) return [];
 
-  /*
-   * Which names are actually on the chart, told to the chart so its semantic
-   * list can carry the rest. A bar shorter than `minHeight` gets no name and
-   * therefore no press target, and it is the only thing left to reach it.
-   */
+    // Along the flow is the axis the stages advance on; across it is the axis
+    // carrying the values. Which is horizontal swaps with the orientation.
+    const alongStart = (node: SankeyLayoutNode) => (upright ? node.x0 : node.y0);
+    const alongEnd = (node: SankeyLayoutNode) => (upright ? node.x1 : node.y1);
+    const crossStart = (node: SankeyLayoutNode) => (upright ? node.y0 : node.x0);
+    const crossEnd = (node: SankeyLayoutNode) => (upright ? node.y1 : node.x1);
+    const alongSpan = upright ? width : height;
+    const crossSpan = upright ? height : width;
+
+    /*
+     * Where the neighbouring stages sit along the flow.
+     *
+     * A name's box needs a bound on both sides or it runs the length of the
+     * chart and covers every stage it crosses — and since the boxes are
+     * absolutely positioned siblings, the last one drawn takes the touch. That
+     * is a tap on one name selecting a node two stages away, which is worse
+     * than a small target because it is wrong rather than merely hard.
+     */
+    const edges: number[] = [];
+    for (const placed of layout.nodes) {
+      if (!edges.includes(alongStart(placed))) edges.push(alongStart(placed));
+      if (!edges.includes(alongEnd(placed))) edges.push(alongEnd(placed));
+    }
+    edges.sort((a, b) => a - b);
+
+    // And where a stage's own neighbours sit across it, so a name can borrow
+    // the gap either side of its bar without reaching into anybody else's.
+    const rowEdges = new Map<number, number[]>();
+    for (const placed of layout.nodes) {
+      const list = rowEdges.get(placed.layer) ?? [];
+      list.push(crossStart(placed), crossEnd(placed));
+      rowEdges.set(placed.layer, list);
+    }
+    for (const list of rowEdges.values()) list.sort((a, b) => a - b);
+
+    return layout.nodes.map((node) => {
+      const extent = crossEnd(node) - crossStart(node);
+
+      const after = edges.find((edge) => edge > alongEnd(node) + 1e-6);
+      const before = edges.filter((edge) => edge < alongStart(node) - 1e-6).pop();
+      const trailing = after === undefined;
+
+      /*
+       * The box along the flow: the half of the gap nearest its own bar, so
+       * the name leaving one stage and the name arriving at the next can share
+       * the space between them without sharing a touch target.
+       */
+      const gap = trailing
+        ? (() => {
+            const from = before === undefined ? 0 : (before + alongStart(node)) / 2;
+            return { from, size: Math.max(0, alongStart(node) - LABEL_GAP - from) };
+          })()
+        : (() => {
+            const from = alongEnd(node) + LABEL_GAP;
+            const to = after === undefined ? alongSpan : (alongEnd(node) + after) / 2;
+            return { from, size: Math.max(0, to - from) };
+          })();
+
+      // And across it: the bar's own run, clamped inside the plot.
+      let crossFrom = Math.max(0, Math.min(crossStart(node), crossSpan - extent));
+      let crossSize = extent;
+
+      if (!upright) {
+        /*
+         * A vertical name is bounded by the width of its own bar, which for a
+         * small stage is fewer points than the word it carries. So it borrows
+         * the gap either side, the same amount on both, which keeps it centred
+         * on what it names.
+         */
+        const list = rowEdges.get(node.layer) ?? [];
+        const prev = list.filter((edge) => edge < crossStart(node) - 1e-6).pop();
+        const next = list.find((edge) => edge > crossEnd(node) + 1e-6);
+        const room = Math.min(
+          crossStart(node) - (prev ?? 0),
+          (next ?? crossSpan) - crossEnd(node)
+        );
+        const borrow = Math.max(0, room / 2 - LABEL_GAP / 2);
+        crossFrom = Math.max(0, crossFrom - borrow);
+        crossSize = Math.min(extent + borrow * 2, crossSpan - crossFrom);
+      }
+
+      /*
+       * Whether there is room to say anything.
+       *
+       * Along the flow the test is the bar's own run, because that is what the
+       * names would overlap into a grey band if every one of forty were drawn.
+       * Across it — and only where the flow runs downwards, where the box is
+       * as narrow as the value — the test is whether a name would survive the
+       * box at all: under a handful of characters every name truncates to the
+       * same "T…", and a column of those says nothing while looking like it is
+       * saying something. Those stages are read from the legend and the
+       * breakdown instead, and their bars are still pressable.
+       */
+      const show = extent >= minHeight && (upright || crossSize >= minWidth);
+
+      return { node, show, trailing, gap, crossFrom, crossSize, extent };
+    });
+  }, [drawing, layout.nodes, width, height, upright, minHeight, minWidth]);
+
   const drawn = useMemo(
-    () =>
-      drawing
-        ? layout.nodes.filter((node) => extentOf(node) >= minHeight).map((node) => node.id)
-        : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [drawing, layout.nodes, minHeight, upright]
+    () => (drawing ? placements.filter((p) => p.show).map((p) => p.node.id) : null),
+    [drawing, placements]
   );
 
   useEffect(() => {
@@ -1262,133 +1364,31 @@ function SankeyChartLabels({
 
   const format = formatValue ?? ((value: number) => compactNumber(value));
 
-  /*
-   * Where the neighbouring stages sit, along the axis the flow advances on.
-   *
-   * A name's box needs a bound on both sides or it runs the length of the
-   * chart and covers every stage it crosses — and since the boxes are
-   * absolutely positioned siblings, the last one drawn takes the touch. That
-   * is a tap on one name selecting a node two stages away, which is worse than
-   * a small target because it is wrong rather than merely hard.
-   */
-  const alongStart = (node: SankeyLayoutNode) => (upright ? node.x0 : node.y0);
-  const alongEnd = (node: SankeyLayoutNode) => (upright ? node.x1 : node.y1);
-  const crossStart = (node: SankeyLayoutNode) => (upright ? node.y0 : node.x0);
-  const crossEnd = (node: SankeyLayoutNode) => (upright ? node.y1 : node.x1);
-  const span = upright ? width : height;
-
-  const edges: number[] = [];
-  for (const placed of layout.nodes) {
-    if (!edges.includes(alongStart(placed))) edges.push(alongStart(placed));
-    if (!edges.includes(alongEnd(placed))) edges.push(alongEnd(placed));
-  }
-  edges.sort((a, b) => a - b);
-
-  /*
-   * And where a stage's own neighbours sit, across the flow.
-   *
-   * A name centred on a bar the width of its value has, at the small end,
-   * fewer points than the word it is carrying — and a box narrower than one
-   * word makes React Native break the word rather than the line, which reads
-   * as a bug rather than as a truncation. So the box borrows the gap on either
-   * side of its bar, symmetrically, which is room no neighbour is using.
-   */
-  const rowEdges = new Map<number, number[]>();
-  for (const placed of layout.nodes) {
-    const list = rowEdges.get(placed.layer) ?? [];
-    list.push(crossStart(placed), crossEnd(placed));
-    rowEdges.set(placed.layer, list);
-  }
-  for (const list of rowEdges.values()) list.sort((a, b) => a - b);
-  const nextEdge = (at: number) => edges.find((edge) => edge > at + 1e-6);
-  const previousEdge = (at: number) => {
-    let found: number | undefined;
-    for (const edge of edges) if (edge < at - 1e-6) found = edge;
-    return found;
-  };
-
   return (
     <>
-      {layout.nodes.map((node) => {
-        const extent = extentOf(node);
-        if (extent < minHeight) return null;
+      {placements.map(({ node, show, trailing, gap, crossFrom, crossSize, extent }) => {
+        if (!show) return null;
 
-        /*
-         * Which side the name goes on is decided by where the bar actually is,
-         * not by which stage it belongs to. Under a right-to-left layout the
-         * finished diagram is mirrored, so the last stage is the one on the
-         * left — reading the side off the stage number there puts every name
-         * in a box of zero width and the chart loses all of them.
-         */
-        const after = nextEdge(alongEnd(node));
-        const before = previousEdge(alongStart(node));
-        const trailing = after === undefined;
         const name = labelFor(node.id);
         const value = format(node.value, datumFor(node));
         const selected = activeId === node.id;
 
         /*
-         * The box the name sits in, along the flow: the half of the gap
-         * nearest its own bar, so the name leaving one stage and the name
-         * arriving at the next can share the space between them without
-         * sharing a touch target.
+         * A sliver's box is padded out to a real target rather than drawn
+         * longer — growing it would push it over its neighbours, and two
+         * overlapping targets are worse than one small one.
          */
-        const gap = trailing
-          ? (() => {
-              const from = before === undefined ? 0 : (before + alongStart(node)) / 2;
-              return { from, size: Math.max(0, alongStart(node) - LABEL_GAP - from) };
-            })()
-          : (() => {
-              const from = alongEnd(node) + LABEL_GAP;
-              const to = after === undefined ? span : (alongEnd(node) + after) / 2;
-              return { from, size: Math.max(0, to - from) };
-            })();
-
-        /*
-         * And across it: the bar's own run, clamped inside the plot. A sliver
-         * is padded out to a real target rather than drawn longer — growing
-         * the box would push it over its neighbours, and two overlapping
-         * targets are worse than one small one.
-         */
-        const crossSpan = upright ? height : width;
         const slack = Math.max(0, (MIN_TARGET - extent) / 2);
-        const cross = Math.max(
-          0,
-          Math.min(crossStart(node), crossSpan - extent)
-        );
-
-        /*
-         * Across the flow, a vertical name takes its bar's run plus as much of
-         * the gap either side as the nearest neighbour in the same row is not
-         * using — the same amount on both sides, so the name stays centred on
-         * what it names.
-         */
-        let crossFrom = cross;
-        let crossSize = extent;
-        if (!upright) {
-          const list = rowEdges.get(node.layer) ?? [];
-          const before = list.filter((edge) => edge < crossStart(node) - 1e-6).pop();
-          const after = list.find((edge) => edge > crossEnd(node) + 1e-6);
-          const room = Math.min(
-            crossStart(node) - (before ?? 0),
-            (after ?? crossSpan) - crossEnd(node)
-          );
-          const borrow = Math.max(0, room / 2 - LABEL_GAP / 2);
-          crossFrom = Math.max(0, cross - borrow);
-          crossSize = Math.min(extent + borrow * 2, crossSpan - crossFrom);
-        }
 
         /*
          * Two lines only where a second one would help: somewhere to break,
-         * and a box wide enough that the words either side of the break stand
-         * a chance of fitting.
-         *
-         * Without the width test a narrow box breaks the word itself rather
-         * than the line, and "Eati/ng out" reads as a fault in the chart where
-         * "Eati…" reads as a name that did not fit. A truncation is a thing
-         * readers know how to interpret; a word split down the middle is not.
+         * and a box wide enough that the words either side of it stand a
+         * chance. Without the width test a narrow box breaks the word itself,
+         * and "Eati/ng out" reads as a fault in the chart where "Eating…"
+         * reads as a name that did not fit.
          */
         const lines = !upright && crossSize >= WRAPPABLE && name.trim().includes(' ') ? 2 : 1;
+        const align = upright ? (trailing ? 'right' : 'left') : 'center';
 
         return (
           <Pressable
@@ -1396,18 +1396,14 @@ function SankeyChartLabels({
             accessibilityRole="button"
             accessibilityState={{ selected }}
             accessibilityLabel={`${name}, ${value}`}
-            hitSlop={
-              upright
-                ? { top: slack, bottom: slack }
-                : { left: slack, right: slack }
-            }
+            hitSlop={upright ? { top: slack, bottom: slack } : { left: slack, right: slack }}
             onPress={() => setActiveId(selected ? null : node.id)}
             style={{
               position: 'absolute',
               ...(upright
                 ? {
-                    top: cross,
-                    height: extent,
+                    top: crossFrom,
+                    height: crossSize,
                     left: gap.from,
                     width: gap.size,
                     justifyContent: 'center',
@@ -1431,35 +1427,20 @@ function SankeyChartLabels({
               * Both alignments are stated rather than inherited. A paragraph's
               * default alignment follows the reading direction, so under a
               * right-to-left layout an unaligned name drifts to the far end of
-              * its box and ends up sitting in the middle of the plot instead of
-              * against the bar it belongs to. Which side the name hugs is a
-              * fact about where its bar is, not about the language.
-              *
-              * A vertical flow centres instead: the box is the bar's own run,
-              * so the middle of it is the middle of what the name names.
+              * its box and ends up in the middle of the plot instead of against
+              * the bar it belongs to. Which side the name hugs is a fact about
+              * where its bar is, not about the language.
               */}
             <Text
               size="xs"
               weight={selected ? 'bold' : 'medium'}
-              /*
-               * Where the flow runs downwards a name may take a second line,
-               * because the box is the bar's own run rather than the gap
-               * between two stages and there is no neighbour above or below to
-               * collide with. Only a name with a space in it, though — see the
-               * note on `lines`.
-               */
               numberOfLines={lines}
-              style={{ textAlign: upright ? (trailing ? 'right' : 'left') : 'center' }}
+              style={{ textAlign: align }}
             >
               {name}
             </Text>
             {showValue ? (
-              <Text
-                size="xs"
-                muted
-                numberOfLines={1}
-                style={{ textAlign: upright ? (trailing ? 'right' : 'left') : 'center' }}
-              >
+              <Text size="xs" muted numberOfLines={1} style={{ textAlign: align }}>
                 {value}
               </Text>
             ) : null}

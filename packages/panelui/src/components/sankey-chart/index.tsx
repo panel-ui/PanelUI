@@ -125,9 +125,10 @@ const DEFAULT_HEIGHT = 240;
  * A vertical diagram's height is the length of the flow, so unlike the
  * horizontal case it grows with the data: four stages in the height of three
  * is a set of bars with no room for a ribbon between them. Enough for a bar,
- * the names either side of it, and a run of ribbon long enough to read as one.
+ * a name on each side of it, and a run of ribbon long enough to read as one —
+ * and no more, because on a phone every extra point of it is a scroll.
  */
-const VERTICAL_STAGE = 132;
+const VERTICAL_STAGE = 104;
 
 /** How thick a node's bar is. Thin enough to read as an edge the flow meets. */
 const DEFAULT_NODE_WIDTH = 10;
@@ -172,13 +173,26 @@ const LABEL_GAP = 6;
 const MIN_TARGET = 44;
 
 /**
- * The narrowest a vertical name's box may be and still be allowed two lines.
+ * Roughly how wide a name is drawn, in points, backdrop included.
  *
- * Below this a break puts one or two characters on the second line, which
- * costs a whole line of height to say nothing. Roughly ten characters at the
- * size the names are set in.
+ * An estimate rather than a measurement, because measuring every name means a
+ * render to find out where to render them. Deliberately on the generous side:
+ * guessing short is how a name ends up cut off, and guessing long only costs a
+ * few points of the row.
  */
-const WRAPPABLE = 72;
+function nameWidth(name: string): number {
+  return name.length * 7 + 18;
+}
+
+/**
+ * How much height one line of a name takes, in points, backdrop included.
+ *
+ * A name is centred on its bar, and a bar thinner than this carries a name
+ * taller than itself — which is fine until two of them sit close enough for
+ * the text to run into each other. So names are placed as boxes of this
+ * height, not of the bar's.
+ */
+const LABEL_LINE = 20;
 
 /** Columns the placeholder suggests while there is no data to count. */
 const SKELETON_COLUMNS = 3;
@@ -1190,16 +1204,6 @@ export interface SankeyChartLabelsProps {
    * takes over.
    */
   minHeight?: number;
-  /**
-   * Hide the name where its box is narrower than this, in points. Only where
-   * the flow runs vertically, because only there is a name's width its value.
-   *
-   * Under a handful of characters every name truncates to the same `T…`, and a
-   * row of those says nothing while looking like it is saying something. The
-   * stages that lose their name are read from `SankeyChart.Legend` and
-   * `SankeyChart.Breakdown`, and their bars stay pressable.
-   */
-  minWidth?: number;
 }
 
 /**
@@ -1224,7 +1228,6 @@ function SankeyChartLabels({
   formatValue,
   showValue = false,
   minHeight = 6,
-  minWidth = 54,
 }: SankeyChartLabelsProps) {
   const {
     layout,
@@ -1276,17 +1279,8 @@ function SankeyChartLabels({
     }
     edges.sort((a, b) => a - b);
 
-    // And where a stage's own neighbours sit across it, so a name can borrow
-    // the gap either side of its bar without reaching into anybody else's.
-    const rowEdges = new Map<number, number[]>();
-    for (const placed of layout.nodes) {
-      const list = rowEdges.get(placed.layer) ?? [];
-      list.push(crossStart(placed), crossEnd(placed));
-      rowEdges.set(placed.layer, list);
-    }
-    for (const list of rowEdges.values()) list.sort((a, b) => a - b);
 
-    return layout.nodes.map((node) => {
+    const placed = layout.nodes.map((node) => {
       const extent = crossEnd(node) - crossStart(node);
 
       const after = edges.find((edge) => edge > alongEnd(node) + 1e-6);
@@ -1313,42 +1307,100 @@ function SankeyChartLabels({
       let crossFrom = Math.max(0, Math.min(crossStart(node), crossSpan - extent));
       let crossSize = extent;
 
-      if (!upright) {
-        /*
-         * A vertical name is bounded by the width of its own bar, which for a
-         * small stage is fewer points than the word it carries. So it borrows
-         * the gap either side, the same amount on both, which keeps it centred
-         * on what it names.
-         */
-        const list = rowEdges.get(node.layer) ?? [];
-        const prev = list.filter((edge) => edge < crossStart(node) - 1e-6).pop();
-        const next = list.find((edge) => edge > crossEnd(node) + 1e-6);
-        const room = Math.min(
-          crossStart(node) - (prev ?? 0),
-          (next ?? crossSpan) - crossEnd(node)
-        );
-        const borrow = Math.max(0, room / 2 - LABEL_GAP / 2);
-        crossFrom = Math.max(0, crossFrom - borrow);
-        crossSize = Math.min(extent + borrow * 2, crossSpan - crossFrom);
-      }
-
       /*
-       * Whether there is room to say anything.
-       *
-       * Along the flow the test is the bar's own run, because that is what the
-       * names would overlap into a grey band if every one of forty were drawn.
-       * Across it — and only where the flow runs downwards, where the box is
-       * as narrow as the value — the test is whether a name would survive the
-       * box at all: under a handful of characters every name truncates to the
-       * same "T…", and a column of those says nothing while looking like it is
-       * saying something. Those stages are read from the legend and the
-       * breakdown instead, and their bars are still pressable.
+       * Along the flow the test is the bar's own run: forty names on forty
+       * hairlines overlap into a grey band that hides the flow behind it.
+       * Across it, where the flow runs downwards, whether a name fits is
+       * decided below, once every name in the row is known.
        */
-      const show = extent >= minHeight && (upright || crossSize >= minWidth);
+      const show = extent >= minHeight;
 
       return { node, show, trailing, gap, crossFrom, crossSize, extent };
     });
-  }, [drawing, layout.nodes, width, height, upright, minHeight, minWidth]);
+
+    if (!upright) {
+      /*
+       * Where the flow runs downwards a name sits across its bar, and a bar is
+       * as wide as its value — so a stage worth a few percent has a bar
+       * narrower than its own name. Squeezing the name into it gives "Groce…",
+       * which is cut off rather than shown.
+       *
+       * So a name is laid out at its own width, centred on its bar, and the
+       * row is filled from its largest stage down. A name may run over a
+       * neighbour's bar when that neighbour is not using the room — and where
+       * it would collide with a name already placed it slides clear, as long
+       * as it still sits over its own bar. A name that cannot be shown whole
+       * is not shown at all; the legend and the breakdown carry it, and its
+       * bar is still pressable.
+       */
+      const taken = new Map<number, [number, number][]>();
+      const order = [...placed].sort((a, b) => b.node.value - a.node.value);
+      for (const entry of order) {
+        if (!entry.show) continue;
+        const centre = (entry.node.x0 + entry.node.x1) / 2;
+        const size = Math.min(crossSpan, Math.max(entry.extent, nameWidth(labelFor(entry.node.id))));
+        const boxes = taken.get(entry.node.layer) ?? [];
+
+        // The free stretch of the row around this bar's centre.
+        let lo = 0;
+        let hi = crossSpan;
+        for (const [a, b] of boxes) {
+          if (b <= centre) lo = Math.max(lo, b + LABEL_GAP);
+          else if (a >= centre) hi = Math.min(hi, a - LABEL_GAP);
+          else {
+            lo = hi = centre;
+          }
+        }
+        if (hi - lo < size) {
+          entry.show = false;
+          continue;
+        }
+        // Centred where it can be, slid clear where it cannot, and never so
+        // far that it stops sitting over the bar it names.
+        const from = Math.max(lo, Math.min(centre - size / 2, hi - size));
+        if (centre < from || centre > from + size) {
+          entry.show = false;
+          continue;
+        }
+        boxes.push([from, from + size]);
+        taken.set(entry.node.layer, boxes);
+        entry.crossFrom = from;
+        entry.crossSize = size;
+      }
+      return placed;
+    }
+
+    /*
+     * Across the flow, an upright name is a line of text centred on a bar that
+     * may be thinner than the line. Where two such bars sit close together
+     * their names run into each other and both come out unreadable — which is
+     * worse than one of them being missing. So each column keeps names from
+     * its largest node down, and a name whose line would touch one already
+     * kept is left off. The node keeps its pressable bar, its place in the
+     * accessibility list and its entry in the legend.
+     */
+    const lineHeight = showValue ? LABEL_LINE * 2 : LABEL_LINE;
+    const kept = new Map<string, [number, number][]>();
+    const order = [...placed].sort((a, b) => b.node.value - a.node.value);
+    for (const entry of order) {
+      if (!entry.show) continue;
+      const centre = (entry.node.y0 + entry.node.y1) / 2;
+      const size = Math.max(entry.extent, lineHeight);
+      const from = Math.max(0, Math.min(centre - size / 2, height - size));
+      const to = from + size;
+      const key = `${entry.node.layer}:${entry.trailing ? 'end' : 'start'}`;
+      const taken = kept.get(key) ?? [];
+      if (taken.some(([a, b]) => from < b && to > a)) {
+        entry.show = false;
+        continue;
+      }
+      taken.push([from, to]);
+      kept.set(key, taken);
+      entry.crossFrom = from;
+      entry.crossSize = size;
+    }
+    return placed;
+  }, [drawing, layout.nodes, width, height, upright, minHeight, showValue, labelFor]);
 
   const drawn = useMemo(
     () => (drawing ? placements.filter((p) => p.show).map((p) => p.node.id) : null),
@@ -1366,7 +1418,7 @@ function SankeyChartLabels({
 
   return (
     <>
-      {placements.map(({ node, show, trailing, gap, crossFrom, crossSize, extent }) => {
+      {placements.map(({ node, show, trailing, gap, crossFrom, crossSize }) => {
         if (!show) return null;
 
         const name = labelFor(node.id);
@@ -1378,16 +1430,8 @@ function SankeyChartLabels({
          * longer — growing it would push it over its neighbours, and two
          * overlapping targets are worse than one small one.
          */
-        const slack = Math.max(0, (MIN_TARGET - extent) / 2);
+        const slack = Math.max(0, (MIN_TARGET - crossSize) / 2);
 
-        /*
-         * Two lines only where a second one would help: somewhere to break,
-         * and a box wide enough that the words either side of it stand a
-         * chance. Without the width test a narrow box breaks the word itself,
-         * and "Eati/ng out" reads as a fault in the chart where "Eating…"
-         * reads as a name that did not fit.
-         */
-        const lines = !upright && crossSize >= WRAPPABLE && name.trim().includes(' ') ? 2 : 1;
         const align = upright ? (trailing ? 'right' : 'left') : 'center';
 
         return (
@@ -1431,19 +1475,28 @@ function SankeyChartLabels({
               * the bar it belongs to. Which side the name hugs is a fact about
               * where its bar is, not about the language.
               */}
-            <Text
-              size="xs"
-              weight={selected ? 'bold' : 'medium'}
-              numberOfLines={lines}
-              style={{ textAlign: align }}
-            >
-              {name}
-            </Text>
-            {showValue ? (
-              <Text size="xs" muted numberOfLines={1} style={{ textAlign: align }}>
-                {value}
+            {/*
+              * A backdrop in the page colour, because the names sit over the
+              * ribbons and a ribbon can be any colour at all — dark text on a
+              * dark ribbon, or light on light, is unreadable with nothing
+              * between them. Tight to the text rather than filling the box, so
+              * it hides as little of the flow as it can.
+              */}
+            <View className="max-w-full rounded-md bg-background/80 px-1.5 py-0.5">
+              <Text
+                size="xs"
+                weight={selected ? 'bold' : 'medium'}
+                numberOfLines={1}
+                style={{ textAlign: align }}
+              >
+                {name}
               </Text>
-            ) : null}
+              {showValue ? (
+                <Text size="xs" muted numberOfLines={1} style={{ textAlign: align }}>
+                  {value}
+                </Text>
+              ) : null}
+            </View>
           </Pressable>
         );
       })}

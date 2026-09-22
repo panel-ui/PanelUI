@@ -9,6 +9,39 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.102.0] — 2026-09-22
+
+### Added
+
+- **Support** — the support section of an app, end to end. The help screen a
+  person arrives on — whether anyone is there and how long a reply takes, the
+  ways to reach somebody, what the problem is about, and the requests they
+  already made — and the furniture around the thread once one is open: who is
+  answering, which request it belongs to, the moment it passes from the
+  assistant to a person, suggested replies, the wait time above the composer,
+  and a "did this solve it?" at the end. The turns themselves are still
+  `Message` and the composer `AIInput`, so there is one set of bubbles in the
+  library rather than two.
+- **SankeyChart** — made for a phone. `orientation="vertical"` runs the flow
+  down the screen, which gives the stages the long side of the device;
+  `collapse` folds each column's smallest nodes into one "Other" bucket, which
+  the page used to tell you to do by hand before the rows arrived; and two new
+  parts under the diagram — `Legend`, which names every stage with its share,
+  and `Breakdown`, which writes the selected stage out in full and lets a flow
+  be walked one stage at a time.
+- **Spinner** — `color` and `trackColor`, for a spinner on a surface the theme
+  did not choose, like a filled button or a photo. Thanks @yashDahiwale for the
+  request. (#222)
+
+### Fixed
+
+- **SankeyChart** — a stage too small to carry a name was unreachable: no press
+  target, and no entry for a screen reader either. Bars are now pressable, the
+  semantic list keeps every node that has no name on the chart, and each ribbon
+  is read out as "source to target, value". Names are shown whole or not at
+  all — two that would collide keep the larger stage's — and sit on a backdrop
+  in the page colour, so they read over a ribbon of any colour.
+
 ## [0.101.1] — 2026-09-21
 
 ### Fixed

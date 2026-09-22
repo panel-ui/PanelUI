@@ -171,6 +171,15 @@ const LABEL_GAP = 6;
 /** The smallest a label's press target is allowed to be, in points. */
 const MIN_TARGET = 44;
 
+/**
+ * The narrowest a vertical name's box may be and still be allowed two lines.
+ *
+ * Below this a break puts one or two characters on the second line, which
+ * costs a whole line of height to say nothing. Roughly ten characters at the
+ * size the names are set in.
+ */
+const WRAPPABLE = 72;
+
 /** Columns the placeholder suggests while there is no data to count. */
 const SKELETON_COLUMNS = 3;
 
@@ -1264,6 +1273,8 @@ function SankeyChartLabels({
    */
   const alongStart = (node: SankeyLayoutNode) => (upright ? node.x0 : node.y0);
   const alongEnd = (node: SankeyLayoutNode) => (upright ? node.x1 : node.y1);
+  const crossStart = (node: SankeyLayoutNode) => (upright ? node.y0 : node.x0);
+  const crossEnd = (node: SankeyLayoutNode) => (upright ? node.y1 : node.x1);
   const span = upright ? width : height;
 
   const edges: number[] = [];
@@ -1272,6 +1283,23 @@ function SankeyChartLabels({
     if (!edges.includes(alongEnd(placed))) edges.push(alongEnd(placed));
   }
   edges.sort((a, b) => a - b);
+
+  /*
+   * And where a stage's own neighbours sit, across the flow.
+   *
+   * A name centred on a bar the width of its value has, at the small end,
+   * fewer points than the word it is carrying — and a box narrower than one
+   * word makes React Native break the word rather than the line, which reads
+   * as a bug rather than as a truncation. So the box borrows the gap on either
+   * side of its bar, symmetrically, which is room no neighbour is using.
+   */
+  const rowEdges = new Map<number, number[]>();
+  for (const placed of layout.nodes) {
+    const list = rowEdges.get(placed.layer) ?? [];
+    list.push(crossStart(placed), crossEnd(placed));
+    rowEdges.set(placed.layer, list);
+  }
+  for (const list of rowEdges.values()) list.sort((a, b) => a - b);
   const nextEdge = (at: number) => edges.find((edge) => edge > at + 1e-6);
   const previousEdge = (at: number) => {
     let found: number | undefined;
@@ -1326,8 +1354,41 @@ function SankeyChartLabels({
         const slack = Math.max(0, (MIN_TARGET - extent) / 2);
         const cross = Math.max(
           0,
-          Math.min(upright ? node.y0 : node.x0, crossSpan - extent)
+          Math.min(crossStart(node), crossSpan - extent)
         );
+
+        /*
+         * Across the flow, a vertical name takes its bar's run plus as much of
+         * the gap either side as the nearest neighbour in the same row is not
+         * using — the same amount on both sides, so the name stays centred on
+         * what it names.
+         */
+        let crossFrom = cross;
+        let crossSize = extent;
+        if (!upright) {
+          const list = rowEdges.get(node.layer) ?? [];
+          const before = list.filter((edge) => edge < crossStart(node) - 1e-6).pop();
+          const after = list.find((edge) => edge > crossEnd(node) + 1e-6);
+          const room = Math.min(
+            crossStart(node) - (before ?? 0),
+            (after ?? crossSpan) - crossEnd(node)
+          );
+          const borrow = Math.max(0, room / 2 - LABEL_GAP / 2);
+          crossFrom = Math.max(0, cross - borrow);
+          crossSize = Math.min(extent + borrow * 2, crossSpan - crossFrom);
+        }
+
+        /*
+         * Two lines only where a second one would help: somewhere to break,
+         * and a box wide enough that the words either side of the break stand
+         * a chance of fitting.
+         *
+         * Without the width test a narrow box breaks the word itself rather
+         * than the line, and "Eati/ng out" reads as a fault in the chart where
+         * "Eati…" reads as a name that did not fit. A truncation is a thing
+         * readers know how to interpret; a word split down the middle is not.
+         */
+        const lines = !upright && crossSize >= WRAPPABLE && name.trim().includes(' ') ? 2 : 1;
 
         return (
           <Pressable
@@ -1353,8 +1414,8 @@ function SankeyChartLabels({
                     alignItems: trailing ? ('flex-end' as const) : ('flex-start' as const),
                   }
                 : {
-                    left: cross,
-                    width: extent,
+                    left: crossFrom,
+                    width: crossSize,
                     top: gap.from,
                     height: gap.size,
                     alignItems: 'center',
@@ -1381,12 +1442,13 @@ function SankeyChartLabels({
               size="xs"
               weight={selected ? 'bold' : 'medium'}
               /*
-               * Two lines where the flow runs downwards. The box is as wide as
-               * the bar's value rather than as wide as the gap between two
-               * stages, so a long name has a second line to fall onto and no
-               * neighbour above or below to collide with.
+               * Where the flow runs downwards a name may take a second line,
+               * because the box is the bar's own run rather than the gap
+               * between two stages and there is no neighbour above or below to
+               * collide with. Only a name with a space in it, though — see the
+               * note on `lines`.
                */
-              numberOfLines={upright ? 1 : 2}
+              numberOfLines={lines}
               style={{ textAlign: upright ? (trailing ? 'right' : 'left') : 'center' }}
             >
               {name}

@@ -11,26 +11,34 @@ import { Support } from 'panelui-native';
 ### Anatomy
 
 ```tsx
+{/* the screen they arrive on */}
 <Support availability="online">
   <Support.Header />         {/* the screen's name, and who answers */}
   <Support.Status />         {/* whether anyone is there, and how long a reply takes */}
-
   <Support.Channels>         {/* the ways to reach somebody */}
     <Support.Channel />
   </Support.Channels>
-
   <Support.Topics>           {/* what the problem is about */}
     <Support.Topic />
   </Support.Topics>
-
   <Support.Conversations>    {/* requests already made */}
     <Support.Conversation />
   </Support.Conversations>
-
   <Support.Articles>         {/* the questions with a written answer */}
     <Support.Article />
   </Support.Articles>
 </Support>
+
+{/* and the thread, once one is open */}
+<Support.Agent />            {/* who is answering */}
+<Support.Ticket />           {/* which request this is */}
+<Support.Handoff />          {/* the moment it changes hands */}
+  …Message / Response turns…
+<Support.Replies>            {/* the suggested answers */}
+  <Support.Reply />
+</Support.Replies>
+<Support.Resolution />       {/* did this help? */}
+<Support.Note />             {/* the wait, above the composer */}
 ```
 
 ### Variants
@@ -51,6 +59,13 @@ import { Support } from 'panelui-native';
 - `Support.Conversation` — One of them: the subject, the last thing said, where it has got to, and when it last moved.
 - `Support.Articles` — The titled run of help-centre pages.
 - `Support.Article` — One page, with the collection it came from under it.
+- `Support.Agent` — Who the reader is talking to, above the transcript: a face, a name, what they are, and whether they are there. `typing` replaces the status line rather than sitting beside it — the two answer the same question and the live one wins.
+- `Support.Ticket` — Which request the thread belongs to, pinned above it, with its status. Worth having on screen: a reader who came back a day later does not otherwise know which of their requests they are looking at.
+- `Support.Handoff` — The moment the thread changes hands. Between two turns rather than inside either, because it is not something anybody said — an assistant's answer followed by a person's, with nothing between them, leaves the reader working out who they are talking to from the writing style.
+- `Support.Note` — One quiet line above the composer — what the wait is, or when they are back. It belongs there rather than at the top of the screen because that is where somebody is deciding whether it is worth typing, and an expectation set four screens ago is not one they still have in mind.
+- `Support.Replies` — The suggested answers under a turn.
+- `Support.Reply` — One of them. It is a part rather than a row of buttons because of what goes in it: the way out to a person is the reply that has to be there from the first turn, and a component that makes it easy to put there is one that gets it put there.
+- `Support.Resolution` — Whether it actually helped, asked at the end. The control that takes the answer is yours — pass a [Rating](/docs/components/rating), or two buttons.
 
 ### Props
 
@@ -165,6 +180,80 @@ Extends `Omit<ViewProps, 'children'>`.
 | `collection` | `string` | — | Which part of the help centre it came from. |
 | `onPress` | `() => void` | — | — |
 
+#### `SupportAgentProps`
+
+Extends `Omit<ViewProps, 'children' \| 'role'>`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `avatar` | `ReactNode` | — | Slot for the avatar. |
+| `name` | `string` | **required** | Who is answering. |
+| `role` | `string` | — | What they are — "Support", "Billing team", "Assistant". |
+| `availability` | `SupportAvailability` | `online` | Overrides the availability the root published. |
+| `typing` | `boolean` | — | They are writing a reply right now. |
+
+#### `SupportTicketProps`
+
+Extends `Omit<ViewProps, 'children'>`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `reference` | `string` | — | Reference for the request, as the reader sees it. |
+| `subject` | `string` | — | What it was about. |
+| `status` | `SupportConversationStatus` | `open` | — |
+
+#### `SupportHandoffProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `icon` | `ReactNode` | — | — |
+| `children` | `ReactNode` | — | — |
+
+#### `SupportNoteProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `children` | `ReactNode` | — | — |
+
+#### `SupportRepliesProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `children` | `ReactNode` | — | — |
+
+#### `SupportReplyProps`
+
+Extends `Omit<ViewProps, 'children'>`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `value` | `string` | — | What pressing it sends. Defaults to the label. |
+| `label` | `string` | **required** | — |
+| `disabled` | `boolean` | — | — |
+| `onPress` | `(value: string) => void` | — | — |
+
+#### `SupportResolutionProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `title` | `string` | — | The question asked. |
+| `children` | `ReactNode` | — | Slot for the control that takes the answer — a Rating, two buttons. |
+
 ### Example — The ways in
 
 Each channel is a row with an action for a label, a line of what it is for, and what the wait is. `disabled` is for a channel that is real but shut — out of hours, or not on this plan — which reads better than a channel that vanishes.
@@ -211,6 +300,14 @@ Four, and fewer than a helpdesk runs internally. The states a desk distinguishes
 ### Selection
 
 `Support.Topics` is a radio group: it wires `accessibilityRole` on itself and on each `Support.Topic`, and reports the selected one through `accessibilityState`. Leave `value` unset and it tracks its own; pass it and it stands back.
+
+### The thread is two components deep
+
+`Support.Agent`, `Support.Ticket`, `Support.Handoff`, `Support.Replies`, `Support.Resolution` and `Support.Note` are the support-specific furniture around a transcript, not a transcript. Put them around `MessageScroller` and `Message`, and give the thread its own route: a conversation wants the whole screen and the keyboard handling that comes with `AIInput`.
+
+### Escalation
+
+Put the way out to a person in `Support.Replies` from the first turn rather than revealing it once the assistant has failed. It is the one reply a reader may arrive already wanting, and a screen that hides it until it has had its turn is a screen people learn to distrust.
 
 ---
 

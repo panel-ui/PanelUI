@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1391,
+    "exports": 1398,
     "values": 351,
-    "types": 1040,
+    "types": 1047,
     "modules": 162,
     "components": 135,
     "hooks": 13
@@ -4940,6 +4940,34 @@
           },
           {
             "name": "SupportArticleProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportAgentProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportTicketProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportHandoffProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportNoteProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportRepliesProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportReplyProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportResolutionProps",
             "kind": "type"
           },
           {

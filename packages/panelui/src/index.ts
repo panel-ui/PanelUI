@@ -1123,6 +1123,13 @@ export {
   type SupportTopicProps,
   type SupportConversationProps,
   type SupportArticleProps,
+  type SupportAgentProps,
+  type SupportTicketProps,
+  type SupportHandoffProps,
+  type SupportNoteProps,
+  type SupportRepliesProps,
+  type SupportReplyProps,
+  type SupportResolutionProps,
   type SupportAvailability,
   type SupportConversationStatus,
 } from './components/support';

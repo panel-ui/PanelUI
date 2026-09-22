@@ -74,6 +74,13 @@ const supportVariants = tv({
       'w-full flex-row items-start gap-3 rounded-xl border border-border bg-card px-3.5 py-3',
     article: 'w-full flex-row items-center gap-3 rounded-xl bg-muted px-3.5 py-3',
     badge: 'rounded-full px-2 py-0.5',
+    agent: 'w-full flex-row items-center gap-3',
+    ticket: 'w-full flex-row items-center justify-between gap-2 rounded-lg bg-muted px-3 py-2',
+    note: 'w-full text-center text-xs text-muted-foreground',
+    handoff: 'w-full flex-row items-center gap-2 rounded-xl bg-muted px-3 py-2.5',
+    replies: 'w-full flex-row flex-wrap items-center gap-2',
+    reply: 'rounded-full border border-border bg-card px-3 py-1.5',
+    resolution: 'w-full items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-3.5',
   },
   variants: {
     availability: {
@@ -586,6 +593,255 @@ const SupportArticle = forwardRef<View, SupportArticleProps>(function SupportArt
 });
 SupportArticle.displayName = 'Support.Article';
 
+// `role` here is the person's job, not the accessibility role — the component
+// sets that itself, so the prop it would collide with is taken off.
+export interface SupportAgentProps extends Omit<ViewProps, 'children' | 'role'> {
+  className?: string;
+  /** Slot for the avatar. */
+  avatar?: ReactNode;
+  /** Who is answering. */
+  name: string;
+  /** What they are — "Support", "Billing team", "Assistant". */
+  role?: string;
+  /** Overrides the availability the root published. */
+  availability?: SupportAvailability;
+  /** They are writing a reply right now. */
+  typing?: boolean;
+}
+
+/**
+ * Who the reader is talking to, above the transcript.
+ *
+ * A support thread is the one conversation where the other end is a stranger,
+ * and "someone from Billing, who is here now" is a different thing to talk to
+ * than an unattributed queue. `typing` replaces the status line rather than
+ * sitting beside it, because the two answer the same question and the live one
+ * wins.
+ */
+const SupportAgent = forwardRef<View, SupportAgentProps>(function SupportAgent(
+  { className, avatar, name, role, availability: availabilityProp, typing = false, ...props },
+  ref
+) {
+  const { availability: inherited } = useSupport();
+  const availability = availabilityProp ?? inherited;
+  const { agent, statusDot } = supportVariants({ availability });
+
+  const state =
+    availability === 'online' ? 'Online' : availability === 'away' ? 'Away' : 'Offline';
+
+  return (
+    <View
+      ref={ref}
+      accessibilityRole="header"
+      accessibilityLabel={`${name}${role ? `, ${role}` : ''}, ${typing ? 'typing' : state}`}
+      className={agent({ className })}
+      {...props}
+    >
+      {avatar ? <View className="shrink-0">{avatar}</View> : null}
+      <View className="shrink grow gap-0.5">
+        <Text size="sm" weight="semibold" numberOfLines={1}>
+          {name}
+        </Text>
+        <View className="flex-row items-center gap-1.5">
+          {typing ? null : <View className={statusDot()} />}
+          <Text size="xs" muted numberOfLines={1}>
+            {typing ? 'Typing…' : role ? `${role} · ${state}` : state}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+});
+SupportAgent.displayName = 'Support.Agent';
+
+export interface SupportTicketProps extends Omit<ViewProps, 'children'> {
+  className?: string;
+  /** Reference for the request, as the reader sees it. */
+  reference?: string;
+  /** What it was about. */
+  subject?: string;
+  status?: SupportConversationStatus;
+}
+
+/** The request this thread belongs to, pinned above it. */
+const SupportTicket = forwardRef<View, SupportTicketProps>(function SupportTicket(
+  { className, reference, subject, status = 'open', ...props },
+  ref
+) {
+  const { ticket, badge } = supportVariants();
+  const tone = STATUS_STYLE[status];
+
+  return (
+    <View
+      ref={ref}
+      accessibilityLabel={[subject, reference, tone.label].filter(Boolean).join(', ')}
+      className={ticket({ className })}
+      {...props}
+    >
+      <View className="shrink grow gap-0.5">
+        {subject ? (
+          <Text size="xs" weight="medium" numberOfLines={1}>
+            {subject}
+          </Text>
+        ) : null}
+        {reference ? (
+          <Text size="xs" muted numberOfLines={1}>
+            {reference}
+          </Text>
+        ) : null}
+      </View>
+      <View className={badge({ className: tone.className })}>
+        <Text size="xs" weight="medium" className={tone.textClassName}>
+          {tone.label}
+        </Text>
+      </View>
+    </View>
+  );
+});
+SupportTicket.displayName = 'Support.Ticket';
+
+export interface SupportHandoffProps extends ViewProps {
+  className?: string;
+  icon?: ReactNode;
+  children?: ReactNode;
+}
+
+/**
+ * The moment the thread changes hands.
+ *
+ * Between two turns rather than inside either, because it is not something
+ * anybody said — an assistant's answer followed by a person's, with nothing
+ * between them, leaves the reader working out who they are talking to from the
+ * writing style.
+ */
+const SupportHandoff = forwardRef<View, SupportHandoffProps>(function SupportHandoff(
+  { className, icon, children, ...props },
+  ref
+) {
+  const { handoff } = supportVariants();
+
+  return (
+    <View ref={ref} accessibilityRole="alert" className={handoff({ className })} {...props}>
+      {icon ? <View className="shrink-0">{icon}</View> : null}
+      <Text size="xs" muted className="shrink">
+        {textChildren(children)}
+      </Text>
+    </View>
+  );
+});
+SupportHandoff.displayName = 'Support.Handoff';
+
+export interface SupportNoteProps extends ViewProps {
+  className?: string;
+  children?: ReactNode;
+}
+
+/**
+ * One quiet line above the composer — what the wait is, or when they are back.
+ *
+ * It belongs here rather than at the top of the screen because this is where
+ * somebody is deciding whether it is worth typing, and an expectation set four
+ * screens ago is not one they still have in mind.
+ */
+const SupportNote = forwardRef<View, SupportNoteProps>(function SupportNote(
+  { className, children, ...props },
+  ref
+) {
+  const { note } = supportVariants();
+  return (
+    <View ref={ref} className="w-full" {...props}>
+      <Text className={note({ className })}>{textChildren(children)}</Text>
+    </View>
+  );
+});
+SupportNote.displayName = 'Support.Note';
+
+export interface SupportRepliesProps extends ViewProps {
+  className?: string;
+  children?: ReactNode;
+}
+
+/** The suggested answers under a turn. */
+const SupportReplies = forwardRef<View, SupportRepliesProps>(function SupportReplies(
+  { className, children, ...props },
+  ref
+) {
+  const { replies } = supportVariants();
+  return (
+    <View ref={ref} className={replies({ className })} {...props}>
+      {textChildren(children)}
+    </View>
+  );
+});
+SupportReplies.displayName = 'Support.Replies';
+
+export interface SupportReplyProps extends Omit<ViewProps, 'children'> {
+  className?: string;
+  /** What pressing it sends. Defaults to the label. */
+  value?: string;
+  label: string;
+  disabled?: boolean;
+  onPress?: (value: string) => void;
+}
+
+/**
+ * One suggested answer.
+ *
+ * Worth having as a part rather than leaving to a row of buttons because of
+ * what goes in it: the way out to a person is the reply that has to be on the
+ * screen from the first turn, and a component that makes it easy to put there
+ * is a component that gets it put there.
+ */
+const SupportReply = forwardRef<View, SupportReplyProps>(function SupportReply(
+  { className, value, label, disabled = false, onPress, ...props },
+  ref
+) {
+  const { reply } = supportVariants();
+
+  return (
+    <AnimatedPressable
+      ref={ref}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      accessibilityLabel={label}
+      disabled={disabled}
+      onPress={() => onPress?.(value ?? label)}
+      className={reply({ className })}
+      {...props}
+    >
+      <Text size="xs" weight="medium" numberOfLines={1}>
+        {label}
+      </Text>
+    </AnimatedPressable>
+  );
+});
+SupportReply.displayName = 'Support.Reply';
+
+export interface SupportResolutionProps extends ViewProps {
+  className?: string;
+  /** The question asked. */
+  title?: string;
+  /** Slot for the control that takes the answer — a Rating, two buttons. */
+  children?: ReactNode;
+}
+
+/** Whether it actually helped, asked at the end of a thread. */
+const SupportResolution = forwardRef<View, SupportResolutionProps>(
+  function SupportResolution({ className, title = 'Did this solve it?', children, ...props }, ref) {
+    const { resolution } = supportVariants();
+
+    return (
+      <View ref={ref} className={resolution({ className })} {...props}>
+        <Text size="sm" weight="medium">
+          {title}
+        </Text>
+        {children ? <View className="w-full items-center">{textChildren(children)}</View> : null}
+      </View>
+    );
+  }
+);
+SupportResolution.displayName = 'Support.Resolution';
+
 export const Support = Object.assign(SupportRoot, {
   Header: SupportHeader,
   Status: SupportStatus,
@@ -597,6 +853,13 @@ export const Support = Object.assign(SupportRoot, {
   Conversation: SupportConversation,
   Articles: SupportArticles,
   Article: SupportArticle,
+  Agent: SupportAgent,
+  Ticket: SupportTicket,
+  Handoff: SupportHandoff,
+  Note: SupportNote,
+  Replies: SupportReplies,
+  Reply: SupportReply,
+  Resolution: SupportResolution,
 });
 
 export type SupportVariants = VariantProps<typeof supportVariants>;

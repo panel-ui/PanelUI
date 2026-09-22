@@ -4,9 +4,9 @@ description: The screen a person arrives on when they need help.
 status: new
 ---
 
-It covers the front of a support section: whether anyone is there, the ways to reach them, what the problem is about, and what happened to the request the reader already made.
+It covers a support section end to end: whether anyone is there, the ways to reach them, what the problem is about, what happened to the request the reader already made — and the thread itself, once one is open.
 
-The conversation itself is not in here. A support thread is a chat transcript with a name on it, so compose [MessageScroller](/docs/components/message-scroller), [Message](/docs/components/message) and [AIInput](/docs/ai-components/ai-input) behind whichever channel the reader picks, rather than a second set of bubbles that would drift away from the first.
+**It does not render the transcript.** The turns are [Message](/docs/components/message) inside [MessageScroller](/docs/components/message-scroller), and the composer is [AIInput](/docs/ai-components/ai-input); a second set of bubbles in here would drift away from those the first time either changed. What Support adds is everything around them: who is answering, which request it belongs to, the moment it changes hands, the suggested replies, the wait time above the composer, and the question at the end.
 
 Every part is optional. An app with no help centre leaves out `Support.Articles`; an app that routes everything to one queue leaves out `Support.Topics`.
 
@@ -17,7 +17,7 @@ Every part is optional. An app with no help centre leaves out `Support.Articles`
 Support ships with the library — no separate install.
 
 ```tsx
-import { Support, MessageCircleIcon, SparklesIcon, MailIcon, CardIcon, BugIcon, Avatar } from 'panelui-native';
+import { Support, MessageCircleIcon, SparklesIcon, MailIcon, CardIcon, BugIcon, HeadsetIcon, PaperclipIcon, Avatar, Message, MessageScroller, AIInput, Response, Rating } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -48,26 +48,34 @@ npx panelui-cli@latest add support
 ## Composition
 
 ```tsx
+{/* the screen they arrive on */}
 <Support availability="online">
   <Support.Header />         {/* the screen's name, and who answers */}
   <Support.Status />         {/* whether anyone is there, and how long a reply takes */}
-
   <Support.Channels>         {/* the ways to reach somebody */}
     <Support.Channel />
   </Support.Channels>
-
   <Support.Topics>           {/* what the problem is about */}
     <Support.Topic />
   </Support.Topics>
-
   <Support.Conversations>    {/* requests already made */}
     <Support.Conversation />
   </Support.Conversations>
-
   <Support.Articles>         {/* the questions with a written answer */}
     <Support.Article />
   </Support.Articles>
 </Support>
+
+{/* and the thread, once one is open */}
+<Support.Agent />            {/* who is answering */}
+<Support.Ticket />           {/* which request this is */}
+<Support.Handoff />          {/* the moment it changes hands */}
+  …Message / Response turns…
+<Support.Replies>            {/* the suggested answers */}
+  <Support.Reply />
+</Support.Replies>
+<Support.Resolution />       {/* did this help? */}
+<Support.Note />             {/* the wait, above the composer */}
 ```
 
 - **`Support.Header`** — The screen's name and one line under it, with a trailing slot for the faces of the people who answer.
@@ -80,6 +88,13 @@ npx panelui-cli@latest add support
 - **`Support.Conversation`** — One of them: the subject, the last thing said, where it has got to, and when it last moved.
 - **`Support.Articles`** — The titled run of help-centre pages.
 - **`Support.Article`** — One page, with the collection it came from under it.
+- **`Support.Agent`** — Who the reader is talking to, above the transcript: a face, a name, what they are, and whether they are there. `typing` replaces the status line rather than sitting beside it — the two answer the same question and the live one wins.
+- **`Support.Ticket`** — Which request the thread belongs to, pinned above it, with its status. Worth having on screen: a reader who came back a day later does not otherwise know which of their requests they are looking at.
+- **`Support.Handoff`** — The moment the thread changes hands. Between two turns rather than inside either, because it is not something anybody said — an assistant's answer followed by a person's, with nothing between them, leaves the reader working out who they are talking to from the writing style.
+- **`Support.Note`** — One quiet line above the composer — what the wait is, or when they are back. It belongs there rather than at the top of the screen because that is where somebody is deciding whether it is worth typing, and an expectation set four screens ago is not one they still have in mind.
+- **`Support.Replies`** — The suggested answers under a turn.
+- **`Support.Reply`** — One of them. It is a part rather than a row of buttons because of what goes in it: the way out to a person is the reply that has to be there from the first turn, and a component that makes it easy to put there is one that gets it put there.
+- **`Support.Resolution`** — Whether it actually helped, asked at the end. The control that takes the answer is yours — pass a [Rating](/docs/components/rating), or two buttons.
 
 ## Examples
 
@@ -177,9 +192,80 @@ const [topic, setTopic] = useState<string | null>(null);
 </Support.Conversations>
 ```
 
-### Handing off to the conversation
+### The conversation itself
 
-Support gets the reader as far as choosing; the thread is the existing message components. Keep the screen and the transcript as two routes rather than folding the transcript into this one — they scroll differently, and a composer wants the keyboard handling `AIInput` already has.
+Support supplies everything around the transcript; the turns are `Message` and the composer is `AIInput`.
+
+The order is the order a reader needs it in: who is answering, which request this is, then the thread, then — last, just above the composer — how long a reply takes, because that is the moment they are deciding whether to type.
+
+```tsx
+<View className="flex-1">
+  <View className="gap-3 border-b border-border px-4 pb-3">
+    <Support availability="online">
+      <Support.Agent
+        name="Mia Aden"
+        role="Support"
+        avatar={<Avatar size="sm" fallback="MA" />}
+      />
+      <Support.Ticket subject="Refund for order #4821" reference="#4821" status="open" />
+    </Support>
+  </View>
+
+  <MessageScroller autoScroll className="flex-1">
+    <MessageScroller.Viewport>
+      <MessageScroller.Content className="gap-3 px-4 py-4">
+        <Support.Handoff icon={<HeadsetIcon />}>
+          You were passed to Mia, who can see everything you told the assistant.
+        </Support.Handoff>
+
+        {turns.map((turn) => (
+          <Message key={turn.id} align={turn.mine ? 'end' : 'start'}>
+            …
+          </Message>
+        ))}
+
+        <Support.Resolution>
+          <Rating defaultValue={0} max={5} onValueCommit={rate} />
+        </Support.Resolution>
+      </MessageScroller.Content>
+    </MessageScroller.Viewport>
+  </MessageScroller>
+
+  <View className="gap-2 px-4">
+    <Support.Note>Mia typically replies in under an hour</Support.Note>
+    <AIInput value={draft} onValueChange={setDraft} onSubmit={send}>
+      <AIInput.Field placeholder="Write a reply" />
+      <AIInput.Toolbar>
+        <AIInput.Action label="Attach" icon={<PaperclipIcon />} onPress={attach} />
+        <AIInput.Spacer />
+        <AIInput.Submit />
+      </AIInput.Toolbar>
+    </AIInput>
+  </View>
+</View>
+```
+
+### Handing off to a person
+
+The escalation is a suggested reply, and it is on screen from the first turn rather than offered once the assistant has run out of answers. A reader who has decided they want a person has decided; making them prove it first is how a support screen earns its reputation.
+
+`Support.Handoff` then marks the change in the transcript, so the next turn is not just a different tone of voice.
+
+```tsx
+<Support.Replies>
+  <Support.Reply label="Talk to a person" onPress={escalate} />
+  <Support.Reply label="That's all, thanks" onPress={close} />
+</Support.Replies>
+
+// …and once it has happened, in the transcript:
+<Support.Handoff icon={<HeadsetIcon />}>
+  You were passed to Mia, who can see everything you told the assistant.
+</Support.Handoff>
+```
+
+### The whole way through
+
+The four screens in order: the help screen, the topic, the assistant's answer, and the person who can act on it. Keep them as separate routes rather than one screen that changes shape — they scroll differently, and the thread wants the keyboard handling `AIInput` already has.
 
 ```tsx
 function Help() {
@@ -188,10 +274,10 @@ function Help() {
   return (
     <Support availability="online">
       <Support.Header title="Support">
-        <Avatar.Group max={3}>
-          <Avatar size="sm" fallback="MA" />
-          <Avatar size="sm" fallback="KB" />
-          <Avatar size="sm" fallback="JR" />
+        <Avatar.Group size="sm" max={3}>
+          <Avatar fallback="MA" />
+          <Avatar fallback="KB" />
+          <Avatar fallback="JR" />
         </Avatar.Group>
       </Support.Header>
 
@@ -327,6 +413,62 @@ function Help() {
 | `collection` | `string` | — | Which part of the help centre it came from. |
 | `onPress` | `() => void` | — |  |
 
+### Support.Agent
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `avatar` | `ReactNode` | — | Slot for the avatar. |
+| `name` | `string` | — | Who is answering. |
+| `role` | `string` | — | What they are — "Support", "Billing team", "Assistant". |
+| `availability` | `SupportAvailability` | `online` | Overrides the availability the root published. |
+| `typing` | `boolean` | — | They are writing a reply right now. |
+
+### Support.Ticket
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `reference` | `string` | — | Reference for the request, as the reader sees it. |
+| `subject` | `string` | — | What it was about. |
+| `status` | `SupportConversationStatus` | `'open'` |  |
+
+### Support.Handoff
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `icon` | `ReactNode` | — |  |
+
+### Support.Note
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Support.Replies
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Support.Reply
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — | What pressing it sends. Defaults to the label. |
+| `label` | `string` | — |  |
+| `disabled` | `boolean` | — |  |
+| `onPress` | `(value: string) => void` | — |  |
+
+### Support.Resolution
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | The question asked. |
+
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 
 ## Notes
@@ -347,10 +489,18 @@ Four, and fewer than a helpdesk runs internally. The states a desk distinguishes
 
 `Support.Topics` is a radio group: it wires `accessibilityRole` on itself and on each `Support.Topic`, and reports the selected one through `accessibilityState`. Leave `value` unset and it tracks its own; pass it and it stands back.
 
+### The thread is two components deep
+
+`Support.Agent`, `Support.Ticket`, `Support.Handoff`, `Support.Replies`, `Support.Resolution` and `Support.Note` are the support-specific furniture around a transcript, not a transcript. Put them around `MessageScroller` and `Message`, and give the thread its own route: a conversation wants the whole screen and the keyboard handling that comes with `AIInput`.
+
+### Escalation
+
+Put the way out to a person in `Support.Replies` from the first turn rather than revealing it once the assistant has failed. It is the one reply a reader may arrive already wanting, and a screen that hides it until it has had its turn is a screen people learn to distrust.
+
 ## Public exports
 
 {/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
 
 **Values:** `Support`, `useSupport`
 
-**Types:** `SupportProps`, `SupportHeaderProps`, `SupportStatusProps`, `SupportGroupProps`, `SupportChannelProps`, `SupportTopicsProps`, `SupportTopicProps`, `SupportConversationProps`, `SupportArticleProps`, `SupportAvailability`, `SupportConversationStatus`
+**Types:** `SupportProps`, `SupportHeaderProps`, `SupportStatusProps`, `SupportGroupProps`, `SupportChannelProps`, `SupportTopicsProps`, `SupportTopicProps`, `SupportConversationProps`, `SupportArticleProps`, `SupportAgentProps`, `SupportTicketProps`, `SupportHandoffProps`, `SupportNoteProps`, `SupportRepliesProps`, `SupportReplyProps`, `SupportResolutionProps`, `SupportAvailability`, `SupportConversationStatus`

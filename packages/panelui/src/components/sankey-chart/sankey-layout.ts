@@ -49,6 +49,21 @@ export interface SankeyLayoutLinkInput {
   value: number;
 }
 
+/** Which nodes get folded into one, and what the result is called. */
+export interface SankeyCollapse {
+  /**
+   * Keep at most this many nodes in a column, bucket included. A column with
+   * more folds its smallest until it fits.
+   */
+  maxPerColumn?: number;
+  /**
+   * Fold any node worth less than this share of its own column, `0` to `1`.
+   */
+  minShare?: number;
+  /** What the bucket is called. Defaults to `Other`. */
+  label?: string;
+}
+
 export interface SankeyLayoutOptions {
   width: number;
   height: number;
@@ -59,12 +74,30 @@ export interface SankeyLayoutOptions {
   align: SankeyAlign;
   /** Relaxation rounds. More is steadier and slower; six is the useful knee. */
   iterations: number;
+  /**
+   * Folds a column's smallest nodes into one bucket before laying it out.
+   *
+   * A ribbon carries its value in its thickness, so a column of thirty is
+   * thirty hairlines — present in the data and unreadable on the screen. This
+   * is the only option here that reduces what is drawn rather than rearranging
+   * it.
+   */
+  collapse?: SankeyCollapse;
 }
 
 export interface SankeyLayoutNode {
   id: string;
-  /** Position in the input array, so a caller can find its own datum again. */
+  /**
+   * Position in the input array, so a caller can find its own datum again.
+   * `-1` on a node the layout made up rather than was given — see `collapsed`.
+   */
   index: number;
+  /**
+   * The ids folded into this node, on the bucket `collapse` produced. Absent
+   * on every node that came from the caller's array, which is how the two are
+   * told apart without comparing ids against the input.
+   */
+  collapsed?: string[];
   /** Which column it landed in, counting from the left. */
   layer: number;
   /** What flows through it: the larger of what arrives and what leaves. */
@@ -89,7 +122,10 @@ export interface SankeyLayoutLink {
   value: number;
   /** How thick the ribbon is, in points. */
   width: number;
-  /** The ribbon's centre where it leaves the source, in points from the top. */
+  /**
+   * The ribbon's centre where it leaves the source, across the flow — points
+   * from the top of an upright layout, and from the left of a transposed one.
+   */
   y0: number;
   /** And where it meets the target. */
   y1: number;
@@ -374,6 +410,208 @@ function resolveCollisions(column: Node[], alpha: number, padding: number, heigh
  * cannot be drawn — no nodes, no room, nothing carrying a value — comes back
  * empty rather than as a diagram of zeroes.
  */
+/**
+ * A bucket's id, chosen so it cannot be one the caller already used.
+ *
+ * Suffixed rather than prefixed with something unlikely: the id is what the
+ * chart falls back to for the name, so a readable one means a bucket reads as
+ * "Other" without anybody registering a label for it.
+ */
+function bucketId(label: string, taken: Set<string>, layer: number): string {
+  if (!taken.has(label)) return label;
+  let candidate = `${label} (${layer + 1})`;
+  let n = 2;
+  while (taken.has(candidate)) {
+    candidate = `${label} (${layer + 1}.${n})`;
+    n += 1;
+  }
+  return candidate;
+}
+
+interface CollapsePlan {
+  nodes: SankeyLayoutNodeInput[];
+  links: SankeyLayoutLinkInput[];
+  /** Bucket id -> the caller ids folded into it. */
+  buckets: Map<string, string[]>;
+  /** New node id -> the caller's index, or `-1` for a bucket. */
+  origin: Map<string, number>;
+  /** New link position -> the caller's row, or `-1` where rows were merged. */
+  linkOrigin: number[];
+}
+
+/**
+ * Which nodes to fold, and the graph that results.
+ *
+ * Worked out from a finished layout rather than from the raw rows, because
+ * "smallest in its column" needs the columns, and the columns come from the
+ * links. So the flow is solved once to find out where everything landed, the
+ * tail is folded, and it is solved again — twice through a few hundred
+ * microseconds of arithmetic, against a diagram nobody can read.
+ *
+ * Returns `null` when there is nothing worth folding. One node in a bucket is
+ * not a bucket, it is a rename, so a column only collapses where at least two
+ * of its nodes go in.
+ */
+function planCollapse(
+  layout: SankeyLayout,
+  nodeInput: readonly SankeyLayoutNodeInput[],
+  linkInput: readonly SankeyLayoutLinkInput[],
+  collapse: SankeyCollapse
+): CollapsePlan | null {
+  const label = collapse.label ?? 'Other';
+  const maxPerColumn =
+    typeof collapse.maxPerColumn === 'number' && collapse.maxPerColumn >= 1
+      ? Math.floor(collapse.maxPerColumn)
+      : Infinity;
+  const minShare =
+    typeof collapse.minShare === 'number' && collapse.minShare > 0 ? collapse.minShare : 0;
+  if (maxPerColumn === Infinity && minShare === 0) return null;
+
+  const byLayer = new Map<number, SankeyLayoutNode[]>();
+  for (const node of layout.nodes) {
+    const column = byLayer.get(node.layer);
+    if (column) column.push(node);
+    else byLayer.set(node.layer, [node]);
+  }
+
+  /** Caller id -> the bucket it was folded into. */
+  const folded = new Map<string, string>();
+  const buckets = new Map<string, string[]>();
+  const taken = new Set(layout.nodes.map((node) => node.id));
+
+  for (const [layer, column] of byLayer) {
+    if (column.length < 2) continue;
+    let total = 0;
+    for (const node of column) total += node.value;
+    if (!(total > 0)) continue;
+
+    // Largest first, so "the ones that go" is always a tail of the list and
+    // the two rules can be applied to the same ordering.
+    const ranked = [...column].sort((a, b) => b.value - a.value || a.id.localeCompare(b.id));
+    const doomed = new Set<string>();
+    if (minShare > 0) {
+      for (const node of ranked) {
+        if (node.value / total < minShare) doomed.add(node.id);
+      }
+    }
+    if (ranked.length > maxPerColumn) {
+      // The bucket takes one of the places, so only `maxPerColumn - 1` survive.
+      for (const node of ranked.slice(Math.max(0, maxPerColumn - 1))) doomed.add(node.id);
+    }
+    if (doomed.size < 2) continue;
+
+    const id = bucketId(label, taken, layer);
+    taken.add(id);
+    const members = ranked.filter((node) => doomed.has(node.id)).map((node) => node.id);
+    buckets.set(id, members);
+    for (const member of members) folded.set(member, id);
+  }
+
+  if (!buckets.size) return null;
+
+  const origin = new Map<string, number>();
+  const nodes: SankeyLayoutNodeInput[] = [];
+  const emitted = new Set<string>();
+  for (const [index, input] of nodeInput.entries()) {
+    const bucket = folded.get(input.id);
+    if (bucket === undefined) {
+      if (emitted.has(input.id)) continue;
+      emitted.add(input.id);
+      nodes.push(input);
+      origin.set(input.id, index);
+      continue;
+    }
+    // The bucket takes the place of the first of its members, so a column's
+    // order is still the order the caller wrote.
+    if (emitted.has(bucket)) continue;
+    emitted.add(bucket);
+    // No pinned value: a bucket is worth what its links carry, and summing
+    // pins would state a total none of the rows support.
+    nodes.push({ id: bucket });
+    origin.set(bucket, -1);
+  }
+
+  /*
+   * The rows, with folded endpoints renamed to their bucket.
+   *
+   * Two rows that now name the same pair are added together — that is the
+   * whole point of a bucket, and leaving them separate would stack a dozen
+   * hairlines between the same two bars instead of one ribbon. A row whose
+   * ends both landed in one bucket described a flow inside it and has nowhere
+   * left to go, so it is taken out here rather than being failed by the second
+   * pass and counted a second time.
+   *
+   * Rows that were already undrawable pass through untouched, so the second
+   * pass fails them for the reason the first one did.
+   */
+  const rename = (id: string) => folded.get(id) ?? id;
+  const links: SankeyLayoutLinkInput[] = [];
+  const linkOrigin: number[] = [];
+  const mergedAt = new Map<string, number>();
+  for (const [index, row] of linkInput.entries()) {
+    const source = rename(row.source);
+    const target = rename(row.target);
+    const usable =
+      origin.has(source) &&
+      origin.has(target) &&
+      source !== target &&
+      typeof row.value === 'number' &&
+      Number.isFinite(row.value) &&
+      row.value > 0;
+
+    if (!usable) {
+      if (folded.has(row.source) && folded.has(row.target) && source === target) continue;
+      links.push(row);
+      linkOrigin.push(index);
+      continue;
+    }
+
+    const key = `${source}\u0000${target}`;
+    const at = mergedAt.get(key);
+    if (at === undefined) {
+      mergedAt.set(key, links.length);
+      links.push({ source, target, value: row.value });
+      linkOrigin.push(index);
+      continue;
+    }
+    links[at] = { source, target, value: links[at]!.value + row.value };
+    // Merged: no single row of the caller's describes it any more.
+    linkOrigin[at] = -1;
+  }
+
+  return { nodes, links, buckets, origin, linkOrigin };
+}
+
+/**
+ * The same arrangement, read down the screen instead of across it.
+ *
+ * A flow diagram has one axis carrying the order of the stages and another
+ * carrying the values, and which of them is horizontal is a question about the
+ * screen rather than about the data. So the layout is solved once, upright,
+ * and turned afterwards — the alternative is a second copy of the relaxation
+ * with every comparison reversed, which is the same maths maintained twice.
+ *
+ * Reflecting about the diagonal, so it is its own inverse: transposing twice
+ * returns the layout unchanged. Call `sankeyLayout` with `width` and `height`
+ * swapped and then pass the result through here, or the diagram comes back
+ * fitted to the wrong box.
+ */
+export function transposeLayout(layout: SankeyLayout): SankeyLayout {
+  return {
+    ...layout,
+    nodes: layout.nodes.map((node) => ({
+      ...node,
+      x0: node.y0,
+      x1: node.y1,
+      y0: node.x0,
+      y1: node.x1,
+    })),
+    // A link's `y0`/`y1` are already across the flow rather than along it, so
+    // the axis they name changes while the numbers do not.
+    links: layout.links.map((link) => ({ ...link })),
+  };
+}
+
 export function sankeyLayout(
   nodeInput: readonly SankeyLayoutNodeInput[],
   linkInput: readonly SankeyLayoutLinkInput[],
@@ -384,6 +622,42 @@ export function sankeyLayout(
   const requestedPadding = Math.max(0, options.nodePadding);
 
   if (!nodeInput.length || !(width > 0) || !(height > 0)) return EMPTY;
+
+  /*
+   * Folding the tail needs the columns, and the columns come out of the links,
+   * so the only way to know what to fold is to lay it out once and look. The
+   * second pass runs with `collapse` cleared, which is what stops this
+   * recurring.
+   */
+  if (options.collapse) {
+    const bare = { ...options, collapse: undefined };
+    const first = sankeyLayout(nodeInput, linkInput, bare);
+    const plan = planCollapse(first, nodeInput, linkInput, options.collapse);
+    if (plan) {
+      const second = sankeyLayout(plan.nodes, plan.links, bare);
+      return {
+        ...second,
+        nodes: second.nodes.map((node) => {
+          const members = plan.buckets.get(node.id);
+          return {
+            ...node,
+            index: plan.origin.get(node.id) ?? -1,
+            ...(members ? { collapsed: members } : {}),
+          };
+        }),
+        links: second.links.map((link) => ({
+          ...link,
+          input: plan.linkOrigin[link.input] ?? -1,
+        })),
+        /*
+         * Counted from the pass that saw the caller's own rows. The second
+         * pass reads a graph this function invented, and how many of those
+         * failed is not something anybody asked about.
+         */
+        dropped: first.dropped,
+      };
+    }
+  }
 
   const nodes: Node[] = [];
   const byId = new Map<string, Node>();

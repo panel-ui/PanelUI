@@ -1304,5 +1304,14 @@
       "addedIn": "0.93.0",
       "category": "layout"
     }
+  ],
+  "support": [
+    "Support",
+    "The screen a person arrives on when they need help.",
+    "react native support help center screen",
+    {
+      "addedIn": "0.102.0",
+      "category": "media"
+    }
   ]
 }

@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1370,
-    "values": 341,
-    "types": 1029,
-    "modules": 161,
-    "components": 134,
+    "exports": 1391,
+    "values": 351,
+    "types": 1040,
+    "modules": 162,
+    "components": 135,
     "hooks": 13
   },
   "groups": {
@@ -4894,6 +4894,65 @@
         ]
       },
       {
+        "source": "components/support/index.tsx",
+        "slug": "support",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "Support",
+            "kind": "value"
+          },
+          {
+            "name": "useSupport",
+            "kind": "value"
+          },
+          {
+            "name": "SupportProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportHeaderProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportStatusProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportGroupProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportChannelProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportTopicsProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportTopicProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportConversationProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportArticleProps",
+            "kind": "type"
+          },
+          {
+            "name": "SupportAvailability",
+            "kind": "type"
+          },
+          {
+            "name": "SupportConversationStatus",
+            "kind": "type"
+          }
+        ]
+      },
+      {
         "source": "components/surface/index.tsx",
         "slug": "surface",
         "category": "components",
@@ -6353,6 +6412,38 @@
           },
           {
             "name": "CardIcon",
+            "kind": "value"
+          },
+          {
+            "name": "HeadsetIcon",
+            "kind": "value"
+          },
+          {
+            "name": "LifebuoyIcon",
+            "kind": "value"
+          },
+          {
+            "name": "HelpCircleIcon",
+            "kind": "value"
+          },
+          {
+            "name": "MailIcon",
+            "kind": "value"
+          },
+          {
+            "name": "CallIcon",
+            "kind": "value"
+          },
+          {
+            "name": "BugIcon",
+            "kind": "value"
+          },
+          {
+            "name": "BookIcon",
+            "kind": "value"
+          },
+          {
+            "name": "TicketIcon",
             "kind": "value"
           },
           {

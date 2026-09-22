@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-134 component modules. The **Reference** column links to a file in this skill holding that
+135 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -175,6 +175,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `Post` | A social card — author, body, media and the counts underneath, with the votes animated. | [post](./components/post.md) |
 | `QRCode` | A string a camera can read — framed, titled, or folded away behind a button. | [qr-code](./components/qr-code.md) |
 | `ScrollText` | Text that resolves word by word as you scroll. | [scroll-text](./components/scroll-text.md) |
+| `Support` | The screen a person arrives on when they need help. | [support](./components/support.md) |
 | `TextAnimation` | Five ways a piece of text or a number arrives. | [text-animation](./components/text-animation.md) |
 
 ## AI components

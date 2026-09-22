@@ -1,0 +1,356 @@
+---
+title: Support
+description: The screen a person arrives on when they need help.
+status: new
+---
+
+It covers the front of a support section: whether anyone is there, the ways to reach them, what the problem is about, and what happened to the request the reader already made.
+
+The conversation itself is not in here. A support thread is a chat transcript with a name on it, so compose [MessageScroller](/docs/components/message-scroller), [Message](/docs/components/message) and [AIInput](/docs/ai-components/ai-input) behind whichever channel the reader picks, rather than a second set of bubbles that would drift away from the first.
+
+Every part is optional. An app with no help centre leaves out `Support.Articles`; an app that routes everything to one queue leaves out `Support.Topics`.
+
+`availability` is the one thing the root decides, and the parts below read it from context — a screen that is half "we're here" and half "we're not" is worse than either.
+
+## Installation
+
+Support ships with the library — no separate install.
+
+```tsx
+import { Support, MessageCircleIcon, SparklesIcon, MailIcon, CardIcon, BugIcon, Avatar } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add support
+```
+
+## Usage
+
+```tsx
+<Support availability="online">
+  <Support.Header title="Support" description="We answer most things the same day" />
+  <Support.Status replyTime="Typically replies in under an hour" />
+
+  <Support.Channels>
+    <Support.Channel
+      icon={<MessageCircleIcon />}
+      label="Message us"
+      description="Start a conversation with the team"
+      detail="~1h"
+      onPress={openThread}
+    />
+  </Support.Channels>
+</Support>
+```
+
+## Composition
+
+```tsx
+<Support availability="online">
+  <Support.Header />         {/* the screen's name, and who answers */}
+  <Support.Status />         {/* whether anyone is there, and how long a reply takes */}
+
+  <Support.Channels>         {/* the ways to reach somebody */}
+    <Support.Channel />
+  </Support.Channels>
+
+  <Support.Topics>           {/* what the problem is about */}
+    <Support.Topic />
+  </Support.Topics>
+
+  <Support.Conversations>    {/* requests already made */}
+    <Support.Conversation />
+  </Support.Conversations>
+
+  <Support.Articles>         {/* the questions with a written answer */}
+    <Support.Article />
+  </Support.Articles>
+</Support>
+```
+
+- **`Support.Header`** — The screen's name and one line under it, with a trailing slot for the faces of the people who answer.
+- **`Support.Status`** — Whether anyone is there, and how long an answer takes. The dot takes its colour from `availability`; `replyTime` is your own wording, because the honest version is a median somebody measured and the rounding is a judgement about tone.
+- **`Support.Channels`** — The titled run of ways to get in touch.
+- **`Support.Channel`** — One of them. A row rather than a tile, because each channel is a sentence — what it is, and what it costs you in waiting — and a grid of icons with one word under each is a quiz about which one is right.
+- **`Support.Topics`** — Single-select group for what the problem is about. A request goes to one queue, so it selects one. Controlled with `value`, or left to track its own.
+- **`Support.Topic`** — One thing the problem could be about, with room for a line of what belongs under it.
+- **`Support.Conversations`** — The titled run of requests the reader already made.
+- **`Support.Conversation`** — One of them: the subject, the last thing said, where it has got to, and when it last moved.
+- **`Support.Articles`** — The titled run of help-centre pages.
+- **`Support.Article`** — One page, with the collection it came from under it.
+
+## Examples
+
+### The ways in
+
+Each channel is a row with an action for a label, a line of what it is for, and what the wait is. `disabled` is for a channel that is real but shut — out of hours, or not on this plan — which reads better than a channel that vanishes.
+
+```tsx
+<Support.Channels title="Get in touch">
+  <Support.Channel
+    icon={<SparklesIcon />}
+    label="Ask the assistant"
+    description="Answers most questions straight away"
+    onPress={openAssistant}
+  />
+  <Support.Channel
+    icon={<MessageCircleIcon />}
+    label="Message the team"
+    description="We pick these up through the day"
+    detail="~1h"
+    onPress={openThread}
+  />
+  <Support.Channel
+    icon={<MailIcon />}
+    label="Email us"
+    description="support@example.com"
+    detail="1 day"
+    onPress={openMail}
+  />
+</Support.Channels>
+```
+
+### Whether anyone is there
+
+`availability` is set once on the root and read by everything below it. `Support.Status` states it in your words through `replyTime`, or falls back to saying the availability itself when there is no measured figure to give.
+
+```tsx
+<Support availability="away">
+  <Support.Status replyTime="Back tomorrow morning — leave a message and we'll reply first thing" />
+</Support>
+
+// With nothing to say about timing, the availability speaks for itself.
+<Support availability="offline">
+  <Support.Status />
+</Support>
+```
+
+### Routing it to the right queue
+
+`Support.Topics` is a single-select list, and it is optional — plenty of support screens are better without one. Add it where the answer decides which team a request lands with.
+
+```tsx
+const [topic, setTopic] = useState<string | null>(null);
+
+<Support.Topics title="What is it about?" value={topic} onValueChange={setTopic}>
+  <Support.Topic
+    value="billing"
+    icon={<CardIcon />}
+    label="Billing"
+    description="Invoices, refunds and plans"
+  />
+  <Support.Topic
+    value="bug"
+    icon={<BugIcon />}
+    label="Something is broken"
+    description="Send us what you were doing at the time"
+  />
+</Support.Topics>
+```
+
+### What happened to the last one
+
+`status` is one of four words the reader can act on: `open`, `pending` (waiting on them), `solved` and `closed`.
+
+`unread` and `updated` are separate on purpose. A reply nobody has read and a thread that merely moved are different facts, and one dot meaning both means neither — so the unread dot takes the accent colour and the updated one stays grey.
+
+```tsx
+<Support.Conversations title="Your requests">
+  <Support.Conversation
+    title="Refund for order #4821"
+    preview="We've issued the refund — it should land in 3–5 days."
+    status="solved"
+    reference="#4821"
+    timestamp="2h"
+    unread
+    onPress={() => open('4821')}
+  />
+  <Support.Conversation
+    title="Can't add a second device"
+    preview="Could you tell us which OS version it is running?"
+    status="pending"
+    timestamp="Yesterday"
+    onPress={() => open('4810')}
+  />
+</Support.Conversations>
+```
+
+### Handing off to the conversation
+
+Support gets the reader as far as choosing; the thread is the existing message components. Keep the screen and the transcript as two routes rather than folding the transcript into this one — they scroll differently, and a composer wants the keyboard handling `AIInput` already has.
+
+```tsx
+function Help() {
+  const router = useRouter();
+
+  return (
+    <Support availability="online">
+      <Support.Header title="Support">
+        <Avatar.Group max={3}>
+          <Avatar size="sm" fallback="MA" />
+          <Avatar size="sm" fallback="KB" />
+          <Avatar size="sm" fallback="JR" />
+        </Avatar.Group>
+      </Support.Header>
+
+      <Support.Status replyTime="Typically replies in under an hour" />
+
+      <Support.Channels>
+        <Support.Channel
+          icon={<MessageCircleIcon />}
+          label="Message us"
+          onPress={() => router.push('/support/new')}
+        />
+      </Support.Channels>
+    </Support>
+  );
+}
+
+// /support/new renders the transcript.
+<MessageScroller autoScroll>
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {turns.map((turn) => (
+        <Message key={turn.id} align={turn.mine ? 'end' : 'start'}>
+          …
+        </Message>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+</MessageScroller>
+<AIInput value={draft} onValueChange={setDraft} onSubmit={send} />
+```
+
+## Variants
+
+### `availability`
+
+- `online` *(default)*
+- `away`
+- `offline`
+
+```tsx
+<Support availability="online">…</Support>
+<Support availability="away">…</Support>
+<Support availability="offline">…</Support>
+```
+
+## API Reference
+
+### Support
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `availability` | `SupportAvailability` | `online` | Whether anyone is at the other end. Read by every part below rather than passed to each — a screen that is half "we're here" and half "we're not" is worse than either. |
+
+### Support.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | The screen's own name. |
+| `description` | `string` | — | One line under it — who answers, or what this section covers. |
+
+### Support.Status
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `availability` | `SupportAvailability` | `online` | Overrides the availability the root published. |
+| `replyTime` | `string` | — | How long a reply takes, in your own words — "Typically replies in under an hour", "Back on Monday". Left unset, the availability alone is stated. A string rather than a number of minutes, because the honest version of this is a median somebody measured and the rounding is a judgement about tone: "a few minutes" and "4 minutes" promise different things. |
+
+### Support.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | Small heading above the rows. |
+
+### Support.Channel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `icon` | `ReactNode` | — | The glyph on the left. Tinted to match the row. |
+| `label` | `string` | — | What the channel is called — the thing pressed, so write it as an action. |
+| `description` | `string` | — | One line under it: what it is for, or the address behind it. |
+| `detail` | `string` | — | Trailing note — a wait time, an opening hour. |
+| `disabled` | `boolean` | — |  |
+| `onPress` | `() => void` | — |  |
+
+### Support.Topics
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | Small heading above the list. |
+| `value` | `string \| null` | — | The selected topic. Leave unset to let the group track it. |
+| `defaultValue` | `string \| null` | — | The topic selected before anybody pressed anything. |
+| `onValueChange` | `(value: string) => void` | — |  |
+
+### Support.Topic
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `value` | `string` | — | What this topic is worth to the group's `value`. |
+| `icon` | `ReactNode` | — |  |
+| `label` | `string` | — |  |
+| `description` | `string` | — | One line of what belongs under it, for the ones whose name is not enough. |
+| `disabled` | `boolean` | — |  |
+| `onPress` | `() => void` | — |  |
+
+### Support.Conversation
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `title` | `string` | — | What it was about. |
+| `preview` | `string` | — | The last thing said in it. |
+| `status` | `SupportConversationStatus` | `'open'` | Where it has got to. |
+| `timestamp` | `string` | — | When it last moved, in your own words — "2h", "Yesterday". |
+| `unread` | `boolean` | `false` | There is a reply here the reader has not seen. Separate from `updated`, because they are different facts: a thread can move without anything being addressed to you, and a dot that means both means neither. |
+| `updated` | `boolean` | `false` | The thread moved since it was last opened, with nothing new to read. |
+| `reference` | `string` | — | Reference for the request, shown beside the status. |
+| `onPress` | `() => void` | — |  |
+
+### Support.Article
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `icon` | `ReactNode` | — |  |
+| `title` | `string` | — | The article's own title. |
+| `collection` | `string` | — | Which part of the help centre it came from. |
+| `onPress` | `() => void` | — |  |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Availability
+
+`availability` is published by the root and read from context by `Support.Status`. A part can override it for itself, which is for the case where one channel keeps different hours from the rest — not for saying two different things about the same team.
+
+### Why the conversation is not in here
+
+A support thread is a chat transcript. `Message`, `MessageScroller`, `Response`, `Sources`, `Reasoning` and `AIInput` already cover one, including the scroll behaviour and the keyboard handling, and a second set of bubbles living in this component would drift away from those the first time either changed. So `Support` ends where the conversation begins.
+
+### Statuses
+
+Four, and fewer than a helpdesk runs internally. The states a desk distinguishes for its own routing are not distinctions the person waiting can act on, and offering them invites a question about the difference that nobody wants to answer.
+
+### Selection
+
+`Support.Topics` is a radio group: it wires `accessibilityRole` on itself and on each `Support.Topic`, and reports the selected one through `accessibilityState`. Leave `value` unset and it tracks its own; pass it and it stands back.
+
+## Public exports
+
+{/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
+
+**Values:** `Support`, `useSupport`
+
+**Types:** `SupportProps`, `SupportHeaderProps`, `SupportStatusProps`, `SupportGroupProps`, `SupportChannelProps`, `SupportTopicsProps`, `SupportTopicProps`, `SupportConversationProps`, `SupportArticleProps`, `SupportAvailability`, `SupportConversationStatus`

@@ -1915,6 +1915,20 @@
     "docsPath": "components/steps"
   },
   {
+    "name": "support",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "The screen a person arrives on when they need help.",
+    "registryDependencies": [
+      "animated-pressable",
+      "cn",
+      "text"
+    ],
+    "docsPath": "components/support"
+  },
+  {
     "name": "surface",
     "type": "registry:ui",
     "kind": "ui",

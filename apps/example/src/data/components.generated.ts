@@ -114,6 +114,7 @@ export const COMPONENTS = [
   {"slug":"split-view","name":"SplitView","summary":"Two resizable stacked panes that settle on a named height"},
   {"slug":"stack-card","name":"StackCard","summary":"A pile of cards, taken one at a time by throwing the top one off"},
   {"slug":"steps","name":"Steps","summary":"Stepper for multi-step flows"},
+  {"slug":"support","name":"Support","summary":"The screen a person arrives on when they need help"},
   {"slug":"surface","name":"Surface","summary":"Elevated container with a variant ladder"},
   {"slug":"swipe","name":"Swipe","summary":"A row that slides aside to reveal its actions"},
   {"slug":"switch","name":"Switch","summary":"On/off toggle"},

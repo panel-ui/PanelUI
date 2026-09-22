@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View } from "react-native";
-import { Button, Card, Compare, Frame, SankeyChart, type SankeyLink, type SankeyNode, Text } from "panelui-native";
+import { ScrollView, View } from "react-native";
+import { Avatar, Button, Card, Compare, Frame, SankeyChart, type SankeyLink, type SankeyNode, Support, Text, BugIcon, CardIcon, LockIcon, MailIcon, MessageCircleIcon, SparklesIcon } from "panelui-native";
 import type { ComponentEntry } from '../component-types';
 
 /* -------------------------------------------------------------------------- */
@@ -686,6 +686,117 @@ function SankeyLegendDemo() {
   );
 }
 
+function SupportHomeVersion() {
+  return (
+    <ScrollView contentContainerClassName="p-4 pb-10">
+      <Support availability="online">
+        <Support.Header title="Support" description="We answer most things the same day">
+          <Avatar.Group max={3}>
+            <Avatar size="sm" fallback="MA" />
+            <Avatar size="sm" fallback="KB" />
+            <Avatar size="sm" fallback="JR" />
+          </Avatar.Group>
+        </Support.Header>
+
+        <Support.Status replyTime="Typically replies in under an hour" />
+
+        <Support.Channels title="Get in touch">
+          <Support.Channel
+            icon={<SparklesIcon />}
+            label="Ask the assistant"
+            description="Answers most questions straight away"
+          />
+          <Support.Channel
+            icon={<MessageCircleIcon />}
+            label="Message the team"
+            description="We pick these up through the day"
+            detail="~1h"
+          />
+          <Support.Channel
+            icon={<MailIcon />}
+            label="Email us"
+            description="support@panelui.dev"
+            detail="1 day"
+          />
+        </Support.Channels>
+
+        <Support.Conversations title="Your requests">
+          <Support.Conversation
+            title="Refund for order #4821"
+            preview="We've issued the refund — it should land in 3–5 days."
+            status="solved"
+            reference="#4821"
+            timestamp="2h"
+            unread
+          />
+          <Support.Conversation
+            title="Can't add a second device"
+            preview="Could you tell us which OS version it is running?"
+            status="pending"
+            reference="#4810"
+            timestamp="Yesterday"
+            updated
+          />
+        </Support.Conversations>
+      </Support>
+    </ScrollView>
+  );
+}
+
+function SupportTopicsVersion() {
+  const [topic, setTopic] = useState<string | null>('billing');
+
+  return (
+    <ScrollView contentContainerClassName="p-4 pb-10">
+      <Support>
+        <Support.Header
+          title="What do you need?"
+          description="Picking one gets you to the right team first time"
+        />
+
+        <Support.Topics title="What is it about?" value={topic} onValueChange={setTopic}>
+          <Support.Topic
+            value="billing"
+            icon={<CardIcon />}
+            label="Billing"
+            description="Invoices, refunds and plans"
+          />
+          <Support.Topic
+            value="account"
+            icon={<LockIcon />}
+            label="Account and sign-in"
+            description="Passwords, devices and two-factor"
+          />
+          <Support.Topic
+            value="bug"
+            icon={<BugIcon />}
+            label="Something is broken"
+            description="Send us what you were doing at the time"
+          />
+        </Support.Topics>
+
+        <Button disabled={!topic}>Start a conversation</Button>
+      </Support>
+    </ScrollView>
+  );
+}
+
+function SupportAwayDemo() {
+  return (
+    <View className="w-full gap-3">
+      <Support availability="away">
+        <Support.Status replyTime="Back tomorrow morning — leave a message and we'll reply first thing" />
+      </Support>
+      <Support availability="offline">
+        <Support.Status />
+      </Support>
+      <Text size="xs" muted className="px-1">
+        `availability` colours the dot and supplies the wording when `replyTime` says nothing.
+      </Text>
+    </View>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
   {
     slug: 'sankey-chart',
@@ -779,6 +890,31 @@ export const ENTRIES: ComponentEntry[] = [
       { label: 'A seam that runs the other way', render: () => <CompareVerticalDemo /> },
       { label: 'Where the seam starts', render: () => <CompareStartDemo /> },
       { label: 'Frozen', render: () => <CompareFrozenDemo /> },
+    ],
+  },
+  {
+    slug: 'support',
+    name: 'Support',
+    summary: 'The screen a person arrives on when they need help',
+    layout: 'pager',
+    demos: [
+      {
+        label: 'The help screen',
+        id: 'home',
+        fullPage: true,
+        description:
+          'Who is there, the ways to reach them, and what happened to the last thing you asked. The unread dot takes the accent colour; the one on a thread that merely moved stays grey.',
+        render: () => <SupportHomeVersion />,
+      },
+      {
+        label: 'Picking a topic',
+        id: 'topics',
+        fullPage: true,
+        description:
+          'A single-select list, for a desk that routes to different teams. It is a radio group, so a screen reader reads it as one.',
+        render: () => <SupportTopicsVersion />,
+      },
+      { label: 'When nobody is there', render: () => <SupportAwayDemo /> },
     ],
   },
 ];

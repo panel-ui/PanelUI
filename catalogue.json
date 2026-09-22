@@ -114,6 +114,7 @@
     "splitter",
     "stack-card",
     "steps",
+    "support",
     "surface",
     "swipe",
     "switch",
@@ -223,16 +224,16 @@
     }
   ],
   "counts": {
-    "componentModules": 134,
-    "packageComponentExports": 134,
-    "documentedComponents": 134,
-    "exampleEntries": 134,
+    "componentModules": 135,
+    "packageComponentExports": 135,
+    "documentedComponents": 135,
+    "exampleEntries": 135,
     "registry": {
-      "componentItems": 134,
+      "componentItems": 135,
       "supportItems": 36,
-      "totalItems": 170,
+      "totalItems": 171,
       "byType": {
-        "registry:ui": 149,
+        "registry:ui": 150,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

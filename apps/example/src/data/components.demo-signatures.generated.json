@@ -351,7 +351,7 @@
     },
     {
       "slug": "sankey-chart",
-      "signature": "f7bf6bbbcc01f308764e432a95faefce9956584f39106fa0a7d71ea4b1d86214"
+      "signature": "0f8514e5d09c55110e9cdc4c69a8716ce8c4086b49edd78786f9b41ca45c323a"
     },
     {
       "slug": "scatter-chart",
@@ -452,6 +452,10 @@
     {
       "slug": "steps",
       "signature": "6dc58a137914d4b7bb13738c361e1a7f270eff6c47be05520823eed7e2bf2f46"
+    },
+    {
+      "slug": "support",
+      "signature": "6367a6e36f9ede66c04810d55cbe9563d07f8f9b221e8bf7fa6c8446c950834c"
     },
     {
       "slug": "surface",

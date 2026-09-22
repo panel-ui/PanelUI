@@ -1857,6 +1857,30 @@ const message = (
   </Stack>
 );
 
+const support = (
+  <Stack className="w-44 gap-2">
+    {/* The availability line, then the ways in, then a request already made. */}
+    <Row className="items-center gap-2 rounded-xl bg-fd-muted px-2.5 py-2">
+      <Accent className="size-1.5 shrink-0 rounded-full" />
+      <Bar className="w-24" faint />
+    </Row>
+    <Row className="items-center gap-2 rounded-xl border border-fd-border px-2.5 py-2">
+      <Fill className="size-5 shrink-0 rounded-md" />
+      <Stack className="grow gap-1">
+        <Bar className="w-16" />
+        <Bar className="w-24" faint />
+      </Stack>
+    </Row>
+    <Row className="items-start gap-2 rounded-xl border border-fd-border px-2.5 py-2">
+      <Accent className="mt-1 size-1.5 shrink-0 rounded-full" />
+      <Stack className="grow gap-1">
+        <Bar className="w-20" />
+        <Bar className="w-28" faint />
+      </Stack>
+    </Row>
+  </Stack>
+);
+
 const messageScroller = (
   <div className="relative w-44">
     <Stack className="gap-2">
@@ -2321,6 +2345,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   marquee,
   message,
   'message-scroller': messageScroller,
+  support,
   post,
   'image-viewer': imageViewer,
   'qr-code': qrCode,

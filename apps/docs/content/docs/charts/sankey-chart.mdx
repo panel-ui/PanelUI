@@ -6,11 +6,13 @@ status: new
 
 Use it for a routing question: which campaigns produced which signups, which budget lines paid for which departments, what the traffic that landed on a page went on to do. The answer has to need a source *and* a target — a quantity leaves one thing and arrives at another, and the size of each stream is the point.
 
-A ribbon's thickness is its value, on one scale shared by the whole diagram. Nothing else here is a quantity: how far a ribbon travels is just the number of columns between its ends, and the vertical order inside a column is chosen to keep the ribbons from crossing.
+A ribbon's thickness is its value, on one scale shared by the whole diagram. Nothing else here is a quantity: how far a ribbon travels is just the number of stages between its ends, and the order within a stage is chosen to keep the ribbons from crossing.
 
-**Columns come from the links, not from the order of your `nodes` array.** A node that receives from another has to be drawn after it, so the diagram works out the columns itself and `align` only settles what the flow leaves open.
+**Stages come from the links, not from the order of your `nodes` array.** A node that receives from another has to be drawn after it, so the diagram works out the stages itself and `align` only settles what the flow leaves open.
 
-**It needs room.** Ribbons carry their value in their thickness, so a diagram of thirty nodes on a phone is thirty hairlines. Past a dozen or so nodes, give it a taller `height`, or aggregate the long tail before it arrives.
+**On a phone, run the flow downwards.** `orientation="vertical"` stacks the stages down the screen instead of across it, which gives them the long side of the device and gives each name the width of its own bar rather than the gap between two columns.
+
+**Past a dozen or so nodes a column becomes hairlines**, because a ribbon carries its value in its thickness. `collapse` folds each column's smallest into one bucket so what is left is thick enough to read, and [Breakdown](#composition) lists what the selected stage carries in full underneath.
 
 For a total cut into its parts with no routing between them, use [TreemapChart](/docs/charts/treemap-chart). For what survived each step of one process, use [FunnelChart](/docs/charts/funnel-chart).
 
@@ -45,19 +47,23 @@ npx panelui-cli@latest add sankey-chart
 
 ```tsx
 <SankeyChart nodes={…} links={…}>
-  <SankeyChart.Header />    {/* the strip above the diagram */}
-  <SankeyChart.Skeleton />  {/* the plain shape it waits behind */}
-  <SankeyChart.Links />     {/* the ribbons */}
-  <SankeyChart.Nodes />     {/* the bars they run between */}
-  <SankeyChart.Labels />    {/* the names, and the press targets */}
-  <SankeyChart.Tooltip />   {/* what the selected node carries */}
+  <SankeyChart.Header />     {/* the strip above the diagram */}
+  <SankeyChart.Skeleton />   {/* the plain shape it waits behind */}
+  <SankeyChart.Links />      {/* the ribbons */}
+  <SankeyChart.Nodes />      {/* the bars they run between */}
+  <SankeyChart.Labels />     {/* the names, and the press targets */}
+  <SankeyChart.Tooltip />    {/* what the selected node carries */}
+  <SankeyChart.Legend />     {/* every stage named, under the diagram */}
+  <SankeyChart.Breakdown />  {/* the selected stage, written out in full */}
 </SankeyChart>
 ```
 
+- **`SankeyChart.Breakdown`** — What the selected stage carries, listed underneath at the full width of the card: where each stream came from, where each one went, and what share of the stage it was. In and out are separate because they are only the same number when nothing was lost, and a stage where they differ is the interesting one. Pressing a row selects the node at the other end, so a flow can be walked one stage at a time.
+- **`SankeyChart.Legend`** — Every stage named, under the diagram, with its share of the largest stage. Pressing one selects the same node its bar would and fades the rest. This is how the nodes too small to carry a name are read and reached — on the chart they are a sliver, here they are a full name and a proper target.
 - **`SankeyChart.Header`** — The strip above the diagram — what the flow is of, what it totals, and room for a control. The value is not derived, because the formatting is not the chart's to guess: 128400 is a count, a currency or a rate depending on what was routed.
 - **`SankeyChart.Links`** — The ribbons. Drawn before the bars, so a bar sits on top of the flows that meet it and keeps a clean edge. Translucent at rest, because ribbons cross and an opaque one hides whichever passes under it.
-- **`SankeyChart.Nodes`** — The bars the ribbons run between, drawn solid. A node is the one thing here that is not crossing anything else, and it reads as an edge only if nothing shows through it.
-- **`SankeyChart.Labels`** — The names, set beside the bars rather than on them — a bar is ten points thick and no name fits in ten points. Also the press targets: a node worth one percent of the flow is a sliver nobody can hit, so the row it sits in is the target, padded out where the sliver is smaller than one.
+- **`SankeyChart.Nodes`** — The bars the ribbons run between, drawn solid. A node is the one thing here that is not crossing anything else, and it reads as an edge only if nothing shows through it. Pressing a bar selects its node, so a stage too small to carry a name can still be reached; `interactive={false}` turns that off.
+- **`SankeyChart.Labels`** — The names, set beside the bars rather than on them — a bar is ten points thick and no name fits in ten points. Also the press targets, padded out where a bar is smaller than one. Under `orientation="vertical"` a name sits above or below its bar, centred, and may run to two lines. A bar shorter than `minHeight` gets no name; those are the ones Legend and Breakdown are for.
 - **`SankeyChart.Tooltip`** — What the selected node carries, anchored beside it and clamped to the plot. In and out are shown separately because they are only the same number when nothing was lost — and a node where they differ is the interesting one on the chart.
 - **`SankeyChart.Skeleton`** — The waiting state: a few plain bars and the ribbons between them, every one the same size. Varied thicknesses would be an invented routing, and nobody can tell an invented one from a real one until it changes under them.
 
@@ -139,6 +145,74 @@ const [active, setActive] = useState<string | null>(null);
 </SankeyChart>
 ```
 
+### Running the flow downwards
+
+`orientation="vertical"` advances the stages down the screen instead of across it. A phone is tall and narrow, so this is the axis with room on it — and a name is bounded by the width of its own bar rather than by the gap between two columns, which is where the truncation came from.
+
+Left unset, `height` is worked out from how many stages the flow turned out to need; set it to override that.
+
+```tsx
+<SankeyChart nodes={sources} links={flows} orientation="vertical">
+  <SankeyChart.Header title="Sessions" value="128,400" />
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+  <SankeyChart.Breakdown />
+</SankeyChart>
+```
+
+### Folding the long tail
+
+A ribbon carries its value in its thickness, so a column of thirty is thirty hairlines — in the data and unreadable on the screen. `collapse` folds the smallest of each column into one bucket before the diagram is drawn, either by a count or by a share of the column, or both.
+
+A column where fewer than two nodes would go in is left alone: one node in a bucket is a rename, not a simplification. The bucket selects like any other node, and `Breakdown` lists what went into it.
+
+```tsx
+// At most six bars in any column, the bucket included.
+<SankeyChart nodes={sources} links={flows} collapse={{ maxPerColumn: 6 }}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+
+// Or by share: anything under 2% of its own column goes in.
+<SankeyChart
+  nodes={sources}
+  links={flows}
+  collapse={{ minShare: 0.02, label: 'Everything else' }}
+>
+  …
+</SankeyChart>
+```
+
+### Reading a stage in full
+
+`SankeyChart.Breakdown` writes the selected stage out underneath the diagram, at the full width of the card: what arrived, what left, and what share of the stage each stream was.
+
+Pressing a row selects the node at the other end of it, so a flow can be walked one stage at a time without going back to the diagram.
+
+```tsx
+<SankeyChart nodes={sources} links={flows} orientation="vertical">
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+  <SankeyChart.Breakdown maxRows={4} onSelectNode={setFocus} />
+</SankeyChart>
+```
+
+### Naming the stages that have no room
+
+`SankeyChart.Labels` drops the name on any bar shorter than `minHeight`, because forty names at that spacing overlap into a grey band that hides the flow behind them. `SankeyChart.Legend` is where those nodes are read instead — every stage gets its full name and a proper press target, and pressing one selects the same node its bar would.
+
+```tsx
+<SankeyChart nodes={sources} links={flows}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+  <SankeyChart.Legend limit={8} />
+</SankeyChart>
+```
+
 ### Rows that cannot be drawn
 
 Flow data is usually joined together from somewhere nobody owns, and it arrives with rows naming a node that is not there, carrying a zero, or closing a loop. A loop has no left-to-right reading at all.
@@ -195,9 +269,11 @@ The placeholder's bars and ribbons are all the same size on purpose. Varied ones
 | `className` | `string` | — |  |
 | `nodes` | `SankeyNode[]` | — | The stages. Order does not decide position — the links do. |
 | `links` | `SankeyLink[]` | — | What travels between them. |
-| `height` | `number` | `240` | How tall the diagram is drawn, in points. The width is the card's, but nothing in a flow says how deep it should be: a diagram of four nodes and one of forty are the same data at two heights, and which of them is right is a question about the screen. |
+| `height` | `number` | — | How tall the diagram is drawn, in points. Under `orientation="vertical"` this is the length of the flow rather than the size of the bars, and left unset it is worked out from how many stages the flow turned out to need. The width is the card's, but nothing in a flow says how deep it should be: a diagram of four nodes and one of forty are the same data at two heights, and which of them is right is a question about the screen. |
 | `nodeWidth` | `number` | `10` | How thick a node's bar is, in points. |
 | `nodePadding` | `number` | `14` | The gap between two nodes in a column, in points. A maximum rather than a promise. A crowded column gives its spacing up before it gives up the height of its bars, because the bar is the reading. |
+| `orientation` | `SankeyOrientation` | `'horizontal'` | Which way the flow runs: `horizontal` from one side to the other, `vertical` from the top of the diagram down to the bottom. This is the axis the *stages* advance along, not the one the bars point along — a vertical flow draws its bars as horizontal rules and stacks them down the screen. Prefer it on a phone: the stages get the long side of the screen, and a name gets the whole width of the card instead of the gap between two columns. |
+| `collapse` | `SankeyCollapse` | — | Folds each column's smallest nodes into one bucket, named `Other` unless you say otherwise. A ribbon carries its value in its thickness, so a column of thirty is thirty hairlines. `maxPerColumn` caps how many nodes a column keeps, the bucket included; `minShare` folds anything under that fraction of its own column. A column where fewer than two nodes would go in is left alone, because one node in a bucket is a rename rather than a simplification. |
 | `align` | `SankeyAlign` | `'justify'` | Which column a node goes in where the flow leaves a choice. |
 | `iterations` | `number` | `6` | Relaxation rounds spent untangling the ribbons. |
 | `curve` | `number` | `0.5` | How far a ribbon bends, `0` for a straight diagonal and `0.5` for an S. |
@@ -208,6 +284,7 @@ The placeholder's bars and ribbons are all the same size on purpose. Varied ones
 | `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
 | `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the selected node's id, or `null` when the selection is cleared. |
 | `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn — ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render, so a banner can be shown and taken away from the same signal. |
+| `accessibilityLabelForLink` | `(link: SankeyLink, index: number) => string` | — | Overrides what a screen reader says for one ribbon. The ribbons are the reading — a node's total says how much passed through it, never where it went — so each one is spoken in its own right, as "source to target, value". Only the rows that could be drawn are offered; a dropped row is reported through `onDropLinks` instead. |
 
 ### SankeyChart.Links
 
@@ -221,8 +298,9 @@ The placeholder's bars and ribbons are all the same size on purpose. Varied ones
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `radius` | `number` | — | Corner radius on a node's bar, in points. |
-| `dimOpacity` | `number` | `0.08` | A bar's opacity when something else is selected. |
+| `radius` | `number` | `2` | Corner radius on a node's bar, in points. |
+| `dimOpacity` | `number` | `0.25` | A bar's opacity when something else is selected. |
+| `interactive` | `boolean` | `true` | Whether pressing a bar selects its node. On by default, because the names are not always there to press. A bar below `SankeyChart.Labels`' `minHeight` has no name and, without this, no way to be selected at all. |
 
 ### SankeyChart.Labels
 
@@ -239,6 +317,24 @@ The placeholder's bars and ribbons are all the same size on purpose. Varied ones
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 | `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+
+### SankeyChart.Breakdown
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+| `maxRows` | `number` | — | How many rows each side shows before stopping. |
+| `onSelectNode` | `(id: string) => void` | — | Fires with the node at the other end of a row, so a breakdown can be walked: press where a stream went and the chart follows it there. |
+| `placeholder` | `string` | `'Select a stage to see what it carries'` | Shown in place of the rows when nothing is selected. |
+
+### SankeyChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `limit` | `number` | — | How many names to show before stopping. |
+| `showShare` | `boolean` | `true` | Show each node's share of the whole flow beside its name. |
 
 ### SankeyChart.Skeleton
 
@@ -267,10 +363,20 @@ Colours come from the theme's five chart tokens, assigned by a node's position i
 
 Under a right-to-left layout the flow is mirrored, so it still reads from where it starts.
 
+### Which way it runs
+
+`orientation` names the axis the *stages* advance along, not the one the bars point along: a vertical flow draws its bars as horizontal rules and stacks them down the screen. `align` swaps with it and settles which row a node goes in rather than which column.
+
+A right-to-left layout mirrors a horizontal flow, so it still reads from where it starts. A vertical one is left alone — it starts at the top in every script, and mirroring it would flip the axis carrying the values rather than the one carrying the order.
+
+### Reaching a stage too small to label
+
+Pressing a bar selects its node, and a bar below the minimum target gets an invisible one over it to be pressed by, so selection never depends on a name being there. A node whose name was dropped stays in the accessibility tree, and every ribbon is offered to a screen reader in its own right as "source to target, value" — a node's total says how much passed through it and never where it went. `accessibilityLabelForLink` changes that wording.
+
 ## Public exports
 
 {/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
 
 **Values:** `SankeyChart`, `useSankeyChart`
 
-**Types:** `SankeyChartProps`, `SankeyChartHandle`, `SankeyChartHeaderProps`, `SankeyChartLinksProps`, `SankeyChartNodesProps`, `SankeyChartLabelsProps`, `SankeyChartTooltipProps`, `SankeyChartSkeletonProps`, `SankeyChartStatus`, `SankeyNode`, `SankeyLink`, `SankeyAlign`
+**Types:** `SankeyChartProps`, `SankeyChartHandle`, `SankeyChartHeaderProps`, `SankeyChartLinksProps`, `SankeyChartNodesProps`, `SankeyChartLabelsProps`, `SankeyChartTooltipProps`, `SankeyChartSkeletonProps`, `SankeyChartBreakdownProps`, `SankeyChartLegendProps`, `SankeyChartFlow`, `SankeyChartStatus`, `SankeyNode`, `SankeyLink`, `SankeyAlign`, `SankeyCollapse`, `SankeyOrientation`

@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1365,
+    "exports": 1370,
     "values": 341,
-    "types": 1024,
+    "types": 1029,
     "modules": 161,
     "components": 134,
     "hooks": 13
@@ -4089,6 +4089,18 @@
             "kind": "type"
           },
           {
+            "name": "SankeyChartBreakdownProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartLegendProps",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyChartFlow",
+            "kind": "type"
+          },
+          {
             "name": "SankeyChartStatus",
             "kind": "type"
           },
@@ -4102,6 +4114,14 @@
           },
           {
             "name": "SankeyAlign",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyCollapse",
+            "kind": "type"
+          },
+          {
+            "name": "SankeyOrientation",
             "kind": "type"
           }
         ]

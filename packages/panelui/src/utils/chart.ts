@@ -1174,6 +1174,46 @@ export function ribbonPath(
  * is the S that reads as one continuous flow, and `0` gives a straight
  * diagonal.
  */
+/**
+ * The same ribbon, running down the screen instead of across it.
+ *
+ * Written out rather than produced by swapping the arguments of `flowPath`,
+ * because the coordinates in a path string are ordered and a worklet cannot
+ * reorder them after the fact without building the string twice. The shape is
+ * identical, reflected about the diagonal: the ends stay horizontal so a
+ * ribbon still meets the flat side of a node, and `curve` reaches down the run
+ * rather than along it.
+ */
+export function flowPathVertical(
+  y0: number,
+  cx0: number,
+  y1: number,
+  cx1: number,
+  thickness: number,
+  curve: number
+): string {
+  'worklet';
+  if (!(thickness > 0)) return '';
+
+  const half = thickness / 2;
+  const leftStart = cx0 - half;
+  const leftEnd = cx1 - half;
+  const rightStart = cx0 + half;
+  const rightEnd = cx1 + half;
+
+  const run = y1 - y0;
+  const near = y0 + run * curve;
+  const far = y1 - run * curve;
+
+  return (
+    `M${leftStart},${y0}` +
+    `C${leftStart},${near},${leftEnd},${far},${leftEnd},${y1}` +
+    `L${rightEnd},${y1}` +
+    `C${rightEnd},${far},${rightStart},${near},${rightStart},${y0}` +
+    `Z`
+  );
+}
+
 export function flowPath(
   x0: number,
   cy0: number,

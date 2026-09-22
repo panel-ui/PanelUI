@@ -1122,10 +1122,15 @@ export {
   type SankeyChartLabelsProps,
   type SankeyChartTooltipProps,
   type SankeyChartSkeletonProps,
+  type SankeyChartBreakdownProps,
+  type SankeyChartLegendProps,
+  type SankeyChartFlow,
   type SankeyChartStatus,
   type SankeyNode,
   type SankeyLink,
   type SankeyAlign,
+  type SankeyCollapse,
+  type SankeyOrientation,
 } from './components/sankey-chart';
 export {
   ScatterChart,

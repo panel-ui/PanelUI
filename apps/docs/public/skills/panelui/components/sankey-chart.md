@@ -12,21 +12,25 @@ import { SankeyChart } from 'panelui-native';
 
 ```tsx
 <SankeyChart nodes={…} links={…}>
-  <SankeyChart.Header />    {/* the strip above the diagram */}
-  <SankeyChart.Skeleton />  {/* the plain shape it waits behind */}
-  <SankeyChart.Links />     {/* the ribbons */}
-  <SankeyChart.Nodes />     {/* the bars they run between */}
-  <SankeyChart.Labels />    {/* the names, and the press targets */}
-  <SankeyChart.Tooltip />   {/* what the selected node carries */}
+  <SankeyChart.Header />     {/* the strip above the diagram */}
+  <SankeyChart.Skeleton />   {/* the plain shape it waits behind */}
+  <SankeyChart.Links />      {/* the ribbons */}
+  <SankeyChart.Nodes />      {/* the bars they run between */}
+  <SankeyChart.Labels />     {/* the names, and the press targets */}
+  <SankeyChart.Tooltip />    {/* what the selected node carries */}
+  <SankeyChart.Legend />     {/* every stage named, under the diagram */}
+  <SankeyChart.Breakdown />  {/* the selected stage, written out in full */}
 </SankeyChart>
 ```
 
 ### Parts
 
+- `SankeyChart.Breakdown` — What the selected stage carries, listed underneath at the full width of the card: where each stream came from, where each one went, and what share of the stage it was. In and out are separate because they are only the same number when nothing was lost, and a stage where they differ is the interesting one. Pressing a row selects the node at the other end, so a flow can be walked one stage at a time.
+- `SankeyChart.Legend` — Every stage named, under the diagram, with its share of the largest stage. Pressing one selects the same node its bar would and fades the rest. This is how the nodes too small to carry a name are read and reached — on the chart they are a sliver, here they are a full name and a proper target.
 - `SankeyChart.Header` — The strip above the diagram — what the flow is of, what it totals, and room for a control. The value is not derived, because the formatting is not the chart's to guess: 128400 is a count, a currency or a rate depending on what was routed.
 - `SankeyChart.Links` — The ribbons. Drawn before the bars, so a bar sits on top of the flows that meet it and keeps a clean edge. Translucent at rest, because ribbons cross and an opaque one hides whichever passes under it.
-- `SankeyChart.Nodes` — The bars the ribbons run between, drawn solid. A node is the one thing here that is not crossing anything else, and it reads as an edge only if nothing shows through it.
-- `SankeyChart.Labels` — The names, set beside the bars rather than on them — a bar is ten points thick and no name fits in ten points. Also the press targets: a node worth one percent of the flow is a sliver nobody can hit, so the row it sits in is the target, padded out where the sliver is smaller than one.
+- `SankeyChart.Nodes` — The bars the ribbons run between, drawn solid. A node is the one thing here that is not crossing anything else, and it reads as an edge only if nothing shows through it. Pressing a bar selects its node, so a stage too small to carry a name can still be reached; `interactive={false}` turns that off.
+- `SankeyChart.Labels` — The names, set beside the bars rather than on them — a bar is ten points thick and no name fits in ten points. Also the press targets, padded out where a bar is smaller than one. Under `orientation="vertical"` a name sits above or below its bar, centred, and may run to two lines. A bar shorter than `minHeight` gets no name; those are the ones Legend and Breakdown are for.
 - `SankeyChart.Tooltip` — What the selected node carries, anchored beside it and clamped to the plot. In and out are shown separately because they are only the same number when nothing was lost — and a node where they differ is the interesting one on the chart.
 - `SankeyChart.Skeleton` — The waiting state: a few plain bars and the ribbons between them, every one the same size. Varied thicknesses would be an invented routing, and nobody can tell an invented one from a real one until it changes under them.
 
@@ -41,9 +45,11 @@ Extends `ViewProps, ChartAccessibilityProps<SankeyNode>`.
 | `className` | `string` | — | — |
 | `nodes` | `SankeyNode[]` | **required** | The stages. Order does not decide position — the links do. |
 | `links` | `SankeyLink[]` | **required** | What travels between them. |
-| `height` | `number` | `240` | How tall the diagram is drawn, in points. The width is the card's, but nothing in a flow says how deep it should be: a diagram of four nodes and one of forty are the same data at two heights, and which of them is right is a question about the screen. |
+| `height` | `number` | — | How tall the diagram is drawn, in points. Under `orientation="vertical"` this is the length of the flow rather than the size of the bars, and left unset it is worked out from how many stages the flow turned out to need. The width is the card's, but nothing in a flow says how deep it should be: a diagram of four nodes and one of forty are the same data at two heights, and which of them is right is a question about the screen. |
 | `nodeWidth` | `number` | `10` | How thick a node's bar is, in points. |
 | `nodePadding` | `number` | `14` | The gap between two nodes in a column, in points. A maximum rather than a promise. A crowded column gives its spacing up before it gives up the height of its bars, because the bar is the reading. |
+| `orientation` | `SankeyOrientation` | `horizontal` | Which way the flow runs: `horizontal` from one side to the other, `vertical` from the top of the diagram down to the bottom. This is the axis the *stages* advance along, not the one the bars point along — a vertical flow draws its bars as horizontal rules and stacks them down the screen. Prefer it on a phone: the stages get the long side of the screen, and a name gets the whole width of the card instead of the gap between two columns. |
+| `collapse` | `SankeyCollapse` | — | Folds each column's smallest nodes into one bucket, named `Other` unless you say otherwise. A ribbon carries its value in its thickness, so a column of thirty is thirty hairlines. `maxPerColumn` caps how many nodes a column keeps, the bucket included; `minShare` folds anything under that fraction of its own column. A column where fewer than two nodes would go in is left alone, because one node in a bucket is a rename rather than a simplification. |
 | `align` | `SankeyAlign` | `justify` | Which column a node goes in where the flow leaves a choice. |
 | `iterations` | `number` | `6` | Relaxation rounds spent untangling the ribbons. |
 | `curve` | `number` | `0.5` | How far a ribbon bends, `0` for a straight diagonal and `0.5` for an S. |
@@ -54,6 +60,7 @@ Extends `ViewProps, ChartAccessibilityProps<SankeyNode>`.
 | `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
 | `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the selected node's id, or `null` when the selection is cleared. |
 | `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn — ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render, so a banner can be shown and taken away from the same signal. |
+| `accessibilityLabelForLink` | `(link: SankeyLink, index: number) => string` | — | Overrides what a screen reader says for one ribbon. The ribbons are the reading — a node's total says how much passed through it, never where it went — so each one is spoken in its own right, as "source to target, value". Only the rows that could be drawn are offered; a dropped row is reported through `onDropLinks` instead. |
 | `children` | `ReactNode` | — | — |
 
 #### `SankeyChartLinksProps`
@@ -68,8 +75,9 @@ Extends `ViewProps, ChartAccessibilityProps<SankeyNode>`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `radius` | `number` | — | Corner radius on a node's bar, in points. |
+| `radius` | `number` | `2` | Corner radius on a node's bar, in points. |
 | `dimOpacity` | `number` | `0.08` | A bar's opacity when something else is selected. |
+| `interactive` | `boolean` | `true` | Whether pressing a bar selects its node. On by default, because the names are not always there to press. A bar below `SankeyChart.Labels`' `minHeight` has no name and, without this, no way to be selected at all. |
 
 #### `SankeyChartLabelsProps`
 
@@ -86,6 +94,28 @@ Extends `ViewProps, ChartAccessibilityProps<SankeyNode>`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 | `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+
+#### `SankeyChartBreakdownProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+| `maxRows` | `number` | — | How many rows each side shows before stopping. |
+| `onSelectNode` | `(id: string) => void` | — | Fires with the node at the other end of a row, so a breakdown can be walked: press where a stream went and the chart follows it there. |
+| `placeholder` | `string` | `Select a stage to see what it carries` | Shown in place of the rows when nothing is selected. |
+
+#### `SankeyChartLegendProps`
+
+Extends `ViewProps`.
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+| `limit` | `number` | — | How many names to show before stopping. |
+| `showShare` | `boolean` | `true` | Show each node's share of the whole flow beside its name. |
 
 #### `SankeyChartSkeletonProps`
 
@@ -140,6 +170,16 @@ The imperative handle carries `replay`, for a control that re-runs the entrance.
 Colours come from the theme's five chart tokens, assigned by a node's position in your array and stepped once the palette runs out. A ribbon takes its source node's colour, so a stream is the colour of where it came from; set `color` on a link to override that, or on a node to fix the node and everything leaving it.
 
 Under a right-to-left layout the flow is mirrored, so it still reads from where it starts.
+
+### Which way it runs
+
+`orientation` names the axis the *stages* advance along, not the one the bars point along: a vertical flow draws its bars as horizontal rules and stacks them down the screen. `align` swaps with it and settles which row a node goes in rather than which column.
+
+A right-to-left layout mirrors a horizontal flow, so it still reads from where it starts. A vertical one is left alone — it starts at the top in every script, and mirroring it would flip the axis carrying the values rather than the one carrying the order.
+
+### Reaching a stage too small to label
+
+Pressing a bar selects its node, and a bar below the minimum target gets an invisible one over it to be pressed by, so selection never depends on a name being there. A node whose name was dropped stays in the accessibility tree, and every ribbon is offered to a screen reader in its own right as "source to target, value" — a node's total says how much passed through it and never where it went. `accessibilityLabelForLink` changes that wording.
 
 ---
 

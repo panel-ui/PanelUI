@@ -88,13 +88,29 @@ import {
   type ChartAccessibilityProps,
 } from '../../primitives/chart-accessibility';
 import { Text } from '../../primitives/text';
-import { compactNumber, flowPath, seriesColorAt, useSeriesColor } from '../../utils/chart';
+import {
+  compactNumber,
+  flowPath,
+  flowPathVertical,
+  seriesColorAt,
+  useSeriesColor,
+} from '../../utils/chart';
 import { cn } from '../../utils/cn';
 import { useDirection } from '../../hooks/use-direction';
 import { useSkeletonHandoff } from '../../hooks/use-skeleton-handoff';
-import { sankeyLayout, type SankeyAlign, type SankeyLayout } from './sankey-layout';
+import {
+  sankeyLayout,
+  transposeLayout,
+  type SankeyAlign,
+  type SankeyCollapse,
+  type SankeyLayout,
+  type SankeyLayoutNode,
+} from './sankey-layout';
 
-export type { SankeyAlign } from './sankey-layout';
+export type { SankeyAlign, SankeyCollapse } from './sankey-layout';
+
+/** Which way the flow runs. */
+export type SankeyOrientation = 'horizontal' | 'vertical';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
@@ -102,6 +118,16 @@ const AnimatedG = Animated.createAnimatedComponent(G);
 
 /** How tall the diagram is drawn when the caller does not say. */
 const DEFAULT_HEIGHT = 240;
+
+/**
+ * How much depth one stage of an upright flow is given when nothing says.
+ *
+ * A vertical diagram's height is the length of the flow, so unlike the
+ * horizontal case it grows with the data: four stages in the height of three
+ * is a set of bars with no room for a ribbon between them. Enough for a bar,
+ * the names either side of it, and a run of ribbon long enough to read as one.
+ */
+const VERTICAL_STAGE = 132;
 
 /** How thick a node's bar is. Thin enough to read as an edge the flow meets. */
 const DEFAULT_NODE_WIDTH = 10;
@@ -210,6 +236,15 @@ interface SankeyChartContextValue {
   activeId: string | null;
   setActiveId: (id: string | null) => void;
   labelFor: (id: string) => string;
+  orientation: SankeyOrientation;
+  /**
+   * The caller's datum for a laid-out node, or a stand-in for one the layout
+   * invented. `collapse` produces bars nobody wrote a row for, and every part
+   * that reaches for a node's own data would otherwise drop them silently —
+   * which, for the bucket holding a column's whole tail, is the one bar on the
+   * diagram that most needs its name.
+   */
+  datumFor: (node: SankeyLayoutNode) => SankeyNode;
   /**
    * How `SankeyChart.Labels` tells the chart which names it actually drew.
    *
@@ -232,35 +267,95 @@ function useChart(component: string): SankeyChartContextValue {
   return context;
 }
 
+/** One end of a stream meeting the selected node. */
+export interface SankeyChartFlow {
+  /** The node at the other end. */
+  id: string;
+  /** Its name, already resolved. */
+  label: string;
+  /** What travels between the two. */
+  value: number;
+  /** That value as a fraction of the selected node's total, `0` to `1`. */
+  share: number;
+  /** The other node's colour, for a swatch beside its name. */
+  color: string;
+}
+
 /** The selected node and what runs through it, for something drawn inside the chart. */
 export function useSankeyChart() {
-  const { nodes, layout, activeId } = useChart('useSankeyChart');
+  const { nodes, layout, activeId, colors, labelFor } = useChart('useSankeyChart');
 
   return useMemo(() => {
     const placed = activeId ? layout.nodes.find((node) => node.id === activeId) : undefined;
     if (!placed) {
-      return { activeId: null, activeNode: null, activeValue: 0, incoming: 0, outgoing: 0 };
+      return {
+        activeId: null,
+        activeNode: null,
+        activeValue: 0,
+        incoming: 0,
+        outgoing: 0,
+        sources: [] as SankeyChartFlow[],
+        targets: [] as SankeyChartFlow[],
+        collapsed: null as string[] | null,
+      };
     }
 
     const position = layout.nodes.indexOf(placed);
     let incoming = 0;
     let outgoing = 0;
+    const sources: SankeyChartFlow[] = [];
+    const targets: SankeyChartFlow[] = [];
+
+    const flow = (at: number, value: number): SankeyChartFlow | null => {
+      const other = layout.nodes[at];
+      if (!other) return null;
+      return {
+        id: other.id,
+        label: labelFor(other.id),
+        value,
+        // Against what passes through the node rather than against the side's
+        // own total, so in and out are read on one scale — at a node that
+        // loses some of what it received, two totals that differ is the point.
+        share: placed.value > 0 ? value / placed.value : 0,
+        color: colors[at] ?? colors[0] ?? '#3b82f6',
+      };
+    };
+
     for (const link of layout.links) {
-      if (link.target === position) incoming += link.value;
-      if (link.source === position) outgoing += link.value;
+      if (link.target === position) {
+        incoming += link.value;
+        const row = flow(link.source, link.value);
+        if (row) sources.push(row);
+      }
+      if (link.source === position) {
+        outgoing += link.value;
+        const row = flow(link.target, link.value);
+        if (row) targets.push(row);
+      }
     }
+
+    // Largest first: the reason to open a breakdown is to find out what the
+    // biggest part of it was.
+    sources.sort((a, b) => b.value - a.value);
+    targets.sort((a, b) => b.value - a.value);
 
     return {
       activeId,
-      activeNode: nodes.find((node) => node.id === activeId) ?? null,
+      activeNode: nodes[placed.index] ?? { id: placed.id },
       /** What passes through it — what the bar's height is drawn from. */
       activeValue: placed.value,
       /** What arrives. Zero at a node the flow starts from. */
       incoming,
       /** What leaves. Zero at a node the flow ends at. */
       outgoing,
+      /** Where it came from, largest first. */
+      sources,
+      /** Where it went, largest first. */
+      targets,
+      /** The ids `collapse` folded in, on a bucket. `null` on every other node. */
+      collapsed: placed.collapsed ?? null,
     };
-  }, [nodes, layout, activeId]);
+  }, [nodes, layout, activeId, colors, labelFor]);
 }
 
 export interface SankeyChartProps
@@ -272,7 +367,9 @@ export interface SankeyChartProps
   /** What travels between them. */
   links: SankeyLink[];
   /**
-   * How tall the diagram is drawn, in points.
+   * How tall the diagram is drawn, in points. Under `orientation="vertical"`
+   * this is the length of the flow rather than the size of the bars, and left
+   * unset it is worked out from how many stages the flow turned out to need.
    *
    * The width is the card's, but nothing in a flow says how deep it should be:
    * a diagram of four nodes and one of forty are the same data at two heights,
@@ -288,6 +385,28 @@ export interface SankeyChartProps
    * before it gives up the height of its bars, because the bar is the reading.
    */
   nodePadding?: number;
+  /**
+   * Which way the flow runs: `horizontal` from one side to the other,
+   * `vertical` from the top of the diagram down to the bottom.
+   *
+   * This is the axis the *stages* advance along, not the one the bars point
+   * along — a vertical flow draws its bars as horizontal rules and stacks them
+   * down the screen. Prefer it on a phone: the stages get the long side of the
+   * screen, and a name gets the whole width of the card instead of the gap
+   * between two columns.
+   */
+  orientation?: SankeyOrientation;
+  /**
+   * Folds each column's smallest nodes into one bucket, named `Other` unless
+   * you say otherwise.
+   *
+   * A ribbon carries its value in its thickness, so a column of thirty is
+   * thirty hairlines. `maxPerColumn` caps how many nodes a column keeps, the
+   * bucket included; `minShare` folds anything under that fraction of its own
+   * column. A column where fewer than two nodes would go in is left alone,
+   * because one node in a bucket is a rename rather than a simplification.
+   */
+  collapse?: SankeyCollapse;
   /** Which column a node goes in where the flow leaves a choice. */
   align?: SankeyAlign;
   /** Relaxation rounds spent untangling the ribbons. */
@@ -335,9 +454,11 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       className,
       nodes,
       links,
-      height = DEFAULT_HEIGHT,
+      height: heightProp,
       nodeWidth = DEFAULT_NODE_WIDTH,
       nodePadding = DEFAULT_NODE_PADDING,
+      orientation = 'horizontal',
+      collapse,
       align = 'justify',
       iterations = DEFAULT_ITERATIONS,
       curve = CURVE,
@@ -375,26 +496,61 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       [controlled, onActiveIdChange]
     );
 
-    const layout = useMemo(
-      () =>
-        sankeyLayout(nodes, links, {
-          width,
-          height,
-          nodeWidth,
-          nodePadding,
-          align,
-          iterations,
-        }),
-      [nodes, links, width, height, nodeWidth, nodePadding, align, iterations]
-    );
+    const upright = orientation === 'horizontal';
+
+    /*
+     * How many stages the flow needs, for the case where the height has to be
+     * worked out from it. Solved with no relaxation rounds and in an arbitrary
+     * box, because the column count falls out of the links alone — the
+     * arrangement inside the columns is exactly the part being skipped.
+     */
+    const stages = useMemo(() => {
+      if (upright || heightProp !== undefined) return 0;
+      return sankeyLayout(nodes, links, {
+        width: 1000,
+        height: 1000,
+        nodeWidth,
+        nodePadding,
+        align,
+        iterations: 0,
+        collapse,
+      }).columns;
+    }, [upright, heightProp, nodes, links, nodeWidth, nodePadding, align, collapse]);
+
+    const height =
+      heightProp ??
+      (upright ? DEFAULT_HEIGHT : Math.max(DEFAULT_HEIGHT, stages * VERTICAL_STAGE));
+
+    const layout = useMemo(() => {
+      /*
+       * An upright flow is solved in the box as given. A vertical one is
+       * solved in that box turned on its side and then turned back, so the
+       * stages advance down the screen — one set of maths, read the other way.
+       */
+      const solved = sankeyLayout(nodes, links, {
+        width: upright ? width : height,
+        height: upright ? height : width,
+        nodeWidth,
+        nodePadding,
+        align,
+        iterations,
+        collapse,
+      });
+      return upright ? solved : transposeLayout(solved);
+    }, [nodes, links, width, height, nodeWidth, nodePadding, align, iterations, collapse, upright]);
 
     /*
      * A flow reads from where it starts, and under a right-to-left layout that
      * is the right-hand edge. Mirroring the finished layout rather than laying
      * it out backwards keeps one set of maths under both directions — the
      * arrangement is identical, it is only read from the other end.
+     *
+     * Only where the flow runs across the screen. A vertical one starts at the
+     * top in every script, and mirroring it would flip the axis carrying the
+     * values rather than the one carrying the order — the same diagram with
+     * its bars reflected, for no reason a reader could name.
      */
-    const mirrored = direction === 'rtl';
+    const mirrored = direction === 'rtl' && upright;
     const placed = useMemo<SankeyLayout>(() => {
       if (!mirrored || !layout.nodes.length) return layout;
       return {
@@ -436,6 +592,11 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
       const names = new Map(nodes.map((node) => [node.id, node.label ?? node.id]));
       return (id: string) => names.get(id) ?? id;
     }, [nodes]);
+
+    const datumFor = useMemo(
+      () => (node: SankeyLayoutNode) => nodes[node.index] ?? { id: node.id },
+      [nodes]
+    );
 
     /*
      * One clock, with each column given the slice of it that it draws in, so
@@ -531,6 +692,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
         setActiveId,
         labelFor,
         reportLabelled,
+        orientation,
+        datumFor,
       }),
       [
         nodes,
@@ -547,6 +710,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps>(
         setActiveId,
         labelFor,
         reportLabelled,
+        orientation,
+        datumFor,
       ]
     );
 
@@ -696,17 +861,25 @@ function LinkAccessibilityData({
       {layout.links.map((link) => {
         // `input` points back at the caller's row; `index` is the drawn order,
         // which has closed up behind every row that could not be drawn.
-        const datum = links[link.input];
+        // A ribbon that `collapse` merged has no single row of the caller's
+        // behind it, so there is nothing to hand an override — it still gets
+        // spoken, in the chart's own words.
+        const datum = link.input >= 0 ? links[link.input] : undefined;
         const source = layout.nodes[link.source];
         const target = layout.nodes[link.target];
-        if (!datum || !source || !target) return null;
+        if (!source || !target) return null;
 
         const label =
-          labelForLink?.(datum, link.input) ??
+          (datum ? labelForLink?.(datum, link.input) : undefined) ??
           `${labelFor(source.id)} to ${labelFor(target.id)}, ${compactNumber(link.value)}`;
 
         return (
-          <View key={`${source.id}-${target.id}-${link.input}`} accessible accessibilityRole="text" accessibilityLabel={label} />
+          <View
+            key={`${source.id}-${target.id}-${link.index}`}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={label}
+          />
         );
       })}
     </View>
@@ -753,10 +926,12 @@ function SankeyChartLinks({
   activeOpacity = LINK_ACTIVE_OPACITY,
   dimOpacity = LINK_DIM_OPACITY,
 }: SankeyChartLinksProps) {
-  const { layout, links, colors, curve, reveal, windows, status, activeId } =
+  const { layout, links, colors, curve, reveal, windows, status, activeId, orientation } =
     useChart('SankeyChart.Links');
 
   if (status === 'loading' || !layout.links.length) return null;
+
+  const upright = orientation === 'horizontal';
 
   return (
     <G>
@@ -771,13 +946,21 @@ function SankeyChartLinks({
         return (
           <Ribbon
             key={link.index}
-            x0={source.x1}
-            cy0={link.y0}
-            x1={target.x0}
-            cy1={link.y1}
+            // Where the ribbon leaves and arrives, along whichever axis the
+            // stages advance on; `link.y0`/`y1` are already across it.
+            from={upright ? source.x1 : source.y1}
+            cFrom={link.y0}
+            to={upright ? target.x0 : target.y0}
+            cTo={link.y1}
+            upright={upright}
             thickness={link.width}
             curve={curve}
-            fill={links[link.input]?.color ?? colors[link.source] ?? colors[0] ?? '#3b82f6'}
+            fill={
+              (link.input >= 0 ? links[link.input]?.color : undefined) ??
+              colors[link.source] ??
+              colors[0] ??
+              '#3b82f6'
+            }
             reveal={reveal}
             window={window}
             opacity={
@@ -793,29 +976,31 @@ SankeyChartLinks.displayName = 'SankeyChart.Links';
 SankeyChartLinks.slot = 'svg' as const;
 
 function Ribbon({
-  x0,
-  cy0,
-  x1,
-  cy1,
+  from: edgeFrom,
+  cFrom: centreFrom,
+  to: edgeTo,
+  cTo: centreTo,
   thickness,
   curve,
   fill,
   reveal,
   window,
   opacity,
+  upright,
 }: {
-  x0: number;
-  cy0: number;
-  x1: number;
-  cy1: number;
+  from: number;
+  cFrom: number;
+  to: number;
+  cTo: number;
   thickness: number;
   curve: number;
   fill: string;
   reveal: SharedValue<number>;
   window: { from: number; to: number };
   opacity: number;
+  upright: boolean;
 }) {
-  const { from, to } = window;
+  const { from: windowFrom, to: windowTo } = window;
   const settled = useDerivedValue<number>(() =>
     withTiming(opacity, { duration: SELECT_DURATION })
   );
@@ -826,9 +1011,11 @@ function Ribbon({
      * one edge, so it stays anchored where it meets the node instead of
      * sliding down it as it arrives.
      */
-    const grown = thickness * progress(reveal.value, from, to);
+    const grown = thickness * progress(reveal.value, windowFrom, windowTo);
     return {
-      d: flowPath(x0, cy0, x1, cy1, grown, curve),
+      d: upright
+        ? flowPath(edgeFrom, centreFrom, edgeTo, centreTo, grown, curve)
+        : flowPathVertical(edgeFrom, centreFrom, edgeTo, centreTo, grown, curve),
       fillOpacity: settled.value,
     };
   });
@@ -863,10 +1050,12 @@ function SankeyChartNodes({
   dimOpacity = 0.25,
   interactive = true,
 }: SankeyChartNodesProps) {
-  const { layout, colors, reveal, windows, status, activeId, setActiveId } =
+  const { layout, colors, reveal, windows, status, activeId, setActiveId, orientation } =
     useChart('SankeyChart.Nodes');
 
   if (status === 'loading' || !layout.nodes.length) return null;
+
+  const upright = orientation === 'horizontal';
 
   return (
     <G>
@@ -876,10 +1065,13 @@ function SankeyChartNodes({
         return (
           <NodeBar
             key={node.id}
-            x={node.x0}
-            width={node.x1 - node.x0}
-            y0={node.y0}
-            y1={node.y1}
+            // The bar is `nodeWidth` across the flow and its value along it,
+            // so which pair of edges is which swaps with the orientation.
+            thin0={upright ? node.x0 : node.y0}
+            thin1={upright ? node.x1 : node.y1}
+            long0={upright ? node.y0 : node.x0}
+            long1={upright ? node.y1 : node.x1}
+            upright={upright}
             radius={radius}
             fill={colors[index] ?? '#3b82f6'}
             reveal={reveal}
@@ -898,10 +1090,11 @@ SankeyChartNodes.displayName = 'SankeyChart.Nodes';
 SankeyChartNodes.slot = 'svg' as const;
 
 function NodeBar({
-  x,
-  width,
-  y0,
-  y1,
+  thin0,
+  thin1,
+  long0,
+  long1,
+  upright,
   radius,
   fill,
   reveal,
@@ -909,10 +1102,13 @@ function NodeBar({
   opacity,
   onPress,
 }: {
-  x: number;
-  width: number;
-  y0: number;
-  y1: number;
+  /** The bar's leading edge across the flow — `nodeWidth` separates the two. */
+  thin0: number;
+  thin1: number;
+  /** And along it, which is where the value is. */
+  long0: number;
+  long1: number;
+  upright: boolean;
   radius: number;
   fill: string;
   reveal: SharedValue<number>;
@@ -921,8 +1117,9 @@ function NodeBar({
   onPress?: () => void;
 }) {
   const { from, to } = window;
-  const extent = y1 - y0;
-  const centre = (y0 + y1) / 2;
+  const extent = long1 - long0;
+  const centre = (long0 + long1) / 2;
+  const thickness = thin1 - thin0;
   const settled = useDerivedValue<number>(() =>
     withTiming(opacity, { duration: SELECT_DURATION })
   );
@@ -930,19 +1127,13 @@ function NodeBar({
   const animatedProps = useAnimatedProps(() => {
     // Grown about its centre, to match the ribbons meeting it.
     const grown = extent * progress(reveal.value, from, to);
-    return { y: centre - grown / 2, height: grown, opacity: settled.value };
+    const near = centre - grown / 2;
+    return upright
+      ? { y: near, height: grown, x: thin0, width: thickness, opacity: settled.value }
+      : { x: near, width: grown, y: thin0, height: thickness, opacity: settled.value };
   });
 
-  const bar = (
-    <AnimatedRect
-      animatedProps={animatedProps}
-      x={x}
-      width={width}
-      rx={radius}
-      fill={fill}
-      onPress={onPress}
-    />
-  );
+  const bar = <AnimatedRect animatedProps={animatedProps} rx={radius} fill={fill} onPress={onPress} />;
 
   if (!onPress || extent >= MIN_TARGET) return bar;
 
@@ -957,13 +1148,16 @@ function NodeBar({
    * rather than beside it.
    */
   const target = Math.max(extent, MIN_TARGET);
+  const thinCentre = (thin0 + thin1) / 2;
+  const across = { from: thinCentre - MIN_TARGET / 2, size: MIN_TARGET };
+  const along = { from: centre - target / 2, size: target };
   return (
     <>
       <Rect
-        x={x + width / 2 - MIN_TARGET / 2}
-        width={MIN_TARGET}
-        y={centre - target / 2}
-        height={target}
+        x={upright ? across.from : along.from}
+        width={upright ? across.size : along.size}
+        y={upright ? along.from : across.from}
+        height={upright ? along.size : across.size}
         fill="transparent"
         onPress={onPress}
       />
@@ -1012,10 +1206,29 @@ function SankeyChartLabels({
   showValue = false,
   minHeight = 6,
 }: SankeyChartLabelsProps) {
-  const { layout, nodes, width, height, status, activeId, setActiveId, labelFor, reportLabelled } =
-    useChart('SankeyChart.Labels');
+  const {
+    layout,
+    width,
+    height,
+    status,
+    activeId,
+    setActiveId,
+    labelFor,
+    reportLabelled,
+    orientation,
+    datumFor,
+  } = useChart('SankeyChart.Labels');
 
+  const upright = orientation === 'horizontal';
   const drawing = status !== 'loading' && layout.nodes.length > 0;
+
+  /*
+   * The bar's size along the axis carrying the values. That is its height in
+   * an upright flow and its width in a vertical one, and it is what `minHeight`
+   * is measured against either way — the bar is the same bar, turned.
+   */
+  const extentOf = (node: SankeyLayoutNode) =>
+    upright ? node.y1 - node.y0 : node.x1 - node.x0;
 
   /*
    * Which names are actually on the chart, told to the chart so its semantic
@@ -1025,11 +1238,10 @@ function SankeyChartLabels({
   const drawn = useMemo(
     () =>
       drawing
-        ? layout.nodes
-            .filter((node) => node.y1 - node.y0 >= minHeight && nodes[node.index])
-            .map((node) => node.id)
+        ? layout.nodes.filter((node) => extentOf(node) >= minHeight).map((node) => node.id)
         : null,
-    [drawing, layout.nodes, nodes, minHeight]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [drawing, layout.nodes, minHeight, upright]
   );
 
   useEffect(() => {
@@ -1042,57 +1254,80 @@ function SankeyChartLabels({
   const format = formatValue ?? ((value: number) => compactNumber(value));
 
   /*
-   * Where the neighbouring columns sit, in points across the plot.
+   * Where the neighbouring stages sit, along the axis the flow advances on.
    *
-   * A name's row needs a bound on both sides or it runs the width of the chart
-   * and covers every row it crosses — and since the rows are absolutely
-   * positioned siblings, the last one drawn takes the touch. That is a tap on
-   * one name selecting a node two columns away, which is worse than a small
-   * target because it is wrong rather than merely hard.
+   * A name's box needs a bound on both sides or it runs the length of the
+   * chart and covers every stage it crosses — and since the boxes are
+   * absolutely positioned siblings, the last one drawn takes the touch. That
+   * is a tap on one name selecting a node two stages away, which is worse than
+   * a small target because it is wrong rather than merely hard.
    */
+  const alongStart = (node: SankeyLayoutNode) => (upright ? node.x0 : node.y0);
+  const alongEnd = (node: SankeyLayoutNode) => (upright ? node.x1 : node.y1);
+  const span = upright ? width : height;
+
   const edges: number[] = [];
   for (const placed of layout.nodes) {
-    if (!edges.includes(placed.x0)) edges.push(placed.x0);
-    if (!edges.includes(placed.x1)) edges.push(placed.x1);
+    if (!edges.includes(alongStart(placed))) edges.push(alongStart(placed));
+    if (!edges.includes(alongEnd(placed))) edges.push(alongEnd(placed));
   }
   edges.sort((a, b) => a - b);
-  const nextEdge = (x: number) => edges.find((edge) => edge > x + 1e-6);
-  const previousEdge = (x: number) => {
+  const nextEdge = (at: number) => edges.find((edge) => edge > at + 1e-6);
+  const previousEdge = (at: number) => {
     let found: number | undefined;
-    for (const edge of edges) if (edge < x - 1e-6) found = edge;
+    for (const edge of edges) if (edge < at - 1e-6) found = edge;
     return found;
   };
 
   return (
     <>
       {layout.nodes.map((node) => {
-        const datum = nodes[node.index];
-        if (!datum) return null;
-
-        const extent = node.y1 - node.y0;
+        const extent = extentOf(node);
         if (extent < minHeight) return null;
 
         /*
          * Which side the name goes on is decided by where the bar actually is,
-         * not by which column it belongs to. Under a right-to-left layout the
-         * finished diagram is mirrored, so the last column is the one on the
-         * left — reading the side off the column number there puts every name
+         * not by which stage it belongs to. Under a right-to-left layout the
+         * finished diagram is mirrored, so the last stage is the one on the
+         * left — reading the side off the stage number there puts every name
          * in a box of zero width and the chart loses all of them.
          */
-        const after = nextEdge(node.x1);
-        const before = previousEdge(node.x0);
+        const after = nextEdge(alongEnd(node));
+        const before = previousEdge(alongStart(node));
         const trailing = after === undefined;
         const name = labelFor(node.id);
-        const value = format(node.value, datum);
+        const value = format(node.value, datumFor(node));
         const selected = activeId === node.id;
 
         /*
-         * A sliver's row is padded out to a real target rather than drawn
-         * taller — growing the row would push it over its neighbours, and two
-         * overlapping targets are worse than a small one.
+         * The box the name sits in, along the flow: the half of the gap
+         * nearest its own bar, so the name leaving one stage and the name
+         * arriving at the next can share the space between them without
+         * sharing a touch target.
          */
+        const gap = trailing
+          ? (() => {
+              const from = before === undefined ? 0 : (before + alongStart(node)) / 2;
+              return { from, size: Math.max(0, alongStart(node) - LABEL_GAP - from) };
+            })()
+          : (() => {
+              const from = alongEnd(node) + LABEL_GAP;
+              const to = after === undefined ? span : (alongEnd(node) + after) / 2;
+              return { from, size: Math.max(0, to - from) };
+            })();
+
+        /*
+         * And across it: the bar's own run, clamped inside the plot. A sliver
+         * is padded out to a real target rather than drawn longer — growing
+         * the box would push it over its neighbours, and two overlapping
+         * targets are worse than one small one.
+         */
+        const crossSpan = upright ? height : width;
         const slack = Math.max(0, (MIN_TARGET - extent) / 2);
-        const top = Math.max(0, Math.min(node.y0, height - extent));
+        const cross = Math.max(
+          0,
+          Math.min(upright ? node.y0 : node.x0, crossSpan - extent)
+        );
 
         return (
           <Pressable
@@ -1100,32 +1335,34 @@ function SankeyChartLabels({
             accessibilityRole="button"
             accessibilityState={{ selected }}
             accessibilityLabel={`${name}, ${value}`}
-            hitSlop={{ top: slack, bottom: slack }}
+            hitSlop={
+              upright
+                ? { top: slack, bottom: slack }
+                : { left: slack, right: slack }
+            }
             onPress={() => setActiveId(selected ? null : node.id)}
             style={{
               position: 'absolute',
-              top,
-              height: extent,
-              justifyContent: 'center',
-              /*
-               * Each row takes the half of its gap nearest its own bar, so the
-               * name leaving one column and the name arriving at the next can
-               * share the space between them without sharing a touch target.
-               */
-              ...(trailing
-                ? (() => {
-                    const from = before === undefined ? 0 : (before + node.x0) / 2;
-                    return {
-                      left: from,
-                      width: Math.max(0, node.x0 - LABEL_GAP - from),
-                      alignItems: 'flex-end' as const,
-                    };
-                  })()
-                : (() => {
-                    const from = node.x1 + LABEL_GAP;
-                    const to = after === undefined ? width : (node.x1 + after) / 2;
-                    return { left: from, width: Math.max(0, to - from) };
-                  })()),
+              ...(upright
+                ? {
+                    top: cross,
+                    height: extent,
+                    left: gap.from,
+                    width: gap.size,
+                    justifyContent: 'center',
+                    alignItems: trailing ? ('flex-end' as const) : ('flex-start' as const),
+                  }
+                : {
+                    left: cross,
+                    width: extent,
+                    top: gap.from,
+                    height: gap.size,
+                    alignItems: 'center',
+                    // Against the bar rather than centred in the gap, so the
+                    // name sits with what it names instead of floating in the
+                    // middle of the ribbons.
+                    justifyContent: trailing ? ('flex-end' as const) : ('flex-start' as const),
+                  }),
             }}
             className={cn(className)}
           >
@@ -1133,15 +1370,24 @@ function SankeyChartLabels({
               * Both alignments are stated rather than inherited. A paragraph's
               * default alignment follows the reading direction, so under a
               * right-to-left layout an unaligned name drifts to the far end of
-              * its row and ends up sitting in the middle of the plot instead of
+              * its box and ends up sitting in the middle of the plot instead of
               * against the bar it belongs to. Which side the name hugs is a
               * fact about where its bar is, not about the language.
+              *
+              * A vertical flow centres instead: the box is the bar's own run,
+              * so the middle of it is the middle of what the name names.
               */}
             <Text
               size="xs"
               weight={selected ? 'bold' : 'medium'}
-              numberOfLines={1}
-              style={{ textAlign: trailing ? 'right' : 'left' }}
+              /*
+               * Two lines where the flow runs downwards. The box is as wide as
+               * the bar's value rather than as wide as the gap between two
+               * stages, so a long name has a second line to fall onto and no
+               * neighbour above or below to collide with.
+               */
+              numberOfLines={upright ? 1 : 2}
+              style={{ textAlign: upright ? (trailing ? 'right' : 'left') : 'center' }}
             >
               {name}
             </Text>
@@ -1150,7 +1396,7 @@ function SankeyChartLabels({
                 size="xs"
                 muted
                 numberOfLines={1}
-                style={{ textAlign: trailing ? 'right' : 'left' }}
+                style={{ textAlign: upright ? (trailing ? 'right' : 'left') : 'center' }}
               >
                 {value}
               </Text>
@@ -1183,7 +1429,7 @@ export interface SankeyChartTooltipProps {
  * it belongs to — a card half off the edge of a phone is a card nobody can read.
  */
 function SankeyChartTooltip({ className, formatValue }: SankeyChartTooltipProps) {
-  const { layout, width, height, labelFor } = useChart('SankeyChart.Tooltip');
+  const { layout, width, height, labelFor, orientation } = useChart('SankeyChart.Tooltip');
   const { activeId, activeValue, incoming, outgoing } = useSankeyChart();
 
   if (!activeId) return null;
@@ -1192,20 +1438,38 @@ function SankeyChartTooltip({ className, formatValue }: SankeyChartTooltipProps)
 
   const format = formatValue ?? compactNumber;
   const CARD = 132;
-  const trailing = node.x1 + LABEL_GAP + CARD > width;
-  const left = trailing
-    ? Math.max(0, node.x0 - LABEL_GAP - CARD)
-    : Math.min(node.x1 + LABEL_GAP, Math.max(0, width - CARD));
-  const centre = (node.y0 + node.y1) / 2;
+  const HALF = 34;
+  const upright = orientation === 'horizontal';
+
+  /*
+   * Beside the bar on the axis the flow advances along, and level with its
+   * middle on the other — then clamped into the plot at both ends, so a node
+   * at an edge gets a card that is still entirely on the chart. It flips to
+   * the near side when there is no room on the far one, which is what keeps a
+   * last-stage node's card off the edge rather than half over it.
+   */
+  const alongEnd = upright ? node.x1 : node.y1;
+  const alongStart = upright ? node.x0 : node.y0;
+  const alongSpan = upright ? width : height;
+  const cardAlong = upright ? CARD : HALF * 2;
+  const trailing = alongEnd + LABEL_GAP + cardAlong > alongSpan;
+  const along = trailing
+    ? Math.max(0, alongStart - LABEL_GAP - cardAlong)
+    : Math.min(alongEnd + LABEL_GAP, Math.max(0, alongSpan - cardAlong));
+
+  const crossCentre = upright ? (node.y0 + node.y1) / 2 : (node.x0 + node.x1) / 2;
+  const crossSpan = upright ? height : width;
+  const cardCross = upright ? HALF * 2 : CARD;
+  const cross = Math.max(0, Math.min(crossCentre - cardCross / 2, crossSpan - cardCross));
 
   return (
     <View
       pointerEvents="none"
       style={{
         position: 'absolute',
-        left,
         width: CARD,
-        top: Math.max(0, Math.min(centre - 34, height - 68)),
+        left: upright ? along : cross,
+        top: upright ? cross : along,
       }}
       className={cn(
         'gap-0.5 rounded-lg border border-border bg-background px-2.5 py-2 shadow-sm',
@@ -1227,6 +1491,206 @@ function SankeyChartTooltip({ className, formatValue }: SankeyChartTooltipProps)
 SankeyChartTooltip.displayName = 'SankeyChart.Tooltip';
 SankeyChartTooltip.slot = 'overlay' as const;
 
+export interface SankeyChartBreakdownProps extends ViewProps {
+  className?: string;
+  /** Format the figures. Defaults to a compact number. */
+  formatValue?: (value: number) => string;
+  /** How many rows each side shows before stopping. */
+  maxRows?: number;
+  /**
+   * Fires with the node at the other end of a row, so a breakdown can be
+   * walked: press where a stream went and the chart follows it there.
+   */
+  onSelectNode?: (id: string) => void;
+  /** Shown in place of the rows when nothing is selected. */
+  placeholder?: string;
+}
+
+/**
+ * What the selected node carries, written out in full underneath the diagram.
+ *
+ * The names on a flow diagram live in the gaps between its stages, which on a
+ * phone is a few dozen points — wide enough to truncate almost anything. Here
+ * there is the whole width of the card, so a stream is read as the name of
+ * where it came from and the number it carried rather than as a ribbon whose
+ * label ran out of room.
+ *
+ * In and out are listed separately because they are only the same total when
+ * nothing was lost on the way through, and a node where they differ is the
+ * interesting one on the chart.
+ */
+function SankeyChartBreakdown({
+  className,
+  formatValue,
+  maxRows,
+  onSelectNode,
+  placeholder = 'Select a stage to see what it carries',
+  ...props
+}: SankeyChartBreakdownProps) {
+  const { status, setActiveId, labelFor } = useChart('SankeyChart.Breakdown');
+  const { activeId, activeValue, sources, targets } = useSankeyChart();
+
+  if (status === 'loading') return null;
+
+  const format = formatValue ?? compactNumber;
+  const limit = maxRows && maxRows > 0 ? Math.floor(maxRows) : undefined;
+
+  if (!activeId) {
+    return (
+      <View {...props} className={cn('w-full pt-3', className)}>
+        <Text size="xs" muted>
+          {placeholder}
+        </Text>
+      </View>
+    );
+  }
+
+  const side = (title: string, rows: SankeyChartFlow[]) => {
+    if (!rows.length) return null;
+    const shown = limit ? rows.slice(0, limit) : rows;
+    const rest = rows.length - shown.length;
+    return (
+      <View className="w-full gap-1">
+        <Text size="xs" muted weight="medium">
+          {title}
+        </Text>
+        {shown.map((row) => (
+          <Pressable
+            key={`${title}-${row.id}`}
+            accessibilityRole="button"
+            accessibilityLabel={`${row.label}, ${format(row.value)}, ${Math.round(row.share * 100)} percent`}
+            onPress={() => {
+              setActiveId(row.id);
+              onSelectNode?.(row.id);
+            }}
+            className="w-full flex-row items-center gap-2 py-1"
+          >
+            <View
+              style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: row.color }}
+            />
+            {/* The name takes whatever the numbers leave, which is most of it. */}
+            <Text size="xs" numberOfLines={1} className="shrink grow">
+              {row.label}
+            </Text>
+            <Text size="xs" weight="medium" numberOfLines={1}>
+              {format(row.value)}
+            </Text>
+            <Text size="xs" muted numberOfLines={1} className="w-10 text-right">
+              {`${Math.round(row.share * 100)}%`}
+            </Text>
+          </Pressable>
+        ))}
+        {rest > 0 ? (
+          <Text size="xs" muted>
+            {`and ${rest} more`}
+          </Text>
+        ) : null}
+      </View>
+    );
+  };
+
+  return (
+    <View {...props} className={cn('w-full gap-2 pt-3', className)}>
+      <View className="w-full flex-row items-baseline justify-between gap-2">
+        <Text size="xs" weight="bold" numberOfLines={1} className="shrink">
+          {labelFor(activeId)}
+        </Text>
+        <Text size="xs" weight="semibold">
+          {format(activeValue)}
+        </Text>
+      </View>
+      {side('In', sources)}
+      {side('Out', targets)}
+    </View>
+  );
+}
+SankeyChartBreakdown.displayName = 'SankeyChart.Breakdown';
+SankeyChartBreakdown.slot = 'footer' as const;
+
+export interface SankeyChartLegendProps extends ViewProps {
+  className?: string;
+  /** How many names to show before stopping. */
+  limit?: number;
+  /** Show each node's share of the whole flow beside its name. */
+  showShare?: boolean;
+}
+
+/**
+ * Every stage named, under the diagram.
+ *
+ * The names on the chart are dropped wherever a bar is too short to carry one,
+ * which is the right call — forty names at that spacing overlap into a grey
+ * band that hides the flow behind them — but it leaves the smallest nodes with
+ * no name and nothing to press. Here each one gets its full name and a proper
+ * target, and pressing it selects the same node the bar would.
+ */
+function SankeyChartLegend({
+  className,
+  limit,
+  showShare = true,
+  ...props
+}: SankeyChartLegendProps) {
+  const { layout, colors, status, activeId, setActiveId, labelFor } =
+    useChart('SankeyChart.Legend');
+
+  if (status === 'loading' || !layout.nodes.length) return null;
+
+  // Against the widest stage rather than the sum of every node, which counts
+  // whatever passes through a middle stage twice and makes every share small.
+  let total = 0;
+  const byLayer = new Map<number, number>();
+  for (const node of layout.nodes) {
+    const carried = (byLayer.get(node.layer) ?? 0) + node.value;
+    byLayer.set(node.layer, carried);
+    if (carried > total) total = carried;
+  }
+
+  const shown = limit && limit > 0 ? layout.nodes.slice(0, Math.floor(limit)) : layout.nodes;
+
+  return (
+    <View
+      {...props}
+      className={cn('w-full flex-row flex-wrap items-center gap-x-3 gap-y-1.5 pt-3', className)}
+    >
+      {shown.map((node, index) => {
+        const percent = total > 0 ? Math.round((node.value / total) * 100) : 0;
+        const selected = activeId === node.id;
+        const dimmed = activeId !== null && !selected;
+        return (
+          <Pressable
+            key={node.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            accessibilityLabel={`${labelFor(node.id)}, ${percent} percent`}
+            onPress={() => setActiveId(selected ? null : node.id)}
+            style={{ opacity: dimmed ? 0.4 : 1 }}
+            className="max-w-full flex-row items-center gap-1.5"
+          >
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                backgroundColor: colors[index] ?? '#3b82f6',
+              }}
+            />
+            <Text size="xs" muted numberOfLines={1} className="shrink">
+              {labelFor(node.id)}
+            </Text>
+            {showShare ? (
+              <Text size="xs" weight="medium" numberOfLines={1}>
+                {`${percent}%`}
+              </Text>
+            ) : null}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+SankeyChartLegend.displayName = 'SankeyChart.Legend';
+SankeyChartLegend.slot = 'footer' as const;
+
 export interface SankeyChartSkeletonProps {
   color?: string;
 }
@@ -1242,7 +1706,7 @@ export interface SankeyChartSkeletonProps {
  * wrong.
  */
 function SankeyChartSkeleton({ color }: SankeyChartSkeletonProps) {
-  const { width, height, curve, status } = useChart('SankeyChart.Skeleton');
+  const { width, height, curve, status, orientation } = useChart('SankeyChart.Skeleton');
   const token = useCSSVariable('--color-skeleton');
   const fill = color ?? (typeof token === 'string' ? token : 'rgba(128,128,128,0.2)');
 
@@ -1252,21 +1716,29 @@ function SankeyChartSkeleton({ color }: SankeyChartSkeletonProps) {
   const { mounted, opacity } = useSkeletonHandoff(status === 'loading');
   const animatedProps = useAnimatedProps(() => ({ opacity: opacity.value }));
 
+  const upright = orientation === 'horizontal';
+
   const shape = useMemo(() => {
     if (width <= 0 || height <= 0) return null;
+    // The placeholder is the diagram's own shape, turned the same way: a
+    // waiting state that does not match what replaces it moves the whole card
+    // at the moment the data lands.
+    const along = upright ? width : height;
+    const cross = upright ? height : width;
     const bar = DEFAULT_NODE_WIDTH;
-    const step = (width - bar) / Math.max(SKELETON_COLUMNS - 1, 1);
-    const band = height / 3;
+    const step = (along - bar) / Math.max(SKELETON_COLUMNS - 1, 1);
+    const band = cross / 3;
     const columns = Array.from({ length: SKELETON_COLUMNS }, (_, i) => i * step);
+    const path = upright ? flowPath : flowPathVertical;
     const ribbons: string[] = [];
     for (let i = 0; i < SKELETON_COLUMNS - 1; i += 1) {
       const from = columns[i]! + bar;
       const to = columns[i + 1]!;
-      ribbons.push(flowPath(from, height / 3, to, height / 3, band * 0.5, curve));
-      ribbons.push(flowPath(from, (height * 2) / 3, to, (height * 2) / 3, band * 0.5, curve));
+      ribbons.push(path(from, cross / 3, to, cross / 3, band * 0.5, curve));
+      ribbons.push(path(from, (cross * 2) / 3, to, (cross * 2) / 3, band * 0.5, curve));
     }
-    return { bar, band, columns, ribbons };
-  }, [width, height, curve]);
+    return { bar, band, columns, ribbons, cross };
+  }, [width, height, curve, upright]);
 
   if (!mounted || !shape) return null;
 
@@ -1275,13 +1747,13 @@ function SankeyChartSkeleton({ color }: SankeyChartSkeletonProps) {
       {shape.ribbons.map((d, index) => (
         <Path key={`ribbon-${index}`} d={d} fill={fill} fillOpacity={0.5} />
       ))}
-      {shape.columns.map((x, index) => (
+      {shape.columns.map((at, index) => (
         <Rect
           key={`bar-${index}`}
-          x={x}
-          y={height / 6}
-          width={shape.bar}
-          height={(height * 2) / 3}
+          x={upright ? at : shape.cross / 6}
+          y={upright ? shape.cross / 6 : at}
+          width={upright ? shape.bar : (shape.cross * 2) / 3}
+          height={upright ? (shape.cross * 2) / 3 : shape.bar}
           rx={2}
           fill={fill}
         />
@@ -1349,6 +1821,8 @@ SankeyChartHeader.displayName = 'SankeyChart.Header';
 SankeyChartHeader.slot = 'header' as const;
 
 export const SankeyChart = Object.assign(SankeyChartRoot, {
+  Breakdown: SankeyChartBreakdown,
+  Legend: SankeyChartLegend,
   Header: SankeyChartHeader,
   Links: SankeyChartLinks,
   Nodes: SankeyChartNodes,

@@ -51,6 +51,53 @@ const BUDGET_LINKS: SankeyLink[] = [
 ];
 
 /*
+ * A month off a current account, which is the shape `collapse` exists for: two
+ * things paying in, one balance, and a tail of categories that runs from rent
+ * down to eleven pounds of stationery. Drawn whole, the bottom nine are
+ * hairlines — present in the data and impossible to tell apart on a phone.
+ */
+const SPEND_NODES: SankeyNode[] = [
+  { id: 'salary', label: 'Salary' },
+  { id: 'freelance', label: 'Freelance' },
+  { id: 'account', label: 'Current account' },
+  { id: 'rent', label: 'Rent' },
+  { id: 'groceries', label: 'Groceries' },
+  { id: 'transport', label: 'Transport' },
+  { id: 'utilities', label: 'Utilities' },
+  { id: 'eating-out', label: 'Eating out' },
+  { id: 'subscriptions', label: 'Subscriptions' },
+  { id: 'insurance', label: 'Insurance' },
+  { id: 'phone', label: 'Phone' },
+  { id: 'gym', label: 'Gym' },
+  { id: 'books', label: 'Books' },
+  { id: 'haircuts', label: 'Haircuts' },
+  { id: 'charity', label: 'Charity' },
+  { id: 'pharmacy', label: 'Pharmacy' },
+  { id: 'stationery', label: 'Stationery' },
+  { id: 'saved', label: 'Saved' },
+];
+
+const SPEND_LINKS: SankeyLink[] = [
+  { source: 'salary', target: 'account', value: 2400 },
+  { source: 'freelance', target: 'account', value: 380 },
+  { source: 'account', target: 'rent', value: 1450 },
+  { source: 'account', target: 'groceries', value: 520 },
+  { source: 'account', target: 'transport', value: 190 },
+  { source: 'account', target: 'utilities', value: 165 },
+  { source: 'account', target: 'eating-out', value: 148 },
+  { source: 'account', target: 'subscriptions', value: 62 },
+  { source: 'account', target: 'insurance', value: 58 },
+  { source: 'account', target: 'phone', value: 34 },
+  { source: 'account', target: 'gym', value: 32 },
+  { source: 'account', target: 'books', value: 26 },
+  { source: 'account', target: 'haircuts', value: 24 },
+  { source: 'account', target: 'charity', value: 20 },
+  { source: 'account', target: 'pharmacy', value: 16 },
+  { source: 'account', target: 'stationery', value: 11 },
+  { source: 'account', target: 'saved', value: 24 },
+];
+
+/*
  * A flow with one stage that genuinely stops early: `reserve` takes money out
  * of revenue and sends it nowhere. It is the only node `align` can move, and
  * without one in the data the two settings draw the same picture — which is a
@@ -126,6 +173,72 @@ function SankeyStagesVersion() {
             <SankeyChart.Labels />
             <SankeyChart.Tooltip />
           </SankeyChart>
+        </Frame.Panel>
+      </Frame>
+    </View>
+  );
+}
+
+function SankeyVerticalVersion() {
+  return (
+    <View className="flex-1 justify-center p-4">
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Down the screen</Frame.Title>
+          <Frame.Action>£m</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel>
+          <SankeyChart
+            nodes={BUDGET_NODES}
+            links={BUDGET_LINKS}
+            orientation="vertical"
+            className="px-3 pb-4 pt-3"
+          >
+            <SankeyChart.Header title="Budget" value="£1.06bn" caption="Income through to spend" />
+            <SankeyChart.Links />
+            <SankeyChart.Nodes />
+            <SankeyChart.Labels />
+            <SankeyChart.Breakdown />
+          </SankeyChart>
+        </Frame.Panel>
+      </Frame>
+    </View>
+  );
+}
+
+function SankeyCollapseVersion() {
+  const [folded, setFolded] = useState(true);
+
+  return (
+    <View className="flex-1 justify-center p-4">
+      <Frame className="w-full">
+        <Frame.Header>
+          <Frame.Title>Seventeen into six</Frame.Title>
+          <Frame.Action>{folded ? '6 of 17' : 'all 17'}</Frame.Action>
+        </Frame.Header>
+        <Frame.Panel>
+          <SankeyChart
+            nodes={SPEND_NODES}
+            links={SPEND_LINKS}
+            orientation="vertical"
+            collapse={folded ? { maxPerColumn: 6 } : undefined}
+            className="px-3 pb-4 pt-3"
+          >
+            <SankeyChart.Header
+              title="March"
+              value="£2,780"
+              caption={folded ? 'Smallest folded into Other' : 'Every category, as it arrived'}
+            />
+            <SankeyChart.Links />
+            <SankeyChart.Nodes />
+            <SankeyChart.Labels />
+            <SankeyChart.Breakdown maxRows={5} />
+          </SankeyChart>
+          <View className="px-3 pb-3">
+            <Button size="sm" variant="secondary" onPress={() => setFolded((on) => !on)}>
+              {folded ? 'Show every category' : 'Fold the tail'}
+            </Button>
+          </View>
         </Frame.Panel>
       </Frame>
     </View>
@@ -547,6 +660,32 @@ function CompareFrozenDemo() {
   );
 }
 
+function SankeyLegendDemo() {
+  return (
+    <View className="w-full gap-3">
+      <Card>
+        <Card.Content className="p-0">
+          <SankeyChart
+            nodes={SPEND_NODES}
+            links={SPEND_LINKS}
+            height={260}
+            className="px-3 pb-4 pt-3"
+          >
+            <SankeyChart.Links />
+            <SankeyChart.Nodes />
+            <SankeyChart.Labels />
+            <SankeyChart.Legend limit={9} />
+          </SankeyChart>
+        </Card.Content>
+      </Card>
+      <Text size="xs" muted className="px-1">
+        The bottom categories are too thin to carry a name. The legend is where they get one, and
+        pressing it selects the same node the bar would.
+      </Text>
+    </View>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
   {
     slug: 'sankey-chart',
@@ -571,6 +710,22 @@ export const ENTRIES: ComponentEntry[] = [
         render: () => <SankeyStagesVersion />,
       },
       {
+        label: 'Down the screen',
+        id: 'vertical',
+        fullPage: true,
+        description:
+          'The same budget with the flow running top to bottom. The stages get the long side of the phone, and a name gets the width of its own bar instead of the gap between two columns.',
+        render: () => <SankeyVerticalVersion />,
+      },
+      {
+        label: 'Folding the long tail',
+        id: 'collapse',
+        fullPage: true,
+        description:
+          'A month of spending, seventeen categories deep. Folded, the five largest keep their own bars and the rest become Other; unfolded, the bottom nine are hairlines.',
+        render: () => <SankeyCollapseVersion />,
+      },
+      {
         label: 'Where the endings sit',
         id: 'align',
         fullPage: true,
@@ -586,6 +741,7 @@ export const ENTRIES: ComponentEntry[] = [
           'The placeholder dissolves under the real diagram growing across it, so the card never has a blank frame in the middle of it.',
         render: () => <SankeyLoadingVersion />,
       },
+      { label: 'Naming what is too thin to label', render: () => <SankeyLegendDemo /> },
       { label: 'Rows that cannot be drawn', render: () => <SankeyDroppedDemo /> },
       { label: 'How far the ribbons bend', render: () => <SankeyCurveDemo /> },
     ],

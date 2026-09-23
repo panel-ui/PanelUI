@@ -540,6 +540,56 @@ sharp toolchains and are a standing known state.
 
 ## Git & release
 
+> ### Current outage: GitHub Actions is disabled for the maintainer's account (since 2026-09-22)
+>
+> **Read this before anything below.** Delete this block once the maintainer confirms
+> Actions works again (one `gh workflow run ci.yml --ref main` that is accepted is proof).
+>
+> GitHub has disabled Actions *for the maintainer's user*, not for the repository. The
+> repository's Actions settings still say enabled and every workflow is `active`, which is
+> what makes it confusing. Git itself still works — commits and tags push — but nothing that
+> user does starts a workflow:
+>
+> - A push to `main` creates **no run at all**, not a failed one. There is nothing to re-run.
+> - `gh workflow run` is refused with `HTTP 422: Actions has been disabled for this user`.
+>   That message is the diagnosis; GitHub's status page shows nothing, because nothing is
+>   down.
+> - So **CI does not gate anything**, `publish.yml` will not put a release on npm, and
+>   `deploy-docs.yml` will not deploy panelui.dev. A GitHub release cut now is only a record.
+>
+> The last commit CI actually checked is `d318f62f`. Run the gates locally in their place,
+> all of them, before any release — they are the only check there is.
+>
+> **While it lasts, a release is done by hand, in this order.** Only the maintainer runs the
+> publish and the deploy; they are production actions and an agent asks rather than runs them.
+>
+> 1. Bump, changelog, commit and push exactly as below. Then, on that commit:
+>    `npm ci && npm run release:check && npm run typecheck && npm run build && npm test &&
+>    npm run verify:package --workspace=panelui-native`.
+> 2. **Publish from `packages/panelui`**: `npm publish --access public`, logged in as a
+>    maintainer (`npm whoami`), with the 2FA code when asked. Leave out `--provenance`: it
+>    only works inside a CI provider, so a hand-published version carries no provenance
+>    attestation — say so in the release notes. There is no dry run that can be undone
+>    afterwards; npm never lets a version be published twice, even after an unpublish.
+> 3. **Verify** before telling anyone: `npm view panelui-native@X.Y.Z version` answers, and
+>    the thing the release was for is in the tarball (`npm pack panelui-native@X.Y.Z` and
+>    look).
+> 4. **Tag and cut the GitHub release** as usual. Nothing will fire from it, which is fine —
+>    npm already has the version, and a publish run would only fail on the duplicate.
+> 5. **Deploy panelui.dev**, any one of:
+>    - POST the deploy hook the workflow uses — the URL is in Vercel under the `panel-ui-0`
+>      project → Settings → Git → Deploy Hooks: `curl -X POST "<hook url>"`. Same build as
+>      the workflow, from `main`.
+>    - The Vercel dashboard: `panel-ui-0` → Deployments → redeploy the latest `main` to
+>      Production.
+>    - The Vercel CLI, from the **repository root** (the project's Root Directory is
+>      `apps/docs`, so running it inside `apps/docs` looks for `apps/docs/apps/docs`):
+>      `vercel link` once to `panel-ui-0`, then `vercel deploy --prod`. It uploads the
+>      local tree rather than cloning `main`, so deploy from a clean checkout of the pushed
+>      commit. `vercel.json`'s `git.deploymentEnabled: false` does not affect the CLI.
+> 6. Only then close any issue the release answers. Issue #222 (Spinner `color`) is waiting on
+>    0.102.0 this way: reply and close only after step 3 has confirmed it on npm.
+
 - **Every modification gets its own git commit.** Commit as soon as a logical unit of work is
   done — never batch unrelated changes into one commit, and never leave finished work uncommitted.
 - **Never put a `Claude-Session:` URL in a commit message.** The default git instructions ask for

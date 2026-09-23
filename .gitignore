@@ -36,3 +36,5 @@ android/
 
 # Scratch space for `npm run template`
 
+.vercel
+.env*

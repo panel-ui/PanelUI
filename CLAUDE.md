@@ -582,13 +582,28 @@ sharp toolchains and are a standing known state.
 >      the workflow, from `main`.
 >    - The Vercel dashboard: `panel-ui-0` → Deployments → redeploy the latest `main` to
 >      Production.
->    - The Vercel CLI, from the **repository root** (the project's Root Directory is
->      `apps/docs`, so running it inside `apps/docs` looks for `apps/docs/apps/docs`):
->      `vercel link` once to `panel-ui-0`, then `vercel deploy --prod`. It uploads the
->      local tree rather than cloning `main`, so deploy from a clean checkout of the pushed
->      commit. `vercel.json`'s `git.deploymentEnabled: false` does not affect the CLI.
-> 6. Only then close any issue the release answers. Issue #222 (Spinner `color`) is waiting on
->    0.102.0 this way: reply and close only after step 3 has confirmed it on npm.
+>    - The Vercel CLI — the way 0.102.0 was deployed. **Never run it in the working tree.**
+>      It uploads every file that is not in its own short ignore list, and git's ignores do
+>      not count: here that was 28,333 files (the example's native `ios/`, `lib/`, `.next`),
+>      over Vercel's 15,000 limit, *and* it would have shipped
+>      `apps/example/.env.eas-simulator` and `.claude/settings.local.json`. Deploy a clean
+>      export of the pushed commit instead — 2,618 files, the same tree a git deploy builds,
+>      and the docs' prebuild regenerates everything ignored:
+>
+>      ```bash
+>      npx vercel login                                   # once; opens the browser
+>      npx vercel link --yes --project panel-ui-0 --scope khalids-projects-c17d80c9
+>      rm -rf /tmp/panelui-deploy && mkdir /tmp/panelui-deploy
+>      git archive HEAD | tar -x -C /tmp/panelui-deploy && cp -R .vercel /tmp/panelui-deploy/
+>      (cd /tmp/panelui-deploy && npx vercel deploy --prod --yes)
+>      rm -f .env.local                                   # `link` drops a Vercel token here
+>      ```
+>
+>      Link from the **repository root**: the project's Root Directory is `apps/docs`, so
+>      linking inside it looks for `apps/docs/apps/docs`. `vercel.json`'s
+>      `git.deploymentEnabled: false` does not affect the CLI.
+> 6. Only then close any issue the release answers — 0.102.0 went out this way on 2026-09-23,
+>    and #222 was closed only after its tarball had been checked on npm.
 
 - **Every modification gets its own git commit.** Commit as soon as a logical unit of work is
   done — never batch unrelated changes into one commit, and never leave finished work uncommitted.

@@ -1,5 +1,11 @@
 {
   "slug": "frame",
+  "preview": {
+    "src": "/previews/frame.jpg",
+    "alt": "The Frame component, running in the example app.",
+    "width": 1179,
+    "height": 974
+  },
   "intro": "A card of rows sitting in a titled tray — the shell a widget sits in.\n\nThe tray shows along one edge only; the strip left above the card is the header. The card is flush to its left, right and bottom, and draws the hairlines between its own rows.\n\n`variant=\"inset\"` nests the two the other way: the card floats clear of the tray on all four sides, and the band left around it carries `Frame.Footer`.",
   "usage": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Agent monitor</Frame.Title>\n    <Frame.Action>All agents under 25% token limit</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Frame.Content>\n        <Frame.Title>opus-4.6</Frame.Title>\n        <Frame.Description>Indexing the repository</Frame.Description>\n      </Frame.Content>\n      <Frame.Actions>\n        <Chip size=\"sm\" variant=\"success\">Running</Chip>\n      </Frame.Actions>\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>",
   "extraImports": [
@@ -33,14 +39,59 @@
       "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Notifications</Frame.Title>\n    <Frame.Description>How we reach you.</Frame.Description>\n  </Frame.Header>\n  <Frame.Panel>\n    <Frame.Row>\n      <Text className=\"flex-1\">Push</Text>\n      <Switch value={push} onValueChange={setPush} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">Email</Text>\n      <Switch value={email} onValueChange={setEmail} />\n    </Frame.Row>\n    <Frame.Row>\n      <Text className=\"flex-1\">SMS</Text>\n      <Switch value={sms} onValueChange={setSms} />\n    </Frame.Row>\n  </Frame.Panel>\n</Frame>"
     },
     {
+      "title": "Rows that show a value",
+      "description": "A label on the left and its current value on the right, muted. Give the label `flex-1` so the value is pushed to the trailing edge.",
+      "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Preferences</Frame.Title>\n    <Frame.Action>Edit</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {preferences.map(([label, value]) => (\n      <Frame.Row key={label}>\n        <Text size=\"sm\" className=\"flex-1\">{label}</Text>\n        <Text size=\"sm\" muted>{value}</Text>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n</Frame>",
+      "preview": {
+        "src": "/previews/frame-rows-that-show-a-value.jpg",
+        "alt": "Frame — Rows that show a value.",
+        "width": 1179,
+        "height": 618
+      }
+    },
+    {
+      "title": "A member list",
+      "description": "An avatar in `Frame.Media`, a name and an email in `Frame.Content`, and the role in `Frame.Actions`. The header's action can be a badge instead of text.",
+      "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Team members</Frame.Title>\n    <Frame.Action>\n      <Badge variant=\"secondary\">{members.length}</Badge>\n    </Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {members.map((member) => (\n      <Frame.Row key={member.email}>\n        <Frame.Media>\n          <Avatar size=\"sm\" fallback={member.initials} />\n        </Frame.Media>\n        <Frame.Content>\n          <Frame.Title>{member.name}</Frame.Title>\n          <Frame.Description>{member.email}</Frame.Description>\n        </Frame.Content>\n        <Frame.Actions>\n          <Badge variant=\"outline\">{member.role}</Badge>\n        </Frame.Actions>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n</Frame>",
+      "preview": {
+        "src": "/previews/frame-a-member-list.jpg",
+        "alt": "Frame — A member list.",
+        "width": 1179,
+        "height": 778
+      }
+    },
+    {
+      "title": "A leading graphic",
+      "description": "`Frame.Media` holds any small graphic at its own size. Here each row leads with a progress ring of the app's own.",
+      "code": "<Frame>\n  <Frame.Header>\n    <Frame.Title>Usage Type</Frame.Title>\n    <Frame.Action>Amount</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {usage.map((item) => (\n      <Frame.Row key={item.label}>\n        <Frame.Media>\n          <UsageRing percent={item.percent} />\n        </Frame.Media>\n        <Frame.Content>\n          <Text numberOfLines={1}>{item.label}</Text>\n        </Frame.Content>\n        <Frame.Actions>\n          <Text weight=\"medium\">{item.value}</Text>\n        </Frame.Actions>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n</Frame>",
+      "preview": {
+        "src": "/previews/frame-a-leading-graphic.jpg",
+        "alt": "Frame — A leading graphic.",
+        "width": 1179,
+        "height": 808
+      }
+    },
+    {
       "title": "A row that would not fit",
       "description": "Everything here is longer than the room it has. The media and the actions hold their size, the content column shrinks around them, and nothing is clipped — at any width, without measuring anything.",
-      "code": "<Frame.Panel>\n  {deploys.map((deploy) => (\n    <Frame.Row key={deploy.id} align=\"start\">\n      <Frame.Media>\n        <Avatar size=\"sm\" fallback={deploy.initials} />\n      </Frame.Media>\n      <Frame.Content>\n        <Frame.Title>{deploy.message}</Frame.Title>\n        <Frame.Description>{deploy.detail}</Frame.Description>\n      </Frame.Content>\n      <Frame.Actions>\n        <Chip size=\"sm\" variant=\"success\">Live</Chip>\n        <Chip size=\"sm\" variant=\"outline\">{deploy.age}</Chip>\n      </Frame.Actions>\n    </Frame.Row>\n  ))}\n</Frame.Panel>"
+      "code": "<Frame.Panel>\n  {deploys.map((deploy) => (\n    <Frame.Row key={deploy.id} align=\"start\">\n      <Frame.Media>\n        <Avatar size=\"sm\" fallback={deploy.initials} />\n      </Frame.Media>\n      <Frame.Content>\n        <Frame.Title>{deploy.message}</Frame.Title>\n        <Frame.Description>{deploy.detail}</Frame.Description>\n      </Frame.Content>\n      <Frame.Actions>\n        <Chip size=\"sm\" variant=\"success\">Live</Chip>\n        <Chip size=\"sm\" variant=\"outline\">{deploy.age}</Chip>\n      </Frame.Actions>\n    </Frame.Row>\n  ))}\n</Frame.Panel>",
+      "preview": {
+        "src": "/previews/frame-a-row-that-would-not-fit.jpg",
+        "alt": "Frame — A row that would not fit.",
+        "width": 1179,
+        "height": 730
+      }
     },
     {
       "title": "A row of chips that wraps",
       "description": "`wrap` lets the row run onto a second line. For a cluster of tags, a second line beats one of them disappearing off the edge.",
-      "code": "<Frame.Panel>\n  <Frame.Row wrap className=\"gap-2\">\n    <Chip size=\"sm\" variant=\"success\">2 Running</Chip>\n    <Chip size=\"sm\">1 Idle</Chip>\n    <Chip size=\"sm\" variant=\"outline\">1 Done</Chip>\n    <Frame.Actions className=\"ml-auto\">\n      <Text size=\"xs\" muted>15m12s ago</Text>\n    </Frame.Actions>\n  </Frame.Row>\n</Frame.Panel>"
+      "code": "<Frame.Panel>\n  <Frame.Row wrap className=\"gap-2\">\n    <Chip size=\"sm\" variant=\"success\">2 Running</Chip>\n    <Chip size=\"sm\">1 Idle</Chip>\n    <Chip size=\"sm\" variant=\"outline\">1 Done</Chip>\n    <Frame.Actions className=\"ml-auto\">\n      <Text size=\"xs\" muted>15m12s ago</Text>\n    </Frame.Actions>\n  </Frame.Row>\n</Frame.Panel>",
+      "preview": {
+        "src": "/previews/frame-a-row-of-chips-that-wraps.jpg",
+        "alt": "Frame — A row of chips that wraps.",
+        "width": 1179,
+        "height": 342
+      }
     },
     {
       "title": "With a header action and a footer",
@@ -49,20 +100,62 @@
     {
       "title": "Rows that lead somewhere",
       "description": "A row with an `onPress` is a real pressable — press feedback and a button role — instead of a View with a handler bolted on. `chevron` says so before you tap it.",
-      "code": "<Frame.Panel>\n  {sections.map((section) => (\n    <Frame.Row\n      key={section.id}\n      chevron\n      onPress={() => router.push(section.href)}\n    >\n      <Text size=\"sm\" className=\"flex-1\">{section.label}</Text>\n    </Frame.Row>\n  ))}\n</Frame.Panel>"
+      "code": "<Frame.Panel>\n  {sections.map((section) => (\n    <Frame.Row\n      key={section.id}\n      chevron\n      onPress={() => router.push(section.href)}\n    >\n      <Text size=\"sm\" className=\"flex-1\">{section.label}</Text>\n    </Frame.Row>\n  ))}\n</Frame.Panel>",
+      "preview": {
+        "src": "/previews/frame-rows-that-lead-somewhere.jpg",
+        "alt": "Frame — Rows that lead somewhere.",
+        "width": 1179,
+        "height": 616
+      }
     },
     {
       "title": "Sections inside a panel",
       "description": "For a widget with more than one cluster of rows. Each section labels its group and divides its own rows.",
-      "code": "<Frame.Panel>\n  <Frame.Section title=\"General\">\n    <Frame.Row>…</Frame.Row>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Section>\n  <Frame.Section title=\"Danger zone\">\n    <Frame.Row chevron onPress={confirmDelete}>\n      <Text size=\"sm\" className=\"flex-1 text-destructive\">\n        Delete workspace\n      </Text>\n    </Frame.Row>\n  </Frame.Section>\n</Frame.Panel>"
+      "code": "<Frame.Panel>\n  <Frame.Section title=\"General\">\n    <Frame.Row>…</Frame.Row>\n    <Frame.Row>…</Frame.Row>\n  </Frame.Section>\n  <Frame.Section title=\"Danger zone\">\n    <Frame.Row chevron onPress={confirmDelete}>\n      <Text size=\"sm\" className=\"flex-1 text-destructive\">\n        Delete workspace\n      </Text>\n    </Frame.Row>\n  </Frame.Section>\n</Frame.Panel>",
+      "preview": {
+        "src": "/previews/frame-sections-inside-a-panel.jpg",
+        "alt": "Frame — Sections inside a panel.",
+        "width": 1179,
+        "height": 812
+      }
     },
     {
       "title": "A widget that asks for something",
       "description": "`inset` is for a widget with a decision at the bottom of it. The panel is set into a recessed band on all four sides and `Frame.Footer` puts the actions in that band, so what the widget says and what you do about it are on two surfaces rather than one.\n\nThe band shapes what is put in it. The actions take equal widths and full pills without being asked — a row of equal decisions should not arrive with three different radii — and the footer is held in further than the panel, because a row running the full width of the shell reads as another edge of it.\n\nFor a widget that only reports, keep the default. A band with nothing in it is a margin.",
-      "code": "<Frame variant=\"inset\">\n  <Frame.Panel>\n    {invites.map((invite) => (\n      <Frame.Row key={invite.id}>\n        <Frame.Media>\n          <Avatar size=\"sm\" fallback={invite.initials} />\n        </Frame.Media>\n        <Frame.Content>\n          <Frame.Title>{invite.name}</Frame.Title>\n          <Frame.Description>{invite.email}</Frame.Description>\n        </Frame.Content>\n        <Frame.Actions>\n          <Badge variant=\"outline\">{invite.role}</Badge>\n        </Frame.Actions>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Button variant=\"secondary\" onPress={declineAll}>Decline all</Button>\n    <Button onPress={acceptAll}>Accept all</Button>\n  </Frame.Footer>\n</Frame>"
+      "code": "<Frame variant=\"inset\">\n  <Frame.Panel>\n    {invites.map((invite) => (\n      <Frame.Row key={invite.id}>\n        <Frame.Media>\n          <Avatar size=\"sm\" fallback={invite.initials} />\n        </Frame.Media>\n        <Frame.Content>\n          <Frame.Title>{invite.name}</Frame.Title>\n          <Frame.Description>{invite.email}</Frame.Description>\n        </Frame.Content>\n        <Frame.Actions>\n          <Badge variant=\"outline\">{invite.role}</Badge>\n        </Frame.Actions>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Button variant=\"secondary\" onPress={declineAll}>Decline all</Button>\n    <Button onPress={acceptAll}>Accept all</Button>\n  </Frame.Footer>\n</Frame>",
+      "preview": {
+        "src": "/previews/frame-a-widget-that-asks-for-something.jpg",
+        "alt": "Frame — A widget that asks for something.",
+        "width": 1179,
+        "height": 676
+      }
+    },
+    {
+      "title": "A header in the band",
+      "description": "Under `inset` the header sits in the band above the panel, the same way the footer sits in the band below it.",
+      "code": "<Frame variant=\"inset\">\n  <Frame.Header>\n    <Frame.Title>Usage this month</Frame.Title>\n    <Frame.Action>Aug 1 – Aug 31</Frame.Action>\n  </Frame.Header>\n  <Frame.Panel>\n    {usage.map(([label, value]) => (\n      <Frame.Row key={label}>\n        <Text size=\"sm\" className=\"flex-1\">{label}</Text>\n        <Text size=\"sm\" weight=\"medium\">{value}</Text>\n      </Frame.Row>\n    ))}\n  </Frame.Panel>\n  <Frame.Footer>\n    <Button variant=\"secondary\">Export</Button>\n  </Frame.Footer>\n</Frame>",
+      "preview": {
+        "src": "/previews/frame-a-header-in-the-band.jpg",
+        "alt": "Frame — A header in the band.",
+        "width": 1179,
+        "height": 814
+      }
     }
   ],
   "variantCode": {
     "variant": "{/* The default: a card flush inside a shell, with the header in the strip above it. */}\n<Frame variant=\"default\">…</Frame>\n\n{/* No shell — for a Frame inside a card that already draws a border,\n    where the shell’s own edge just inside it reads as a double line. */}\n<Card>\n  <Card.Content className=\"p-4\">\n    <Frame variant=\"plain\">\n      <Frame.Panel>…</Frame.Panel>\n    </Frame>\n  </Card.Content>\n</Card>\n\n{/* The panel set into a recessed band on all four sides, with the\n    actions in the band under it. */}\n<Frame variant=\"inset\">\n  <Frame.Panel>…</Frame.Panel>\n  <Frame.Footer>\n    <Button variant=\"secondary\">Not now</Button>\n    <Button>Review</Button>\n  </Frame.Footer>\n</Frame>"
+  },
+  "variantMedia": {
+    "variant": [
+      {
+        "preview": {
+          "src": "/previews/frame-plain.jpg",
+          "alt": "Frame — variant plain, inside a Card.",
+          "width": 1179,
+          "height": 446,
+          "caption": "plain"
+        }
+      }
+    ]
   }
 }

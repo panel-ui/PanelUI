@@ -3,6 +3,13 @@ title: Frame
 description: Widget shell — a card of rows sitting in a titled tray.
 ---
 
+<Preview
+  src="/previews/frame.jpg"
+  alt="The Frame component, running in the example app."
+  width={1179}
+  height={974}
+/>
+
 A card of rows sitting in a titled tray — the shell a widget sits in.
 
 The tray shows along one edge only; the strip left above the card is the header. The card is flush to its left, right and bottom, and draws the hairlines between its own rows.
@@ -110,9 +117,117 @@ Nothing has to say where the hairlines go — the panel puts one above every row
 </Frame>
 ```
 
+### Rows that show a value
+
+A label on the left and its current value on the right, muted. Give the label `flex-1` so the value is pushed to the trailing edge.
+
+<Preview
+  src="/previews/frame-rows-that-show-a-value.jpg"
+  alt="Frame — Rows that show a value."
+  width={1179}
+  height={618}
+/>
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Preferences</Frame.Title>
+    <Frame.Action>Edit</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {preferences.map(([label, value]) => (
+      <Frame.Row key={label}>
+        <Text size="sm" className="flex-1">{label}</Text>
+        <Text size="sm" muted>{value}</Text>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+</Frame>
+```
+
+### A member list
+
+An avatar in `Frame.Media`, a name and an email in `Frame.Content`, and the role in `Frame.Actions`. The header's action can be a badge instead of text.
+
+<Preview
+  src="/previews/frame-a-member-list.jpg"
+  alt="Frame — A member list."
+  width={1179}
+  height={778}
+/>
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Team members</Frame.Title>
+    <Frame.Action>
+      <Badge variant="secondary">{members.length}</Badge>
+    </Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {members.map((member) => (
+      <Frame.Row key={member.email}>
+        <Frame.Media>
+          <Avatar size="sm" fallback={member.initials} />
+        </Frame.Media>
+        <Frame.Content>
+          <Frame.Title>{member.name}</Frame.Title>
+          <Frame.Description>{member.email}</Frame.Description>
+        </Frame.Content>
+        <Frame.Actions>
+          <Badge variant="outline">{member.role}</Badge>
+        </Frame.Actions>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+</Frame>
+```
+
+### A leading graphic
+
+`Frame.Media` holds any small graphic at its own size. Here each row leads with a progress ring of the app's own.
+
+<Preview
+  src="/previews/frame-a-leading-graphic.jpg"
+  alt="Frame — A leading graphic."
+  width={1179}
+  height={808}
+/>
+
+```tsx
+<Frame>
+  <Frame.Header>
+    <Frame.Title>Usage Type</Frame.Title>
+    <Frame.Action>Amount</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {usage.map((item) => (
+      <Frame.Row key={item.label}>
+        <Frame.Media>
+          <UsageRing percent={item.percent} />
+        </Frame.Media>
+        <Frame.Content>
+          <Text numberOfLines={1}>{item.label}</Text>
+        </Frame.Content>
+        <Frame.Actions>
+          <Text weight="medium">{item.value}</Text>
+        </Frame.Actions>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+</Frame>
+```
+
 ### A row that would not fit
 
 Everything here is longer than the room it has. The media and the actions hold their size, the content column shrinks around them, and nothing is clipped — at any width, without measuring anything.
+
+<Preview
+  src="/previews/frame-a-row-that-would-not-fit.jpg"
+  alt="Frame — A row that would not fit."
+  width={1179}
+  height={730}
+/>
 
 ```tsx
 <Frame.Panel>
@@ -137,6 +252,13 @@ Everything here is longer than the room it has. The media and the actions hold t
 ### A row of chips that wraps
 
 `wrap` lets the row run onto a second line. For a cluster of tags, a second line beats one of them disappearing off the edge.
+
+<Preview
+  src="/previews/frame-a-row-of-chips-that-wraps.jpg"
+  alt="Frame — A row of chips that wraps."
+  width={1179}
+  height={342}
+/>
 
 ```tsx
 <Frame.Panel>
@@ -176,6 +298,13 @@ Everything here is longer than the room it has. The media and the actions hold t
 
 A row with an `onPress` is a real pressable — press feedback and a button role — instead of a View with a handler bolted on. `chevron` says so before you tap it.
 
+<Preview
+  src="/previews/frame-rows-that-lead-somewhere.jpg"
+  alt="Frame — Rows that lead somewhere."
+  width={1179}
+  height={616}
+/>
+
 ```tsx
 <Frame.Panel>
   {sections.map((section) => (
@@ -193,6 +322,13 @@ A row with an `onPress` is a real pressable — press feedback and a button role
 ### Sections inside a panel
 
 For a widget with more than one cluster of rows. Each section labels its group and divides its own rows.
+
+<Preview
+  src="/previews/frame-sections-inside-a-panel.jpg"
+  alt="Frame — Sections inside a panel."
+  width={1179}
+  height={812}
+/>
 
 ```tsx
 <Frame.Panel>
@@ -217,6 +353,13 @@ For a widget with more than one cluster of rows. Each section labels its group a
 The band shapes what is put in it. The actions take equal widths and full pills without being asked — a row of equal decisions should not arrive with three different radii — and the footer is held in further than the panel, because a row running the full width of the shell reads as another edge of it.
 
 For a widget that only reports, keep the default. A band with nothing in it is a margin.
+
+<Preview
+  src="/previews/frame-a-widget-that-asks-for-something.jpg"
+  alt="Frame — A widget that asks for something."
+  width={1179}
+  height={676}
+/>
 
 ```tsx
 <Frame variant="inset">
@@ -243,6 +386,37 @@ For a widget that only reports, keep the default. A band with nothing in it is a
 </Frame>
 ```
 
+### A header in the band
+
+Under `inset` the header sits in the band above the panel, the same way the footer sits in the band below it.
+
+<Preview
+  src="/previews/frame-a-header-in-the-band.jpg"
+  alt="Frame — A header in the band."
+  width={1179}
+  height={814}
+/>
+
+```tsx
+<Frame variant="inset">
+  <Frame.Header>
+    <Frame.Title>Usage this month</Frame.Title>
+    <Frame.Action>Aug 1 – Aug 31</Frame.Action>
+  </Frame.Header>
+  <Frame.Panel>
+    {usage.map(([label, value]) => (
+      <Frame.Row key={label}>
+        <Text size="sm" className="flex-1">{label}</Text>
+        <Text size="sm" weight="medium">{value}</Text>
+      </Frame.Row>
+    ))}
+  </Frame.Panel>
+  <Frame.Footer>
+    <Button variant="secondary">Export</Button>
+  </Frame.Footer>
+</Frame>
+```
+
 ## Variants
 
 ### `variant`
@@ -250,6 +424,14 @@ For a widget that only reports, keep the default. A band with nothing in it is a
 - `default` *(default)*
 - `plain`
 - `inset`
+
+<Preview
+  src="/previews/frame-plain.jpg"
+  alt="Frame — variant plain, inside a Card."
+  width={1179}
+  height={446}
+  caption="plain"
+/>
 
 ```tsx
 {/* The default: a card flush inside a shell, with the header in the strip above it. */}

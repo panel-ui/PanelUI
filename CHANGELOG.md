@@ -9,6 +9,16 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.102.1] — 2026-09-25
+
+### Docs
+
+- **AI setup** — the polyfill install command now installs
+  `@ungap/structured-clone` and `@stardazed/streams-text-encoding`, the two
+  packages `polyfills.js` imports. Before, it installed three different
+  packages, so following the guide exactly failed to bundle with
+  `Unable to resolve "@stardazed/streams-text-encoding"`.
+
 ## [0.102.0] — 2026-09-22
 
 ### Added

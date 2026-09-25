@@ -22,10 +22,10 @@ npx expo install @ai-sdk/anthropic
 ## Polyfills
 
 React Native's JavaScript runtime is missing pieces the AI SDK's streaming path
-depends on. Install them:
+depends on. Install the two packages `polyfills.js` imports:
 
 ```bash
-npx expo install structured-clone react-native-fetch-api web-streams-polyfill
+npx expo install @ungap/structured-clone @stardazed/streams-text-encoding
 ```
 
 Then create `polyfills.js` and import it **first** in your root layout, before

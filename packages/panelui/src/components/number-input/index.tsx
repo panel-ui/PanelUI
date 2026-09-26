@@ -11,7 +11,8 @@
  * short delay and then faster, the way a native stepper does — so walking from
  * 0 to 200 is a press, not two hundred of them. The repeat reads the live
  * value from a ref rather than a closure, so it never strides off a stale
- * number.
+ * number, and it stops at a bound on its own rather than waiting for a
+ * release a disabled button may never send.
  *
  * Typing is allowed to be briefly invalid — an empty field, a lone `-`, a
  * trailing `.` — because clamping every keystroke fights the person mid-number.
@@ -35,6 +36,7 @@ import { Text } from '../../primitives/text';
 import { selectionTick } from '../../utils/haptics';
 import { Label } from '../label';
 import { normalize, precisionOf } from './number-input-math';
+import { createRepeater } from './number-input-repeat';
 
 /** Wait before a held button starts repeating — a tap must not trip it. */
 const REPEAT_DELAY = 400;
@@ -227,33 +229,42 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
         const clamped = normalize(next, min, max, step);
         if (tick && haptics) selectionTick();
         if (!isControlled) setUncontrolled(clamped);
-        if (clamped !== value) onValueChange?.(clamped);
+        if (clamped !== valueRef.current) onValueChange?.(clamped);
+        // Advance the ref now, so the next repeat steps from here even if the
+        // render carrying this value has not landed yet.
+        valueRef.current = clamped;
       },
-      [min, max, step, haptics, isControlled, value, onValueChange]
+      [min, max, step, haptics, isControlled, onValueChange]
     );
 
     // --- hold-to-repeat -----------------------------------------------------
-    const delayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    // The timer outlives the render that started it, so it calls the latest
+    // `commit` through a ref instead of the one it was created with.
+    const commitRef = useRef(commit);
+    commitRef.current = commit;
 
-    const stopRepeat = useCallback(() => {
-      if (delayRef.current) clearTimeout(delayRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      delayRef.current = null;
-      intervalRef.current = null;
-    }, []);
+    const repeaterRef = useRef<ReturnType<typeof createRepeater> | null>(null);
+    if (!repeaterRef.current) repeaterRef.current = createRepeater(REPEAT_DELAY, REPEAT_INTERVAL);
+    const repeater = repeaterRef.current;
 
+    const stopRepeat = repeater.stop;
     useEffect(() => stopRepeat, [stopRepeat]);
+    useEffect(() => {
+      if (disabled) stopRepeat();
+    }, [disabled, stopRepeat]);
 
     const startRepeat = useCallback(
       (direction: 1 | -1) => {
-        const nudge = () => commit(valueRef.current + direction * step, true);
-        nudge();
-        delayRef.current = setTimeout(() => {
-          intervalRef.current = setInterval(nudge, REPEAT_INTERVAL);
-        }, REPEAT_DELAY);
+        repeater.start(() => {
+          const current = valueRef.current;
+          const next = normalize(current + direction * step, min, max, step);
+          if (next === current) return false;
+          commitRef.current(next, true);
+          // Keep going only while there is room for another step.
+          return direction > 0 ? next < max : next > min;
+        });
       },
-      [commit, step]
+      [repeater, step, min, max]
     );
 
     const atMin = value <= min;

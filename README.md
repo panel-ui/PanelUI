@@ -274,12 +274,29 @@ Thank you to everyone who has shipped something here. If you would like to join 
 **[CONTRIBUTING.md](CONTRIBUTING.md)** is the place to start.
 
 <p align="center">
-  <a href="https://github.com/panel-ui/PanelUI/graphs/contributors">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/contributors/panel-ui/PanelUI.svg?title=false&amp;preset=transparent&amp;border=false&amp;mode=dark" />
-      <img alt="PanelUI contributors" src="https://shieldcn.dev/contributors/panel-ui/PanelUI.svg?title=false&amp;preset=transparent&amp;border=false&amp;mode=light" />
-    </picture>
-  </a>
+  <a href="https://github.com/Khalidabdi1" title="@Khalidabdi1"><img src="https://github.com/Khalidabdi1.png?size=112" width="56" height="56" alt="@Khalidabdi1" /></a>
+  <a href="https://github.com/danestves" title="@danestves"><img src="https://github.com/danestves.png?size=112" width="56" height="56" alt="@danestves" /></a>
+</p>
+
+### Issue reporters
+
+A clear bug report is how most fixes here start. Thank you to everyone who took the time to
+[open one](https://github.com/panel-ui/PanelUI/issues/new/choose).
+
+<p align="center">
+  <a href="https://github.com/yashDahiwale" title="@yashDahiwale"><img src="https://github.com/yashDahiwale.png?size=112" width="56" height="56" alt="@yashDahiwale" /></a>
+  <a href="https://github.com/arnabJ" title="@arnabJ"><img src="https://github.com/arnabJ.png?size=112" width="56" height="56" alt="@arnabJ" /></a>
+  <a href="https://github.com/AnxavY" title="@AnxavY"><img src="https://github.com/AnxavY.png?size=112" width="56" height="56" alt="@AnxavY" /></a>
+  <a href="https://github.com/MiddleKerb" title="@MiddleKerb"><img src="https://github.com/MiddleKerb.png?size=112" width="56" height="56" alt="@MiddleKerb" /></a>
+  <a href="https://github.com/Carloss616" title="@Carloss616"><img src="https://github.com/Carloss616.png?size=112" width="56" height="56" alt="@Carloss616" /></a>
+  <a href="https://github.com/zerocodefast" title="@zerocodefast"><img src="https://github.com/zerocodefast.png?size=112" width="56" height="56" alt="@zerocodefast" /></a>
+  <a href="https://github.com/ryzencool" title="@ryzencool"><img src="https://github.com/ryzencool.png?size=112" width="56" height="56" alt="@ryzencool" /></a>
+  <a href="https://github.com/ruimarcosjoao" title="@ruimarcosjoao"><img src="https://github.com/ruimarcosjoao.png?size=112" width="56" height="56" alt="@ruimarcosjoao" /></a>
+  <a href="https://github.com/gmarcospires" title="@gmarcospires"><img src="https://github.com/gmarcospires.png?size=112" width="56" height="56" alt="@gmarcospires" /></a>
+  <a href="https://github.com/emran-niftyitsolution" title="@emran-niftyitsolution"><img src="https://github.com/emran-niftyitsolution.png?size=112" width="56" height="56" alt="@emran-niftyitsolution" /></a>
+  <a href="https://github.com/ajoslin" title="@ajoslin"><img src="https://github.com/ajoslin.png?size=112" width="56" height="56" alt="@ajoslin" /></a>
+  <a href="https://github.com/aibohphobia1" title="@aibohphobia1"><img src="https://github.com/aibohphobia1.png?size=112" width="56" height="56" alt="@aibohphobia1" /></a>
+  <a href="https://github.com/Valharault" title="@Valharault"><img src="https://github.com/Valharault.png?size=112" width="56" height="56" alt="@Valharault" /></a>
 </p>
 
 ## License

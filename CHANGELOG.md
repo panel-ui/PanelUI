@@ -9,6 +9,18 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.102.2] — 2026-09-26
+
+### Fixed
+
+- **NumberInput** — quick taps on − or + could leave the value stepping on
+  its own, forever. On Android a fast tap can arrive as a second press before
+  the first one's release, and each press started a hold-to-repeat timer
+  without clearing the one already running; the orphaned timer kept going.
+  A press now always replaces any repeat in progress, and a held button stops
+  repeating by itself at `min` or `max` instead of relying on a release the
+  disabled button may never send. Reported by @yashDahiwale in #224.
+
 ## [0.102.1] — 2026-09-25
 
 ### Docs

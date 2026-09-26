@@ -167,13 +167,15 @@ try {
  * It needs to be well clear of it, though, because this step also runs in
  * `publish.yml`, after the tag exists. A budget that a few ordinary components
  * can cross turns a release into a failure at the one moment there is nothing
- * useful to do about it. At the current catalogue size the package is 768 files
- * and 2.1 MB packed, and each new component costs six or seven files — so this leaves room
- * for roughly another sixty of them. Raise it when it is genuinely reached;
- * that is a normal thing to do and not a signal that anything is wrong.
+ * useful to do about it. At 0.102.2 the package is 1,205 files and 3.2 MB
+ * packed (12.0 MB unpacked), and each new component costs six or seven files —
+ * so the file count leaves room for roughly another sixty of them. Raise it
+ * when it is genuinely reached; that is a normal thing to do and not a signal
+ * that anything is wrong. The byte budgets have less room than the count does,
+ * so check them at the same time.
  */
 const budgets = {
-  files: 1_200,
+  files: 1_600,
   packedBytes: 4_000_000,
   unpackedBytes: 14_000_000,
 };

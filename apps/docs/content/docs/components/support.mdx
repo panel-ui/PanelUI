@@ -4,6 +4,13 @@ description: The screen a person arrives on when they need help.
 status: new
 ---
 
+<Preview
+  src="/previews/support.jpg"
+  alt="The Support help screen: the team, the reply time, three ways to get in touch and two earlier requests."
+  width={1206}
+  height={2622}
+/>
+
 It covers a support section end to end: whether anyone is there, the ways to reach them, what the problem is about, what happened to the request the reader already made — and the thread itself, once one is open.
 
 **It does not render the transcript.** The turns are [Message](/docs/components/message) inside [MessageScroller](/docs/components/message-scroller), and the composer is [AIInput](/docs/ai-components/ai-input); a second set of bubbles in here would drift away from those the first time either changed. What Support adds is everything around them: who is answering, which request it belongs to, the moment it changes hands, the suggested replies, the wait time above the composer, and the question at the end.
@@ -266,6 +273,234 @@ The escalation is a suggested reply, and it is on screen from the first turn rat
 ### The whole way through
 
 The four screens in order: the help screen, the topic, the assistant's answer, and the person who can act on it. Keep them as separate routes rather than one screen that changes shape — they scroll differently, and the thread wants the keyboard handling `AIInput` already has.
+
+```tsx
+function Help() {
+  const router = useRouter();
+
+  return (
+    <Support availability="online">
+      <Support.Header title="Support">
+        <Avatar.Group size="sm" max={3}>
+          <Avatar fallback="KA" />
+          <Avatar fallback="KB" />
+          <Avatar fallback="JR" />
+        </Avatar.Group>
+      </Support.Header>
+
+      <Support.Status replyTime="Typically replies in under an hour" />
+
+      <Support.Channels>
+        <Support.Channel
+          icon={<MessageCircleIcon />}
+          label="Message us"
+          onPress={() => router.push('/support/new')}
+        />
+      </Support.Channels>
+    </Support>
+  );
+}
+
+// /support/new renders the transcript.
+<MessageScroller autoScroll>
+  <MessageScroller.Viewport>
+    <MessageScroller.Content>
+      {turns.map((turn) => (
+        <Message key={turn.id} align={turn.mine ? 'end' : 'start'}>
+          …
+        </Message>
+      ))}
+    </MessageScroller.Content>
+  </MessageScroller.Viewport>
+</MessageScroller>
+<AIInput value={draft} onValueChange={setDraft} onSubmit={send} />
+```
+
+## Versions
+
+### The help screen
+
+The screen a person lands on: who is answering, how long a reply takes, the ways to get in touch, and their earlier requests. An unread reply has an accent-coloured dot. A thread that has only been updated has a grey one.
+
+<Preview
+  src="/previews/support.jpg"
+  alt="Support — The help screen."
+  width={1206}
+  height={2622}
+/>
+
+```tsx
+<Support availability="online">
+  <Support.Header title="Support" description="We answer most things the same day">
+    <Avatar.Group size="sm" max={3}>
+      {team.map((person) => (
+        <Avatar key={person.name} source={{ uri: person.uri }} fallback={person.initials} />
+      ))}
+    </Avatar.Group>
+  </Support.Header>
+
+  <Support.Status replyTime="Typically replies in under an hour" />
+
+  <Support.Channels title="Get in touch">
+    <Support.Channel
+      icon={<SparklesIcon />}
+      label="Ask the assistant"
+      description="Answers most questions straight away"
+      onPress={openAssistant}
+    />
+    <Support.Channel
+      icon={<MessageCircleIcon />}
+      label="Message the team"
+      description="We pick these up through the day"
+      detail="~1h"
+      onPress={openThread}
+    />
+    <Support.Channel
+      icon={<MailIcon />}
+      label="Email us"
+      description="support@example.com"
+      detail="1 day"
+      onPress={openMail}
+    />
+  </Support.Channels>
+
+  <Support.Conversations title="Your requests">
+    <Support.Conversation
+      title="Refund for order #4821"
+      preview="We've issued the refund — it should land in 3–5 days."
+      status="solved"
+      reference="#4821"
+      timestamp="2h"
+      unread
+    />
+    <Support.Conversation
+      title="Can't add a second device"
+      preview="Could you tell us which OS version it is running?"
+      status="pending"
+      reference="#4810"
+      timestamp="Yesterday"
+      updated
+    />
+  </Support.Conversations>
+</Support>
+```
+
+### Picking a topic
+
+A single-select list of topics, followed by a button that stays disabled until one is picked. Screen readers announce the list as a radio group.
+
+<PreviewVideo
+  src="/previews/support-picking-a-topic.mp4"
+  poster="/previews/support-picking-a-topic-poster.jpg"
+  alt="Support — Picking a topic, with each topic selected in turn."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+const [topic, setTopic] = useState<string | null>('billing');
+
+<Support>
+  <Support.Header
+    title="What is it about?"
+    description="Picking one gets you to the right team first time"
+  />
+  <Support.Topics value={topic} onValueChange={setTopic}>
+    <Support.Topic
+      value="billing"
+      icon={<CardIcon />}
+      label="Billing"
+      description="Invoices, refunds and plans"
+    />
+    <Support.Topic
+      value="account"
+      icon={<LockIcon />}
+      label="Account and sign-in"
+      description="Passwords, devices and two-factor"
+    />
+    <Support.Topic
+      value="bug"
+      icon={<BugIcon />}
+      label="Something is broken"
+      description="Send us what you were doing at the time"
+    />
+  </Support.Topics>
+  <Button disabled={!topic} onPress={next}>
+    Continue
+  </Button>
+</Support>
+```
+
+### Talking to somebody
+
+A full-screen conversation. The agent and the request sit at the top, then the handoff and the transcript, then a rating once the request is resolved. The reply time and the composer sit at the bottom.
+
+<PreviewVideo
+  src="/previews/support-talking-to-somebody.mp4"
+  poster="/previews/support-talking-to-somebody-poster.jpg"
+  alt="Support — Talking to somebody, with the conversation being rated four stars."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+<View className="flex-1">
+  <View className="gap-3 border-b border-border px-4 pb-3">
+    <Support availability="online">
+      <Support.Agent
+        name="Khalid Abdi"
+        role="Support"
+        avatar={<Avatar size="sm" fallback="KA" />}
+      />
+      <Support.Ticket subject="Refund for order #4821" reference="#4821" status="open" />
+    </Support>
+  </View>
+
+  <MessageScroller autoScroll className="flex-1">
+    <MessageScroller.Viewport>
+      <MessageScroller.Content className="gap-3 px-4 py-4">
+        <Support.Handoff icon={<HeadsetIcon />}>
+          You were passed to Khalid, who can see everything you told the assistant.
+        </Support.Handoff>
+
+        {turns.map((turn) => (
+          <Message key={turn.id} align={turn.mine ? 'end' : 'start'}>
+            …
+          </Message>
+        ))}
+
+        <Support.Resolution>
+          <Rating defaultValue={0} max={5} onValueCommit={rate} />
+        </Support.Resolution>
+      </MessageScroller.Content>
+    </MessageScroller.Viewport>
+  </MessageScroller>
+
+  <View className="gap-2 px-4">
+    <Support.Note>Khalid typically replies in under an hour</Support.Note>
+    <AIInput value={draft} onValueChange={setDraft} onSubmit={send}>
+      <AIInput.Field placeholder="Write a reply" />
+      <AIInput.Toolbar>
+        <AIInput.Action label="Attach" icon={<PaperclipIcon />} onPress={attach} />
+        <AIInput.Spacer />
+        <AIInput.Submit />
+      </AIInput.Toolbar>
+    </AIInput>
+  </View>
+</View>
+```
+
+### The whole way through
+
+All four steps in order: the help screen, picking a topic, the assistant's answer, and the handoff to a person. Each step is its own screen.
+
+<PreviewVideo
+  src="/previews/support-the-whole-way-through.mp4"
+  poster="/previews/support-the-whole-way-through-poster.jpg"
+  alt="Support — The whole way through: the help screen, a topic, the assistant's answer, and the handoff to a person."
+  width={720}
+  height={1566}
+/>
 
 ```tsx
 function Help() {

@@ -9,6 +9,16 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.102.3] — 2026-09-27
+
+### Fixed
+
+- **BottomSheet** — on Android, the navigation bar covered the bottom of a
+  `detached` sheet. The sheet floated a fixed 24 points above the screen edge
+  and ignored the safe-area inset, which with three-button navigation is about
+  48dp. On Android it now sits 12 points above the inset. iOS is unchanged.
+  Reported by @yashDahiwale in #225.
+
 ## [0.102.2] — 2026-09-26
 
 ### Fixed

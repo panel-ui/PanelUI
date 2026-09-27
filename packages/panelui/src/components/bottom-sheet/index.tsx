@@ -15,6 +15,7 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -100,8 +101,9 @@ const sheetVariants = tv({
       // rule through the middle of nothing.
       false: 'rounded-t-3xl border-b-0',
       // Floating: all four edges are real, so all four are drawn and all four
-      // corners are rounded.
-      true: 'mx-4 mb-6 rounded-3xl',
+      // corners are rounded. The bottom gap depends on the safe area, so it is
+      // set in the style rather than here — see `detachedGap`.
+      true: 'mx-4 rounded-3xl',
     },
   },
   defaultVariants: {
@@ -352,7 +354,8 @@ export interface BottomSheetContentProps extends ViewProps {
    * bottom, so it reads as a card laid over the app rather than a drawer
    * pulled out of it. All four corners round and the bottom border comes back,
    * since a floating sheet has four real edges where a docked one has three.
-   * Ignored by the native sheet, which the platform positions itself.
+   * On Android it floats above the navigation bar, so the system buttons stay
+   * uncovered. Ignored by the native sheet, which the platform positions itself.
    */
   detached?: boolean;
   /**
@@ -694,12 +697,22 @@ function BottomSheetContent({
    * `insets.top` is the status bar and the notch, and content that runs under
    * those is unreadable at exactly the moment the sheet is at its tallest.
    */
+  /*
+   * How far a detached sheet floats above the bottom of the screen.
+   *
+   * On iOS it floats over the home indicator, which only takes a swipe. On
+   * Android the bottom inset can be the three-button navigation bar, whose
+   * buttons have to stay reachable, so the sheet sits above the inset.
+   */
+  const detachedGap =
+    Platform.OS === 'android' ? Math.max(insets.bottom + 12, 24) : 24;
+
   const sizedHeight =
     size === 'auto'
       ? undefined
       : Math.min(
           screenHeight * SIZE_FRACTION[size],
-          screenHeight - insets.top - (detached ? 24 : 8)
+          screenHeight - insets.top - (detached ? detachedGap : 8)
         );
 
   const surface = useMemo(
@@ -828,10 +841,12 @@ function BottomSheetContent({
             // the safe-area padding with it.
             style={[
               sheetStyle,
-              // A detached sheet's own bottom margin already clears the home
-              // indicator, so it takes plain padding rather than stacking the
-              // inset on top of the gap.
-              { paddingBottom: detached ? 16 : Math.max(insets.bottom, 16) },
+              // A detached sheet's own bottom margin already clears the system
+              // bar, so it takes plain padding rather than stacking the inset
+              // on top of the gap.
+              detached
+                ? { marginBottom: detachedGap, paddingBottom: 16 }
+                : { paddingBottom: Math.max(insets.bottom, 16) },
               sizedHeight === undefined ? null : { height: sizedHeight },
               props.style,
             ]}

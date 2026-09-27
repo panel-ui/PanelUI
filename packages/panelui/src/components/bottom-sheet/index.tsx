@@ -693,11 +693,6 @@ function BottomSheetContent({
   }));
 
   /*
-   * A sized sheet is clamped rather than handed its fraction outright.
-   * `insets.top` is the status bar and the notch, and content that runs under
-   * those is unreadable at exactly the moment the sheet is at its tallest.
-   */
-  /*
    * How far a detached sheet floats above the bottom of the screen.
    *
    * On iOS it floats over the home indicator, which only takes a swipe. On
@@ -707,6 +702,11 @@ function BottomSheetContent({
   const detachedGap =
     Platform.OS === 'android' ? Math.max(insets.bottom + 12, 24) : 24;
 
+  /*
+   * A sized sheet is clamped rather than handed its fraction outright.
+   * `insets.top` is the status bar and the notch, and content that runs under
+   * those is unreadable at exactly the moment the sheet is at its tallest.
+   */
   const sizedHeight =
     size === 'auto'
       ? undefined

@@ -9,6 +9,23 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.103.1] — 2026-09-28
+
+### Fixed
+
+- **Sketch** — a stroke or shape vanished for a moment when the finger
+  lifted. The live copy was cleared at once, and the committed copy only
+  appeared once React had rendered it. The live copy now stays until the
+  committed one is on screen.
+- **Sketch** — the shape grid was drawn in a translucent tint, so the drawing
+  showed through it. It now sits on the solid popover surface.
+
+### Docs
+
+- **Sketch** — a recording for each version.
+- **Panelside** — the recordings are redone. The earlier ones stuttered where
+  the simulator had been driven with synthetic drags.
+
 ## [0.103.0] — 2026-09-28
 
 ### Added

@@ -62,6 +62,7 @@ import { useCSSVariable } from 'uniwind';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
+  runOnUI,
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
@@ -601,6 +602,15 @@ function SketchRoot(
   const liveTool = useSharedValue(-1);
   const anchor = useSharedValue({ x: 0, y: 0 });
   const tip = useSharedValue({ x: 0, y: 0 });
+  /*
+   * Which gesture the live values belong to. A finished stroke stays drawn
+   * live until its committed copy has rendered: cleared the moment the finger
+   * lifted, it vanished for the frames React took to put the copy on screen,
+   * and the drawing flickered on every stroke. The number stops a slow commit
+   * from clearing a stroke that has started since.
+   */
+  const strokeSeq = useSharedValue(0);
+  const [settled, setSettled] = useState(0);
 
   const changeRef = useRef(onChange);
   changeRef.current = onChange;
@@ -615,8 +625,9 @@ function SketchRoot(
   const commitState = useRef({ ink, size, shape });
   commitState.current = { ink, size, shape };
 
-  const commitStroke = useCallback((d: string, erase: boolean) => {
+  const commitStroke = useCallback((d: string, erase: boolean, seq: number) => {
     const { ink: currentInk, size: currentSize } = commitState.current;
+    setSettled(seq);
     setItems((current) => [
       ...current,
       erase
@@ -625,8 +636,9 @@ function SketchRoot(
     ]);
   }, []);
 
-  const commitShape = useCallback((d: string) => {
+  const commitShape = useCallback((d: string, seq: number) => {
     const { ink: currentInk, size: currentSize, shape: currentShape } = commitState.current;
+    setSettled(seq);
     setItems((current) => [
       ...current,
       { type: 'shape', shape: currentShape, d, color: currentInk, width: currentSize },
@@ -641,6 +653,7 @@ function SketchRoot(
         .averageTouches(true)
         .onBegin((event) => {
           'worklet';
+          strokeSeq.value += 1;
           liveTool.value = toolValue.value;
           live.value = [event.x, event.y];
           anchor.value = { x: event.x, y: event.y };
@@ -663,27 +676,46 @@ function SketchRoot(
         })
         .onFinalize(() => {
           'worklet';
+          // The live values are left in place: the stroke stays drawn until
+          // its committed copy is on screen, and is cleared from there.
           const mode = liveTool.value;
-          liveTool.value = -1;
+          const seq = strokeSeq.value;
           if (mode === 1) {
             const a = anchor.value;
             const b = tip.value;
-            live.value = [];
             // A tap with the shape tool draws nothing: a shape of no size is
             // not a shape, and a dot would be the pen's job.
-            if (Math.abs(b.x - a.x) < 4 && Math.abs(b.y - a.y) < 4) return;
+            if (Math.abs(b.x - a.x) < 4 && Math.abs(b.y - a.y) < 4) {
+              liveTool.value = -1;
+              return;
+            }
             runOnJS(commitShape)(
-              shapePath(shapeValue.value, a.x, a.y, b.x, b.y, sizeValue.value)
+              shapePath(shapeValue.value, a.x, a.y, b.x, b.y, sizeValue.value),
+              seq
             );
             return;
           }
           const points = live.value;
-          live.value = [];
-          if (points.length === 0) return;
-          runOnJS(commitStroke)(strokePath(points), mode === 2);
+          if (points.length === 0) {
+            liveTool.value = -1;
+            return;
+          }
+          runOnJS(commitStroke)(strokePath(points), mode === 2, seq);
         }),
-    [anchor, commitShape, commitStroke, live, liveTool, shapeValue, sizeValue, tip, toolValue]
+    [anchor, commitShape, commitStroke, live, liveTool, shapeValue, sizeValue, strokeSeq, tip, toolValue]
   );
+
+  // The committed copy of stroke `settled` has rendered, so its live copy
+  // can go — unless another stroke has begun since, which owns the values now.
+  useEffect(() => {
+    if (settled === 0) return;
+    runOnUI((seq: number) => {
+      'worklet';
+      if (strokeSeq.value !== seq) return;
+      liveTool.value = -1;
+      live.value = [];
+    })(settled);
+  }, [items, live, liveTool, settled, strokeSeq]);
 
   // The ink being drawn: a pen stroke or a shape. Empty while erasing.
   const liveInkProps = useAnimatedProps(() => {
@@ -971,7 +1003,10 @@ function SketchRoot(
         ) : null}
 
         {card === 'shapes' ? (
-          <View className="absolute left-4 right-4 top-2 flex-row flex-wrap rounded-3xl bg-muted p-2">
+          // Solid underneath: `muted` is a tint, and on its own the drawing
+          // showed through the card.
+          <View className="absolute left-4 right-4 top-2 overflow-hidden rounded-3xl bg-popover shadow-lg">
+          <View className="flex-row flex-wrap bg-muted p-2">
             {visibleShapes.map((entry) => {
               const selected = tool === 'shape' && shape === entry;
               return (
@@ -990,6 +1025,7 @@ function SketchRoot(
                 </AnimatedPressable>
               );
             })}
+          </View>
           </View>
         ) : null}
 

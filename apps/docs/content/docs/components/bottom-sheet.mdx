@@ -3,6 +3,14 @@ title: BottomSheet
 description: Draggable sheet anchored to the bottom of the screen.
 ---
 
+<PreviewVideo
+  src="/previews/bottom-sheet.mp4"
+  poster="/previews/bottom-sheet-poster.jpg"
+  alt="A share sheet rising from the bottom of the screen with a link field and a Copy link button, then closing from its corner button."
+  width={720}
+  height={1566}
+/>
+
 A sheet anchored to the bottom of the screen, dragged and dismissed with a finger.
 
 It mounts through a portal and unmounts after its exit animation, so a closed sheet costs nothing.
@@ -63,6 +71,14 @@ npx panelui-cli@latest add bottom-sheet
 
 `BottomSheet.Trigger` clones its child and adds the press handler, so any pressable works as the trigger.
 
+<PreviewVideo
+  src="/previews/bottom-sheet.mp4"
+  poster="/previews/bottom-sheet-poster.jpg"
+  alt="A share sheet opened from an outline button, with a link field and a Copy link button, closed from its corner button."
+  width={720}
+  height={1566}
+/>
+
 ```tsx
 <BottomSheet>
   <BottomSheet.Trigger>
@@ -98,6 +114,14 @@ const [open, setOpen] = useState(false);
 
 Floated clear of all four screen edges. For a short, decisive sheet — a confirmation, a rating — where a full-width drawer is more sheet than the question needs.
 
+<PreviewVideo
+  src="/previews/bottom-sheet-a-detached-sheet.mp4"
+  poster="/previews/bottom-sheet-a-detached-sheet-poster.jpg"
+  alt="A rating sheet floating clear of the screen edges with Bad, Fine and Great buttons. Great is pressed and the sheet is dismissed by tapping the backdrop."
+  width={720}
+  height={1566}
+/>
+
 ```tsx
 <BottomSheet>
   <BottomSheet.Trigger>
@@ -123,6 +147,14 @@ Floated clear of all four screen edges. For a short, decisive sheet — a confir
 
 `blur` replaces the dim with a frost, so the screen behind recedes without disappearing. Falls back to the dim when `expo-blur` is not installed.
 
+<PreviewVideo
+  src="/previews/bottom-sheet-a-frosted-backdrop.mp4"
+  poster="/previews/bottom-sheet-a-frosted-backdrop-poster.jpg"
+  alt="A Move to trash sheet over a frosted screen, closed from its corner button."
+  width={720}
+  height={1566}
+/>
+
 ```tsx
 <BottomSheet.Content detached blur>
   <Text size="lg" weight="semibold" className="mb-1">
@@ -140,7 +172,7 @@ Floated clear of all four screen edges. For a short, decisive sheet — a confir
 
 ### A sheet you cannot dismiss by tapping out
 
-`dismissible={false}` removes the backdrop press. The drag-to-dismiss gesture still works, so use it for "are you sure", not for anything you must not escape.
+`dismissible={false}` removes every way out that is not yours: the backdrop press, the drag and the Android back button. Put a button in the sheet that closes it.
 
 ```tsx
 <BottomSheet.Content dismissible={false}>
@@ -178,6 +210,14 @@ A sheet of a handful of rows should size to them. Past that, `size` fixes the he
 
 A plain `ScrollView` and the sheet’s drag are strangers, so the first to activate takes the touch and every downward swipe is a coin toss. `BottomSheet.Body` reports where it is scrolled to, so the list keeps the drag until it reaches its top and the sheet takes over from there.
 
+<PreviewVideo
+  src="/previews/bottom-sheet-a-scrolling-list.mp4"
+  poster="/previews/bottom-sheet-a-scrolling-list-poster.jpg"
+  alt="A Choose a country sheet whose list scrolls under a fixed heading and back, before the sheet is closed."
+  width={720}
+  height={1566}
+/>
+
 ```tsx
 <BottomSheet.Content size="half">
   <BottomSheet.Header title="Choose a country" />
@@ -193,11 +233,126 @@ A plain `ScrollView` and the sheet’s drag are strangers, so the first to activ
 </BottomSheet.Content>
 ```
 
+### Without the close button
+
+`showClose={false}` removes the corner button. The sheet still closes by dragging it down or tapping the backdrop.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-without-the-close-button.mp4"
+  poster="/previews/bottom-sheet-without-the-close-button-poster.jpg"
+  alt="A sheet with no corner button, dismissed by tapping the backdrop."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+<BottomSheet.Content showClose={false}>
+  <Text size="lg" weight="semibold">Drag to dismiss</Text>
+  <Text size="sm" muted>Pull the sheet down, or tap the backdrop.</Text>
+</BottomSheet.Content>
+```
+
+### A form
+
+The sheet does not move for the keyboard on its own. Pad the content by the keyboard's height so the fields stay above it.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-a-form.mp4"
+  poster="/previews/bottom-sheet-a-form-poster.jpg"
+  alt="An Invite a teammate sheet with Email and Message fields and a Send invite button."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+const keyboard = useAnimatedKeyboard();
+const lift = useAnimatedStyle(() => ({ paddingBottom: keyboard.height.value }));
+
+<BottomSheet.Content>
+  <Animated.View style={lift}>
+    <Input label="Email" placeholder="teammate@example.com" />
+    <Input label="Message" placeholder="Optional note" />
+    <Button fullWidth>Send invite</Button>
+  </Animated.View>
+</BottomSheet.Content>
+```
+
+### A list of actions
+
+A column of full-width buttons, for the actions on one item. Put the destructive one last.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-a-list-of-actions.mp4"
+  poster="/previews/bottom-sheet-a-list-of-actions-poster.jpg"
+  alt="A Project sheet listing Rename, Duplicate, Archive and a red Delete button."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+<BottomSheet.Content>
+  <Text size="lg" weight="semibold">Project</Text>
+  <View className="gap-2 pb-2">
+    <Button variant="ghost" fullWidth>Rename</Button>
+    <Button variant="ghost" fullWidth>Duplicate</Button>
+    <Button variant="ghost" fullWidth>Archive</Button>
+    <Button variant="destructive" fullWidth>Delete</Button>
+  </View>
+</BottomSheet.Content>
+```
+
+### The platform's sheet
+
+`native` presents the platform's own sheet, with its detents and dismiss gesture. The platform draws the container; the content inside is still yours and still themed. It needs the optional `@expo/ui`.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-the-platform-sheet.mp4"
+  poster="/previews/bottom-sheet-the-platform-sheet-poster.jpg"
+  alt="A half-height platform sheet in its translucent material, closed from a button inside it."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+<BottomSheet native snapPoints={['half']} open={open} onOpenChange={setOpen}>
+  <BottomSheet.Content>
+    <Text size="lg" weight="semibold">Platform chrome, your content</Text>
+    <Button onPress={() => setOpen(false)}>Close</Button>
+  </BottomSheet.Content>
+</BottomSheet>
+```
+
+### A solid platform sheet
+
+`nativeBackground` paints the platform's sheet in the theme's popover surface instead of its translucent material, for a sheet that is part of the app rather than laid over it.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-a-solid-platform-sheet.mp4"
+  poster="/previews/bottom-sheet-a-solid-platform-sheet-poster.jpg"
+  alt="A half-height platform sheet painted in the theme surface, closed from a button inside it."
+  width={720}
+  height={1566}
+/>
+
+```tsx
+<BottomSheet native nativeBackground snapPoints={['half']} open={open} onOpenChange={setOpen}>
+  <BottomSheet.Content>…</BottomSheet.Content>
+</BottomSheet>
+```
+
 ## Versions
 
 ### Full height
 
 Filters are the honest case for the height: there are more of them than fits, and the button you came to press is the last thing you want to have to scroll to.
+
+<PreviewVideo
+  src="/previews/bottom-sheet-full-height.mp4"
+  poster="/previews/bottom-sheet-full-height-poster.jpg"
+  alt="A full-height Filters sheet whose body scrolls under a fixed heading while Reset and Show 384 results stay pinned at the bottom."
+  width={720}
+  height={1566}
+/>
 
 ```tsx
 <BottomSheet.Content size="full">

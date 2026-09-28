@@ -156,7 +156,7 @@ Extends `Omit<ViewProps, 'children'>, Pick<SelectionVariantProps, 'destructive'>
 | `onOpenChange` | `(open: boolean) => void` | — | — |
 | `title` | `string` | `Select` | The word in front of the count. |
 | `hideSelectAll` | `boolean` | `false` | Hide the select-all control. |
-| `size` | `'auto' \| 'half' \| 'full'` | `full` | How tall the sheet opens. `full` by default, and deliberately not `auto`. A sheet that sizes to its content gives its scrolling body no height to fill, and a list inside a box of no height draws nothing — which looks like an empty sheet rather than like a missing style. Full rather than half because a picker spends a header and a footer before it draws a single row. At half a screen that leaves four or five rows for the thing the sheet was opened to do, and the reader scrolls a list that would have fitted. Pass `half` for a sheet of two or three choices. |
+| `size` | `'auto' \| 'half' \| 'full'` | `full` | How tall the sheet opens. `full` by default. `auto` sizes the sheet to its rows, up to the height of the screen, and suits a short list. Full rather than half because a picker spends a header and a footer before it draws a single row. At half a screen that leaves four or five rows for the thing the sheet was opened to do, and the reader scrolls a list that would have fitted. Pass `half` for a sheet of two or three choices. |
 | `children` | `ReactNode` | **required** | The things to pick between, and optionally a `SelectionMode.Bar` of actions. The bar is lifted into the sheet's footer wherever it is written. |
 
 ### Example — Anything, not just rows
@@ -186,9 +186,9 @@ An item is a wrapper, so what it holds is yours. Group them in a card for rows, 
 
 ### Notes
 
-### The sheet is half-height by default
+### The sheet is full-height by default
 
-Not `auto`. A sheet that sizes to its content gives its scrolling body no height to fill, and a list in a box of no height draws nothing — which reads as an empty sheet rather than as a missing style. Pass `size="full"` for a long list, or `size="auto"` only when the sheet really is a handful of rows.
+A picker spends a header and a footer before it draws a row, so it opens tall. Pass `size="half"` for two or three choices, or `size="auto"` to size the sheet to its rows — it stops short of the status bar and scrolls past that.
 
 ### Group the items
 

@@ -1055,10 +1055,8 @@ export interface SelectionModeSheetProps {
   /**
    * How tall the sheet opens.
    *
-   * `full` by default, and deliberately not `auto`. A sheet that sizes to its
-   * content gives its scrolling body no height to fill, and a list inside a box
-   * of no height draws nothing — which looks like an empty sheet rather than
-   * like a missing style.
+   * `full` by default. `auto` sizes the sheet to its rows, up to the height
+   * of the screen, and suits a short list.
    *
    * Full rather than half because a picker spends a header and a footer before
    * it draws a single row. At half a screen that leaves four or five rows for

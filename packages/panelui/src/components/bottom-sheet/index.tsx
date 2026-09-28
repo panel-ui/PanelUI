@@ -272,6 +272,18 @@ const SheetSurfaceContext = createContext<{
   hasScrollable: SharedValue<boolean>;
 } | null>(null);
 
+/**
+ * Whether the sheet has a height of its own for `Body` to fill.
+ *
+ * Provided by both the styled and the native sheet, because the body has to be
+ * laid out differently in the two cases. A sized sheet is a definite column,
+ * and the body takes what the header and footer leave. An `auto` sheet is
+ * measured from its content — and a body that asks to fill it (`flex: 1`, a
+ * basis of zero) asks for a share of nothing, so it comes out zero points tall
+ * and everything in it disappears.
+ */
+const SheetSizedContext = createContext(false);
+
 function BottomSheetRoot({
   children,
   open,
@@ -371,7 +383,8 @@ export interface BottomSheetContentProps extends ViewProps {
    * How tall the sheet opens.
    *
    * `auto` sizes to the content, which is right for a sheet that is a handful
-   * of rows. `half` and `full` fix the height instead, for content that has to
+   * of rows. It stops short of the status bar, and a `Body` inside it scrolls
+   * once the content is taller than that. `half` and `full` fix the height instead, for content that has to
    * be given the room rather than allowed to ask for it — a list, a form, a
    * document. Either way the sheet is clamped to leave the status bar clear,
    * so `full` is as tall as the screen allows rather than as tall as the screen.
@@ -707,13 +720,11 @@ function BottomSheetContent({
    * `insets.top` is the status bar and the notch, and content that runs under
    * those is unreadable at exactly the moment the sheet is at its tallest.
    */
+  const sheetCap = screenHeight - insets.top - (detached ? detachedGap : 8);
   const sizedHeight =
     size === 'auto'
       ? undefined
-      : Math.min(
-          screenHeight * SIZE_FRACTION[size],
-          screenHeight - insets.top - (detached ? detachedGap : 8)
-        );
+      : Math.min(screenHeight * SIZE_FRACTION[size], sheetCap);
 
   const surface = useMemo(
     () => ({ scrollGesture, scrollOffset, hasScrollable }),
@@ -766,6 +777,7 @@ function BottomSheetContent({
         >
           <RNHostView matchContents>
             <BottomSheetContext.Provider value={context}>
+              <SheetSizedContext.Provider value={snapPoints !== undefined}>
               <View
                 {...props}
                 className={cn(
@@ -788,6 +800,7 @@ function BottomSheetContent({
               >
                 {textChildren(children)}
               </View>
+              </SheetSizedContext.Provider>
             </BottomSheetContext.Provider>
           </RNHostView>
         </NativeBottomSheet>
@@ -847,11 +860,14 @@ function BottomSheetContent({
               detached
                 ? { marginBottom: detachedGap, paddingBottom: 16 }
                 : { paddingBottom: Math.max(insets.bottom, 16) },
-              sizedHeight === undefined ? null : { height: sizedHeight },
+              sizedHeight === undefined
+                ? { maxHeight: sheetCap }
+                : { height: sizedHeight },
               props.style,
             ]}
           >
             <SheetSurfaceContext.Provider value={surface}>
+            <SheetSizedContext.Provider value={sizedHeight !== undefined}>
               {showGrabber ? (
                 <View className="mb-3 self-center">
                   <View className="h-1 w-10 rounded-full bg-muted-foreground/30" />
@@ -884,6 +900,7 @@ function BottomSheetContent({
                   />
                 </Pressable>
               ) : null}
+            </SheetSizedContext.Provider>
             </SheetSurfaceContext.Provider>
           </Animated.View>
         </GestureDetector>
@@ -944,7 +961,12 @@ export interface BottomSheetBodyProps
 }
 
 /**
- * The scrolling part of a sized sheet.
+ * The scrolling part of a sheet.
+ *
+ * In a sheet with a `size` it fills whatever the header and footer leave. In
+ * an `auto` sheet it is as tall as its content, and scrolls once the sheet
+ * has grown as tall as the screen allows — or as a `maxHeight` on the content
+ * allows.
  *
  * A plain `ScrollView` works here too, but only one of the two gestures can
  * win a given drag and neither knows about the other, so the list and the
@@ -958,6 +980,7 @@ const BottomSheetBody = forwardRef<
   BottomSheetBodyProps
 >(function BottomSheetBody({ className, children, onScroll, ...props }, ref) {
   const surface = useContext(SheetSurfaceContext);
+  const sized = useContext(SheetSizedContext);
 
   useEffect(() => {
     if (!surface) return;
@@ -998,7 +1021,10 @@ const BottomSheetBody = forwardRef<
       ref={ref}
       scrollEventThrottle={16}
       showsVerticalScrollIndicator={false}
-      className={cn('flex-1', className)}
+      // In a sized sheet the body fills what the header and footer leave. In
+      // an `auto` one it is as tall as its content and gives way once the
+      // sheet reaches its cap, which is what makes a long list scroll.
+      className={cn(sized ? 'flex-1' : 'shrink grow-0', className)}
       {...props}
       onScroll={composed}
     >

@@ -43,6 +43,7 @@ Releases before 0.40.0 predate this file and are recorded only in the commit his
 
 - **BottomSheet** — a recording for every version, and new examples for the
   demos that had none.
+- **Panelside** — a recording for every version, with the native one on top.
 
 ## [0.102.3] — 2026-09-27
 

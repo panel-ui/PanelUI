@@ -1,0 +1,44 @@
+{
+  "slug": "sketch",
+  "intro": "A drawing surface with its tools around it: a pen, eight shapes, an eraser, a stroke-width slider, colours and undo. It hands back the drawing as SVG when you press confirm.\n\nIt fills the space it is given. Use `Sketch.Sheet` to present it in a bottom sheet, or put `Sketch` on a screen of its own.\n\nFor a signature on a form, use [Signature](/docs/components/signature). It is a single pad with no tools.",
+  "usage": "const [open, setOpen] = useState(false);\n\n<Button onPress={() => setOpen(true)}>Draw</Button>\n<Sketch.Sheet\n  open={open}\n  onOpenChange={setOpen}\n  onDone={({ svg }) => attach(svg)}\n/>",
+  "extraImports": [
+    "Button",
+    "View",
+    "type SketchHandle"
+  ],
+  "parts": {
+    "Sheet": "The sketch in a bottom sheet that fills the screen. The sheet cannot be dragged or tapped away, so close and confirm are the ways out, and both close it. It is the platform's own sheet by default, painted solid; pass `native={false}` for the styled one."
+  },
+  "anatomy": "<Sketch.Sheet open={open} onOpenChange={setOpen} onDone={save} />\n\n{/* or on a screen of its own */}\n<Sketch onClose={goBack} onDone={save} />",
+  "examples": [
+    {
+      "title": "In a sheet",
+      "description": "`Sketch.Sheet` opens over the current screen and closes when the drawing is confirmed. `onDone` receives the SVG, the canvas size in points and the list of what was drawn.",
+      "code": "const [open, setOpen] = useState(false);\nconst [drawing, setDrawing] = useState<string | null>(null);\n\n<Button variant=\"outline\" onPress={() => setOpen(true)}>Open sketch</Button>\n<Sketch.Sheet\n  open={open}\n  onOpenChange={setOpen}\n  onDone={({ svg }) => setDrawing(svg)}\n/>"
+    },
+    {
+      "title": "The styled sheet",
+      "description": "`native={false}` uses PanelUI's own sheet instead of the platform's. It is also what you get when `@expo/ui` is not installed.",
+      "code": "<Sketch.Sheet native={false} open={open} onOpenChange={setOpen} onDone={save} />"
+    },
+    {
+      "title": "Choosing the tools",
+      "description": "`colors` replaces the swatches and `shapes` chooses which shapes the grid offers, in order. `customColor={false}` removes the colour-picker button before the swatches.",
+      "code": "<Sketch\n  colors={['#111111', '#ef4444', '#3b82f6']}\n  shapes={['arrow', 'rectangle', 'ellipse']}\n  defaultSize={4}\n  minSize={1}\n  maxSize={12}\n  onDone={save}\n/>"
+    },
+    {
+      "title": "Driving it from outside",
+      "description": "A ref gives you `undo`, `clear`, `isEmpty`, `toSVG` and `toPNG`. `toPNG` needs the optional `react-native-view-shot` and throws by name without it.",
+      "code": "const sketch = useRef<SketchHandle>(null);\n\n<Sketch ref={sketch} onChange={setCount} />\n<Button onPress={async () => share(await sketch.current?.toPNG({ scale: 3 }))}>\n  Share as PNG\n</Button>"
+    }
+  ],
+  "versions": [
+    {
+      "title": "Full page",
+      "description": "The whole screen is the canvas. Pad it by the safe-area insets, since it draws edge to edge.",
+      "code": "const insets = useSafeAreaInsets();\n\n<Sketch\n  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}\n  onClose={() => router.back()}\n  onDone={save}\n/>"
+    }
+  ],
+  "notes": "### The eraser rubs out, it does not delete\n\nThe eraser paints a mask over what was drawn before it, so it removes only what is under the finger. Ink drawn afterwards over an erased patch is not affected. Undo takes an eraser stroke back like any other mark.\n\nThe drawing stays vector, and `toSVG()` writes the same masks, so an export matches the screen.\n\n### The sheet cannot be dragged away\n\nOn a canvas every drag is a stroke. On iOS the platform sheet is told not to take drags, and the styled sheet's drag is switched off. On Android, the platform sheet keeps its own drag handling.\n\n### It needs a height\n\n`Sketch` fills its parent, like any `flex-1` view. On a screen, that is the screen. Inside a scroll view it has no height to fill; give it one.\n\n### Colours\n\nThe chrome is drawn in theme tokens, so it follows light and dark. The swatches are ink colours rather than tokens, because a drawing keeps its colours when it leaves the app. The default ink is the theme's foreground."
+}

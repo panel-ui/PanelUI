@@ -4,9 +4,10 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Pressable, ScrollView, View } from "react-native";
-import { Alert, Avatar, Badge, BookmarkIcon, BottomSheet, Button, Card, CheckIcon, ChevronLeftIcon, EllipsisIcon, EyeIcon, Frame, HeartIcon, ImageViewer, Item, ListChecksIcon, MaximizeIcon, Message, MessageCircleIcon, MessageScroller, Plan, MicIcon, MoonIcon, PackageIcon, PauseIcon, PencilIcon, PlayIcon, Post, type PostVote, Portal, Progress, RepeatIcon, Scrim, SendIcon, ShareNodesIcon, ScrollBlur, ScrollFade, Separator, Signature, type SignatureHandle, Skeleton, Sortable, reorderItems, useSortableItem, Soundwave, Steps, SunIcon, Surface, Task, Text, XIcon, ToggleButton, ToggleButtonGroup, useThemeMode } from "panelui-native";
+import { Alert, Avatar, Badge, BookmarkIcon, BottomSheet, Button, Card, CheckIcon, ChevronLeftIcon, EllipsisIcon, EyeIcon, Frame, HeartIcon, ImageViewer, Item, ListChecksIcon, MaximizeIcon, Message, MessageCircleIcon, MessageScroller, Plan, MicIcon, MoonIcon, PackageIcon, PauseIcon, PencilIcon, PlayIcon, Post, type PostVote, Portal, Progress, RepeatIcon, Scrim, SendIcon, ShareNodesIcon, ScrollBlur, ScrollFade, Separator, Signature, type SignatureHandle, Sketch, type SketchResult, Skeleton, Sortable, reorderItems, useSortableItem, Soundwave, Steps, SunIcon, Surface, Task, Text, XIcon, ToggleButton, ToggleButtonGroup, useThemeMode } from "panelui-native";
 import { formatClock, useVoiceRecorder, VoiceControls } from "../../components/voice";
 import { useCSSVariable } from 'uniwind';
+import { SvgXml } from 'react-native-svg';
 import type { ComponentEntry } from '../component-types';
 
 /** Stable remote portraits for the Avatar demos. */
@@ -1931,6 +1932,59 @@ function ScrollBlurSheetVersion() {
   );
 }
 
+
+/**
+ * A button that opens the sketch in a sheet, and the finished drawing shown
+ * back on the screen that asked for it.
+ */
+function SketchSheetDemo({ native = true }: { native?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState<SketchResult | null>(null);
+
+  return (
+    <View className="w-full items-center gap-4">
+      {result ? (
+        <View className="w-full items-center overflow-hidden rounded-2xl border border-border bg-popover">
+          <SvgXml
+            xml={result.svg}
+            width="100%"
+            height={180}
+            viewBox={`0 0 ${result.width} ${result.height}`}
+          />
+        </View>
+      ) : (
+        <Text size="sm" muted className="text-center">
+          Draw something, then press the check to bring it back here.
+        </Text>
+      )}
+      <Button variant="outline" onPress={() => setOpen(true)}>
+        {result ? 'Draw again' : 'Open sketch'}
+      </Button>
+      <Sketch.Sheet native={native} open={open} onOpenChange={setOpen} onDone={setResult} />
+    </View>
+  );
+}
+
+/**
+ * The whole screen is the canvas, with its own way back. Portalled over the
+ * route's header, because the sketch's close button is the way out and a back
+ * button above it would be a second one.
+ */
+function SketchFullPageVersion() {
+  const insets = useSafeAreaInsets();
+  return (
+    <Portal>
+      <View className="absolute inset-0">
+        <Sketch
+          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+          onClose={() => router.back()}
+          onDone={() => router.back()}
+        />
+      </View>
+    </Portal>
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
 {
     slug: 'post',
@@ -2442,6 +2496,22 @@ export const ENTRIES: ComponentEntry[] = [
             ))}
           </View>
         ),
+      },
+    ],
+  },
+{
+    slug: 'sketch',
+    name: 'Sketch',
+    summary: 'Draw with a pen, shapes and an eraser, in a sheet or a whole screen',
+    demos: [
+      { label: 'Native sheet', render: () => <SketchSheetDemo /> },
+      { label: 'Styled sheet', render: () => <SketchSheetDemo native={false} /> },
+      {
+        label: 'Full page',
+        id: 'full-page',
+        fullPage: true,
+        description: 'The whole screen is the canvas, with close and confirm at the ends.',
+        render: () => <SketchFullPageVersion />,
       },
     ],
   },

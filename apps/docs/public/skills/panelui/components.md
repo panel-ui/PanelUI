@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-135 component modules. The **Reference** column links to a file in this skill holding that
+136 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -103,6 +103,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `ScrollFade` | Fades the edges of a scroll container. | [scroll-fade](./components/scroll-fade.md) |
 | `ScrollHeader` | A screen title that hands over to a compact bar as the page scrolls. | [scroll-header](./components/scroll-header.md) |
 | `Separator` | Horizontal or vertical rule between content, optionally labelled. | [separator](./components/separator.md) |
+| `Sketch` | Draw with a pen, shapes and an eraser, in a sheet or a whole screen. | [sketch](./components/sketch.md) |
 | `Splitter` | Panes that share a container, with a seam between them you can drag. | [splitter](./components/splitter.md) |
 | `SplitView` | Two resizable stacked panes that settle on one of a few named heights. | [split-view](./components/split-view.md) |
 | `Surface` | Elevated container with a variant ladder. | [surface](./components/surface.md) |

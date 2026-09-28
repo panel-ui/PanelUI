@@ -190,6 +190,7 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
     load11().then((module) => module.ENTRIES_BY_SLUG['separator']),
   signature: () =>
     load11().then((module) => module.ENTRIES_BY_SLUG['signature']),
+  sketch: () => load11().then((module) => module.ENTRIES_BY_SLUG['sketch']),
   skeleton: () => load11().then((module) => module.ENTRIES_BY_SLUG['skeleton']),
   sortable: () => load11().then((module) => module.ENTRIES_BY_SLUG['sortable']),
   slider: () => load12().then((module) => module.ENTRIES_BY_SLUG['slider']),

@@ -789,6 +789,14 @@
       "group": "ai-components"
     }
   ],
+  "sketch": [
+    "Sketch",
+    "Draw with a pen, shapes and an eraser, in a sheet or a whole screen.",
+    "react native drawing canvas sketch pad",
+    {
+      "addedIn": "0.103.0"
+    }
+  ],
   "signature": [
     "Signature",
     "Sign with a finger, and get the result back out as SVG or PNG.",

@@ -1773,6 +1773,22 @@
     "docsPath": "components/skeleton"
   },
   {
+    "name": "sketch",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Draw with a pen, shapes and an eraser, in a sheet or a whole screen.",
+    "registryDependencies": [
+      "animated-pressable",
+      "bottom-sheet",
+      "cn",
+      "color-picker",
+      "haptics"
+    ],
+    "docsPath": "components/sketch"
+  },
+  {
     "name": "slide-button",
     "type": "registry:ui",
     "kind": "ui",

@@ -1203,6 +1203,17 @@ export {
   type SignatureButtonProps,
 } from './components/signature';
 export {
+  Sketch,
+  hasSketchRaster,
+  type SketchProps,
+  type SketchSheetProps,
+  type SketchHandle,
+  type SketchResult,
+  type SketchItem,
+  type SketchTool,
+  type SketchShape,
+} from './components/sketch';
+export {
   AIInput,
   type AIInputProps,
   type AIInputStatus,

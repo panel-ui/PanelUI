@@ -483,6 +483,35 @@ const signature = (
   </Plate>
 );
 
+const sketch = (
+  <Plate className="w-44 gap-2 p-2.5">
+    <Row className="justify-between">
+      <div className="size-4 rounded-full bg-fd-muted-foreground/15" />
+      <div className="flex gap-1 rounded-full bg-fd-muted-foreground/15 p-0.5">
+        <div className="size-3 rounded-full bg-fd-muted-foreground/25" />
+        <div className="size-3 rounded-full" />
+        <div className="size-3 rounded-full" />
+      </div>
+      <div className="size-4 rounded-full bg-fd-muted-foreground/15" />
+    </Row>
+    <svg viewBox="0 0 120 44" className="w-full text-fd-muted-foreground/60" fill="none">
+      <path
+        d="M20 30c6-14 14-20 22-10s-6 16 4 14 12-18 20-16"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <rect x="78" y="8" width="26" height="22" rx="2" stroke="currentColor" strokeWidth="2" />
+    </svg>
+    <Row className="gap-1">
+      {['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500', 'bg-blue-500'].map((tone) => (
+        <div key={tone} className={`size-3 rounded-full ${tone}`} />
+      ))}
+      <Accent className="ms-auto size-4 rounded-full" />
+    </Row>
+  </Plate>
+);
+
 const slider = (
   <div className="w-44">
     <div className="relative h-1.5 rounded-full bg-fd-muted-foreground/15">
@@ -2246,6 +2275,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   'search-bar': searchBar,
   select,
   signature,
+  sketch,
   slider,
   switch: switchThumb,
   'tag-input': tagInput,

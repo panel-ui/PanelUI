@@ -104,6 +104,7 @@ export const COMPONENTS = [
   {"slug":"shimmer","name":"Shimmer","summary":"Animated highlight sweeping across content"},
   {"slug":"signature","name":"Signature","summary":"Sign with a finger, and get the result back out"},
   {"slug":"skeleton","name":"Skeleton","summary":"Shimmer placeholder for loading content"},
+  {"slug":"sketch","name":"Sketch","summary":"Draw with a pen, shapes and an eraser, in a sheet or a whole screen"},
   {"slug":"slide-button","name":"SlideButton","summary":"Drag across to confirm, with the distance drawn on the button"},
   {"slug":"slider","name":"Slider","summary":"Pick a value by dragging a thumb along a track"},
   {"slug":"sortable","name":"Sortable","summary":"A list whose rows can be dragged into a different order"},

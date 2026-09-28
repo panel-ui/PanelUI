@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1398,
-    "values": 351,
-    "types": 1047,
-    "modules": 162,
-    "components": 135,
+    "exports": 1407,
+    "values": 353,
+    "types": 1054,
+    "modules": 163,
+    "components": 136,
     "hooks": 13
   },
   "groups": {
@@ -4575,6 +4575,49 @@
           },
           {
             "name": "SkeletonProps",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/sketch/index.tsx",
+        "slug": "sketch",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "Sketch",
+            "kind": "value"
+          },
+          {
+            "name": "hasSketchRaster",
+            "kind": "value"
+          },
+          {
+            "name": "SketchProps",
+            "kind": "type"
+          },
+          {
+            "name": "SketchSheetProps",
+            "kind": "type"
+          },
+          {
+            "name": "SketchHandle",
+            "kind": "type"
+          },
+          {
+            "name": "SketchResult",
+            "kind": "type"
+          },
+          {
+            "name": "SketchItem",
+            "kind": "type"
+          },
+          {
+            "name": "SketchTool",
+            "kind": "type"
+          },
+          {
+            "name": "SketchShape",
             "kind": "type"
           }
         ]

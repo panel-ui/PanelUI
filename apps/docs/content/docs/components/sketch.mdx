@@ -4,6 +4,14 @@ description: Draw with a pen, shapes and an eraser, in a sheet or a whole screen
 status: new
 ---
 
+<PreviewVideo
+  src="/previews/sketch.mp4"
+  poster="/previews/sketch-poster.jpg"
+  alt="Sketch in a solid platform sheet: two white strokes, a red rectangle from the shape grid, an eraser pass through the rectangle, then confirm, which brings the drawing back to the page."
+  width={720}
+  height={1566}
+/>
+
 A drawing surface with its tools around it: a pen, eight shapes, an eraser, a stroke-width slider, colours and undo. It hands back the drawing as SVG when you press confirm.
 
 It fills the space it is given. Use `Sketch.Sheet` to present it in a bottom sheet, or put `Sketch` on a screen of its own.
@@ -55,6 +63,14 @@ const [open, setOpen] = useState(false);
 
 `Sketch.Sheet` opens over the current screen and closes when the drawing is confirmed. `onDone` receives the SVG, the canvas size in points and the list of what was drawn.
 
+<PreviewVideo
+  src="/previews/sketch.mp4"
+  poster="/previews/sketch-poster.jpg"
+  alt="Sketch in a solid platform sheet: strokes, a red rectangle and an eraser pass, confirmed back onto the page as a thumbnail."
+  width={720}
+  height={1566}
+/>
+
 ```tsx
 const [open, setOpen] = useState(false);
 const [drawing, setDrawing] = useState<string | null>(null);
@@ -70,6 +86,14 @@ const [drawing, setDrawing] = useState<string | null>(null);
 ### The styled sheet
 
 `native={false}` uses PanelUI's own sheet instead of the platform's. It is also what you get when `@expo/ui` is not installed.
+
+<PreviewVideo
+  src="/previews/sketch-the-styled-sheet.mp4"
+  poster="/previews/sketch-the-styled-sheet-poster.jpg"
+  alt="Sketch in the styled sheet: a thick stroke set from the width slider, a red star, an eraser pass through it undone, then close."
+  width={720}
+  height={1566}
+/>
 
 ```tsx
 <Sketch.Sheet native={false} open={open} onOpenChange={setOpen} onDone={save} />
@@ -108,6 +132,14 @@ const sketch = useRef<SketchHandle>(null);
 ### Full page
 
 The whole screen is the canvas. Pad it by the safe-area insets, since it draws edge to edge.
+
+<PreviewVideo
+  src="/previews/sketch-full-page.mp4"
+  poster="/previews/sketch-full-page-poster.jpg"
+  alt="Sketch filling the screen: a white cross, a red heart and an orange arrow from the shape grid, an eraser pass that is undone, then close back to the page."
+  width={720}
+  height={1566}
+/>
 
 ```tsx
 const insets = useSafeAreaInsets();

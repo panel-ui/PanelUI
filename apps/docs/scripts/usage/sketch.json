@@ -15,12 +15,26 @@
     {
       "title": "In a sheet",
       "description": "`Sketch.Sheet` opens over the current screen and closes when the drawing is confirmed. `onDone` receives the SVG, the canvas size in points and the list of what was drawn.",
-      "code": "const [open, setOpen] = useState(false);\nconst [drawing, setDrawing] = useState<string | null>(null);\n\n<Button variant=\"outline\" onPress={() => setOpen(true)}>Open sketch</Button>\n<Sketch.Sheet\n  open={open}\n  onOpenChange={setOpen}\n  onDone={({ svg }) => setDrawing(svg)}\n/>"
+      "code": "const [open, setOpen] = useState(false);\nconst [drawing, setDrawing] = useState<string | null>(null);\n\n<Button variant=\"outline\" onPress={() => setOpen(true)}>Open sketch</Button>\n<Sketch.Sheet\n  open={open}\n  onOpenChange={setOpen}\n  onDone={({ svg }) => setDrawing(svg)}\n/>",
+      "previewVideo": {
+        "src": "/previews/sketch.mp4",
+        "poster": "/previews/sketch-poster.jpg",
+        "alt": "Sketch in a solid platform sheet: strokes, a red rectangle and an eraser pass, confirmed back onto the page as a thumbnail.",
+        "width": 720,
+        "height": 1566
+      }
     },
     {
       "title": "The styled sheet",
       "description": "`native={false}` uses PanelUI's own sheet instead of the platform's. It is also what you get when `@expo/ui` is not installed.",
-      "code": "<Sketch.Sheet native={false} open={open} onOpenChange={setOpen} onDone={save} />"
+      "code": "<Sketch.Sheet native={false} open={open} onOpenChange={setOpen} onDone={save} />",
+      "previewVideo": {
+        "src": "/previews/sketch-the-styled-sheet.mp4",
+        "poster": "/previews/sketch-the-styled-sheet-poster.jpg",
+        "alt": "Sketch in the styled sheet: a thick stroke set from the width slider, a red star, an eraser pass through it undone, then close.",
+        "width": 720,
+        "height": 1566
+      }
     },
     {
       "title": "Choosing the tools",
@@ -37,8 +51,22 @@
     {
       "title": "Full page",
       "description": "The whole screen is the canvas. Pad it by the safe-area insets, since it draws edge to edge.",
-      "code": "const insets = useSafeAreaInsets();\n\n<Sketch\n  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}\n  onClose={() => router.back()}\n  onDone={save}\n/>"
+      "code": "const insets = useSafeAreaInsets();\n\n<Sketch\n  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}\n  onClose={() => router.back()}\n  onDone={save}\n/>",
+      "previewVideo": {
+        "src": "/previews/sketch-full-page.mp4",
+        "poster": "/previews/sketch-full-page-poster.jpg",
+        "alt": "Sketch filling the screen: a white cross, a red heart and an orange arrow from the shape grid, an eraser pass that is undone, then close back to the page.",
+        "width": 720,
+        "height": 1566
+      }
     }
   ],
-  "notes": "### The eraser rubs out, it does not delete\n\nThe eraser paints a mask over what was drawn before it, so it removes only what is under the finger. Ink drawn afterwards over an erased patch is not affected. Undo takes an eraser stroke back like any other mark.\n\nThe drawing stays vector, and `toSVG()` writes the same masks, so an export matches the screen.\n\n### The sheet cannot be dragged away\n\nOn a canvas every drag is a stroke. On iOS the platform sheet is told not to take drags, and the styled sheet's drag is switched off. On Android, the platform sheet keeps its own drag handling.\n\n### It needs a height\n\n`Sketch` fills its parent, like any `flex-1` view. On a screen, that is the screen. Inside a scroll view it has no height to fill; give it one.\n\n### Colours\n\nThe chrome is drawn in theme tokens, so it follows light and dark. The swatches are ink colours rather than tokens, because a drawing keeps its colours when it leaves the app. The default ink is the theme's foreground."
+  "notes": "### The eraser rubs out, it does not delete\n\nThe eraser paints a mask over what was drawn before it, so it removes only what is under the finger. Ink drawn afterwards over an erased patch is not affected. Undo takes an eraser stroke back like any other mark.\n\nThe drawing stays vector, and `toSVG()` writes the same masks, so an export matches the screen.\n\n### The sheet cannot be dragged away\n\nOn a canvas every drag is a stroke. On iOS the platform sheet is told not to take drags, and the styled sheet's drag is switched off. On Android, the platform sheet keeps its own drag handling.\n\n### It needs a height\n\n`Sketch` fills its parent, like any `flex-1` view. On a screen, that is the screen. Inside a scroll view it has no height to fill; give it one.\n\n### Colours\n\nThe chrome is drawn in theme tokens, so it follows light and dark. The swatches are ink colours rather than tokens, because a drawing keeps its colours when it leaves the app. The default ink is the theme's foreground.",
+  "previewVideo": {
+    "src": "/previews/sketch.mp4",
+    "poster": "/previews/sketch-poster.jpg",
+    "alt": "Sketch in a solid platform sheet: two white strokes, a red rectangle from the shape grid, an eraser pass through the rectangle, then confirm, which brings the drawing back to the page.",
+    "width": 720,
+    "height": 1566
+  }
 }

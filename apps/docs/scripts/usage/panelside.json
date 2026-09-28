@@ -12,7 +12,6 @@
   "extraImports": [
     "AIInput",
     "Avatar",
-    "BottomSheet",
     "Button",
     "Menu",
     "MenuIcon",
@@ -27,14 +26,13 @@
     "usePanelside",
     "Pressable",
     "Popover",
-    "SearchBar",
     "Item"
   ],
   "anatomy": "<Panelside>\n  <Panelside.Panel>\n    <Panelside.Header action={<Panelside.SearchTrigger />} />\n    <Panelside.Content>\n      <Panelside.Group>\n        <Panelside.GroupLabel>\u2026</Panelside.GroupLabel>\n        <Panelside.Item>\n          <Panelside.ItemIcon>\u2026</Panelside.ItemIcon>\n          <Panelside.ItemLabel>\u2026</Panelside.ItemLabel>\n          <Panelside.ItemBadge>\u2026</Panelside.ItemBadge>\n          <Panelside.ItemActions>\u2026</Panelside.ItemActions>\n        </Panelside.Item>\n      </Panelside.Group>\n    </Panelside.Content>\n    <Panelside.Footer>\n      <Panelside.Cta />\n    </Panelside.Footer>\n  </Panelside.Panel>\n\n  <Panelside.Scene>\n    <Panelside.Trigger />\n    <Panelside.Pages>\n      <Panelside.Page />\n    </Panelside.Pages>\n  </Panelside.Scene>\n\n</Panelside>",
   "parts": {
     "Panel": "The navigation surface, sitting behind the app. It is a column: a sticky header, a scroller, and a footer pinned to the bottom edge.",
     "Header": "The panel's title row, and anything below it that should not scroll. It clears the status bar itself, because the panel draws behind it. `action` takes a single element at the trailing end \u2014 the search button goes there. It paints nothing behind itself; `surface` is for a header you have positioned over the list yourself.",
-    "Search": "The inline filter field. Still right for a docked panel on a tablet, where there is width for a field and no keyboard covering half the screen \u2014 on a phone use `Panelside.SearchTrigger` and give it a page to open. It reports what was typed and nothing else, since a search that only read titles would be wrong for the first app that indexes message bodies.",
+    "Search": "The inline filter field, for a docked panel on a tablet, where there is width for a field and no keyboard covering half the screen. On a phone, use `Panelside.SearchTrigger` instead. It reports what was typed and nothing else, so your app decides what the query matches.",
     "Content": "The scrolling middle. It leaves room at the end for a floating footer, measured rather than assumed.",
     "Group": "A run of related rows. Groups are the unit of spacing, so an empty one costs nothing to render conditionally.",
     "GroupLabel": "The heading over a group \u2014 \u201cStarred\u201d, \u201cRecents\u201d, \u201cToday\u201d. Announced as a heading.",
@@ -77,14 +75,9 @@
       "code": "<Panelside.Content>\n  <Panelside.Group>\n    <Panelside.Item icon={<MessageCircleIcon size={20} />} label=\"Chats\" active />\n    <Panelside.Item icon={<PackageIcon size={20} />} label=\"Projects\" badge={4} />\n  </Panelside.Group>\n\n  <Panelside.Group>\n    <Panelside.GroupLabel>Recents</Panelside.GroupLabel>\n    {recents.map((chat) => (\n      <Panelside.Item key={chat.id} label={chat.title} onPress={() => open(chat.id)}>\n        <Panelside.Action label={`Options for ${chat.title}`} onPress={() => menu(chat.id)} />\n      </Panelside.Item>\n    ))}\n  </Panelside.Group>\n</Panelside.Content>"
     },
     {
-      "title": "Search, as a page rather than a panel",
-      "description": "A field in the header is the obvious way to put search in a navigation panel, and it is the wrong one on a phone. The panel is most of the screen and the field is forty points of it, so a search that returns anything has to push the history down a screen it already fills.\n\nSo the button is in the header and what it opens is a page. Searching your chats is somewhere you go and stay for a while, and a surface over the screen you came from spends that time covering the thing it is a list of.\n\n`Panelside.SearchTrigger` draws the button and reports the press. Where search lives is a decision about the app \u2014 a scene of your own, a `Panelside.Page`, a screen pushed onto the router's stack \u2014 so the component does not answer it for you. Give the page a way back: `SearchBar` with `cancel=\"always\"` draws the field and the Cancel beside it, and calls `onCancel` once the field has emptied and dropped focus.",
-      "code": "const [searching, setSearching] = useState(false);\n\nreturn (\n  <Panelside>\n    <Panelside.Panel>\n      <Panelside.Header\n        title=\"Assistant\"\n        action={\n          <Panelside.SearchTrigger\n            onPress={() => {\n              setSearching(true);\n              setOpen(false);\n            }}\n          />\n        }\n      />\n      <Panelside.Content>{history}</Panelside.Content>\n    </Panelside.Panel>\n\n    <Panelside.Scene>\n      {searching ? (\n        <View className=\"flex-1\">\n          <View className=\"px-4 pb-2.5\">\n            <SearchBar\n              shape=\"pill\"\n              variant=\"filled\"\n              value={query}\n              onChangeText={setQuery}\n              onCancel={() => setSearching(false)}\n              placeholder=\"Search chats, images, files\"\n              cancel=\"always\"\n              autoFocus\n            />\n          </View>\n          {results}\n        </View>\n      ) : (\n        app\n      )}\n    </Panelside.Scene>\n  </Panelside>\n);"
-    },
-    {
-      "title": "Settings from the account avatar",
-      "description": "The footer's trailing slot is the account, and pressing it opens a full-height sheet. Full height because it is a settings screen rather than a confirmation: the rows go past the fold, and a sheet that stops halfway is one you have to drag before you can read it.\n\nUnder `native` pass `nativeBackground` with it. A settings list is a column of rows on a surface, and the platform's translucent material with a moving screen behind it makes every one of those rows harder to read for nothing.\n\n**Leave the sheet's top padding alone.** The platform draws its grabber *inside* the sheet, over the first 24 to 28 points of whatever is hosted in it, and the sheet's own padding is what stands clear of it \u2014 a header row put in at the top with that padding stripped arrives with its top third behind the grabber.",
-      "code": "const [account, setAccount] = useState(false);\n\n<Panelside.Footer>\n  <Panelside.Cta icon={<PlusIcon size={18} />} label=\"New chat\" />\n  <View className=\"flex-1\" />\n  <Pressable accessibilityRole=\"button\" accessibilityLabel=\"Account\" onPress={() => setAccount(true)}>\n    <Avatar size=\"md\" fallback=\"K\" />\n  </Pressable>\n</Panelside.Footer>\n\n<BottomSheet open={account} onOpenChange={setAccount} native nativeBackground snapPoints={['full']}>\n  <BottomSheet.Content size=\"full\" showClose={false}>\n    \u2026\n  </BottomSheet.Content>\n</BottomSheet>"
+      "title": "What the search and account buttons open",
+      "description": "The search button and the account control draw themselves and call `onPress`. What they open is up to your app: a route, a sheet, a menu or a screen on your navigator's stack.\n\nClose the panel in the same handler when the destination replaces the screen. Leave it open when the destination sits over the panel, such as a menu.\n\nOn a phone, keep search as a button rather than a field. The panel is most of the screen, and a field at its top is at the far end from the keyboard. For a docked panel on a tablet, `Panelside.Search` is the inline field.",
+      "code": "const { setOpen } = usePanelside();\n\n<Panelside.Header\n  title=\"Assistant\"\n  action={\n    <Panelside.SearchTrigger\n      onPress={() => {\n        router.push('/search');\n        setOpen(false);\n      }}\n    />\n  }\n/>\n\n<Panelside.Footer>\n  <Panelside.Cta icon={<PlusIcon size={18} />} label=\"New chat\" />\n  <View className=\"flex-1\" />\n  <Pressable\n    accessibilityRole=\"button\"\n    accessibilityLabel=\"Account\"\n    onPress={openAccount}\n  >\n    <Avatar size=\"md\" fallback=\"K\" />\n  </Pressable>\n</Panelside.Footer>"
     },
     {
       "title": "Pages, and rows that go to them",

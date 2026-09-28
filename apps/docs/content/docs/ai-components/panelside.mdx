@@ -25,7 +25,7 @@ A button in the corner, and the screen slides across, shrinks, rounds its corner
 Panelside ships with the library — no separate install.
 
 ```tsx
-import { Panelside, AIInput, Avatar, BottomSheet, Button, Menu, MenuIcon, MicIcon, PackageIcon, PencilIcon, PlusIcon, ShareNodesIcon, StarIcon, TrashIcon, usePanelside, Popover, SearchBar, Item } from 'panelui-native';
+import { Panelside, AIInput, Avatar, Button, Menu, MenuIcon, MicIcon, PackageIcon, PencilIcon, PlusIcon, ShareNodesIcon, StarIcon, TrashIcon, usePanelside, Popover, Item } from 'panelui-native';
 import { View, Pressable } from 'react-native';
 ```
 
@@ -143,83 +143,40 @@ Two groups, because they are two different things. The first is where you can go
 </Panelside.Content>
 ```
 
-### Search, as a page rather than a panel
+### What the search and account buttons open
 
-A field in the header is the obvious way to put search in a navigation panel, and it is the wrong one on a phone. The panel is most of the screen and the field is forty points of it, so a search that returns anything has to push the history down a screen it already fills.
+The search button and the account control draw themselves and call `onPress`. What they open is up to your app: a route, a sheet, a menu or a screen on your navigator's stack.
 
-So the button is in the header and what it opens is a page. Searching your chats is somewhere you go and stay for a while, and a surface over the screen you came from spends that time covering the thing it is a list of.
+Close the panel in the same handler when the destination replaces the screen. Leave it open when the destination sits over the panel, such as a menu.
 
-`Panelside.SearchTrigger` draws the button and reports the press. Where search lives is a decision about the app — a scene of your own, a `Panelside.Page`, a screen pushed onto the router's stack — so the component does not answer it for you. Give the page a way back: `SearchBar` with `cancel="always"` draws the field and the Cancel beside it, and calls `onCancel` once the field has emptied and dropped focus.
-
-```tsx
-const [searching, setSearching] = useState(false);
-
-return (
-  <Panelside>
-    <Panelside.Panel>
-      <Panelside.Header
-        title="Assistant"
-        action={
-          <Panelside.SearchTrigger
-            onPress={() => {
-              setSearching(true);
-              setOpen(false);
-            }}
-          />
-        }
-      />
-      <Panelside.Content>{history}</Panelside.Content>
-    </Panelside.Panel>
-
-    <Panelside.Scene>
-      {searching ? (
-        <View className="flex-1">
-          <View className="px-4 pb-2.5">
-            <SearchBar
-              shape="pill"
-              variant="filled"
-              value={query}
-              onChangeText={setQuery}
-              onCancel={() => setSearching(false)}
-              placeholder="Search chats, images, files"
-              cancel="always"
-              autoFocus
-            />
-          </View>
-          {results}
-        </View>
-      ) : (
-        app
-      )}
-    </Panelside.Scene>
-  </Panelside>
-);
-```
-
-### Settings from the account avatar
-
-The footer's trailing slot is the account, and pressing it opens a full-height sheet. Full height because it is a settings screen rather than a confirmation: the rows go past the fold, and a sheet that stops halfway is one you have to drag before you can read it.
-
-Under `native` pass `nativeBackground` with it. A settings list is a column of rows on a surface, and the platform's translucent material with a moving screen behind it makes every one of those rows harder to read for nothing.
-
-**Leave the sheet's top padding alone.** The platform draws its grabber *inside* the sheet, over the first 24 to 28 points of whatever is hosted in it, and the sheet's own padding is what stands clear of it — a header row put in at the top with that padding stripped arrives with its top third behind the grabber.
+On a phone, keep search as a button rather than a field. The panel is most of the screen, and a field at its top is at the far end from the keyboard. For a docked panel on a tablet, `Panelside.Search` is the inline field.
 
 ```tsx
-const [account, setAccount] = useState(false);
+const { setOpen } = usePanelside();
+
+<Panelside.Header
+  title="Assistant"
+  action={
+    <Panelside.SearchTrigger
+      onPress={() => {
+        router.push('/search');
+        setOpen(false);
+      }}
+    />
+  }
+/>
 
 <Panelside.Footer>
   <Panelside.Cta icon={<PlusIcon size={18} />} label="New chat" />
   <View className="flex-1" />
-  <Pressable accessibilityRole="button" accessibilityLabel="Account" onPress={() => setAccount(true)}>
+  <Pressable
+    accessibilityRole="button"
+    accessibilityLabel="Account"
+    onPress={openAccount}
+  >
     <Avatar size="md" fallback="K" />
   </Pressable>
 </Panelside.Footer>
-
-<BottomSheet open={account} onOpenChange={setAccount} native nativeBackground snapPoints={['full']}>
-  <BottomSheet.Content size="full" showClose={false}>
-    …
-  </BottomSheet.Content>
-</BottomSheet>
 ```
 
 ### Pages, and rows that go to them

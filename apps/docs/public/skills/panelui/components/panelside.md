@@ -50,7 +50,7 @@ import { Panelside } from 'panelui-native';
 
 - `Panelside.Panel` — The navigation surface, sitting behind the app. It is a column: a sticky header, a scroller, and a footer pinned to the bottom edge.
 - `Panelside.Header` — The panel's title row, and anything below it that should not scroll. It clears the status bar itself, because the panel draws behind it. `action` takes a single element at the trailing end — the search button goes there. It paints nothing behind itself; `surface` is for a header you have positioned over the list yourself.
-- `Panelside.Search` — The inline filter field. Still right for a docked panel on a tablet, where there is width for a field and no keyboard covering half the screen — on a phone use `Panelside.SearchTrigger` and give it a page to open. It reports what was typed and nothing else, since a search that only read titles would be wrong for the first app that indexes message bodies.
+- `Panelside.Search` — The inline filter field, for a docked panel on a tablet, where there is width for a field and no keyboard covering half the screen. On a phone, use `Panelside.SearchTrigger` instead. It reports what was typed and nothing else, so your app decides what the query matches.
 - `Panelside.Content` — The scrolling middle. It leaves room at the end for a floating footer, measured rather than assumed.
 - `Panelside.Group` — A run of related rows. Groups are the unit of spacing, so an empty one costs nothing to render conditionally.
 - `Panelside.GroupLabel` — The heading over a group — “Starred”, “Recents”, “Today”. Announced as a heading.

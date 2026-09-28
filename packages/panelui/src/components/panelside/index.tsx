@@ -120,23 +120,13 @@ import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { LinearGradient } from 'expo-linear-gradient';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react-native';
-import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
 import Menu01Icon from '@hugeicons/core-free-icons/Menu01Icon';
 import MoreHorizontalIcon from '@hugeicons/core-free-icons/MoreHorizontalIcon';
 import Search01Icon from '@hugeicons/core-free-icons/Search01Icon';
 import { IconColorProvider, useIconColor } from '../../icons';
-import {
-  BottomSheet,
-  bottomSheetDetentHeight,
-  type BottomSheetBodyProps,
-  type BottomSheetProps,
-} from '../bottom-sheet';
 import { Button } from '../button';
 import { Menu, type MenuContentProps } from '../menu';
-import { Tabs } from '../tabs';
-import { getNativeUI } from '../../native';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
-import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text, textChildren, type TextProps } from '../../primitives/text';
 import { useBackHandler } from '../../hooks/use-back-handler';
 import { useDirectionSign } from '../../hooks/use-direction';
@@ -253,20 +243,6 @@ const DOCK_WIDTH_MAX = 320;
 
 /** How far above the floating footer the list starts dissolving into it. */
 const FOOTER_FADE = 28;
-
-/**
- * What `BottomSheet.Content` leaves below its last child, maxed against the
- * home indicator. Mirrored here so the search field can subtract the strip it
- * already sits above before it travels with the keyboard.
- */
-const SHEET_BOTTOM_PADDING = 16;
-
-/**
- * The top padding the search surface asks `BottomSheet.Content` for, and takes
- * back off the column's height. Smaller than the sheet's own default, because
- * this surface leads with a round button rather than with a title.
- */
-const SHEET_TOP_PADDING = 12;
 
 /** Progress past which a layer is treated as fully hidden for accessibility. */
 const HIDDEN_EPSILON = 0.05;
@@ -2060,22 +2036,16 @@ function PanelsideTrigger({
 /* ------------------------------------------------------------------ *
  * Search.
  *
- * A field in the header is the obvious way to put search in a navigation
- * panel, and it is the wrong one on a phone. The panel is 80% of the screen
- * and the field is 40 points of it, so a search that returns anything has to
- * push the history down the screen it is already filling — and the field is at
- * the top, which is the far end of the screen from the keyboard that has just
- * opened under it.
+ * On a phone, search is a button in the header rather than a field. The panel
+ * is most of the screen and a field is 40 points of it, so results would have
+ * to push the history down — and the field would be at the far end of the
+ * screen from the keyboard.
  *
- * So search is a surface rather than a row. A round button in the header opens
- * a sheet that is the whole screen; the tabs across the top narrow what is
- * being searched; the results fill the middle; and the field is at the bottom,
- * where the thumb already is, riding the keyboard rather than hiding behind
- * it.
+ * The button draws the control and nothing else. What it opens — a page, a
+ * sheet, a screen on the app's own stack — is the app's to decide.
  *
- * `Panelside.Search` — the inline field — is still exported, and is still
- * right for a docked panel on a tablet, where there is width for a field and
- * no keyboard covering half the screen.
+ * `Panelside.Search`, the inline field, suits a docked panel on a tablet,
+ * where there is width for a field and no keyboard covering half the screen.
  * ------------------------------------------------------------------ */
 
 export interface PanelsideSearchTriggerProps extends Omit<PressableProps, 'children'> {

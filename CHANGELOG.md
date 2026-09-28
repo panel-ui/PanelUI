@@ -9,6 +9,41 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.103.0] — 2026-09-28
+
+### Added
+
+- **Sketch** — a drawing surface with a pen, eight shapes, an eraser, a
+  stroke-width slider, colour swatches with a custom-colour picker, undo and a
+  confirm button that returns the drawing as SVG. `Sketch.Sheet` presents it in
+  a solid platform sheet; `Sketch` on its own fills a screen. The eraser rubs
+  out only what it passes over, rather than deleting whole strokes, and
+  `toSVG()` exports exactly what is on screen.
+- **BottomSheet** — on iOS, the native sheet now honours `dismissible={false}`
+  by refusing the drag, and `showGrabber={false}` by hiding the platform's
+  grabber. Both were ignored by the native sheet before. A sheet whose content
+  takes drags needs both, or a downward stroke moves the sheet.
+
+### Changed
+
+- **Panelside** is out of alpha. The search button and the account control
+  only call `onPress`; what they open is up to your app. The example app's
+  search page and account sheet are gone, and the docs show how to wire each
+  one to your own route, sheet or menu.
+
+### Fixed
+
+- **BottomSheet** — everything inside `BottomSheet.Body` disappeared when the
+  sheet was `size="auto"`. The body asked to fill a sheet that had no height of
+  its own, so it came out zero points tall. In an auto sheet the body now takes
+  its content's height and scrolls once the sheet reaches the top of the
+  screen. Reported by @yashDahiwale in #226.
+
+### Docs
+
+- **BottomSheet** — a recording for every version, and new examples for the
+  demos that had none.
+
 ## [0.102.3] — 2026-09-27
 
 ### Fixed

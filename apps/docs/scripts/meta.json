@@ -92,7 +92,7 @@
     "Draggable sheet anchored to the bottom of the screen.",
     "react native bottom sheet",
     {
-      "updatedIn": "0.88.0",
+      "updatedIn": "0.103.0",
       "category": "overlays"
     }
   ],

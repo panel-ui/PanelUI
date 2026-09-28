@@ -245,6 +245,31 @@ function nativeSheetSurface(color: string): unknown[] | undefined {
 }
 
 /**
+ * The modifiers that hold a native sheet still and hide its grabber, where the
+ * platform has them. iOS only: Compose's sheet is not asked, and keeps its own
+ * drag and handle.
+ *
+ * A sheet whose content takes drags — a canvas, a map — needs both. Left to
+ * the platform, a downward stroke on the content moves the sheet instead.
+ */
+function nativeSheetBehaviour(
+  dismissible: boolean,
+  showGrabber: boolean
+): unknown[] {
+  const swiftUI = getSwiftUIModifiers();
+  if (!swiftUI) return [];
+
+  const modifiers: unknown[] = [];
+  if (!dismissible && swiftUI.interactiveDismissDisabled) {
+    modifiers.push(swiftUI.interactiveDismissDisabled(true));
+  }
+  if (!showGrabber && swiftUI.presentationDragIndicator) {
+    modifiers.push(swiftUI.presentationDragIndicator('hidden'));
+  }
+  return modifiers;
+}
+
+/**
  * Set by the root so Content knows the platform is drawing the sheet, and with
  * which detents. Null means the styled sheet renders.
  */
@@ -343,7 +368,13 @@ function BottomSheetTrigger({ children }: BottomSheetTriggerProps) {
 
 export interface BottomSheetContentProps extends ViewProps {
   className?: string;
-  /** Tap on the backdrop closes the sheet. Default true. */
+  /**
+   * Whether the reader can close the sheet themselves — by tapping the
+   * backdrop, dragging it down, or pressing back on Android. Default true.
+   *
+   * Off, only your own controls close it. On the native sheet this also stops
+   * the drag on iOS, which is what a sheet whose content takes drags needs.
+   */
   dismissible?: boolean;
   /**
    * Show a close button in the top trailing corner — the right in a
@@ -359,6 +390,8 @@ export interface BottomSheetContentProps extends ViewProps {
    * Turn it off when the sheet draws its own — a component wrapping this one
    * to give the surface a material of its own has to put the handle on that
    * material, and a handle floating above it belongs to nothing.
+   *
+   * On the native sheet it hides the platform's grabber on iOS.
    */
   showGrabber?: boolean;
   /**
@@ -755,7 +788,10 @@ function BottomSheetContent({
         : typeof requested === 'string'
           ? requested
           : undefined;
-    const modifiers = surface ? nativeSheetSurface(surface) : undefined;
+    const painted = surface ? nativeSheetSurface(surface) ?? [] : [];
+    const held = nativeSheetBehaviour(dismissible, showGrabber);
+    const modifiers =
+      painted.length || held.length ? [...painted, ...held] : undefined;
     // The platform owns presentation, so this stays mounted and toggles
     // isPresented rather than unmounting on close.
     //

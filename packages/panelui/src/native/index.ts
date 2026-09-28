@@ -183,6 +183,14 @@ interface SwiftUIModifiers {
    */
   presentationBackground: (color: string) => unknown;
   /**
+   * Stops a sheet being dragged or swiped away. Its controls can still close
+   * it. Optional for the same reason as `disabled` below: call it through a
+   * guard.
+   */
+  interactiveDismissDisabled?: (isDisabled?: boolean) => unknown;
+  /** Shows or hides the grabber at the top of a sheet. Optional; guard it. */
+  presentationDragIndicator?: (visibility: 'automatic' | 'visible' | 'hidden') => unknown;
+  /**
    * Greys a control out and stops it answering.
    *
    * Optional because the module is cast whole rather than feature-checked, and

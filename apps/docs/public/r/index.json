@@ -1212,7 +1212,7 @@
     "type": "registry:ui",
     "kind": "ui",
     "group": "ai-components",
-    "stability": "alpha",
+    "stability": "stable",
     "description": "Navigation panel that moves the app aside instead of covering it.",
     "registryDependencies": [
       "animated-pressable",

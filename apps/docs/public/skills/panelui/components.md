@@ -186,7 +186,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | `AIInput` | A prompt composer: a field that grows to five lines, a row of controls, and the sheet they open. | [ai-input](./components/ai-input.md) |
 | `CodeBlock` | A fenced snippet, syntax-coloured and scrolled sideways. | [code-block](./components/code-block.md) |
 | `ImageGeneration` | The place an image will be, while it is being made. | [image-generation](./components/image-generation.md) |
-| `Panelside` *(alpha)* | Navigation panel that moves the app aside instead of covering it. | [panelside](./components/panelside.md) |
+| `Panelside` | Navigation panel that moves the app aside instead of covering it. | [panelside](./components/panelside.md) |
 | `Plan` | What an agent intends to do, before it does it. | [plan](./components/plan.md) |
 | `Reasoning` | The model's working, shown while it happens and folded away after. | [reasoning](./components/reasoning.md) |
 | `Response` | A model's answer, rendered as markdown while it is still arriving. | [response](./components/response.md) |

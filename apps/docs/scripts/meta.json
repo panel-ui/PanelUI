@@ -1122,9 +1122,7 @@
     "react native ai app navigation drawer",
     {
       "group": "ai-components",
-      "addedIn": "0.34.0",
-      "alpha": true,
-      "updatedIn": "0.84.0"
+      "addedIn": "0.103.0"
     }
   ],
   "kpi": [

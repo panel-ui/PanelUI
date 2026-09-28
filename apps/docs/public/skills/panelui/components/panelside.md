@@ -1,8 +1,6 @@
 # Panelside
 
 Navigation panel that moves the app aside instead of covering it.
-> **Alpha.** This API is still moving.
-
 
 ```tsx
 import { Panelside } from 'panelui-native';

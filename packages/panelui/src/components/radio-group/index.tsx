@@ -162,11 +162,20 @@ const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
 RadioGroupRoot.displayName = 'RadioGroup';
 
 export interface RadioGroupItemProps {
+  /**
+   * Styles the pressable row — layout, border, fill. It does not reach the
+   * label: text colour is not inherited from a view in React Native, so use
+   * `labelClassName` for that.
+   */
   className?: string;
   value: string;
   label?: string;
+  /** Classes for the label text, merged over the defaults — e.g. `text-black`. */
+  labelClassName?: string;
   /** Secondary line under the label. Most at home in the `card` variant. */
   description?: string;
+  /** Classes for the description text, merged over the defaults. */
+  descriptionClassName?: string;
   disabled?: boolean;
   /** Hide the disc entirely — for a card whose selected fill is enough. */
   hideIndicator?: boolean;
@@ -175,7 +184,17 @@ export interface RadioGroupItemProps {
 
 const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
   (
-    { className, value, label, description, disabled: itemDisabled, hideIndicator, children },
+    {
+      className,
+      value,
+      label,
+      labelClassName,
+      description,
+      descriptionClassName,
+      disabled: itemDisabled,
+      hideIndicator,
+      children,
+    },
     ref
   ) => {
     const context = useContext(RadioGroupContext);
@@ -216,9 +235,11 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
     // so children given instead of the prop are dressed the same way rather
     // than reaching the pressable bare.
     const labelled = label ? (
-      <Text className={slots.label()}>{label}</Text>
+      <Text className={slots.label({ className: labelClassName })}>{label}</Text>
     ) : (
-      textChildren(children, (text) => <Text className={slots.label()}>{text}</Text>)
+      textChildren(children, (text) => (
+        <Text className={slots.label({ className: labelClassName })}>{text}</Text>
+      ))
     );
 
     // The card lays its text out first so the disc sits at the trailing edge;
@@ -229,7 +250,9 @@ const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
           <View className="flex-1 gap-1">
             {labelled}
             {description ? (
-              <Text className={slots.description()}>{description}</Text>
+              <Text className={slots.description({ className: descriptionClassName })}>
+                {description}
+              </Text>
             ) : null}
           </View>
           {indicator}

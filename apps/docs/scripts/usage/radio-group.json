@@ -34,6 +34,11 @@
         "width": 720,
         "height": 504
       }
+    },
+    {
+      "title": "Styling the label",
+      "description": "`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.",
+      "code": "<RadioGroup value={method} onValueChange={setMethod} variant=\"card\">\n  <RadioGroup.Item\n    value=\"card\"\n    label=\"Card\"\n    description=\"Visa, Mastercard, Amex\"\n    className=\"bg-white\"\n    labelClassName=\"text-black\"\n    descriptionClassName=\"text-neutral-500\"\n  />\n</RadioGroup>"
     }
   ],
   "extraImports": [

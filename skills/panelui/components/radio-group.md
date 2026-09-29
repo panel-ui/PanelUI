@@ -47,10 +47,12 @@ Extends `ViewProps`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `className` | `string` | — | — |
+| `className` | `string` | — | Styles the pressable row — layout, border, fill. It does not reach the label: text colour is not inherited from a view in React Native, so use `labelClassName` for that. |
 | `value` | `string` | **required** | — |
 | `label` | `string` | — | — |
+| `labelClassName` | `string` | — | Classes for the label text, merged over the defaults — e.g. `text-black`. |
 | `description` | `string` | — | Secondary line under the label. Most at home in the `card` variant. |
+| `descriptionClassName` | `string` | — | Classes for the description text, merged over the defaults. |
 | `disabled` | `boolean` | — | — |
 | `hideIndicator` | `boolean` | — | Hide the disc entirely — for a card whose selected fill is enough. |
 | `children` | `ReactNode` | — | — |

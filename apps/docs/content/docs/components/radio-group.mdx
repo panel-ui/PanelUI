@@ -121,6 +121,23 @@ Short labels stacked one per line read as a longer list than they are. `orientat
 </RadioGroup>
 ```
 
+### Styling the label
+
+`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.
+
+```tsx
+<RadioGroup value={method} onValueChange={setMethod} variant="card">
+  <RadioGroup.Item
+    value="card"
+    label="Card"
+    description="Visa, Mastercard, Amex"
+    className="bg-white"
+    labelClassName="text-black"
+    descriptionClassName="text-neutral-500"
+  />
+</RadioGroup>
+```
+
 ## Variants
 
 ### `variant`
@@ -155,10 +172,12 @@ Short labels stacked one per line read as a longer list than they are. `orientat
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `className` | `string` | — |  |
+| `className` | `string` | — | Styles the pressable row — layout, border, fill. It does not reach the label: text colour is not inherited from a view in React Native, so use `labelClassName` for that. |
 | `value` | `string` | — |  |
 | `label` | `string` | — |  |
+| `labelClassName` | `string` | — | Classes for the label text, merged over the defaults — e.g. `text-black`. |
 | `description` | `string` | — | Secondary line under the label. Most at home in the `card` variant. |
+| `descriptionClassName` | `string` | — | Classes for the description text, merged over the defaults. |
 | `disabled` | `boolean` | — |  |
 | `hideIndicator` | `boolean` | — | Hide the disc entirely — for a card whose selected fill is enough. |
 

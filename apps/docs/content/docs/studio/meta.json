@@ -1,0 +1,11 @@
+{
+  "title": "Studio",
+  "pages": [
+    "index",
+    "quickstart",
+    "feedback",
+    "conversations",
+    "identify-users",
+    "api-reference"
+  ]
+}

@@ -1,0 +1,44 @@
+---
+title: Identify users
+description: Studio works with anonymous installs by default. When your app has sign-in, attach the user so the inbox shows who wrote.
+---
+
+An app doesn't need accounts to use Studio. Each install registers itself and
+is anonymous: the inbox shows its device and reports, and replies reach it.
+
+When your app does know who someone is, tell Studio after they sign in:
+
+```ts
+await studio.identify({
+  id: user.id,
+  email: user.email,
+  name: user.displayName,
+});
+```
+
+From then on, this install's reports show that name and email in the inbox, and
+everything they send from other devices is grouped under the same person.
+
+- `id` is your own user id, up to 128 characters. `email` and `name` are
+  optional, and a later call fills in what an earlier one left out.
+- Identity is what the app says it is — it isn't verified. It labels reports;
+  it never gives one install access to another's conversations.
+- Call it again whenever the details change. It's cheap and safe to repeat.
+
+## Signing out
+
+An install belongs to a device, not a person. When someone signs out and the
+next person should start fresh, forget the install:
+
+```ts
+await studio.reset();
+```
+
+The next call registers a new, anonymous install.
+
+## Deleting someone's data
+
+When a user asks to be forgotten, open any of their reports in the inbox and use
+**Delete this person's data**. It removes every report and screenshot from them
+in that project, with their installs and identity. Owners and admins can do
+this on every plan.

@@ -1,0 +1,107 @@
+---
+title: Feedback
+description: What a report can carry, how screenshots are uploaded, and what happens when a workspace reaches its monthly allowance.
+---
+
+A report is one call. Everything but `message` is optional.
+
+```ts
+const { feedback, warnings } = await studio.feedback.submit({
+  message: 'Checkout spins forever on the last step.',
+  rating: 2,
+  tags: ['Bug', 'Checkout'],
+  screen: '/checkout/confirm',
+  appVersion: '2.4.1',
+  build: '241',
+  metadata: { cartSize: 3, plan: 'gold' },
+});
+```
+
+| Field | What it's for |
+|---|---|
+| `message` | What the user wrote. 1–5,000 characters. |
+| `rating` | 1–5, when you ask for one. Ratings of 2 or lower are flagged in the inbox. |
+| `tags` | Up to 5. Unknown tags are created, up to 100 per project. |
+| `screen` | Where the user was. A route works well. |
+| `appVersion`, `build` | Filled from the device when left out. |
+| `metadata` | Your own context, as a JSON object. Pro and Team. |
+| `attachmentIds` | Screenshots, from `uploads.screenshot()`. |
+| `country` | ISO-3166 alpha-2, when your app knows it better than the device locale. |
+
+The device context — platform, OS, model, locale — comes from the device and
+doesn't need passing.
+
+## Warnings
+
+A report that is accepted with something left out resolves normally and says so
+in `warnings`. Each entry starts with a code:
+
+| Warning | Meaning |
+|---|---|
+| `metadata_ignored` | The workspace is on Free, so `metadata` was dropped. |
+| `tags_dropped` | The project already has 100 tags, so the new names weren't created. |
+| `over_quota` | The workspace is past this month's allowance. The report was still saved. |
+
+Warnings are for you, not your users. Log them; don't show them.
+
+## Screenshots
+
+Uploading is its own step, so a slow upload never holds up the report:
+
+```ts
+const attachmentId = await studio.uploads.screenshot({ uri: capture.uri });
+
+await studio.feedback.submit({
+  message: 'The chart overlaps the legend.',
+  attachmentIds: [attachmentId],
+});
+```
+
+`uri` is a local file (`file://…`) or anything `fetch` can read. PNG, JPEG or
+WebP, up to 5 MB. The bytes go straight to private storage; Studio only ever
+shows them to your team through links that expire within minutes.
+
+Each plan allows a number of screenshots per report — 1 on Free, 3 on Pro and
+Team — and a total amount of storage across the workspace. Once storage is full,
+`uploads.screenshot()` fails with `storage_full` and reports still go through
+without images.
+
+## Monthly allowance
+
+Reports count against the workspace's allowance for the calendar month (UTC).
+Going over doesn't lose anything your users send:
+
+- **Free:** reports past the allowance are saved but held out of the inbox until
+  the workspace upgrades.
+- **Pro and Team:** reports keep arriving for another 20%, and the workspace's
+  owners get an email.
+
+Past that, `submit()` fails with `quota_exceeded` until the next month or an
+upgrade.
+
+<Callout>
+  Rate limits are separate and the same on every plan: 5 reports a minute and 50
+  a day per install. A limited call fails with `rate_limited` and carries
+  `retryAfter` in seconds.
+</Callout>
+
+## Handling errors
+
+Every failure is a `StudioError` with a stable `code`. Branch on the code, never
+on the message:
+
+```ts
+import { isStudioError } from 'panelui-studio';
+
+try {
+  await studio.feedback.submit({ message });
+} catch (error) {
+  if (isStudioError(error) && error.code === 'rate_limited') {
+    showToast(`Try again in ${error.retryAfter ?? 60} seconds.`);
+  } else {
+    showToast("Couldn't send that. Check your connection and try again.");
+  }
+}
+```
+
+The full list is in the [API reference](/docs/studio/api-reference#errors).

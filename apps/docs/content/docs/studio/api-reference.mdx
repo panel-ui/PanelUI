@@ -1,0 +1,134 @@
+---
+title: API reference
+description: Every client method, React hook, type and error code in panelui-studio, and the HTTP endpoints behind them.
+---
+
+## createStudio
+
+```ts
+import { createStudio } from 'panelui-studio';
+
+const studio = createStudio(config);
+```
+
+| Option | Type | Default |
+|---|---|---|
+| `publishableKey` | `string` | Required. The project's `pk_…` key. |
+| `baseUrl` | `string` | `https://studio.panelui.dev/api/v1` |
+| `storage` | `StudioStorage` | Secure storage, then AsyncStorage, then memory |
+| `device` | `DeviceContext` | Detected from the device; anything passed wins |
+| `timeoutMs` | `number` | `10000`. Uploads get three times this. |
+| `fetch` | `typeof fetch` | The global `fetch` |
+
+## Client
+
+| Method | Returns | |
+|---|---|---|
+| `register()` | `Installation` | Registers this install if it isn't yet. Every other call does this for you. |
+| `reset()` | `void` | Forgets the install; the next call registers a new one. |
+| `identify({ id, email?, name? })` | `{ userId }` | Attaches one of your users to this install. |
+| `feedback.submit(input)` | `SubmitFeedbackResult` | Sends a report. See [Feedback](/docs/studio/feedback). |
+| `feedback.list()` | `FeedbackSummary[]` | This install's reports, newest first (latest 50). |
+| `conversations.messages(id)` | `ConversationMessage[]` | A thread, oldest first. Marks replies as read. |
+| `conversations.send(id, body)` | `ConversationMessage` | Adds the user's reply. |
+| `uploads.screenshot({ uri, contentType?, byteSize? })` | `string` | Uploads a screenshot; returns its attachment id. |
+
+## React
+
+From `panelui-studio/react`.
+
+| Export | |
+|---|---|
+| `<StudioProvider publishableKey="…">` | Creates one client for the tree. Also takes `client={studio}` to share one you made. |
+| `useStudio()` | The client from the nearest provider. |
+| `useFeedbackList()` | `{ items, isLoading, error, reload, submit }` |
+| `useConversation(id, { pollMs? })` | `{ messages, isLoading, isSending, error, send, reload }`. Polls every 15 s by default; `pollMs: 0` turns it off. |
+
+## Types
+
+```ts
+type SubmitFeedbackInput = {
+  message: string;
+  rating?: number;               // 1–5
+  tags?: string[];               // up to 5
+  screen?: string;
+  appVersion?: string;
+  build?: string;
+  metadata?: Record<string, unknown>; // Pro and Team
+  attachmentIds?: string[];      // 1 on Free, 3 on Pro and Team
+  country?: string;              // ISO-3166 alpha-2
+};
+
+type SubmitFeedbackResult = {
+  feedback: { id: string; number: number; status: FeedbackStatus; createdAt: string };
+  warnings: string[];
+};
+
+type FeedbackStatus = 'new' | 'in_progress' | 'resolved' | 'archived';
+
+type FeedbackSummary = {
+  id: string;
+  number: number;
+  message: string;
+  status: FeedbackStatus;
+  createdAt: string;
+  lastMessageAt: string | null;
+  replies: number;
+};
+
+type ConversationMessage = {
+  id: string;
+  author: 'user' | 'developer';
+  body: string;
+  createdAt: string;
+};
+
+type StudioStorage = {
+  getItem(key: string): Promise<string | null> | string | null;
+  setItem(key: string, value: string): Promise<void> | void;
+  removeItem(key: string): Promise<void> | void;
+};
+```
+
+Storage helpers: `secureStore()`, `asyncStorage()`, `memoryStorage()` and
+`defaultStorage()`.
+
+## Errors
+
+Every failure is a `StudioError` with `code`, `status`, and `retryAfter` when
+rate limited. `isStudioError(error)` narrows an unknown catch.
+
+| Code | Status | Meaning |
+|---|---|---|
+| `bad_request` | 400 | Validation failed; the message says which field. |
+| `invalid_json` | 400 | The body wasn't JSON. |
+| `unauthorized` | 401 | Missing, unknown or revoked publishable key. |
+| `invalid_installation` | 401 | The install token is unknown. `reset()` and retry. |
+| `quota_exceeded` | 402 | The workspace reached this month's hard limit. |
+| `feature_unavailable` | 403 | The workspace's plan doesn't include this. |
+| `storage_full` | 403 | Screenshot storage is full; send the report without it. |
+| `not_found` | 404 | Not found, or not this install's. |
+| `payload_too_large` | 413 | Body over 64 KB, or a screenshot over 5 MB. |
+| `rate_limited` | 429 | Too many requests; wait `retryAfter` seconds. |
+| `internal_error` | 500 | Nothing was recorded; retrying is safe. |
+| `storage_unavailable` | 503 | File storage isn't available. |
+| `network_error`, `timeout` | — | The request never got an answer. |
+
+## HTTP
+
+For platforms without the SDK, the same API is plain JSON over HTTPS with open
+CORS and no cookies. Every request carries `Authorization: Bearer pk_…`; all but
+registration also carry `X-Studio-Installation: it_…`.
+
+| Endpoint | |
+|---|---|
+| `POST /installations` | Register an install. Returns `{ installationId, installationToken }` once. |
+| `POST /identify` | `{ id, email?, name? }` |
+| `POST /feedback` | Submit a report. `201` with `{ feedback, warnings }`. |
+| `GET /feedback` | This install's reports. |
+| `GET /feedback/{id}/messages` | A thread. |
+| `POST /feedback/{id}/messages` | `{ body }` — the user's reply. |
+| `POST /uploads` | `{ contentType, byteSize }` → a presigned `PUT` URL valid for 5 minutes. |
+
+Errors come back as `{ "error": { "code": "…", "message": "…" } }` with the
+statuses above.

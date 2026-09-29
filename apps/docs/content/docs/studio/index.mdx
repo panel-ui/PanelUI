@@ -1,0 +1,49 @@
+---
+title: Overview
+description: PanelUI Studio is the hosted backend behind PanelUI's Feedback — reports, screenshots and two-way conversations, with an inbox for your team.
+---
+
+PanelUI draws the screens. Studio is where what your users send ends up: an
+inbox your team reads and replies from, and an API the app talks to with nothing
+more than a publishable key.
+
+It is optional. Every PanelUI component works without it, and PanelUI stays free
+and open source. Studio is a hosted service with a free plan, for when you'd
+rather not build the backend yourself.
+
+## What it does
+
+- **Feedback.** A message, a rating, tags, the screen it came from and the
+  device context — collected by the SDK, not typed by the user.
+- **Screenshots.** Uploaded straight from the device to private storage.
+- **Conversations.** Every report is a thread. You reply from the inbox; the app
+  shows the reply and the user can answer.
+- **Identity, optionally.** Anonymous by default, so apps without accounts work.
+  If your app has sign-in, attach the user to their reports.
+
+## How the pieces fit
+
+```text
+Your app ── panelui-studio (SDK) ── Studio API ── Inbox (your team)
+   │                                     │
+   └─ PanelUI Feedback / Message         └─ email, Slack, Linear
+```
+
+The app ships a **publishable key**, which is public by design: it can only
+submit to its own project. Each install registers itself once and keeps its own
+token in secure storage, so no secret is ever bundled into the app.
+
+## When to reach for it
+
+Use Studio when you want feedback and replies working without a database, an
+upload pipeline and an admin screen of your own. If you already run a backend
+and want the data there, [Feedback](/docs/components/feedback) posts to any
+`onSubmit` you give it — Studio is one destination, not a requirement.
+
+## In this section
+
+- [Quickstart](/docs/studio/quickstart) — from a new project to the first report.
+- [Feedback](/docs/studio/feedback) — what a report can carry, screenshots and limits.
+- [Conversations](/docs/studio/conversations) — showing replies in the app.
+- [Identify users](/docs/studio/identify-users) — anonymous installs and signed-in users.
+- [API reference](/docs/studio/api-reference) — every method, hook, type and error code.

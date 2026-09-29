@@ -1,0 +1,80 @@
+---
+title: Conversations
+description: Show a user their reports and your team's replies, and let them answer — with the React hooks or the client directly.
+---
+
+Every report is a thread. Your team replies from the inbox; the app reads the
+thread and can add to it. Replies travel over plain HTTP, so an open thread
+polls while someone is looking at it and nothing runs in the background.
+
+## A user's reports
+
+`useFeedbackList` lists this install's own reports, newest first, with how many
+replies each has:
+
+```tsx
+import { FlatList, RefreshControl } from 'react-native';
+import { useFeedbackList } from 'panelui-studio/react';
+
+export function MyReports({ onOpen }: { onOpen: (id: string) => void }) {
+  const { items, isLoading, reload } = useFeedbackList();
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item.id}
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={reload} />}
+      renderItem={({ item }) => (
+        <ReportRow report={item} onPress={() => onOpen(item.id)} />
+      )}
+    />
+  );
+}
+```
+
+It doesn't poll: a list of your own reports rarely changes while you look at it.
+Pull to refresh calls `reload`.
+
+## One thread
+
+`useConversation` loads a thread, polls it every 15 seconds while mounted, and
+sends replies:
+
+```tsx
+import { useConversation } from 'panelui-studio/react';
+
+export function Thread({ feedbackId }: { feedbackId: string }) {
+  const { messages, isLoading, isSending, send } = useConversation(feedbackId);
+
+  return (
+    <>
+      {messages.map((message) => (
+        <Bubble key={message.id} mine={message.author === 'user'}>
+          {message.body}
+        </Bubble>
+      ))}
+      <Composer disabled={isSending} onSend={send} />
+    </>
+  );
+}
+```
+
+- `author` is `'user'` for the person using your app and `'developer'` for your
+  team. Internal notes never reach the app.
+- Pass `{ pollMs: 0 }` to turn polling off, or a longer interval to poll less.
+- A sent message appears straight away; the next poll reconciles it.
+- Reading a thread marks your team's replies as read, which the inbox shows.
+- A reply on resolved feedback moves it back to *In progress*.
+
+PanelUI's [Message](/docs/components/message) draws the bubbles, and
+[Message Scroller](/docs/components/message-scroller) keeps the newest in view.
+
+## Without React
+
+The client has the same operations:
+
+```ts
+const reports = await studio.feedback.list();
+const thread = await studio.conversations.messages(reports[0].id);
+await studio.conversations.send(reports[0].id, 'Yes, it happens every time.');
+```

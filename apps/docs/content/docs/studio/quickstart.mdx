@@ -1,0 +1,134 @@
+---
+title: Quickstart
+description: Create a Studio project, install the SDK and send the first report from an Expo or React Native app.
+---
+
+<Steps>
+
+<Step>
+
+### Create a project
+
+Sign in to [PanelUI Studio](https://studio.panelui.dev), create a workspace and
+a project for your app. **Project → Settings** shows its publishable key
+(`pk_…`).
+
+</Step>
+
+<Step>
+
+### Install the SDK
+
+<InstallTabs packages="panelui-studio" />
+
+Each install keeps a token that proves it is itself, so the SDK stores it in
+secure storage when it can. In an Expo app, add that:
+
+```sh
+npx expo install expo-secure-store
+```
+
+Without it the SDK falls back to AsyncStorage, then to memory — and memory
+means a new install is registered on every launch.
+
+</Step>
+
+<Step>
+
+### Create the client
+
+```ts title="lib/studio.ts"
+import { createStudio } from 'panelui-studio';
+
+export const studio = createStudio({
+  publishableKey: process.env.EXPO_PUBLIC_STUDIO_KEY!,
+});
+```
+
+The publishable key is public by design, so `EXPO_PUBLIC_` is the right place
+for it: all it allows is submitting to this one project.
+
+</Step>
+
+<Step>
+
+### Send a report
+
+```ts
+await studio.feedback.submit({
+  message: 'The workout screen freezes.',
+  rating: 2,
+  screen: '/workout/start',
+});
+```
+
+The first call registers the install, then sends. Platform, OS, device model,
+app version and locale are filled in for you. Open the inbox and it's there.
+
+</Step>
+
+<Step>
+
+### Put it behind Feedback
+
+```tsx
+import { useState } from 'react';
+import { Button, Feedback } from 'panelui-native';
+
+import { studio } from '@/lib/studio';
+
+export function FeedbackButton() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Feedback open={open} onOpenChange={setOpen}>
+      <Feedback.Trigger>
+        <Button variant="outline">Send feedback</Button>
+      </Feedback.Trigger>
+      <Feedback.Content>
+        <Feedback.Panel>
+          <Feedback.Title>What should we fix first?</Feedback.Title>
+          <Feedback.Close />
+          <Feedback.Field placeholder="Tell us what got in your way" />
+        </Feedback.Panel>
+        <Feedback.Footer>
+          <Feedback.Cancel />
+          <Feedback.Submit
+            onSubmit={async (message) => {
+              await studio.feedback.submit({ message });
+              setOpen(false);
+            }}
+          />
+        </Feedback.Footer>
+      </Feedback.Content>
+    </Feedback>
+  );
+}
+```
+
+`Feedback.Submit` doesn't close the dialog by itself, so a failed send can still
+show its error. Close it once `submit` resolves.
+
+</Step>
+
+</Steps>
+
+## With React context
+
+`panelui-studio/react` hands one client to the whole tree:
+
+```tsx title="app/_layout.tsx"
+import { Stack } from 'expo-router';
+import { StudioProvider } from 'panelui-studio/react';
+
+export default function RootLayout() {
+  return (
+    <StudioProvider publishableKey={process.env.EXPO_PUBLIC_STUDIO_KEY!}>
+      <Stack />
+    </StudioProvider>
+  );
+}
+```
+
+Anything below can call `useStudio()` for the client, or use the hooks in
+[Conversations](/docs/studio/conversations).

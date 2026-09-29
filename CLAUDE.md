@@ -88,6 +88,11 @@ the library source into `api.json`; `gen.mjs` merges it with the hand-written `u
 `npm run docs:generate --workspace=docs`, which also rebuilds the registry. See
 `apps/docs/scripts/README.md` for what each `usage.json` key becomes.
 
+**Everything about PanelUI Studio or its `panelui-studio` SDK goes in the Studio section**,
+`apps/docs/content/docs/studio/` (hand-written MDX, listed in that folder's `meta.json`). Never add
+a Studio or SDK page anywhere else in the sidebar. Its signatures come from the SDK source in the
+`panel-ui/panelui-studio` repo (`packages/sdk/src`), never from memory.
+
 ### Write a guide, not an argument
 
 Docs prose is there to be *used*. A reader arrives with a decision to make — should I use this,

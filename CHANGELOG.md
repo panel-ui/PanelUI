@@ -9,6 +9,24 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.103.2] — 2026-09-29
+
+### Fixed
+
+- **RadioGroup** — an item's label could not be recoloured. `className` on
+  `RadioGroup.Item` styles the pressable row, and React Native does not pass a
+  text colour down from a view, so `text-black` there never reached the label:
+  it kept `text-foreground`, which is white on a dark theme. Items now take
+  `labelClassName` and `descriptionClassName`, merged over the defaults.
+  ([#227](https://github.com/panel-ui/PanelUI/issues/227))
+- **Checkbox** — the same gap, closed the same way: `labelClassName` and
+  `descriptionClassName`.
+
+### Docs
+
+- **RadioGroup**, **Checkbox** — a "Styling the label" example, and
+  `className` now says what it reaches.
+
 ## [0.103.1] — 2026-09-28
 
 ### Fixed

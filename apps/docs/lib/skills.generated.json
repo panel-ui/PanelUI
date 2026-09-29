@@ -11,6 +11,6 @@
     "type": "skill-md",
     "description": "Build React Native and Expo UIs with PanelUI — adding components, theming, composing overlays and forms, and debugging why something is unstyled. Applies when working in an Expo or React Native project that has panelui-native installed or a panelui.json, when the user mentions PanelUI, or when they ask for a bottom sheet, dialog, chart, chat transcript, form or any other screen UI in React Native.",
     "path": "/skills/panelui/SKILL.md",
-    "digest": "sha256:40e6c6f866a3573139f0514915b0e5174e45cee6a8ec8cdef9b159eed32ffe43"
+    "digest": "sha256:45d7680dfce75c983ecfff217cee6c4fc77e2b543a81eb4496ba2734137bc5ce"
   }
 ]

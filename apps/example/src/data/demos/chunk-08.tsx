@@ -90,6 +90,37 @@ function RadioGroupCardDemo() {
   );
 }
 
+function RadioGroupStyledDemo() {
+  const [method, setMethod] = useState('card');
+
+  return (
+    <RadioGroup
+      value={method}
+      onValueChange={setMethod}
+      variant="card"
+      orientation="horizontal"
+      className="w-full"
+    >
+      <RadioGroup.Item
+        value="card"
+        label="Card"
+        description="Visa, Amex"
+        className="bg-white"
+        labelClassName="text-black"
+        descriptionClassName="text-neutral-500"
+      />
+      <RadioGroup.Item
+        value="wallet"
+        label="Wallet"
+        description="Apple Pay"
+        className="bg-white"
+        labelClassName="text-black"
+        descriptionClassName="text-neutral-500"
+      />
+    </RadioGroup>
+  );
+}
+
 function SelectDemo() {
   const [fruit, setFruit] = useState<string>();
 
@@ -1780,6 +1811,7 @@ export const ENTRIES: ComponentEntry[] = [
       { label: 'Plans', render: () => <RadioGroupDemo /> },
       { label: 'Horizontal', render: () => <RadioGroupRowDemo /> },
       { label: 'Cards', render: () => <RadioGroupCardDemo /> },
+      { label: 'Styled labels', render: () => <RadioGroupStyledDemo /> },
       {
         label: 'In a card',
         render: () => (

@@ -37,6 +37,11 @@
         "width": 720,
         "height": 348
       }
+    },
+    {
+      "title": "Styling the label",
+      "description": "`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.",
+      "code": "<Checkbox\n  variant=\"card\"\n  checked={express}\n  onCheckedChange={setExpress}\n  label=\"Express delivery\"\n  description=\"Arrives tomorrow\"\n  className=\"bg-white\"\n  labelClassName=\"text-black\"\n  descriptionClassName=\"text-neutral-500\"\n/>"
     }
   ],
   "variantCode": {

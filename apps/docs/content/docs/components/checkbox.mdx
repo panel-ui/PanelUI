@@ -130,6 +130,23 @@ const some = selected.length > 0 && !all;
 />
 ```
 
+### Styling the label
+
+`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.
+
+```tsx
+<Checkbox
+  variant="card"
+  checked={express}
+  onCheckedChange={setExpress}
+  label="Express delivery"
+  description="Arrives tomorrow"
+  className="bg-white"
+  labelClassName="text-black"
+  descriptionClassName="text-neutral-500"
+/>
+```
+
 ## Variants
 
 ### `variant`
@@ -156,13 +173,15 @@ const some = selected.length > 0 && !all;
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `className` | `string` | — |  |
+| `className` | `string` | — | Styles the pressable row — layout, border, fill. It does not reach the label: text colour is not inherited from a view in React Native, so use `labelClassName` for that. |
 | `checked` | `boolean` | — |  |
 | `onCheckedChange` | `(checked: boolean) => void` | — |  |
 | `indeterminate` | `boolean` | — | A third, in-between state for a box that governs a group of others — some on, some off. It fills like a checked box but shows a dash rather than a tick, and announces itself as `mixed` to a screen reader. Pressing it resolves the ambiguity by turning the whole group on, so the press reports `true`. `indeterminate` overrides `checked` for what is drawn. |
 | `disabled` | `boolean` | — |  |
 | `label` | `string` | — | Optional label rendered next to the box; pressing it also toggles. |
+| `labelClassName` | `string` | — | Classes for the label text, merged over the defaults — e.g. `text-black`. |
 | `description` | `string` | — | Secondary line under the label, for extra context. |
+| `descriptionClassName` | `string` | — | Classes for the description text, merged over the defaults. |
 
 Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
 

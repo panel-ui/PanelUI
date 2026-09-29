@@ -52,6 +52,11 @@ const checkboxVariants = tv({
 });
 
 export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
+  /**
+   * Styles the pressable row — layout, border, fill. It does not reach the
+   * label: text colour is not inherited from a view in React Native, so use
+   * `labelClassName` for that.
+   */
   className?: string;
   checked: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -66,8 +71,12 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
   disabled?: boolean;
   /** Optional label rendered next to the box; pressing it also toggles. */
   label?: string;
+  /** Classes for the label text, merged over the defaults — e.g. `text-black`. */
+  labelClassName?: string;
   /** Secondary line under the label, for extra context. */
   description?: string;
+  /** Classes for the description text, merged over the defaults. */
+  descriptionClassName?: string;
 }
 
 export const Checkbox = forwardRef<View, CheckboxProps>(
@@ -79,7 +88,9 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       indeterminate,
       disabled,
       label,
+      labelClassName,
       description,
+      descriptionClassName,
       variant,
     },
     ref
@@ -143,9 +154,13 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
         {variant === 'card' ? null : box}
         {label || description ? (
           <View className={slots.content()}>
-            {label ? <Text className={slots.label()}>{label}</Text> : null}
+            {label ? (
+              <Text className={slots.label({ className: labelClassName })}>{label}</Text>
+            ) : null}
             {description ? (
-              <Text className={slots.description()}>{description}</Text>
+              <Text className={slots.description({ className: descriptionClassName })}>
+                {description}
+              </Text>
             ) : null}
           </View>
         ) : null}

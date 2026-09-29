@@ -41,13 +41,15 @@ Extends `VariantProps<typeof checkboxVariants>`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `className` | `string` | — | — |
+| `className` | `string` | — | Styles the pressable row — layout, border, fill. It does not reach the label: text colour is not inherited from a view in React Native, so use `labelClassName` for that. |
 | `checked` | `boolean` | **required** | — |
 | `onCheckedChange` | `(checked: boolean) => void` | — | — |
 | `indeterminate` | `boolean` | — | A third, in-between state for a box that governs a group of others — some on, some off. It fills like a checked box but shows a dash rather than a tick, and announces itself as `mixed` to a screen reader. Pressing it resolves the ambiguity by turning the whole group on, so the press reports `true`. `indeterminate` overrides `checked` for what is drawn. |
 | `disabled` | `boolean` | — | — |
 | `label` | `string` | — | Optional label rendered next to the box; pressing it also toggles. |
+| `labelClassName` | `string` | — | Classes for the label text, merged over the defaults — e.g. `text-black`. |
 | `description` | `string` | — | Secondary line under the label, for extra context. |
+| `descriptionClassName` | `string` | — | Classes for the description text, merged over the defaults. |
 
 ### Example — Controlled
 

@@ -1,0 +1,73 @@
+---
+title: Webhooks
+description: Get a signed HTTP request in your own backend when a report arrives, changes or gets a reply.
+---
+
+Webhooks send Studio's events to your own systems: open a ticket, post to your
+chat, update a CRM. Add an endpoint in **Project → Settings → Integrations →
+Webhooks** (Pro and Team). Studio shows its signing secret once; keep it on your
+server.
+
+## Events
+
+| Event | When |
+|---|---|
+| `feedback.created` | A report arrives. |
+| `feedback.updated` | A report's status or tags change. The payload adds `change`. |
+| `message.created` | Someone writes in a conversation. The payload adds `message`, with `author` `user` or `developer`. |
+| `support.created` | A user starts a support conversation. |
+
+Every request is a JSON `POST`:
+
+```json
+{
+  "type": "feedback.created",
+  "timestamp": "2026-10-01T12:00:00.000Z",
+  "data": {
+    "id": "fb_…",
+    "number": 184,
+    "kind": "feedback",
+    "status": "new",
+    "message": "The workout screen freezes.",
+    "rating": 2,
+    "tags": ["Bug"],
+    "fields": { "plan": "Pro" },
+    "user": { "id": "user_42", "name": "Sam", "email": "sam@example.com" },
+    "project": { "id": "proj_…", "name": "Workout Tracker" },
+    "url": "https://studio.panelui.dev/…",
+    "created_at": "2026-10-01T12:00:00.000Z"
+  }
+}
+```
+
+## Verify the signature
+
+Requests are signed in the Standard Webhooks format (`webhook-id`,
+`webhook-timestamp`, `webhook-signature`), so any Standard Webhooks library
+checks them with the endpoint's `whsec_…` secret as it is:
+
+```ts title="app/api/studio/route.ts"
+import { Webhook } from 'standardwebhooks';
+
+const webhook = new Webhook(process.env.STUDIO_WEBHOOK_SECRET!);
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const event = webhook.verify(body, Object.fromEntries(request.headers)) as {
+    type: string;
+    data: unknown;
+  };
+  // … handle event.type
+  return new Response(null, { status: 204 });
+}
+```
+
+Verify against the raw body, before parsing it.
+
+## Delivery
+
+- Answer with a `2xx` within 5 seconds. Do slow work after responding.
+- Each event is sent once. **Send test** in Studio sends a `ping` any time.
+- Ten failures in a row turn the endpoint off and email the workspace's owners;
+  turn it back on once it's fixed.
+- URLs must be HTTPS on a public address.

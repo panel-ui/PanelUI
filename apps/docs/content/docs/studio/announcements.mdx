@@ -1,0 +1,43 @@
+---
+title: Announcements
+description: Write a message once in Studio and show it in every app that asks — release notes, maintenance windows, a feature to try.
+---
+
+Announcements are published in Studio (**Announcements** in the project) with a
+title, a message and an optional button, for a window of time and for the
+platforms you choose. Apps ask for the live ones; each install can dismiss them.
+Free workspaces can have one live announcement at a time; Pro and Team have no
+limit.
+
+## Show them
+
+```tsx
+import { useAnnouncements } from 'panelui-studio/react';
+
+export function AnnouncementBanner() {
+  const { announcements, seen, dismiss } = useAnnouncements();
+  const next = announcements[0];
+  if (!next) return null;
+
+  return (
+    <Banner
+      title={next.title}
+      body={next.body}
+      action={next.cta ? { label: next.cta.label, href: next.cta.url } : undefined}
+      onShow={() => seen(next.id)}
+      onClose={() => dismiss(next.id)}
+    />
+  );
+}
+```
+
+- `announcements` holds what this install should show now: published, inside
+  its start and end, for this platform, and not dismissed. Newest first.
+- `seen(id)` records a view — Studio shows how many installs saw each one.
+  It doesn't hide it.
+- `dismiss(id)` hides it for this install for good, straight away.
+
+PanelUI's [Alert](/docs/components/alert) or a [Toast](/docs/components/toast)
+are good places to put one.
+
+Without React: `studio.announcements.list()`, `.seen(id)` and `.dismiss(id)`.

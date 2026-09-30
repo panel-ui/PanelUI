@@ -4,8 +4,12 @@
     "index",
     "quickstart",
     "feedback",
+    "custom-forms",
     "conversations",
+    "support",
+    "announcements",
     "identify-users",
+    "webhooks",
     "api-reference"
   ]
 }

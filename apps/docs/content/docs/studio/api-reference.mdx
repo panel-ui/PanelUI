@@ -28,7 +28,12 @@ const studio = createStudio(config);
 | `reset()` | `void` | Forgets the install; the next call registers a new one. |
 | `identify({ id, email?, name? })` | `{ userId }` | Attaches one of your users to this install. |
 | `feedback.submit(input)` | `SubmitFeedbackResult` | Sends a report. See [Feedback](/docs/studio/feedback). |
-| `feedback.list()` | `FeedbackSummary[]` | This install's reports, newest first (latest 50). |
+| `feedback.list()` | `FeedbackSummary[]` | This install's reports and support conversations, newest first (latest 50). |
+| `feedback.form()` | `FormField[]` | The project's custom form. Empty on Free or without fields. |
+| `support.start(message)` | `StartSupportResult` | Starts a support conversation. Takes a string or a `StartSupportInput`. |
+| `announcements.list()` | `Announcement[]` | Live announcements for this install. |
+| `announcements.seen(id)` | `void` | Records a view. |
+| `announcements.dismiss(id)` | `void` | Hides it for this install for good. |
 | `conversations.messages(id)` | `ConversationMessage[]` | A thread, oldest first. Marks replies as read. |
 | `conversations.send(id, body)` | `ConversationMessage` | Adds the user's reply. |
 | `uploads.screenshot({ uri, contentType?, byteSize? })` | `string` | Uploads a screenshot; returns its attachment id. |
@@ -43,6 +48,8 @@ From `panelui-studio/react`.
 | `useStudio()` | The client from the nearest provider. |
 | `useFeedbackList()` | `{ items, isLoading, error, reload, submit }` |
 | `useConversation(id, { pollMs? })` | `{ messages, isLoading, isSending, error, send, reload }`. Polls every 15 s by default; `pollMs: 0` turns it off. |
+| `useFeedbackForm()` | `{ fields, isLoading, error }` |
+| `useAnnouncements()` | `{ announcements, isLoading, error, seen, dismiss, reload }` |
 
 ## Types
 
@@ -56,7 +63,28 @@ type SubmitFeedbackInput = {
   build?: string;
   metadata?: Record<string, unknown>; // Pro and Team
   attachmentIds?: string[];      // 1 on Free, 3 on Pro and Team
+  fields?: Record<string, string | number | boolean>; // Pro and Team
   country?: string;              // ISO-3166 alpha-2
+};
+
+type FormField = {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'choice' | 'checkbox' | 'rating';
+  options: string[];             // for choice
+  required: boolean;
+};
+
+type StartSupportInput = Omit<SubmitFeedbackInput, 'rating' | 'tags'>;
+
+type Announcement = {
+  id: string;
+  title: string;
+  body: string;
+  cta: { label: string; url: string } | null;
+  endsAt: string | null;
+  seen: boolean;
+  createdAt: string;
 };
 
 type SubmitFeedbackResult = {
@@ -69,6 +97,7 @@ type FeedbackStatus = 'new' | 'in_progress' | 'resolved' | 'archived';
 type FeedbackSummary = {
   id: string;
   number: number;
+  kind: 'feedback' | 'support';
   message: string;
   status: FeedbackStatus;
   createdAt: string;
@@ -129,6 +158,11 @@ registration also carry `X-Studio-Installation: it_…`.
 | `GET /feedback/{id}/messages` | A thread. |
 | `POST /feedback/{id}/messages` | `{ body }` — the user's reply. |
 | `POST /uploads` | `{ contentType, byteSize }` → a presigned `PUT` URL valid for 5 minutes. |
+| `GET /form` | The project's custom form fields. |
+| `POST /support` | Starts a support conversation. `201` with `{ conversation, warnings }`. |
+| `GET /announcements` | Live announcements for this install. |
+| `POST /announcements/{id}/seen` | Records a view. |
+| `POST /announcements/{id}/dismiss` | Hides it for this install. |
 
 Errors come back as `{ "error": { "code": "…", "message": "…" } }` with the
 statuses above.

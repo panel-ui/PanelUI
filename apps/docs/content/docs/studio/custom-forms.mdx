@@ -1,0 +1,58 @@
+---
+title: Custom forms
+description: Ask the questions your team needs alongside the message — a plan, a rating, a checkbox — and get answers Studio has already checked.
+---
+
+A report is a message plus whatever the device knows. When your team needs more —
+which plan someone is on, how easy a task was — add fields to the project's
+form in Studio (**Project → Settings → Feedback form**). Custom forms are part of
+Pro and Team.
+
+Each field has a label, a **key** the app answers under, a type and whether it's
+required:
+
+| Type | The app sends |
+|---|---|
+| `text`, `textarea` | A string, up to 2,000 characters. `text` is kept to one line. |
+| `choice` | One of the field's options, exactly. |
+| `checkbox` | `true` or `false`. |
+| `rating` | A whole number from 1 to 5. |
+
+## Render the form
+
+The app asks for the form, so a new field shows up without shipping an update:
+
+```tsx
+import { useFeedbackForm } from 'panelui-studio/react';
+
+export function ExtraQuestions({ answers, onChange }) {
+  const { fields } = useFeedbackForm();
+
+  return fields.map((field) => (
+    <FormField key={field.key} field={field} value={answers[field.key]} onChange={onChange} />
+  ));
+}
+```
+
+Without React, `await studio.feedback.form()` returns the same list. It's empty
+on Free and when the project has no fields, so rendering it is always safe.
+
+## Send the answers
+
+```ts
+await studio.feedback.submit({
+  message,
+  fields: { plan: 'Pro', ease_of_use: 4, contact_me: true },
+});
+```
+
+Studio checks every answer against the form before the report is saved:
+
+- A wrong type — a rating of 9, a choice that isn't an option — fails with
+  `bad_request`, and the message names the field.
+- Keys that aren't on the form are dropped and reported as a `fields_ignored`
+  warning, so an app built against an older form never loses a report.
+- Required fields are enforced once the app sends `fields` at all. A version of
+  your app that predates the form, and sends none, still gets through.
+
+Answers show in the inbox under **Form** and export one column per field.

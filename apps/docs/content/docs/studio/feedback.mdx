@@ -25,6 +25,7 @@ const { feedback, warnings } = await studio.feedback.submit({
 | `screen` | Where the user was. A route works well. |
 | `appVersion`, `build` | Filled from the device when left out. |
 | `metadata` | Your own context, as a JSON object. Pro and Team. |
+| `fields` | Answers to the project's [custom form](/docs/studio/custom-forms). Pro and Team. |
 | `attachmentIds` | Screenshots, from `uploads.screenshot()`. |
 | `country` | ISO-3166 alpha-2, when your app knows it better than the device locale. |
 
@@ -39,6 +40,7 @@ in `warnings`. Each entry starts with a code:
 | Warning | Meaning |
 |---|---|
 | `metadata_ignored` | The workspace is on Free, so `metadata` was dropped. |
+| `fields_ignored` | The workspace is on Free, or some answers aren't on the form. |
 | `tags_dropped` | The project already has 100 tags, so the new names weren't created. |
 | `over_quota` | The workspace is past this month's allowance. The report was still saved. |
 

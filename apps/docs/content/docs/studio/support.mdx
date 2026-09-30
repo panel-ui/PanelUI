@@ -1,0 +1,42 @@
+---
+title: Support
+description: Let people start a conversation from your app — not just answer yours — and reply from a Support inbox that works like Feedback.
+---
+
+Feedback is the app asking. Support is the user asking: "I can't sign in",
+"where did my data go". One call opens a conversation that lands in the
+project's **Support** inbox, on every plan.
+
+```ts
+const { conversation } = await studio.support.start("I can't sign in since the update.");
+```
+
+Pass an object for more context — the same fields a report takes, apart from
+`rating` and `tags`:
+
+```ts
+await studio.support.start({
+  message: "Checkout fails on the last step.",
+  screen: '/checkout/confirm',
+  fields: { order_id: 'A-1042' },
+});
+```
+
+## The conversation
+
+A support conversation is a thread like any other, so everything in
+[Conversations](/docs/studio/conversations) applies unchanged:
+
+```tsx
+const { messages, send } = useConversation(conversation.id);
+```
+
+`feedback.list()` returns support conversations too, marked
+`kind: "support"`, so one "My messages" screen can show both.
+
+## What counts
+
+Support conversations use the workspace's monthly allowance, the same rate
+limits, and the same email, Slack and webhook notifications (`support.created`)
+as reports. Your team sees them in their own inbox, with the same statuses,
+tags and replies.

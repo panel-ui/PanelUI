@@ -6,7 +6,7 @@
     "poster": "/previews/panelside-poster.jpg",
     "alt": "The native Panelside: the chat slides aside to reveal the panel, whose New chat and account buttons are the platform's own, and a tap on the chat brings it back.",
     "width": 720,
-    "height": 1566
+    "height": 1560
   },
   "usage": "<Panelside>\n  <Panelside.Panel>\n    <Panelside.Header\n      title=\"Assistant\"\n      action={<Panelside.SearchTrigger onPress={openSearch} />}\n    />\n\n    <Panelside.Content>\n      <Panelside.Group>\n        <Panelside.GroupLabel>Recents</Panelside.GroupLabel>\n        <Panelside.Item label=\"Migrating the design tokens\" />\n      </Panelside.Group>\n    </Panelside.Content>\n\n    <Panelside.Footer>\n      <Panelside.Cta label=\"New chat\" onPress={compose} />\n    </Panelside.Footer>\n  </Panelside.Panel>\n\n  <Panelside.Scene>\n    <Panelside.Trigger />\n    <Conversation />\n  </Panelside.Scene>\n\n</Panelside>",
   "extraImports": [
@@ -125,7 +125,7 @@
         "poster": "/previews/panelside-assistant-poster.jpg",
         "alt": "The menu button opens the panel, the chat slides and rounds aside, and a tap on the chat closes it.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     },
     {
@@ -137,7 +137,7 @@
         "poster": "/previews/panelside-open-a-conversation-poster.jpg",
         "alt": "A conversation is pressed in the panel, which closes onto that chat. Then a second one is opened the same way.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     },
     {
@@ -147,9 +147,9 @@
       "previewVideo": {
         "src": "/previews/panelside-row-actions.mp4",
         "poster": "/previews/panelside-row-actions-poster.jpg",
-        "alt": "A recent conversation's overflow menu offers Rename, Star, Share and Delete. Star moves the row into the Starred group.",
+        "alt": "A conversation's overflow menu offers Rename, Star, Share and Delete. A renamed chat opens under its new title, and starring or unstarring moves a row between the Starred and Recents groups.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     },
     {
@@ -161,7 +161,7 @@
         "poster": "/previews/panelside-overlay-poster.jpg",
         "alt": "The panel slides in over a chat that stays where it is, and a tap on the dimmed chat closes it.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     },
     {
@@ -195,9 +195,9 @@
       "previewVideo": {
         "src": "/previews/panelside-full-chat.mp4",
         "poster": "/previews/panelside-full-chat-poster.jpg",
-        "alt": "A full chat screen with its composer slides aside to reveal the panel, and comes back on a tap.",
+        "alt": "A reply streams into the transcript and scrolls with it, then the chat slides aside to reveal the panel and comes back on a tap.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     },
     {
@@ -209,7 +209,7 @@
         "poster": "/previews/panelside-poster.jpg",
         "alt": "The native Panelside: the chat slides aside to reveal the panel with the platform's own buttons, and comes back on a tap.",
         "width": 720,
-        "height": 1566
+        "height": 1560
       }
     }
   ],

@@ -75,11 +75,41 @@ app version and locale are filled in for you. Open the inbox and it's there.
 
 </Step>
 
-<Step>
+</Steps>
 
-### Usage with PanelUI
+Any UI can call `submit` — a form of your own, a settings screen, a shake
+gesture. If your app uses PanelUI, [Usage with PanelUI](#usage-with-panelui)
+puts it behind its Feedback dialog.
 
-Put it behind PanelUI's [Feedback](/docs/components/feedback) dialog:
+## With React context
+
+`panelui-studio/react` hands one client to the whole tree:
+
+```tsx title="app/_layout.tsx"
+import { Stack } from 'expo-router';
+import { StudioProvider } from 'panelui-studio/react';
+
+import { studio } from '@/lib/studio';
+
+export default function RootLayout() {
+  return (
+    <StudioProvider client={studio}>
+      <Stack />
+    </StudioProvider>
+  );
+}
+```
+
+`client={studio}` shares the client from `lib/studio.ts`, so code outside React
+and the hooks use the same install; `publishableKey="pk_…"` instead creates one
+for the tree. Anything below can call `useStudio()` for the client, or use the
+hooks in [Conversations](/docs/studio/conversations).
+
+## Usage with PanelUI
+
+Studio doesn't need PanelUI. If your app uses it, PanelUI's
+[Feedback](/docs/components/feedback) dialog is a ready-made place to collect a
+report:
 
 ```tsx
 import { useState } from 'react';
@@ -123,38 +153,18 @@ show its error. Close it once `submit` resolves.
 [Feedback](/docs/studio/feedback#usage-with-panelui) adds a rating, a
 screenshot and the error message.
 
-</Step>
-
-</Steps>
-
-## With React context
-
-`panelui-studio/react` hands one client to the whole tree. Put it **above**
+With PanelUI and the React hooks together, put `StudioProvider` **above**
 `PanelUIProvider`:
 
 ```tsx title="app/_layout.tsx"
-import { Stack } from 'expo-router';
-import { PanelUIProvider } from 'panelui-native';
-import { StudioProvider } from 'panelui-studio/react';
-
-import { studio } from '@/lib/studio';
-
-export default function RootLayout() {
-  return (
-    <StudioProvider client={studio}>
-      <PanelUIProvider>
-        <Stack />
-      </PanelUIProvider>
-    </StudioProvider>
-  );
-}
+<StudioProvider client={studio}>
+  <PanelUIProvider>
+    <Stack />
+  </PanelUIProvider>
+</StudioProvider>
 ```
 
 PanelUI's dialogs, sheets and popovers render into a layer that
 `PanelUIProvider` owns. A `StudioProvider` inside it can't be seen from there,
 so a hook like `useFeedbackForm()` in a Feedback dialog would throw
 `useStudio must be used inside <StudioProvider>`.
-
-`client={studio}` shares the client from `lib/studio.ts`, so code outside React
-and the hooks use the same install. Anything below can call `useStudio()` for
-the client, or use the hooks in [Conversations](/docs/studio/conversations).

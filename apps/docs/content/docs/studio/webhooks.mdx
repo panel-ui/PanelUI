@@ -8,16 +8,6 @@ chat, update a CRM. Add an endpoint in **Project → Settings → Integrations �
 Webhooks** (Pro and Team). Studio shows its signing secret once; keep it on your
 server.
 
-## Usage with PanelUI
-
-Nothing changes in the app. Webhooks go from Studio to your server, so the
-PanelUI screens on the other pages — the [Feedback](/docs/studio/feedback#usage-with-panelui)
-dialog, the [Support](/docs/studio/support#usage-with-panelui) screen, a
-[thread](/docs/studio/conversations#usage-with-panelui) — already produce every
-event below: a report sends `feedback.created`, a reply from the app sends
-`message.created`, and **Message us** sends `support.created`. The signing
-secret stays on your server and never ships in the app.
-
 ## Events
 
 | Event | When |
@@ -81,3 +71,14 @@ Verify against the raw body, before parsing it.
 - Ten failures in a row turn the endpoint off and email the workspace's owners;
   turn it back on once it's fixed.
 - URLs must be HTTPS on a public address.
+
+## Usage with PanelUI
+
+Webhooks go from Studio to your server, so nothing changes in the app, PanelUI
+or not. If your app uses the PanelUI screens on the other pages — the
+[Feedback](/docs/studio/feedback#usage-with-panelui) dialog, the
+[Support](/docs/studio/support#usage-with-panelui) screen, a
+[thread](/docs/studio/conversations#usage-with-panelui) — they already produce
+the events below: a report sends `feedback.created`, a reply from the app sends
+`message.created`, and starting a support conversation sends `support.created`.
+The signing secret stays on your server and never ships in the app.

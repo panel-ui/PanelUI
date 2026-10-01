@@ -38,10 +38,18 @@ await studio.reset();
 
 The next call registers a new, anonymous install.
 
+## Deleting someone's data
+
+When a user asks to be forgotten, open any of their reports in the inbox and use
+**Delete this person's data**. It removes every report and screenshot from them
+in that project, with their installs and identity. Owners and admins can do
+this on every plan.
+
 ## Usage with PanelUI
 
-Call `identify` where your sign-in finishes and `reset` where sign-out does —
-here, from an account [Card](/docs/components/card), with a
+`identify` and `reset` aren't tied to any UI: call them where your sign-in
+finishes and where sign-out does. If your app uses PanelUI, here they are behind
+an account [Card](/docs/components/card), with a
 [Toast](/docs/components/toast) to confirm:
 
 ```tsx title="app/account.tsx"
@@ -90,10 +98,3 @@ export default function Account() {
   height={262}
   caption="After identify, the inbox names the sender instead of Anonymous."
 />
-
-## Deleting someone's data
-
-When a user asks to be forgotten, open any of their reports in the inbox and use
-**Delete this person's data**. It removes every report and screenshot from them
-in that project, with their installs and identity. Owners and admins can do
-this on every plan.

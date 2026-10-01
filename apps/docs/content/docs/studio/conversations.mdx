@@ -70,9 +70,20 @@ PanelUI's.
 - Reading a thread marks your team's replies as read, which the inbox shows.
 - A reply on resolved feedback moves it back to *In progress*.
 
+## Without React
+
+The client has the same operations:
+
+```ts
+const reports = await studio.feedback.list();
+const thread = await studio.conversations.messages(reports[0].id);
+await studio.conversations.send(reports[0].id, 'Yes, it happens every time.');
+```
+
 ## Usage with PanelUI
 
-A "My messages" screen: [Support](/docs/components/support)'s conversation rows
+The hooks return plain data, so any UI can draw them. If your app uses PanelUI,
+here is a "My messages" screen: [Support](/docs/components/support)'s conversation rows
 list the reports, with a status pill and a dot when there's a reply.
 
 ```tsx title="app/messages.tsx"
@@ -176,13 +187,3 @@ export default function Thread() {
   height={820}
   caption="The team replied from the inbox; the app showed it on its next poll, and the user answered."
 />
-
-## Without React
-
-The client has the same operations:
-
-```ts
-const reports = await studio.feedback.list();
-const thread = await studio.conversations.messages(reports[0].id);
-await studio.conversations.send(reports[0].id, 'Yes, it happens every time.');
-```

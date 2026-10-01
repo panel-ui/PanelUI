@@ -61,7 +61,8 @@ Answers show in the inbox under **Form** and export one column per field.
 
 ## Usage with PanelUI
 
-Each field type has a PanelUI control: `choice` is a
+The form is plain data, so any UI can render it. If your app uses PanelUI, each
+field type has a control: `choice` is a
 [Radio Group](/docs/components/radio-group), `rating` a
 [Rating](/docs/components/rating), `checkbox` a
 [Checkbox](/docs/components/checkbox), and the text types an
@@ -171,7 +172,7 @@ await studio.feedback.submit({ message, fields: answers });
 
 `useFeedbackForm()` has to reach a `StudioProvider` from inside the dialog, so
 the provider goes above `PanelUIProvider` — see
-[With React context](/docs/studio/quickstart#with-react-context).
+[Usage with PanelUI](/docs/studio/quickstart#usage-with-panelui) in the Quickstart.
 
 <Preview
   src="/studio/custom-forms-answers.jpg"

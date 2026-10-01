@@ -34,9 +34,17 @@ const { messages, send } = useConversation(conversation.id);
 `feedback.list()` returns support conversations too, marked
 `kind: "support"`, so one "My messages" screen can show both.
 
+## What counts
+
+Support conversations use the workspace's monthly allowance, the same rate
+limits, and the same email, Slack and webhook notifications (`support.created`)
+as reports. Your team sees them in their own inbox, with the same statuses,
+tags and replies.
+
 ## Usage with PanelUI
 
-PanelUI's [Support](/docs/components/support) screen is the front door: a
+`support.start` works from any screen. If your app uses PanelUI, its
+[Support](/docs/components/support) screen is a ready-made front door: a
 **Message us** channel opens a [Textarea](/docs/components/textarea), and
 sending starts the conversation and opens its thread. The user's earlier
 conversations sit underneath.
@@ -122,10 +130,3 @@ and the reply time are yours to write; Studio doesn't set them.
   height={1660}
   caption="Sending opens the conversation in the project's Support inbox, next to Feedback."
 />
-
-## What counts
-
-Support conversations use the workspace's monthly allowance, the same rate
-limits, and the same email, Slack and webhook notifications (`support.created`)
-as reports. Your team sees them in their own inbox, with the same statuses,
-tags and replies.

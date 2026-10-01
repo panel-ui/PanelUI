@@ -37,7 +37,59 @@ export function AnnouncementBanner() {
   It doesn't hide it.
 - `dismiss(id)` hides it for this install for good, straight away.
 
-PanelUI's [Alert](/docs/components/alert) or a [Toast](/docs/components/toast)
-are good places to put one.
-
 Without React: `studio.announcements.list()`, `.seen(id)` and `.dismiss(id)`.
+
+## Usage with PanelUI
+
+An [Alert](/docs/components/alert) at the top of a screen, with the
+announcement's button and a **Dismiss**:
+
+```tsx title="components/announcement-banner.tsx"
+import { useEffect } from 'react';
+import { Linking, View } from 'react-native';
+import { Alert, Button } from 'panelui-native';
+import { useAnnouncements } from 'panelui-studio/react';
+
+export function AnnouncementBanner() {
+  const { announcements, seen, dismiss } = useAnnouncements();
+  const next = announcements[0];
+
+  // Count the view once it's on screen; seen() doesn't hide it.
+  useEffect(() => {
+    if (next && !next.seen) void seen(next.id);
+  }, [next, seen]);
+
+  if (!next) return null;
+
+  return (
+    <Alert variant="info">
+      <Alert.Indicator />
+      <Alert.Content>
+        <Alert.Title>{next.title}</Alert.Title>
+        <Alert.Description>{next.body}</Alert.Description>
+        <View className="flex-row gap-2 pt-3">
+          {next.cta ? (
+            <Button size="sm" onPress={() => Linking.openURL(next.cta!.url)}>
+              {next.cta.label}
+            </Button>
+          ) : null}
+          <Button size="sm" variant="ghost" onPress={() => dismiss(next.id)}>
+            Dismiss
+          </Button>
+        </View>
+      </Alert.Content>
+    </Alert>
+  );
+}
+```
+
+`next.seen` is true once this install has recorded a view, so each install
+counts once in Studio's **Seen by** column.
+
+<Preview
+  src="/studio/announcement-banner.jpg"
+  alt="An info Alert on an iPhone: Studio is live, with a Read the docs button and Dismiss."
+  width={1206}
+  height={860}
+  caption="An announcement published in Studio, shown until the user dismisses it."
+/>

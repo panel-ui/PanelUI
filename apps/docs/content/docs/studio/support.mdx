@@ -34,6 +34,95 @@ const { messages, send } = useConversation(conversation.id);
 `feedback.list()` returns support conversations too, marked
 `kind: "support"`, so one "My messages" screen can show both.
 
+## Usage with PanelUI
+
+PanelUI's [Support](/docs/components/support) screen is the front door: a
+**Message us** channel opens a [Textarea](/docs/components/textarea), and
+sending starts the conversation and opens its thread. The user's earlier
+conversations sit underneath.
+
+```tsx title="app/support.tsx"
+import { useState } from 'react';
+import { View } from 'react-native';
+import { router } from 'expo-router';
+import { Button, MessageCircleIcon, Support, Textarea } from 'panelui-native';
+import { useFeedbackList, useStudio } from 'panelui-studio/react';
+
+const status = { new: 'open', in_progress: 'open', resolved: 'solved', archived: 'closed' } as const;
+
+export default function SupportScreen() {
+  const studio = useStudio();
+  const { items } = useFeedbackList();
+  const [writing, setWriting] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+
+  async function start() {
+    setSending(true);
+    try {
+      const { conversation } = await studio.support.start({ message: draft.trim(), screen: '/support' });
+      setDraft('');
+      setWriting(false);
+      router.push(`/thread/${conversation.id}`);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Support availability="online">
+      <Support.Header title="Support" description="We answer most things the same day" />
+      <Support.Status replyTime="Typically replies in under an hour" />
+
+      <Support.Channels>
+        <Support.Channel
+          icon={<MessageCircleIcon />}
+          label="Message us"
+          description="Start a conversation with the team"
+          onPress={() => setWriting(true)}
+        />
+      </Support.Channels>
+
+      {writing ? (
+        <View className="gap-3">
+          <Textarea label="How can we help?" rows={4} value={draft} onChangeText={setDraft} />
+          <Button loading={sending} disabled={!draft.trim()} onPress={start}>
+            Send
+          </Button>
+        </View>
+      ) : null}
+
+      <Support.Conversations title="Your conversations">
+        {items
+          .filter((item) => item.kind === 'support')
+          .map((item) => (
+            <Support.Conversation
+              key={item.id}
+              title={item.message}
+              status={status[item.status]}
+              timestamp={new Date(item.lastMessageAt ?? item.createdAt).toLocaleDateString()}
+              updated={item.replies > 0}
+              onPress={() => router.push(`/thread/${item.id}`)}
+            />
+          ))}
+      </Support.Conversations>
+    </Support>
+  );
+}
+```
+
+`/thread/[id]` is the same thread screen as in
+[Conversations](/docs/studio/conversations#usage-with-panelui). The status pill
+and the reply time are yours to write; Studio doesn't set them.
+
+<Preview
+  src="/studio/support-screen.jpg"
+  alt="PanelUI's Support screen on an iPhone: a Message us channel, a message being written, a Send button, and an earlier conversation marked Open."
+  width={1206}
+  height={1660}
+  caption="Sending opens the conversation in the project's Support inbox, next to Feedback."
+/>
+
 ## What counts
 
 Support conversations use the workspace's monthly allowance, the same rate

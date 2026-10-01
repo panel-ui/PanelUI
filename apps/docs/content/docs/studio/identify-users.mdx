@@ -18,6 +18,8 @@ await studio.identify({
 
 From then on, this install's reports show that name and email in the inbox, and
 everything they send from other devices is grouped under the same person.
+Reports sent before `identify` keep the sender they had — on a shared device,
+someone else may have written them.
 
 - `id` is your own user id, up to 128 characters. `email` and `name` are
   optional, and a later call fills in what an earlier one left out.
@@ -35,6 +37,59 @@ await studio.reset();
 ```
 
 The next call registers a new, anonymous install.
+
+## Usage with PanelUI
+
+Call `identify` where your sign-in finishes and `reset` where sign-out does —
+here, from an account [Card](/docs/components/card), with a
+[Toast](/docs/components/toast) to confirm:
+
+```tsx title="app/account.tsx"
+import { Button, Card, useToast } from 'panelui-native';
+
+import { useAuth } from '@/lib/auth'; // your app's own sign-in
+import { studio } from '@/lib/studio';
+
+export default function Account() {
+  const { toast } = useToast();
+  const { user, signIn, signOut } = useAuth();
+
+  async function handleSignIn() {
+    const signedIn = await signIn();
+    await studio.identify({ id: signedIn.id, email: signedIn.email, name: signedIn.name });
+    toast.show({ variant: 'success', label: `Signed in as ${signedIn.name}` });
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    await studio.reset();
+  }
+
+  return (
+    <Card>
+      <Card.Header>
+        <Card.Title>{user ? user.name : 'Not signed in'}</Card.Title>
+        <Card.Description>
+          {user ? 'Reports now carry your name and email.' : 'Reports come from an anonymous install.'}
+        </Card.Description>
+      </Card.Header>
+      <Card.Footer>
+        <Button variant="outline" onPress={user ? handleSignOut : handleSignIn}>
+          {user ? 'Sign out' : 'Sign in'}
+        </Button>
+      </Card.Footer>
+    </Card>
+  );
+}
+```
+
+<Preview
+  src="/studio/identify-sender.jpg"
+  alt="A report in Studio from Sam Rivera, sam@example.com, rated two stars: Please add a weekly distance goal."
+  width={1254}
+  height={262}
+  caption="After identify, the inbox names the sender instead of Anonymous."
+/>
 
 ## Deleting someone's data
 

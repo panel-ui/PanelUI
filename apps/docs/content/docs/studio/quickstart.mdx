@@ -65,11 +65,21 @@ await studio.feedback.submit({
 The first call registers the install, then sends. Platform, OS, device model,
 app version and locale are filled in for you. Open the inbox and it's there.
 
+<Preview
+  src="/studio/quickstart-inbox.jpg"
+  alt="A report open in the Studio inbox: Feedback #5, status New, a Demo tag, and the message with its sender and a two-star rating."
+  width={1568}
+  height={424}
+  caption="The report in the project's Feedback inbox, seconds after the app sent it."
+/>
+
 </Step>
 
 <Step>
 
-### Put it behind Feedback
+### Usage with PanelUI
+
+Put it behind PanelUI's [Feedback](/docs/components/feedback) dialog:
 
 ```tsx
 import { useState } from 'react';
@@ -81,33 +91,37 @@ export function FeedbackButton() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Feedback open={open} onOpenChange={setOpen}>
-      <Feedback.Trigger>
-        <Button variant="outline">Send feedback</Button>
-      </Feedback.Trigger>
-      <Feedback.Content>
-        <Feedback.Panel>
-          <Feedback.Title>What should we fix first?</Feedback.Title>
-          <Feedback.Close />
-          <Feedback.Field placeholder="Tell us what got in your way" />
-        </Feedback.Panel>
-        <Feedback.Footer>
-          <Feedback.Cancel />
-          <Feedback.Submit
-            onSubmit={async (message) => {
-              await studio.feedback.submit({ message });
-              setOpen(false);
-            }}
-          />
-        </Feedback.Footer>
-      </Feedback.Content>
-    </Feedback>
+    <>
+      <Button variant="outline" onPress={() => setOpen(true)}>
+        Send feedback
+      </Button>
+      <Feedback open={open} onOpenChange={setOpen}>
+        <Feedback.Content>
+          <Feedback.Panel>
+            <Feedback.Title>What should we fix first?</Feedback.Title>
+            <Feedback.Close />
+            <Feedback.Field placeholder="Tell us what got in your way" />
+          </Feedback.Panel>
+          <Feedback.Footer>
+            <Feedback.Cancel />
+            <Feedback.Submit
+              onSubmit={async (message) => {
+                await studio.feedback.submit({ message });
+                setOpen(false);
+              }}
+            />
+          </Feedback.Footer>
+        </Feedback.Content>
+      </Feedback>
+    </>
   );
 }
 ```
 
 `Feedback.Submit` doesn't close the dialog by itself, so a failed send can still
 show its error. Close it once `submit` resolves.
+[Feedback](/docs/studio/feedback#usage-with-panelui) adds a rating, a
+screenshot and the error message.
 
 </Step>
 
@@ -115,20 +129,32 @@ show its error. Close it once `submit` resolves.
 
 ## With React context
 
-`panelui-studio/react` hands one client to the whole tree:
+`panelui-studio/react` hands one client to the whole tree. Put it **above**
+`PanelUIProvider`:
 
 ```tsx title="app/_layout.tsx"
 import { Stack } from 'expo-router';
+import { PanelUIProvider } from 'panelui-native';
 import { StudioProvider } from 'panelui-studio/react';
+
+import { studio } from '@/lib/studio';
 
 export default function RootLayout() {
   return (
-    <StudioProvider publishableKey={process.env.EXPO_PUBLIC_STUDIO_KEY!}>
-      <Stack />
+    <StudioProvider client={studio}>
+      <PanelUIProvider>
+        <Stack />
+      </PanelUIProvider>
     </StudioProvider>
   );
 }
 ```
 
-Anything below can call `useStudio()` for the client, or use the hooks in
-[Conversations](/docs/studio/conversations).
+PanelUI's dialogs, sheets and popovers render into a layer that
+`PanelUIProvider` owns. A `StudioProvider` inside it can't be seen from there,
+so a hook like `useFeedbackForm()` in a Feedback dialog would throw
+`useStudio must be used inside <StudioProvider>`.
+
+`client={studio}` shares the client from `lib/studio.ts`, so code outside React
+and the hooks use the same install. Anything below can call `useStudio()` for
+the client, or use the hooks in [Conversations](/docs/studio/conversations).

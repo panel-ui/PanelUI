@@ -59,6 +59,10 @@ export function Thread({ feedbackId }: { feedbackId: string }) {
 }
 ```
 
+`Bubble` and `Composer` stand in for your own components;
+[Usage with PanelUI](#usage-with-panelui) has the same thread built from
+PanelUI's.
+
 - `author` is `'user'` for the person using your app and `'developer'` for your
   team. Internal notes never reach the app.
 - Pass `{ pollMs: 0 }` to turn polling off, or a longer interval to poll less.
@@ -66,8 +70,112 @@ export function Thread({ feedbackId }: { feedbackId: string }) {
 - Reading a thread marks your team's replies as read, which the inbox shows.
 - A reply on resolved feedback moves it back to *In progress*.
 
-PanelUI's [Message](/docs/components/message) draws the bubbles, and
-[Message Scroller](/docs/components/message-scroller) keeps the newest in view.
+## Usage with PanelUI
+
+A "My messages" screen: [Support](/docs/components/support)'s conversation rows
+list the reports, with a status pill and a dot when there's a reply.
+
+```tsx title="app/messages.tsx"
+import { router } from 'expo-router';
+import { Support } from 'panelui-native';
+import { useFeedbackList } from 'panelui-studio/react';
+
+// PanelUI's `pending` reads "Waiting on you" — the user — so Studio's
+// in_progress, which is the team's turn, stays `open`.
+const status = { new: 'open', in_progress: 'open', resolved: 'solved', archived: 'closed' } as const;
+
+export default function Messages() {
+  const { items } = useFeedbackList();
+
+  return (
+    <Support.Conversations>
+      {items.map((item) => (
+        <Support.Conversation
+          key={item.id}
+          title={item.kind === 'support' ? 'Support' : `Feedback #${item.number}`}
+          preview={item.message}
+          status={status[item.status]}
+          timestamp={new Date(item.lastMessageAt ?? item.createdAt).toLocaleDateString()}
+          updated={item.replies > 0}
+          onPress={() => router.push(`/thread/${item.id}`)}
+        />
+      ))}
+    </Support.Conversations>
+  );
+}
+```
+
+The thread: [Message](/docs/components/message) draws each turn,
+[Message Scroller](/docs/components/message-scroller) keeps the newest in view,
+and a [Textarea](/docs/components/textarea) answers.
+
+```tsx title="app/thread/[id].tsx"
+import { useState } from 'react';
+import { KeyboardAvoidingView, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { Button, Message, MessageScroller, Textarea } from 'panelui-native';
+import { useConversation } from 'panelui-studio/react';
+
+export default function Thread() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { messages, isSending, send } = useConversation(id);
+  const [draft, setDraft] = useState('');
+
+  async function reply() {
+    const body = draft.trim();
+    if (!body) return;
+    setDraft('');
+    await send(body);
+  }
+
+  return (
+    <KeyboardAvoidingView behavior="padding" className="flex-1">
+      <MessageScroller autoScroll className="flex-1">
+        <MessageScroller.List
+          data={messages.map((message) => ({ ...message, messageId: message.id }))}
+          contentContainerClassName="gap-3 px-5"
+          renderItem={({ item }) => (
+            <Message align={item.author === 'user' ? 'end' : 'start'}>
+              <Message.Content>
+                <Message.Header>{item.author === 'user' ? 'You' : 'The team'}</Message.Header>
+                <Message.Bubble>
+                  <Message.BubbleContent>{item.body}</Message.BubbleContent>
+                </Message.Bubble>
+              </Message.Content>
+            </Message>
+          )}
+        />
+        <MessageScroller.Button />
+      </MessageScroller>
+      <View className="flex-row items-end gap-2 px-5 pt-3">
+        <Textarea
+          containerClassName="flex-1"
+          autoGrow
+          rows={1}
+          maxRows={5}
+          placeholder="Reply"
+          value={draft}
+          onChangeText={setDraft}
+        />
+        <Button loading={isSending} onPress={reply}>
+          Send
+        </Button>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+```
+
+`MessageScroller.List` needs a stable `messageId` on each row, so the message
+`id` is copied onto it.
+
+<Preview
+  src="/studio/conversation-thread.jpg"
+  alt="A conversation on an iPhone: the team's question on the left, and the user's answer on the right."
+  width={1206}
+  height={820}
+  caption="The team replied from the inbox; the app showed it on its next poll, and the user answered."
+/>
 
 ## Without React
 

@@ -32,6 +32,96 @@ const { feedback, warnings } = await studio.feedback.submit({
 The device context — platform, OS, model, locale — comes from the device and
 doesn't need passing.
 
+## Usage with PanelUI
+
+PanelUI's [Feedback](/docs/components/feedback) dialog collects the message;
+a [Rating](/docs/components/rating) and a [Checkbox](/docs/components/checkbox)
+sit in its panel for the rest. On submit, capture the screen behind the dialog,
+upload it, then send the report:
+
+```tsx title="components/feedback-button.tsx"
+import { useState, type RefObject } from 'react';
+import { View } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
+import { Button, Checkbox, Feedback, Rating, Text, useToast } from 'panelui-native';
+import { isStudioError } from 'panelui-studio';
+
+import { studio } from '@/lib/studio';
+
+export function FeedbackButton({ screenRef }: { screenRef: RefObject<View | null> }) {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [attach, setAttach] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(message: string) {
+    setError(null);
+    try {
+      const attachmentIds: string[] = [];
+      if (attach) {
+        const uri = await captureRef(screenRef, { format: 'png', result: 'tmpfile' });
+        attachmentIds.push(await studio.uploads.screenshot({ uri }));
+      }
+
+      const { feedback } = await studio.feedback.submit({
+        message,
+        rating: rating || undefined,
+        screen: '/workouts',
+        attachmentIds,
+      });
+
+      setOpen(false);
+      setRating(0);
+      toast.show({ variant: 'success', label: `Sent as #${feedback.number}` });
+    } catch (caught) {
+      // Shown in the dialog: a toast would sit underneath it.
+      setError(isStudioError(caught) ? caught.message : "Couldn't send that. Check your connection.");
+    }
+  }
+
+  return (
+    <>
+      <Button onPress={() => setOpen(true)}>Send feedback</Button>
+      <Feedback open={open} onOpenChange={setOpen}>
+        <Feedback.Content>
+          <Feedback.Panel>
+            <Feedback.Title>What should we fix first?</Feedback.Title>
+            <Feedback.Close />
+            <Feedback.Field placeholder="Tell us what got in your way" />
+            <View className="gap-4 pt-2">
+              <Rating label="How was it?" value={rating} onValueChange={setRating} />
+              <Checkbox label="Attach a screenshot" checked={attach} onCheckedChange={setAttach} />
+              {error ? (
+                <Text size="sm" className="text-destructive">
+                  {error}
+                </Text>
+              ) : null}
+            </View>
+          </Feedback.Panel>
+          <Feedback.Footer>
+            <Feedback.Cancel />
+            <Feedback.Submit onSubmit={send} />
+          </Feedback.Footer>
+        </Feedback.Content>
+      </Feedback>
+    </>
+  );
+}
+```
+
+`screenRef` is the screen being reported on — pass a ref to its root `View`,
+with `collapsable={false}` so Android keeps it to capture. The dialog renders in
+PanelUI's overlay layer, outside that view, so it isn't in the screenshot.
+
+<Preview
+  src="/studio/feedback-dialog.jpg"
+  alt="The PanelUI Feedback dialog on an iPhone: a message, a two-star rating, the project's form questions and a checked Attach a screenshot box."
+  width={1206}
+  height={2100}
+  caption="What the user sees. The Plan and How easy questions come from the project's custom form."
+/>
+
 ## Warnings
 
 A report that is accepted with something left out resolves normally and says so
@@ -59,8 +149,9 @@ await studio.feedback.submit({
 });
 ```
 
-`uri` is a local file (`file://…`) or anything `fetch` can read. PNG, JPEG or
-WebP, up to 5 MB. The bytes go straight to private storage; Studio only ever
+`uri` is a local file — a `file://…` URI or, from `panelui-studio` 0.2.1, a
+bare path, which is what `react-native-view-shot` returns on iOS — or anything
+`fetch` can read. PNG, JPEG or WebP, up to 5 MB. The bytes go straight to private storage; Studio only ever
 shows them to your team through links that expire within minutes.
 
 Each plan allows a number of screenshots per report — 1 on Free, 3 on Pro and

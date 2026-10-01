@@ -34,7 +34,8 @@ export function ExtraQuestions({ answers, onChange }) {
 }
 ```
 
-Without React, `await studio.feedback.form()` returns the same list. It's empty
+[Usage with PanelUI](#usage-with-panelui) has the whole form drawn with PanelUI's
+controls. Without React, `await studio.feedback.form()` returns the same list. It's empty
 on Free and when the project has no fields, so rendering it is always safe.
 
 ## Send the answers
@@ -52,7 +53,130 @@ Studio checks every answer against the form before the report is saved:
   `bad_request`, and the message names the field.
 - Keys that aren't on the form are dropped and reported as a `fields_ignored`
   warning, so an app built against an older form never loses a report.
-- Required fields are enforced once the app sends `fields` at all. A version of
-  your app that predates the form, and sends none, still gets through.
+- Required fields are enforced once the app sends `fields` at all — including
+  `fields: {}`, when the user skipped every question. A version of your app that
+  predates the form, and sends none, still gets through.
 
 Answers show in the inbox under **Form** and export one column per field.
+
+## Usage with PanelUI
+
+Each field type has a PanelUI control: `choice` is a
+[Radio Group](/docs/components/radio-group), `rating` a
+[Rating](/docs/components/rating), `checkbox` a
+[Checkbox](/docs/components/checkbox), and the text types an
+[Input](/docs/components/input) or [Textarea](/docs/components/textarea):
+
+```tsx title="components/form-fields.tsx"
+import { View } from 'react-native';
+import { Checkbox, Input, RadioGroup, Rating, Text, Textarea } from 'panelui-native';
+import type { FormField } from 'panelui-studio';
+import { useFeedbackForm } from 'panelui-studio/react';
+
+export type Answers = Record<string, string | number | boolean>;
+
+export function FormFields({
+  answers,
+  onChange,
+}: {
+  answers: Answers;
+  onChange: (key: string, value: string | number | boolean) => void;
+}) {
+  const { fields } = useFeedbackForm();
+  if (fields.length === 0) return null;
+
+  return (
+    <View className="gap-4">
+      {fields.map((field) => (
+        <FormFieldInput
+          key={field.key}
+          field={field}
+          value={answers[field.key]}
+          onChange={(value) => onChange(field.key, value)}
+        />
+      ))}
+    </View>
+  );
+}
+
+function FormFieldInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: FormField;
+  value: string | number | boolean | undefined;
+  onChange: (value: string | number | boolean) => void;
+}) {
+  switch (field.type) {
+    case 'choice':
+      return (
+        <View className="gap-2">
+          <Text size="sm" weight="medium">
+            {field.label}
+            {field.required ? ' *' : ''}
+          </Text>
+          <RadioGroup
+            value={typeof value === 'string' ? value : ''}
+            onValueChange={onChange}
+            orientation="horizontal"
+          >
+            {field.options.map((option) => (
+              <RadioGroup.Item key={option} value={option} label={option} />
+            ))}
+          </RadioGroup>
+        </View>
+      );
+    case 'rating':
+      return (
+        <Rating
+          label={field.label}
+          value={typeof value === 'number' ? value : 0}
+          onValueChange={onChange}
+        />
+      );
+    case 'checkbox':
+      return <Checkbox label={field.label} checked={value === true} onCheckedChange={onChange} />;
+    case 'textarea':
+      return (
+        <Textarea
+          label={field.label}
+          isRequired={field.required}
+          value={typeof value === 'string' ? value : ''}
+          onChangeText={onChange}
+        />
+      );
+    default:
+      return (
+        <Input label={field.label} value={typeof value === 'string' ? value : ''} onChangeText={onChange} />
+      );
+  }
+}
+```
+
+Put `<FormFields>` inside the panel of the
+[Feedback dialog](/docs/studio/feedback#usage-with-panelui), keep the answers in
+state, and send them as `fields`:
+
+```tsx
+const [answers, setAnswers] = useState<Answers>({});
+
+<FormFields
+  answers={answers}
+  onChange={(key, value) => setAnswers((current) => ({ ...current, [key]: value }))}
+/>
+
+await studio.feedback.submit({ message, fields: answers });
+```
+
+`useFeedbackForm()` has to reach a `StudioProvider` from inside the dialog, so
+the provider goes above `PanelUIProvider` — see
+[With React context](/docs/studio/quickstart#with-react-context).
+
+<Preview
+  src="/studio/custom-forms-answers.jpg"
+  alt="The Form section of a report in Studio: Which plan are you on? Pro. How easy was it? 4."
+  width={941}
+  height={145}
+  caption="The answers from the dialog, under Form in the report."
+/>

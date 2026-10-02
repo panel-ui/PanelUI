@@ -29,6 +29,7 @@
     "combobox",
     "compare",
     "context-menu",
+    "countdown",
     "date-picker",
     "date-time-picker",
     "dialog",
@@ -226,16 +227,16 @@
     }
   ],
   "counts": {
-    "componentModules": 137,
-    "packageComponentExports": 137,
-    "documentedComponents": 137,
-    "exampleEntries": 137,
+    "componentModules": 138,
+    "packageComponentExports": 138,
+    "documentedComponents": 138,
+    "exampleEntries": 138,
     "registry": {
-      "componentItems": 137,
+      "componentItems": 138,
       "supportItems": 36,
-      "totalItems": 173,
+      "totalItems": 174,
       "byType": {
-        "registry:ui": 152,
+        "registry:ui": 153,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

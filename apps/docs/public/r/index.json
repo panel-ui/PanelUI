@@ -494,6 +494,19 @@
     "registryDependencies": []
   },
   {
+    "name": "countdown",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "The time left until a moment, ticking down to it.",
+    "registryDependencies": [
+      "cn",
+      "text"
+    ],
+    "docsPath": "components/countdown"
+  },
+  {
     "name": "date",
     "type": "registry:lib",
     "kind": "lib",

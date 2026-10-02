@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-137 component modules. The **Reference** column links to a file in this skill holding that
+138 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -113,6 +113,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 
 | Component | What it is | Reference |
 | --- | --- | --- |
+| `Countdown` | The time left until a moment, ticking down to it. | [countdown](./components/countdown.md) |
 | `Flow` | Pan-and-zoom canvas of draggable nodes joined by animated edges. | [flow](./components/flow.md) |
 | `Kpi` | One number, what it is doing, and the shape it made getting there. | [kpi](./components/kpi.md) |
 | `Leaderboard` | Entries ranked by a value, with the top three on a podium. | [leaderboard](./components/leaderboard.md) |

@@ -29,6 +29,7 @@ export const COMPONENTS = [
   {"slug":"combobox","name":"Combobox","summary":"A text field that filters a list as you type"},
   {"slug":"compare","name":"Compare","summary":"Two versions of one picture, with a seam you drag across it"},
   {"slug":"context-menu","name":"ContextMenu","summary":"Actions for a piece of content, opened by holding it"},
+  {"slug":"countdown","name":"Countdown","summary":"The time left until a moment, ticking down to it"},
   {"slug":"date-picker","name":"DatePicker","summary":"A calendar behind a button"},
   {"slug":"date-time-picker","name":"DateTimePicker","summary":"A day and a time, picked in one panel"},
   {"slug":"dialog","name":"Dialog","summary":"Modal confirmation overlay"},

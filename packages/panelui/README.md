@@ -228,6 +228,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `ColorPicker` | A colour chosen by dragging — a saturation square, a hue scale, and opacity |
 | `Combobox` | A text field that filters a list of options as you type |
 | `Compare` | Two versions of one picture, with a seam you drag across it |
+| `Countdown` | The time left until a moment, ticking down to it |
 | `ContextMenu` | Actions for a piece of content, opened by holding it |
 | `DatePicker` | A calendar behind a button |
 | `DateTimePicker` | A day and a time of day, picked in one panel |

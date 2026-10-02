@@ -23,6 +23,7 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
     load16().then((module) => module.ENTRIES_BY_SLUG['sankey-chart']),
   compare: () => load16().then((module) => module.ENTRIES_BY_SLUG['compare']),
   support: () => load16().then((module) => module.ENTRIES_BY_SLUG['support']),
+  countdown: () => load16().then((module) => module.ENTRIES_BY_SLUG['countdown']),
   leaderboard: () =>
     load16().then((module) => module.ENTRIES_BY_SLUG['leaderboard']),
   'bump-chart': () =>

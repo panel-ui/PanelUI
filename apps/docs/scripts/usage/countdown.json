@@ -1,0 +1,47 @@
+{
+  "slug": "countdown",
+  "previewVideo": {
+    "src": "/previews/countdown.mp4",
+    "poster": "/previews/countdown-poster.jpg",
+    "width": 720,
+    "height": 1566,
+    "alt": "Countdown — a launch page ticking down in four large boxes, then a flash sale timer that turns red as it crosses five minutes."
+  },
+  "intro": "Use it to show how long is left until a fixed moment: a launch, the end of a sale, an auction closing, the wait before a verification code can be sent again. Pass the moment as `to`, and the component works out what is left and updates once a second.\n\nIt reads the clock on every tick instead of subtracting one each second. So it stays correct after the app has been in the background, and it reaches zero at the moment `to` passes.\n\n**Seconds round up.** It shows `0:01` through the final second and `0:00` only once the time is up, so a sale never shows zero while it is still running.\n\nFor a value that changes for other reasons and should be seen changing, use [TextAnimation](/docs/components/text-animation). For progress towards a total rather than towards a time, use [Progress](/docs/components/progress).",
+  "usage": "const [launch] = useState(() => Date.now() + 2 * 86400 * 1000);\n\n<Countdown to={launch} />",
+  "extraImports": [
+    "Text"
+  ],
+  "examples": [
+    {
+      "title": "Inline",
+      "description": "`variant=\"inline\"` writes the time as a line of text, `2d 14:03:22`, for a banner, a card header or the line under a field. Put your own words around it in a row.",
+      "code": "<View className=\"flex-row items-baseline gap-1.5\">\n  <Text size=\"sm\" muted>Ends in</Text>\n  <Countdown to={saleEnds} variant=\"inline\" size=\"sm\" />\n</View>"
+    },
+    {
+      "title": "Choosing the units",
+      "description": "`units` picks which fields are shown. The largest one takes everything above it, so `['hours', 'minutes']` shows two days as 48 hours. By default, leading units that are zero are dropped, so a countdown three hours out has no days box. The smallest two always stay. Set `trim={false}` to keep every unit.",
+      "code": "<Countdown to={target} units={['hours', 'minutes', 'seconds']} />\n<Countdown to={target} trim={false} />"
+    },
+    {
+      "title": "The last few minutes",
+      "description": "`urgentBelow` is a number of seconds. Once that much or less is left, the digits switch to the destructive colour.",
+      "code": "<Countdown to={auctionEnds} variant=\"inline\" urgentBelow={300} />"
+    },
+    {
+      "title": "When it reaches zero",
+      "description": "`onComplete` runs once when the time is up. It also runs on mount if `to` has already passed. Use it to swap the countdown for whatever comes next. `onTick` receives the seconds left each time the display changes.",
+      "code": "const [ready, setReady] = useState(false);\nconst [target, setTarget] = useState(() => Date.now() + 30_000);\n\n{ready ? (\n  <Button variant=\"outline\" onPress={() => { setReady(false); setTarget(Date.now() + 30_000); }}>\n    Resend code\n  </Button>\n) : (\n  <Countdown to={target} variant=\"inline\" size=\"sm\" units={['minutes', 'seconds']} onComplete={() => setReady(true)} />\n)}"
+    },
+    {
+      "title": "Labels in another language",
+      "description": "`labels` replaces the names under each box in `segmented`. Pass only the ones you want to change.",
+      "code": "<Countdown to={target} labels={{ days: 'Jours', hours: 'Heures', minutes: 'Min', seconds: 'Sec' }} />"
+    }
+  ],
+  "notes": "### Keep `to` stable\n\n`to` is the moment itself, not a duration. Compute it once, in state or from your data, and pass the same value on every render. `Date.now() + 30_000` written straight into the JSX makes a new target on every render, so the countdown restarts each time the parent renders.\n\n### Accessibility\n\nThe countdown is a single element with the `timer` role. Its label is coarser than the display: it names days, hours and minutes, and counts seconds only in the last minute. A label that changed every second would be read again every second.\n\n### Motion\n\nWhen a digit changes, the old one slides down and out and the new one comes in from above. Only the digits that changed move. Nothing animates on the first render, and nothing animates when reduce motion is on.",
+  "variantCode": {
+    "variant": "<Countdown to={target} variant=\"segmented\" />\n<Countdown to={target} variant=\"inline\" />",
+    "size": "<Countdown to={target} size=\"sm\" />\n<Countdown to={target} size=\"md\" />\n<Countdown to={target} size=\"lg\" />"
+  }
+}

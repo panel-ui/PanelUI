@@ -1179,6 +1179,22 @@ const flow = (
   </Chartlet>
 );
 
+const countdown = (
+  <Row className="gap-1.5">
+    {/* Four boxes of two digits; the seconds box is the one that is moving. */}
+    {[0, 1, 2, 3].map((i) => (
+      <Plate key={i} className="items-center gap-1 px-2 py-1.5">
+        {i === 3 ? (
+          <Accent className="h-4 w-6 rounded-sm" />
+        ) : (
+          <div className="h-4 w-6 rounded-sm bg-fd-muted-foreground/45" />
+        )}
+        <Bar className="w-5" faint />
+      </Plate>
+    ))}
+  </Row>
+);
+
 const leaderboard = (
   <Plate className="w-44 gap-1.5 p-2.5">
     {/* The podium, 2-1-3, with the leader's bar the one accent; one row below. */}
@@ -2354,6 +2370,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   // Data
   flow,
   kpi,
+  countdown,
   leaderboard,
   map,
   planner,

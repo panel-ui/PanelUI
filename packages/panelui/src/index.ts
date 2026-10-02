@@ -873,6 +873,11 @@ export {
   type KpiTone,
 } from './components/kpi';
 export {
+  Countdown,
+  type CountdownProps,
+  type CountdownUnit,
+} from './components/countdown';
+export {
   Leaderboard,
   rankEntries,
   type LeaderboardEntry,

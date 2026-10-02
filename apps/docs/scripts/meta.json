@@ -1328,5 +1328,14 @@
       "addedIn": "0.104.0",
       "category": "data"
     }
+  ],
+  "countdown": [
+    "Countdown",
+    "The time left until a moment, ticking down to it.",
+    "react native countdown timer",
+    {
+      "addedIn": "0.105.0",
+      "category": "data"
+    }
   ]
 }

@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1415,
-    "values": 355,
-    "types": 1060,
-    "modules": 164,
-    "components": 137,
+    "exports": 1418,
+    "values": 356,
+    "types": 1062,
+    "modules": 165,
+    "components": 138,
     "hooks": 13
   },
   "groups": {
@@ -1134,6 +1134,25 @@
           },
           {
             "name": "ContextMenuAnchor",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/countdown/index.tsx",
+        "slug": "countdown",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "Countdown",
+            "kind": "value"
+          },
+          {
+            "name": "CountdownProps",
+            "kind": "type"
+          },
+          {
+            "name": "CountdownUnit",
             "kind": "type"
           }
         ]

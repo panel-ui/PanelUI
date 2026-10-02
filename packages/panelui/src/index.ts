@@ -340,6 +340,7 @@ export {
   CARTO_SOURCE,
   type MapProps,
   type MapHandle,
+  type MapFitBoundsOptions,
   type MapMarkerProps,
   type MapLabelProps,
   type MapPopupProps,
@@ -356,6 +357,7 @@ export {
   type BasemapTokens,
   type LngLat,
   type LngLatBounds,
+  type ViewPadding,
   type ViewState,
 } from './components/map';
 export {

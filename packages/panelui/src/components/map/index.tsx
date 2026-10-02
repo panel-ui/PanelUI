@@ -46,7 +46,14 @@ import {
 import { Pressable, StyleSheet, View, type PressableProps, type ViewProps } from 'react-native';
 import { useCSSVariable } from 'uniwind';
 import { tv } from 'tailwind-variants';
-import { CompassIcon, CrosshairIcon, MinusIcon, PlusIcon } from '../../icons';
+import {
+  CompassIcon,
+  CrosshairIcon,
+  IconColorProvider,
+  MaximizeIcon,
+  MinusIcon,
+  PlusIcon,
+} from '../../icons';
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import {
@@ -64,6 +71,7 @@ import {
   type MapRef,
   type PixelPoint,
   type StyleSpecification,
+  type ViewPadding,
   type ViewState,
 } from './maplibre';
 import {
@@ -74,7 +82,15 @@ import {
 import { asMapLayer, partitionMapChildren } from './map-children';
 
 export { hasMapLibre, CARTO_SOURCE };
-export type { BasemapSource, BasemapTokens, LngLat, LngLatBounds, PixelPoint, ViewState };
+export type {
+  BasemapSource,
+  BasemapTokens,
+  LngLat,
+  LngLatBounds,
+  PixelPoint,
+  ViewPadding,
+  ViewState,
+};
 export type { MapFeatureAccessibility } from './map-accessibility';
 
 const mapVariants = tv({
@@ -179,6 +195,8 @@ interface MapContextValue {
   cameraRef: React.RefObject<CameraRef | null>;
   /** The style has loaded and the map is drawing. */
   ready: boolean;
+  /** Move the camera back to where the map opened. */
+  recenter(duration?: number): void;
 }
 
 interface AccessibleFeatureGroup {
@@ -207,13 +225,39 @@ export function useMap(): MapContextValue {
 /** Set by `Map.Marker`, so a popup inside one knows where it is. */
 const MarkerContext = createContext<LngLat | null>(null);
 
+/** How `fitBounds` frames its box. */
+export interface MapFitBoundsOptions {
+  /**
+   * Points kept clear around the box. One number for every side, or per side
+   * — for a sheet or a toolbar covering part of the map. Defaults to 48.
+   */
+  padding?: number | ViewPadding;
+  /** Animation length in milliseconds. 0 jumps. Defaults to 900. */
+  duration?: number;
+}
+
 export interface MapHandle {
   /** Move the camera, animating unless `duration` is 0. */
   flyTo(options: { center: LngLat; zoom?: number; duration?: number }): void;
-  /** Frame a bounding box, leaving `padding` points around it. */
-  fitBounds(bounds: LngLatBounds, padding?: number): void;
+  /**
+   * Frame a bounding box, `[west, south, east, north]`. The second argument is
+   * either the padding in points or a `MapFitBoundsOptions`.
+   */
+  fitBounds(bounds: LngLatBounds, options?: number | MapFitBoundsOptions): void;
+  /**
+   * Return to the opening view — the `bounds`, or `center` and `zoom`, the map
+   * was mounted with. Animates unless `duration` is 0.
+   */
+  recenter(duration?: number): void;
   /** Where the map is looking right now. */
   getViewState(): Promise<ViewState | null>;
+}
+
+/** Expands a padding shorthand to the four sides the camera takes. */
+function toViewPadding(padding: number | ViewPadding): ViewPadding {
+  return typeof padding === 'number'
+    ? { top: padding, right: padding, bottom: padding, left: padding }
+    : padding;
 }
 
 export interface MapProps extends Omit<ViewProps, 'children'> {
@@ -361,29 +405,52 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
     ]
   );
 
+  // The opening view, kept from the first render. The props describe where
+  // the map starts, not where it is, so a later change to them must not move
+  // the target `recenter` returns to without the caller asking.
+  const initialView = useRef({ center, zoom, bearing, pitch, bounds }).current;
+
+  const recenter = useCallback(
+    (duration = 600) => {
+      const camera = cameraRef.current;
+      if (!camera) return;
+      if (initialView.bounds) {
+        camera.fitBounds(initialView.bounds, { duration });
+        return;
+      }
+      camera.flyTo({
+        center: initialView.center ?? [0, 20],
+        zoom: initialView.zoom,
+        bearing: initialView.bearing ?? 0,
+        pitch: initialView.pitch ?? 0,
+        duration,
+      });
+    },
+    [initialView]
+  );
+
   useImperativeHandle(
     ref,
     () => ({
       flyTo: ({ center: to, zoom: z, duration = 900 }) =>
         cameraRef.current?.flyTo({ center: to, zoom: z, duration }),
-      fitBounds: (box, padding = 48) =>
+      fitBounds: (box, options) => {
+        const { padding = 48, duration = 900 } =
+          typeof options === 'number' ? { padding: options } : (options ?? {});
         cameraRef.current?.fitBounds(box, {
-          padding: {
-            top: padding,
-            right: padding,
-            bottom: padding,
-            left: padding,
-          },
-          duration: 900,
-        }),
+          padding: toViewPadding(padding),
+          duration,
+        });
+      },
+      recenter,
       getViewState: async () => (await mapRef.current?.getViewState()) ?? null,
     }),
-    []
+    [recenter]
   );
 
   const context = useMemo(
-    () => ({ mapRef, cameraRef, ready, registerAccessibleFeatures }),
-    [ready, registerAccessibleFeatures]
+    () => ({ mapRef, cameraRef, ready, recenter, registerAccessibleFeatures }),
+    [ready, recenter, registerAccessibleFeatures]
   );
 
   if (!hasMapLibre || !MapLibre) {
@@ -722,6 +789,11 @@ export interface MapControlsProps {
   locate?: boolean;
   /** Reset bearing and pitch to north and flat. */
   compass?: boolean;
+  /**
+   * Return to the view the map opened on — its `bounds`, or its `center` and
+   * `zoom`. The same move as `MapHandle.recenter()`.
+   */
+  recenter?: boolean;
   className?: string;
   /** Called with the located coordinate, so a caller can react to it. */
   onLocate?: (lngLat: LngLat) => void;
@@ -762,11 +834,16 @@ function MapControls({
   zoom = true,
   locate = false,
   compass = false,
+  recenter = false,
   className,
   onLocate,
 }: MapControlsProps) {
   const slots = mapVariants({ position });
-  const { mapRef, cameraRef } = useMap();
+  const { mapRef, cameraRef, recenter: returnToStart } = useMap();
+  // Every glyph takes the theme's icon colour from here rather than from its
+  // own default, which was chosen for wherever that icon first appeared — the
+  // minus sign's is white, for a checked checkbox, and vanished on the card.
+  const iconTint = useToken('--color-muted-foreground', '#737373');
 
   // Read the live zoom rather than tracking it in state: the map is moved by
   // gestures too, and a counter kept alongside it drifts on the first pinch.
@@ -816,33 +893,42 @@ function MapControls({
   }, [mapRef, cameraRef]);
 
   return (
-    <View className={slots.controls({ className })}>
-      {zoom ? (
-        <View className={slots.group()}>
-          <ControlButton label="Zoom in" onPress={() => nudgeZoom(1)}>
-            <PlusIcon size={16} />
-          </ControlButton>
-          <View className="h-px bg-border" />
-          <ControlButton label="Zoom out" onPress={() => nudgeZoom(-1)}>
-            <MinusIcon size={16} />
-          </ControlButton>
-        </View>
-      ) : null}
-      {compass ? (
-        <View className={slots.group()}>
-          <ControlButton label="Face north" onPress={resetNorth}>
-            <CompassIcon size={16} />
-          </ControlButton>
-        </View>
-      ) : null}
-      {locate ? (
-        <View className={slots.group()}>
-          <ControlButton label="Show my location" onPress={handleLocate}>
-            <CrosshairIcon size={16} />
-          </ControlButton>
-        </View>
-      ) : null}
-    </View>
+    <IconColorProvider color={iconTint}>
+      <View className={slots.controls({ className })}>
+        {zoom ? (
+          <View className={slots.group()}>
+            <ControlButton label="Zoom in" onPress={() => nudgeZoom(1)}>
+              <PlusIcon size={16} />
+            </ControlButton>
+            <View className="h-px bg-border" />
+            <ControlButton label="Zoom out" onPress={() => nudgeZoom(-1)}>
+              <MinusIcon size={16} strokeWidth={2} />
+            </ControlButton>
+          </View>
+        ) : null}
+        {recenter ? (
+          <View className={slots.group()}>
+            <ControlButton label="Recenter map" onPress={() => returnToStart()}>
+              <MaximizeIcon size={16} />
+            </ControlButton>
+          </View>
+        ) : null}
+        {compass ? (
+          <View className={slots.group()}>
+            <ControlButton label="Face north" onPress={resetNorth}>
+              <CompassIcon size={16} />
+            </ControlButton>
+          </View>
+        ) : null}
+        {locate ? (
+          <View className={slots.group()}>
+            <ControlButton label="Show my location" onPress={handleLocate}>
+              <CrosshairIcon size={16} />
+            </ControlButton>
+          </View>
+        ) : null}
+      </View>
+    </IconColorProvider>
   );
 }
 MapControls.displayName = 'Map.Controls';

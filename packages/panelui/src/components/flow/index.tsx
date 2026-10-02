@@ -89,7 +89,14 @@ import Svg, {
   Rect,
 } from 'react-native-svg';
 import { tv } from 'tailwind-variants';
-import { LockIcon, MaximizeIcon, MinusIcon, PlusIcon, UnlockIcon } from '../../icons';
+import {
+  IconColorProvider,
+  LockIcon,
+  MaximizeIcon,
+  MinusIcon,
+  PlusIcon,
+  UnlockIcon,
+} from '../../icons';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
@@ -2027,58 +2034,65 @@ function FlowControls({
 }: FlowControlsProps) {
   const { zoomBy, fitView, locked, setLocked } = useFlow('Flow.Controls');
   const slots = flowVariants();
+  // One colour for every glyph in the stack. Without it each icon falls back
+  // to its own default, and the minus sign's is white — drawn for a checked
+  // checkbox, and invisible on the card.
+  const token = useCSSVariable('--color-muted-foreground');
+  const tint = typeof token === 'string' ? token : '#737373';
 
   return (
-    <View className={slots.controls({ className })}>
-      {showZoom ? (
-        <>
-          <AnimatedPressable
-            accessibilityRole="button"
-            accessibilityLabel="Zoom in"
-            className={slots.control()}
-            onPress={() => zoomBy(step)}
-          >
-            <PlusIcon size={16} />
-          </AnimatedPressable>
-          <View className="h-px bg-border" />
-          <AnimatedPressable
-            accessibilityRole="button"
-            accessibilityLabel="Zoom out"
-            className={slots.control()}
-            onPress={() => zoomBy(1 / step)}
-          >
-            <MinusIcon size={16} />
-          </AnimatedPressable>
-        </>
-      ) : null}
-      {fit ? (
-        <>
-          <View className="h-px bg-border" />
-          <AnimatedPressable
-            accessibilityRole="button"
-            accessibilityLabel="Fit the whole graph on screen"
-            className={slots.control()}
-            onPress={fitView}
-          >
-            <MaximizeIcon size={16} />
-          </AnimatedPressable>
-        </>
-      ) : null}
-      {lock ? (
-        <>
-          <View className="h-px bg-border" />
-          <AnimatedPressable
-            accessibilityRole="button"
-            accessibilityLabel={locked ? 'Unlock the canvas' : 'Lock the canvas'}
-            accessibilityState={{ selected: locked }}
-            className={slots.control()}
-            onPress={() => setLocked(!locked)}
-          >
-            {locked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
-          </AnimatedPressable>
-        </>
-      ) : null}
-    </View>
+    <IconColorProvider color={tint}>
+      <View className={slots.controls({ className })}>
+        {showZoom ? (
+          <>
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel="Zoom in"
+              className={slots.control()}
+              onPress={() => zoomBy(step)}
+            >
+              <PlusIcon size={16} />
+            </AnimatedPressable>
+            <View className="h-px bg-border" />
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel="Zoom out"
+              className={slots.control()}
+              onPress={() => zoomBy(1 / step)}
+            >
+              <MinusIcon size={16} strokeWidth={2} />
+            </AnimatedPressable>
+          </>
+        ) : null}
+        {fit ? (
+          <>
+            <View className="h-px bg-border" />
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel="Fit the whole graph on screen"
+              className={slots.control()}
+              onPress={fitView}
+            >
+              <MaximizeIcon size={16} />
+            </AnimatedPressable>
+          </>
+        ) : null}
+        {lock ? (
+          <>
+            <View className="h-px bg-border" />
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel={locked ? 'Unlock the canvas' : 'Lock the canvas'}
+              accessibilityState={{ selected: locked }}
+              className={slots.control()}
+              onPress={() => setLocked(!locked)}
+            >
+              {locked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
+            </AnimatedPressable>
+          </>
+        ) : null}
+      </View>
+    </IconColorProvider>
   );
 }
 FlowControls.displayName = 'Flow.Controls';

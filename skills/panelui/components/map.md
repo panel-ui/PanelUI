@@ -108,6 +108,7 @@ Extends `Omit<PressableProps, 'children' \| 'onPress' \| 'style'>`.
 | `zoom` | `boolean` | `2` | Zoom in and out. On by default — it is the one control a map always needs. |
 | `locate` | `boolean` | `false` | Recentre on the device's location. Needs a location permission. |
 | `compass` | `boolean` | `false` | Reset bearing and pitch to north and flat. |
+| `recenter` | `boolean` | `false` | Return to the view the map opened on — its `bounds`, or its `center` and `zoom`. The same move as `MapHandle.recenter()`. |
 | `className` | `string` | — | — |
 | `onLocate` | `(lngLat: LngLat) => void` | — | Called with the located coordinate, so a caller can react to it. |
 
@@ -222,6 +223,19 @@ Pass `mapStyle` to skip all of it and use a style wholesale — the escape hatch
 `Map.Controls` — and any view of your own written as a child of `Map` — is drawn above the map rather than inside the renderer. The renderer's own view lays its children out itself, so a view handed to it arrives stretched to the full size of the map and covering it. Splitting them means `position` lands where it says it does, and a control group written to sit in a corner sits in that corner.
 
 What that leaves for you: put layers — `Map.Marker`, `Map.Route`, `Map.Arc`, `Map.GeoJSON`, `Map.Cluster`, `Map.Heatmap`, `Map.UserLocation` — inside `Map` and they reach the renderer. Everything else inside `Map` floats over it, positioned by your own classes, with touches passing through wherever it is not drawing.
+
+### Moving the map from code
+
+A ref on `Map` is a `MapHandle`:
+
+| Method | What it does |
+| --- | --- |
+| `flyTo({ center, zoom?, duration? })` | Moves to a point. |
+| `fitBounds(bounds, padding \| { padding?, duration? })` | Frames a box. Padding is one number, or `{ top, right, bottom, left }`. |
+| `recenter(duration?)` | Returns to the view the map opened on. |
+| `getViewState()` | Resolves to where the map is looking now. |
+
+The `center`, `zoom` and `bounds` props set the opening view only. Changing them later does not move the map, so a re-render cannot pull it back mid-gesture. Use the ref to move it. For a control drawn inside the map, `useMap()` returns the same `recenter`.
 
 ### Markers or clusters
 

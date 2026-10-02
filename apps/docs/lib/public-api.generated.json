@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1407,
+    "exports": 1409,
     "values": 353,
-    "types": 1054,
+    "types": 1056,
     "modules": 163,
     "components": 136,
     "hooks": 13
@@ -2337,6 +2337,10 @@
             "kind": "type"
           },
           {
+            "name": "MapFitBoundsOptions",
+            "kind": "type"
+          },
+          {
             "name": "MapMarkerProps",
             "kind": "type"
           },
@@ -2398,6 +2402,10 @@
           },
           {
             "name": "LngLatBounds",
+            "kind": "type"
+          },
+          {
+            "name": "ViewPadding",
             "kind": "type"
           },
           {

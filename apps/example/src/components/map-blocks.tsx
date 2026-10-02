@@ -383,8 +383,8 @@ export function ChoroplethBlock() {
             }}
           />
           {/* No position: the default corner, which nothing else on this
-              screen is using. */}
-          <Map.Controls />
+              screen is using. Recenter brings Europe back after a pan. */}
+          <Map.Controls recenter />
         </Map>
       </View>
 

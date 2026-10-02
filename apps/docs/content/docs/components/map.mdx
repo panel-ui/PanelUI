@@ -39,7 +39,7 @@ Without it `Map` renders a message saying so rather than throwing, so a screen t
 Map ships with the library — no separate install.
 
 ```tsx
-import { Map, Text, type LngLat, hasMapLibre } from 'panelui-native';
+import { Map, Text, type LngLat, hasMapLibre, type MapHandle, Button } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -164,19 +164,61 @@ A route follows the ground; an arc does not pretend to. The bow on an arc is not
 </Map>
 ```
 
+### Moving the camera from code
+
+Give `Map` a ref to move it in response to something that is not a gesture on the map — a list row, a search result, a filter. `fitBounds` frames a box, `[west, south, east, north]`; its second argument is the padding in points, or an object with `padding` and `duration`. Padding can be set per side, so the box stays clear of a sheet covering the bottom of the map.
+
+`recenter()` returns to the view the map opened on. You do not need to remount the map with a new `key` to reset it.
+
+```tsx
+const map = useRef<MapHandle>(null);
+
+<Map ref={map} bounds={[-0.2, 51.47, -0.05, 51.54]}>
+  <Map.Marker lngLat={[-0.118, 51.509]} />
+</Map>
+
+<Button onPress={() => map.current?.fitBounds([2.25, 48.81, 2.42, 48.9], { padding: { top: 48, right: 48, bottom: 320, left: 48 }, duration: 600 })}>
+  Show Paris
+</Button>
+<Button onPress={() => map.current?.flyTo({ center: [-74.006, 40.713], zoom: 12 })}>
+  Show New York
+</Button>
+<Button variant="outline" onPress={() => map.current?.recenter()}>
+  Back to start
+</Button>
+```
+
+### A button that returns to the start
+
+`recenter` on `Map.Controls` adds a button that does the same as `recenter()` on the ref: it goes back to the map's opening `bounds`, or its `center` and `zoom`.
+
+```tsx
+<Map bounds={[-0.2, 51.47, -0.05, 51.54]}>
+  <Map.Controls recenter compass />
+</Map>
+```
+
 ### Bringing your own tiles
 
 The tiles are the one part of the style that is somebody else's to license. `source` swaps the provider while keeping the token-built layers, so the map still follows your theme. The default is CARTO, which is free for non-commercial use and needs a licence for everything else.
 
+Any provider serving the OpenMapTiles schema works. This one is MapTiler: create a key in your MapTiler account, and keep it in an environment variable rather than in source. `fonts` has to name a font stack the glyph endpoint serves.
+
 ```tsx
+const key = process.env.EXPO_PUBLIC_MAPTILER_KEY;
+
 <Map
+  center={[2.35, 48.86]}
+  zoom={12}
   source={{
-    url: 'https://example.com/tiles.json',
-    glyphs: 'https://example.com/fonts/{fontstack}/{range}.pbf',
-    fonts: ['Inter Regular'],
-    attribution: '© OpenStreetMap contributors',
+    url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${key}`,
+    glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${key}`,
+    fonts: ['Noto Sans Regular'],
+    attribution: '© MapTiler © OpenStreetMap contributors',
   }}
-/>
+>
+  <Map.Controls />
+</Map>
 ```
 
 ## Versions
@@ -395,6 +437,7 @@ Edge nodes coloured by state, spread across the world. A marker is a React view,
 | `zoom` | `boolean` | `true` | Zoom in and out. On by default — it is the one control a map always needs. |
 | `locate` | `boolean` | `false` | Recentre on the device's location. Needs a location permission. |
 | `compass` | `boolean` | `false` | Reset bearing and pitch to north and flat. |
+| `recenter` | `boolean` | `false` | Return to the view the map opened on — its `bounds`, or its `center` and `zoom`. The same move as `MapHandle.recenter()`. |
 | `className` | `string` | — |  |
 | `onLocate` | `(lngLat: LngLat) => void` | — | Called with the located coordinate, so a caller can react to it. |
 
@@ -491,6 +534,19 @@ Pass `mapStyle` to skip all of it and use a style wholesale — the escape hatch
 
 What that leaves for you: put layers — `Map.Marker`, `Map.Route`, `Map.Arc`, `Map.GeoJSON`, `Map.Cluster`, `Map.Heatmap`, `Map.UserLocation` — inside `Map` and they reach the renderer. Everything else inside `Map` floats over it, positioned by your own classes, with touches passing through wherever it is not drawing.
 
+### Moving the map from code
+
+A ref on `Map` is a `MapHandle`:
+
+| Method | What it does |
+| --- | --- |
+| `flyTo({ center, zoom?, duration? })` | Moves to a point. |
+| `fitBounds(bounds, padding \| { padding?, duration? })` | Frames a box. Padding is one number, or `{ top, right, bottom, left }`. |
+| `recenter(duration?)` | Returns to the view the map opened on. |
+| `getViewState()` | Resolves to where the map is looking now. |
+
+The `center`, `zoom` and `bounds` props set the opening view only. Changing them later does not move the map, so a re-render cannot pull it back mid-gesture. Use the ref to move it. For a control drawn inside the map, `useMap()` returns the same `recenter`.
+
 ### Markers or clusters
 
 `Map.Marker` is a React view, which is what lets it hold an avatar, a chip, or anything else the library draws. That also means a marker costs what a view costs. Past a few dozen points use `Map.Cluster`, which draws in a style layer and merges points as they crowd — by the time markers become expensive they have also become unreadable, so the two limits arrive together.
@@ -507,4 +563,4 @@ What that does not solve is a map with a dozen of them. `size="sm"` tightens the
 
 **Values:** `Map`, `useMap`, `hasMapLibre`, `CARTO_SOURCE`
 
-**Types:** `MapProps`, `MapHandle`, `MapMarkerProps`, `MapLabelProps`, `MapPopupProps`, `MapControlsProps`, `MapControlsPosition`, `MapRouteProps`, `MapArcProps`, `MapGeoJSONProps`, `MapClusterProps`, `MapFeatureAccessibility`, `MapHeatmapProps`, `MapUserLocationProps`, `BasemapSource`, `BasemapTokens`, `LngLat`, `LngLatBounds`, `ViewState`
+**Types:** `MapProps`, `MapHandle`, `MapFitBoundsOptions`, `MapMarkerProps`, `MapLabelProps`, `MapPopupProps`, `MapControlsProps`, `MapControlsPosition`, `MapRouteProps`, `MapArcProps`, `MapGeoJSONProps`, `MapClusterProps`, `MapFeatureAccessibility`, `MapHeatmapProps`, `MapUserLocationProps`, `BasemapSource`, `BasemapTokens`, `LngLat`, `LngLatBounds`, `ViewPadding`, `ViewState`

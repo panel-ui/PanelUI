@@ -53,6 +53,7 @@ export const COMPONENTS = [
   {"slug":"item","name":"Item","summary":"Row of media, text and actions"},
   {"slug":"kpi","name":"Kpi","summary":"One number, and what it is doing"},
   {"slug":"label","name":"Label","summary":"Form field label with required and invalid states"},
+  {"slug":"leaderboard","name":"Leaderboard","summary":"Entries ranked by a value, with the top three on a podium"},
   {"slug":"line-chart","name":"LineChart","summary":"Animated time series, drawn on the UI thread"},
   {"slug":"live-line-chart","name":"LiveLineChart","summary":"A reading that keeps arriving, against a window that keeps moving"},
   {"slug":"loader","name":"Loader","summary":"Nine loading animations behind one variant prop"},

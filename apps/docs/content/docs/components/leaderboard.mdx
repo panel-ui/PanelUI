@@ -1,0 +1,143 @@
+---
+title: Leaderboard
+description: Entries ranked by a value, with the top three on a podium.
+status: new
+---
+
+Use it for any list where the order is the point: a fitness challenge, a sales team's month, a game's weekly XP, the fastest times on a course. You pass entries with a value, and the component sorts them, numbers the places and draws the top three on a podium above the rest.
+
+The component works out the ranks, so the data does not carry them. Entries on the same value share a place and the next place is skipped (1, 2, 2, 4), which is how a scoreboard is normally read.
+
+**It renders every row it is given.** It is not virtualised, so for a long board pass `limit` and let `highlightId` keep the viewer's own row in view.
+
+For one number and its trend, use [Kpi](/docs/components/kpi). For positions that change over several periods, use [BumpChart](/docs/charts/bump-chart).
+
+## Installation
+
+Leaderboard ships with the library — no separate install.
+
+```tsx
+import { Leaderboard } from 'panelui-native';
+```
+
+Or copy the source into your project, to own and edit it:
+
+```bash
+npx panelui-cli@latest add leaderboard
+```
+
+## Usage
+
+```tsx
+<Leaderboard
+  data={[
+    { id: 'maya', name: 'Maya Chen', value: 84210, change: 2 },
+    { id: 'omar', name: 'Omar Haddad', value: 79655 },
+    { id: 'lena', name: 'Lena Brandt', value: 71038, change: -1 },
+    { id: 'sam', name: 'Sam Okafor', value: 66402, change: 1 },
+    { id: 'ines', name: 'Inès Moreau', value: 61987, change: -2 },
+  ]}
+  unit="steps"
+/>
+```
+
+## Examples
+
+### Podium bars to scale
+
+The default podium. Each bar is drawn against the leader's value, so a close race looks close and a runaway looks like one. A floor keeps third place visible as a bar when the leader is far ahead. Set `podiumScale="rank"` to step the heights by place instead.
+
+```tsx
+<Leaderboard data={walkers} unit="steps" podiumHeight={140} />
+```
+
+### Cards instead of bars
+
+`podium="cards"` gives each of the top three a card, with first raised between the other two. Use it when the values are labels people read — revenue, a level — rather than amounts to compare by eye. `formatValue` controls how the value is written, and the screen reader hears the same text.
+
+```tsx
+const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+<Leaderboard
+  data={reps}
+  podium="cards"
+  formatValue={(value) => currency.format(value)}
+  unit="in closed deals"
+/>
+```
+
+### Keeping the viewer in sight
+
+`highlightId` tints that entry's row. When `limit` cuts it off, the row is pinned under the list with its real place, after a break that shows rows were skipped.
+
+```tsx
+<Leaderboard data={players} limit={8} highlightId={me.id} unit="XP" />
+```
+
+### Lowest first, for times
+
+`order="asc"` ranks the smallest value first, for a race time or a golf score. The podium then always steps by place, because a bar scaled to a winning time would be the shortest. `podium="none"` puts everyone in the list.
+
+```tsx
+const lap = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toFixed(2).padStart(5, '0')}`;
+
+<Leaderboard data={laps} order="asc" podium="none" formatValue={lap} />
+```
+
+### Movement and presses
+
+`change` is the number of places an entry moved since the last period: positive is up the board, negative is down, 0 shows a dash. Leave it out and no movement column is drawn. `onPressEntry` makes every row and podium place a button, and receives the entry and its rank.
+
+```tsx
+<Leaderboard
+  data={[
+    { id: 'a', name: 'Priya Nair', value: 412, change: 3, subtitle: 'Design' },
+    { id: 'b', name: 'Tomás Ruiz', value: 398, change: 0, subtitle: 'Platform' },
+    { id: 'c', name: 'Aiko Tanaka', value: 377, change: -2, subtitle: 'Growth' },
+  ]}
+  onPressEntry={(entry, rank) => router.push(`/people/${entry.id}`)}
+/>
+```
+
+## API Reference
+
+### Leaderboard
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+| `data` | `readonly LeaderboardEntry[]` | — | The entries, in any order. Places are worked out from `value`. |
+| `podium` | `LeaderboardPodium` | `'bars'` | How the top three are drawn. `bars` stands them on a podium whose bars are scaled to their values; `cards` gives each a card, with first raised between the other two; `none` puts everyone in the list. |
+| `order` | `'desc' \| 'asc'` | `'desc'` | `desc` ranks the highest value first. `asc` ranks the lowest first, for a time or a golf score. |
+| `podiumScale` | `'value' \| 'rank'` | `'value'` | What the podium bar heights follow. `value` draws each against the leader's value; `rank` steps them by place. Always `rank` when `order` is `asc`, where the winning value is the smallest. |
+| `podiumHeight` | `number` | `132` | Height of the tallest podium bar, in points. |
+| `limit` | `number` | — | Show at most this many entries, podium included. |
+| `highlightId` | `string` | — | The entry to mark — usually the person looking at the board. Their row is tinted, and if `limit` cuts them off it is pinned at the bottom with their real place. |
+| `formatValue` | `(value: number) => string` | `(value: number) => value.toLocaleString('en-US')` | Turns a value into its label. Defaults to grouped digits: 12,480. |
+| `unit` | `string` | — | Word read after the value by a screen reader, e.g. "points". |
+| `onPressEntry` | `(entry: LeaderboardEntry, rank: number) => void` | — | Makes every row and podium place pressable. |
+| `emptyText` | `string` | `'No entries yet'` | Shown when `data` has nothing to rank. |
+
+Every part also accepts the underlying React Native props (`ViewProps` or `TextProps`) and a `className` for Tailwind utilities.
+
+## Notes
+
+### Accessibility
+
+Each podium place and each row is a single accessible element, read as one sentence: "Rank 2, Omar Haddad, 79,655 steps, up 1 place". A tie adds "tied" after the rank. Pass `unit` so the value is read with what it counts; without it, the reader hears a bare number.
+
+### Reduced motion
+
+The podium bars grow on mount, third place first and the leader last. With reduce motion on, they are drawn at full height straight away.
+
+### Colour
+
+The podium uses the theme's primary colour at three strengths rather than gold, silver and bronze. Fixed medal colours would clash with most of the themes, and the place is already shown by the number on the bar.
+
+## Public exports
+
+{/* Generated by scripts/build-api-reference.mjs. Do not edit. */}
+
+**Values:** `Leaderboard`, `rankEntries`
+
+**Types:** `LeaderboardEntry`, `LeaderboardPodium`, `LeaderboardProps`, `LeaderboardRanked`

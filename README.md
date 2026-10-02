@@ -45,7 +45,7 @@
 ---
 
 **PanelUI is an open-source React Native UI component library for Expo apps**, styled with
-Tailwind CSS v4 and animated with Reanimated 4. **136 accessible, typed component modules** — buttons,
+Tailwind CSS v4 and animated with Reanimated 4. **137 accessible, typed component modules** — buttons,
 inputs, forms, dialogs, bottom sheets, charts, calendars, maps and a set of AI chat components —
 in one coherent visual language, with light and dark themes out of the box.
 
@@ -146,7 +146,7 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
 
 ## Components
 
-**136 component modules**, documented with live examples and full props tables at
+**137 component modules**, documented with live examples and full props tables at
 **[panelui.dev/docs](https://panelui.dev/docs)**.
 
 - **Layout & content** — Card, Frame, PageHeader, Surface, Item, GridItem, Separator, Splitter, Typography,
@@ -163,7 +163,7 @@ Every component takes `className`, so anything can be restyled with Tailwind cla
 - **Data visualisation** — Plot, LineChart, LiveLineChart, AreaChart, MirrorAreaChart, BarChart,
   WaterfallChart, PyramidChart, ScatterChart, BubbleChart, BumpChart, CandlestickChart, PieChart,
   PolarAreaChart, FunnelChart, TreemapChart, SankeyChart, RingChart, RadarChart, HeatmapChart,
-  HexChart, Kpi, Map, Marker, Flow, QRCode
+  HexChart, Kpi, Leaderboard, Map, Marker, Flow, QRCode
 - **AI components** — Message, MessageScroller, Response, Reasoning, Plan, Task, Sources,
   CodeBlock, Shimmer, ThinkingOrb, Soundwave
 - **Social** — Post, ImageViewer, Compare, Avatar, Attachment

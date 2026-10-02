@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1409,
-    "values": 353,
-    "types": 1056,
-    "modules": 163,
-    "components": 136,
+    "exports": 1415,
+    "values": 355,
+    "types": 1060,
+    "modules": 164,
+    "components": 137,
     "hooks": 13
   },
   "groups": {
@@ -2134,6 +2134,37 @@
           },
           {
             "name": "LabelTextProps",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/leaderboard/index.tsx",
+        "slug": "leaderboard",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "Leaderboard",
+            "kind": "value"
+          },
+          {
+            "name": "rankEntries",
+            "kind": "value"
+          },
+          {
+            "name": "LeaderboardEntry",
+            "kind": "type"
+          },
+          {
+            "name": "LeaderboardPodium",
+            "kind": "type"
+          },
+          {
+            "name": "LeaderboardProps",
+            "kind": "type"
+          },
+          {
+            "name": "LeaderboardRanked",
             "kind": "type"
           }
         ]

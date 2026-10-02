@@ -934,6 +934,21 @@
     "docsPath": "components/label"
   },
   {
+    "name": "leaderboard",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Entries ranked by a value, with the top three on a podium.",
+    "registryDependencies": [
+      "avatar",
+      "cn",
+      "icons",
+      "text"
+    ],
+    "docsPath": "components/leaderboard"
+  },
+  {
     "name": "line-chart",
     "type": "registry:ui",
     "kind": "chart",

@@ -53,6 +53,7 @@
     "item",
     "kpi",
     "label",
+    "leaderboard",
     "line-chart",
     "live-line-chart",
     "loader",
@@ -225,16 +226,16 @@
     }
   ],
   "counts": {
-    "componentModules": 136,
-    "packageComponentExports": 136,
-    "documentedComponents": 136,
-    "exampleEntries": 136,
+    "componentModules": 137,
+    "packageComponentExports": 137,
+    "documentedComponents": 137,
+    "exampleEntries": 137,
     "registry": {
-      "componentItems": 136,
+      "componentItems": 137,
       "supportItems": 36,
-      "totalItems": 172,
+      "totalItems": 173,
       "byType": {
-        "registry:ui": 151,
+        "registry:ui": 152,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1

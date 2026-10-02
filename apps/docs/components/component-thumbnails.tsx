@@ -1179,6 +1179,34 @@ const flow = (
   </Chartlet>
 );
 
+const leaderboard = (
+  <Plate className="w-44 gap-1.5 p-2.5">
+    {/* The podium, 2-1-3, with the leader's bar the one accent; one row below. */}
+    <div className="flex items-end gap-1.5 px-1">
+      {[
+        { h: 'h-7', lead: false },
+        { h: 'h-10', lead: true },
+        { h: 'h-5', lead: false },
+      ].map(({ h, lead }, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center gap-1">
+          <div className={lead ? 'size-4 rounded-full bg-fd-muted-foreground/45' : 'size-3 rounded-full bg-fd-muted-foreground/35'} />
+          {lead ? (
+            <Accent className={`w-full rounded-b-none ${h}`} />
+          ) : (
+            <Fill className={`w-full rounded-b-none ${h}`} />
+          )}
+        </div>
+      ))}
+    </div>
+    <Row className="rounded-md border border-fd-border px-1.5 py-1">
+      <Bar className="w-1.5" faint />
+      <div className="size-2.5 rounded-full bg-fd-muted-foreground/30" />
+      <Bar className="w-12" faint />
+      <Bar className="ml-auto w-5" />
+    </Row>
+  </Plate>
+);
+
 const kpi = (
   <Plate className="w-44 gap-2 p-3">
     <Bar className="w-14" faint />
@@ -2326,6 +2354,7 @@ const THUMBNAILS: Record<string, ReactNode> = {
   // Data
   flow,
   kpi,
+  leaderboard,
   map,
   planner,
   table,

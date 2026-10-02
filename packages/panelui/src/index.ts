@@ -872,6 +872,14 @@ export {
   type KpiGoodDirection,
   type KpiTone,
 } from './components/kpi';
+export {
+  Leaderboard,
+  rankEntries,
+  type LeaderboardEntry,
+  type LeaderboardPodium,
+  type LeaderboardProps,
+  type LeaderboardRanked,
+} from './components/leaderboard';
 export { Label, type LabelProps, type LabelTextProps } from './components/label';
 export {
   LineChart,

@@ -248,6 +248,7 @@ memory pressure the OS can end the process with nothing in the terminal to expla
 | `InputGroup` | Input with leading and trailing decorators |
 | `Item` | Row of media, text and actions for lists and settings |
 | `Kpi` | One number, what it is doing, and the shape it made getting there |
+| `Leaderboard` | Entries ranked by a value, with the top three on a podium |
 | `Label` | Form field label with required, invalid and disabled states |
 | `LineChart` | Animated time series, drawn on the UI thread |
 | `LiveLineChart` | A reading that keeps arriving, against a window that keeps moving |

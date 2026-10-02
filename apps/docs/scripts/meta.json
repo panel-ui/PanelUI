@@ -1319,5 +1319,14 @@
       "addedIn": "0.102.0",
       "category": "media"
     }
+  ],
+  "leaderboard": [
+    "Leaderboard",
+    "Entries ranked by a value, with the top three on a podium.",
+    "react native leaderboard ranking podium",
+    {
+      "addedIn": "0.104.0",
+      "category": "data"
+    }
   ]
 }

@@ -210,6 +210,10 @@
       "signature": "9abf07c48e742030c8cd3c1365fa1e6e24fde80e0b2bca409f82006888c04e00"
     },
     {
+      "slug": "leaderboard",
+      "signature": "5c98db8719c41fe006806171c35040d9fb21c329bccd4595d834ce95062a2008"
+    },
+    {
       "slug": "line-chart",
       "signature": "06eb9fbfdefa298c1b153e6e1d6c3cbea07693ec0c77f71b536e99852e013eb4"
     },
@@ -331,7 +335,7 @@
     },
     {
       "slug": "radio-group",
-      "signature": "4a77ae3a1032e5a2ba52fe76d72ec4acc5dcb480043a6fe2517fd1a6c97b6c0e"
+      "signature": "c9998fd54f688e71f4d681f8e4ee197386a160c5185f9d72b7b8ef2ca2d0cfae"
     },
     {
       "slug": "rating",

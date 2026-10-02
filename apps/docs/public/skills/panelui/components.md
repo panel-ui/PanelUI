@@ -2,7 +2,7 @@
 
 Generated from the library's own TypeScript — do not edit by hand.
 
-136 component modules. The **Reference** column links to a file in this skill holding that
+137 component modules. The **Reference** column links to a file in this skill holding that
 component's anatomy, every prop with its type and default, its variants, its compound parts and a
 worked example. **Read it before using a component you have not used in this session** — the props
 there are read from the source, and anything you remember is a guess.
@@ -115,6 +115,7 @@ There is no need to fetch anything over the network. If you would rather, the sa
 | --- | --- | --- |
 | `Flow` | Pan-and-zoom canvas of draggable nodes joined by animated edges. | [flow](./components/flow.md) |
 | `Kpi` | One number, what it is doing, and the shape it made getting there. | [kpi](./components/kpi.md) |
+| `Leaderboard` | Entries ranked by a value, with the top three on a podium. | [leaderboard](./components/leaderboard.md) |
 | `Map` *(alpha)* | Vector map whose basemap is drawn from your theme tokens. | [map](./components/map.md) |
 | `Planner` | A month of days, each carrying what falls on it. | [planner](./components/planner.md) |
 | `Table` | Rows and columns that stay lined up, with sortable headers. | [table](./components/table.md) |

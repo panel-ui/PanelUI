@@ -3,7 +3,11 @@ import Link from 'next/link';
 import {
   AccessibilityIcon,
   ArrowRightIcon,
+  ArrowUpRightIcon,
   GaugeIcon,
+  InboxIcon,
+  MegaphoneIcon,
+  MessageSquareIcon,
   MoonStarIcon,
   PackageIcon,
   PaletteIcon,
@@ -101,6 +105,39 @@ const THEMES = [
   },
   { name: 'Grass', body: 'Green accent on warm neutrals, soft generous corners.', swatch: '#24b47e' },
 ];
+
+const STUDIO_TOOLS = [
+  {
+    icon: MessageSquareIcon,
+    title: 'Feedback',
+    body: 'Reports with screenshots and device context, each one a two-way conversation.',
+  },
+  {
+    icon: MegaphoneIcon,
+    title: 'Announcements',
+    body: 'Write a message once and show it in every app that asks for it.',
+  },
+  {
+    icon: InboxIcon,
+    title: 'Support inbox',
+    body: 'Users start a conversation themselves, and your team answers from one place.',
+  },
+];
+
+/**
+ * The inbox thread drawn beside the Studio copy. Static markup, not a
+ * screenshot, so it follows the active theme and stays sharp at any size.
+ */
+const STUDIO_THREAD = {
+  number: 42,
+  title: 'The workout screen freezes.',
+  context: ['iOS 26.1', 'v2.4.0 (118)', '/workout/start', 'en-GB'],
+  messages: [
+    { mine: false, author: 'User', body: 'Tapping start does nothing after the update.' },
+    { mine: true, author: 'You', body: 'Thanks — fixed in 2.4.1, out today. Can you try again?' },
+    { mine: false, author: 'User', body: 'Works now, thank you!' },
+  ],
+};
 
 /** Reused from the README — these are the questions people actually search. */
 const FAQ = [
@@ -249,6 +286,110 @@ export default function HomePage() {
             Read the theming guide
             <ArrowRightIcon />
           </Button>
+        </div>
+      </section>
+
+      {/* Studio */}
+      <section className="border-t px-6 py-20" id="studio">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <Badge variant="secondary" className="self-start">
+                PanelUI Studio · Free for one project
+              </Badge>
+              <h2 className="font-heading text-3xl font-semibold tracking-tight">
+                Feedback and support, answered from one inbox
+              </h2>
+              <p className="max-w-xl text-muted-foreground">
+                Studio is the hosted backend for what your users send. Install the{' '}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-[0.85em] text-foreground">
+                  panelui-studio
+                </code>{' '}
+                SDK, ship a publishable key, and reply from an inbox your team shares. You
+                run no backend of your own, and your users need no account.
+              </p>
+            </div>
+
+            <ul className="flex flex-col gap-4">
+              {STUDIO_TOOLS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-card">
+                    <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm font-medium">{title}</p>
+                    <p className="text-sm text-muted-foreground">{body}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button render={<Link href={site.studio} target="_blank" rel="noreferrer" />}>
+                Explore Studio
+                <ArrowUpRightIcon />
+              </Button>
+              <Button variant="outline" render={<Link href="/docs/studio" />}>
+                Read the Studio docs
+              </Button>
+            </div>
+          </div>
+
+          {/* An example thread, drawn on a dot grid so it reads as a product
+              surface rather than one more card in the page's card grids. */}
+          <div className="relative rounded-2xl border bg-muted/40 p-4 sm:p-8">
+            <div
+              className="pointer-events-none absolute inset-0 rounded-2xl opacity-60 [background-image:radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:16px_16px]"
+              aria-hidden="true"
+            />
+            <Card
+              className="relative gap-0 overflow-hidden py-0 shadow-lg"
+              role="figure"
+              aria-label="An example Studio conversation"
+            >
+              <div className="flex items-center justify-between gap-3 border-b px-5 py-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <InboxIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  <span className="text-sm font-medium">Inbox</span>
+                </div>
+                <Badge variant="success">Resolved</Badge>
+              </div>
+
+              <div className="flex flex-col gap-3 border-b px-5 py-4">
+                <p className="text-sm font-medium">
+                  <span className="text-muted-foreground">#{STUDIO_THREAD.number}</span>{' '}
+                  {STUDIO_THREAD.title}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {STUDIO_THREAD.context.map((item) => (
+                    <Badge key={item} variant="outline" className="font-mono">
+                      {item}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <ol className="flex flex-col gap-3 px-5 py-5">
+                {STUDIO_THREAD.messages.map(({ mine, author, body }) => (
+                  <li
+                    key={body}
+                    className={mine ? 'flex flex-col items-end gap-1' : 'flex flex-col items-start gap-1'}
+                  >
+                    <span className="px-1 text-xs text-muted-foreground">{author}</span>
+                    <p
+                      className={
+                        mine
+                          ? 'max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-3.5 py-2 text-sm text-primary-foreground'
+                          : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-3.5 py-2 text-sm'
+                      }
+                    >
+                      {body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+          </div>
         </div>
       </section>
 

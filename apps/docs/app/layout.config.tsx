@@ -173,7 +173,8 @@ export const baseOptions: BaseLayoutProps = {
  *
  * Sponsors is here and not in `baseOptions`: it belongs to the landing page and
  * to the page it points at, and a docs reader deep in a component's props table
- * is not being asked to fund anything.
+ * is not being asked to fund anything. Studio sits beside it for the same
+ * reason: it is a product pitch, and the docs have their own Studio section.
  *
  * GitHub is the custom item rather than the plain one, for the reason given
  * above it. And the mobile menu needs the Components destination that
@@ -186,6 +187,7 @@ export const homeOptions: BaseLayoutProps = {
   links: [
     docsLink,
     { type: 'main', text: 'Sponsors', url: '/sponsors', active: 'nested-url' },
+    { type: 'main', text: 'Studio', url: site.studio, external: true },
     githubHomeLink,
     githubMenuLink,
     getStartedLink,

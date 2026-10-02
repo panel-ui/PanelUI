@@ -50,6 +50,8 @@ export const site = {
    * project two funding destinations, so change both.
    */
   sponsors: 'https://github.com/sponsors/Khalidabdi1',
+  /** PanelUI Studio, the hosted feedback and support backend. */
+  studio: 'https://studio.panelui.dev/',
   /**
    * Google Analytics measurement ID. Not a secret — it ships in the page
    * source either way — but it lives here so a fork or a preview deploy can

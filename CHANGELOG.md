@@ -9,6 +9,42 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.104.0] — 2026-10-02
+
+### Added
+
+- **Leaderboard** — entries ranked by a value, with the top three on a
+  podium and the rest as rows. Pass values and it works out the places, with
+  ties sharing one (1, 2, 2, 4). The podium is drawn as bars scaled to the
+  leader's value (`podium="bars"`, the default), as cards (`"cards"`), or
+  left out (`"none"`). `order="asc"` ranks the lowest value first, for times
+  and golf scores. `highlightId` marks the viewer's row and, when `limit`
+  cuts it off, pins it under the list with its real place. `change` shows
+  places moved since the last period.
+- **Map** — `recenter()` on the ref and `recenter` on `Map.Controls` return
+  to the view the map opened on. Before this, resetting a map meant
+  remounting it with a new `key`. `useMap()` returns the same `recenter`.
+  ([#228](https://github.com/panel-ui/PanelUI/issues/228))
+- **Map** — `fitBounds(bounds, options)` now takes `{ padding, duration }`
+  as well as a padding number, and padding can be set per side, so the box
+  can stay clear of a sheet covering part of the map. New types:
+  `MapFitBoundsOptions`, `ViewPadding`.
+
+### Fixed
+
+- **Map**, **Flow** — the zoom-out button in `Map.Controls` and
+  `Flow.Controls` drew a white minus sign on a white card. The minus icon's
+  default colour is white because it was made for a checked checkbox, and
+  the controls passed no colour of their own. Every glyph in both control
+  stacks now uses the muted-foreground token, and the minus matches the plus
+  sign's weight. ([#228](https://github.com/panel-ui/PanelUI/issues/228))
+
+### Docs
+
+- **Map** — examples for moving the camera from code and for the recenter
+  button, a table of the `MapHandle` methods, and a MapTiler source in
+  "Bringing your own tiles".
+
 ## [0.103.2] — 2026-09-29
 
 ### Fixed

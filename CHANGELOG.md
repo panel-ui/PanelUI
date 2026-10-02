@@ -9,6 +9,25 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.105.0] — 2026-10-02
+
+### Added
+
+- **Countdown** — the time left until a moment, ticking down to it: a
+  launch, the end of a sale, the wait before a code can be resent. Pass the
+  moment as `to`. `variant="segmented"` puts each unit in a box with its
+  name; `"inline"` writes `2d 14:03:22` for a banner or a caption. `units`
+  picks the fields, `urgentBelow` turns the digits red for the last
+  stretch, and `onComplete` fires once when the time is up. It reads the
+  clock on every tick rather than counting, so it stays right after the app
+  has been in the background, and seconds round up so it never shows zero
+  while time is left.
+
+### Docs
+
+- **Leaderboard**, **Countdown** — preview recordings at the top of each
+  page.
+
 ## [0.104.0] — 2026-10-02
 
 ### Added

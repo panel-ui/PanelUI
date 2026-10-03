@@ -7,9 +7,9 @@ status: new
 <PreviewVideo
   src="/previews/leaderboard.mp4"
   poster="/previews/leaderboard-poster.jpg"
-  alt="Leaderboard — a step challenge whose podium bars grow in, regrow when the week switches, and a list of fourteen walkers scrolled below."
+  alt="Leaderboard — a step challenge with podium bars scaled to each walker’s steps, regrowing to new totals when the week is switched."
   width={720}
-  height={1566}
+  height={1264}
 />
 
 Use it for any list where the order is the point: a fitness challenge, a sales team's month, a game's weekly XP, the fastest times on a course. You pass entries with a value, and the component sorts them, numbers the places and draws the top three on a podium above the rest.
@@ -105,6 +105,131 @@ const lap = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toFixed(2).padStart
   ]}
   onPressEntry={(entry, rank) => router.push(`/people/${entry.id}`)}
 />
+```
+
+### A short list
+
+With three entries and `podium="none"`, everyone sits in the list. `subtitle` adds a second line under the name.
+
+<Preview
+  src="/previews/leaderboard-a-short-list.jpg"
+  alt="Leaderboard — three people in a list with no podium, each with a team subtitle and a movement indicator."
+  width={1179}
+  height={749}
+/>
+
+```tsx
+<Leaderboard
+  podium="none"
+  data={[
+    { id: 'a', name: 'Priya Nair', value: 412, change: 3, subtitle: 'Design' },
+    { id: 'b', name: 'Tomás Ruiz', value: 398, change: 0, subtitle: 'Platform' },
+    { id: 'c', name: 'Aiko Tanaka', value: 377, change: -2, subtitle: 'Growth' },
+  ]}
+  unit="points"
+/>
+```
+
+### Nothing to rank
+
+An empty `data` array shows `emptyText` in place of the board. It defaults to "No entries yet".
+
+<Preview
+  src="/previews/leaderboard-nothing-to-rank.jpg"
+  alt="Leaderboard — an empty board reading “Nobody has logged a run this week”."
+  width={1179}
+  height={407}
+/>
+
+```tsx
+<Leaderboard data={[]} emptyText="Nobody has logged a run this week" />
+```
+
+## Versions
+
+### Step challenge
+
+The bar podium, scaled to the values. Switching weeks swaps the data and the bars regrow to the new totals.
+
+<PreviewVideo
+  src="/previews/leaderboard.mp4"
+  poster="/previews/leaderboard-poster.jpg"
+  alt="Leaderboard — Step challenge: the bar podium regrows when the week tab changes."
+  width={720}
+  height={1264}
+/>
+
+```tsx
+const [week, setWeek] = useState('this');
+
+<Tabs value={week} onValueChange={setWeek}>
+  <Tabs.List>
+    <Tabs.Trigger value="this">This week</Tabs.Trigger>
+    <Tabs.Trigger value="last">Last week</Tabs.Trigger>
+  </Tabs.List>
+</Tabs>
+<Leaderboard
+  data={week === 'this' ? thisWeek : lastWeek}
+  unit="steps"
+  podiumHeight={140}
+/>
+```
+
+### Sales team
+
+Cards for the top three, with revenue written out in currency.
+
+<PreviewVideo
+  src="/previews/leaderboard-sales-team.mp4"
+  poster="/previews/leaderboard-sales-team-poster.jpg"
+  alt="Leaderboard — Sales team: card podium and a list of reps with revenue in dollars."
+  width={720}
+  height={1232}
+/>
+
+```tsx
+const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+<Leaderboard
+  data={reps}
+  podium="cards"
+  formatValue={(value) => currency.format(value)}
+  unit="in closed deals"
+/>
+```
+
+### Weekly league
+
+Forty players cut to ten. The viewer is 27th, so their row is pinned under the list with its real place.
+
+<PreviewVideo
+  src="/previews/leaderboard-weekly-league.mp4"
+  poster="/previews/leaderboard-weekly-league-poster.jpg"
+  alt="Leaderboard — Weekly league: the top ten, then the viewer’s own row pinned at 27th."
+  width={720}
+  height={1228}
+/>
+
+```tsx
+<Leaderboard data={league} limit={10} highlightId="you" unit="XP" podiumScale="rank" />
+```
+
+### Fastest laps
+
+Lowest time first, no podium, and a tie for second.
+
+<PreviewVideo
+  src="/previews/leaderboard-fastest-laps.mp4"
+  poster="/previews/leaderboard-fastest-laps-poster.jpg"
+  alt="Leaderboard — Fastest laps: lap times ranked lowest first, with two drivers sharing second."
+  width={720}
+  height={1268}
+/>
+
+```tsx
+const lap = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toFixed(3).padStart(6, '0')}`;
+
+<Leaderboard data={laps} order="asc" podium="none" formatValue={lap} />
 ```
 
 ## API Reference

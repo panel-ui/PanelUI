@@ -1,17 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  AccessibilityIcon,
   ArrowRightIcon,
   ArrowUpRightIcon,
-  GaugeIcon,
   InboxIcon,
   MegaphoneIcon,
   MessageSquareIcon,
-  MoonStarIcon,
-  PackageIcon,
-  PaletteIcon,
-  ZapIcon,
 } from 'lucide-react';
 import {
   Accordion,
@@ -28,6 +22,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { CopyInstall } from '@/components/copy-install';
+import { IsoFigure, type IsoFigureKind } from '@/components/iso-figures';
 import { LayoutLink } from '@/components/layout-link';
 import { Showcase } from '@/components/showcase';
 import { absoluteUrl, site } from '@/lib/site';
@@ -53,34 +48,34 @@ export const metadata: Metadata = {
  */
 const INSTALL = 'npx create-panelui-app@latest';
 
-const FEATURES = [
+const FEATURES: { figure: IsoFigureKind; title: string; body: string }[] = [
   {
-    icon: ZapIcon,
+    figure: 'tailwind',
     title: 'Tailwind CSS for React Native',
     body: 'Built on Uniwind — no Babel transform, and roughly 2.4–3× faster styling than NativeWind.',
   },
   {
-    icon: GaugeIcon,
+    figure: 'fps',
     title: '60fps on the UI thread',
     body: 'Press feedback, switches, sheets, dialogs and tabs run on Reanimated 4 and never touch the JS thread.',
   },
   {
-    icon: PaletteIcon,
+    figure: 'themes',
     title: 'Six themes, three families',
     body: 'A theme sets radius as well as colour, so switching one restyles the shape of the UI too.',
   },
   {
-    icon: MoonStarIcon,
+    figure: 'dark',
     title: 'Native dark mode',
     body: 'Theme changes are applied natively by Uniwind, without re-rendering your component tree.',
   },
   {
-    icon: AccessibilityIcon,
+    figure: 'a11y',
     title: 'Accessible by default',
     body: 'Every interactive component wires up its role, mirrors its state, and hides decorative icons from screen readers.',
   },
   {
-    icon: PackageIcon,
+    figure: 'native',
     title: 'Zero native modules',
     body: 'Pure TypeScript, tree-shakeable and typed. Runs in Expo Go with no prebuild.',
   },
@@ -240,10 +235,12 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map(({ icon: Icon, title, body }) => (
+            {FEATURES.map(({ figure, title, body }) => (
               <Card key={title}>
+                <div className="border-b px-5 pt-4 pb-3">
+                  <IsoFigure kind={figure} />
+                </div>
                 <CardHeader>
-                  <Icon className="mb-2 size-5 text-muted-foreground" aria-hidden="true" />
                   <CardTitle>{title}</CardTitle>
                   <CardDescription>{body}</CardDescription>
                 </CardHeader>

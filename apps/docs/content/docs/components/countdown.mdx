@@ -7,9 +7,9 @@ status: new
 <PreviewVideo
   src="/previews/countdown.mp4"
   poster="/previews/countdown-poster.jpg"
-  alt="Countdown — a launch page ticking down in four large boxes, then a flash sale timer that turns red as it crosses five minutes."
+  alt="Countdown — a launch page with four large boxes ticking down two and a half days to release."
   width={720}
-  height={1566}
+  height={1560}
 />
 
 Use it to show how long is left until a fixed moment: a launch, the end of a sale, an auction closing, the wait before a verification code can be sent again. Pass the moment as `to`, and the component works out what is left and updates once a second.
@@ -25,7 +25,7 @@ For a value that changes for other reasons and should be seen changing, use [Tex
 Countdown ships with the library — no separate install.
 
 ```tsx
-import { Countdown, Text } from 'panelui-native';
+import { Countdown, Badge, Button, Card, OtpInput, Text } from 'panelui-native';
 ```
 
 Or copy the source into your project, to own and edit it:
@@ -53,6 +53,24 @@ const [launch] = useState(() => Date.now() + 2 * 86400 * 1000);
   <Text size="sm" muted>Ends in</Text>
   <Countdown to={saleEnds} variant="inline" size="sm" />
 </View>
+```
+
+### Sizes and units
+
+`size` scales the boxes and the digits together. Each size can show its own set of units. Here the large one drops seconds.
+
+<PreviewVideo
+  src="/previews/countdown-sizes-and-units.mp4"
+  poster="/previews/countdown-sizes-and-units-poster.jpg"
+  alt="Countdown — the same target at the small, medium and large sizes, the large one in hours and minutes only."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+<Countdown to={target} size="sm" />
+<Countdown to={target} size="md" />
+<Countdown to={target} size="lg" units={["hours", "minutes"]} />
 ```
 
 ### Choosing the units
@@ -89,12 +107,130 @@ const [target, setTarget] = useState(() => Date.now() + 30_000);
 )}
 ```
 
-### Labels in another language
+### Translated labels
 
 `labels` replaces the names under each box in `segmented`. Pass only the ones you want to change.
 
+<PreviewVideo
+  src="/previews/countdown-translated-labels.mp4"
+  poster="/previews/countdown-translated-labels-poster.jpg"
+  alt="Countdown — segmented boxes labelled Jours, Heures, Min and Sec."
+  width={720}
+  height={1560}
+/>
+
 ```tsx
 <Countdown to={target} labels={{ days: 'Jours', hours: 'Heures', minutes: 'Min', seconds: 'Sec' }} />
+```
+
+## Versions
+
+### Launch page
+
+Large boxes under a headline, two and a half days out, with a button to be told when it ships.
+
+<PreviewVideo
+  src="/previews/countdown.mp4"
+  poster="/previews/countdown-poster.jpg"
+  alt="Countdown — Launch page: four large boxes ticking down under a headline and a Notify me button."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+const [launch] = useState(() => Date.now() + (2 * 86400 + 14 * 3600) * 1000);
+
+<View className="flex-1 items-center justify-center gap-8 px-6">
+  <View className="items-center gap-3">
+    <Badge variant="outline">Launching Thursday</Badge>
+    <Text size="3xl" weight="bold">Panel 2</Text>
+    <Text muted>A new editor, offline sync, and a public API.</Text>
+  </View>
+  <Countdown to={launch} size="lg" />
+  <Button>Notify me</Button>
+</View>
+```
+
+### Flash sale
+
+Inline in a card header. The digits turn red in the last five minutes, and the line becomes "Ended" when it reaches zero.
+
+<PreviewVideo
+  src="/previews/countdown-flash-sale.mp4"
+  poster="/previews/countdown-flash-sale-poster.jpg"
+  alt="Countdown — Flash sale: an inline timer in a card header turns red as it crosses five minutes."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+const [ends] = useState(() => Date.now() + 308_000);
+const [over, setOver] = useState(false);
+
+<Card>
+  <Card.Header>
+    <View className="flex-row items-center justify-between gap-3">
+      <Badge>Flash sale</Badge>
+      {over ? (
+        <Text size="sm" weight="semibold" muted>Ended</Text>
+      ) : (
+        <View className="flex-row items-baseline gap-1.5">
+          <Text size="sm" muted>Ends in</Text>
+          <Countdown
+            to={ends}
+            variant="inline"
+            size="sm"
+            units={["minutes", "seconds"]}
+            urgentBelow={300}
+            onComplete={() => setOver(true)}
+          />
+        </View>
+      )}
+    </View>
+    <Card.Title>40% off every annual plan</Card.Title>
+  </Card.Header>
+</Card>
+```
+
+### Resend a code
+
+Thirty seconds under a code field. At zero the line becomes a button, and pressing it starts the wait again.
+
+<PreviewVideo
+  src="/previews/countdown-resend-a-code.mp4"
+  poster="/previews/countdown-resend-a-code-poster.jpg"
+  alt="Countdown — Resend a code: a thirty-second wait under a code field that turns into a Resend code button."
+  width={720}
+  height={1560}
+/>
+
+```tsx
+const [target, setTarget] = useState(() => Date.now() + 30_000);
+const [ready, setReady] = useState(false);
+
+<OtpInput length={6} groupEvery={3} />
+{ready ? (
+  <Button
+    variant="outline"
+    onPress={() => {
+      setReady(false);
+      setTarget(Date.now() + 30_000);
+    }}
+  >
+    Resend code
+  </Button>
+) : (
+  <View className="flex-row items-baseline justify-center gap-1.5">
+    <Text size="sm" muted>Resend a code in</Text>
+    <Countdown
+      to={target}
+      variant="inline"
+      size="sm"
+      units={["minutes", "seconds"]}
+      onComplete={() => setReady(true)}
+    />
+  </View>
+)}
 ```
 
 ## Variants

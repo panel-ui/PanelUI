@@ -4,12 +4,16 @@
     "src": "/previews/countdown.mp4",
     "poster": "/previews/countdown-poster.jpg",
     "width": 720,
-    "height": 1566,
-    "alt": "Countdown — a launch page ticking down in four large boxes, then a flash sale timer that turns red as it crosses five minutes."
+    "height": 1560,
+    "alt": "Countdown — a launch page with four large boxes ticking down two and a half days to release."
   },
   "intro": "Use it to show how long is left until a fixed moment: a launch, the end of a sale, an auction closing, the wait before a verification code can be sent again. Pass the moment as `to`, and the component works out what is left and updates once a second.\n\nIt reads the clock on every tick instead of subtracting one each second. So it stays correct after the app has been in the background, and it reaches zero at the moment `to` passes.\n\n**Seconds round up.** It shows `0:01` through the final second and `0:00` only once the time is up, so a sale never shows zero while it is still running.\n\nFor a value that changes for other reasons and should be seen changing, use [TextAnimation](/docs/components/text-animation). For progress towards a total rather than towards a time, use [Progress](/docs/components/progress).",
   "usage": "const [launch] = useState(() => Date.now() + 2 * 86400 * 1000);\n\n<Countdown to={launch} />",
   "extraImports": [
+    "Badge",
+    "Button",
+    "Card",
+    "OtpInput",
     "Text"
   ],
   "examples": [
@@ -17,6 +21,18 @@
       "title": "Inline",
       "description": "`variant=\"inline\"` writes the time as a line of text, `2d 14:03:22`, for a banner, a card header or the line under a field. Put your own words around it in a row.",
       "code": "<View className=\"flex-row items-baseline gap-1.5\">\n  <Text size=\"sm\" muted>Ends in</Text>\n  <Countdown to={saleEnds} variant=\"inline\" size=\"sm\" />\n</View>"
+    },
+    {
+      "title": "Sizes and units",
+      "description": "`size` scales the boxes and the digits together. Each size can show its own set of units. Here the large one drops seconds.",
+      "code": "<Countdown to={target} size=\"sm\" />\n<Countdown to={target} size=\"md\" />\n<Countdown to={target} size=\"lg\" units={[\"hours\", \"minutes\"]} />",
+      "previewVideo": {
+        "src": "/previews/countdown-sizes-and-units.mp4",
+        "poster": "/previews/countdown-sizes-and-units-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Countdown — the same target at the small, medium and large sizes, the large one in hours and minutes only."
+      }
     },
     {
       "title": "Choosing the units",
@@ -34,9 +50,54 @@
       "code": "const [ready, setReady] = useState(false);\nconst [target, setTarget] = useState(() => Date.now() + 30_000);\n\n{ready ? (\n  <Button variant=\"outline\" onPress={() => { setReady(false); setTarget(Date.now() + 30_000); }}>\n    Resend code\n  </Button>\n) : (\n  <Countdown to={target} variant=\"inline\" size=\"sm\" units={['minutes', 'seconds']} onComplete={() => setReady(true)} />\n)}"
     },
     {
-      "title": "Labels in another language",
+      "title": "Translated labels",
       "description": "`labels` replaces the names under each box in `segmented`. Pass only the ones you want to change.",
-      "code": "<Countdown to={target} labels={{ days: 'Jours', hours: 'Heures', minutes: 'Min', seconds: 'Sec' }} />"
+      "code": "<Countdown to={target} labels={{ days: 'Jours', hours: 'Heures', minutes: 'Min', seconds: 'Sec' }} />",
+      "previewVideo": {
+        "src": "/previews/countdown-translated-labels.mp4",
+        "poster": "/previews/countdown-translated-labels-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Countdown — segmented boxes labelled Jours, Heures, Min and Sec."
+      }
+    }
+  ],
+  "versions": [
+    {
+      "title": "Launch page",
+      "description": "Large boxes under a headline, two and a half days out, with a button to be told when it ships.",
+      "code": "const [launch] = useState(() => Date.now() + (2 * 86400 + 14 * 3600) * 1000);\n\n<View className=\"flex-1 items-center justify-center gap-8 px-6\">\n  <View className=\"items-center gap-3\">\n    <Badge variant=\"outline\">Launching Thursday</Badge>\n    <Text size=\"3xl\" weight=\"bold\">Panel 2</Text>\n    <Text muted>A new editor, offline sync, and a public API.</Text>\n  </View>\n  <Countdown to={launch} size=\"lg\" />\n  <Button>Notify me</Button>\n</View>",
+      "previewVideo": {
+        "src": "/previews/countdown.mp4",
+        "poster": "/previews/countdown-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Countdown — Launch page: four large boxes ticking down under a headline and a Notify me button."
+      }
+    },
+    {
+      "title": "Flash sale",
+      "description": "Inline in a card header. The digits turn red in the last five minutes, and the line becomes \"Ended\" when it reaches zero.",
+      "code": "const [ends] = useState(() => Date.now() + 308_000);\nconst [over, setOver] = useState(false);\n\n<Card>\n  <Card.Header>\n    <View className=\"flex-row items-center justify-between gap-3\">\n      <Badge>Flash sale</Badge>\n      {over ? (\n        <Text size=\"sm\" weight=\"semibold\" muted>Ended</Text>\n      ) : (\n        <View className=\"flex-row items-baseline gap-1.5\">\n          <Text size=\"sm\" muted>Ends in</Text>\n          <Countdown\n            to={ends}\n            variant=\"inline\"\n            size=\"sm\"\n            units={[\"minutes\", \"seconds\"]}\n            urgentBelow={300}\n            onComplete={() => setOver(true)}\n          />\n        </View>\n      )}\n    </View>\n    <Card.Title>40% off every annual plan</Card.Title>\n  </Card.Header>\n</Card>",
+      "previewVideo": {
+        "src": "/previews/countdown-flash-sale.mp4",
+        "poster": "/previews/countdown-flash-sale-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Countdown — Flash sale: an inline timer in a card header turns red as it crosses five minutes."
+      }
+    },
+    {
+      "title": "Resend a code",
+      "description": "Thirty seconds under a code field. At zero the line becomes a button, and pressing it starts the wait again.",
+      "code": "const [target, setTarget] = useState(() => Date.now() + 30_000);\nconst [ready, setReady] = useState(false);\n\n<OtpInput length={6} groupEvery={3} />\n{ready ? (\n  <Button\n    variant=\"outline\"\n    onPress={() => {\n      setReady(false);\n      setTarget(Date.now() + 30_000);\n    }}\n  >\n    Resend code\n  </Button>\n) : (\n  <View className=\"flex-row items-baseline justify-center gap-1.5\">\n    <Text size=\"sm\" muted>Resend a code in</Text>\n    <Countdown\n      to={target}\n      variant=\"inline\"\n      size=\"sm\"\n      units={[\"minutes\", \"seconds\"]}\n      onComplete={() => setReady(true)}\n    />\n  </View>\n)}",
+      "previewVideo": {
+        "src": "/previews/countdown-resend-a-code.mp4",
+        "poster": "/previews/countdown-resend-a-code-poster.jpg",
+        "width": 720,
+        "height": 1560,
+        "alt": "Countdown — Resend a code: a thirty-second wait under a code field that turns into a Resend code button."
+      }
     }
   ],
   "notes": "### Keep `to` stable\n\n`to` is the moment itself, not a duration. Compute it once, in state or from your data, and pass the same value on every render. `Date.now() + 30_000` written straight into the JSX makes a new target on every render, so the countdown restarts each time the parent renders.\n\n### Accessibility\n\nThe countdown is a single element with the `timer` role. Its label is coarser than the display: it names days, hours and minutes, and counts seconds only in the last minute. A label that changed every second would be read again every second.\n\n### Motion\n\nWhen a digit changes, the old one slides down and out and the new one comes in from above. Only the digits that changed move. Nothing animates on the first render, and nothing animates when reduce motion is on.",

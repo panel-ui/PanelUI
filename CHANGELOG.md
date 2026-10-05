@@ -9,6 +9,25 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.105.1] — 2026-10-05
+
+The library's code is unchanged from 0.105.0. This release publishes the documentation below.
+
+### Docs
+
+- **Text colour** — a troubleshooting entry, *Text keeps its default colour*, for a label that
+  stays near-white in dark mode after it has been given a colour. It covers three causes. A
+  colour on a row's view does not reach the text inside it. In the default theme `text-primary`
+  resolves to the same value as `text-foreground`, so a label drawn in it looks unchanged. A
+  `--color-primary` set in `@theme`, rather than once per theme, is replaced at runtime by the
+  theme's own value. The Colors page now states the second where `primary` is listed.
+- **RadioGroup** — an example that colours the selected option's label from the group's value.
+- **Item** — a note that `Item.Title` and `Item.Description` take their colour from their own
+  `className`, and that a colour on `Item` does not reach them.
+- **Countdown**, **Leaderboard** — new preview recordings.
+- The landing page has a section for PanelUI Studio, and its feature cards draw interactive
+  isometric figures.
+
 ## [0.105.0] — 2026-10-02
 
 ### Added

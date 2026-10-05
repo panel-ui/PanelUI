@@ -521,6 +521,24 @@ file exists where `dtsFile` says it should and that `tsconfig.json` includes it.
 Dialog, BottomSheet and Select render into the portal host that `PanelUIProvider` sets up. Make
 sure the provider is at the root of the app and wraps the screen you are opening the overlay from.
 
+### Text keeps its default colour
+
+A label that stays near-white in dark mode, or near-black in light, after you have given it a
+colour usually has one of three causes.
+
+**The class is on a view, not on the text.** React Native does not pass a text colour down from a
+view, so `text-*` in a row's `className`, or `color` in its `style`, never reaches the text inside
+it. Colour the text itself: `labelClassName` on `RadioGroup.Item` and `Checkbox`, `className` on
+`Item.Title`.
+
+**The colour is the default one.** In the default theme `text-primary` resolves to the same value
+as `text-foreground`, so it changes nothing you can see. See
+[Colors](/docs/customization/colors#actions-and-state).
+
+**The token was redefined outside a `@variant` block.** A `--color-primary` set in `@theme` or in a
+bare `:root` is replaced at runtime by the active theme's own value. Redefine it once per theme, as
+[Changing a colour](/docs/customization/colors#changing-a-colour) shows.
+
 Still stuck? [Open an issue](https://github.com/panel-ui/PanelUI/issues) with your
 `metro.config.js`, your `global.css` and the error — that is usually enough to spot it.
 

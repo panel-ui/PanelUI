@@ -39,6 +39,11 @@
       "title": "Styling the label",
       "description": "`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.",
       "code": "<RadioGroup value={method} onValueChange={setMethod} variant=\"card\">\n  <RadioGroup.Item\n    value=\"card\"\n    label=\"Card\"\n    description=\"Visa, Mastercard, Amex\"\n    className=\"bg-white\"\n    labelClassName=\"text-black\"\n    descriptionClassName=\"text-neutral-500\"\n  />\n</RadioGroup>"
+    },
+    {
+      "title": "Colouring the selected option",
+      "description": "An item does not restyle its label when it is selected. Work the class out from the group's value and pass it as `labelClassName`.\n\nPick a colour that differs from the label's default. In the default theme `text-primary` resolves to the same value as `text-foreground`, so a selected label drawn in it looks unchanged — see [Colors](/docs/customization/colors#actions-and-state).",
+      "code": "const [speed, setSpeed] = useState(\"standard\");\n\n<RadioGroup value={speed} onValueChange={setSpeed} variant=\"card\">\n  {speeds.map((option) => (\n    <RadioGroup.Item\n      key={option.value}\n      value={option.value}\n      label={option.label}\n      description={option.description}\n      labelClassName={option.value === speed ? undefined : \"text-muted-foreground\"}\n    />\n  ))}\n</RadioGroup>"
     }
   ],
   "extraImports": [

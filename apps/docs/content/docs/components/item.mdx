@@ -379,6 +379,10 @@ Give the item an `onPress` and it renders as an `AnimatedPressable` with `access
 
 `size` is set once on the item. `Item.Media`, `Item.Title` and `Item.Description` read it from context, so the icon tile, title size and description size all move together. Override any of them individually by passing `size` or `className` to that part.
 
+### Colouring the text
+
+`Item.Title` and `Item.Description` are the text, so their own `className` sets the colour: `<Item.Title className="text-destructive">`. A colour on `Item`, through `className` or `style`, styles the row's view and does not reach the text inside it — React Native does not pass a text colour down from a view.
+
 ### The two axes
 
 `orientation` means something different on the item and on the group, and they are independent:

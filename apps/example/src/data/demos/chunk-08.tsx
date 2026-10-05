@@ -121,6 +121,37 @@ function RadioGroupStyledDemo() {
   );
 }
 
+const DELIVERY_SPEEDS = [
+  { value: 'standard', label: 'Standard', description: '3–5 days' },
+  { value: 'express', label: 'Express', description: 'Next day' },
+];
+
+function RadioGroupSelectedLabelDemo() {
+  const [speed, setSpeed] = useState('standard');
+
+  return (
+    <RadioGroup
+      value={speed}
+      onValueChange={setSpeed}
+      variant="card"
+      orientation="horizontal"
+      className="w-full"
+    >
+      {/* The item does not restyle its label on selection, so the colour is
+          worked out here from the group's value. */}
+      {DELIVERY_SPEEDS.map((option) => (
+        <RadioGroup.Item
+          key={option.value}
+          value={option.value}
+          label={option.label}
+          description={option.description}
+          labelClassName={option.value === speed ? undefined : 'text-muted-foreground'}
+        />
+      ))}
+    </RadioGroup>
+  );
+}
+
 function SelectDemo() {
   const [fruit, setFruit] = useState<string>();
 
@@ -1812,6 +1843,7 @@ export const ENTRIES: ComponentEntry[] = [
       { label: 'Horizontal', render: () => <RadioGroupRowDemo /> },
       { label: 'Cards', render: () => <RadioGroupCardDemo /> },
       { label: 'Styled labels', render: () => <RadioGroupStyledDemo /> },
+      { label: 'Colouring the selected label', render: () => <RadioGroupSelectedLabelDemo /> },
       {
         label: 'In a card',
         render: () => (

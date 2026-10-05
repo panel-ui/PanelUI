@@ -138,6 +138,28 @@ Short labels stacked one per line read as a longer list than they are. `orientat
 </RadioGroup>
 ```
 
+### Colouring the selected option
+
+An item does not restyle its label when it is selected. Work the class out from the group's value and pass it as `labelClassName`.
+
+Pick a colour that differs from the label's default. In the default theme `text-primary` resolves to the same value as `text-foreground`, so a selected label drawn in it looks unchanged — see [Colors](/docs/customization/colors#actions-and-state).
+
+```tsx
+const [speed, setSpeed] = useState("standard");
+
+<RadioGroup value={speed} onValueChange={setSpeed} variant="card">
+  {speeds.map((option) => (
+    <RadioGroup.Item
+      key={option.value}
+      value={option.value}
+      label={option.label}
+      description={option.description}
+      labelClassName={option.value === speed ? undefined : "text-muted-foreground"}
+    />
+  ))}
+</RadioGroup>
+```
+
 ## Variants
 
 ### `variant`

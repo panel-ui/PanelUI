@@ -9,6 +9,42 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.106.0] — 2026-10-06
+
+### Added
+
+- **Select** — `sheetProps` sets how the `sheet` presentation draws its sheet.
+  `sheetProps.native` presents the platform's own sheet, SwiftUI on iOS and Jetpack Compose on
+  Android, so it gets the system's detents, dismiss gesture and material. `snapPoints` sets the
+  detents and `nativeBackground` paints a solid surface instead of the translucent material.
+  Only the container is the platform's: the options inside are still the select's own, so
+  groups, disabled options and `searchable` keep working. In a sheet with detents the list
+  fills the first one and scrolls inside it. `size` gives the sheet a fixed `half` or `full`
+  height in either form. The native sheet needs the optional `@expo/ui` package; without it the
+  styled sheet is shown. `SelectSheetProps` is exported.
+
+### Changed
+
+- **BottomSheet** — `BottomSheet.Body` turns off Android's overscroll effect by default. At the
+  top of the list a pull moves the sheet, and the effect drew the content stretching inside a
+  sheet that was already moving. Pass `overScrollMode` to bring it back.
+
+### Fixed
+
+- **Select** — on Android, swiping over the options in the `sheet` presentation dragged the
+  whole sheet up or down instead of scrolling the list. The options were in a plain scroller
+  the sheet's drag knew nothing about, so whichever gesture started first kept the touch. They
+  now scroll in `BottomSheet.Body`: the list scrolls until it reaches its top, and pulling down
+  from there drags the sheet.
+- **BottomSheet** — `BottomSheet.Body` and the sheet now agree about which drags belong to
+  which:
+  - A fast flick back up a scrolled list no longer closes the sheet, and the haptic no longer
+    fires at the end of every scroll.
+  - An upward drag over the list scrolls it, rather than lifting the sheet as the list starts
+    to move.
+  - While the sheet is being dragged, the list holds still instead of scrolling under it.
+  - On Android a scroll no longer stops when the finger moves outside the list.
+
 ## [0.105.1] — 2026-10-05
 
 The library's code is unchanged from 0.105.0. This release publishes the documentation below.

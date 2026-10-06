@@ -92,7 +92,7 @@
     "Draggable sheet anchored to the bottom of the screen.",
     "react native bottom sheet",
     {
-      "updatedIn": "0.103.0",
+      "updatedIn": "0.106.0",
       "category": "overlays"
     }
   ],
@@ -740,7 +740,7 @@
     "Picker shown in a bottom sheet, expanded in place, or floating over the page.",
     "expo select component",
     {
-      "updatedIn": "0.82.0",
+      "updatedIn": "0.106.0",
       "category": "forms"
     }
   ],

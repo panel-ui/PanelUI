@@ -53,6 +53,7 @@ import {
   View,
   type LayoutChangeEvent,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -68,7 +69,7 @@ import { Portal } from '../../primitives/portal';
 import { Text, textChildren } from '../../primitives/text';
 import { useBackHandler } from '../../hooks/use-back-handler';
 import { cn } from '../../utils/cn';
-import { BottomSheet } from '../bottom-sheet';
+import { BottomSheet, bottomSheetDetentHeight } from '../bottom-sheet';
 import { InputGroup } from '../input-group';
 import { nativeSelectSupportsOptions } from './native-select-contract';
 
@@ -321,6 +322,50 @@ function filterOptions(children: ReactNode, needle: string): FilterResult {
   return { kept, seen };
 }
 
+/**
+ * How the sheet is drawn in the `sheet` presentation. The other two
+ * presentations ignore it, and so does the `native` picker, which replaces the
+ * sheet altogether.
+ */
+export interface SelectSheetProps {
+  /**
+   * Present the platform's own sheet — SwiftUI on iOS, Jetpack Compose on
+   * Android — instead of the styled one. Requires the optional `@expo/ui`
+   * package; without it the styled sheet is shown.
+   *
+   * Only the container is the platform's. The options inside are still the
+   * select's own, so groups, disabled options and `searchable` all work.
+   */
+  native?: boolean;
+  /**
+   * Heights the native sheet can rest at. Omit to size to the options. The
+   * list fills the first one and scrolls inside it. `{ fraction }` and
+   * `{ height }` are iOS-only. Native sheet only.
+   */
+  snapPoints?: ('half' | 'full' | { fraction: number } | { height: number })[];
+  /**
+   * Paint the native sheet a solid colour instead of the platform's
+   * translucent material. `true` uses the theme's popover surface; a string
+   * paints that colour. Native sheet only.
+   */
+  nativeBackground?: boolean | string;
+  /**
+   * How tall the sheet opens. `auto`, the default, sizes to the options and
+   * scrolls once they pass 384 points; `half` and `full` fix the height and
+   * the list fills it. On the native sheet these map onto the platform's
+   * detents, and `snapPoints` wins over them.
+   */
+  size?: 'auto' | 'half' | 'full';
+}
+
+/**
+ * The native sheet's own top padding, which clears the platform's grabber —
+ * `pt-5` on `BottomSheet.Content`. A list that fills a detent has to be given
+ * the height left inside that padding, because the platform hosts the content
+ * at whatever size it reports.
+ */
+const NATIVE_SHEET_TOP_PADDING = 20;
+
 /** Trigger frame in window coordinates, measured when the list opens. */
 interface Anchor {
   x: number;
@@ -385,6 +430,11 @@ export interface SelectProps {
   /** Sheet title shown above the options. `sheet` presentation only. */
   title?: string;
   /**
+   * How the sheet is drawn — the platform's own sheet, its detents and
+   * surface, or a fixed height. `sheet` presentation only.
+   */
+  sheetProps?: SelectSheetProps;
+  /**
    * Width of the floating list. `trigger` matches the trigger, `content` sizes
    * to the longest option, or pass a pixel value. `overlay` only.
    */
@@ -441,6 +491,7 @@ function SelectRoot({
   emptyClassName,
   presentation = 'sheet',
   title,
+  sheetProps,
   contentWidth = 'trigger',
   offset = 8,
   onOpenChange,
@@ -458,6 +509,7 @@ function SelectRoot({
   const triggerRef = useRef<View>(null);
   const chevron = useSharedValue(0);
   const { height: screenHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const options = useMemo(() => {
     const collected: SelectItemProps[] = [];
@@ -653,6 +705,58 @@ function SelectRoot({
   );
 
   if (presentation === 'sheet') {
+    const size = sheetProps?.size ?? 'auto';
+    const nativeSheet = !!sheetProps?.native && !!getNativeUI();
+    // The native sheet's resting heights — `snapPoints`, or `size` mapped onto
+    // the platform's detents. Undefined means it sizes to the options.
+    const detents = nativeSheet
+      ? sheetProps?.snapPoints ?? (size === 'auto' ? undefined : [size])
+      : undefined;
+    const sized = nativeSheet ? detents !== undefined : size !== 'auto';
+
+    /*
+     * A list asked to fill a native sheet needs a definite height above it.
+     * The platform hosts the content at the size it reports, so a list left to
+     * fill reports every row and runs off the bottom of the detent.
+     */
+    const detentHeight = bottomSheetDetentHeight(detents, screenHeight);
+    const nativeHeight =
+      detentHeight === undefined
+        ? undefined
+        : detentHeight - NATIVE_SHEET_TOP_PADDING - Math.max(insets.bottom, 16);
+
+    const sheetBody = (
+      <>
+        {title ? (
+          <Text size="lg" weight="semibold" className="mb-2 px-3">
+            {title}
+          </Text>
+        ) : null}
+        {search ? <View className="px-1">{search}</View> : null}
+        {/*
+          * The sheet's own scroller rather than a plain one, because the sheet
+          * and the list both want a vertical drag. Unrelated, whichever takes
+          * the touch first keeps it — on Android that was usually the sheet,
+          * so the options dragged the sheet instead of scrolling. This one
+          * scrolls until the list reaches its top and hands the drag over
+          * there.
+          */}
+        <BottomSheet.Body
+          bounces={false}
+          // A sized sheet gives the list its height; an `auto` one stops it at
+          // 384 points so a long list scrolls instead of filling the screen.
+          className={sized ? undefined : 'max-h-96'}
+          // The filter is a text field above a scroller: dismissing the
+          // keyboard on a drag is what lets you look at what you filtered
+          // to without first tapping somewhere neutral.
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className={slots.options({ className: listClassName })}>{optionList}</View>
+        </BottomSheet.Body>
+      </>
+    );
+
     return (
       <SelectContext.Provider value={context}>
         <View className={className}>{trigger}</View>
@@ -663,36 +767,19 @@ function SelectRoot({
           onOpenChange={(next) => {
             if (!next) close();
           }}
+          native={nativeSheet}
+          snapPoints={sheetProps?.snapPoints}
+          nativeBackground={sheetProps?.nativeBackground}
         >
-          <BottomSheet.Content>
+          <BottomSheet.Content size={size}>
             {/* BottomSheet.Content portals its children out of this subtree —
                 re-provide the select context so Select.Item keeps working. */}
             <SelectContext.Provider value={context}>
-              {title ? (
-                <Text size="lg" weight="semibold" className="mb-2 px-3">
-                  {title}
-                </Text>
-              ) : null}
-              {search ? <View className="px-1">{search}</View> : null}
-              {/*
-                * The sheet's own scroller rather than a plain one, because the
-                * sheet and the list both want a vertical drag. Unrelated,
-                * whichever takes the touch first keeps it — on Android that
-                * was usually the sheet, so the options dragged the sheet
-                * instead of scrolling. This one scrolls until the list
-                * reaches its top and hands the drag over there.
-                */}
-              <BottomSheet.Body
-                bounces={false}
-                className="max-h-96"
-                // The filter is a text field above a scroller: dismissing the
-                // keyboard on a drag is what lets you look at what you filtered
-                // to without first tapping somewhere neutral.
-                keyboardDismissMode="on-drag"
-                keyboardShouldPersistTaps="handled"
-              >
-                <View className={slots.options({ className: listClassName })}>{optionList}</View>
-              </BottomSheet.Body>
+              {nativeHeight === undefined ? (
+                sheetBody
+              ) : (
+                <View style={{ height: nativeHeight }}>{sheetBody}</View>
+              )}
             </SelectContext.Provider>
           </BottomSheet.Content>
         </BottomSheet>

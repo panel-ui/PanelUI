@@ -380,6 +380,7 @@ export {
   type SelectItemProps,
   type SelectGroupProps,
   type SelectPresentation,
+  type SelectSheetProps,
 } from './components/select';
 export {
   SelectionMode,

@@ -246,6 +246,33 @@ function LongSelectDemo() {
   );
 }
 
+function NativeSheetSelectDemo() {
+  const [zone, setZone] = useState<string>();
+
+  return (
+    <NativeDemo>
+      <View className="w-full gap-1.5">
+        <Label>Time zone</Label>
+        <Select
+          value={zone}
+          onValueChange={setZone}
+          placeholder="Select a time zone"
+          title="Time zone"
+          sheetProps={{
+            native: true,
+            snapPoints: ['half', 'full'],
+            nativeBackground: true,
+          }}
+        >
+          {TIMEZONES.map((tz) => (
+            <Select.Item key={tz.value} value={tz.value} label={tz.label} />
+          ))}
+        </Select>
+      </View>
+    </NativeDemo>
+  );
+}
+
 function DisabledOptionSelectDemo() {
   const [plan, setPlan] = useState<string>('starter');
 
@@ -2066,6 +2093,7 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       { label: 'Disabled option', render: () => <DisabledOptionSelectDemo /> },
+      { label: 'Native sheet', render: () => <NativeSheetSelectDemo /> },
       { label: 'Native — menu', render: () => <NativeSelectDemo /> },
       { label: 'Native — wheel', render: () => <NativeWheelPickerDemo /> },
     ],

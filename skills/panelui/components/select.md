@@ -52,6 +52,15 @@ import { Select } from 'panelui-native';
 | `labelClassName` | `string` | — | Extra classes for the heading. |
 | `children` | `ReactNode` | **required** | — |
 
+#### `SelectSheetProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `native` | `boolean` | — | Present the platform's own sheet — SwiftUI on iOS, Jetpack Compose on Android — instead of the styled one. Requires the optional `@expo/ui` package; without it the styled sheet is shown. Only the container is the platform's. The options inside are still the select's own, so groups, disabled options and `searchable` all work. |
+| `snapPoints` | `('half' \| 'full' \| { fraction: number } \| { height: number })[]` | — | Heights the native sheet can rest at. Omit to size to the options. The list fills the first one and scrolls inside it. `{ fraction }` and `{ height }` are iOS-only. Native sheet only. |
+| `nativeBackground` | `boolean \| string` | — | Paint the native sheet a solid colour instead of the platform's translucent material. `true` uses the theme's popover surface; a string paints that colour. Native sheet only. |
+| `size` | `'auto' \| 'half' \| 'full'` | — | How tall the sheet opens. `auto`, the default, sizes to the options and scrolls once they pass 384 points; `half` and `full` fix the height and the list fills it. On the native sheet these map onto the platform's detents, and `snapPoints` wins over them. |
+
 #### `SelectProps`
 
 | Prop | Type | Default | What it does |
@@ -72,6 +81,7 @@ import { Select } from 'panelui-native';
 | `emptyClassName` | `string` | — | Extra classes for the message shown when the filter matches nothing. |
 | `presentation` | `SelectPresentation` | `sheet` | Where the options appear. `sheet` takes the bottom of the screen, `inline` expands the list in layout flow, `overlay` floats it above the page anchored to the trigger. |
 | `title` | `string` | — | Sheet title shown above the options. `sheet` presentation only. |
+| `sheetProps` | `SelectSheetProps` | — | How the sheet is drawn — the platform's own sheet, its detents and surface, or a fixed height. `sheet` presentation only. |
 | `contentWidth` | `'trigger' \| 'content' \| number` | `trigger` | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. `overlay` only. |
 | `offset` | `number` | `8` | Gap between the trigger and the floating list. `overlay` only. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the options open or close. |
@@ -139,11 +149,17 @@ None of these reach a `native` picker. The platform draws that one.
 
 In `sheet` the options scroll inside the sheet's own scroller, so the list and the sheet share one drag. The list scrolls until it reaches its top; pulling down from there drags the sheet.
 
+### Configuring the sheet
+
+`sheetProps` sets how the `sheet` presentation draws its sheet. `size` gives it a fixed height: `half` or `full`, with the list filling it, instead of `auto`, where the sheet sizes to the options and the list scrolls past 384 points.
+
+`sheetProps.native` presents the platform's own sheet — SwiftUI on iOS, Jetpack Compose on Android — so it gets the system's detents, dismiss gesture and material. Only the container is the platform's: the options are still the select's own, so groups, disabled options and `searchable` keep working, and the styling props still reach them. `snapPoints` sets the detents, and the list fills the first one and scrolls inside it. `nativeBackground` paints the sheet a solid colour instead of the platform's translucent material; `true` uses the theme's popover surface. Like the rest of native rendering, it needs the optional `@expo/ui` package, and without it the styled sheet is shown.
+
 ### Native rendering
 
 Pass `native` to render the platform’s own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.
 
-**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className`, `triggerClassName`, `presentation` and every other styling prop are ignored. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit "None" item.
+**Theme tokens do not apply in native mode**: the platform draws the control with its own colours and metrics, so `className`, `triggerClassName`, `presentation` and every other styling prop are ignored. `native` replaces the sheet too, so it wins over `sheetProps` — for the platform's sheet with the select's own options inside it, use `sheetProps.native` instead. A native picker always has a selection, so an unset `value` shows the first option rather than the placeholder — set an initial value or add an explicit "None" item.
 
 The portable native picker cannot disable one option independently. When any `Select.Item` is disabled, Select keeps the styled presentation even if `native` is requested, so the disabled choice remains visible without becoming selectable.
 

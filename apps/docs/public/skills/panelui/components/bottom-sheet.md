@@ -80,6 +80,7 @@ Extends `Omit<ComponentProps<typeof Animated.ScrollView>, 'ref'>`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
+| `overScrollMode` | `'auto' \| 'always' \| 'never'` | — | Android's overscroll effect, drawn when the list is pulled past an end. Off by default: at the top of the list that pull moves the sheet, and the effect would draw the content stretching inside a sheet that is already moving. |
 | `children` | `ReactNode` | — | — |
 
 #### `BottomSheetFooterProps`
@@ -127,6 +128,8 @@ On the native sheet `size` maps onto the platform’s own detents, so it keeps t
 ### Scrolling inside a sheet
 
 Use `BottomSheet.Body` rather than a bare `ScrollView`. Both gestures want the same downward drag, and with no relationship between them whichever activates first takes the touch outright — so either the list never scrolls or the sheet never drags. `Body` reports its scroll position to the sheet, which holds off until the list has run out: pull down on a list at its top and the sheet comes with you, pull down anywhere else and the list scrolls.
+
+While the sheet has the drag, the list holds still, and an upward drag over the list always scrolls it rather than lifting the sheet. `Body` also turns off Android's overscroll effect by default, because at the top of the list that pull moves the sheet; pass `overScrollMode` to bring it back.
 
 ### The backdrop
 

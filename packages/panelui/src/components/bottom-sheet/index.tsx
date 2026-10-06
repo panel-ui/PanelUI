@@ -30,6 +30,8 @@ import Animated, {
   cancelAnimation,
   interpolate,
   runOnJS,
+  scrollTo,
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useComposedEventHandler,
@@ -295,7 +297,17 @@ const SheetSurfaceContext = createContext<{
   scrollGesture: ScrollGesture;
   scrollOffset: SharedValue<number>;
   hasScrollable: SharedValue<boolean>;
+  /**
+   * Where the list is held while the sheet has the drag, or {@link UNHELD}
+   * while it does not. Both gestures see every move of a shared drag, so
+   * without a hold a sheet being pushed back up scrolls the list under it at
+   * the same time.
+   */
+  scrollHold: SharedValue<number>;
 } | null>(null);
+
+/** `scrollHold` while the list is free to scroll. */
+const UNHELD = -1;
 
 /**
  * Whether the sheet has a height of its own for `Body` to fill.
@@ -479,10 +491,18 @@ function BottomSheetContent({
    * gesture is composed before its children have mounted. `Body` attaches it
    * to its own scroll view; with no `Body` it is simply never attached, and
    * the drag reverts to owning every touch.
+   *
+   * Not cancelled when the finger leaves the list. Android cancels a native
+   * scroll at its bounds by default, and a long upward scroll ends above the
+   * list it started in — the list stopped dead partway through the stroke.
    */
-  const scrollGesture = useMemo(() => Gesture.Native(), []);
+  const scrollGesture = useMemo(
+    () => Gesture.Native().shouldCancelWhenOutside(false),
+    []
+  );
   const scrollOffset = useSharedValue(0);
   const hasScrollable = useSharedValue(false);
+  const scrollHold = useSharedValue(UNHELD);
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
@@ -672,11 +692,35 @@ function BottomSheetContent({
           if (hasScrollable.value && scrollOffset.value > 0 && translateY.value <= 0) {
             return;
           }
-          // Rubber-band when dragging upward, follow the finger downward.
           const next = translateY.value + event.changeY;
+          /*
+           * Above its resting place the sheet rubber-bands — unless there is a
+           * list in it, in which case an upward drag is a scroll and the sheet
+           * stays where it is. Lifting the sheet as the list began to move
+           * read as the sheet taking a drag that was meant for the list.
+           */
+          if (next <= 0 && hasScrollable.value) {
+            translateY.value = 0;
+            // Back at rest, the rest of the stroke is the list's again.
+            scrollHold.value = UNHELD;
+            return;
+          }
+          // The sheet has the drag now, so the list holds where it is. Never
+          // below its top: a list caught mid-bounce is held at rest.
+          if (scrollHold.value === UNHELD) {
+            scrollHold.value = Math.max(scrollOffset.value, 0);
+          }
           translateY.value = next > 0 ? next : next / 3;
         })
         .onEnd((event) => {
+          /*
+           * A drag that ends with the sheet at rest is not the sheet's to
+           * settle. Over a list that is most of them, because the two gestures
+           * share every drag — and read as the sheet's, a fast flick back up a
+           * long list cleared the dismiss velocity and closed the sheet out
+           * from under it.
+           */
+          if (scrollHold.value === UNHELD) return;
           /*
            * Velocity decides as much as distance does, and it is handed to the
            * animation rather than only consulted by it. A flat timing from
@@ -710,6 +754,11 @@ function BottomSheetContent({
             // commits to staying, not when it finishes arriving.
             runOnJS(impactKnock)();
           }
+        })
+        // Every way a drag can finish lets go of the list, a cancelled one
+        // included — a hold left behind would pin the list for good.
+        .onFinalize(() => {
+          scrollHold.value = UNHELD;
         }),
     // Rebuilt only when one of these changes. Built inline it would be a new
     // gesture on every render — and the sheet re-renders while it is being
@@ -722,6 +771,7 @@ function BottomSheetContent({
       scrollGesture,
       scrollOffset,
       hasScrollable,
+      scrollHold,
     ]
   );
 
@@ -760,8 +810,8 @@ function BottomSheetContent({
       : Math.min(screenHeight * SIZE_FRACTION[size], sheetCap);
 
   const surface = useMemo(
-    () => ({ scrollGesture, scrollOffset, hasScrollable }),
-    [scrollGesture, scrollOffset, hasScrollable]
+    () => ({ scrollGesture, scrollOffset, hasScrollable, scrollHold }),
+    [scrollGesture, scrollOffset, hasScrollable, scrollHold]
   );
 
   if (nativeSheet) {
@@ -993,6 +1043,13 @@ BottomSheetHeader.displayName = 'BottomSheet.Header';
 export interface BottomSheetBodyProps
   extends Omit<ComponentProps<typeof Animated.ScrollView>, 'ref'> {
   className?: string;
+  /**
+   * Android's overscroll effect, drawn when the list is pulled past an end.
+   * Off by default: at the top of the list that pull moves the sheet, and the
+   * effect would draw the content stretching inside a sheet that is already
+   * moving.
+   */
+  overScrollMode?: 'auto' | 'always' | 'never';
   children?: ReactNode;
 }
 
@@ -1014,9 +1071,21 @@ export interface BottomSheetBodyProps
 const BottomSheetBody = forwardRef<
   ComponentRef<typeof Animated.ScrollView>,
   BottomSheetBodyProps
->(function BottomSheetBody({ className, children, onScroll, ...props }, ref) {
+>(function BottomSheetBody(
+  { className, children, onScroll, overScrollMode = 'never', ...props },
+  ref
+) {
   const surface = useContext(SheetSurfaceContext);
   const sized = useContext(SheetSizedContext);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const setRef = useCallback(
+    (node: ComponentRef<typeof Animated.ScrollView> | null) => {
+      scrollRef(node);
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref, scrollRef]
+  );
 
   useEffect(() => {
     if (!surface) return;
@@ -1034,9 +1103,18 @@ const BottomSheetBody = forwardRef<
    * along with it, and a gesture is not a value that can be copied.
    */
   const scrollOffset = surface?.scrollOffset;
+  const scrollHold = surface?.scrollHold;
 
   const handler = useAnimatedScrollHandler((event) => {
-    if (scrollOffset) scrollOffset.value = event.contentOffset.y;
+    if (!scrollOffset) return;
+    // The sheet has the drag: put the list back where it was rather than let
+    // it scroll under a sheet that is moving.
+    if (scrollHold && scrollHold.value !== UNHELD) {
+      scrollTo(scrollRef, 0, scrollHold.value, false);
+      scrollOffset.value = scrollHold.value;
+      return;
+    }
+    scrollOffset.value = event.contentOffset.y;
   });
 
   /*
@@ -1054,9 +1132,10 @@ const BottomSheetBody = forwardRef<
 
   const body = (
     <Animated.ScrollView
-      ref={ref}
+      ref={setRef}
       scrollEventThrottle={16}
       showsVerticalScrollIndicator={false}
+      overScrollMode={overScrollMode}
       // In a sized sheet the body fills what the header and footer leave. In
       // an `auto` one it is as tall as its content and gives way once the
       // sheet reaches its cap, which is what makes a long list scroll.

@@ -225,6 +225,27 @@ function SearchableSelectDemo({
   );
 }
 
+/** Twenty options with no filter, so the list has to be scrolled. */
+function LongSelectDemo() {
+  const [zone, setZone] = useState<string>();
+
+  return (
+    <View className="w-full gap-1.5">
+      <Label>Time zone</Label>
+      <Select
+        value={zone}
+        onValueChange={setZone}
+        placeholder="Select a time zone"
+        title="Time zone"
+      >
+        {TIMEZONES.map((tz) => (
+          <Select.Item key={tz.value} value={tz.value} label={tz.label} />
+        ))}
+      </Select>
+    </View>
+  );
+}
+
 function DisabledOptionSelectDemo() {
   const [plan, setPlan] = useState<string>('starter');
 
@@ -1965,6 +1986,7 @@ export const ENTRIES: ComponentEntry[] = [
     summary: 'Picker shown in a sheet, in place, or floating over the page',
     demos: [
       { label: 'Sheet (default)', render: () => <SelectDemo /> },
+      { label: 'Sheet — a long list', render: () => <LongSelectDemo /> },
       {
         label: 'Inline — the row grows',
         render: () => (

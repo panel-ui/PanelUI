@@ -135,6 +135,10 @@ In `sheet` there is no list surface of the select's own — the sheet is the sur
 
 None of these reach a `native` picker. The platform draws that one.
 
+### Scrolling the options
+
+In `sheet` the options scroll inside the sheet's own scroller, so the list and the sheet share one drag. The list scrolls until it reaches its top; pulling down from there drags the sheet.
+
 ### Native rendering
 
 Pass `native` to render the platform’s own picker instead — SwiftUI on iOS, Jetpack Compose on Android. It needs the optional `@expo/ui` package and is a silent no-op without it.

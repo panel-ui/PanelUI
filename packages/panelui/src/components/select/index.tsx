@@ -674,7 +674,15 @@ function SelectRoot({
                 </Text>
               ) : null}
               {search ? <View className="px-1">{search}</View> : null}
-              <ScrollView
+              {/*
+                * The sheet's own scroller rather than a plain one, because the
+                * sheet and the list both want a vertical drag. Unrelated,
+                * whichever takes the touch first keeps it — on Android that
+                * was usually the sheet, so the options dragged the sheet
+                * instead of scrolling. This one scrolls until the list
+                * reaches its top and hands the drag over there.
+                */}
+              <BottomSheet.Body
                 bounces={false}
                 className="max-h-96"
                 // The filter is a text field above a scroller: dismissing the
@@ -684,7 +692,7 @@ function SelectRoot({
                 keyboardShouldPersistTaps="handled"
               >
                 <View className={slots.options({ className: listClassName })}>{optionList}</View>
-              </ScrollView>
+              </BottomSheet.Body>
             </SelectContext.Provider>
           </BottomSheet.Content>
         </BottomSheet>

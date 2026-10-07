@@ -110,7 +110,7 @@
     "Pressable action with variants, sizes, loading state and icon slots.",
     "react native button",
     {
-      "updatedIn": "0.77.0",
+      "updatedIn": "0.107.0",
       "category": "actions"
     }
   ],

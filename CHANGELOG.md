@@ -9,6 +9,17 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.107.0] — 2026-10-07
+
+### Added
+
+- **Button** — `spinnerProps` reaches the spinner a loading button shows. Until now it was always
+  drawn in the label's colour, with no way to change it. `color` and `trackColor` take any colour
+  React Native accepts; `className` takes theme tokens, and replaces the variant's own classes
+  rather than competing with them. `size` overrides the size picked from the button's. There is no
+  `label`, because the button already announces itself as busy while it loads. A `native` button
+  has no spinner and ignores the prop.
+
 ## [0.106.0] — 2026-10-06
 
 ### Added

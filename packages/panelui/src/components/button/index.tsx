@@ -10,7 +10,7 @@ import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { IconColorProvider } from '../../icons';
 import { NativeHost, getNativeUI, getSwiftUIModifiers } from '../../native';
-import { Spinner } from '../spinner';
+import { Spinner, type SpinnerProps } from '../spinner';
 
 const buttonVariants = tv({
   slots: {
@@ -171,6 +171,20 @@ export interface ButtonProps
   disabled?: boolean;
   /** Show a spinner and block presses while an action is in flight. */
   loading?: boolean;
+  /**
+   * Props for the spinner `loading` shows. Leave it unset and the spinner is
+   * drawn in the label's colour, at a size picked from the button's.
+   *
+   * `color` paints the turning arc and `trackColor` the faint ring under it —
+   * any colour React Native accepts. `className` takes theme tokens instead,
+   * such as `border-t-success`. On a filled button, set the track as well as
+   * the arc: the default track is a tint of the label colour, and beside an
+   * arc in another colour it reads as a second spinner.
+   *
+   * There is no `label`. The button already announces itself as busy while it
+   * loads, so a label on the spinner would announce the same wait twice.
+   */
+  spinnerProps?: Omit<SpinnerProps, 'label'>;
   /** Content rendered before the label (replaced by the spinner while loading). */
   startContent?: ReactNode;
   /** Content rendered after the label. */
@@ -182,8 +196,8 @@ export interface ButtonProps
    * optional `@expo/ui` package; without it this prop does nothing.
    *
    * **Theme tokens do not apply** — the platform draws the button, so
-   * `className`, `fullWidth`, `startContent`, `endContent` and `loading` are
-   * all ignored. `variant` maps onto the nearest platform style:
+   * `className`, `fullWidth`, `startContent`, `endContent`, `loading` and
+   * `spinnerProps` are all ignored. `variant` maps onto the nearest platform style:
    * `primary`/`destructive` → filled, `outline` → outlined, everything else
    * → text; `size` sets the height.
    *
@@ -321,6 +335,7 @@ export const Button = forwardRef<View, ButtonProps>(
       fullWidth,
       disabled,
       loading = false,
+      spinnerProps,
       startContent,
       endContent,
       native,
@@ -502,7 +517,14 @@ export const Button = forwardRef<View, ButtonProps>(
           accessibilityState={{ ...accessibilityState, disabled: isDisabled, busy: loading }}
         >
           {loading ? (
-            <Spinner size={SPINNER_SIZE[resolvedSize ?? 'md']} className={spinner()} />
+            // The caller's props after the defaults, so a size they pick wins;
+            // the class goes through the slot so their tokens replace the
+            // variant's rather than competing with them.
+            <Spinner
+              size={SPINNER_SIZE[resolvedSize ?? 'md']}
+              {...spinnerProps}
+              className={spinner({ className: spinnerProps?.className })}
+            />
           ) : (
             startContent
           )}

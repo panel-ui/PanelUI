@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
 import { Image, View } from "react-native";
+import { useCSSVariable } from "uniwind";
 import { Alert, AppleIcon, Badge, BookmarkIcon, BottomSheet, Breadcrumb, Button, ButtonGroup, Calendar, CopyIcon, CrosshairIcon, Card, Carousel, Checkbox, ChevronDownIcon, ChevronRightIcon, type DateRange, DownloadIcon, EyeIcon, FacebookIcon, FileIcon, GoogleIcon, Input, ImageIcon, Item, Label, MaximizeIcon, MinusIcon, PencilIcon, PlusIcon, Popover, RadioGroup, RotateCcwIcon, RotateCwIcon, SearchIcon, SendIcon, ShareNodesIcon, Separator, Slider, StarIcon, Switch, Tabs, Text, TrashIcon, hasNativeUI, useToast } from "panelui-native";
 import type { ComponentEntry } from '../component-types';
 
@@ -876,6 +877,48 @@ function LoadingButtonDemo() {
   );
 }
 
+/**
+ * A spinner in a colour of its own, rather than the label's.
+ *
+ * The two buttons reach the same spinner two ways: a resolved colour for the
+ * arc, and theme classes for the arc and its track together.
+ */
+function SpinnerColorButtonDemo() {
+  const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const token = useCSSVariable('--color-info');
+  const info = typeof token === 'string' ? token : undefined;
+
+  return (
+    <View className="w-full gap-2">
+      <Button
+        fullWidth
+        variant="outline"
+        loading={uploading}
+        spinnerProps={{ color: info }}
+        onPress={() => {
+          setUploading(true);
+          setTimeout(() => setUploading(false), 1800);
+        }}
+      >
+        {uploading ? 'Uploading…' : 'Upload photo'}
+      </Button>
+      <Button
+        fullWidth
+        variant="secondary"
+        loading={syncing}
+        spinnerProps={{ className: 'border-success/24 border-t-success' }}
+        onPress={() => {
+          setSyncing(true);
+          setTimeout(() => setSyncing(false), 1800);
+        }}
+      >
+        {syncing ? 'Syncing…' : 'Sync now'}
+      </Button>
+    </View>
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /* ButtonGroup                                                                */
 /* -------------------------------------------------------------------------- */
@@ -1291,6 +1334,7 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       { label: 'Loading', render: () => <LoadingButtonDemo /> },
+      { label: 'Spinner colour', render: () => <SpinnerColorButtonDemo /> },
       {
         label: 'Social login',
         render: () => (

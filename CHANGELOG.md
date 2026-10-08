@@ -9,6 +9,32 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.107.1] — 2026-10-08
+
+### Fixed
+
+- **Map** — a style passed to `mapStyle` keeps all of its layers on a device. Styles written for
+  the browser can use `icon-overlap`, `text-overlap` and `resampling`, which the native renderer
+  cannot parse. It dropped every layer that used one and logged `layer doesn't support this
+  property` for each. A hosted street style lost its station, bus-stop and city labels this way.
+  `Map` now changes those properties to the older names native reads. It also removes the
+  attribution-only source behind `source must have tiles`, which drew nothing. To do this `Map`
+  fetches a URL style itself and draws nothing until the style arrives. If the fetch fails, the
+  URL goes to the renderer unchanged, as before.
+- **Button**, **AnimatedBadge**, **Progress** — on Android, a control that had been busy kept
+  reading as "busy" after it settled, in place of its own name. React Native writes the busy
+  state into the view's description, and leaves the old description in place when it has
+  nothing to replace it with. Button and AnimatedBadge now take a name from plain-text children,
+  so the description is rebuilt from that text. A Button whose children include an element needs
+  an `accessibilityLabel` for the same fix. A Progress bar that turned determinate no longer reads
+  as busy beside its value. AnimatedBadge is also read as one element, its word and its state
+  together.
+
+### Docs
+
+- **Map** — an example for a hosted style. The props table now says `source` is ignored when
+  `mapStyle` is set.
+
 ## [0.107.0] — 2026-10-07
 
 ### Added

@@ -80,6 +80,7 @@ import {
   type MapFeatureAccessibilityDescription,
 } from './map-accessibility';
 import { asMapLayer, partitionMapChildren } from './map-children';
+import { useNativeStyle } from './native-style';
 
 export { hasMapLibre, CARTO_SOURCE };
 export type {
@@ -284,11 +285,21 @@ export interface MapProps extends Omit<ViewProps, 'children'> {
   /**
    * Where the vector tiles come from. Defaults to CARTO, which is free for
    * non-commercial use and licensed for everything else.
+   *
+   * Ignored when `mapStyle` is set, because that style names its own sources.
    */
   source?: BasemapSource;
   /**
-   * Use this style wholesale instead of building one from tokens. The escape
-   * hatch for a map that has to match something outside the app.
+   * Use this style wholesale instead of building one from tokens — a URL, or
+   * the style document itself. For a map that has to match something outside
+   * the app.
+   *
+   * Styles written for the browser can use properties the native renderer
+   * cannot parse, and it drops every layer that has one. `Map` translates
+   * them to the older names the renderer does read before handing the style
+   * over. To do that it fetches a URL itself, and draws nothing until the
+   * style has arrived. If the fetch fails, the URL goes to the renderer
+   * unchanged.
    */
   mapStyle?: string | StyleSpecification;
   /** Let the map rotate and tilt. Off by default — most maps only pan and zoom. */
@@ -387,8 +398,8 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
     labelHalo: useToken('--color-background', '#ffffff'),
   };
 
-  const style = useMemo(
-    () => mapStyle ?? buildBasemapStyle(tokens, { blank, source }),
+  const built = useMemo(
+    () => (mapStyle === undefined ? buildBasemapStyle(tokens, { blank, source }) : undefined),
     // The token object is rebuilt every render, so depend on its values.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -404,6 +415,23 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
       tokens.labelHalo,
     ]
   );
+
+  // A caller's style is translated into what the native renderer can parse
+  // first. `null` means a hosted one is still being fetched — see
+  // `native-style.ts`.
+  const hosted = useNativeStyle(mapStyle);
+  const next = built ?? hosted;
+
+  /*
+   * The last style that was ready, so switching to a hosted one keeps drawing
+   * the old style until the new one arrives. Without it the map would unmount
+   * for the length of the fetch and come back at its opening position.
+   */
+  const [shown, setShown] = useState(next);
+  useEffect(() => {
+    if (next) setShown(next);
+  }, [next]);
+  const style = next ?? shown;
 
   // The opening view, kept from the first render. The props describe where
   // the map starts, not where it is, so a later change to them must not move
@@ -470,52 +498,55 @@ const MapRoot = forwardRef<MapHandle, MapProps>(function MapRoot(
   return (
     <MapContext.Provider value={context}>
       <View className={slots.root({ className })} {...props}>
-        <MapLibreMap
-          ref={mapRef}
-          mapStyle={style}
-          style={{ flex: 1 }}
-          // The library's own ornaments are turned off across the board:
-          // they are drawn by the renderer in its own style and cannot be
-          // themed, so `Map.Controls` replaces them with views that can.
-          logo={false}
-          compass={false}
-          attribution={false}
-          scaleBar={false}
-          dragPan={interactive}
-          touchZoom={interactive}
-          touchRotate={rotatable}
-          touchPitch={rotatable}
-          accessible={false}
-          importantForAccessibility="no"
-          onDidFinishLoadingMap={() => {
-            setReady(true);
-            onReady?.();
-          }}
-          onRegionDidChange={
-            onViewStateChange
-              ? (event) => onViewStateChange(event.nativeEvent)
-              : undefined
-          }
-          onPress={
-            onPress
-              ? (event) => onPress(event.nativeEvent.lngLat, event.nativeEvent.point)
-              : undefined
-          }
-        >
-          <Camera
-            ref={cameraRef}
-            // The opening position, and only that: this is applied on the
-            // first frame and never again, so a re-render cannot pull the map
-            // back to its starting point mid-gesture. Everything afterwards
-            // goes through the ref.
-            initialViewState={
-              bounds
-                ? { bounds }
-                : { center: center ?? [0, 20], zoom, bearing, pitch }
+        {/* Nothing to draw until a hosted style has arrived the first time. */}
+        {style ? (
+          <MapLibreMap
+            ref={mapRef}
+            mapStyle={style}
+            style={{ flex: 1 }}
+            // The library's own ornaments are turned off across the board:
+            // they are drawn by the renderer in its own style and cannot be
+            // themed, so `Map.Controls` replaces them with views that can.
+            logo={false}
+            compass={false}
+            attribution={false}
+            scaleBar={false}
+            dragPan={interactive}
+            touchZoom={interactive}
+            touchRotate={rotatable}
+            touchPitch={rotatable}
+            accessible={false}
+            importantForAccessibility="no"
+            onDidFinishLoadingMap={() => {
+              setReady(true);
+              onReady?.();
+            }}
+            onRegionDidChange={
+              onViewStateChange
+                ? (event) => onViewStateChange(event.nativeEvent)
+                : undefined
             }
-          />
-          {layers}
-        </MapLibreMap>
+            onPress={
+              onPress
+                ? (event) => onPress(event.nativeEvent.lngLat, event.nativeEvent.point)
+                : undefined
+            }
+          >
+            <Camera
+              ref={cameraRef}
+              // The opening position, and only that: this is applied on the
+              // first frame and never again, so a re-render cannot pull the map
+              // back to its starting point mid-gesture. Everything afterwards
+              // goes through the ref.
+              initialViewState={
+                bounds
+                  ? { bounds }
+                  : { center: center ?? [0, 20], zoom, bearing, pitch }
+              }
+            />
+            {layers}
+          </MapLibreMap>
+        ) : null}
         {overlay.length > 0 ? (
           <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
             {textChildren(overlay)}

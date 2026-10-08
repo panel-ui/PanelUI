@@ -60,8 +60,8 @@ Extends `Omit<ViewProps, 'children'>`.
 | `pitch` | `number` | — | Initial tilt in degrees. 0 looks straight down. |
 | `bounds` | `LngLatBounds` | — | Frame these bounds instead of centring — `[west, south, east, north]`. Wins over `center` and `zoom` when both are given. |
 | `blank` | `boolean` | `false` | Drop the basemap and keep only the ground colour. For data that carries its own geography — a choropleth, an arc diagram — where streets underneath are noise rather than context. |
-| `source` | `BasemapSource` | — | Where the vector tiles come from. Defaults to CARTO, which is free for non-commercial use and licensed for everything else. |
-| `mapStyle` | `string \| StyleSpecification` | — | Use this style wholesale instead of building one from tokens. The escape hatch for a map that has to match something outside the app. |
+| `source` | `BasemapSource` | — | Where the vector tiles come from. Defaults to CARTO, which is free for non-commercial use and licensed for everything else. Ignored when `mapStyle` is set, because that style names its own sources. |
+| `mapStyle` | `string \| StyleSpecification` | — | Use this style wholesale instead of building one from tokens — a URL, or the style document itself. For a map that has to match something outside the app. Styles written for the browser can use properties the native renderer cannot parse, and it drops every layer that has one. `Map` translates them to the older names the renderer does read before handing the style over. To do that it fetches a URL itself, and draws nothing until the style has arrived. If the fetch fails, the URL goes to the renderer unchanged. |
 | `rotatable` | `boolean` | `false` | Let the map rotate and tilt. Off by default — most maps only pan and zoom. |
 | `interactive` | `boolean` | `true` | Turn off panning and zooming, for a map that is an illustration. |
 | `onViewStateChange` | `(state: ViewState) => void` | — | Fires continuously while the map moves. |
@@ -212,7 +212,7 @@ A hosted style ships its colours baked in, which gives you exactly two maps. Eve
 
 The layer list is deliberately short. A full street style runs to ninety-odd layers separating tunnel casings from bridge casings across eleven zoom stops; almost none of that survives being recoloured down to five greys, and every layer is another thing to keep in step with the tokens. What is there is the set that still reads as a map at any zoom: ground, water, green space, buildings, roads, boundaries, and the labels that make them findable.
 
-Pass `mapStyle` to skip all of it and use a style wholesale — the escape hatch for a map that has to match something outside the app.
+Pass `mapStyle` to skip all of it and use a style wholesale, for a map that has to match something outside the app. See *Using a hosted style* above.
 
 ### Tile licensing
 

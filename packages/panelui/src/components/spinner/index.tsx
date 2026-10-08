@@ -129,7 +129,7 @@ export const Spinner = memo(function Spinner({
     <Animated.View
       accessibilityRole={announced ? 'progressbar' : undefined}
       accessibilityLabel={label}
-      accessibilityState={announced ? { busy: true } : undefined}
+      accessibilityState={{ busy: announced }}
       accessibilityElementsHidden={!announced}
       importantForAccessibility={announced ? 'auto' : 'no-hide-descendants'}
       // After the class, so a colour passed here wins over the theme's. The

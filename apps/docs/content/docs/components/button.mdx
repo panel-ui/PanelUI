@@ -227,7 +227,7 @@ The `social` variant is a neutral surface sized for a full-width column of provi
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `disabled` | `boolean` | — |  |
-| `loading` | `boolean` | `false` | Show a spinner and block presses while an action is in flight. |
+| `loading` | `boolean` | `false` | Show a spinner and block presses while an action is in flight. Screen readers hear the button as busy until it ends. On Android the button needs a name to stop being read as busy afterwards. Plain-text children give it one. A button whose children include an element needs an `accessibilityLabel`. |
 | `spinnerProps` | `Omit<SpinnerProps, 'label'>` | — | Props for the spinner `loading` shows. Leave it unset and the spinner is drawn in the label's colour, at a size picked from the button's. `color` paints the turning arc and `trackColor` the faint ring under it — any colour React Native accepts. `className` takes theme tokens instead, such as `border-t-success`. On a filled button, set the track as well as the arc: the default track is a tint of the label colour, and beside an arc in another colour it reads as a second spinner. There is no `label`. The button already announces itself as busy while it loads, so a label on the spinner would announce the same wait twice. |
 | `startContent` | `ReactNode` | — | Content rendered before the label (replaced by the spinner while loading). |
 | `endContent` | `ReactNode` | — | Content rendered after the label. |

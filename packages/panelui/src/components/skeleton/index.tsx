@@ -88,7 +88,7 @@ export const Skeleton = memo(function Skeleton({
     <Animated.View
       accessibilityRole={announced ? 'progressbar' : undefined}
       accessibilityLabel={label}
-      accessibilityState={announced ? { busy: true } : undefined}
+      accessibilityState={{ busy: announced }}
       accessibilityElementsHidden={!announced}
       importantForAccessibility={announced ? 'auto' : 'no-hide-descendants'}
       style={[style, animatedStyle]}

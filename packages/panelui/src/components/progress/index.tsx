@@ -305,7 +305,9 @@ export const Progress = forwardRef<View, ProgressProps>(
         accessibilityLabel={label}
         // Indeterminate has no value to announce, so `busy` is the only thing
         // separating "working, length unknown" from "empty and going nowhere".
-        accessibilityState={indeterminate ? { busy: true } : undefined}
+        // Always a boolean, never `undefined`: Android ignores a state that
+        // goes missing, so a bar turning determinate would still read as busy.
+        accessibilityState={{ busy: indeterminate }}
         accessibilityValue={
           indeterminate
             ? undefined

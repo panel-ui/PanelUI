@@ -90,3 +90,28 @@ export function textChildren(
     typeof child === 'string' || typeof child === 'number' ? render(child) : child
   );
 }
+
+/**
+ * The words among `children`, for a part that needs an accessibility label of
+ * its own — or `undefined` when the children are not all text.
+ *
+ * Android needs the label. React Native writes a state such as `busy` into a
+ * view's content description, and it rebuilds that description only when
+ * there is something to put in it. A view with no label that stops being busy
+ * has nothing to rebuild from, so it keeps saying "busy" and never reads its
+ * text again.
+ *
+ * All or nothing, unlike `textChildren`. An element among the children might
+ * carry words of its own, such as a count in a badge. A label built from the
+ * text beside it would leave those out, and a screen reader that already reads
+ * them would stop.
+ */
+export function textLabel(children: ReactNode): string | undefined {
+  const parts = Children.toArray(children);
+  if (!parts.length) return undefined;
+  if (!parts.every((part) => typeof part === 'string' || typeof part === 'number')) {
+    return undefined;
+  }
+  const label = parts.join('').trim();
+  return label || undefined;
+}

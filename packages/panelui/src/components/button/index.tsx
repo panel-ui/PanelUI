@@ -6,7 +6,7 @@ import {
   AnimatedPressable,
   type AnimatedPressableProps,
 } from '../../primitives/animated-pressable';
-import { Text, textChildren } from '../../primitives/text';
+import { Text, textChildren, textLabel } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { IconColorProvider } from '../../icons';
 import { NativeHost, getNativeUI, getSwiftUIModifiers } from '../../native';
@@ -169,7 +169,14 @@ export interface ButtonProps
     Omit<ButtonVariantProps, 'disabled'> {
   children?: ReactNode;
   disabled?: boolean;
-  /** Show a spinner and block presses while an action is in flight. */
+  /**
+   * Show a spinner and block presses while an action is in flight. Screen
+   * readers hear the button as busy until it ends.
+   *
+   * On Android the button needs a name to stop being read as busy afterwards.
+   * Plain-text children give it one. A button whose children include an
+   * element needs an `accessibilityLabel`.
+   */
   loading?: boolean;
   /**
    * Props for the spinner `loading` shows. Leave it unset and the spinner is
@@ -515,6 +522,10 @@ export const Button = forwardRef<View, ButtonProps>(
           {...props}
           accessibilityRole="button"
           accessibilityState={{ ...accessibilityState, disabled: isDisabled, busy: loading }}
+          // Named from its text when nothing else names it. Without a label,
+          // Android keeps reading the button as "busy" after `loading` ends —
+          // see `textLabel`.
+          accessibilityLabel={props.accessibilityLabel ?? textLabel(children)}
         >
           {loading ? (
             // The caller's props after the defaults, so a size they pick wins;

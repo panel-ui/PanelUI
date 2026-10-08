@@ -75,7 +75,7 @@ import {
   XIcon,
 } from '../../icons';
 import { IconColorProvider } from '../../icons';
-import { Text, textChildren } from '../../primitives/text';
+import { Text, textChildren, textLabel } from '../../primitives/text';
 
 /** How long the pulse takes to swell and settle again, in milliseconds. */
 const PULSE_DURATION = 800;
@@ -298,6 +298,8 @@ export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
         ? children
         : status);
 
+    const accessibleName = props.accessibilityLabel ?? textLabel(children);
+
     /*
      * The width spring is for a badge changing, not for one arriving.
      *
@@ -356,6 +358,11 @@ export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
             ? undefined
             : LinearTransition.springify().damping(22)
         }
+        // One element with a name, so the word and its state are read
+        // together. The name is also what lets Android drop "busy" once the
+        // status moves on — see `textLabel`.
+        accessible={accessibleName != null}
+        accessibilityLabel={accessibleName}
         accessibilityRole="text"
         accessibilityState={{ busy: status === 'loading' }}
         className={slots.root({ className })}

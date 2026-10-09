@@ -41,12 +41,12 @@
   ],
   "onboarding": [
     "Onboarding",
-    "Three introduction screens with one shape — a mark, a title, a paragraph and three benefits — numbered steps and one button.",
+    "A first run in four steps: two screens on the app, one question, and a first plan made from the answer.",
     "onboarding",
     {
       "addedIn": "0.108.0",
-      "intro": "The first three screens of an app, written for a trip planner. Every screen has the same shape: a mark at the top, a large title, one short paragraph, and three benefits, each a small icon with a line in bold and a line of detail. The layout is left-aligned, like the pages of a guide. The last word of the first title turns over between three promises, and the third screen's mark is the faces of the people on the trip.\n\nThe step numbers at the top right show how far there is to go, and each one jumps to its screen. The one action is a full-width button at the bottom that stays still while the screens move: Continue, then Get started. The screens are a native paging scroll, so a screen follows the finger and settles the way the platform does.",
-      "notes": "Keep every screen in the same shape when you write your own. An introduction reads as one story only when its screens look like pages of the same thing, and a reader skimming for what the app does finds it in the same place each time.\n\nThe marks and benefits are plain data in `SCREENS`. Each screen scrolls on its own if its text runs long — at a large text size, or on a short phone — so the button never covers the last benefit."
+      "intro": "The first run of an app, written for a trip planner. Two screens say what the app does, one asks what kind of trip is next, and the last turns the answer into a first plan.\n\nThe pictures are flat shapes in a few strong colours — a sun over hills, a globe with a route across it, a badge for the kind of trip — drawn in SVG from the chart tokens. Each theme recolours them, and there is nothing to download. On the introduction screens the picture fills the bottom half and runs off the edges, with the title and one line at the top.\n\nThe question screen hangs a coloured band with a curved edge over a short list of answers. Continue waits until one is picked, because the last screen is built from it. Every screen has one full-width button at the bottom, and Skip goes straight to the question.",
+      "notes": "Pass `onFinish` to take the reader into the app when they press Start planning; it receives the answer they picked. Without it the introduction starts over, which is what the gallery does.\n\nThe pictures take their colours from `--color-chart-2` to `--color-chart-5`. To put them on brand, set those tokens in your theme, or change `usePalette()` to read your own.\n\nAsk only what the next screen uses. The question earns its place here because the result is built from the answer; a question whose answer goes nowhere is a step between the reader and the app."
     }
   ]
 }

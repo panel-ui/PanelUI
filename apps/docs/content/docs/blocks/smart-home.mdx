@@ -1,12 +1,12 @@
 ---
 title: Smart Home
-description: "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device."
+description: "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device that toggles when pressed."
 status: new
 ---
 
 A home controller, one room at a time. The thermostat is a dial with the target temperature in the middle. The slider under it sets the target, and the number rolls to the new value as the thumb moves. The arc takes the colour of the mode — heating, cooling or automatic — and greys out when climate control is off.
 
-Scenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile with a switch, and the tile's icon fills in while the device is on.
+Scenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile, and pressing the tile turns the device on or off. A tile that is on is drawn in the primary colour, so the room's state reads at a glance.
 
 The room tabs at the top switch everything below them, and the energy card at the bottom is for the whole house.
 
@@ -41,7 +41,6 @@ The sample data is a set of typed constants at the top of the file. Replace them
 - [Kpi](/docs/components/kpi)
 - [RingChart](/docs/charts/ring-chart)
 - [Slider](/docs/components/slider)
-- [Switch](/docs/components/switch)
 - [Tabs](/docs/components/tabs)
 - [TextAnimation](/docs/components/text-animation)
 - [ToggleButton](/docs/components/toggle-button)
@@ -68,7 +67,8 @@ The dial runs from `MIN_TEMPERATURE` to `MAX_TEMPERATURE`. Keep the slider's `mi
  *
  * Scenes are a single choice because a room is in one of them at a time.
  * Picking one sets the devices below to match it, and changing a device by
- * hand clears the scene, since the room no longer is in it.
+ * hand clears the scene, since the room no longer is in it. Each device is a
+ * tile that toggles when pressed.
  *
  * The sample data is the constants below. Replace them with your own, or
  * lift them into props.
@@ -98,11 +98,11 @@ import { Button } from '@/components/ui/button';
 import { Kpi } from '@/components/ui/kpi';
 import { RingChart } from '@/components/ui/ring-chart';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Tabs } from '@/components/ui/tabs';
 import { TextAnimation } from '@/components/ui/text-animation';
 import { ToggleButton, ToggleButtonGroup } from '@/components/ui/toggle-button';
 import { ChevronLeftIcon, useIconColor } from '@/components/ui/icons';
+import { AnimatedPressable } from '@/components/ui/animated-pressable';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/cn';
 
@@ -351,34 +351,44 @@ function Thermostat({ room, onChange }: { room: Room; onChange: (patch: Partial<
   );
 }
 
+/**
+ * One device. The whole tile is the control: pressing it turns the device on
+ * or off, and an on tile is drawn inverted, in the primary colour, so the
+ * state reads from across the room rather than from a switch in its corner.
+ */
 function DeviceTile({ device, onToggle }: { device: Device; onToggle: (on: boolean) => void }) {
-  const onPrimary = useToken('--color-primary-foreground', '#fafafa');
+  const primary = useToken('--color-primary', '#262626');
   const muted = useToken('--color-muted-foreground', '#737373');
 
   return (
-    <View
+    <AnimatedPressable
+      onPress={() => onToggle(!device.on)}
+      accessibilityRole="switch"
+      accessibilityLabel={device.name}
+      accessibilityState={{ checked: device.on }}
+      accessibilityValue={{ text: stateOf(device) }}
       className={cn(
-        'flex-1 gap-4 rounded-3xl border p-4',
-        device.on ? 'border-primary bg-card' : 'border-border bg-card'
+        'flex-1 gap-5 rounded-3xl border p-4',
+        device.on ? 'border-primary bg-primary' : 'border-border bg-card'
       )}
     >
-      <View className="flex-row items-start justify-between">
-        <View
-          className={cn('h-11 w-11 items-center justify-center rounded-full', device.on ? 'bg-primary' : 'bg-muted')}
-        >
-          <Glyph icon={device.icon} size={20} color={device.on ? onPrimary : muted} />
-        </View>
-        <Switch value={device.on} onValueChange={onToggle} label={device.name} />
+      <View
+        className={cn(
+          'h-11 w-11 items-center justify-center rounded-full',
+          device.on ? 'bg-primary-foreground' : 'bg-muted'
+        )}
+      >
+        <Glyph icon={device.icon} size={20} color={device.on ? primary : muted} />
       </View>
       <View>
-        <Text weight="semibold" numberOfLines={1}>
+        <Text weight="semibold" numberOfLines={1} className={cn(device.on && 'text-primary-foreground')}>
           {device.name}
         </Text>
-        <Text size="sm" muted>
+        <Text size="sm" muted={!device.on} className={cn(device.on && 'text-primary-foreground opacity-70')}>
           {stateOf(device)}
         </Text>
       </View>
-    </View>
+    </AnimatedPressable>
   );
 }
 

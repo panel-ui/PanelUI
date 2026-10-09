@@ -31,11 +31,11 @@
   ],
   "smart-home": [
     "Smart Home",
-    "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device.",
+    "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device that toggles when pressed.",
     "smart home",
     {
       "addedIn": "0.108.0",
-      "intro": "A home controller, one room at a time. The thermostat is a dial with the target temperature in the middle. The slider under it sets the target, and the number rolls to the new value as the thumb moves. The arc takes the colour of the mode — heating, cooling or automatic — and greys out when climate control is off.\n\nScenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile with a switch, and the tile's icon fills in while the device is on.\n\nThe room tabs at the top switch everything below them, and the energy card at the bottom is for the whole house.",
+      "intro": "A home controller, one room at a time. The thermostat is a dial with the target temperature in the middle. The slider under it sets the target, and the number rolls to the new value as the thumb moves. The arc takes the colour of the mode — heating, cooling or automatic — and greys out when climate control is off.\n\nScenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile, and pressing the tile turns the device on or off. A tile that is on is drawn in the primary colour, so the room's state reads at a glance.\n\nThe room tabs at the top switch everything below them, and the energy card at the bottom is for the whole house.",
       "notes": "What a scene does is a table in `SCENES`, keyed by kind of device rather than by device. A new lamp joins Night without anyone editing Night. A kind a scene leaves out is left alone — a lighting scene does not touch the dishwasher.\n\nThe dial runs from `MIN_TEMPERATURE` to `MAX_TEMPERATURE`. Keep the slider's `min` and `max` on the same two constants, or the arc and the thumb stop agreeing about where the target sits."
     }
   ]

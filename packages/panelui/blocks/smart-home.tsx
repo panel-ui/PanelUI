@@ -11,7 +11,8 @@
  *
  * Scenes are a single choice because a room is in one of them at a time.
  * Picking one sets the devices below to match it, and changing a device by
- * hand clears the scene, since the room no longer is in it.
+ * hand clears the scene, since the room no longer is in it. Each device is a
+ * tile that toggles when pressed.
  *
  * The sample data is the constants below. Replace them with your own, or
  * lift them into props.
@@ -41,11 +42,11 @@ import { Button } from '../src/components/button';
 import { Kpi } from '../src/components/kpi';
 import { RingChart } from '../src/components/ring-chart';
 import { Slider } from '../src/components/slider';
-import { Switch } from '../src/components/switch';
 import { Tabs } from '../src/components/tabs';
 import { TextAnimation } from '../src/components/text-animation';
 import { ToggleButton, ToggleButtonGroup } from '../src/components/toggle-button';
 import { ChevronLeftIcon, useIconColor } from '../src/icons';
+import { AnimatedPressable } from '../src/primitives/animated-pressable';
 import { Text } from '../src/primitives/text';
 import { cn } from '../src/utils/cn';
 
@@ -294,34 +295,44 @@ function Thermostat({ room, onChange }: { room: Room; onChange: (patch: Partial<
   );
 }
 
+/**
+ * One device. The whole tile is the control: pressing it turns the device on
+ * or off, and an on tile is drawn inverted, in the primary colour, so the
+ * state reads from across the room rather than from a switch in its corner.
+ */
 function DeviceTile({ device, onToggle }: { device: Device; onToggle: (on: boolean) => void }) {
-  const onPrimary = useToken('--color-primary-foreground', '#fafafa');
+  const primary = useToken('--color-primary', '#262626');
   const muted = useToken('--color-muted-foreground', '#737373');
 
   return (
-    <View
+    <AnimatedPressable
+      onPress={() => onToggle(!device.on)}
+      accessibilityRole="switch"
+      accessibilityLabel={device.name}
+      accessibilityState={{ checked: device.on }}
+      accessibilityValue={{ text: stateOf(device) }}
       className={cn(
-        'flex-1 gap-4 rounded-3xl border p-4',
-        device.on ? 'border-primary bg-card' : 'border-border bg-card'
+        'flex-1 gap-5 rounded-3xl border p-4',
+        device.on ? 'border-primary bg-primary' : 'border-border bg-card'
       )}
     >
-      <View className="flex-row items-start justify-between">
-        <View
-          className={cn('h-11 w-11 items-center justify-center rounded-full', device.on ? 'bg-primary' : 'bg-muted')}
-        >
-          <Glyph icon={device.icon} size={20} color={device.on ? onPrimary : muted} />
-        </View>
-        <Switch value={device.on} onValueChange={onToggle} label={device.name} />
+      <View
+        className={cn(
+          'h-11 w-11 items-center justify-center rounded-full',
+          device.on ? 'bg-primary-foreground' : 'bg-muted'
+        )}
+      >
+        <Glyph icon={device.icon} size={20} color={device.on ? primary : muted} />
       </View>
       <View>
-        <Text weight="semibold" numberOfLines={1}>
+        <Text weight="semibold" numberOfLines={1} className={cn(device.on && 'text-primary-foreground')}>
           {device.name}
         </Text>
-        <Text size="sm" muted>
+        <Text size="sm" muted={!device.on} className={cn(device.on && 'text-primary-foreground opacity-70')}>
           {stateOf(device)}
         </Text>
       </View>
-    </View>
+    </AnimatedPressable>
   );
 }
 

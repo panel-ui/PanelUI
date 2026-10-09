@@ -1,13 +1,11 @@
 /**
- * Smart Home — one room of a house at a time: its thermostat, a row of
- * scenes, and every device in it.
+ * Smart Home — one room of a house at a time: its climate, a row of scenes,
+ * and every device in it.
  *
- * The thermostat is the centre of the screen because it is the control with
- * a number on it, and the number is what a person adjusts. It is a gauge
- * rather than a full ring — three quarters of a turn, open at the bottom, the
- * way a dial on a wall reads — and the temperature in the middle rolls digit
- * by digit as the slider under it moves. The arc takes the colour of the
- * mode: warm for heating, cool for cooling.
+ * Climate is a single row — the mode, what the room is doing, and the target
+ * with a step either side — because a temperature is set and then left alone.
+ * The devices are what a person comes back to the screen for, so they get the
+ * room.
  *
  * Scenes are a single choice because a room is in one of them at a time.
  * Picking one sets the devices below to match it, and changing a device by
@@ -34,19 +32,20 @@ import Fan01Icon from '@hugeicons/core-free-icons/Fan01Icon';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import LockGlyph from '@hugeicons/core-free-icons/LockIcon';
 import Moon02Icon from '@hugeicons/core-free-icons/Moon02Icon';
+import PowerIcon from '@hugeicons/core-free-icons/PowerIcon';
+import SnowIcon from '@hugeicons/core-free-icons/SnowIcon';
 import Speaker01Icon from '@hugeicons/core-free-icons/Speaker01Icon';
 import Sun03Icon from '@hugeicons/core-free-icons/Sun03Icon';
 import SunCloud01Icon from '@hugeicons/core-free-icons/SunCloud01Icon';
+import ThermometerIcon from '@hugeicons/core-free-icons/ThermometerIcon';
 import Tv01Icon from '@hugeicons/core-free-icons/Tv01Icon';
 import { BarChart, type BarChartDatum } from '../src/components/bar-chart';
 import { Button } from '../src/components/button';
 import { Frame } from '../src/components/frame';
-import { RingChart } from '../src/components/ring-chart';
-import { Slider } from '../src/components/slider';
 import { Tabs } from '../src/components/tabs';
 import { TextAnimation } from '../src/components/text-animation';
 import { ToggleButton, ToggleButtonGroup } from '../src/components/toggle-button';
-import { ChevronLeftIcon, useIconColor } from '../src/icons';
+import { ChevronLeftIcon, MinusIcon, PlusIcon, useIconColor } from '../src/icons';
 import { AnimatedPressable } from '../src/primitives/animated-pressable';
 import { Text } from '../src/primitives/text';
 import { cn } from '../src/utils/cn';
@@ -136,18 +135,19 @@ const ROOMS: Room[] = [
 
 const OUTSIDE = { temperature: 14, summary: 'Light cloud' };
 
-/** The range the dial covers, in degrees Celsius. */
+/** The range the target can be set within, in degrees Celsius. */
 const MIN_TEMPERATURE = 10;
 const MAX_TEMPERATURE = 30;
 
-const MODES: { id: Mode; label: string }[] = [
-  { id: 'heat', label: 'Heat' },
-  { id: 'cool', label: 'Cool' },
-  { id: 'auto', label: 'Auto' },
-  { id: 'off', label: 'Off' },
+/** In the order the mode button steps through them. `surface` is the soft fill behind the icon. */
+const MODES: { id: Mode; label: string; icon: IconSvgElement; surface: string }[] = [
+  { id: 'heat', label: 'Heat', icon: FireIcon, surface: 'bg-warning-subtle' },
+  { id: 'cool', label: 'Cool', icon: SnowIcon, surface: 'bg-info-subtle' },
+  { id: 'auto', label: 'Auto', icon: ThermometerIcon, surface: 'bg-success-subtle' },
+  { id: 'off', label: 'Off', icon: PowerIcon, surface: 'bg-muted' },
 ];
 
-/** The arc takes the mode's colour, so heating and cooling read before the number does. */
+/** The mode icon takes the mode's colour, so heating and cooling read before the number does. */
 const MODE_TOKEN: Record<Mode, string> = {
   heat: '--color-warning',
   cool: '--color-info',
@@ -210,96 +210,87 @@ function stateOf(device: Device) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * The dial: an open ring showing where the target sits in the range, with the
- * target itself in the middle.
+ * Climate, as one row: what the room is doing, and a target nudged half a
+ * degree at a time.
  *
- * The number is drawn over the ring rather than by the ring's own centre
- * readout, so it can roll digit by digit as the slider moves.
+ * A row rather than a dial because the temperature is set once and then left
+ * alone — the devices are what a person comes back to this screen for. The
+ * icon names the mode, in the mode's colour, and pressing it steps to the next
+ * one. The target rolls digit by digit as it changes.
  */
-function Thermostat({ room, onChange }: { room: Room; onChange: (patch: Partial<Room>) => void }) {
+function Climate({ room, onChange }: { room: Room; onChange: (patch: Partial<Room>) => void }) {
+  const mode = MODES.find((item) => item.id === room.mode)!;
   const tint = useToken(MODE_TOKEN[room.mode], '#f59e0b');
-  const size = 232;
   const off = room.mode === 'off';
-  const heading =
-    off
-      ? 'Heating and cooling are off'
-      : room.current < room.target - 0.2
-        ? `Heating to ${room.target.toFixed(1)}°`
-        : room.current > room.target + 0.2
-          ? `Cooling to ${room.target.toFixed(1)}°`
-          : 'Holding temperature';
+  // A mode can only move the room one way: heat cannot cool a warm room, so
+  // it holds instead. Auto goes whichever way the target is.
+  const tooCold = room.current < room.target - 0.2;
+  const tooWarm = room.current > room.target + 0.2;
+  const status = off
+    ? 'Off'
+    : tooCold && room.mode !== 'cool'
+      ? 'Heating'
+      : tooWarm && room.mode !== 'heat'
+        ? 'Cooling'
+        : 'Holding';
+  const nextMode = MODES[(MODES.indexOf(mode) + 1) % MODES.length]!;
+  const nudge = (by: number) =>
+    onChange({ target: Math.min(MAX_TEMPERATURE, Math.max(MIN_TEMPERATURE, room.target + by)) });
 
   return (
-    <Frame className="w-full">
-      <Frame.Header>
-        <Frame.Title>Climate</Frame.Title>
-        <Frame.Action>{`Now ${room.current.toFixed(1)}°`}</Frame.Action>
-      </Frame.Header>
-      <Frame.Panel>
-        {/* The dial is open at the bottom, so the slider tucks up into the gap. */}
-        <View className="-mb-6 items-center pt-5">
-          <View style={{ width: size, height: size }}>
-            <RingChart
-              data={[{ label: 'Target', value: room.target - MIN_TEMPERATURE, maxValue: MAX_TEMPERATURE - MIN_TEMPERATURE }]}
-              size={size}
-              strokeWidth={20}
-              startAngle={-135}
-              endAngle={135}
-            >
-              <RingChart.Ring index={0} color={tint} trackOpacity={0.12} />
-            </RingChart>
-            <View
-              pointerEvents="none"
-              className="absolute inset-0 items-center justify-center"
-              accessible
-              accessibilityLabel={`Target ${room.target.toFixed(1)} degrees. ${heading}.`}
-            >
-              <Text size="sm" muted>
-                {off ? 'Off' : 'Target'}
-              </Text>
-              <View className={cn('flex-row items-start', off && 'opacity-40')}>
-                <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-6xl font-bold" />
-                <Text weight="bold" className="text-3xl">
-                  °
-                </Text>
-              </View>
-              <Text size="sm" muted>
-                {heading}
-              </Text>
-            </View>
-          </View>
-        </View>
+    <View className="flex-row items-center gap-3 rounded-3xl border border-border bg-card p-3 pl-4">
+      <AnimatedPressable
+        onPress={() => onChange({ mode: nextMode.id })}
+        accessibilityRole="button"
+        accessibilityLabel={`Mode: ${mode.label}`}
+        accessibilityHint={`Changes the mode to ${nextMode.label}`}
+        className={cn('h-11 w-11 items-center justify-center rounded-full', mode.surface)}
+      >
+        <Glyph icon={mode.icon} size={20} color={tint} />
+      </AnimatedPressable>
 
-        <View className="px-4 pb-4">
-          <Slider
-            label="Target temperature"
-            min={MIN_TEMPERATURE}
-            max={MAX_TEMPERATURE}
-            step={0.5}
-            value={room.target}
-            onValueChange={(target) => onChange({ target })}
-            disabled={off}
-          />
-        </View>
-      </Frame.Panel>
-      <Frame.Footer>
-        <ToggleButtonGroup
-          selectionMode="single"
-          value={[room.mode]}
-          onValueChange={(value) => {
-            const next = value[0] as Mode | undefined;
-            if (next) onChange({ mode: next });
-          }}
-          className="w-full"
-        >
-          {MODES.map((mode) => (
-            <ToggleButton key={mode.id} id={mode.id} className="flex-1">
-              {mode.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
-      </Frame.Footer>
-    </Frame>
+      <View
+        className="flex-1"
+        accessible
+        accessibilityLabel={`Climate. ${status}, currently ${room.current.toFixed(1)} degrees`}
+      >
+        <Text weight="semibold">Climate</Text>
+        <Text size="sm" muted className="tabular-nums" numberOfLines={1}>
+          {status} · {room.current.toFixed(1)}°
+        </Text>
+      </View>
+
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-9 w-9 rounded-full"
+        accessibilityLabel="Lower the target by half a degree"
+        disabled={off || room.target <= MIN_TEMPERATURE}
+        onPress={() => nudge(-0.5)}
+      >
+        <MinusIcon size={14} />
+      </Button>
+      <View
+        accessible
+        accessibilityLabel={`Target ${room.target.toFixed(1)} degrees`}
+        className={cn('flex-row items-start', off && 'opacity-40')}
+      >
+        <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-2xl font-bold" />
+        <Text weight="bold" className="text-lg">
+          °
+        </Text>
+      </View>
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-9 w-9 rounded-full"
+        accessibilityLabel="Raise the target by half a degree"
+        disabled={off || room.target >= MAX_TEMPERATURE}
+        onPress={() => nudge(0.5)}
+      >
+        <PlusIcon size={14} />
+      </Button>
+    </View>
   );
 }
 
@@ -437,7 +428,7 @@ export function SmartHomeBlock({ onBack, className }: SmartHomeBlockProps) {
             </Tabs.List>
           </Tabs>
 
-          <Thermostat room={room} onChange={patchRoom} />
+          <Climate room={room} onChange={patchRoom} />
 
           {/* Scenes */}
           <View className="gap-3">

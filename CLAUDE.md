@@ -225,7 +225,7 @@ the odd one out on a page beside them:
 
 ```bash
 # video: any container -> mp4, whole frame, 720 points wide
-ffmpeg -i "<source>" -vf scale=720:-2:flags=lanczos \
+ffmpeg -i "<source>" -vf scale=720:-2:flags=lanczos -r 60 \
   -an -c:v libx264 -preset slow -crf 26 \
   -pix_fmt yuv420p -movflags +faststart "<slug>[-<kebab-title>].mp4"
 
@@ -239,6 +239,13 @@ ffmpeg -i "<slug>.mp4" -frames:v 1 -q:v 3 "<slug>[-<kebab-title>]-poster.jpg"
 - **Stills are already framed at 1179 points.** Re-encode them to `.jpg` at quality 90 and do
   not resize them.
 - Strip the audio. None of these have any, and a silent track is bytes on every page load.
+- **`-r 60` is what keeps the motion.** A screen recording, from a phone or a simulator, writes a
+  frame only when the screen changes, and its header often declares no rate at all. Without `-r`,
+  ffmpeg sets the encoder's clock from the *average* rate — under 20 fps once a recording has a
+  few idle seconds in it — and drops every frame that falls between two ticks. The drops land
+  exactly where things move, so the result looks like the app stuttering when it did not.
+  Sixteen previews in the folder are below 50 fps, ten of them Bottom Sheet at 15–40 fps.
+  Check a conversion with `ffprobe -show_entries stream=avg_frame_rate`: it should read `60/1`.
 
 **Wiring it up.** Files go in `apps/docs/public/previews`; the entries go in
 `apps/docs/scripts/usage.json`, never into an MDX file by hand. A video is `previewVideo` with a

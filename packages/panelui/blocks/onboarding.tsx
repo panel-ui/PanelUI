@@ -2,47 +2,55 @@
  * Onboarding — the first three screens of an app, for a trip planner called
  * Wayfarer: what it does, where people go with it, and who you plan with.
  *
- * Each slide is an illustration made of components rather than a picture, so
- * it repaints with the theme and costs nothing to ship: a badge of text
- * turning round a compass, rows of destinations drifting past each other, and
- * a trip being planned by several people, caught while one of them adds to it. The illustration takes the top
- * of the screen and the words sit under it, where the eye lands after it.
+ * Every screen is built the same way, because an introduction reads as one
+ * story only when its screens share a shape: a mark at the top, a large title,
+ * one short paragraph, and three benefits — each a small icon, a line in bold
+ * and a line of detail. The layout is left-aligned, like the pages of a
+ * guide, so the eye runs down one edge from the mark to the last benefit
+ * without crossing back and forth.
  *
- * The slides are a native paging scroll rather than an animated deck, so a
- * slide follows the finger exactly and settles with the platform's own
- * deceleration instead of being thrown to the next one.
+ * The first two marks are icon tiles; the third is the faces of the people on
+ * a trip, since that screen is about them. Nothing on any screen is drawn to
+ * look like the app's own interface, so nothing reads as something to press
+ * that cannot be.
  *
- * The bottom control changes with the slide. On the first two it is a plain
- * Continue, because moving on is cheap; on the last it is a slide to start,
- * because starting is the one step that commits to something. Skip is there
- * throughout for the reader who already knows the app.
+ * The step numbers sit at the top right and say how far there is to go; each
+ * is a button that jumps to its screen. The one action is a full-width button
+ * at the bottom, held still while the screens move: Continue, then Get
+ * started. The screens are a native paging scroll, so one follows the finger
+ * and settles with the platform's own deceleration.
  *
  * The sample data is the constants below. Replace them with your own, or
  * lift them into props.
  */
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
-import Animated, { LinearTransition, useReducedMotion } from 'react-native-reanimated';
+import {
+  Pressable,
+  ScrollView,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCSSVariable } from 'uniwind';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react-native';
 // Deep imports: the icon package's barrel re-exports thousands of glyphs, and
 // a bundler that cannot tree-shake follows every one of them.
 import Airplane01Icon from '@hugeicons/core-free-icons/Airplane01Icon';
+import Bookmark02Icon from '@hugeicons/core-free-icons/Bookmark02Icon';
+import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
 import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon';
 import CompassIcon from '@hugeicons/core-free-icons/CompassIcon';
-import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
-import Restaurant01Icon from '@hugeicons/core-free-icons/Restaurant01Icon';
-import Train01Icon from '@hugeicons/core-free-icons/Train01Icon';
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon';
+import Link01Icon from '@hugeicons/core-free-icons/Link01Icon';
+import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
+import Route01Icon from '@hugeicons/core-free-icons/Route01Icon';
+import StarIcon from '@hugeicons/core-free-icons/StarIcon';
+import Wallet01Icon from '@hugeicons/core-free-icons/Wallet01Icon';
+import WifiOff01Icon from '@hugeicons/core-free-icons/WifiOff01Icon';
 import { Avatar } from '../src/components/avatar';
 import { Button } from '../src/components/button';
-import { Chip } from '../src/components/chip';
-import { CircularText } from '../src/components/circular-text';
-import { Marquee } from '../src/components/marquee';
-import { Shimmer } from '../src/components/shimmer';
-import { SlideButton } from '../src/components/slide-button';
 import { TextAnimation } from '../src/components/text-animation';
-import { Timeline } from '../src/components/timeline';
 import { ChevronLeftIcon, useIconColor } from '../src/icons';
 import { Text } from '../src/primitives/text';
 import { cn } from '../src/utils/cn';
@@ -51,19 +59,12 @@ import { cn } from '../src/utils/cn';
 /* Sample data                                                                */
 /* -------------------------------------------------------------------------- */
 
-const APP = { name: 'Wayfarer', badge: 'PLAN · PACK · GO · TOGETHER · ' };
+const APP = { name: 'Wayfarer' };
 
-/** The word that turns over in the first headline. */
+/** The word that turns over at the end of the first title. */
 const PROMISES = ['planned', 'shared', 'remembered'];
 
-/** Three rows of places, so the drift reads as a world rather than a list. */
-const PLACES = [
-  ['Lisbon', 'Kyoto', 'Oaxaca', 'Tromsø', 'Hoi An', 'Valparaíso'],
-  ['Cape Town', 'Tbilisi', 'Sintra', 'Hokkaido', 'Cartagena', 'Ljubljana'],
-  ['Essaouira', 'Bergen', 'Luang Prabang', 'Puglia', 'Hobart', 'Cusco'],
-];
-
-const FRIENDS = [
+const TRAVELLERS = [
   { name: 'Maya Lindqvist', initials: 'ML' },
   { name: 'Tomás Ferreira', initials: 'TF' },
   { name: 'Ines Moreau', initials: 'IM' },
@@ -71,32 +72,86 @@ const FRIENDS = [
   { name: 'Ada Okafor', initials: 'AO' },
 ];
 
-/** The trip on the third slide, its entries so far, and who is adding the next. */
-const TRIP = { name: 'Lisbon', dates: '14–18 October' };
-const PLAN = [
-  { title: 'Flight to Lisbon', when: 'Tue 14 · 08:40', by: 'ML', icon: Airplane01Icon },
-  { title: 'Train to Sintra', when: 'Wed 15 · 10:15', by: 'TF', icon: Train01Icon },
-  { title: 'Dinner at Taberna do Largo', when: 'Wed 15 · 20:30', by: 'IM', icon: Restaurant01Icon },
-];
-const PLAN_ADDING_NOW = 'KA';
+interface Benefit {
+  icon: IconSvgElement;
+  title: string;
+  detail: string;
+}
 
-const SLIDES = [
+/**
+ * One entry per screen. `mark` is the icon in the tile at the top; a screen
+ * without one shows the travellers instead.
+ */
+const SCREENS: { id: string; title: string; body: string; mark?: IconSvgElement; benefits: Benefit[] }[] = [
   {
     id: 'plan',
     title: 'Every trip,',
     body: 'Flights, stays and the day-by-day in one place, ready before you leave.',
+    mark: CompassIcon,
+    benefits: [
+      {
+        icon: Airplane01Icon,
+        title: 'Bookings in one list',
+        detail: 'Forward a confirmation email and it lands on the right day.',
+      },
+      {
+        icon: Calendar03Icon,
+        title: 'A plan for every day',
+        detail: 'Drag places between days; travel times work themselves out.',
+      },
+      {
+        icon: WifiOff01Icon,
+        title: 'Works without signal',
+        detail: 'The whole trip is saved to your phone before you fly.',
+      },
+    ],
   },
   {
     id: 'discover',
     title: 'Ideas from people who went',
-    body: 'Thousands of itineraries, written by travellers rather than by ads.',
+    body: 'Itineraries written by travellers rather than by ads, for over 4,000 places.',
+    mark: Globe02Icon,
+    benefits: [
+      {
+        icon: Route01Icon,
+        title: 'Whole routes, not lists',
+        detail: 'See how someone spent four days in Kyoto, in the order they did it.',
+      },
+      {
+        icon: StarIcon,
+        title: 'Ranked by people who stayed',
+        detail: 'Reviews only count from travellers who booked through a trip.',
+      },
+      {
+        icon: Bookmark02Icon,
+        title: 'Save a day in one tap',
+        detail: 'Take the parts you like into your own plan.',
+      },
+    ],
   },
   {
     id: 'together',
     title: 'Plan it together',
     body: 'Invite the people you travel with. Everyone sees the same plan, and every change.',
+    benefits: [
+      {
+        icon: Link01Icon,
+        title: 'Invite with a link',
+        detail: 'No account needed to look; one to make changes.',
+      },
+      {
+        icon: PencilEdit02Icon,
+        title: 'Edit at the same time',
+        detail: 'Changes show up for everyone as they are made.',
+      },
+      {
+        icon: Wallet01Icon,
+        title: 'Split costs as you go',
+        detail: 'Log what you paid, and see who owes whom at the end.',
+      },
+    ],
   },
-] as const;
+];
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
@@ -113,160 +168,64 @@ function Glyph({ icon, size = 18, color }: { icon: IconSvgElement; size?: number
   const inherited = useIconColor();
   const fallback = useToken('--color-foreground', '#262626');
   return (
-    <HugeiconsIcon icon={icon} size={size} color={color ?? inherited ?? fallback} strokeWidth={1.5} />
+    <HugeiconsIcon icon={icon} size={size} color={color ?? inherited ?? fallback} strokeWidth={1.75} />
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* Illustrations                                                              */
+/* Parts                                                                      */
 /* -------------------------------------------------------------------------- */
 
-/** A ring of words turning slowly round the app's mark. */
-function CompassBadge() {
-  const onPrimary = useToken('--color-primary-foreground', '#fafafa');
+/** The mark at the top of a screen: an icon on a soft tile. */
+function MarkTile({ icon }: { icon: IconSvgElement }) {
   return (
-    <View className="items-center justify-center" importantForAccessibility="no-hide-descendants">
-      <CircularText radius={124} textClassName="text-sm font-semibold tracking-widest text-muted-foreground">
-        {APP.badge}
-      </CircularText>
-      <View className="absolute h-36 w-36 items-center justify-center rounded-full bg-primary">
-        <Glyph icon={CompassIcon} size={64} color={onPrimary} />
+    <View className="h-16 w-16 items-center justify-center rounded-2xl border border-border bg-surface-secondary">
+      <Glyph icon={icon} size={30} />
+    </View>
+  );
+}
+
+/** One benefit: a small icon in a soft circle, a line in bold, and a line of detail. */
+function BenefitRow({ benefit }: { benefit: Benefit }) {
+  return (
+    <View className="flex-row gap-4" accessible accessibilityLabel={`${benefit.title}. ${benefit.detail}`}>
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary">
+        <Glyph icon={benefit.icon} size={18} />
+      </View>
+      <View className="flex-1 gap-0.5">
+        <Text weight="semibold">{benefit.title}</Text>
+        <Text size="sm" muted>
+          {benefit.detail}
+        </Text>
       </View>
     </View>
   );
 }
 
-/**
- * Rows of destinations drifting in opposite directions.
- *
- * No pause button over them: the rows are decoration, and a button on an
- * illustration reads as something to press. Tapping the rows pauses and
- * resumes them instead, and they stand still on their own when the system
- * asks for reduced motion.
- */
-function Destinations() {
-  const [playing, setPlaying] = useState(true);
+/** Numbered steps: how far there is to go, and a way to jump to any of them. */
+function StepNumbers({ count, index, onSelect }: { count: number; index: number; onSelect: (index: number) => void }) {
   return (
-    // Out past the page's padding: rows that drift should run to the screen's
-    // edges, not stop short of them.
-    <Pressable
-      onPress={() => setPlaying((current) => !current)}
-      accessibilityRole="button"
-      accessibilityLabel={playing ? 'Pause the destinations' : 'Play the destinations'}
-      className="-mx-6 gap-3 self-stretch"
-    >
-      {/* Each row is given its height and width: a marquee's track fills the
-          row rather than measuring it, so a row with no size has nothing to
-          fill and draws empty. */}
-      <Marquee.Group playing={playing} showPauseControl={false} className="w-full gap-3">
-        {PLACES.map((row, index) => (
-          <Marquee
-            key={row[0]}
-            reverse={index % 2 === 1}
-            spacing={10}
-            speed={24 + index * 6}
-            className="h-12 w-full"
+    <View className="flex-row gap-2">
+      {Array.from({ length: count }, (_, step) => {
+        const current = step === index;
+        return (
+          <Pressable
+            key={step}
+            onPress={() => onSelect(step)}
+            accessibilityRole="button"
+            accessibilityLabel={`Step ${step + 1} of ${count}`}
+            accessibilityState={{ selected: current }}
+            className={cn(
+              'h-9 w-9 items-center justify-center rounded-full',
+              current ? 'bg-primary' : 'bg-surface-secondary'
+            )}
           >
-            <View className="flex-row gap-2.5">
-              {row.map((place) => (
-                <Chip
-                  key={place}
-                  size="lg"
-                  variant={index === 1 ? 'primary' : 'outline'}
-                  start={<Glyph icon={Location01Icon} size={16} />}
-                >
-                  {place}
-                </Chip>
-              ))}
-            </View>
-          </Marquee>
-        ))}
-      </Marquee.Group>
-    </Pressable>
-  );
-}
-
-/**
- * A trip three people are planning, caught mid-edit: the trip and who is on
- * it, the entries so far with the face of whoever added each one, and a line
- * at the bottom showing someone adding the next.
- *
- * The plan rather than the people is the point of the slide — what
- * "together" buys you is that the train Tomás booked sits in the same list as
- * the flight Maya booked, and that you can watch Kenji add a place while you
- * look at it.
- */
-function SharedPlan() {
-  const adding = FRIENDS.find((friend) => friend.initials === PLAN_ADDING_NOW)!;
-  return (
-    <View
-      className="w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card"
-      importantForAccessibility="no-hide-descendants"
-    >
-      <View className="flex-row items-center justify-between gap-3 border-b border-border p-4">
-        <View className="flex-1">
-          <Text weight="semibold">{TRIP.name}</Text>
-          <Text size="sm" muted>
-            {TRIP.dates}
-          </Text>
-        </View>
-        <Avatar.Group size="sm" max={3} total={FRIENDS.length}>
-          {FRIENDS.map((friend) => (
-            <Avatar key={friend.initials} fallback={friend.initials} />
-          ))}
-        </Avatar.Group>
-      </View>
-
-      <View className="px-4 pt-4">
-        <Timeline variant="icon" value={PLAN.length - 1}>
-          {PLAN.map((entry, index) => {
-            const friend = FRIENDS.find((item) => item.initials === entry.by)!;
-            return (
-              <Timeline.Item key={entry.title} step={index} last={index === PLAN.length - 1}>
-                <Timeline.Indicator>
-                  <Glyph icon={entry.icon} size={14} />
-                </Timeline.Indicator>
-                <Timeline.Content>
-                  <Timeline.Header>
-                    <Timeline.Heading>
-                      <Timeline.Title>{entry.title}</Timeline.Title>
-                    </Timeline.Heading>
-                    <Avatar size="sm" fallback={friend.initials} />
-                  </Timeline.Header>
-                  <Timeline.Description>{entry.when}</Timeline.Description>
-                </Timeline.Content>
-              </Timeline.Item>
-            );
-          })}
-        </Timeline>
-      </View>
-
-      {/* Presence: the plan is being written by someone else right now. */}
-      <View className="flex-row items-center gap-2.5 border-t border-border px-4 py-3">
-        <Avatar size="sm" fallback={adding.initials} />
-        <Shimmer textClassName="text-sm">{`${adding.name.split(' ')[0]} is adding a place…`}</Shimmer>
-      </View>
-    </View>
-  );
-}
-
-/** Where the reader is: the current slide is a bar, the others dots. */
-function PageDots({ count, index }: { count: number; index: number }) {
-  const reducedMotion = useReducedMotion();
-  return (
-    <View
-      accessible
-      accessibilityRole="text"
-      accessibilityLabel={`Slide ${index + 1} of ${count}`}
-      className="flex-row items-center justify-center gap-1.5"
-    >
-      {Array.from({ length: count }, (_, dot) => (
-        <Animated.View
-          key={dot}
-          layout={reducedMotion ? undefined : LinearTransition.duration(220)}
-          className={cn('h-1.5 rounded-full', dot === index ? 'w-6 bg-foreground' : 'w-1.5 bg-muted-foreground opacity-40')}
-        />
-      ))}
+            <Text size="sm" weight="semibold" className={current ? 'text-primary-foreground' : 'text-muted-foreground'}>
+              {step + 1}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -288,11 +247,11 @@ export function OnboardingBlock({ onBack, className }: OnboardingBlockProps) {
   const [started, setStarted] = useState(false);
   const [pageWidth, setPageWidth] = useState(0);
   const pager = useRef<ScrollView>(null);
-  const last = index === SLIDES.length - 1;
+  const last = index === SCREENS.length - 1;
 
-  const goTo = (page: number) => {
-    pager.current?.scrollTo({ x: page * pageWidth, animated: true });
-    setIndex(page);
+  const goTo = (target: number) => {
+    pager.current?.scrollTo({ x: target * pageWidth, animated: true });
+    setIndex(target);
   };
 
   const settle = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -327,7 +286,6 @@ export function OnboardingBlock({ onBack, className }: OnboardingBlockProps) {
 
   return (
     <View className={cn('flex-1 bg-background', className)}>
-      {/* Back and Skip */}
       <View style={{ paddingTop: insets.top + 8 }} className="flex-row items-center justify-between px-5 pb-2">
         {onBack ? (
           <Button variant="outline" size="icon" className="rounded-full" accessibilityLabel="Back" onPress={onBack}>
@@ -336,11 +294,7 @@ export function OnboardingBlock({ onBack, className }: OnboardingBlockProps) {
         ) : (
           <View />
         )}
-        {last ? null : (
-          <Button variant="ghost" onPress={() => goTo(SLIDES.length - 1)}>
-            Skip
-          </Button>
-        )}
+        <StepNumbers count={SCREENS.length} index={index} onSelect={goTo} />
       </View>
 
       {/* Measured, so a page is exactly the width it is shown at — on a
@@ -353,52 +307,75 @@ export function OnboardingBlock({ onBack, className }: OnboardingBlockProps) {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={settle}
-            className="flex-1"
           >
-            {SLIDES.map((slide, slideIndex) => (
-              <View key={slide.id} style={{ width: pageWidth }} className="flex-1 px-6">
-                {/* The illustration takes the top of the screen. */}
-                <View className="flex-1 items-center justify-center">
-                  {slideIndex === 0 ? <CompassBadge /> : slideIndex === 1 ? <Destinations /> : <SharedPlan />}
-                </View>
+            {SCREENS.map((screen) => (
+              <ScrollView
+                key={screen.id}
+                style={{ width: pageWidth }}
+                contentContainerClassName="px-6 pb-6 pt-6"
+                showsVerticalScrollIndicator={false}
+              >
+                <View className="w-full max-w-md gap-8 self-center">
+                  <View className="gap-5">
+                    {screen.mark ? (
+                      <MarkTile icon={screen.mark} />
+                    ) : (
+                      <Avatar.Group size="lg" max={4} total={TRAVELLERS.length}>
+                        {TRAVELLERS.map((person) => (
+                          <Avatar key={person.initials} fallback={person.initials} accessibilityLabel={person.name} />
+                        ))}
+                      </Avatar.Group>
+                    )}
 
-                <View className="w-full max-w-xl gap-3 self-center pb-6">
-                  {slide.id === 'plan' ? (
-                    <View>
-                      <Text size="3xl" weight="bold" className="tracking-tight">
-                        {slide.title}
+                    <View className="gap-3">
+                      {screen.id === 'plan' ? (
+                        <View>
+                          <Text size="3xl" weight="bold" className="tracking-tight">
+                            {screen.title}
+                          </Text>
+                          {/* Text props go to the words; className would only reach the box around them. */}
+                          <TextAnimation.Rotating
+                            text={PROMISES}
+                            duration={2200}
+                            size="3xl"
+                            weight="bold"
+                            muted
+                          />
+                        </View>
+                      ) : (
+                        <Text size="3xl" weight="bold" className="tracking-tight">
+                          {screen.title}
+                        </Text>
+                      )}
+                      <Text size="lg" muted>
+                        {screen.body}
                       </Text>
-                      {/* Text props go to the words; className would only reach the box around them. */}
-                      <TextAnimation.Rotating text={PROMISES} duration={2200} size="3xl" weight="bold" muted />
                     </View>
-                  ) : (
-                    <Text size="3xl" weight="bold" className="tracking-tight">
-                      {slide.title}
-                    </Text>
-                  )}
-                  <Text size="lg" muted>
-                    {slide.body}
-                  </Text>
+                  </View>
+
+                  <View className="gap-6">
+                    {screen.benefits.map((benefit) => (
+                      <BenefitRow key={benefit.title} benefit={benefit} />
+                    ))}
+                  </View>
                 </View>
-              </View>
+              </ScrollView>
             ))}
           </ScrollView>
         ) : null}
       </View>
-      <PageDots count={SLIDES.length} index={index} />
 
-      {/* Moving on is a button; starting is a slide. */}
-      <View style={{ paddingBottom: insets.bottom + 12 }} className="px-5 pt-5">
-        <View className="w-full max-w-xl self-center">
-          {last ? (
-            <SlideButton onComplete={() => setStarted(true)} accessibilityActionLabel={`Start using ${APP.name}`}>
-              <SlideButton.Label>Slide to get started</SlideButton.Label>
-            </SlideButton>
-          ) : (
-            <Button size="lg" fullWidth onPress={() => goTo(index + 1)}>
-              Continue
-            </Button>
-          )}
+      {/* The one action, held still while the screens move. */}
+      <View style={{ paddingBottom: insets.bottom + 12 }} className="px-5 pt-3">
+        <View className="w-full max-w-md self-center">
+          <Button
+            size="lg"
+            fullWidth
+            className="rounded-full"
+            onPress={() => (last ? setStarted(true) : goTo(index + 1))}
+          >
+            {last ? 'Get started' : 'Continue'}
+          </Button>
         </View>
       </View>
     </View>

@@ -41,12 +41,12 @@
   ],
   "onboarding": [
     "Onboarding",
-    "Three welcome slides with illustrations built from components, a Continue button, and a slide to get started.",
+    "Three introduction screens with one shape — a mark, a title, a paragraph and three benefits — numbered steps and one button.",
     "onboarding",
     {
       "addedIn": "0.108.0",
-      "intro": "The first three screens of an app, written for a trip planner. Each slide has an illustration made from components rather than an image: a ring of text turning round the app's mark, rows of destinations drifting in opposite directions, and a trip being planned by several people — the entries so far, each with the face of whoever added it, and a line showing someone adding the next. The words sit under the illustration, and the first headline's last word turns over between three promises.\n\nThe slides are a native paging scroll, so a slide follows the finger and settles the way the platform does. The control at the bottom changes with the slide: the first two have a Continue button, and the last has a slide to get started, because starting is the step that commits to something. Skip jumps to the last slide from anywhere.",
-      "notes": "The illustrations repaint with the theme because they are drawn with tokens, and they cost nothing to download. To use pictures instead, replace the three functions under Illustrations; the layout around them stays the same.\n\nThe drifting destinations have no pause button, because a button on an illustration reads as something to press. Tapping the rows pauses and resumes them, and they stand still when the system asks for reduced motion. Keep one of the two if you keep the motion."
+      "intro": "The first three screens of an app, written for a trip planner. Every screen has the same shape: a mark at the top, a large title, one short paragraph, and three benefits, each a small icon with a line in bold and a line of detail. The layout is left-aligned, like the pages of a guide. The last word of the first title turns over between three promises, and the third screen's mark is the faces of the people on the trip.\n\nThe step numbers at the top right show how far there is to go, and each one jumps to its screen. The one action is a full-width button at the bottom that stays still while the screens move: Continue, then Get started. The screens are a native paging scroll, so a screen follows the finger and settles the way the platform does.",
+      "notes": "Keep every screen in the same shape when you write your own. An introduction reads as one story only when its screens look like pages of the same thing, and a reader skimming for what the app does finds it in the same place each time.\n\nThe marks and benefits are plain data in `SCREENS`. Each screen scrolls on its own if its text runs long — at a large text size, or on a short phone — so the button never covers the last benefit."
     }
   ]
 }

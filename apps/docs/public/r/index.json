@@ -1225,20 +1225,14 @@
     "kind": "block",
     "group": "blocks",
     "stability": "stable",
-    "description": "Three welcome slides with illustrations built from components, a Continue button, and a slide to get started.",
+    "description": "Three introduction screens with one shape — a mark, a title, a paragraph and three benefits — numbered steps and one button.",
     "registryDependencies": [
       "avatar",
       "button",
-      "chip",
-      "circular-text",
       "cn",
       "icons",
-      "marquee",
-      "shimmer",
-      "slide-button",
       "text",
-      "text-animation",
-      "timeline"
+      "text-animation"
     ],
     "docsPath": "blocks/onboarding"
   },

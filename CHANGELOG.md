@@ -9,6 +9,43 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.108.0] — 2026-10-09
+
+### Added
+
+- **Blocks** — whole screens composed from the components, installed with
+  `npx panelui-cli@latest add <block>` and copied into `components/ui/blocks/` with every
+  component they use. They are not part of the npm package: a block is a starting point to edit,
+  so it belongs in your project rather than behind an import. Each takes `onBack` and
+  `className`, and keeps its sample data in typed constants at the top of the file. Five ship
+  with this release:
+  - **Boarding Pass** — a paper ticket with the route, seat and gate, a boarding countdown, the
+    steps to the gate, and a slide to check in that unlocks the boarding code. The stub turns over
+    to show the fare and bags.
+  - **Wallet** — a stack of cards with one in front, a total that rolls digit by digit when money
+    moves, a spending chart under Week/Month/Year tabs, and activity rows that swipe open to split
+    or hide a payment.
+  - **Activity** — goal rings, body readings, steps and a thirteen-week workout streak, all set to
+    the same period by one row of tabs.
+  - **Smart Home** — a room at a time: climate in one row, scenes that set every device at once,
+    and a tile per device that toggles when pressed.
+  - **Onboarding** — a first run in four steps: two introduction screens with flat illustrations
+    drawn from the chart tokens, one question, and a first plan built from the answer.
+- Registry items now have a `registry:block` type, and the registry index gives blocks the kind
+  `block` and the group `blocks`. CLIs before 0.7.0 install blocks without change and list them
+  under Components.
+
+### Fixed
+
+- **Avatar** — the circle behind the initials is now an opaque surface. It was a translucent
+  tint, so in an `Avatar.Group` each face showed the one underneath it through itself and the
+  stack read as overlapping glass rather than as people.
+
+### Docs
+
+- A **Blocks** section, generated from the registry: each page has the install command, what
+  the block is built from with links to those components, and the full source as `add` writes it.
+
 ## [0.107.1] — 2026-10-08
 
 ### Fixed

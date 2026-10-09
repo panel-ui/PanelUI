@@ -35,7 +35,7 @@ import { FlipCard } from '../src/components/flip-card';
 import { QRCode } from '../src/components/qr-code';
 import { SlideButton } from '../src/components/slide-button';
 import { Timeline } from '../src/components/timeline';
-import { ChevronLeftIcon, LockIcon, useIconColor } from '../src/icons';
+import { ChevronLeftIcon, ClockIcon, LockIcon, useIconColor } from '../src/icons';
 import { Text } from '../src/primitives/text';
 import { cn } from '../src/utils/cn';
 
@@ -66,6 +66,8 @@ const DEPARTS_IN_MINUTES = 172;
 /** Boarding opens this long before departure, and the gate closes this long before. */
 const BOARDING_LEAD_MINUTES = 35;
 const GATE_CLOSES_LEAD_MINUTES = 15;
+/** The countdown turns to the destructive colour for the last ten minutes. */
+const URGENT_BELOW_SECONDS = 600;
 
 /** What the code encodes — the bar-coded boarding pass string a gate scanner reads. */
 const BOARDING_CODE = 'M1LINDQVIST/MAYA     EK7QX2M LISCPHNW 1482 289Y014A0042 100';
@@ -276,6 +278,7 @@ export function BoardingPassBlock({ onBack, className }: BoardingPassBlockProps)
   const insets = useSafeAreaInsets();
   const [checkedIn, setCheckedIn] = useState(false);
   const onPrimary = useToken('--color-primary-foreground', '#fafafa');
+  const mutedForeground = useToken('--color-muted-foreground', '#737373');
 
   // One moment everything else is measured from, fixed when the screen opens.
   const times = useMemo(() => {
@@ -301,7 +304,7 @@ export function BoardingPassBlock({ onBack, className }: BoardingPassBlockProps)
     { title: 'Security', detail: 'Allow about 20 minutes at this time of day', at: '20 min' },
     {
       title: `Gate ${FLIGHT.gate}`,
-      detail: `Boarding by group — group ${FLIGHT.group} is called second`,
+      detail: `Group ${FLIGHT.group} is called second. The gate closes at ${clock(times.gateCloses)}.`,
       at: clock(times.boards),
     },
   ];
@@ -388,6 +391,22 @@ export function BoardingPassBlock({ onBack, className }: BoardingPassBlockProps)
                   <Field label="Boards" value={clock(times.boards)} align="end" />
                 </View>
               </View>
+
+              {/* Time left, on the ticket rather than beside it: it is a
+                  fact about this flight, read in the same glance as the gate. */}
+              <View className="flex-row items-center gap-2.5 rounded-2xl bg-muted px-4 py-3">
+                <ClockIcon size={16} color={mutedForeground} />
+                <Text size="sm" muted className="flex-1">
+                  Boarding in
+                </Text>
+                <Countdown
+                  to={times.boards}
+                  variant="inline"
+                  size="sm"
+                  units={['hours', 'minutes', 'seconds']}
+                  urgentBelow={URGENT_BELOW_SECONDS}
+                />
+              </View>
             </View>
 
             <Perforation />
@@ -422,24 +441,6 @@ export function BoardingPassBlock({ onBack, className }: BoardingPassBlockProps)
                 ))}
               </FlipCard.Back>
             </FlipCard>
-          </View>
-
-          {/* Time left */}
-          <View className="flex-row items-end justify-between gap-4 rounded-3xl border border-border bg-card p-5">
-            <View className="gap-2">
-              <Text size="sm" muted>
-                Boarding starts in
-              </Text>
-              <Countdown to={times.boards} size="sm" units={['hours', 'minutes', 'seconds']} />
-            </View>
-            <View className="items-end gap-0.5">
-              <Text size="sm" muted>
-                Gate closes
-              </Text>
-              <Text size="lg" weight="semibold" className="tabular-nums">
-                {clock(times.gateCloses)}
-              </Text>
-            </View>
           </View>
 
           {/* Between here and the gate */}

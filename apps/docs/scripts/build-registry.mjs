@@ -20,6 +20,9 @@ const OUT = path.join(HERE, '../public/r');
 const DOCS = path.join(HERE, '../content/docs');
 
 const meta = JSON.parse(fs.readFileSync(path.join(HERE, 'meta.json'), 'utf8'));
+const blocks = JSON.parse(fs.readFileSync(path.join(HERE, 'blocks.json'), 'utf8'));
+/** Whole screens built from the components. Beside `src`, so npm never ships them. */
+const BLOCKS = path.join(ROOT, 'packages/panelui/blocks');
 
 /** Always present in an Expo app — listing them would be noise. */
 const PROVIDED = new Set(['react', 'react-native']);
@@ -250,6 +253,38 @@ register(
   () => `${ALIAS.components}/panel-ui-provider`
 );
 
+/*
+ * Blocks: whole screens composed from the components, copy-in only.
+ *
+ * Registered last so a block can never take a name a component already has —
+ * `add <name>` has to mean one thing. The files land under `ui/blocks/`, which
+ * every published CLI already routes to the components alias; a block needs
+ * nothing from the CLI that a component does not.
+ *
+ * Every file in the folder needs an entry in blocks.json and every entry needs
+ * a file, so a block cannot ship without its docs page or be documented
+ * without existing.
+ */
+const blockFiles = fs.existsSync(BLOCKS)
+  ? fs.readdirSync(BLOCKS).filter((file) => /\.tsx$/.test(file)).map((file) => file.replace(/\.tsx$/, ''))
+  : [];
+for (const slug of blockFiles) {
+  if (!blocks[slug]) throw new Error(`packages/panelui/blocks/${slug}.tsx has no entry in blocks.json`);
+}
+for (const slug of Object.keys(blocks)) {
+  if (!blockFiles.includes(slug)) {
+    throw new Error(`blocks.json lists ${slug}, but packages/panelui/blocks/${slug}.tsx does not exist`);
+  }
+  if (items.has(slug)) throw new Error(`${slug}: a block cannot share a name with another registry item`);
+  register(
+    slug,
+    'registry:block',
+    [path.join(BLOCKS, `${slug}.tsx`)],
+    () => `ui/blocks/${slug}.tsx`,
+    () => `${ALIAS.components}/blocks/${slug}`
+  );
+}
+
 /* ------------------------------------------------------------------ *
  * 2. Rewrite imports and collect dependencies.
  * ------------------------------------------------------------------ */
@@ -328,7 +363,7 @@ for (const [name, item] of items) {
     files.push({ path: dest, type: item.type, content: source });
   }
 
-  const [, description] = meta[name] ?? [];
+  const [, description] = (item.type === 'registry:block' ? blocks[name] : meta[name]) ?? [];
 
   built.push({
     name,
@@ -346,6 +381,14 @@ function descriptionFor(name) {
 }
 
 function discoveryFor(name, type) {
+  if (type === 'registry:block') {
+    const options = blocks[name]?.[3] ?? {};
+    return {
+      kind: 'block',
+      group: 'blocks',
+      stability: options.alpha ? 'alpha' : options.beta ? 'beta' : 'stable',
+    };
+  }
   const options = meta[name]?.[3] ?? {};
   const group =
     options.group ??
@@ -365,6 +408,11 @@ function discoveryFor(name, type) {
 
 /** The markdown route for an item, but only when that page actually exists. */
 function docsPathFor(name, type) {
+  // Written by gen-blocks.mjs, which runs after this and reads what it wrote —
+  // so the page cannot be checked for here, and gen-blocks fails instead if it
+  // does not write one.
+  if (type === 'registry:block') return `blocks/${name}`;
+
   const entry = meta[name];
   const group = entry
     ? (entry[3]?.group ?? 'components')

@@ -67,6 +67,20 @@ changing the library:
   required or optional. Optional means reached through a lazy `require`/`import` inside a
   `try`/`catch`, and it must be listed in `OPTIONAL` in the builder.
 
+### Blocks
+
+Blocks are whole screens composed from the components — copy-in only, never in the npm package.
+
+- Source: `packages/panelui/blocks/<slug>.tsx`, beside `src/` so `files` and bob never see it.
+  Import the library relatively (`../src/components/<name>`, `../src/icons`, `../src/primitives/text`)
+  so the registry builder can rewrite each import to the project's alias. Export exactly one
+  `<Name>Block({ onBack, className })`, keep sample data in typed constants at the top, and never
+  import `expo-router` — the host passes `onBack`.
+- Metadata: `apps/docs/scripts/blocks.json` (`[name, summary, keyword, { intro, notes, addedIn, preview }]`).
+  It feeds the registry (`registry:block`, landing in `components/ui/blocks/`), the generated docs
+  section (`gen-blocks.mjs` → `content/docs/blocks/`) and the example's `blocks.generated.ts`.
+- Example: add one loader line to `apps/example/src/data/blocks.tsx`; the typecheck fails until you do.
+
 ## Documentation is part of the change
 
 `apps/docs` is the published documentation site. **A component change is not complete until its

@@ -93,7 +93,7 @@ export function GET(): Response {
             name: { type: 'string' },
             type: {
               type: 'string',
-              enum: ['registry:ui', 'registry:lib', 'registry:hook', 'registry:theme'],
+              enum: ['registry:ui', 'registry:lib', 'registry:hook', 'registry:theme', 'registry:block'],
             },
             description: { type: 'string' },
             registryDependencies: { type: 'array', items: { type: 'string' } },

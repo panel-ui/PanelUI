@@ -233,13 +233,15 @@
     "exampleEntries": 138,
     "registry": {
       "componentItems": 138,
+      "blockItems": 0,
       "supportItems": 36,
       "totalItems": 174,
       "byType": {
         "registry:ui": 153,
         "registry:hook": 13,
         "registry:lib": 7,
-        "registry:theme": 1
+        "registry:theme": 1,
+        "registry:block": 0
       }
     },
     "visualizations": {

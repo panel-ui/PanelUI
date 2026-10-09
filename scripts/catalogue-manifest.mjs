@@ -199,7 +199,7 @@ function buildManifest() {
   const visualizations = visualizationEntries();
 
   const registryTypes = Object.fromEntries(
-    ["registry:ui", "registry:hook", "registry:lib", "registry:theme"].map(
+    ["registry:ui", "registry:hook", "registry:lib", "registry:theme", "registry:block"].map(
       (type) => [type, registry.filter((item) => item.type === type).length],
     ),
   );
@@ -215,7 +215,9 @@ function buildManifest() {
       exampleEntries: examples.length,
       registry: {
         componentItems: registryComponents.length,
-        supportItems: registry.length - registryComponents.length,
+        blockItems: registryTypes["registry:block"],
+        supportItems:
+          registry.length - registryComponents.length - registryTypes["registry:block"],
         totalItems: registry.length,
         byType: registryTypes,
       },

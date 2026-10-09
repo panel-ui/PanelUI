@@ -3,3 +3,4 @@
 @import '../../packages/panelui/theme.css';
 
 @source '../../packages/panelui/src';
+@source '../../packages/panelui/blocks';

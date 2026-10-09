@@ -438,6 +438,9 @@ export default function HomePage() {
             <Link href={site.repo} className="hover:text-foreground">
               GitHub
             </Link>
+            <LayoutLink href="/privacy" className="hover:text-foreground">
+              Privacy
+            </LayoutLink>
             {/* A mark rather than a word. The row beside it is four
                 destinations named in text, and a fifth reading "X" is a letter
                 nobody would recognise as a link to anywhere. */}

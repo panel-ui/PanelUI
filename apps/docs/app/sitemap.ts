@@ -80,15 +80,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     /*
-     * Hand-written, because it is not under `content/docs` and so is not in the
-     * page tree the rest of this is derived from. Monthly: the list on it moves
-     * when a sponsor arrives, which is not weekly.
+     * Hand-written, because these are not under `content/docs` and so are not
+     * in the page tree the rest of this is derived from. Sponsors is monthly:
+     * the list on it moves when a sponsor arrives, which is not weekly. The
+     * privacy policy changes only when what the app or site collects does.
      */
     {
       url: absoluteUrl('/sponsors'),
       lastModified: fallback,
       changeFrequency: 'monthly',
       priority: 0.5,
+    },
+    {
+      url: absoluteUrl('/privacy'),
+      lastModified: fallback,
+      changeFrequency: 'yearly',
+      priority: 0.2,
     },
     ...pages,
   ];

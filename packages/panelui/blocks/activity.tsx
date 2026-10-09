@@ -347,7 +347,10 @@ export function ActivityBlock({ onBack, className }: ActivityBlockProps) {
                 {goals.map((goal, index) => (
                   <RingChart.Ring key={goal.label} index={index} />
                 ))}
-                <RingChart.Center defaultLabel={goals[0]!.label} formatValue={(value) => grouped(value)} />
+                {/* The centre's own compact format: the hole is about fifty
+                    points across, so a month's 14,020 kcal does not fit in it.
+                    The header above carries the exact figure. */}
+                <RingChart.Center defaultLabel={goals[0]!.label} />
               </RingChart>
             </Frame.Panel>
           </Frame>

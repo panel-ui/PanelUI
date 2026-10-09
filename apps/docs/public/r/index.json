@@ -1889,6 +1889,28 @@
     "docsPath": "components/slider"
   },
   {
+    "name": "smart-home",
+    "type": "registry:block",
+    "kind": "block",
+    "group": "blocks",
+    "stability": "stable",
+    "description": "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device.",
+    "registryDependencies": [
+      "button",
+      "cn",
+      "icons",
+      "kpi",
+      "ring-chart",
+      "slider",
+      "switch",
+      "tabs",
+      "text",
+      "text-animation",
+      "toggle-button"
+    ],
+    "docsPath": "blocks/smart-home"
+  },
+  {
     "name": "sortable",
     "type": "registry:ui",
     "kind": "ui",

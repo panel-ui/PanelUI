@@ -7,14 +7,16 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY = path.resolve(HERE, '../apps/docs/public/r');
 
 /*
- * These are capacity guards, not targets. At 137 items the generated registry
- * is 2.88 MB and its largest response is 96 KB. The ceilings leave room for
- * about 60 ordinary items, while still catching copied assets, bundled output,
- * or accidentally duplicated source before it reaches the docs CDN and CLI.
+ * These are capacity guards, not targets. At 179 items — five of them blocks —
+ * the generated registry is 180 files and 4.53 MB, and its largest response is
+ * 104 KB (sankey-chart). An ordinary item is about 25 KB, so the ceilings leave
+ * room for about 20 more files and 700 KB, while still catching copied assets,
+ * bundled output, or accidentally duplicated source before it reaches the docs
+ * CDN and CLI. When a ceiling trips, measure first and restate these numbers.
  */
 export const REGISTRY_BUDGETS = Object.freeze({
   files: 200,
-  totalBytes: 4_500_000,
+  totalBytes: 5_250_000,
   itemBytes: 150_000,
 });
 

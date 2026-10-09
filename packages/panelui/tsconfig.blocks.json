@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["blocks", "types", "src/uniwind-env.d.ts"]
+}

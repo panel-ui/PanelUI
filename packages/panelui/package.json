@@ -96,7 +96,7 @@
     "test": "node --experimental-strip-types --test test/*.test.mjs",
     "benchmark:bar-chart": "node scripts/benchmark-bar-chart.mjs",
     "benchmark:planner": "node --experimental-strip-types scripts/benchmark-planner.mjs",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.type-tests.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.type-tests.json && tsc --noEmit -p tsconfig.blocks.json",
     "clean": "rm -rf lib",
     "verify:package": "node scripts/verify-package.mjs",
     "generate:subpaths": "node scripts/generate-subpath-exports.mjs --write",

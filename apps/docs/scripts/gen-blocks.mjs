@@ -87,8 +87,11 @@ for (const [slug, entry] of Object.entries(blocks)) {
   if (!options.intro) throw new Error(`${slug}: blocks.json has no intro`);
   sections.push(options.intro);
 
-  const dependencies = item.dependencies.length
-    ? ` It also installs ${item.dependencies.map((dep) => `\`${dep}\``).join(', ')} if the project does not have ${item.dependencies.length === 1 ? 'it' : 'them'}.`
+  const packages = item.dependencies.map((dep) => `\`${dep}\``);
+  const listed =
+    packages.length > 1 ? `${packages.slice(0, -1).join(', ')} and ${packages.at(-1)}` : packages[0];
+  const dependencies = packages.length
+    ? ` It also installs ${listed} if the project does not have ${packages.length === 1 ? 'it' : 'them'}.`
     : '';
 
   sections.push(`## Installation

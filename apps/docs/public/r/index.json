@@ -143,6 +143,27 @@
     "docsPath": "charts/bar-chart"
   },
   {
+    "name": "boarding-pass",
+    "type": "registry:block",
+    "kind": "block",
+    "group": "blocks",
+    "stability": "stable",
+    "description": "A flight on one screen: the ticket, the time to boarding, the way to the gate, and a slide to check in.",
+    "registryDependencies": [
+      "animated-badge",
+      "button",
+      "cn",
+      "countdown",
+      "flip-card",
+      "icons",
+      "qr-code",
+      "slide-button",
+      "text",
+      "timeline"
+    ],
+    "docsPath": "blocks/boarding-pass"
+  },
+  {
     "name": "bottom-sheet",
     "type": "registry:ui",
     "kind": "ui",

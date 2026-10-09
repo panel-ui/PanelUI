@@ -32,7 +32,10 @@ export const BLOCKS: readonly BlockEntry[] = BLOCK_METADATA;
  * One loader per block. Typed by the generated slugs, so a block added to
  * blocks.json without a line here fails the typecheck rather than the screen.
  */
-const LOADERS: Record<BlockSlug, BlockLoader> = {};
+const LOADERS: Record<BlockSlug, BlockLoader> = {
+  'boarding-pass': () =>
+    import('../../../../packages/panelui/blocks/boarding-pass').then((m) => m.BoardingPassBlock),
+};
 
 export function isBlockSlug(slug: string): slug is BlockSlug {
   return Object.prototype.hasOwnProperty.call(LOADERS, slug);

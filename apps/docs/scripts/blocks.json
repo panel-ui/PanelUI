@@ -1,1 +1,12 @@
-{}
+{
+  "boarding-pass": [
+    "Boarding Pass",
+    "A flight on one screen: the ticket, the time to boarding, the way to the gate, and a slide to check in.",
+    "boarding pass",
+    {
+      "addedIn": "0.108.0",
+      "intro": "A boarding pass for one flight. The ticket carries the route, the times and the fields a gate agent asks for. Under it are a countdown to boarding, the steps between check-in and the gate, and a slide that checks the traveller in.\n\nThe code on the stub stays locked until check-in is complete. Tapping the stub turns it over to show the fare and the bags.\n\nEvery time on the screen is worked out from one departure moment, so the countdown, the gate times and the journey always agree. Change `DEPARTS_IN_MINUTES`, or replace it with a real departure, and all of them move together.",
+      "notes": "The notches in the tear line are filled with the page background, so the block expects to sit on `bg-background`. On any other surface, change the two notch views to that surface's colour.\n\nCheck-in here is local state. In an app it is a request: hold `checkedIn` in your own state and set it once the server has confirmed, so the slide shows its tick only when check-in has actually happened."
+    }
+  ]
+}

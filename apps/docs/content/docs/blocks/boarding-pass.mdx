@@ -1,0 +1,541 @@
+---
+title: Boarding Pass
+description: "A flight on one screen: the ticket, the time to boarding, the way to the gate, and a slide to check in."
+status: new
+---
+
+A boarding pass for one flight. The ticket carries the route, the times and the fields a gate agent asks for. Under it are a countdown to boarding, the steps between check-in and the gate, and a slide that checks the traveller in.
+
+The code on the stub stays locked until check-in is complete. Tapping the stub turns it over to show the fare and the bags.
+
+Every time on the screen is worked out from one departure moment, so the countdown, the gate times and the journey always agree. Change `DEPARTS_IN_MINUTES`, or replace it with a real departure, and all of them move together.
+
+## Installation
+
+Blocks are not part of the npm package. The CLI copies the file into your project, and from then on it is yours to edit.
+
+```bash
+npx panelui-cli@latest add boarding-pass
+```
+
+That writes `components/ui/blocks/boarding-pass.tsx`, plus every component it is built from that the project does not already have. It also installs `@hugeicons/core-free-icons`, `@hugeicons/react-native`, `react-native-safe-area-context`, `react-native-svg` and `uniwind` if the project does not have them.
+
+## Usage
+
+A block is a whole screen. Render it as the only child of a route, and pass `onBack` if the screen should show a back button.
+
+```tsx title="app/boarding-pass.tsx"
+import { router } from 'expo-router';
+import { BoardingPassBlock } from '@/components/ui/blocks/boarding-pass';
+
+export default function Screen() {
+  return <BoardingPassBlock onBack={router.back} />;
+}
+```
+
+The sample data is a set of typed constants at the top of the file. Replace them with your own, or turn them into props.
+
+## Built from
+
+- [AnimatedBadge](/docs/components/animated-badge)
+- [Button](/docs/components/button)
+- [Countdown](/docs/components/countdown)
+- [FlipCard](/docs/components/flip-card)
+- [QRCode](/docs/components/qr-code)
+- [SlideButton](/docs/components/slide-button)
+- [Timeline](/docs/components/timeline)
+
+## Notes
+
+The notches in the tear line are filled with the page background, so the block expects to sit on `bg-background`. On any other surface, change the two notch views to that surface's colour.
+
+Check-in here is local state. In an app it is a request: hold `checkedIn` in your own state and set it once the server has confirmed, so the slide shows its tick only when check-in has actually happened.
+
+## Source
+
+```tsx title="components/ui/blocks/boarding-pass.tsx"
+/**
+ * Boarding Pass — a flight's boarding pass as one screen: the ticket, the
+ * time left before boarding, the steps between here and the gate, and the
+ * check-in that unlocks the code.
+ *
+ * The ticket is drawn as paper, because that is the object a traveller is
+ * looking for: the two airport codes are the largest thing on it, the fields
+ * a gate agent asks for sit in a grid under them, and a perforated tear line
+ * separates the part you keep from the stub with the code on it. The stub
+ * turns over to show the fare and the bags, which matter once and then get
+ * in the way of the code.
+ *
+ * The code stays locked until the slide at the bottom is completed — a
+ * boarding pass that scans before check-in would be the one bug a reader
+ * notices. Every time on the screen is derived from one departure moment, so
+ * the countdown, the gate times and the journey always agree with each other.
+ *
+ * The sample data is the constants below. Replace them with your own, or
+ * lift them into props.
+ */
+import { useMemo, useState, type ReactNode } from 'react';
+import { ScrollView, View, type LayoutChangeEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { useCSSVariable } from 'uniwind';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react-native';
+// Deep imports: the icon package's barrel re-exports thousands of glyphs, and
+// a bundler that cannot tree-shake follows every one of them.
+import Airplane01Icon from '@hugeicons/core-free-icons/Airplane01Icon';
+import Luggage01Icon from '@hugeicons/core-free-icons/Luggage01Icon';
+import { AnimatedBadge } from '@/components/ui/animated-badge';
+import { Button } from '@/components/ui/button';
+import { Countdown } from '@/components/ui/countdown';
+import { FlipCard } from '@/components/ui/flip-card';
+import { QRCode } from '@/components/ui/qr-code';
+import { SlideButton } from '@/components/ui/slide-button';
+import { Timeline } from '@/components/ui/timeline';
+import { ChevronLeftIcon, LockIcon, useIconColor } from '@/components/ui/icons';
+import { Text } from '@/components/ui/text';
+import { cn } from '@/lib/cn';
+
+/* -------------------------------------------------------------------------- */
+/* Sample data                                                                */
+/* -------------------------------------------------------------------------- */
+
+const FLIGHT = {
+  airline: 'Northwind Air',
+  number: 'NW 1482',
+  cabin: 'Economy',
+  from: { code: 'LIS', city: 'Lisbon' },
+  to: { code: 'CPH', city: 'Copenhagen' },
+  /** Gate to gate. */
+  durationMinutes: 215,
+  /** Copenhagen is an hour ahead of Lisbon; arrival is shown in local time. */
+  arrivalOffsetMinutes: 60,
+  passenger: 'Maya Lindqvist',
+  booking: 'K7QX2M',
+  gate: 'B22',
+  seat: '14A',
+  group: '2',
+  terminal: '1',
+};
+
+/** How far away departure is when the screen opens. */
+const DEPARTS_IN_MINUTES = 172;
+/** Boarding opens this long before departure, and the gate closes this long before. */
+const BOARDING_LEAD_MINUTES = 35;
+const GATE_CLOSES_LEAD_MINUTES = 15;
+
+/** What the code encodes — the bar-coded boarding pass string a gate scanner reads. */
+const BOARDING_CODE = 'M1LINDQVIST/MAYA     EK7QX2M LISCPHNW 1482 289Y014A0042 100';
+
+/** The back of the stub. */
+const FARE = [
+  { label: 'Fare', value: 'Classic' },
+  { label: 'Cabin bag', value: '1 × 8 kg' },
+  { label: 'Checked bag', value: '1 × 23 kg' },
+  { label: 'Seat', value: '14A · Window' },
+  { label: 'Meal', value: 'Vegetarian, pre-ordered' },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const MINUTE = 60_000;
+
+/** Wall-clock time as `08:40`. */
+function clock(ms: number) {
+  const date = new Date(ms);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+/** `215` as `3h 35m`. */
+function duration(minutes: number) {
+  return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`;
+}
+
+/** A theme token, resolved for the drawing props that cannot take a class. */
+function useToken(name: string, fallback: string) {
+  const value = useCSSVariable(name);
+  return typeof value === 'string' && value.length > 0 ? value : fallback;
+}
+
+/** A glyph from the icon set, tinted by whatever surface it sits on. */
+function Glyph({ icon, size = 18, color }: { icon: IconSvgElement; size?: number; color?: string }) {
+  const inherited = useIconColor();
+  const fallback = useToken('--color-foreground', '#262626');
+  return (
+    <HugeiconsIcon icon={icon} size={size} color={color ?? inherited ?? fallback} strokeWidth={1.75} />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Parts                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/** A small uppercase label over its value — the unit the whole ticket is set in. */
+function Field({ label, value, align = 'start' }: { label: string; value: string; align?: 'start' | 'end' }) {
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${label}, ${value}`}
+      className={cn('gap-0.5', align === 'end' && 'items-end')}
+    >
+      <Text size="xs" weight="medium" muted className="uppercase tracking-wider">
+        {label}
+      </Text>
+      <Text weight="semibold" className="tabular-nums">
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * The dashed arc between the two airports, with the plane at its top.
+ *
+ * Drawn to the measured width rather than stretched from a fixed viewBox: a
+ * stretched path stretches its dashes too, and they stop being dashes.
+ */
+function FlightPath() {
+  const [width, setWidth] = useState(0);
+  const stroke = useToken('--color-muted-foreground', '#737373');
+  const plane = useToken('--color-foreground', '#262626');
+  const height = 44;
+  const inset = 6;
+
+  return (
+    <View
+      className="flex-1 items-center"
+      onLayout={(event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width)}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
+      <View style={{ height }} className="w-full">
+        {width > 0 ? (
+          <Svg width={width} height={height}>
+            <Path
+              d={`M ${inset} ${height - 6} Q ${width / 2} ${-height / 2} ${width - inset} ${height - 6}`}
+              stroke={stroke}
+              strokeOpacity={0.6}
+              strokeWidth={1.5}
+              strokeDasharray="3 5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Circle cx={inset} cy={height - 6} r={3} fill={stroke} />
+            <Circle cx={width - inset} cy={height - 6} r={3} fill={stroke} />
+          </Svg>
+        ) : null}
+        <View className="absolute inset-x-0 top-0 items-center">
+          <View className="rounded-full bg-card px-1.5">
+            <View style={{ transform: [{ rotate: '45deg' }] }}>
+              <Glyph icon={Airplane01Icon} size={20} color={plane} />
+            </View>
+          </View>
+        </View>
+      </View>
+      <Text size="xs" muted className="tabular-nums">
+        {duration(FLIGHT.durationMinutes)} · Direct
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * The tear line: a notch cut into each edge and a row of dashes between them.
+ *
+ * The dashes are views rather than a dashed border, because a dashed border
+ * on one side only is not drawn reliably on every platform.
+ */
+function Perforation() {
+  return (
+    <View className="h-7 justify-center" importantForAccessibility="no" accessibilityElementsHidden>
+      <View className="absolute -left-3.5 h-7 w-7 rounded-full border border-border bg-background" />
+      <View className="absolute -right-3.5 h-7 w-7 rounded-full border border-border bg-background" />
+      <View className="mx-6 flex-row justify-between">
+        {Array.from({ length: 22 }, (_, index) => (
+          <View key={index} className="h-0.5 w-1.5 rounded-full bg-muted-foreground opacity-40" />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/** The code, or where it will be once the traveller has checked in. */
+function BoardingCode({ checkedIn }: { checkedIn: boolean }) {
+  if (!checkedIn) {
+    return (
+      <View
+        accessible
+        accessibilityLabel="Boarding code locked. Check in to get it."
+        className="h-36 w-36 items-center justify-center gap-2 rounded-2xl bg-muted"
+      >
+        <LockIcon size={22} />
+        <Text size="xs" muted className="text-center">
+          Check in to{'\n'}get your code
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <QRCode value={BOARDING_CODE} errorCorrection="Q">
+      <QRCode.Canvas pixelSize={144} moduleShape="rounded" eyeFrameShape="rounded" />
+    </QRCode>
+  );
+}
+
+function Header({ onBack, checkedIn }: { onBack?: () => void; checkedIn: boolean }) {
+  return (
+    <View className="flex-row items-center gap-3">
+      {onBack ? (
+        <Button variant="outline" size="icon" className="rounded-full" accessibilityLabel="Back" onPress={onBack}>
+          <ChevronLeftIcon size={18} />
+        </Button>
+      ) : null}
+      <View className="flex-1">
+        <Text size="lg" weight="semibold" numberOfLines={1}>
+          Boarding pass
+        </Text>
+        <Text size="sm" muted>
+          Today · {FLIGHT.number}
+        </Text>
+      </View>
+      <AnimatedBadge status={checkedIn ? 'success' : 'info'}>
+        {checkedIn ? 'Checked in' : 'Check-in open'}
+      </AnimatedBadge>
+    </View>
+  );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <View className="gap-3">
+      <Text size="sm" weight="semibold" muted>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Block                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export interface BoardingPassBlockProps {
+  /** Shows a back button in the header and is called when it is pressed. */
+  onBack?: () => void;
+  className?: string;
+}
+
+export function BoardingPassBlock({ onBack, className }: BoardingPassBlockProps) {
+  const insets = useSafeAreaInsets();
+  const [checkedIn, setCheckedIn] = useState(false);
+  const onPrimary = useToken('--color-primary-foreground', '#fafafa');
+
+  // One moment everything else is measured from, fixed when the screen opens.
+  const times = useMemo(() => {
+    const departs = Math.ceil((Date.now() + DEPARTS_IN_MINUTES * MINUTE) / (5 * MINUTE)) * 5 * MINUTE;
+    return {
+      departs,
+      arrives: departs + (FLIGHT.durationMinutes + FLIGHT.arrivalOffsetMinutes) * MINUTE,
+      boards: departs - BOARDING_LEAD_MINUTES * MINUTE,
+      gateCloses: departs - GATE_CLOSES_LEAD_MINUTES * MINUTE,
+      bagDropCloses: departs - 60 * MINUTE,
+    };
+  }, []);
+  // A late flight lands the next day; without the marker it would read as landing before it left.
+  const landsNextDay = new Date(times.arrives).getDate() !== new Date(times.departs).getDate();
+
+  const journey = [
+    { title: 'Check in', detail: 'Online, until an hour before departure', at: checkedIn ? 'Done' : 'Now' },
+    {
+      title: 'Drop your bag',
+      detail: `Desks 14–18, Terminal ${FLIGHT.terminal}`,
+      at: `by ${clock(times.bagDropCloses)}`,
+    },
+    { title: 'Security', detail: 'Allow about 20 minutes at this time of day', at: '20 min' },
+    {
+      title: `Gate ${FLIGHT.gate}`,
+      detail: `Boarding by group — group ${FLIGHT.group} is called second`,
+      at: clock(times.boards),
+    },
+  ];
+
+  return (
+    <View className={cn('flex-1 bg-background', className)}>
+      <View style={{ paddingTop: insets.top + 8 }} className="px-5 pb-3">
+        <View className="w-full max-w-xl self-center">
+          <Header onBack={onBack} checkedIn={checkedIn} />
+        </View>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+        contentContainerClassName="px-5 pt-2"
+      >
+        <View className="w-full max-w-xl gap-6 self-center">
+          {/* The ticket */}
+          <View className="overflow-hidden rounded-3xl border border-border bg-card">
+            <View className="gap-6 p-5">
+              <View className="flex-row items-center gap-2.5">
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-primary">
+                  <Glyph icon={Airplane01Icon} size={16} color={onPrimary} />
+                </View>
+                <Text size="sm" weight="semibold" className="flex-1">
+                  {FLIGHT.airline}
+                </Text>
+                <Text size="sm" muted>
+                  {FLIGHT.cabin}
+                </Text>
+              </View>
+
+              <View className="flex-row items-start gap-3">
+                <View accessible accessibilityLabel={`From ${FLIGHT.from.city}, departs ${clock(times.departs)}`}>
+                  <Text weight="bold" className="text-5xl tracking-tight">
+                    {FLIGHT.from.code}
+                  </Text>
+                  <Text size="sm" muted>
+                    {FLIGHT.from.city}
+                  </Text>
+                  <Text size="lg" weight="semibold" className="mt-2 tabular-nums">
+                    {clock(times.departs)}
+                  </Text>
+                </View>
+
+                <View className="flex-1 pt-3">
+                  <FlightPath />
+                </View>
+
+                <View
+                  className="items-end"
+                  accessible
+                  accessibilityLabel={`To ${FLIGHT.to.city}, arrives ${clock(times.arrives)} local time${landsNextDay ? ', the next day' : ''}`}
+                >
+                  <Text weight="bold" className="text-5xl tracking-tight">
+                    {FLIGHT.to.code}
+                  </Text>
+                  <Text size="sm" muted>
+                    {FLIGHT.to.city}
+                  </Text>
+                  <View className="mt-2 flex-row items-start gap-0.5">
+                    <Text size="lg" weight="semibold" className="tabular-nums">
+                      {clock(times.arrives)}
+                    </Text>
+                    {landsNextDay ? (
+                      <Text size="xs" weight="semibold" muted>
+                        +1
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+              </View>
+
+              <View className="gap-4">
+                <View className="flex-row justify-between">
+                  <Field label="Passenger" value={FLIGHT.passenger} />
+                  <Field label="Booking" value={FLIGHT.booking} align="end" />
+                </View>
+                <View className="flex-row justify-between">
+                  <Field label="Gate" value={FLIGHT.gate} />
+                  <Field label="Seat" value={FLIGHT.seat} />
+                  <Field label="Group" value={FLIGHT.group} />
+                  <Field label="Boards" value={clock(times.boards)} align="end" />
+                </View>
+              </View>
+            </View>
+
+            <Perforation />
+
+            {/* The stub turns over for the fare; the code is on its face. */}
+            <FlipCard className="h-64">
+              <FlipCard.Front className="flex-1 items-center justify-center gap-3 p-5">
+                <BoardingCode checkedIn={checkedIn} />
+                <Text size="xs" muted>
+                  Tap for fare and bags
+                </Text>
+              </FlipCard.Front>
+              <FlipCard.Back className="flex-1 gap-3 bg-card p-5">
+                <View className="flex-row items-center gap-2">
+                  <Glyph icon={Luggage01Icon} size={18} />
+                  <Text weight="semibold" className="flex-1">
+                    Fare and bags
+                  </Text>
+                  <Text size="xs" muted>
+                    Tap to turn back
+                  </Text>
+                </View>
+                {FARE.map((row) => (
+                  <View key={row.label} className="flex-row items-center justify-between">
+                    <Text size="sm" muted>
+                      {row.label}
+                    </Text>
+                    <Text size="sm" weight="medium">
+                      {row.value}
+                    </Text>
+                  </View>
+                ))}
+              </FlipCard.Back>
+            </FlipCard>
+          </View>
+
+          {/* Time left */}
+          <View className="flex-row items-end justify-between gap-4 rounded-3xl border border-border bg-card p-5">
+            <View className="gap-2">
+              <Text size="sm" muted>
+                Boarding starts in
+              </Text>
+              <Countdown to={times.boards} size="sm" units={['hours', 'minutes', 'seconds']} />
+            </View>
+            <View className="items-end gap-0.5">
+              <Text size="sm" muted>
+                Gate closes
+              </Text>
+              <Text size="lg" weight="semibold" className="tabular-nums">
+                {clock(times.gateCloses)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Between here and the gate */}
+          <Section title="Your journey">
+            <Timeline value={checkedIn ? 0 : -1}>
+              {journey.map((step, index) => (
+                <Timeline.Item key={step.title} step={index} last={index === journey.length - 1}>
+                  <Timeline.Indicator />
+                  <Timeline.Content>
+                    <Timeline.Header>
+                      <Timeline.Heading>
+                        <Timeline.Title>{step.title}</Timeline.Title>
+                      </Timeline.Heading>
+                      <Timeline.Trailing>{step.at}</Timeline.Trailing>
+                    </Timeline.Header>
+                    <Timeline.Description>{step.detail}</Timeline.Description>
+                  </Timeline.Content>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </Section>
+        </View>
+      </ScrollView>
+
+      {/* Check-in, held at the bottom where the thumb already is. */}
+      <View
+        style={{ paddingBottom: insets.bottom + 12 }}
+        className="absolute inset-x-0 bottom-0 border-t border-border bg-background px-5 pt-3"
+      >
+        <View className="w-full max-w-xl self-center">
+          <SlideButton
+            completed={checkedIn}
+            onComplete={() => setCheckedIn(true)}
+            accessibilityActionLabel="Check in"
+          >
+            <SlideButton.Label>{checkedIn ? `Checked in · Seat ${FLIGHT.seat}` : 'Slide to check in'}</SlideButton.Label>
+          </SlideButton>
+        </View>
+      </View>
+    </View>
+  );
+}
+```

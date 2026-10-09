@@ -3,6 +3,7 @@
 export const BLOCK_METADATA = [
   {"slug":"boarding-pass","name":"Boarding Pass","summary":"A flight on one screen: the ticket, the time to boarding, the way to the gate, and a slide to check in."},
   {"slug":"wallet","name":"Wallet","summary":"A stack of cards with one in front, a balance that rolls when it changes, spending by week, month or year, and swipeable activity."},
+  {"slug":"activity","name":"Activity","summary":"Goal rings, body readings, steps and a workout streak, all switched between day, week and month."},
 ] as const;
 
 export type BlockMetadata = (typeof BLOCK_METADATA)[number];

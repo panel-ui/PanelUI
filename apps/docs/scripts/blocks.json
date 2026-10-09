@@ -18,5 +18,15 @@
       "intro": "A wallet with three cards. The total sits at the top. Under it the cards form a stack: the one in front is shown whole, and the others show as strips above it with their name and last four digits. Tapping a strip brings that card to the front.\n\nThe card in front is the one the actions and the spending chart apply to. Topping up or sending money changes its balance, and the total rolls digit by digit to the new figure. The tabs above the chart switch between this week, this month and this year, and dragging across the chart reads off the running total at any point.\n\nEach row in the activity list swipes open to split a payment in two or hide it.",
       "notes": "Each card takes its colours from a theme token pair — `primary`, `surface-tertiary` or `card` — so the deck stays legible in every theme. To add a card in a brand colour, add a tone to `TONES` with an opaque surface and an ink that reads against it in both light and dark. The cards overlap in the deck, so a translucent fill shows the card behind through the one on top.\n\nThe spending figures are generated from each card's `dailySpend` so the chart has something to draw. In an app, replace `spending()` with your own data for the range; the chart animates between whatever it is given.\n\nThe stack's height is worked out from `CARD_HEIGHT` and `STRIP_HEIGHT`. Change both together: a strip has to be tall enough to show the card's top row, or the stack loses the names that make it usable."
     }
+  ],
+  "activity": [
+    "Activity",
+    "Goal rings, body readings, steps and a workout streak, all switched between day, week and month.",
+    "activity summary",
+    {
+      "addedIn": "0.108.0",
+      "intro": "A fitness summary. Three goals — energy, workout minutes and steps — are drawn as rings, each against its own target. Under them are the body readings with their change from the previous period, steps across the period as bars, and the last thirteen weeks of workouts as a calendar.\n\nThe tabs at the top set the period for every figure on the screen: today, the last seven days or the last four weeks. Week and Month run back from today rather than from a Monday or the first of the month, so no bar stands for a day that has not happened yet. Tapping a ring, dragging across the bars or holding a day in the calendar updates that chart's own header with the reading.\n\nThe workout calendar stays on the last thirteen weeks whatever the period, because it is there to show the streak.",
+      "notes": "The steps chart is built so its total matches the Steps ring for the same period. Keep that true with real data: a ring that says 8,214 above bars that add up to something else is the first thing a reader checks.\n\nThe rings are measured against targets in `GOALS`. Each ring has its own target, so a full ring means the same thing for calories, minutes and steps even though they share no scale."
+    }
   ]
 }

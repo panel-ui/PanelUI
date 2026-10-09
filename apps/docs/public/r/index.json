@@ -13,6 +13,27 @@
     "docsPath": "components/accordion"
   },
   {
+    "name": "activity",
+    "type": "registry:block",
+    "kind": "block",
+    "group": "blocks",
+    "stability": "stable",
+    "description": "Goal rings, body readings, steps and a workout streak, all switched between day, week and month.",
+    "registryDependencies": [
+      "bar-chart",
+      "button",
+      "cn",
+      "frame",
+      "heatmap-chart",
+      "icons",
+      "kpi",
+      "ring-chart",
+      "tabs",
+      "text"
+    ],
+    "docsPath": "blocks/activity"
+  },
+  {
     "name": "ai-input",
     "type": "registry:ui",
     "kind": "ui",

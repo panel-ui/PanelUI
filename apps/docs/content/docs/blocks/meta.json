@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "boarding-pass",
-    "wallet"
+    "wallet",
+    "activity"
   ]
 }

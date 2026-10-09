@@ -36,6 +36,7 @@ const LOADERS: Record<BlockSlug, BlockLoader> = {
   'boarding-pass': () =>
     import('../../../../packages/panelui/blocks/boarding-pass').then((m) => m.BoardingPassBlock),
   wallet: () => import('../../../../packages/panelui/blocks/wallet').then((m) => m.WalletBlock),
+  activity: () => import('../../../../packages/panelui/blocks/activity').then((m) => m.ActivityBlock),
 };
 
 export function isBlockSlug(slug: string): slug is BlockSlug {

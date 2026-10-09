@@ -1220,22 +1220,6 @@
     "docsPath": "components/number-input"
   },
   {
-    "name": "onboarding",
-    "type": "registry:block",
-    "kind": "block",
-    "group": "blocks",
-    "stability": "stable",
-    "description": "A first run in four steps: two screens on the app, one question, and a first plan made from the answer.",
-    "registryDependencies": [
-      "button",
-      "cn",
-      "icons",
-      "radio-group",
-      "text"
-    ],
-    "docsPath": "blocks/onboarding"
-  },
-  {
     "name": "otp-input",
     "type": "registry:ui",
     "kind": "ui",

@@ -5,7 +5,6 @@ export const BLOCK_METADATA = [
   {"slug":"wallet","name":"Wallet","summary":"A stack of cards with one in front, a balance that rolls when it changes, spending by week, month or year, and swipeable activity."},
   {"slug":"activity","name":"Activity","summary":"Goal rings, body readings, steps and a workout streak, all switched between day, week and month."},
   {"slug":"smart-home","name":"Smart Home","summary":"A room at a time: climate in one row, scenes that set the devices, and a tile per device that toggles when pressed."},
-  {"slug":"onboarding","name":"Onboarding","summary":"A first run in four steps: two screens on the app, one question, and a first plan made from the answer."},
 ] as const;
 
 export type BlockMetadata = (typeof BLOCK_METADATA)[number];

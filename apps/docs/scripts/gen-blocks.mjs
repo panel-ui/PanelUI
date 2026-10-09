@@ -143,7 +143,7 @@ title: Blocks
 description: Whole screens built from PanelUI components, copied into your project with the CLI.
 ---
 
-A block is a complete screen — a boarding pass, a wallet, an onboarding flow — composed from the components in this library. It is a starting point to copy and change, not a component to configure: it has no props beyond \`onBack\` and \`className\`, and its sample data sits at the top of the file.
+A block is a complete screen — a boarding pass, a wallet, a smart-home controller — composed from the components in this library. It is a starting point to copy and change, not a component to configure: it has no props beyond \`onBack\` and \`className\`, and its sample data sits at the top of the file.
 
 Blocks are installed with the CLI and are not part of the npm package. Each one brings the components it is built from, so it works in a project that has none of them yet.
 

@@ -1234,9 +1234,11 @@
       "cn",
       "icons",
       "marquee",
+      "shimmer",
       "slide-button",
       "text",
-      "text-animation"
+      "text-animation",
+      "timeline"
     ],
     "docsPath": "blocks/onboarding"
   },

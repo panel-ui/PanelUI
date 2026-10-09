@@ -5,7 +5,7 @@
  * Each slide is an illustration made of components rather than a picture, so
  * it repaints with the theme and costs nothing to ship: a badge of text
  * turning round a compass, rows of destinations drifting past each other, and
- * a shared itinerary with the face of whoever added each entry. The illustration takes the top
+ * a trip being planned by several people, caught while one of them adds to it. The illustration takes the top
  * of the screen and the words sit under it, where the eye lands after it.
  *
  * The slides are a native paging scroll rather than an animated deck, so a
@@ -39,8 +39,10 @@ import { Button } from '../src/components/button';
 import { Chip } from '../src/components/chip';
 import { CircularText } from '../src/components/circular-text';
 import { Marquee } from '../src/components/marquee';
+import { Shimmer } from '../src/components/shimmer';
 import { SlideButton } from '../src/components/slide-button';
 import { TextAnimation } from '../src/components/text-animation';
+import { Timeline } from '../src/components/timeline';
 import { ChevronLeftIcon, useIconColor } from '../src/icons';
 import { Text } from '../src/primitives/text';
 import { cn } from '../src/utils/cn';
@@ -69,12 +71,14 @@ const FRIENDS = [
   { name: 'Ada Okafor', initials: 'AO' },
 ];
 
-/** The trip on the third slide: three entries, each added by someone different. */
+/** The trip on the third slide, its entries so far, and who is adding the next. */
+const TRIP = { name: 'Lisbon', dates: '14–18 October' };
 const PLAN = [
-  { title: 'Flight to Lisbon', when: 'Fri 08:40', by: 'ML', icon: Airplane01Icon, tilt: -2.5, inset: 0 },
-  { title: 'Train to Sintra', when: 'Sat 10:15', by: 'TF', icon: Train01Icon, tilt: 1.5, inset: 18 },
-  { title: 'Dinner at Taberna do Largo', when: 'Sat 20:30', by: 'IM', icon: Restaurant01Icon, tilt: -1, inset: 6 },
+  { title: 'Flight to Lisbon', when: 'Tue 14 · 08:40', by: 'ML', icon: Airplane01Icon },
+  { title: 'Train to Sintra', when: 'Wed 15 · 10:15', by: 'TF', icon: Train01Icon },
+  { title: 'Dinner at Taberna do Largo', when: 'Wed 15 · 20:30', by: 'IM', icon: Restaurant01Icon },
 ];
+const PLAN_ADDING_NOW = 'KA';
 
 const SLIDES = [
   {
@@ -183,48 +187,64 @@ function Destinations() {
 }
 
 /**
- * A plan three people have written: each entry is pinned at a slight angle,
- * like a note on a board, with the face of whoever added it.
+ * A trip three people are planning, caught mid-edit: the trip and who is on
+ * it, the entries so far with the face of whoever added each one, and a line
+ * at the bottom showing someone adding the next.
  *
- * Showing the plan rather than the people is the point of the slide — what
- * "together" buys you is that the train Tomás booked is in the same place as
- * the flight Maya booked.
+ * The plan rather than the people is the point of the slide — what
+ * "together" buys you is that the train Tomás booked sits in the same list as
+ * the flight Maya booked, and that you can watch Kenji add a place while you
+ * look at it.
  */
 function SharedPlan() {
+  const adding = FRIENDS.find((friend) => friend.initials === PLAN_ADDING_NOW)!;
   return (
-    <View className="w-full max-w-sm gap-3" importantForAccessibility="no-hide-descendants">
-      {PLAN.map((entry, index) => {
-        const friend = FRIENDS.find((item) => item.initials === entry.by)!;
-        return (
-          <View
-            key={entry.title}
-            style={{ transform: [{ rotate: `${entry.tilt}deg` }], marginLeft: entry.inset }}
-            className="flex-row items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
-          >
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-muted">
-              <Glyph icon={entry.icon} size={20} />
-            </View>
-            <View className="flex-1">
-              <Text weight="semibold" numberOfLines={1}>
-                {entry.title}
-              </Text>
-              <Text size="sm" muted numberOfLines={1}>
-                {entry.when} · added by {friend.name.split(' ')[0]}
-              </Text>
-            </View>
-            <Avatar size="sm" fallback={friend.initials} />
-          </View>
-        );
-      })}
-      <View className="mt-2 flex-row items-center gap-2 self-center">
+    <View
+      className="w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card"
+      importantForAccessibility="no-hide-descendants"
+    >
+      <View className="flex-row items-center justify-between gap-3 border-b border-border p-4">
+        <View className="flex-1">
+          <Text weight="semibold">{TRIP.name}</Text>
+          <Text size="sm" muted>
+            {TRIP.dates}
+          </Text>
+        </View>
         <Avatar.Group size="sm" max={3} total={FRIENDS.length}>
           {FRIENDS.map((friend) => (
             <Avatar key={friend.initials} fallback={friend.initials} />
           ))}
         </Avatar.Group>
-        <Text size="sm" muted>
-          {FRIENDS.length} people on this trip
-        </Text>
+      </View>
+
+      <View className="px-4 pt-4">
+        <Timeline variant="icon" value={PLAN.length - 1}>
+          {PLAN.map((entry, index) => {
+            const friend = FRIENDS.find((item) => item.initials === entry.by)!;
+            return (
+              <Timeline.Item key={entry.title} step={index} last={index === PLAN.length - 1}>
+                <Timeline.Indicator>
+                  <Glyph icon={entry.icon} size={14} />
+                </Timeline.Indicator>
+                <Timeline.Content>
+                  <Timeline.Header>
+                    <Timeline.Heading>
+                      <Timeline.Title>{entry.title}</Timeline.Title>
+                    </Timeline.Heading>
+                    <Avatar size="sm" fallback={friend.initials} />
+                  </Timeline.Header>
+                  <Timeline.Description>{entry.when}</Timeline.Description>
+                </Timeline.Content>
+              </Timeline.Item>
+            );
+          })}
+        </Timeline>
+      </View>
+
+      {/* Presence: the plan is being written by someone else right now. */}
+      <View className="flex-row items-center gap-2.5 border-t border-border px-4 py-3">
+        <Avatar size="sm" fallback={adding.initials} />
+        <Shimmer textClassName="text-sm">{`${adding.name.split(' ')[0]} is adding a place…`}</Shimmer>
       </View>
     </View>
   );

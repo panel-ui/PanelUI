@@ -39,6 +39,8 @@ const LOADERS: Record<BlockSlug, BlockLoader> = {
   activity: () => import('../../../../packages/panelui/blocks/activity').then((m) => m.ActivityBlock),
   'smart-home': () =>
     import('../../../../packages/panelui/blocks/smart-home').then((m) => m.SmartHomeBlock),
+  onboarding: () =>
+    import('../../../../packages/panelui/blocks/onboarding').then((m) => m.OnboardingBlock),
 };
 
 export function isBlockSlug(slug: string): slug is BlockSlug {

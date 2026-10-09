@@ -38,5 +38,15 @@
       "intro": "A home controller, one room at a time. Climate is a single row: an icon for the mode in the mode's colour, what the room is doing, and the target temperature with a step down and a step up either side. Pressing the icon moves to the next mode — Heat, Cool, Auto, Off — and the target rolls digit by digit as it changes.\n\nScenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile, and pressing the tile turns the device on or off. A tile that is on is drawn in the primary colour, so the room's state reads at a glance.\n\nThe room tabs at the top switch everything below them. The energy chart at the bottom is for the whole house, hour by hour, and dragging across it reads off a single hour.",
       "notes": "What a scene does is a table in `SCENES`, keyed by kind of device rather than by device. A new lamp joins Night without anyone editing Night. A kind a scene leaves out is left alone — a lighting scene does not touch the dishwasher.\n\nThe status under Climate follows the mode as well as the temperatures: Heat cannot cool a room that is too warm, so it reads Holding rather than Cooling. Keep that rule if you wire the row to a real thermostat, or the line will claim work the system is not doing."
     }
+  ],
+  "onboarding": [
+    "Onboarding",
+    "Three welcome slides with illustrations built from components, a Continue button, and a slide to get started.",
+    "onboarding",
+    {
+      "addedIn": "0.108.0",
+      "intro": "The first three screens of an app, written for a trip planner. Each slide has an illustration made from components rather than an image: a ring of text turning round the app's mark, rows of destinations drifting in opposite directions, and a shared itinerary with the face of whoever added each entry. The words sit under the illustration, and the first headline's last word turns over between three promises.\n\nThe slides are a native paging scroll, so a slide follows the finger and settles the way the platform does. The control at the bottom changes with the slide: the first two have a Continue button, and the last has a slide to get started, because starting is the step that commits to something. Skip jumps to the last slide from anywhere.",
+      "notes": "The illustrations repaint with the theme because they are drawn with tokens, and they cost nothing to download. To use pictures instead, replace the three functions under Illustrations; the layout around them stays the same.\n\nThe drifting destinations have no pause button, because a button on an illustration reads as something to press. Tapping the rows pauses and resumes them, and they stand still when the system asks for reduced motion. Keep one of the two if you keep the motion."
+    }
   ]
 }

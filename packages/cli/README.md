@@ -43,6 +43,10 @@ npx panelui-cli@latest add item message
 npx panelui-cli@latest add button --overwrite
 ```
 
+Blocks — whole screens built from the components — install the same way and land in
+`components/ui/blocks/`, with the components they use beside the rest. `list --type block` shows
+them.
+
 Successful writes are recorded in `panelui-lock.json`. `--overwrite` remains the explicit way to
 replace an existing file and makes that new copy eligible for later safe updates.
 
@@ -65,7 +69,7 @@ establishes the first trusted digest.
 
 ### `list [--type kind] [--search text] [--json]`
 
-Everything available, grouped as UI, charts, hooks, utilities and theme. Filters use generated
+Everything available, grouped as UI, charts, blocks, hooks, utilities and theme. Filters use generated
 registry metadata; search requires every term and ranks exact names, prefixes, name matches and
 description matches in that order. `--json` returns the same deterministically ordered index rows.
 
@@ -156,7 +160,7 @@ editor-launched sessions, add `--registry <url>` or `--cwd <dir>` to that server
 | `--dry-run` | Show what would happen, write nothing |
 | `--cwd <dir>` | Run against another directory |
 | `--registry <url>` | Use a different registry |
-| `--type <kind>` | Filter list results: `ui`, `chart`, `hook`, `lib` or `theme` |
+| `--type <kind>` | Filter list results: `ui`, `chart`, `block`, `hook`, `lib` or `theme` |
 | `--search <text>` | Rank list results matching every search term |
 | `--json` | Print `list` or `doctor` results as stable JSON |
 

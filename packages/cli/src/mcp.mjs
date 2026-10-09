@@ -65,7 +65,9 @@ function docsPathFor(item, name) {
       ? 'hooks'
       : item?.type === 'registry:lib'
         ? 'utilities'
-        : 'components';
+        : item?.type === 'registry:block'
+          ? 'blocks'
+          : 'components';
   return `${group}/${name}`;
 }
 
@@ -77,13 +79,13 @@ const TOOLS = [
   {
     name: 'panelui_list_components',
     description:
-      'List every component, primitive, hook and utility in the PanelUI registry, with a one-line description of each. Start here when you do not know what exists.',
+      'List every component, block, primitive, hook and utility in the PanelUI registry, with a one-line description of each. Start here when you do not know what exists.',
     inputSchema: {
       type: 'object',
       properties: {
         type: {
           type: 'string',
-          enum: ['ui', 'chart', 'lib', 'hook', 'theme'],
+          enum: ['ui', 'chart', 'block', 'lib', 'hook', 'theme'],
           description: 'Only items of this kind. Omit for everything.',
         },
       },

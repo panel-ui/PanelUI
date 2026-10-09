@@ -77,6 +77,7 @@ test('list filters and ranks the generated discovery index', async () => {
     assert.equal(run(registry, ['--json']).stdout, all.stdout);
     const items = JSON.parse(all.stdout);
     assert.deepEqual([...new Set(items.map((item) => item.kind))].sort(), [
+      'block',
       'chart',
       'hook',
       'lib',
@@ -84,7 +85,7 @@ test('list filters and ranks the generated discovery index', async () => {
       'ui',
     ]);
     assert.ok(items.every((item) => item.group && item.stability));
-    for (const type of ['ui', 'chart', 'hook', 'lib', 'theme']) {
+    for (const type of ['ui', 'chart', 'block', 'hook', 'lib', 'theme']) {
       const filtered = run(registry, ['--type', type, '--json']);
       assert.equal(filtered.status, 0);
       assert.ok(JSON.parse(filtered.stdout).every((item) => item.kind === type));

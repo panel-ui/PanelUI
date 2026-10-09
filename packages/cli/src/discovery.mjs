@@ -1,6 +1,6 @@
 import { fail } from './ui.mjs';
 
-export const DISCOVERY_TYPES = ['ui', 'chart', 'hook', 'lib', 'theme'];
+export const DISCOVERY_TYPES = ['ui', 'chart', 'block', 'hook', 'lib', 'theme'];
 
 export function kindOf(item) {
   if (DISCOVERY_TYPES.includes(item.kind)) return item.kind;

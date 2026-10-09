@@ -124,6 +124,7 @@ export async function list(options) {
   const groups = {
     ui: 'Components',
     chart: 'Charts',
+    block: 'Blocks',
     hook: 'Hooks',
     lib: 'Utilities',
     theme: 'Theme',

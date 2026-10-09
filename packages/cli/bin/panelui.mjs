@@ -37,7 +37,7 @@ ${bold('Options')}
   --dry-run            Show what would happen, write nothing
   --cwd <dir>          Run against another directory
   --registry <url>     Use a different registry
-  --type <kind>        ui | chart | hook | lib | theme
+  --type <kind>        ui | chart | block | hook | lib | theme
   --search <text>      Rank registry items matching every search term
   --json               Print list or doctor results as stable JSON
   --help, -h           This

@@ -2449,6 +2449,28 @@
     "docsPath": "hooks/use-theme"
   },
   {
+    "name": "wallet",
+    "type": "registry:block",
+    "kind": "block",
+    "group": "blocks",
+    "stability": "stable",
+    "description": "A stack of cards with one in front, a balance that rolls when it changes, spending by week, month or year, and swipeable activity.",
+    "registryDependencies": [
+      "area-chart",
+      "avatar",
+      "button",
+      "cn",
+      "frame",
+      "icons",
+      "item",
+      "swipe",
+      "tabs",
+      "text",
+      "text-animation"
+    ],
+    "docsPath": "blocks/wallet"
+  },
+  {
     "name": "waterfall-chart",
     "type": "registry:ui",
     "kind": "chart",

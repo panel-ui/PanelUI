@@ -8,5 +8,15 @@
       "intro": "A boarding pass for one flight. The ticket carries the route, the times, the fields a gate agent asks for and a countdown to boarding. Under it are the steps between check-in and the gate, and a slide that checks the traveller in.\n\nThe code on the stub stays locked until check-in is complete. Tapping the stub turns it over to show the fare and the bags.\n\nEvery time on the screen is worked out from one departure moment, so the countdown, the gate times and the journey always agree. Change `DEPARTS_IN_MINUTES`, or replace it with a real departure, and all of them move together.",
       "notes": "The notches in the tear line are filled with the page background, so the block expects to sit on `bg-background`. On any other surface, change the two notch views to that surface's colour.\n\nCheck-in here is local state. In an app it is a request: hold `checkedIn` in your own state and set it once the server has confirmed, so the slide shows its tick only when check-in has actually happened."
     }
+  ],
+  "wallet": [
+    "Wallet",
+    "A stack of cards with one in front, a balance that rolls when it changes, spending by week, month or year, and swipeable activity.",
+    "wallet",
+    {
+      "addedIn": "0.108.0",
+      "intro": "A wallet with three cards. The total sits at the top. Under it the cards form a stack: the one in front is shown whole, and the others show as strips above it with their name and last four digits. Tapping a strip brings that card to the front.\n\nThe card in front is the one the actions and the spending chart apply to. Topping up or sending money changes its balance, and the total rolls digit by digit to the new figure. The tabs above the chart switch between this week, this month and this year, and dragging across the chart reads off the running total at any point.\n\nEach row in the activity list swipes open to split a payment in two or hide it.",
+      "notes": "Each card takes its colours from a theme token pair — `primary`, `surface-tertiary` or `card` — so the deck stays legible in every theme. To add a card in a brand colour, add a tone to `TONES` with an opaque surface and an ink that reads against it in both light and dark. The cards overlap in the deck, so a translucent fill shows the card behind through the one on top.\n\nThe spending figures are generated from each card's `dailySpend` so the chart has something to draw. In an app, replace `spending()` with your own data for the range; the chart animates between whatever it is given.\n\nThe stack's height is worked out from `CARD_HEIGHT` and `STRIP_HEIGHT`. Change both together: a strip has to be tall enough to show the card's top row, or the stack loses the names that make it usable."
+    }
   ]
 }

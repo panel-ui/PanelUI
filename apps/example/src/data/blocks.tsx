@@ -35,6 +35,7 @@ export const BLOCKS: readonly BlockEntry[] = BLOCK_METADATA;
 const LOADERS: Record<BlockSlug, BlockLoader> = {
   'boarding-pass': () =>
     import('../../../../packages/panelui/blocks/boarding-pass').then((m) => m.BoardingPassBlock),
+  wallet: () => import('../../../../packages/panelui/blocks/wallet').then((m) => m.WalletBlock),
 };
 
 export function isBlockSlug(slug: string): slug is BlockSlug {

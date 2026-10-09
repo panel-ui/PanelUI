@@ -5,6 +5,13 @@
     "boarding pass",
     {
       "addedIn": "0.108.0",
+      "previewVideo": {
+        "src": "/previews/boarding-pass.mp4",
+        "poster": "/previews/boarding-pass-poster.jpg",
+        "alt": "Boarding Pass — the stub turns over to the fare and bags and back, then a slide checks the traveller in and the boarding code appears.",
+        "width": 720,
+        "height": 1566
+      },
       "intro": "A boarding pass for one flight. The ticket carries the route, the times, the fields a gate agent asks for and a countdown to boarding. Under it are the steps between check-in and the gate, and a slide that checks the traveller in.\n\nThe code on the stub stays locked until check-in is complete. Tapping the stub turns it over to show the fare and the bags.\n\nEvery time on the screen is worked out from one departure moment, so the countdown, the gate times and the journey always agree. Change `DEPARTS_IN_MINUTES`, or replace it with a real departure, and all of them move together.",
       "notes": "The notches in the tear line are filled with the page background, so the block expects to sit on `bg-background`. On any other surface, change the two notch views to that surface's colour.\n\nCheck-in here is local state. In an app it is a request: hold `checkedIn` in your own state and set it once the server has confirmed, so the slide shows its tick only when check-in has actually happened."
     }
@@ -15,6 +22,13 @@
     "wallet",
     {
       "addedIn": "0.108.0",
+      "previewVideo": {
+        "src": "/previews/wallet.mp4",
+        "poster": "/previews/wallet-poster.jpg",
+        "alt": "Wallet — tapping the Travel strip brings that card to the front, a top-up rolls its balance, and the chart switches to this week before the list scrolls into view.",
+        "width": 720,
+        "height": 1566
+      },
       "intro": "A wallet with three cards. The total sits at the top. Under it the cards form a stack: the one in front is shown whole, and the others show as strips above it with their name and last four digits. Tapping a strip brings that card to the front.\n\nThe card in front is the one the actions and the spending chart apply to. Topping up or sending money changes its balance, and the total rolls digit by digit to the new figure. The tabs above the chart switch between this week, this month and this year, and dragging across the chart reads off the running total at any point.\n\nEach row in the activity list swipes open to split a payment in two or hide it.",
       "notes": "Each card takes its colours from a theme token pair — `primary`, `surface-tertiary` or `card` — so the deck stays legible in every theme. To add a card in a brand colour, add a tone to `TONES` with an opaque surface and an ink that reads against it in both light and dark. The cards overlap in the deck, so a translucent fill shows the card behind through the one on top.\n\nThe spending figures are generated from each card's `dailySpend` so the chart has something to draw. In an app, replace `spending()` with your own data for the range; the chart animates between whatever it is given.\n\nThe stack's height is worked out from `CARD_HEIGHT` and `STRIP_HEIGHT`. Change both together: a strip has to be tall enough to show the card's top row, or the stack loses the names that make it usable."
     }
@@ -25,6 +39,13 @@
     "activity summary",
     {
       "addedIn": "0.108.0",
+      "previewVideo": {
+        "src": "/previews/activity.mp4",
+        "poster": "/previews/activity-poster.jpg",
+        "alt": "Activity — the period switches from today to the last seven days and the last four weeks, a ring is tapped for its reading, and the screen scrolls down to steps and the workout calendar.",
+        "width": 720,
+        "height": 1566
+      },
       "intro": "A fitness summary. Three goals — energy, workout minutes and steps — are drawn as rings, each against its own target. Under them are the body readings with their change from the previous period, steps across the period as bars, and the last thirteen weeks of workouts as a calendar.\n\nThe tabs at the top set the period for every figure on the screen: today, the last seven days or the last four weeks. Week and Month run back from today rather than from a Monday or the first of the month, so no bar stands for a day that has not happened yet. Tapping a ring, dragging across the bars or holding a day in the calendar updates that chart's own header with the reading.\n\nThe workout calendar stays on the last thirteen weeks whatever the period, because it is there to show the streak.",
       "notes": "The steps chart is built so its total matches the Steps ring for the same period. Keep that true with real data: a ring that says 8,214 above bars that add up to something else is the first thing a reader checks.\n\nThe rings are measured against targets in `GOALS`. Each ring has its own target, so a full ring means the same thing for calories, minutes and steps even though they share no scale."
     }
@@ -35,6 +56,13 @@
     "smart home",
     {
       "addedIn": "0.108.0",
+      "previewVideo": {
+        "src": "/previews/smart-home.mp4",
+        "poster": "/previews/smart-home-poster.jpg",
+        "alt": "Smart Home — the target temperature steps up twice, the Night scene turns the lights off, the floor lamp is switched back on, and the Kitchen tab opens.",
+        "width": 720,
+        "height": 1566
+      },
       "intro": "A home controller, one room at a time. Climate is a single row: an icon for the mode in the mode's colour, what the room is doing, and the target temperature with a step down and a step up either side. Pressing the icon moves to the next mode — Heat, Cool, Auto, Off — and the target rolls digit by digit as it changes.\n\nScenes set every device in the room in one tap. Changing a device by hand afterwards clears the scene, because the room is no longer in it. Each device is a tile, and pressing the tile turns the device on or off. A tile that is on is drawn in the primary colour, so the room's state reads at a glance.\n\nThe room tabs at the top switch everything below them. The energy chart at the bottom is for the whole house, hour by hour, and dragging across it reads off a single hour.",
       "notes": "What a scene does is a table in `SCENES`, keyed by kind of device rather than by device. A new lamp joins Night without anyone editing Night. A kind a scene leaves out is left alone — a lighting scene does not touch the dishwasher.\n\nThe status under Climate follows the mode as well as the temperatures: Heat cannot cool a room that is too warm, so it reads Holding rather than Cooling. Keep that rule if you wire the row to a real thermostat, or the line will claim work the system is not doing."
     }

@@ -38,8 +38,9 @@ import Speaker01Icon from '@hugeicons/core-free-icons/Speaker01Icon';
 import Sun03Icon from '@hugeicons/core-free-icons/Sun03Icon';
 import SunCloud01Icon from '@hugeicons/core-free-icons/SunCloud01Icon';
 import Tv01Icon from '@hugeicons/core-free-icons/Tv01Icon';
+import { BarChart, type BarChartDatum } from '../src/components/bar-chart';
 import { Button } from '../src/components/button';
-import { Kpi } from '../src/components/kpi';
+import { Frame } from '../src/components/frame';
 import { RingChart } from '../src/components/ring-chart';
 import { Slider } from '../src/components/slider';
 import { Tabs } from '../src/components/tabs';
@@ -165,9 +166,14 @@ const SCENES: { id: Scene; label: string; icon: IconSvgElement; sets: Partial<Re
   { id: 'night', label: 'Night', icon: Moon02Icon, sets: { light: false, blinds: false, media: false } },
 ];
 
+/** `6` as `06:00`. */
+function clockHour(hour: number) {
+  return `${String(hour).padStart(2, '0')}:00`;
+}
+
 /** Energy used by the whole house today, hour by hour, in kWh. */
 const ENERGY = [0.3, 0.2, 0.2, 0.2, 0.3, 0.6, 0.9, 1.1, 0.7, 0.5, 0.4, 0.5, 0.6, 0.4, 0.4, 0.5, 0.7, 0.9].map(
-  (kwh, hour) => ({ hour, kwh })
+  (kwh, hour) => ({ hour: clockHour(hour), until: clockHour(hour + 1), kwh })
 );
 const ENERGY_TODAY = ENERGY.reduce((sum, row) => sum + row.kwh, 0);
 /** Percentage change on the same hours yesterday. */
@@ -224,74 +230,76 @@ function Thermostat({ room, onChange }: { room: Room; onChange: (patch: Partial<
           : 'Holding temperature';
 
   return (
-    <View className="gap-5 rounded-3xl border border-border bg-card p-5">
-      <View className="flex-row items-center justify-between">
-        <Text weight="semibold">Climate</Text>
-        <Text size="sm" muted className="tabular-nums">
-          Now {room.current.toFixed(1)}°
-        </Text>
-      </View>
-
-      {/* The dial is open at the bottom, so the slider tucks up into the gap. */}
-      <View className="-mb-10 items-center">
-        <View style={{ width: size, height: size }}>
-          <RingChart
-            data={[{ label: 'Target', value: room.target - MIN_TEMPERATURE, maxValue: MAX_TEMPERATURE - MIN_TEMPERATURE }]}
-            size={size}
-            strokeWidth={20}
-            startAngle={-135}
-            endAngle={135}
-          >
-            <RingChart.Ring index={0} color={tint} trackOpacity={0.12} />
-          </RingChart>
-          <View
-            pointerEvents="none"
-            className="absolute inset-0 items-center justify-center"
-            accessible
-            accessibilityLabel={`Target ${room.target.toFixed(1)} degrees. ${heading}.`}
-          >
-            <Text size="sm" muted>
-              {off ? 'Off' : 'Target'}
-            </Text>
-            <View className={cn('flex-row items-start', off && 'opacity-40')}>
-              <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-6xl font-bold" />
-              <Text weight="bold" className="text-3xl">
-                °
+    <Frame className="w-full">
+      <Frame.Header>
+        <Frame.Title>Climate</Frame.Title>
+        <Frame.Action>{`Now ${room.current.toFixed(1)}°`}</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel>
+        {/* The dial is open at the bottom, so the slider tucks up into the gap. */}
+        <View className="-mb-6 items-center pt-5">
+          <View style={{ width: size, height: size }}>
+            <RingChart
+              data={[{ label: 'Target', value: room.target - MIN_TEMPERATURE, maxValue: MAX_TEMPERATURE - MIN_TEMPERATURE }]}
+              size={size}
+              strokeWidth={20}
+              startAngle={-135}
+              endAngle={135}
+            >
+              <RingChart.Ring index={0} color={tint} trackOpacity={0.12} />
+            </RingChart>
+            <View
+              pointerEvents="none"
+              className="absolute inset-0 items-center justify-center"
+              accessible
+              accessibilityLabel={`Target ${room.target.toFixed(1)} degrees. ${heading}.`}
+            >
+              <Text size="sm" muted>
+                {off ? 'Off' : 'Target'}
+              </Text>
+              <View className={cn('flex-row items-start', off && 'opacity-40')}>
+                <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-6xl font-bold" />
+                <Text weight="bold" className="text-3xl">
+                  °
+                </Text>
+              </View>
+              <Text size="sm" muted>
+                {heading}
               </Text>
             </View>
-            <Text size="sm" muted>
-              {heading}
-            </Text>
           </View>
         </View>
-      </View>
 
-      <Slider
-        label="Target temperature"
-        min={MIN_TEMPERATURE}
-        max={MAX_TEMPERATURE}
-        step={0.5}
-        value={room.target}
-        onValueChange={(target) => onChange({ target })}
-        disabled={off}
-      />
-
-      <ToggleButtonGroup
-        selectionMode="single"
-        value={[room.mode]}
-        onValueChange={(value) => {
-          const next = value[0] as Mode | undefined;
-          if (next) onChange({ mode: next });
-        }}
-        className="w-full"
-      >
-        {MODES.map((mode) => (
-          <ToggleButton key={mode.id} id={mode.id} className="flex-1">
-            {mode.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-    </View>
+        <View className="px-4 pb-4">
+          <Slider
+            label="Target temperature"
+            min={MIN_TEMPERATURE}
+            max={MAX_TEMPERATURE}
+            step={0.5}
+            value={room.target}
+            onValueChange={(target) => onChange({ target })}
+            disabled={off}
+          />
+        </View>
+      </Frame.Panel>
+      <Frame.Footer>
+        <ToggleButtonGroup
+          selectionMode="single"
+          value={[room.mode]}
+          onValueChange={(value) => {
+            const next = value[0] as Mode | undefined;
+            if (next) onChange({ mode: next });
+          }}
+          className="w-full"
+        >
+          {MODES.map((mode) => (
+            <ToggleButton key={mode.id} id={mode.id} className="flex-1">
+              {mode.label}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Frame.Footer>
+    </Frame>
   );
 }
 
@@ -352,6 +360,7 @@ export function SmartHomeBlock({ onBack, className }: SmartHomeBlockProps) {
   const [rooms, setRooms] = useState(ROOMS);
   const [roomId, setRoomId] = useState(ROOMS[0]!.id);
   const [scenes, setScenes] = useState<Record<string, Scene | undefined>>({});
+  const [hour, setHour] = useState<BarChartDatum | null>(null);
 
   const room = rooms.find((item) => item.id === roomId) ?? rooms[0]!;
   const scene = scenes[room.id];
@@ -467,18 +476,35 @@ export function SmartHomeBlock({ onBack, className }: SmartHomeBlockProps) {
           </View>
 
           {/* The whole house */}
-          <Kpi colorIndex={1} goodDirection="down">
-            <Kpi.Header>
-              <Kpi.Title>Energy today</Kpi.Title>
-            </Kpi.Header>
-            <Kpi.Content layout="inline">
-              <Kpi.Stat>
-                <Kpi.Value>{ENERGY_TODAY.toFixed(1)} kWh</Kpi.Value>
-                <Kpi.Trend value={ENERGY_TREND} caption="vs. yesterday" />
-              </Kpi.Stat>
-              <Kpi.Chart data={ENERGY} dataKey="kwh" inline />
-            </Kpi.Content>
-          </Kpi>
+          <Frame className="w-full">
+            <Frame.Header>
+              <Frame.Title>Energy today</Frame.Title>
+              <Frame.Action>Whole house</Frame.Action>
+            </Frame.Header>
+            <Frame.Panel>
+              <BarChart
+                data={ENERGY}
+                xDataKey="hour"
+                aspectRatio={2}
+                onActiveIndexChange={(_index, datum) => setHour(datum)}
+              >
+                <BarChart.Header
+                  className="px-4 pt-3.5"
+                  value={`${(hour ? Number(hour.kwh) : ENERGY_TODAY).toFixed(1)} kWh`}
+                  caption={
+                    hour
+                      ? `${hour.hour}–${hour.until}`
+                      : `${ENERGY_TREND}% on the same hours yesterday`
+                  }
+                />
+                <BarChart.Grid />
+                <BarChart.Bar dataKey="kwh" />
+                {/* Two digits: a full `06:00` is wider than an hour's bar. */}
+                <BarChart.XAxis ticks={4} format={(datum) => String(datum.hour).slice(0, 2)} />
+                <BarChart.Tooltip />
+              </BarChart>
+            </Frame.Panel>
+          </Frame>
         </View>
       </ScrollView>
     </View>

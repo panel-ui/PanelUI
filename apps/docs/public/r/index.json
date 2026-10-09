@@ -1897,10 +1897,11 @@
     "description": "A room at a time: a thermostat dial, scenes that set the devices, and a tile per device that toggles when pressed.",
     "registryDependencies": [
       "animated-pressable",
+      "bar-chart",
       "button",
       "cn",
+      "frame",
       "icons",
-      "kpi",
       "ring-chart",
       "slider",
       "tabs",

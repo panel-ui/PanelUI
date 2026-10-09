@@ -26,7 +26,13 @@ import { avatarSourceIdentity } from './avatar-source';
 
 const avatarVariants = tv({
   slots: {
-    root: 'items-center justify-center overflow-hidden rounded-full border border-border bg-muted',
+    /*
+     * An opaque fill, not `bg-muted`. Muted is a translucent tint in every
+     * theme, which is right for a surface and wrong for an object: in a group
+     * each face slides over the next, and a translucent face lets the one
+     * underneath show through it.
+     */
+    root: 'items-center justify-center overflow-hidden rounded-full border border-border bg-surface-secondary',
     /*
      * Rounded itself, not only clipped by the circle around it.
      *

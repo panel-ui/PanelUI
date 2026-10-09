@@ -82,7 +82,7 @@ A plain avatar renders as one clipped node. Adding children wraps it in an uncli
 
 `Avatar.Group` keeps people in the order they were written and exposes each visible person, followed by the `+N` overflow summary, as a list item. Explicit stacking order puts the first face on top without reversing assistive-technology traversal. This logical order is preserved in both LTR and RTL layouts.
 
-Each face in a group gets a ring in the page background, so the stack reads as separate people on any surface. Pass `overlap` to change how far they slide under each other — `0` closes the stack up into a plain row.
+Each face in a group gets a ring in the page background, so the stack reads as separate people on any surface. The fill behind the initials is opaque for the same reason: a face that slides over another hides it rather than letting it show through. Pass `overlap` to change how far they slide under each other — `0` closes the stack up into a plain row.
 
 ---
 

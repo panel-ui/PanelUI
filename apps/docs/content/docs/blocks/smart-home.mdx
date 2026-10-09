@@ -293,58 +293,67 @@ function Climate({ room, onChange }: { room: Room; onChange: (patch: Partial<Roo
     onChange({ target: Math.min(MAX_TEMPERATURE, Math.max(MIN_TEMPERATURE, room.target + by)) });
 
   return (
-    <View className="flex-row items-center gap-3 rounded-3xl border border-border bg-card p-3 pl-4">
-      <AnimatedPressable
-        onPress={() => onChange({ mode: nextMode.id })}
-        accessibilityRole="button"
-        accessibilityLabel={`Mode: ${mode.label}`}
-        accessibilityHint={`Changes the mode to ${nextMode.label}`}
-        className={cn('h-11 w-11 items-center justify-center rounded-full', mode.surface)}
-      >
-        <Glyph icon={mode.icon} size={20} color={tint} />
-      </AnimatedPressable>
+    // Wraps rather than squeezes: at the largest text sizes the stepper moves
+    // to a line of its own instead of crushing "Climate" into a column of
+    // syllables.
+    <View className="flex-row flex-wrap items-center justify-end gap-3 rounded-3xl border border-border bg-card p-3 pl-4">
+      <View className="min-w-36 flex-1 flex-row items-center gap-3">
+        <AnimatedPressable
+          onPress={() => onChange({ mode: nextMode.id })}
+          accessibilityRole="button"
+          accessibilityLabel={`Mode: ${mode.label}`}
+          accessibilityHint={`Changes the mode to ${nextMode.label}`}
+          className={cn('h-11 w-11 items-center justify-center rounded-full', mode.surface)}
+        >
+          <Glyph icon={mode.icon} size={20} color={tint} />
+        </AnimatedPressable>
 
-      <View
-        className="flex-1"
-        accessible
-        accessibilityLabel={`Climate. ${status}, currently ${room.current.toFixed(1)} degrees`}
-      >
-        <Text weight="semibold">Climate</Text>
-        <Text size="sm" muted className="tabular-nums" numberOfLines={1}>
-          {status} · {room.current.toFixed(1)}°
-        </Text>
+        <View
+          className="flex-1"
+          accessible
+          accessibilityLabel={`Climate. ${status}, currently ${room.current.toFixed(1)} degrees`}
+        >
+          <Text weight="semibold" numberOfLines={1}>
+            Climate
+          </Text>
+          <Text size="sm" muted className="tabular-nums" numberOfLines={1}>
+            {status} · {room.current.toFixed(1)}°
+          </Text>
+        </View>
       </View>
 
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-9 w-9 rounded-full"
-        accessibilityLabel="Lower the target by half a degree"
-        disabled={off || room.target <= MIN_TEMPERATURE}
-        onPress={() => nudge(-0.5)}
-      >
-        <MinusIcon size={14} />
-      </Button>
-      <View
-        accessible
-        accessibilityLabel={`Target ${room.target.toFixed(1)} degrees`}
-        className={cn('flex-row items-start', off && 'opacity-40')}
-      >
-        <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-2xl font-bold" />
-        <Text weight="bold" className="text-lg">
-          °
-        </Text>
+      <View className="flex-row items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 rounded-full"
+          accessibilityLabel="Lower the target by half a degree"
+          disabled={off || room.target <= MIN_TEMPERATURE}
+          onPress={() => nudge(-0.5)}
+        >
+          <MinusIcon size={14} />
+        </Button>
+        <View
+          accessible
+          accessibilityLabel={`Target ${room.target.toFixed(1)} degrees`}
+          className={cn('flex-row items-start', off && 'opacity-40')}
+        >
+          <TextAnimation.Sliding value={room.target} decimals={1} textClassName="text-2xl font-bold" />
+          <Text weight="bold" className="text-lg">
+            °
+          </Text>
+        </View>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 rounded-full"
+          accessibilityLabel="Raise the target by half a degree"
+          disabled={off || room.target >= MAX_TEMPERATURE}
+          onPress={() => nudge(0.5)}
+        >
+          <PlusIcon size={14} />
+        </Button>
       </View>
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-9 w-9 rounded-full"
-        accessibilityLabel="Raise the target by half a degree"
-        disabled={off || room.target >= MAX_TEMPERATURE}
-        onPress={() => nudge(0.5)}
-      >
-        <PlusIcon size={14} />
-      </Button>
     </View>
   );
 }
@@ -490,16 +499,24 @@ export function SmartHomeBlock({ onBack, className }: SmartHomeBlockProps) {
             <Text size="sm" weight="semibold" muted>
               Scenes
             </Text>
+            {/* Two to a row, icon beside the word. Four across left each tile
+                about eighty points, and at a larger text size "Morning" broke
+                in the middle of the word and pushed its tile taller than the
+                rest. A half-width tile fits the label on one line at every
+                size the system offers. */}
             <ToggleButtonGroup
               selectionMode="single"
-              size="sm"
               value={scene ? [scene] : []}
               onValueChange={(value) => applyScene(value[0] as Scene | undefined)}
-              className="w-full gap-2"
+              className="w-full flex-wrap gap-2"
             >
               {SCENES.map((item) => (
-                <ToggleButton key={item.id} id={item.id} className="h-auto flex-1 flex-col gap-1.5 py-3">
-                  <Glyph icon={item.icon} size={20} />
+                <ToggleButton
+                  key={item.id}
+                  id={item.id}
+                  className="h-auto min-h-12 grow basis-[46%] justify-start gap-2.5 rounded-2xl px-4 py-3"
+                >
+                  <Glyph icon={item.icon} size={18} />
                   <ToggleButton.Label>{item.label}</ToggleButton.Label>
                 </ToggleButton>
               ))}

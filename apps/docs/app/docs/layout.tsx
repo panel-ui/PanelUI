@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { PLATFORM_SCRIPT } from '@/components/platform-toggle';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
 
@@ -30,6 +31,14 @@ export default function Layout({ children }: { children: ReactNode }) {
       sidebar={{ collapsible: false, prefetch: false }}
       tabMode="navbar"
     >
+      {/*
+        Picks the App or Web version of a Studio page before it paints. Inline
+        and first, because anything later would show the other version first.
+      */}
+      <script
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: PLATFORM_SCRIPT }}
+      />
       {children}
     </DocsLayout>
   );

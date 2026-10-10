@@ -107,6 +107,13 @@ the library source into `api.json`; `gen.mjs` merges it with the hand-written `u
 a Studio or SDK page anywhere else in the sidebar. Its signatures come from the SDK source in the
 `panel-ui/panelui-studio` repo (`packages/sdk/src`), never from memory.
 
+Studio pages that differ between Expo and the web set `platforms: true` in their frontmatter,
+which puts the **App / Web** toggle under the description, and wrap the differing parts in
+`<Platform only="app">` / `<Platform only="web">` (tags on lines of their own, so
+`lib/platform-headings.ts` can hide the matching table-of-contents entries). Shared prose stays
+outside both. PanelUI's components are React Native components, so every "Usage with PanelUI"
+section is App-only, and a page that shows them carries a Web-only notice saying so.
+
 ### Write a guide, not an argument
 
 Docs prose is there to be *used*. A reader arrives with a decision to make — should I use this,

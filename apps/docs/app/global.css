@@ -439,6 +439,29 @@ body {
   }
 }
 /*
+ * Studio pages with an App / Web toggle (components/platform*.tsx). With no
+ * `data-platform` on <html> the reader sees the app version, so the page is
+ * right before any script runs.
+ *
+ * Moved far off-screen and made invisible rather than `display: none`: the
+ * table of contents follows the heading nearest the top of the viewport, and
+ * a `display: none` heading measures as sitting exactly there, so it would
+ * win. `visibility: hidden` still keeps it from screen readers, focus and
+ * find-in-page.
+ */
+html:not([data-platform='web']) [data-platform-only='web'],
+html[data-platform='web'] [data-platform-only='app'] {
+  position: absolute;
+  top: -100000px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
  ---break---
  */
 @layer base {

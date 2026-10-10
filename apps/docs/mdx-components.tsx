@@ -7,6 +7,7 @@ import { Diagram } from '@/components/diagram';
 import { IconGallery } from '@/components/icon-gallery';
 import { InstallTabs } from '@/components/install-tabs';
 import { Preview } from '@/components/preview';
+import { Platform } from '@/components/platform';
 import { PreviewVideo } from '@/components/preview-video';
 import type { MDXComponents } from 'mdx/types';
 
@@ -25,6 +26,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     InstallTabs,
     Preview,
     PreviewVideo,
+    Platform,
     ...components,
   };
 }

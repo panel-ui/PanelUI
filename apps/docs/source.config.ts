@@ -11,6 +11,11 @@ export const docs = defineDocs({
      */
     schema: frontmatterSchema.extend({
       status: z.string().optional(),
+      /*
+       * The page has App and Web versions: it shows the toggle under the
+       * description, and its `<Platform only="…">` blocks follow it.
+       */
+      platforms: z.boolean().optional(),
     }),
   },
 });

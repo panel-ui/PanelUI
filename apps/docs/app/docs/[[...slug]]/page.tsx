@@ -8,7 +8,9 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/notebook/page';
+import { PlatformToggle } from '@/components/platform-toggle';
 import { getMDXComponents } from '@/mdx-components';
+import { platformHeadings as findPlatformHeadings, type PlatformHeadings } from '@/lib/platform-headings';
 import { absoluteUrl, site } from '@/lib/site';
 import { source } from '@/lib/source';
 
@@ -65,6 +67,9 @@ export default async function Page({ params }: PageProps) {
   // no /docs prefix.
   const markdownUrl = `/llms.mdx/${page.slugs.join('/')}`;
   const trail = breadcrumbTrail(slug ?? [], page.data.title);
+  const platformHeadings = page.data.platforms
+    ? findPlatformHeadings(await page.data.getText('raw'), page.data.toc.map((item) => item.url))
+    : null;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -72,7 +77,8 @@ export default async function Page({ params }: PageProps) {
       <DocsDescription>{page.data.description}</DocsDescription>
 
       {/* Copy the page as Markdown, for pasting into an LLM. */}
-      <div className="flex flex-row items-center gap-2 border-b pb-4">
+      <div className="flex flex-row flex-wrap items-center gap-2 border-b pb-4">
+        {page.data.platforms ? <PlatformToggle /> : null}
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
@@ -82,6 +88,7 @@ export default async function Page({ params }: PageProps) {
       <DocsBody>
         <MDX components={getMDXComponents()} />
       </DocsBody>
+      {platformHeadings ? <PlatformTocRules headings={platformHeadings} /> : null}
 
       {/* One graph rather than two script tags: the article and the trail
           describe the same page, and a single block is what a validator and a
@@ -201,3 +208,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
   };
 }
+
+/**
+ * Hides the table-of-contents entries for headings in the version of the page
+ * the reader didn't pick, the same way `global.css` hides the headings. Only
+ * there: a link to one of those headings in shared prose stays visible. The
+ * ids come from `lib/platform-headings.ts`.
+ */
+function PlatformTocRules({ headings }: { headings: PlatformHeadings }) {
+  const rule = (scope: string, ids: string[]) => {
+    const links = ids.filter((id) => CSS_ID.test(id)).map((id) => `a[href="#${id}"]`);
+    return links.length > 0 ? `${scope} :is(${TOC}) :is(${links.join(',')}){display:none}` : '';
+  };
+  const rules = [
+    rule(`html:not([data-platform='web'])`, headings.web),
+    rule(`html[data-platform='web']`, headings.app),
+  ].filter(Boolean);
+  return <style>{rules.join('\n')}</style>;
+}
+
+/** The desktop table of contents and the mobile one above the page. */
+const TOC = '#nd-toc,#nd-tocnav';
+
+/** What Fumadocs' slugger produces. Anything else is left out of the rules. */
+const CSS_ID = /^[\w-]+$/;

@@ -1,7 +1,20 @@
 ---
 title: Conversations
 description: Show a user their reports and your team's replies, and let them answer — with the React hooks or the client directly.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  The hooks and the client work on the web. The PanelUI components the App
+  version draws threads with — Support, Message, Message Scroller and Textarea
+  — are React Native components and don't run in a browser yet.
+  [A thread on the web](#a-thread-on-the-web) builds the same screens with
+  plain markup.
+</Callout>
+
+</Platform>
 
 Every report is a thread. Your team replies from the inbox; the app reads the
 thread and can add to it. Replies travel over plain HTTP, so an open thread
@@ -11,6 +24,8 @@ polls while someone is looking at it and nothing runs in the background.
 
 `useFeedbackList` lists this install's own reports, newest first, with how many
 replies each has:
+
+<Platform only="app">
 
 ```tsx
 import { FlatList, RefreshControl } from 'react-native';
@@ -34,6 +49,42 @@ export function MyReports({ onOpen }: { onOpen: (id: string) => void }) {
 
 It doesn't poll: a list of your own reports rarely changes while you look at it.
 Pull to refresh calls `reload`.
+
+</Platform>
+
+<Platform only="web">
+
+```tsx
+'use client';
+
+import { useFeedbackList } from 'panelui-studio/react';
+
+export function MyReports({ onOpen }: { onOpen: (id: string) => void }) {
+  const { items, isLoading, reload } = useFeedbackList();
+
+  return (
+    <section>
+      <button type="button" onClick={reload} disabled={isLoading}>
+        Refresh
+      </button>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>
+            <button type="button" onClick={() => onOpen(item.id)}>
+              {item.message} {item.replies > 0 ? `· ${item.replies} replies` : ''}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+```
+
+It doesn't poll: a list of your own reports rarely changes while you look at it.
+A refresh button, or opening the page again, calls `reload`.
+
+</Platform>
 
 ## One thread
 
@@ -59,9 +110,20 @@ export function Thread({ feedbackId }: { feedbackId: string }) {
 }
 ```
 
+<Platform only="app">
+
 `Bubble` and `Composer` stand in for your own components;
 [Usage with PanelUI](#usage-with-panelui) has the same thread built from
 PanelUI's.
+
+</Platform>
+
+<Platform only="web">
+
+`Bubble` and `Composer` stand in for your own components;
+[A thread on the web](#a-thread-on-the-web) has both in plain markup.
+
+</Platform>
 
 - `author` is `'user'` for the person using your app and `'developer'` for your
   team. Internal notes never reach the app.
@@ -79,6 +141,60 @@ const reports = await studio.feedback.list();
 const thread = await studio.conversations.messages(reports[0].id);
 await studio.conversations.send(reports[0].id, 'Yes, it happens every time.');
 ```
+
+<Platform only="web">
+
+## A thread on the web
+
+The thread from above with the placeholders filled in: the messages in a list,
+and a form that sends a reply. It polls every 15 seconds while it's on screen.
+
+```tsx title="components/thread.tsx"
+'use client';
+
+import { useState } from 'react';
+import { useConversation } from 'panelui-studio/react';
+
+export function Thread({ feedbackId }: { feedbackId: string }) {
+  const { messages, isSending, send } = useConversation(feedbackId);
+  const [draft, setDraft] = useState('');
+
+  async function reply(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const body = draft.trim();
+    if (!body) return;
+    setDraft('');
+    await send(body);
+  }
+
+  return (
+    <section aria-label="Conversation">
+      <ol>
+        {messages.map((message) => (
+          <li key={message.id} data-author={message.author}>
+            <strong>{message.author === 'user' ? 'You' : 'The team'}</strong>
+            <p>{message.body}</p>
+          </li>
+        ))}
+      </ol>
+      <form onSubmit={reply}>
+        <label htmlFor="reply">Reply</label>
+        <textarea id="reply" value={draft} onChange={(event) => setDraft(event.target.value)} />
+        <button type="submit" disabled={isSending}>
+          Send
+        </button>
+      </form>
+    </section>
+  );
+}
+```
+
+In Next.js, a route like `app/messages/[id]/page.tsx` can pass its `id` to
+`<Thread feedbackId={id} />`.
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -187,3 +303,5 @@ export default function Thread() {
   height={820}
   caption="The team replied from the inbox; the app showed it on its next poll, and the user answered."
 />
+
+</Platform>

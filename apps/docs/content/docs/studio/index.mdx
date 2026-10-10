@@ -1,6 +1,7 @@
 ---
 title: Overview
 description: PanelUI Studio is the hosted backend behind PanelUI's Feedback — reports, screenshots and two-way conversations, with an inbox for your team.
+platforms: true
 ---
 
 PanelUI draws the screens. Studio is where what your users send ends up: an
@@ -15,7 +16,8 @@ rather not build the backend yourself.
 
 - **Feedback.** A message, a rating, tags, the screen it came from and the
   device context — collected by the SDK, not typed by the user.
-- **Screenshots.** Uploaded straight from the device to private storage.
+- **Screenshots.** Uploaded straight from the device or browser to private
+  storage.
 - **Conversations.** Every report is a thread. You reply from the inbox; the app
   shows the reply and the user can answer.
 - **Support.** Users start a conversation themselves, into a Support inbox.
@@ -34,8 +36,25 @@ Your app ── panelui-studio (SDK) ── Studio API ── Inbox (your team)
 ```
 
 The app ships a **publishable key**, which is public by design: it can only
-submit to its own project. Each install registers itself once and keeps its own
-token in secure storage, so no secret is ever bundled into the app.
+submit to its own project.
+
+<Platform only="app">
+
+Each install registers itself once and keeps its own token in secure storage,
+so no secret is ever bundled into the app. The SDK works in Expo, bare React
+Native and Expo's web target.
+
+</Platform>
+
+<Platform only="web">
+
+Each browser registers itself once and keeps its own token in `localStorage`,
+so no secret is ever bundled into the site. The SDK works in Next.js, React,
+Vite and any other web bundler. PanelUI's components are React Native
+components and don't run in a browser yet, so a website draws Studio's screens
+with its own.
+
+</Platform>
 
 ## When to reach for it
 

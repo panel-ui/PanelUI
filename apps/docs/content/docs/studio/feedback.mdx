@@ -1,7 +1,20 @@
 ---
 title: Feedback
 description: What a report can carry, how screenshots are uploaded, and what happens when a workspace reaches its monthly allowance.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  Everything on this page works on the web through the SDK. The PanelUI
+  components the App version uses — Feedback, Rating and Checkbox — are React
+  Native components and don't run in a browser yet, so on the web you build the
+  form with your own components. [A form on the web](#a-form-on-the-web) is a
+  complete one.
+</Callout>
+
+</Platform>
 
 A report is one call. Everything but `message` is optional.
 
@@ -29,8 +42,21 @@ const { feedback, warnings } = await studio.feedback.submit({
 | `attachmentIds` | Screenshots, from `uploads.screenshot()`. |
 | `country` | ISO-3166 alpha-2, when your app knows it better than the device locale. |
 
+<Platform only="app">
+
 The device context — platform, OS, model, locale — comes from the device and
 doesn't need passing.
+
+</Platform>
+
+<Platform only="web">
+
+The device context — platform, OS and its version, browser, locale — comes from
+the browser and doesn't need passing. A browser has no app version, so pass
+`appVersion` yourself, here or once as `device.appVersion` when you create the
+client.
+
+</Platform>
 
 ## Warnings
 
@@ -50,6 +76,8 @@ Warnings are for you, not your users. Log them; don't show them.
 
 Uploading is its own step, so a slow upload never holds up the report:
 
+<Platform only="app">
+
 ```ts
 const attachmentId = await studio.uploads.screenshot({ uri: capture.uri });
 
@@ -61,7 +89,30 @@ await studio.feedback.submit({
 
 `uri` is a local file — a `file://…` URI or, from `panelui-studio` 0.2.1, a
 bare path, which is what `react-native-view-shot` returns on iOS — or anything
-`fetch` can read. PNG, JPEG or WebP, up to 5 MB. The bytes go straight to private storage; Studio only ever
+`fetch` can read.
+
+</Platform>
+
+<Platform only="web">
+
+```ts
+const file = input.files?.[0]; // from <input type="file">
+const attachmentId = await studio.uploads.screenshot({ file });
+
+await studio.feedback.submit({
+  message: 'The chart overlaps the legend.',
+  attachmentIds: [attachmentId],
+});
+```
+
+`file` is the image itself: a `File` from a file input, a pasted or dropped
+image, or any `Blob`. Its own type is used, and anything other than an image is
+refused before an upload starts. A `uri` works too, for an image `fetch` can
+read.
+
+</Platform>
+
+PNG, JPEG or WebP, up to 5 MB. The bytes go straight to private storage; Studio only ever
 shows them to your team through links that expire within minutes.
 
 Each plan allows a number of screenshots per report — 1 on Free, 3 on Pro and
@@ -108,6 +159,70 @@ try {
 ```
 
 The full list is in the [API reference](/docs/studio/api-reference#errors).
+
+<Platform only="web">
+
+## A form on the web
+
+A message, an optional screenshot and the states in between, in plain React.
+`screen` is the page the reader was on:
+
+```tsx title="components/feedback-form.tsx"
+'use client';
+
+import { useState } from 'react';
+import { isStudioError } from 'panelui-studio';
+
+import { studio } from '@/lib/studio';
+
+export function FeedbackForm({ onSent }: { onSent?: () => void }) {
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const shot = form.get('screenshot');
+    setStatus('sending');
+    setError(null);
+    try {
+      const attachmentIds =
+        shot instanceof File && shot.size > 0 ? [await studio.uploads.screenshot({ file: shot })] : [];
+      await studio.feedback.submit({
+        message: String(form.get('message')),
+        screen: window.location.pathname,
+        attachmentIds,
+      });
+      setStatus('sent');
+      onSent?.();
+    } catch (caught) {
+      setStatus('idle');
+      setError(isStudioError(caught) ? caught.message : "Couldn't send that. Check your connection.");
+    }
+  }
+
+  if (status === 'sent') return <p>Thanks — we read every one.</p>;
+
+  return (
+    <form onSubmit={send}>
+      <label htmlFor="feedback-message">What should we fix first?</label>
+      <textarea id="feedback-message" name="message" required maxLength={5000} />
+      <label htmlFor="feedback-screenshot">Screenshot (optional)</label>
+      <input id="feedback-screenshot" name="screenshot" type="file" accept="image/png,image/jpeg,image/webp" />
+      {error ? <p role="alert">{error}</p> : null}
+      <button type="submit" disabled={status === 'sending'}>
+        {status === 'sending' ? 'Sending…' : 'Send feedback'}
+      </button>
+    </form>
+  );
+}
+```
+
+Style it with your own components; the SDK only needs the message and the file.
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -199,3 +314,5 @@ PanelUI's overlay layer, outside that view, so it isn't in the screenshot.
   height={2100}
   caption="What the user sees. The Plan and How easy questions come from the project's custom form."
 />
+
+</Platform>

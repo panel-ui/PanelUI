@@ -1,7 +1,19 @@
 ---
 title: Announcements
 description: Write a message once in Studio and show it in every app that asks — release notes, maintenance windows, a feature to try.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  Announcements work on the web through the SDK. The PanelUI components the
+  App version shows them with — Alert and Button — are React Native components
+  and don't run in a browser yet. [A banner on the web](#a-banner-on-the-web)
+  is the same banner in plain markup.
+</Callout>
+
+</Platform>
 
 Announcements are published in Studio (**Announcements** in the project) with a
 title, a message and an optional button, for a window of time and for the
@@ -38,6 +50,51 @@ export function AnnouncementBanner() {
 - `dismiss(id)` hides it for this install for good, straight away.
 
 Without React: `studio.announcements.list()`, `.seen(id)` and `.dismiss(id)`.
+
+<Platform only="web">
+
+A website reports its platform as `web`. An announcement with no platforms
+picked reaches every platform; one limited to iOS and Android never reaches
+your site, so tick **Web** too.
+
+## A banner on the web
+
+```tsx title="components/announcement-banner.tsx"
+'use client';
+
+import { useEffect } from 'react';
+import { useAnnouncements } from 'panelui-studio/react';
+
+export function AnnouncementBanner() {
+  const { announcements, seen, dismiss } = useAnnouncements();
+  const next = announcements[0];
+
+  // Count the view once it's on screen; seen() doesn't hide it.
+  useEffect(() => {
+    if (next && !next.seen) void seen(next.id);
+  }, [next, seen]);
+
+  if (!next) return null;
+
+  return (
+    <aside role="status">
+      <strong>{next.title}</strong>
+      <p>{next.body}</p>
+      {next.cta ? <a href={next.cta.url}>{next.cta.label}</a> : null}
+      <button type="button" onClick={() => dismiss(next.id)}>
+        Dismiss
+      </button>
+    </aside>
+  );
+}
+```
+
+`next.seen` is true once this install has recorded a view, so each browser
+counts once in Studio's **Seen by** column.
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -94,3 +151,5 @@ counts once in Studio's **Seen by** column.
   height={860}
   caption="An announcement published in Studio, shown until the user dismisses it."
 />
+
+</Platform>

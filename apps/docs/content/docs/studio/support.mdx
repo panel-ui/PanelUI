@@ -1,7 +1,20 @@
 ---
 title: Support
 description: Let people start a conversation from your app — not just answer yours — and reply from a Support inbox that works like Feedback.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  Support works on the web through the SDK. The PanelUI components the App
+  version builds its support screen from — Support, Textarea and Button — are
+  React Native components and don't run in a browser yet.
+  [A contact form on the web](#a-contact-form-on-the-web) is the same flow in
+  plain markup.
+</Callout>
+
+</Platform>
 
 Feedback is the app asking. Support is the user asking: "I can't sign in",
 "where did my data go". One call opens a conversation that lands in the
@@ -40,6 +53,59 @@ Support conversations use the workspace's monthly allowance, the same rate
 limits, and the same email, Slack and webhook notifications (`support.created`)
 as reports. Your team sees them in their own inbox, with the same statuses,
 tags and replies.
+
+<Platform only="web">
+
+## A contact form on the web
+
+A message box that starts the conversation, then shows its thread with the
+`Thread` component from [Conversations](/docs/studio/conversations#a-thread-on-the-web):
+
+```tsx title="components/contact-support.tsx"
+'use client';
+
+import { useState } from 'react';
+import { isStudioError } from 'panelui-studio';
+import { useStudio } from 'panelui-studio/react';
+
+import { Thread } from './thread';
+
+export function ContactSupport() {
+  const studio = useStudio();
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (conversationId) return <Thread feedbackId={conversationId} />;
+
+  async function start(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = String(new FormData(event.currentTarget).get('message')).trim();
+    if (!message) return;
+    try {
+      const { conversation } = await studio.support.start({ message, screen: window.location.pathname });
+      setConversationId(conversation.id);
+    } catch (caught) {
+      setError(isStudioError(caught) ? caught.message : "Couldn't send that. Check your connection.");
+    }
+  }
+
+  return (
+    <form onSubmit={start}>
+      <label htmlFor="support-message">How can we help?</label>
+      <textarea id="support-message" name="message" required />
+      {error ? <p role="alert">{error}</p> : null}
+      <button type="submit">Send</button>
+    </form>
+  );
+}
+```
+
+Earlier conversations come from `useFeedbackList()`, filtered to
+`kind === 'support'`.
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -130,3 +196,5 @@ and the reply time are yours to write; Studio doesn't set them.
   height={1660}
   caption="Sending opens the conversation in the project's Support inbox, next to Feedback."
 />
+
+</Platform>

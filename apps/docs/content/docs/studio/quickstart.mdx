@@ -1,6 +1,7 @@
 ---
 title: Quickstart
-description: Create a Studio project, install the SDK and send the first report from an Expo or React Native app.
+description: Create a Studio project, install the SDK and send the first report from an Expo, React Native or web app.
+platforms: true
 ---
 
 <Steps>
@@ -19,6 +20,8 @@ a project for your app. **Project → Settings** shows its publishable key
 
 ### Install the SDK
 
+<Platform only="app">
+
 <InstallTabs packages="panelui-studio" />
 
 Each install keeps a token that proves it is itself, so the SDK stores it in
@@ -31,11 +34,29 @@ npx expo install expo-secure-store
 Without it the SDK falls back to AsyncStorage, then to memory — and memory
 means a new install is registered on every launch.
 
+The same code runs on Expo's web target. There the SDK uses its browser build,
+which keeps the token in `localStorage`.
+
+</Platform>
+
+<Platform only="web">
+
+<InstallTabs kind="add" packages="panelui-studio" />
+
+Web support needs `panelui-studio` 0.3.0 or later. Next.js, Vite and other web bundlers pick the SDK's browser build on their own.
+It keeps each install's token in `localStorage`, so there's nothing else to
+install. Where the browser blocks storage, the token lives in memory and a new
+install is registered on every page load.
+
+</Platform>
+
 </Step>
 
 <Step>
 
 ### Create the client
+
+<Platform only="app">
 
 ```ts title="lib/studio.ts"
 import { createStudio } from 'panelui-studio';
@@ -47,6 +68,49 @@ export const studio = createStudio({
 
 The publishable key is public by design, so `EXPO_PUBLIC_` is the right place
 for it: all it allows is submitting to this one project.
+
+</Platform>
+
+<Platform only="web">
+
+<Tabs items={['Next.js', 'Vite']}>
+
+<Tab value="Next.js">
+
+```ts title="lib/studio.ts"
+import { createStudio } from 'panelui-studio';
+
+export const studio = createStudio({
+  publishableKey: process.env.NEXT_PUBLIC_STUDIO_KEY!,
+  device: { appVersion: '1.4.0' },
+});
+```
+
+</Tab>
+
+<Tab value="Vite">
+
+```ts title="src/lib/studio.ts"
+import { createStudio } from 'panelui-studio';
+
+export const studio = createStudio({
+  publishableKey: import.meta.env.VITE_STUDIO_KEY,
+  device: { appVersion: '1.4.0' },
+});
+```
+
+</Tab>
+
+</Tabs>
+
+The publishable key is public by design, so the framework's public prefix
+(`NEXT_PUBLIC_` or `VITE_`) is the right place for it: all it allows is
+submitting to this one project.
+
+A browser has no app version to read, so pass your own as `device.appVersion`.
+Leave it out if your site doesn't have one.
+
+</Platform>
 
 </Step>
 
@@ -62,8 +126,20 @@ await studio.feedback.submit({
 });
 ```
 
+<Platform only="app">
+
 The first call registers the install, then sends. Platform, OS, device model,
 app version and locale are filled in for you. Open the inbox and it's there.
+
+</Platform>
+
+<Platform only="web">
+
+The first call registers the install, then sends. The platform (`web`), the OS
+and its version, the browser and the locale are filled in for you; the browser
+shows where the inbox shows a device model. Open the inbox and it's there.
+
+</Platform>
 
 <Preview
   src="/studio/quickstart-inbox.jpg"
@@ -77,13 +153,27 @@ app version and locale are filled in for you. Open the inbox and it's there.
 
 </Steps>
 
+<Platform only="app">
+
 Any UI can call `submit` — a form of your own, a settings screen, a shake
 gesture. If your app uses PanelUI, [Usage with PanelUI](#usage-with-panelui)
 puts it behind its Feedback dialog.
 
+</Platform>
+
+<Platform only="web">
+
+Any UI can call `submit`: a form, a dialog, a button in the footer.
+[Feedback](/docs/studio/feedback#a-form-on-the-web) has a complete form with a
+screenshot.
+
+</Platform>
+
 ## With React context
 
-`panelui-studio/react` hands one client to the whole tree:
+`panelui-studio/react` hands one client to the whole tree.
+
+<Platform only="app">
 
 ```tsx title="app/_layout.tsx"
 import { Stack } from 'expo-router';
@@ -104,6 +194,77 @@ export default function RootLayout() {
 and the hooks use the same install; `publishableKey="pk_…"` instead creates one
 for the tree. Anything below can call `useStudio()` for the client, or use the
 hooks in [Conversations](/docs/studio/conversations).
+
+</Platform>
+
+<Platform only="web">
+
+<Tabs items={['Next.js', 'Vite']}>
+
+<Tab value="Next.js">
+
+`panelui-studio/react` is a client module. The root layout is a server
+component, and a client instance can't be passed from one, so share `studio`
+through a small client component:
+
+```tsx title="app/providers.tsx"
+'use client';
+
+import { StudioProvider } from 'panelui-studio/react';
+
+import { studio } from '@/lib/studio';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <StudioProvider client={studio}>{children}</StudioProvider>;
+}
+```
+
+```tsx title="app/layout.tsx"
+import { Providers } from './providers';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+If nothing outside React needs the client, the layout can render
+`<StudioProvider publishableKey={process.env.NEXT_PUBLIC_STUDIO_KEY!}>`
+directly instead. The hooks only run in client components.
+
+</Tab>
+
+<Tab value="Vite">
+
+```tsx title="src/main.tsx"
+import { createRoot } from 'react-dom/client';
+import { StudioProvider } from 'panelui-studio/react';
+
+import { App } from './app';
+import { studio } from './lib/studio';
+
+createRoot(document.getElementById('root')!).render(
+  <StudioProvider client={studio}>
+    <App />
+  </StudioProvider>
+);
+```
+
+</Tab>
+
+</Tabs>
+
+Anything below can call `useStudio()` for the client, or use the hooks in
+[Conversations](/docs/studio/conversations).
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -168,3 +329,5 @@ PanelUI's dialogs, sheets and popovers render into a layer that
 `PanelUIProvider` owns. A `StudioProvider` inside it can't be seen from there,
 so a hook like `useFeedbackForm()` in a Feedback dialog would throw
 `useStudio must be used inside <StudioProvider>`.
+
+</Platform>

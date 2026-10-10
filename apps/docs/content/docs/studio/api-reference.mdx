@@ -15,8 +15,8 @@ const studio = createStudio(config);
 |---|---|---|
 | `publishableKey` | `string` | Required. The project's `pk_…` key. |
 | `baseUrl` | `string` | `https://studio.panelui.dev/api/v1` |
-| `storage` | `StudioStorage` | Secure storage, then AsyncStorage, then memory |
-| `device` | `DeviceContext` | Detected from the device; anything passed wins |
+| `storage` | `StudioStorage` | In an app: secure storage, then AsyncStorage, then memory. On the web: `localStorage`, then memory. |
+| `device` | `DeviceContext` | Detected from the device or browser; anything passed wins |
 | `timeoutMs` | `number` | `10000`. Uploads get three times this. |
 | `fetch` | `typeof fetch` | The global `fetch` |
 
@@ -36,7 +36,7 @@ const studio = createStudio(config);
 | `announcements.dismiss(id)` | `void` | Hides it for this install for good. |
 | `conversations.messages(id)` | `ConversationMessage[]` | A thread, oldest first. Marks replies as read. |
 | `conversations.send(id, body)` | `ConversationMessage` | Adds the user's reply. |
-| `uploads.screenshot({ uri, contentType?, byteSize? })` | `string` | Uploads a screenshot; returns its attachment id. |
+| `uploads.screenshot(input)` | `string` | Uploads a screenshot from a `uri` or a `file`; returns its attachment id. See `ScreenshotInput`. |
 
 ## React
 
@@ -112,6 +112,22 @@ type ConversationMessage = {
   createdAt: string;
 };
 
+type ScreenshotInput =
+  | { uri: string; contentType?: ScreenshotContentType; byteSize?: number }  // a file uri, or anything fetch reads
+  | { file: Blob; contentType?: ScreenshotContentType; byteSize?: number }; // a File from <input type="file">, or any Blob
+
+type ScreenshotContentType = 'image/png' | 'image/jpeg' | 'image/webp';
+
+type DeviceContext = {
+  platform?: 'ios' | 'android' | 'web' | 'other';
+  osName?: string;
+  osVersion?: string;
+  model?: string;                // the browser and its major version on the web
+  locale?: string;
+  appVersion?: string;
+  country?: string;              // ISO-3166 alpha-2
+};
+
 type StudioStorage = {
   getItem(key: string): Promise<string | null> | string | null;
   setItem(key: string, value: string): Promise<void> | void;
@@ -119,8 +135,17 @@ type StudioStorage = {
 };
 ```
 
-Storage helpers: `secureStore()`, `asyncStorage()`, `memoryStorage()` and
-`defaultStorage()`.
+Storage helpers: `secureStore()` and `asyncStorage()` (apps only; on the web
+they throw), `browserStorage()` (`localStorage`, falling back to memory),
+`memoryStorage()` and `defaultStorage()`.
+
+## Builds
+
+`panelui-studio` ships two builds behind one set of types. React Native and
+Expo resolve the native build through the package's `react-native` export
+condition; everything else — Next.js, Vite, Expo's web target, Node — gets the
+browser build, which has no React Native imports. `panelui-studio/react` is a
+client module and uses whichever build the app resolved.
 
 ## Errors
 
@@ -146,8 +171,9 @@ rate limited. `isStudioError(error)` narrows an unknown catch.
 ## HTTP
 
 For platforms without the SDK, the same API is plain JSON over HTTPS with open
-CORS and no cookies. Every request carries `Authorization: Bearer pk_…`; all but
-registration also carry `X-Studio-Installation: it_…`.
+CORS and no cookies; browsers can read `Retry-After`. Every request carries
+`Authorization: Bearer pk_…`; all but registration also carry
+`X-Studio-Installation: it_…`.
 
 | Endpoint | |
 |---|---|

@@ -1,10 +1,30 @@
 ---
 title: Identify users
 description: Studio works with anonymous installs by default. When your app has sign-in, attach the user so the inbox shows who wrote.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  `identify` and `reset` work on the web exactly as shown here. The PanelUI
+  components the App version's account screen uses — Card, Button and Toast —
+  are React Native components and don't run in a browser yet, so call these
+  from your own sign-in and sign-out code.
+</Callout>
+
+</Platform>
 
 An app doesn't need accounts to use Studio. Each install registers itself and
 is anonymous: the inbox shows its device and reports, and replies reach it.
+
+<Platform only="web">
+
+On the web an install is one browser: its token lives in that browser's
+`localStorage`. Another browser, a private window or cleared site data is a new
+install.
+
+</Platform>
 
 When your app does know who someone is, tell Studio after they sign in:
 
@@ -29,7 +49,7 @@ someone else may have written them.
 
 ## Signing out
 
-An install belongs to a device, not a person. When someone signs out and the
+An install belongs to a device (on the web, a browser), not a person. When someone signs out and the
 next person should start fresh, forget the install:
 
 ```ts
@@ -44,6 +64,39 @@ When a user asks to be forgotten, open any of their reports in the inbox and
 press the trash button next to **Tags**, then confirm. It removes every report
 and screenshot from them in that project, with their installs and identity. Owners and admins can do
 this on every plan.
+
+<Platform only="web">
+
+## On the web
+
+Call them where your sign-in and sign-out already finish — a callback, a
+server action's result, an auth state listener. For example, in a client
+component that knows the signed-in user:
+
+```tsx title="components/studio-identity.tsx"
+'use client';
+
+import { useEffect } from 'react';
+
+import { studio } from '@/lib/studio';
+
+export function StudioIdentity({ user }: { user: { id: string; email: string; name: string } | null }) {
+  useEffect(() => {
+    if (user) void studio.identify({ id: user.id, email: user.email, name: user.name });
+  }, [user]);
+  return null;
+}
+```
+
+And on sign-out, before the page reloads or redirects:
+
+```ts
+await studio.reset();
+```
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -98,3 +151,5 @@ export default function Account() {
   height={262}
   caption="After identify, the inbox names the sender instead of Anonymous."
 />
+
+</Platform>

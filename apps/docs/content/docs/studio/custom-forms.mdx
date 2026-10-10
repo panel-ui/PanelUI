@@ -1,7 +1,20 @@
 ---
 title: Custom forms
 description: Ask the questions your team needs alongside the message — a plan, a rating, a checkbox — and get answers Studio has already checked.
+platforms: true
 ---
+
+<Platform only="web">
+
+<Callout type="warn" title="PanelUI components are native-only for now">
+  The form, its answers and the checks Studio runs work on the web through the
+  SDK. The PanelUI controls the App version draws them with — Radio Group,
+  Rating, Checkbox, Input and Textarea — are React Native components and don't
+  run in a browser yet. [Fields on the web](#fields-on-the-web) renders each
+  type with plain form controls.
+</Callout>
+
+</Platform>
 
 A report is a message plus whatever the device knows. When your team needs more —
 which plan someone is on, how easy a task was — add fields to the project's
@@ -34,8 +47,21 @@ export function ExtraQuestions({ answers, onChange }) {
 }
 ```
 
+<Platform only="app">
+
 [Usage with PanelUI](#usage-with-panelui) has the whole form drawn with PanelUI's
-controls. Without React, `await studio.feedback.form()` returns the same list. It's empty
+controls.
+
+</Platform>
+
+<Platform only="web">
+
+[Fields on the web](#fields-on-the-web) has every field type drawn with plain
+form controls.
+
+</Platform>
+
+Without React, `await studio.feedback.form()` returns the same list. It's empty
 on Free and when the project has no fields, so rendering it is always safe.
 
 ## Send the answers
@@ -58,6 +84,122 @@ Studio checks every answer against the form before the report is saved:
   predates the form, and sends none, still gets through.
 
 Answers show in the inbox under **Form** and export one column per field.
+
+<Platform only="web">
+
+## Fields on the web
+
+The same field types, as plain form controls. Swap in your own components where
+your site has them:
+
+```tsx title="components/form-fields.tsx"
+'use client';
+
+import type { FormField } from 'panelui-studio';
+import { useFeedbackForm } from 'panelui-studio/react';
+
+export type Answers = Record<string, string | number | boolean>;
+
+export function FormFields({
+  answers,
+  onChange,
+}: {
+  answers: Answers;
+  onChange: (key: string, value: string | number | boolean) => void;
+}) {
+  const { fields } = useFeedbackForm();
+  return fields.map((field) => (
+    <FieldInput key={field.key} field={field} value={answers[field.key]} onChange={(v) => onChange(field.key, v)} />
+  ));
+}
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: FormField;
+  value: string | number | boolean | undefined;
+  onChange: (value: string | number | boolean) => void;
+}) {
+  const id = `field-${field.key}`;
+  switch (field.type) {
+    case 'choice':
+      return (
+        <fieldset>
+          <legend>{field.label}</legend>
+          {field.options.map((option) => (
+            <label key={option}>
+              <input
+                type="radio"
+                name={id}
+                required={field.required}
+                checked={value === option}
+                onChange={() => onChange(option)}
+              />
+              {option}
+            </label>
+          ))}
+        </fieldset>
+      );
+    case 'rating':
+      return (
+        <label htmlFor={id}>
+          {field.label}
+          <input
+            id={id}
+            type="range"
+            min={1}
+            max={5}
+            value={typeof value === 'number' ? value : 3}
+            onChange={(event) => onChange(Number(event.target.value))}
+          />
+        </label>
+      );
+    case 'checkbox':
+      return (
+        <label htmlFor={id}>
+          <input id={id} type="checkbox" checked={value === true} onChange={(event) => onChange(event.target.checked)} />
+          {field.label}
+        </label>
+      );
+    default: {
+      const Control = field.type === 'textarea' ? 'textarea' : 'input';
+      return (
+        <label htmlFor={id}>
+          {field.label}
+          <Control
+            id={id}
+            required={field.required}
+            maxLength={2000}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </label>
+      );
+    }
+  }
+}
+```
+
+Render `<FormFields>` inside your feedback form — [the one on the Feedback
+page](/docs/studio/feedback#a-form-on-the-web) works — keep the answers in
+state, and send them as `fields`:
+
+```tsx
+const [answers, setAnswers] = useState<Answers>({});
+
+<FormFields
+  answers={answers}
+  onChange={(key, value) => setAnswers((current) => ({ ...current, [key]: value }))}
+/>
+
+await studio.feedback.submit({ message, fields: answers });
+```
+
+</Platform>
+
+<Platform only="app">
 
 ## Usage with PanelUI
 
@@ -181,3 +323,5 @@ the provider goes above `PanelUIProvider` — see
   height={145}
   caption="The answers from the dialog, under Form in the report."
 />
+
+</Platform>

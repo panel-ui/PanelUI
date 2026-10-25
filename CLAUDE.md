@@ -544,12 +544,27 @@ one by hand — the diff will look plausible and be wrong.
 ### The gates, per PR
 
 ```bash
+npm run release:check                                 # versions, changelog and upgrading.mdx agree
 npm run typecheck
+npm run template:parity
+npm run metadata:check --workspace=example            # stale after any example demo change
+npm run catalogue:check
+npm run themes:check
 npm run build
+npm run build --workspace=panelui-web
+npm run performance:example
+npm run test:a11y
 npm test                                              # every contract test
 npm run docs:generate --workspace=docs && git diff --exit-code
+npm run verify:cli-packages
 npm run verify:package --workspace=panelui-native
 ```
+
+This is the whole of `ci.yml`'s `check` job except the docs build and the browser a11y run, and
+it is the list to run **before every push**, not only on PRs. A shorter list has turned `main`
+red after a push more than once: `metadata:check` fails whenever a demo in `apps/example` is
+added or changed, and `release:check` fails when a release bump misses the current-packages
+table in `apps/docs/content/docs/upgrading.mdx`. Neither is caught by `npm test`.
 
 The `git diff --exit-code` is the load-bearing one: a non-empty diff means generated output was
 hand-written and has drifted. Then merge only once the PR's own `check` run is green.
@@ -591,7 +606,7 @@ sharp toolchains and are a standing known state.
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`. Scope with the component
   or area where it helps (`feat(toast): …`).
 - **When everything the user asked for is finished**, in this order:
-  1. `npm run typecheck` and `npm run build` — both must pass.
+  1. Every gate in **The gates, per PR** above — not just `typecheck` and `build`. All must pass.
   2. Commit the outstanding work and **`git push` to `panel-ui/PanelUI`**.
   3. **Ask the user whether this is going out as a release.** See below — this is a question,
      asked every time, never assumed either way.
@@ -611,7 +626,8 @@ one keystroke. Offer "no release yet" as an option, and take it as the end of th
 
 If the answer is yes, then and only then:
 
-1. Bump the version in `packages/panelui/package.json`. Bump it **before**
+1. Bump the version in `packages/panelui/package.json`, `.claude-plugin/plugin.json` and the
+   `panelui-native` row of `apps/docs/content/docs/upgrading.mdx`. Bump it **before**
    `npm run docs:generate`, because `gen.mjs` compares the library version against
    `addedIn`/`updatedIn` to decide which sidebar dots to emit — regenerating first bakes in the
    old answer.

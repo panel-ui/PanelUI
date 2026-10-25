@@ -947,7 +947,7 @@
     "Segmented navigation with an animated indicator.",
     "react native tabs",
     {
-      "updatedIn": "0.109.0",
+      "updatedIn": "0.115.0",
       "category": "navigation"
     }
   ],

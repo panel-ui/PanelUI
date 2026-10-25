@@ -9,6 +9,23 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.115.0] — 2026-10-25
+
+### Added
+
+- **Tabs colours you choose.** `indicatorClassName` on `Tabs.List` styles the indicator that
+  slides to the selected tab, so it can take your brand colour, a thicker rule or another
+  radius. On `Tabs.Trigger`, `activeLabelClassName` styles the selected label, so its text stays
+  readable on the new indicator colour, `labelClassName` styles the label in every state, and
+  `activeClassName` styles the selected trigger, which is how the open pill in `expanding` is
+  recoloured, since that variant has no indicator. Each one is applied after the variant's own
+  classes, so a `bg-*` or `text-*` replaces the default. ([#249](https://github.com/panel-ui/PanelUI/issues/249))
+
+### Docs
+
+- The Tabs page has a Custom colours example.
+- Camera: the note on why the shutter was grey now gives the right cause.
+
 ## [0.114.0] — 2026-10-22
 
 ### Added

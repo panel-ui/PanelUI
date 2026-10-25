@@ -5,7 +5,7 @@ license: MIT
 compatibility: React 19 with Tailwind CSS v4 and shadcn/ui tokens. Not for React Native — the app library is a separate skill, panelui.
 metadata:
   author: Khalid Abdi
-  version: 0.8.0
+  version: 0.9.0
 allowed-tools: Bash(npx shadcn@latest *), Bash(pnpm dlx shadcn@latest *), Bash(bunx shadcn@latest *)
 ---
 

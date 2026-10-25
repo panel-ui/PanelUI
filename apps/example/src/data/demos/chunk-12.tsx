@@ -1983,6 +1983,39 @@ export const ENTRIES: ComponentEntry[] = [
         ),
       },
       {
+        label: 'Custom colours',
+        render: () => (
+          <View className="w-full gap-6">
+            <Tabs defaultValue="week">
+              <Tabs.List indicatorClassName="bg-primary">
+                {['Day', 'Week', 'Month'].map((name) => (
+                  <Tabs.Trigger
+                    key={name}
+                    value={name.toLowerCase()}
+                    activeLabelClassName="text-primary-foreground"
+                  >
+                    {name}
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </Tabs>
+            <Tabs variant="underline" defaultValue="open">
+              <Tabs.List indicatorClassName="h-1 bg-success">
+                {['Open', 'Merged', 'Closed'].map((name) => (
+                  <Tabs.Trigger
+                    key={name}
+                    value={name.toLowerCase()}
+                    activeLabelClassName="text-success"
+                  >
+                    {name}
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </Tabs>
+          </View>
+        ),
+      },
+      {
         label: 'Two panels',
         render: () => (
           <Tabs defaultValue="preview" className="w-full">

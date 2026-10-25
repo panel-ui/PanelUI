@@ -59,6 +59,7 @@ Extends `ViewProps`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
+| `indicatorClassName` | `string` | — | Classes for the indicator that slides to the selected tab: the chip in `segmented` and `pill`, the rule in `underline`. Use it to change the indicator's colour, height or radius, for example `bg-primary`. `expanding` has no indicator, so this does nothing there. Style the open tab with `activeClassName` on `Tabs.Trigger` instead. |
 | `scrollable` | `boolean` | `false` | Lay the triggers out at their natural widths inside a horizontal scroller instead of splitting the row between them. For more tabs than fit — which a fixed row answers by crushing every label. |
 | `children` | `ReactNode` | **required** | — |
 
@@ -67,6 +68,9 @@ Extends `ViewProps`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
+| `activeClassName` | `string` | — | Classes added to the trigger while it is selected. In `expanding`, where the open tab draws its own pill, this is how the pill is recoloured. |
+| `labelClassName` | `string` | — | Classes for the label in every state, for example its inactive colour. |
+| `activeLabelClassName` | `string` | — | Classes for the label while the tab is selected. Set it with `indicatorClassName` on `Tabs.List` so the text stays readable on the new indicator colour. |
 | `value` | `string` | **required** | — |
 | `icon` | `ReactNode` | — | Rendered before the label. Required by `variant="expanding"`, where it is the only thing a closed tab has left to identify it by. |
 | `badge` | `ReactNode` | — | Rendered after the label — a count, a dot, a status. |

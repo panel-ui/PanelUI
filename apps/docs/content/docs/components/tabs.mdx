@@ -141,6 +141,29 @@ A count or a status goes in `badge` rather than into the children, so the label 
 </Tabs.List>
 ```
 
+### Custom colours
+
+`indicatorClassName` on `Tabs.List` styles the indicator that slides to the selected tab: the chip in `segmented` and `pill`, the rule in `underline`. Change its colour there, then set `activeLabelClassName` on each trigger so the selected label stays readable on it.
+
+`labelClassName` styles the label in every state, and `activeClassName` adds classes to the trigger while it is selected. `expanding` has no indicator, so recolour its open pill with `activeClassName`.
+
+```tsx
+<Tabs defaultValue="week">
+  <Tabs.List indicatorClassName="bg-primary">
+    <Tabs.Trigger value="day" activeLabelClassName="text-primary-foreground">Day</Tabs.Trigger>
+    <Tabs.Trigger value="week" activeLabelClassName="text-primary-foreground">Week</Tabs.Trigger>
+    <Tabs.Trigger value="month" activeLabelClassName="text-primary-foreground">Month</Tabs.Trigger>
+  </Tabs.List>
+</Tabs>
+
+<Tabs variant="underline" defaultValue="open">
+  <Tabs.List indicatorClassName="h-1 bg-success">
+    <Tabs.Trigger value="open" activeLabelClassName="text-success">Open</Tabs.Trigger>
+    <Tabs.Trigger value="merged" activeLabelClassName="text-success">Merged</Tabs.Trigger>
+  </Tabs.List>
+</Tabs>
+```
+
 ### Panels that stay built
 
 A panel that has been shown once stays mounted, so a scroll position or a half-filled form is there when you come back to it — no flag needed. `keepMounted` goes further and mounts the panels you have *not* opened, at startup: reach for it when a panel has to be doing something while it is off screen, and leave it alone otherwise.
@@ -284,6 +307,7 @@ A swipeable tab set needs a height to lay its strip out in — `flex-1` here, or
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `indicatorClassName` | `string` | — | Classes for the indicator that slides to the selected tab: the chip in `segmented` and `pill`, the rule in `underline`. Use it to change the indicator's colour, height or radius, for example `bg-primary`. `expanding` has no indicator, so this does nothing there. Style the open tab with `activeClassName` on `Tabs.Trigger` instead. |
 | `scrollable` | `boolean` | `false` | Lay the triggers out at their natural widths inside a horizontal scroller instead of splitting the row between them. For more tabs than fit — which a fixed row answers by crushing every label. |
 
 ### Tabs.Trigger
@@ -291,6 +315,9 @@ A swipeable tab set needs a height to lay its strip out in — `flex-1` here, or
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+| `activeClassName` | `string` | — | Classes added to the trigger while it is selected. In `expanding`, where the open tab draws its own pill, this is how the pill is recoloured. |
+| `labelClassName` | `string` | — | Classes for the label in every state, for example its inactive colour. |
+| `activeLabelClassName` | `string` | — | Classes for the label while the tab is selected. Set it with `indicatorClassName` on `Tabs.List` so the text stays readable on the new indicator colour. |
 | `value` | `string` | — |  |
 | `icon` | `ReactNode` | — | Rendered before the label. Required by `variant="expanding"`, where it is the only thing a closed tab has left to identify it by. |
 | `badge` | `ReactNode` | — | Rendered after the label — a count, a dot, a status. |

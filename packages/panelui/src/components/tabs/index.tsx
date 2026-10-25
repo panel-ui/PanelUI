@@ -804,7 +804,7 @@ const FILL = { flexGrow: 1, flexShrink: 1, flexBasis: 'auto' } as const;
 /** The window the strip moves behind, one panel wide. */
 const PAGER_VIEWPORT = { ...FILL, overflow: 'hidden' } as const;
 
-function TabsIndicator() {
+function TabsIndicator({ className }: { className?: string }) {
   const { value, layouts, variant, animationDisabled } = useTabs('Tabs.List');
   const x = useSharedValue(0);
   const width = useSharedValue(0);
@@ -836,11 +836,20 @@ function TabsIndicator() {
     width: width.value,
   }));
 
-  return <Animated.View style={style} className={indicator()} />;
+  return <Animated.View style={style} className={cn(indicator(), className)} />;
 }
 
 export interface TabsListProps extends ViewProps {
   className?: string;
+  /**
+   * Classes for the indicator that slides to the selected tab: the chip in
+   * `segmented` and `pill`, the rule in `underline`. Use it to change the
+   * indicator's colour, height or radius, for example `bg-primary`.
+   *
+   * `expanding` has no indicator, so this does nothing there. Style the open
+   * tab with `activeClassName` on `Tabs.Trigger` instead.
+   */
+  indicatorClassName?: string;
   /**
    * Lay the triggers out at their natural widths inside a horizontal scroller
    * instead of splitting the row between them. For more tabs than fit — which
@@ -862,7 +871,13 @@ function scrollTarget(layout: TabLayout | undefined): number | null {
   return Math.max(layout.x - 24, 0);
 }
 
-function TabsList({ className, scrollable = false, children, ...props }: TabsListProps) {
+function TabsList({
+  className,
+  indicatorClassName,
+  scrollable = false,
+  children,
+  ...props
+}: TabsListProps) {
   const { variant, value, layouts } = useTabs('Tabs.List');
   const { list } = tabsVariants({ variant });
   const scroller = useRef<ScrollView>(null);
@@ -903,7 +918,7 @@ function TabsList({ className, scrollable = false, children, ...props }: TabsLis
     <View {...props} accessibilityRole="tablist" className={cn(list(), className)}>
       {/* Nothing to slide: in `expanding` every tab draws its own pill, and the
           open one is the shape that moves. */}
-      {variant === 'expanding' ? null : <TabsIndicator />}
+      {variant === 'expanding' ? null : <TabsIndicator className={indicatorClassName} />}
       {textChildren(children)}
     </View>
   );
@@ -934,6 +949,19 @@ function TabsList({ className, scrollable = false, children, ...props }: TabsLis
 
 export interface TabsTriggerProps {
   className?: string;
+  /**
+   * Classes added to the trigger while it is selected. In `expanding`, where
+   * the open tab draws its own pill, this is how the pill is recoloured.
+   */
+  activeClassName?: string;
+  /** Classes for the label in every state, for example its inactive colour. */
+  labelClassName?: string;
+  /**
+   * Classes for the label while the tab is selected. Set it with
+   * `indicatorClassName` on `Tabs.List` so the text stays readable on the new
+   * indicator colour.
+   */
+  activeLabelClassName?: string;
   value: string;
   /**
    * Rendered before the label. Required by `variant="expanding"`, where it is
@@ -949,6 +977,9 @@ export interface TabsTriggerProps {
 
 function TabsTrigger({
   className,
+  activeClassName,
+  labelClassName,
+  activeLabelClassName,
   value,
   icon,
   badge,
@@ -983,6 +1014,10 @@ function TabsTrigger({
     [registerLayout, value]
   );
 
+  // Last, so a caller's `text-*` or `bg-*` replaces the variant's own.
+  const label = cn(slots.label(), labelClassName, active && activeLabelClassName);
+  const trigger = cn(slots.trigger(), className, active && activeClassName);
+
   if (context.variant === 'expanding') {
     return (
       <ExpandingTrigger
@@ -991,8 +1026,8 @@ function TabsTrigger({
         icon={icon}
         badge={badge}
         still={context.animationDisabled}
-        labelClassName={slots.label()}
-        className={cn(slots.trigger(), className)}
+        labelClassName={label}
+        className={trigger}
         onLayout={handleLayout}
         onPress={() => context.setValue(value)}
       >
@@ -1009,11 +1044,16 @@ function TabsTrigger({
       onPress={() => context.setValue(value)}
       onLayout={handleLayout}
       hitSlop={TRIGGER_HIT_SLOP[context.size]}
-      className={cn(slots.trigger(), (icon || badge) && 'flex-row gap-1.5', className)}
+      className={cn(
+        slots.trigger(),
+        (icon || badge) && 'flex-row gap-1.5',
+        className,
+        active && activeClassName
+      )}
     >
       {icon}
       {textChildren(children, (text) => (
-        <Text size="sm" weight="medium" className={slots.label()}>
+        <Text size="sm" weight="medium" className={label}>
           {text}
         </Text>
       ))}

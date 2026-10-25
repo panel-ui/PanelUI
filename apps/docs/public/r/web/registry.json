@@ -129,6 +129,23 @@
       ]
     },
     {
+      "name": "button-group",
+      "type": "registry:component",
+      "title": "Button Group",
+      "description": "Related buttons joined into one control, with separators, text cells and fields between them.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/button-group.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/button-group.tsx"
+        }
+      ]
+    },
+    {
       "name": "canvas",
       "type": "registry:component",
       "title": "Canvas",

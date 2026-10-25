@@ -304,6 +304,17 @@ export {
   type NotFoundColor,
 } from './components/not-found';
 export { Button, buttonVariants, type ButtonProps, type ButtonVariant, type ButtonSize } from './components/button';
+export {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  ButtonGroupText,
+  buttonGroupVariants,
+  type ButtonGroupProps,
+  type ButtonGroupOrientation,
+  type ButtonGroupSeparatorProps,
+  type ButtonGroupTextProps,
+  type ButtonGroupTextSize,
+} from './components/button-group';
 export { Input, InputGroup, InputAddon, type InputProps, type InputGroupProps, type InputAddonProps, type InputSize } from './components/input';
 export { Textarea, type TextareaProps } from './components/textarea';
 export { Switch, type SwitchProps, type SwitchSize, type SwitchColor } from './components/switch';

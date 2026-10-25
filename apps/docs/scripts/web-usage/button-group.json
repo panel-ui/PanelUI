@@ -1,0 +1,53 @@
+{
+  "slug": "button-group",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use it for a few actions on the same thing, such as archiving, snoozing or reporting one message, so they read as one control rather than a row of separate buttons.\n\nThe group joins whatever is placed directly inside it: it squares the corners where two children meet and drops the border one of them would double. Put `Button`s in it, and an `Input`, `Menu.Trigger` or `ButtonGroup.Text` beside them.\n\nFilled buttons have no border to share, so put a `ButtonGroup.Separator` between them.\n\nTo choose one option from a few, use [Tabs](/docs/web/components/tabs): a button group runs actions and does not keep a selection.",
+  "usage": "<ButtonGroup aria-label=\"Message actions\">\n  <Button variant=\"outline\">Archive</Button>\n  <Button variant=\"outline\">Snooze</Button>\n  <Button variant=\"outline\">Report</Button>\n</ButtonGroup>",
+  "anatomy": "<ButtonGroup>\n  <Button />\n  <ButtonGroup.Separator />\n  <ButtonGroup.Text />\n</ButtonGroup>",
+  "parts": {
+    "Separator": "A one-pixel line between two children with no border to share, such as filled buttons. It runs upright by default; pass `orientation=\"horizontal\"` in a vertical group. It is hidden from assistive technology.",
+    "Text": "A cell that is read rather than pressed: a prefix such as `https://`, a unit, or the value a pair of buttons changes. `size` matches the height of the `sm`, `md` or `lg` buttons and fields beside it."
+  },
+  "examples": [
+    {
+      "title": "Orientation",
+      "description": "`orientation=\"vertical\"` stacks the children and joins them top to bottom, for map controls or a short list of options. Every child takes the width of the widest.",
+      "demo": "orientation",
+      "height": 240
+    },
+    {
+      "title": "Sizes",
+      "description": "The group has no size of its own. Give every button in it the same `size`, and the matching `size` to any `ButtonGroup.Text`.",
+      "demo": "sizes",
+      "height": 240
+    },
+    {
+      "title": "Split button",
+      "description": "A main action with a [Menu](/docs/web/components/menu) of other ways to take it. The two halves are filled, so a `ButtonGroup.Separator` divides them; give the menu's icon button an `aria-label`.",
+      "demo": "split",
+      "height": 220
+    },
+    {
+      "title": "Toolbar",
+      "description": "A group whose children are groups spaces them apart instead of joining them. Use one inner group per kind of action, each with its own `aria-label`.",
+      "demo": "toolbar",
+      "height": 180
+    },
+    {
+      "title": "With a field",
+      "description": "An `Input` in the group takes the room the buttons leave, so give the group a width with `className`. Here, a search field with its button and an invite field with its action.",
+      "demo": "input",
+      "height": 220
+    },
+    {
+      "title": "Text cells",
+      "description": "`ButtonGroup.Text` puts fixed text on either side of a field, here a site address, or between two buttons, here the count they change.",
+      "demo": "text",
+      "height": 220
+    }
+  ],
+  "notes": "### Accessibility\n\nThe group has `role=\"group\"`. Give it an `aria-label` that names what its actions have in common, such as \"Formatting\" or \"Message actions\", so a screen reader announces it on the way in. Each icon-only button needs its own `aria-label` too.\n\nThe buttons stay separate stops in the tab order. The group does not move focus between them with the arrow keys.\n\n### What joins\n\nOnly direct children are joined. Wrap a button in another element and that element is joined instead, so the button keeps its own corners. `Menu.Trigger` with `render={<Button />}` renders the button itself and joins as one.\n\n### Server Components\n\nIt holds no state, so a Server Component can render it."
+}

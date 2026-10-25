@@ -5,6 +5,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Actions
 
 - [Button](components/button.md) — Something to press, in the weight its action deserves, with a spinner for while it works.
+- [Button Group](components/button-group.md) — Related buttons joined into one control, with separators, text cells and fields between them.
 
 ## Forms and input
 

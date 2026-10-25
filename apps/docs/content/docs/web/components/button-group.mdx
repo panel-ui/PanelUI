@@ -1,0 +1,428 @@
+---
+title: Button Group
+description: Related buttons joined into one control, with separators, text cells and fields between them.
+status: new
+---
+
+<ComponentPreview name="button-group/overview" height={200}>
+
+```tsx lineNumbers
+import { ArchiveIcon, ClockIcon, FlagIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+
+export default function ButtonGroupOverview() {
+  return (
+    <ButtonGroup aria-label="Message actions">
+      <Button variant="outline">
+        <ArchiveIcon />
+        Archive
+      </Button>
+      <Button variant="outline">
+        <ClockIcon />
+        Snooze
+      </Button>
+      <Button variant="outline">
+        <FlagIcon />
+        Report
+      </Button>
+    </ButtonGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a few actions on the same thing, such as archiving, snoozing or reporting one message, so they read as one control rather than a row of separate buttons.
+
+The group joins whatever is placed directly inside it: it squares the corners where two children meet and drops the border one of them would double. Put `Button`s in it, and an `Input`, `Menu.Trigger` or `ButtonGroup.Text` beside them.
+
+Filled buttons have no border to share, so put a `ButtonGroup.Separator` between them.
+
+To choose one option from a few, use [Tabs](/docs/web/components/tabs): a button group runs actions and does not keep a selection.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/button-group.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/button-group` instead of `@/components/panelui/button-group`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/button-group.tsx`:
+
+<RegistrySource name="button-group" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { ButtonGroup } from "@/components/panelui/button-group"
+```
+
+```tsx
+<ButtonGroup aria-label="Message actions">
+  <Button variant="outline">Archive</Button>
+  <Button variant="outline">Snooze</Button>
+  <Button variant="outline">Report</Button>
+</ButtonGroup>
+```
+
+## Composition
+
+```tsx
+<ButtonGroup>
+  <Button />
+  <ButtonGroup.Separator />
+  <ButtonGroup.Text />
+</ButtonGroup>
+```
+
+- **`ButtonGroup.Separator`** — A one-pixel line between two children with no border to share, such as filled buttons. It runs upright by default; pass `orientation="horizontal"` in a vertical group. It is hidden from assistive technology.
+- **`ButtonGroup.Text`** — A cell that is read rather than pressed: a prefix such as `https://`, a unit, or the value a pair of buttons changes. `size` matches the height of the `sm`, `md` or `lg` buttons and fields beside it.
+
+## Examples
+
+### Orientation
+
+`orientation="vertical"` stacks the children and joins them top to bottom, for map controls or a short list of options. Every child takes the width of the widest.
+
+<ComponentPreview name="button-group/orientation" height={240}>
+
+```tsx lineNumbers
+import { LocateFixedIcon, MinusIcon, PlusIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+
+export default function ButtonGroupOrientation() {
+  return (
+    <div className="flex items-center gap-6">
+      <ButtonGroup orientation="vertical" aria-label="Zoom">
+        <Button variant="outline" size="icon" aria-label="Zoom in">
+          <PlusIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Zoom out">
+          <MinusIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Centre on my location">
+          <LocateFixedIcon />
+        </Button>
+      </ButtonGroup>
+      <ButtonGroup orientation="vertical" aria-label="Sort by">
+        <Button variant="outline">Newest first</Button>
+        <Button variant="outline">Oldest first</Button>
+        <Button variant="outline">Most replies</Button>
+      </ButtonGroup>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes
+
+The group has no size of its own. Give every button in it the same `size`, and the matching `size` to any `ButtonGroup.Text`.
+
+<ComponentPreview name="button-group/sizes" height={240}>
+
+```tsx lineNumbers
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+
+const SIZES = ['sm', 'md', 'lg'] as const;
+
+export default function ButtonGroupSizes() {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      {SIZES.map((size) => (
+        <ButtonGroup key={size} aria-label={`Range, ${size}`}>
+          <Button variant="outline" size={size}>
+            7 days
+          </Button>
+          <Button variant="outline" size={size}>
+            30 days
+          </Button>
+          <Button variant="outline" size={size}>
+            12 months
+          </Button>
+        </ButtonGroup>
+      ))}
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Split button
+
+A main action with a [Menu](/docs/web/components/menu) of other ways to take it. The two halves are filled, so a `ButtonGroup.Separator` divides them; give the menu's icon button an `aria-label`.
+
+<ComponentPreview name="button-group/split" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { CalendarClockIcon, ChevronDownIcon, FileTextIcon, GitMergeIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+import { Menu } from '@/components/panelui/menu';
+
+export default function ButtonGroupSplit() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      <ButtonGroup aria-label="Merge">
+        <Button>
+          <GitMergeIcon />
+          Merge
+        </Button>
+        <ButtonGroup.Separator />
+        <Menu>
+          <Menu.Trigger render={<Button size="icon" aria-label="More ways to merge" />}>
+            <ChevronDownIcon />
+          </Menu.Trigger>
+          <Menu.Content align="end">
+            <Menu.Item>Squash and merge</Menu.Item>
+            <Menu.Item>Rebase and merge</Menu.Item>
+          </Menu.Content>
+        </Menu>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Publish">
+        <Button variant="secondary">Publish</Button>
+        <ButtonGroup.Separator />
+        <Menu>
+          <Menu.Trigger render={<Button variant="secondary" size="icon" aria-label="More ways to publish" />}>
+            <ChevronDownIcon />
+          </Menu.Trigger>
+          <Menu.Content align="end">
+            <Menu.Item>
+              <CalendarClockIcon />
+              Schedule
+            </Menu.Item>
+            <Menu.Item>
+              <FileTextIcon />
+              Save as draft
+            </Menu.Item>
+          </Menu.Content>
+        </Menu>
+      </ButtonGroup>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Toolbar
+
+A group whose children are groups spaces them apart instead of joining them. Use one inner group per kind of action, each with its own `aria-label`.
+
+<ComponentPreview name="button-group/toolbar" height={180}>
+
+```tsx lineNumbers
+import {
+  AlignCenterIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BoldIcon,
+  ItalicIcon,
+  LinkIcon,
+  UnderlineIcon,
+} from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+
+export default function ButtonGroupToolbar() {
+  return (
+    <ButtonGroup aria-label="Formatting">
+      <ButtonGroup aria-label="Text style">
+        <Button variant="outline" size="icon" aria-label="Bold">
+          <BoldIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Italic">
+          <ItalicIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Underline">
+          <UnderlineIcon />
+        </Button>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Alignment">
+        <Button variant="outline" size="icon" aria-label="Align left">
+          <AlignLeftIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Align centre">
+          <AlignCenterIcon />
+        </Button>
+        <Button variant="outline" size="icon" aria-label="Align right">
+          <AlignRightIcon />
+        </Button>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Insert">
+        <Button variant="outline" size="icon" aria-label="Insert link">
+          <LinkIcon />
+        </Button>
+      </ButtonGroup>
+    </ButtonGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+### With a field
+
+An `Input` in the group takes the room the buttons leave, so give the group a width with `className`. Here, a search field with its button and an invite field with its action.
+
+<ComponentPreview name="button-group/input" height={220}>
+
+```tsx lineNumbers
+import { SearchIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+import { Input } from '@/components/panelui/input';
+
+export default function ButtonGroupInput() {
+  return (
+    <div className="flex w-full max-w-sm flex-col gap-4">
+      <ButtonGroup aria-label="Search the changelog" className="w-full">
+        <Input type="search" placeholder="Search the changelog" aria-label="Search" />
+        <Button variant="outline" size="icon" aria-label="Search">
+          <SearchIcon />
+        </Button>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Invite a teammate" className="w-full">
+        <Input type="email" placeholder="name@company.com" aria-label="Email address" />
+        <Button>Send invite</Button>
+      </ButtonGroup>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Text cells
+
+`ButtonGroup.Text` puts fixed text on either side of a field, here a site address, or between two buttons, here the count they change.
+
+<ComponentPreview name="button-group/text" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { ButtonGroup } from '@/components/panelui/button-group';
+import { Input } from '@/components/panelui/input';
+import { useState } from 'react';
+
+export default function ButtonGroupText() {
+  const [seats, setSeats] = useState(4);
+  return (
+    <div className="flex w-full max-w-sm flex-col items-center gap-4">
+      <ButtonGroup aria-label="Site address" className="w-full">
+        <ButtonGroup.Text>https://</ButtonGroup.Text>
+        <Input placeholder="your-team" aria-label="Subdomain" />
+        <ButtonGroup.Text>.panelui.dev</ButtonGroup.Text>
+      </ButtonGroup>
+      <ButtonGroup aria-label="Seats">
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Remove a seat"
+          disabled={seats <= 1}
+          onClick={() => setSeats((n) => n - 1)}
+        >
+          <MinusIcon />
+        </Button>
+        <ButtonGroup.Text className="min-w-24 justify-center tabular-nums text-foreground" aria-live="polite">
+          {seats} {seats === 1 ? 'seat' : 'seats'}
+        </ButtonGroup.Text>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Add a seat"
+          disabled={seats >= 20}
+          onClick={() => setSeats((n) => n + 1)}
+        >
+          <PlusIcon />
+        </Button>
+      </ButtonGroup>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### ButtonGroup
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `ButtonGroupOrientation` | `horizontal` | Lay the children out in a row or a column. Default `horizontal`. |
+
+### ButtonGroup.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Which way the line runs. It follows the group: a row of buttons is divided by upright lines, a column by flat ones. Default `vertical`, for a row. |
+
+### ButtonGroup.Text
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `ButtonGroupTextSize` | `md` | The height, matching the buttons and fields beside it. Default `md`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Accessibility
+
+The group has `role="group"`. Give it an `aria-label` that names what its actions have in common, such as "Formatting" or "Message actions", so a screen reader announces it on the way in. Each icon-only button needs its own `aria-label` too.
+
+The buttons stay separate stops in the tab order. The group does not move focus between them with the arrow keys.
+
+### What joins
+
+Only direct children are joined. Wrap a button in another element and that element is joined instead, so the button keeps its own corners. `Menu.Trigger` with `render={<Button />}` renders the button itself and joins as one.
+
+### Server Components
+
+It holds no state, so a Server Component can render it.

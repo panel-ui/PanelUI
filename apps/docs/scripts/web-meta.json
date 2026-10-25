@@ -309,5 +309,15 @@
       "addedIn": "0.8.0",
       "category": "layout"
     }
+  ],
+  "button-group": [
+    "ButtonGroup",
+    "Related buttons joined into one control, with separators, text cells and fields between them.",
+    "react button group component split button toolbar",
+    {
+      "addedIn": "0.9.0",
+      "category": "actions",
+      "title": "Button Group"
+    }
   ]
 }

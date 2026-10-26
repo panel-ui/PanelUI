@@ -7,7 +7,6 @@ import { Tabs } from 'panelui-web/tabs';
 import { DissolveText } from '@/components/dithercn/dissolve-text';
 import { DitherGlow } from '@/components/dithercn/dither-glow';
 import { CopyInstall } from '@/components/copy-install';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePrefersReducedMotion } from '@/lib/dither';
 
@@ -48,6 +47,16 @@ const PLATFORMS: {
     browse: '/docs/web/components',
   },
 ];
+
+/**
+ * The glow's settings, the same on every side: the ink colour, about a third
+ * of full strength, reaching four tenths of the way across its box.
+ */
+const GLOW = {
+  intensity: 0.35,
+  radius: 0.4,
+  palette: ['transparent', '--dither-ink'],
+} as const;
 
 /** The words the headline ends on, in turn. */
 const WORDS = ['app', 'website'];
@@ -93,31 +102,35 @@ export function Hero() {
   const { word, index, show } = useWordCycle();
 
   return (
-    <section className="relative isolate flex flex-col items-center px-6 pt-40 pb-24 text-center sm:pt-52">
+    <section className="relative isolate flex flex-col items-center px-6 pt-44 pb-24 text-center sm:pt-56">
       {/*
-        The glow has the band above the text to itself, and fades out before
-        the band ends, 32px above the badge, so not one dot lands behind a word at
-        any width.
+        Light on three sides, each glow in a box of its own that stops short
+        of the text: a band above it, and on wide screens a column either side
+        that ends 48px before the text column. Each box fades out towards the
+        text, so not one dot lands behind a word. Phones have no room beside
+        the text, so they get the band alone. The paper is transparent so the
+        boxes can meet without one covering another.
       */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 sm:h-44 [mask-image:linear-gradient(to_bottom,#000_55%,transparent)]"
       >
-        <DitherGlow position="top" intensity={0.35} radius={0.4} className="absolute inset-0" />
+        <DitherGlow position="top" {...GLOW} className="absolute inset-0" />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[calc(50%-31rem)] [mask-image:linear-gradient(to_right,#000_55%,transparent)] xl:block"
+      >
+        <DitherGlow position="left" {...GLOW} className="absolute inset-0" />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-[calc(50%-31rem)] [mask-image:linear-gradient(to_left,#000_55%,transparent)] xl:block"
+      >
+        <DitherGlow position="right" {...GLOW} className="absolute inset-0" />
       </div>
 
       <div className="flex w-full max-w-4xl flex-col items-center gap-6">
-        <Badge
-          variant="secondary"
-          className="gap-1.5"
-          render={<Link href="/docs/web/components/sheet" />}
-        >
-          <span className="font-medium text-foreground">New</span>
-          <span aria-hidden className="h-3 w-px bg-border" />
-          FileUpload, and Sheet for the web
-          <ArrowRightIcon className="size-3" />
-        </Badge>
-
         {/*
           The sentence a reader or a search engine gets is the whole one; the
           cycling word is drawn beside it for the eye only.
@@ -149,7 +162,7 @@ export function Hero() {
         <Tabs
           value={platform}
           onValueChange={(value) => setPlatform(value as Platform)}
-          className="w-full items-center gap-5"
+          className="w-full items-center gap-2"
         >
           <Tabs.List aria-label="Platform">
             {PLATFORMS.map(({ value, label, icon: Icon }) => (

@@ -82,10 +82,16 @@ test('Components remains reachable on the home mobile menu without duplicating t
 
 test('primary content links keep Next prefetch and link behavior passes through', () => {
   const home = read('app/(home)/page.tsx');
+  const hero = read('components/hero/index.tsx');
   const showcase = read('components/showcase/index.tsx');
   const layoutLink = read('components/layout-link.tsx');
 
-  assert.match(home, /<Button render=\{<Link href="\/docs" \/>\}>/);
+  // The hero's Get Started goes through Link, not LayoutLink, so Next still
+  // prefetches it. Its destination comes from the Expo / Web tab, and the
+  // Expo one, shown first, is the docs home.
+  assert.match(home, /<Hero \/>/);
+  assert.match(hero, /<Button render=\{<Link href=\{start\} \/>\}>/);
+  assert.match(hero, /value: 'expo',[\s\S]*?start: '\/docs',/);
   assert.match(showcase, /render=\{<Link href="\/docs\/components" \/>\}/);
   assert.match(home, /<Link href=\{site\.repo\}/);
   assert.match(layoutLink, /prefetch=\{layoutLinkPrefetch\(href, prefetch\)\} \{\.\.\.props\}/);

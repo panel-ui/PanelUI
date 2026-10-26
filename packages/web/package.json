@@ -1,6 +1,6 @@
 {
   "name": "panelui-web",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "PanelUI for the web: animated, data-rich React components styled with Tailwind CSS on shadcn tokens.",
   "type": "module",
   "sideEffects": false,

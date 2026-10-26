@@ -316,6 +316,7 @@
     "react button group component split button toolbar",
     {
       "addedIn": "0.9.0",
+      "updatedIn": "0.9.1",
       "category": "actions",
       "title": "Button Group"
     }

@@ -26,6 +26,12 @@ page. They carry rules worth not reconstructing — for instance, *never rewrite
 If none of them has the component, search the web for other React Native / Tailwind
 implementations before inventing an approach.
 
+The home hero's glow and its dissolving headline word are drawn with a vendored dither engine
+in `apps/docs/lib/dither` and two of its components in `apps/docs/components/dithercn/`, all
+installed from the dithercn registry, with its agent skill in `.claude/skills/dithercn`. Update
+those files with the shadcn CLI as the skill describes, never by hand. The CLI also adds an
+unrelated npm package named `cn` to `apps/docs/package.json` on every run; take it back out.
+
 How to read a repository:
 
 - Use `gh api "repos/<owner>/<repo>/git/trees/main?recursive=1" --jq '.tree[].path'` to locate

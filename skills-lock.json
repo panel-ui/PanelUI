@@ -19,6 +19,11 @@
       "skillPath": "apps/ui/skills/coss-particles/SKILL.md",
       "computedHash": "44c9d1c501a8f76c5332740795a2fa0f07dc814cd1a2c4a6103a971eb982db79"
     },
+    "dithercn": {
+      "source": "dithercn.dev",
+      "sourceType": "well-known",
+      "computedHash": "db10c53efa79b4182410b8be77d80b276d5e5922a4f60de8d93de2c0b46207fd"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",

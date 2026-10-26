@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { CopyInstall } from '@/components/copy-install';
+import { Hero } from '@/components/hero';
 import { IsoFigure, type IsoFigureKind } from '@/components/iso-figures';
 import { LayoutLink } from '@/components/layout-link';
 import { Showcase } from '@/components/showcase';
@@ -36,17 +36,6 @@ export const metadata: Metadata = {
   description: site.description,
   alternates: { canonical: absoluteUrl('/') },
 };
-
-/**
- * The one command that works from nothing.
- *
- * It used to be `npx expo install panelui-native`, which is the right line on
- * the installation page's step 1 and the wrong one here: a visitor who has not
- * got an app yet copies it into an empty folder and gets a package with no
- * project around it. Same reason `npm install react` is not what react.dev
- * puts under its headline.
- */
-const INSTALL = 'npx create-panelui-app@latest';
 
 /**
  * What the web collection holds itself to. The first is the wide card: two of
@@ -221,41 +210,7 @@ export default function HomePage() {
         }}
       />
 
-      {/* Hero */}
-      <section className="flex flex-col items-center gap-6 px-6 py-24 text-center">
-        <Badge
-          variant="secondary"
-          className="gap-1.5"
-          render={<Link href="/docs/web/components/sheet" />}
-        >
-          <span className="font-medium text-foreground">New</span>
-          <span aria-hidden className="h-3 w-px bg-border" />
-          FileUpload, and Sheet for the web
-          <ArrowRightIcon className="size-3" />
-        </Badge>
-        <h1 className="max-w-3xl font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-          Beautiful components for your app and your website
-        </h1>
-        <p className="max-w-xl text-lg text-muted-foreground text-balance">
-          Accessible, animated and styled with Tailwind: for Expo, with zero native code, and for{' '}
-          <Link href="/docs/web" className="text-foreground underline underline-offset-4">
-            the web
-          </Link>
-          . Install the package or copy the code, then make it your own.
-        </p>
-
-        <CopyInstall command={INSTALL} />
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button render={<Link href="/docs" />}>
-            Get Started
-            <ArrowRightIcon />
-          </Button>
-          <Button variant="outline" render={<Link href="/docs/components" />}>
-            Browse Components
-          </Button>
-        </div>
-      </section>
+      <Hero />
 
       <Showcase />
 

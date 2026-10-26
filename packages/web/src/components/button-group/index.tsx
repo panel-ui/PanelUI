@@ -1,5 +1,5 @@
 /**
- * ButtonGroup — related actions joined into one control.
+ * ButtonGroup — related actions held together in one control.
  *
  * ```tsx
  * <ButtonGroup aria-label="History">
@@ -8,39 +8,84 @@
  * </ButtonGroup>
  * ```
  *
- * ## Joining
+ * ## A track, like the segmented Tabs
  *
- * The group does not draw anything of its own. It squares the corners where
- * two children meet and drops the border one of them would otherwise double,
- * so outline buttons read as one strip with dividers. It does that with child
- * selectors rather than props, so any `Button`, `Input`, `Menu.Trigger` or
- * `Select.Trigger` placed directly inside joins without being told to.
+ * The group is drawn the way the segmented `Tabs` are: a muted track with
+ * rounded corners, and the buttons inside it at the radius one step smaller,
+ * so every corner follows the track's. Outline and ghost buttons lie flat in
+ * the track with muted labels; the one under the pointer rises out of it the
+ * way the chosen tab does, and the short dividers on either side of it fade.
+ * A field or a filled button keeps its own surface, so it reads as raised
+ * from the start.
  *
- * Filled buttons have no border to share, so put a `ButtonGroup.Separator`
- * between them; without one, two primary buttons become one long button.
+ * It does this with child selectors rather than props, so any `Button`,
+ * `Input`, `Menu.Trigger` or `ButtonGroup.Text` placed directly inside takes
+ * part without being told to.
+ *
+ * ## Split buttons
+ *
+ * A group with a `ButtonGroup.Separator` in it is a split button instead: no
+ * track, and its filled halves joined edge to edge, with the separator
+ * carrying their fill across the seam.
  *
  * ## Groups of groups
  *
- * A group whose children are groups spaces them apart instead of joining
- * them, which is how a toolbar is built: one group per kind of action.
+ * A group whose children are groups spaces them apart, which is how a
+ * toolbar is built: one track per kind of action.
  */
 import type { ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
+/*
+ * Which of the three a group is depends on what it holds, so the rules below
+ * are scoped by selector rather than by prop:
+ *
+ *   track  &:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))
+ *   split  &:has(>[data-slot=button-group-separator])
+ *
+ * Tailwind reads class names whole, so each selector is written out in full
+ * in every class that uses it.
+ */
 export const buttonGroupVariants = tv({
   slots: {
     root: [
       'flex w-fit items-stretch',
       // A focused child draws its ring over its neighbours, not under them.
       '*:focus-visible:relative *:focus-visible:z-10',
-      // Groups inside a group are spaced, not joined.
-      'has-[>[data-slot=button-group]]:gap-2',
       // A field takes the room the buttons leave.
       '[&>[data-slot=input]]:min-w-0 [&>[data-slot=input]]:flex-1',
+
+      // The track, in the segmented Tabs' colour and radius. Its children
+      // take the radius one step down, which is the track's less its padding.
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))]:gap-1 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))]:rounded-xl [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))]:bg-muted [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))]:p-1',
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*]:relative [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*]:rounded-lg',
+      // Outline and ghost buttons lie flat, with muted labels, and rise out
+      // of the track under the pointer like the chosen tab.
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost])]:border-transparent [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost])]:bg-transparent [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost])]:text-muted-foreground [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost])]:shadow-none',
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:bg-background [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:text-foreground [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:shadow-sm',
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:inset-ring [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:inset-ring-foreground/[0.06]',
+      'dark:[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:bg-input dark:[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>:is([data-variant=outline],[data-variant=ghost]):hover:not(:disabled)]:inset-ring-foreground/10',
+      // Short dividers in the gaps, drawn by the second child of each pair so
+      // the first never gets one. None beside a field, which has its own
+      // edge, and none beside the child under the pointer.
+      "[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:pointer-events-none [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:absolute [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:bg-foreground/10 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:transition-opacity [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:duration-150 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:content-['']",
+      '[&>[data-slot=input]+*]:before:hidden [&>*+[data-slot=input]]:before:hidden',
+      '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*:hover:not(:disabled)]:before:opacity-0 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*:hover:not(:disabled)+*]:before:opacity-0',
+
+      // Groups inside a group are spaced, one track each.
+      'has-[>[data-slot=button-group]]:gap-2',
     ],
-    separator: 'shrink-0 self-stretch bg-border',
+    separator: [
+      'relative shrink-0 self-stretch bg-border',
+      // Between filled buttons the separator carries their fill across the
+      // seam, and a short line in their text colour divides it.
+      "before:absolute before:content-['']",
+      'has-[+[data-variant=default]]:bg-primary has-[+[data-variant=default]]:before:bg-primary-foreground/25',
+      'has-[+[data-variant=secondary]]:bg-secondary has-[+[data-variant=secondary]]:before:bg-secondary-foreground/15',
+      'has-[+[data-variant=destructive]]:bg-destructive has-[+[data-variant=destructive]]:before:bg-white/30',
+    ],
     text: [
-      'flex shrink-0 items-center gap-2 whitespace-nowrap border bg-muted font-medium text-muted-foreground shadow-xs dark:bg-input/30',
+      'relative flex shrink-0 items-center gap-2 whitespace-nowrap font-medium text-muted-foreground',
       '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
     ],
   },
@@ -48,25 +93,26 @@ export const buttonGroupVariants = tv({
     orientation: {
       horizontal: {
         root: [
-          '[&>*:not(:first-child)]:rounded-l-none [&>*:not(:last-child)]:rounded-r-none',
-          '[&>*:not(:first-child)]:border-l-0',
+          '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:inset-y-2 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:-left-0.5 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:w-px',
+          // A split button's halves meet edge to edge.
+          '[&:has(>[data-slot=button-group-separator])>*:not(:first-child)]:rounded-l-none [&:has(>[data-slot=button-group-separator])>*:not(:last-child)]:rounded-r-none',
         ],
-        separator: 'w-px',
+        separator: 'w-px before:inset-y-2 before:inset-x-0',
       },
       vertical: {
         root: [
           'flex-col',
-          '[&>*:not(:first-child)]:rounded-t-none [&>*:not(:last-child)]:rounded-b-none',
-          '[&>*:not(:first-child)]:border-t-0',
+          '[&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:inset-x-2 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:-top-0.5 [&:not(:has(>[data-slot=button-group-separator],>[data-slot=button-group]))>*+*]:before:h-px',
+          '[&:has(>[data-slot=button-group-separator])>*:not(:first-child)]:rounded-t-none [&:has(>[data-slot=button-group-separator])>*:not(:last-child)]:rounded-b-none',
         ],
-        separator: 'h-px',
+        separator: 'h-px before:inset-x-2 before:inset-y-0',
       },
     },
     /** Matches the heights of `Button` and `Input` at the same size. */
     size: {
-      sm: { text: 'h-8 rounded-md px-2.5 text-[0.8125rem]' },
-      md: { text: 'h-9 rounded-lg px-3 text-sm' },
-      lg: { text: 'h-11 rounded-xl px-3.5 text-[0.9375rem]' },
+      sm: { text: 'h-8 px-2.5 text-[0.8125rem]' },
+      md: { text: 'h-9 px-3 text-sm' },
+      lg: { text: 'h-11 px-3.5 text-[0.9375rem]' },
     },
   },
   defaultVariants: { orientation: 'horizontal', size: 'md' },
@@ -108,8 +154,11 @@ export interface ButtonGroupSeparatorProps extends ComponentProps<'span'> {
 }
 
 /**
- * A line between two children that have no border to share, such as filled
- * buttons. It is decorative and hidden from assistive technology.
+ * The divider of a split button. A group with one in it drops its track and
+ * joins its children edge to edge. Before a primary, secondary or destructive
+ * button the separator takes that button's fill, so the two halves read as
+ * one, and draws a short line in the button's text colour. It is decorative
+ * and hidden from assistive technology.
  */
 function ButtonGroupSeparator({
   orientation = 'vertical',

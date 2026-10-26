@@ -35,9 +35,9 @@ export default function ButtonGroupOverview() {
 
 Use it for a few actions on the same thing, such as archiving, snoozing or reporting one message, so they read as one control rather than a row of separate buttons.
 
-The group joins whatever is placed directly inside it: it squares the corners where two children meet and drops the border one of them would double. Put `Button`s in it, and an `Input`, `Menu.Trigger` or `ButtonGroup.Text` beside them.
+The group sets whatever is placed directly inside it in one track, drawn like the segmented [Tabs](/docs/web/components/tabs): outline and ghost buttons lie flat with muted labels, and the one under the pointer rises out of the track. Put `Button`s in it, and an `Input`, `Menu.Trigger` or `ButtonGroup.Text` beside them.
 
-Filled buttons have no border to share, so put a `ButtonGroup.Separator` between them.
+For a split button, put a `ButtonGroup.Separator` between two filled buttons. The group then drops its track and joins them edge to edge.
 
 To choose one option from a few, use [Tabs](/docs/web/components/tabs): a button group runs actions and does not keep a selection.
 
@@ -111,14 +111,14 @@ import { ButtonGroup } from "@/components/panelui/button-group"
 </ButtonGroup>
 ```
 
-- **`ButtonGroup.Separator`** — A one-pixel line between two children with no border to share, such as filled buttons. It runs upright by default; pass `orientation="horizontal"` in a vertical group. It is hidden from assistive technology.
+- **`ButtonGroup.Separator`** — Turns the group into a split button: no track, and the children joined edge to edge. Before a primary, secondary or destructive button it takes that button's fill and draws a short line in its text colour, so the two halves read as one. It runs upright by default; pass `orientation="horizontal"` in a vertical group. It is hidden from assistive technology.
 - **`ButtonGroup.Text`** — A cell that is read rather than pressed: a prefix such as `https://`, a unit, or the value a pair of buttons changes. `size` matches the height of the `sm`, `md` or `lg` buttons and fields beside it.
 
 ## Examples
 
 ### Orientation
 
-`orientation="vertical"` stacks the children and joins them top to bottom, for map controls or a short list of options. Every child takes the width of the widest.
+`orientation="vertical"` stacks the children in a column track, for map controls or a short list of options. Every child takes the width of the widest.
 
 <ComponentPreview name="button-group/orientation" height={240}>
 
@@ -249,7 +249,7 @@ export default function ButtonGroupSplit() {
 
 ### Toolbar
 
-A group whose children are groups spaces them apart instead of joining them. Use one inner group per kind of action, each with its own `aria-label`.
+A group whose children are groups spaces them apart, one track each. Use one inner group per kind of action, each with its own `aria-label`.
 
 <ComponentPreview name="button-group/toolbar" height={180}>
 
@@ -419,9 +419,11 @@ The group has `role="group"`. Give it an `aria-label` that names what its action
 
 The buttons stay separate stops in the tab order. The group does not move focus between them with the arrow keys.
 
-### What joins
+### What takes part
 
-Only direct children are joined. Wrap a button in another element and that element is joined instead, so the button keeps its own corners. `Menu.Trigger` with `render={<Button />}` renders the button itself and joins as one.
+Only outline and ghost buttons lie flat in the track. A field or a filled button keeps its own surface, so it reads as raised from the start.
+
+Only direct children take part. Wrap a button in another element and that element takes its place, so the button keeps its own look. `Menu.Trigger` with `render={<Button />}` renders the button itself and joins as one.
 
 ### Server Components
 

@@ -101,8 +101,13 @@ export default function SheetNested() {
               {COVERS.map((tone, index) => (
                 <Sheet.Close
                   key={tone}
-                  aria-label={`Photo ${index + 1}`}
-                  className={`aspect-square cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring bg-linear-to-br ${tone}`}
+                  render={
+                    <button
+                      type="button"
+                      aria-label={`Photo ${index + 1}`}
+                      className={`aspect-square cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring bg-linear-to-br ${tone}`}
+                    />
+                  }
                 />
               ))}
             </div>

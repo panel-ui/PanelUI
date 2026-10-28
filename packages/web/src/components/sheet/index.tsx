@@ -46,6 +46,18 @@
  * Every sheet follows a drag and leaves on a flick toward its own edge. The
  * grabber on a top or bottom sheet says so before anybody tries.
  *
+ * With a mouse, the text in a sheet is for reading: a press on the title,
+ * the description, the body or the footer selects text the way it does on the
+ * page, and the sheet is dragged by its grabber and the padding around the
+ * header. A finger still swipes the sheet from anywhere.
+ *
+ * ## The close button
+ *
+ * Every sheet has a round close button in its top trailing corner. Write a
+ * bare `<Sheet.Close />` somewhere in the sheet to put it there instead, for
+ * example first in `Sheet.Header` to stand before the title, and the one in
+ * the corner steps aside. `showClose={false}` leaves the sheet with none.
+ *
  * ## Slides
  *
  * `Sheet.Slides` takes the place of the body with a column of rounded
@@ -64,6 +76,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -133,12 +146,24 @@ const sheetVariants = tv({
       'before:h-[5px] before:w-9 before:rounded-full before:bg-muted-foreground/35',
     ],
     close: [
-      'absolute end-4 top-4 z-10 inline-flex size-8 cursor-pointer items-center justify-center rounded-full',
+      'relative inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full',
       'bg-muted text-muted-foreground outline-none transition-[background-color,color,scale] duration-150',
       'after:absolute after:-inset-1.5 hover:bg-foreground/10 hover:text-foreground active:scale-95',
       'focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none',
     ],
-    header: 'flex shrink-0 flex-col gap-1 px-6 pt-6 pb-3',
+    closeCorner: 'absolute end-4 top-4 z-10',
+    /*
+     * A close button written into the header shares the title's line: the
+     * header becomes three columns, the button takes the first or the last
+     * depending on where it was written, and the text keeps the middle.
+     */
+    header: [
+      'flex shrink-0 flex-col gap-1 px-6 pt-6 pb-3',
+      'has-[>[data-slot=sheet-close]]:grid has-[>[data-slot=sheet-close]]:grid-cols-[auto_minmax(0,1fr)_auto] has-[>[data-slot=sheet-close]]:gap-x-3',
+      '[&>*]:col-start-2',
+      '[&>[data-slot=sheet-close]]:row-span-2 [&>[data-slot=sheet-close]]:row-start-1 [&>[data-slot=sheet-close]]:-my-1 [&>[data-slot=sheet-close]]:self-start',
+      '[&>[data-slot=sheet-close]:first-child]:col-start-1 [&>[data-slot=sheet-close]:not(:first-child)]:col-start-3',
+    ],
     title: 'text-[19px] font-semibold leading-6 tracking-[-0.01em]',
     description: 'text-[15px] leading-5 text-muted-foreground',
     body: 'relative flex min-h-0 flex-1 flex-col',
@@ -319,7 +344,15 @@ interface SheetContextValue {
   nested: boolean;
   /** Set by `Sheet.Content`. */
   inline: boolean;
+  /** Whether a swipe can close it, which is what the grabber offers. */
+  dismissible: boolean;
+  /** Whether the round close button stands in the corner. */
   showClose: boolean;
+  /**
+   * Called by a bare `Sheet.Close` written into the sheet, which takes the
+   * corner button's place. Returns the undo.
+   */
+  claimClose(): () => void;
   /** Lets a sheet opened from this one be closed with it. Returns the undo. */
   register(child: SheetHandle): () => void;
   /** Closes this sheet and every sheet opened from it. */
@@ -418,7 +451,9 @@ function SheetFrame({
       stack,
       nested,
       inline: false,
+      dismissible,
       showClose: true,
+      claimClose: () => () => {},
       register: (child) => {
         opened.current.add(child);
         return () => opened.current.delete(child);
@@ -426,7 +461,7 @@ function SheetFrame({
       closeTree: handle.closeTree,
       hasOpenChild: () => [...opened.current].some((child) => child.isOpen()),
     }),
-    [side, stack, nested, handle]
+    [side, stack, nested, dismissible, handle]
   );
 
   return (
@@ -561,9 +596,16 @@ export interface SheetContentProps extends Omit<ComponentProps<'div'>, 'children
    * `full` take that share of the screen, and `full` meets the edges.
    */
   size?: 'auto' | 'half' | 'full';
-  /** Show the grabber. On by default for a top or bottom sheet. */
+  /**
+   * Show the grabber. On by default for a top or bottom sheet that a swipe
+   * can close, and off when `dismissible` is.
+   */
   showGrabber?: boolean;
-  /** Show the round close button in the top trailing corner. Default true. */
+  /**
+   * Show the round close button in the top trailing corner. Default true.
+   * Write a bare `<Sheet.Close />` into the sheet to place it somewhere else,
+   * or set this to `false` for a sheet with no close button at all.
+   */
   showClose?: boolean;
   /** Frost the page behind the sheet instead of only dimming it. */
   blur?: boolean;
@@ -595,12 +637,23 @@ function SheetContent({
     attached: !detached || (vertical && size === 'full'),
     blur,
   });
-  const context = useMemo(() => ({ ...sheet, inline, showClose }), [sheet, inline, showClose]);
+  // Bare close buttons written into the sheet. While there is one, the
+  // corner button is not drawn.
+  const [placed, setPlaced] = useState(0);
+  const claimClose = useCallback(() => {
+    setPlaced((count) => count + 1);
+    return () => setPlaced((count) => count - 1);
+  }, []);
+  const corner = showClose && placed === 0;
+  const context = useMemo(
+    () => ({ ...sheet, inline, showClose: corner, claimClose }),
+    [sheet, inline, corner, claimClose]
+  );
 
   const inside = (
     <>
-      {(showGrabber ?? vertical) ? <div aria-hidden className={slots.grabber()} /> : null}
-      {showClose ? <SheetClose aria-label="Close" className={slots.close()} icon /> : null}
+      {(showGrabber ?? (vertical && sheet.dismissible)) ? <div aria-hidden className={slots.grabber()} /> : null}
+      {corner ? <CloseButton className={slots.closeCorner()} /> : null}
       {children}
     </>
   );
@@ -670,7 +723,7 @@ function SheetTitle({ className, ...props }: SheetTitleProps) {
   const { inline } = useSheet('Sheet.Title');
   const slots = sheetVariants();
   if (inline) return <h2 className={slots.title({ className })} {...props} />;
-  return <Drawer.Title className={slots.title({ className })} {...props} />;
+  return <Drawer.Content render={<Drawer.Title className={slots.title({ className })} {...props} />} />;
 }
 SheetTitle.displayName = 'Sheet.Title';
 
@@ -681,7 +734,9 @@ function SheetDescription({ className, ...props }: SheetDescriptionProps) {
   const { inline } = useSheet('Sheet.Description');
   const slots = sheetVariants();
   if (inline) return <p className={slots.description({ className })} {...props} />;
-  return <Drawer.Description className={slots.description({ className })} {...props} />;
+  return (
+    <Drawer.Content render={<Drawer.Description className={slots.description({ className })} {...props} />} />
+  );
 }
 SheetDescription.displayName = 'Sheet.Description';
 
@@ -692,13 +747,17 @@ export interface SheetBodyProps extends ComponentProps<'div'> {}
  * the scrollbar is a thin drawn thumb that shows while the content is moving.
  */
 function SheetBody({ className, children, ...props }: SheetBodyProps) {
+  const { inline } = useSheet('Sheet.Body');
   const slots = sheetVariants();
+  const content = (
+    <ScrollArea.Content className={slots.bodyContent({ className })} {...props}>
+      {children}
+    </ScrollArea.Content>
+  );
   return (
     <ScrollArea.Root className={slots.body()}>
       <ScrollArea.Viewport className={slots.bodyViewport()}>
-        <ScrollArea.Content className={slots.bodyContent({ className })} {...props}>
-          {children}
-        </ScrollArea.Content>
+        {inline ? content : <Drawer.Content render={content} />}
       </ScrollArea.Viewport>
       <ScrollArea.Scrollbar orientation="vertical" className={slots.scrollbar()}>
         <ScrollArea.Thumb className={slots.thumb()} />
@@ -712,25 +771,56 @@ export interface SheetFooterProps extends ComponentProps<'div'> {}
 
 /** The actions, stacked full width at the bottom of the sheet. */
 function SheetFooter({ className, ...props }: SheetFooterProps) {
+  const { inline } = useSheet('Sheet.Footer');
   const slots = sheetVariants();
-  return <div className={slots.footer({ className })} {...props} />;
+  const footer = <div className={slots.footer({ className })} {...props} />;
+  return inline ? footer : <Drawer.Content render={footer} />;
 }
 SheetFooter.displayName = 'Sheet.Footer';
 
 export interface SheetCloseProps extends ComponentProps<'button'> {
   /**
    * Your own element to close the sheet with, such as a Cancel button.
-   * Without it, and without children, this is the round close button.
+   * Without it, and without children, this is the round close button, drawn
+   * where it is written in place of the one in the corner.
    */
   render?: ReactElement;
-  /** Draw the cross glyph. Set for you on the built-in close button. */
+  /** Draw the round close button. A `Sheet.Close` with nothing inside it already is one. */
   icon?: boolean;
 }
 
-/** Closes the sheet. Works even when `dismissible` is off. */
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * Closes the sheet. Works even when `dismissible` is off. Written bare, it is
+ * the round close button, and the sheet stops drawing its own in the corner.
+ */
 function SheetClose({ render, icon = false, children, ...props }: SheetCloseProps) {
+  const sheet = useSheet('Sheet.Close');
+  const bare = icon || (render === undefined && children === undefined);
+  const { claimClose } = sheet;
+  useIsomorphicLayoutEffect(() => (bare ? claimClose() : undefined), [bare, claimClose]);
+  if (bare) return <CloseButton {...props} />;
+  if (sheet.inline) {
+    return (
+      <button type="button" data-slot="sheet-close" {...props}>
+        {children}
+      </button>
+    );
+  }
+  return (
+    <Drawer.Close data-slot="sheet-close" render={render} {...props}>
+      {children}
+    </Drawer.Close>
+  );
+}
+SheetClose.displayName = 'Sheet.Close';
+
+/** The round button with a cross in it. */
+function CloseButton({ className, 'aria-label': label = 'Close', ...props }: ComponentProps<'button'>) {
   const { inline } = useSheet('Sheet.Close');
-  const content = icon ? (
+  const slots = sheetVariants();
+  const glyph = (
     <svg
       viewBox="0 0 24 24"
       aria-hidden
@@ -742,23 +832,17 @@ function SheetClose({ render, icon = false, children, ...props }: SheetCloseProp
     >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>
-  ) : (
-    children
   );
+  const shared = { 'data-slot': 'sheet-close', 'aria-label': label, className: slots.close({ className }), ...props };
   if (inline) {
     return (
-      <button type="button" {...props}>
-        {content}
+      <button type="button" {...shared}>
+        {glyph}
       </button>
     );
   }
-  return (
-    <Drawer.Close render={render} {...props}>
-      {content}
-    </Drawer.Close>
-  );
+  return <Drawer.Close {...shared}>{glyph}</Drawer.Close>;
 }
-SheetClose.displayName = 'Sheet.Close';
 
 /* ----------------------------------------------------------------- slides */
 

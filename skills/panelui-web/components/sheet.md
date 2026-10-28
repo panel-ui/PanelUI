@@ -47,6 +47,7 @@ For a decision that needs an answer before anything else, use a dialog. For one 
     <Sheet.Trigger />
     <Sheet.Content>
       <Sheet.Header>
+        <Sheet.Close />
         <Sheet.Title />
         <Sheet.Description />
       </Sheet.Header>
@@ -70,7 +71,7 @@ For a decision that needs an answer before anything else, use a dialog. For one 
 ```
 
 - `Sheet.Trigger` — What opens a sheet. A plain button, or your own through `render`. With `to`, it opens the `Sheet.Next` of that name instead, and `payload` is handed to that sheet.
-- `Sheet.Content` — The sheet and the backdrop behind it. It draws the grabber on a top or bottom sheet and the round close button; `showGrabber` and `showClose` turn them off. `inline` draws it in the page instead of over it.
+- `Sheet.Content` — The sheet and the backdrop behind it. It draws the grabber on a top or bottom sheet and the round close button in the top trailing corner. `showGrabber={false}` and `showClose={false}` leave them out. `inline` draws it in the page instead of over it.
 - `Sheet.Next` — A second sheet, opened from the first by any `Sheet.Trigger` whose `to` is its `name`. Declare it anywhere inside the first sheet's content. It takes the same props as `Content` and draws its own, so its children are the header, body and footer. Pass a function as its children to read the opening trigger's `payload`.
 - `Sheet.Header` — The title and a line under it, as `title` and `description` or as `Title` and `Description` children. It leaves room for the close button on the same line.
 - `Sheet.Title` — The sheet's name. It is also what a screen reader announces when the sheet opens.
@@ -79,7 +80,7 @@ For a decision that needs an answer before anything else, use a dialog. For one 
 - `Sheet.Slides` — A column of rounded slides in place of `Sheet.Body`, for photos or a deck. By default it is a deck: each slide fills the sheet's height, a scroll glides to the next slide, the arrow keys move one at a time, and a counter sits under it. `snap={false}` makes it a numbered column of smaller slides that scrolls freely, and with `onIndexChange` pressing one chooses it. `index` and `defaultIndex` hold the current slide.
 - `Sheet.Slide` — One slide: a rounded frame that an image or a video fills edge to edge, or anything drawn. `label` is what a screen reader calls it after its place, such as "3 of 8".
 - `Sheet.Footer` — The actions, stacked full width.
-- `Sheet.Close` — Closes the sheet, even when `dismissible` is off. Give it `render` to make your own button close it.
+- `Sheet.Close` — Closes the sheet, even when `dismissible` is off. Give it `render` or children to make your own button close it. Written with nothing inside, it is the round close button, drawn where it is written; the one in the corner is then left out. Inside `Sheet.Header` it shares the title's line, before the title or after it depending on where it is written.
 - `Sheet.Stage` — Wraps the page. While a sheet inside it is open, the page steps back slightly and rounds its corners. Set `--stage-radius` to the radius of what it sits in, less the gap, so the two corners are concentric.
 
 ## Props
@@ -119,8 +120,8 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `detached` | `boolean` | `true` | Stand clear of the screen edges with every corner rounded. On by default; off, the sheet meets the edges it rises from. |
 | `size` | `'auto' \| 'half' \| 'full'` | `'auto'` | How tall a top or bottom sheet is. `auto` fits the content; `half` and `full` take that share of the screen, and `full` meets the edges. |
-| `showGrabber` | `boolean` | — | Show the grabber. On by default for a top or bottom sheet. |
-| `showClose` | `boolean` | `true` | Show the round close button in the top trailing corner. Default true. |
+| `showGrabber` | `boolean` | — | Show the grabber. On by default for a top or bottom sheet that a swipe can close, and off when `dismissible` is. |
+| `showClose` | `boolean` | `true` | Show the round close button in the top trailing corner. Default true. Write a bare `<Sheet.Close />` into the sheet to place it somewhere else, or set this to `false` for a sheet with no close button at all. |
 | `blur` | `boolean` | `false` | Frost the page behind the sheet instead of only dimming it. |
 | `inline` | `boolean` | `false` | Draw the sheet in the page instead of over it: no backdrop, no trigger, always there. For previews and for a layout that shows the sheet as part of a screen. |
 
@@ -135,8 +136,8 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `render` | `ReactElement` | — | Your own element to close the sheet with, such as a Cancel button. Without it, and without children, this is the round close button. |
-| `icon` | `boolean` | — | Draw the cross glyph. Set for you on the built-in close button. |
+| `render` | `ReactElement` | — | Your own element to close the sheet with, such as a Cancel button. Without it, and without children, this is the round close button, drawn where it is written in place of the one in the corner. |
+| `icon` | `boolean` | — | Draw the round close button. A `Sheet.Close` with nothing inside it already is one. |
 
 #### `SheetSlidesProps`
 
@@ -175,6 +176,8 @@ A sheet written as a plain `<Sheet>` inside another sheet's content also stacks.
 #### Gestures
 
 Swiping follows the pointer, and a quick flick toward the edge closes the sheet even when it has not moved far.
+
+With a mouse, a press on text selects it instead of starting a drag. The grabber and the padding around the header still drag the sheet. Touch swipes from anywhere, except while text in the sheet is selected.
 
 `dismissible={false}` keeps a click outside, Escape and a swipe from closing it. Only `Sheet.Close` and your own `open` state close it then.
 

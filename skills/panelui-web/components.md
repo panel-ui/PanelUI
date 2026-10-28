@@ -58,6 +58,10 @@ Generated from the collection's source. Read a component's own file before using
 - [Feedback](components/feedback.md) — A dialog with a well to write in and two actions in the band around it.
 - [Not Found](components/not-found.md) — An error code drawn in pixels that come apart near the pointer, with a title and a way out.
 
+## Media and motion
+
+- [Timeline](components/timeline.md) — Time laid out left to right: tracks of clips under a ruler, with a playhead.
+
 ## AI components
 
 - [Message](components/message.md) — One turn of a conversation with an assistant: a person's bubble, or an answer set as prose with actions under it.

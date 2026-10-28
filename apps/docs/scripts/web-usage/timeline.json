@@ -1,0 +1,41 @@
+{
+  "slug": "timeline",
+  "demo": "overview",
+  "demoOptions": { "height": 360 },
+  "intro": "Use it to edit or show things placed in time: the cuts and zooms of a screen recording, the tweens of an animation, the voices of a podcast. Tracks of clips sit under a ruler, and a playhead marks the current moment.\n\nA clip given `onChange` can be moved by its middle and trimmed by either end. It stops at its neighbours on the same track, and snaps to other clips' edges, the playhead and the ends, with a guide line while it does.\n\nIt needs a width to lay time across; the height follows the tracks. For a value that moves along a range without clips, use a [Slider](/docs/web/components/slider).",
+  "usage": "<Timeline duration={140} defaultZoom={7}>\n  <Timeline.Header>\n    <Timeline.Time />\n    <Timeline.Zoom />\n  </Timeline.Header>\n  <Timeline.Viewport>\n    <Timeline.Ruler />\n    <Timeline.Track label=\"Zooms\">\n      <Timeline.Clip color=\"chart-4\" start={zoom.start} end={zoom.end} onChange={setZoom} />\n    </Timeline.Track>\n    <Timeline.Track size=\"lg\" label=\"Recording\">\n      <Timeline.Clip color=\"info\" start={0} end={128}>\n        <Timeline.Waveform peaks={peaks} />\n        <Timeline.ClipLabel>Take 3</Timeline.ClipLabel>\n      </Timeline.Clip>\n    </Timeline.Track>\n    <Timeline.Playhead />\n  </Timeline.Viewport>\n</Timeline>",
+  "anatomy": "<Timeline>\n  <Timeline.Header>\n    <Timeline.Time />\n    <Timeline.Zoom />\n  </Timeline.Header>\n  <Timeline.Viewport>\n    <Timeline.Ruler />\n    <Timeline.Track>\n      <Timeline.Clip>\n        <Timeline.Waveform />\n        <Timeline.ClipLabel />\n      </Timeline.Clip>\n    </Timeline.Track>\n    <Timeline.Playhead />\n  </Timeline.Viewport>\n</Timeline>",
+  "parts": {
+    "Header": "A row above the tracks, for a toolbar, the time and the zoom. `useTimeline()` gives a toolbar placed here the time, playback and zoom.",
+    "Time": "The playhead's time, in minutes, seconds and tenths, and the length after it.",
+    "Zoom": "A line [Slider](/docs/web/components/slider) between zoom out and zoom in. It runs on a log scale, so each stretch of it zooms by the same factor.",
+    "Viewport": "The part that scrolls sideways, holding the ruler, the tracks and the playhead. Pinch, or ⌘ or Ctrl with the wheel, zooms about the pointer. A strip of diagonal lines marks the time past the end.",
+    "Ruler": "Ticks and times along the top. Its labels stay at least 64 pixels apart at any zoom. Pressing or dragging on it moves the playhead.",
+    "Track": "A row of clips that cannot overlap. `size` sets its height: `sm` for bars, `md` for blocks, `lg` for media. `label` names it for a screen reader.",
+    "Clip": "One clip from `start` to `end`, in seconds. `variant` is `bar`, `block` or `media`, and follows the track's size unless set. `color` takes a theme colour. With `onChange` it can be moved and trimmed, and `onRemove` is called on Delete.",
+    "ClipLabel": "Words on a clip, with an icon: its length, its name, its speed. A block with a label leaves out its grips.",
+    "Waveform": "Loudness across a media clip, from `peaks` between 0 and 1, drawn mirrored about the middle.",
+    "Playhead": "The line at the current time. Its head shows the time and can be dragged, and with focus the arrow keys step it and Space plays and pauses."
+  },
+  "examples": [
+    {
+      "title": "Voices",
+      "description": "Three tracks of media clips, one per speaker, each in a chart colour so a voice can be followed along the whole episode. Each clip draws its own waveform.",
+      "demo": "podcast",
+      "height": 330
+    },
+    {
+      "title": "Motion",
+      "description": "A timeline is not only for minutes. Here it lays out a card's entrance across 1.6 seconds, one property per track, and the ruler counts in fractions of a second at this zoom. `minZoom` and `maxZoom` set how far it zooms.",
+      "demo": "motion",
+      "height": 300
+    },
+    {
+      "title": "Read only",
+      "description": "`readOnly` shows the clips without letting them be moved or trimmed, for a published cut or a schedule. The playhead can still be moved, and the header can be left out.",
+      "demo": "read-only",
+      "height": 220
+    }
+  ],
+  "notes": "### Snapping\n\nWhile a clip is moved or trimmed, an edge within 8 pixels of another clip's edge, the playhead or either end of the timeline snaps to it, and a guide line marks where. `snap={false}` turns it off.\n\n### Keyboard\n\nA clip takes focus. The left and right arrows move it by a tenth of a second, a second with Shift, and Delete calls `onRemove`. The playhead's head is a slider: the arrows step it, Home and End go to the ends, and Space plays and pauses.\n\n### Time and zoom\n\nTimes are in seconds. `zoom` is in pixels per second, from `minZoom` to `maxZoom`; at 7, a two-minute recording is about 840 pixels wide. `time`, `zoom` and `playing` can each be held by the caller, with `onTimeChange`, `onZoomChange` and `onPlayingChange`.\n\nWith reduced motion turned on, clips do not swell while they are dragged."
+}

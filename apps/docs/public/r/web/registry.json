@@ -856,6 +856,38 @@
       ]
     },
     {
+      "name": "timeline",
+      "type": "registry:component",
+      "title": "Timeline",
+      "description": "Time laid out left to right: tracks of clips under a ruler, with a playhead.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/slider.json"
+      ],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/timeline.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/timeline.tsx"
+        }
+      ]
+    },
+    {
       "name": "toolbar",
       "type": "registry:component",
       "title": "Toolbar",

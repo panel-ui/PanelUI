@@ -367,5 +367,14 @@
       "addedIn": "0.10.0",
       "category": "layout"
     }
+  ],
+  "timeline": [
+    "Timeline",
+    "Time laid out left to right: tracks of clips under a ruler, with a playhead.",
+    "react timeline editor component video editor tracks clips playhead",
+    {
+      "addedIn": "0.10.0",
+      "category": "media"
+    }
   ]
 }

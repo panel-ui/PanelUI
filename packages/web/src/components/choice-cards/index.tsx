@@ -42,8 +42,9 @@ const choiceCardsVariants = tv({
     item: [
       'group/choice relative flex min-w-0 cursor-pointer flex-col gap-1.5 rounded-[18px] p-1.5 text-start outline-none select-none',
       'bg-muted/60 transition-[background-color,box-shadow] duration-200 hover:bg-muted',
-      // The ring stands clear of the card, so it never sits on the picture.
-      'ring-offset-2 ring-offset-background data-checked:bg-muted data-checked:ring-2 data-checked:ring-(--choice)',
+      // The ring stands clear of the card, so it never sits on the picture. It
+      // is an outline, whose gap is see-through on whatever surface holds it.
+      'outline-offset-2 data-checked:bg-muted data-checked:outline-2 data-checked:outline-solid data-checked:outline-(--choice)',
       'focus-visible:ring-2 focus-visible:ring-ring',
       'data-disabled:cursor-not-allowed data-disabled:opacity-50',
     ],

@@ -1,0 +1,342 @@
+---
+title: Slider
+description: A number set by dragging along a track, with its name and value written inside it.
+status: new
+---
+
+<ComponentPreview name="slider/overview" height={240}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider } from '@/components/panelui/slider';
+
+const PERCENT = { style: 'unit', unit: 'percent' } as const;
+
+export default function SliderOverview() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-2">
+      <Slider label="Size" defaultValue={24} min={1} max={120} format={(v) => `${v} px`} />
+      <Slider label="Opacity" defaultValue={80} format={PERCENT} />
+      <Slider label="Hardness" defaultValue={35} format={PERCENT} />
+      <Slider label="Smoothing" defaultValue={1.4} min={0} max={4} step={0.05} format={(v) => `${v.toFixed(2)}×`} />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to set a number where the feel of the change matters more than the exact figure: a brush size, an opacity, a zoom. The value updates while the hand moves, so whatever it drives can follow live.
+
+The default `fill` slider writes its name at the start of the track and its value at the end, so a panel of settings is a column of bars rather than labels, tracks and numbers to line up. Give every slider a `label`; it is also what a screen reader announces.
+
+For a number that has to be typed exactly, such as a price or a page count, use an [Input](/docs/web/components/input). For a choice between a few named options, use [Tabs](/docs/web/components/tabs) or a [Select](/docs/web/components/select).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/slider.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/slider` instead of `@/components/panelui/slider`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/slider.tsx`:
+
+<RegistrySource name="slider" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Slider } from "@/components/panelui/slider"
+```
+
+```tsx
+<Slider label="Opacity" defaultValue={80} format={{ style: "unit", unit: "percent" }} />
+
+<Slider variant="line" label="Zoom" min={25} max={400} defaultValue={100}>
+  <Slider.Step by={-25} aria-label="Zoom out">
+    <MinusIcon />
+  </Slider.Step>
+  <Slider.Step by={25} aria-label="Zoom in">
+    <PlusIcon />
+  </Slider.Step>
+</Slider>
+```
+
+## Composition
+
+```tsx
+<Slider>
+  <Slider.Step />
+</Slider>
+```
+
+- **`Slider.Step`** — A button beside the track that moves the value by `by`. One with a negative `by` stands before the track and one with a positive `by` after it, wherever they are written. It is disabled at the end it moves towards, and does nothing on a range.
+
+## Examples
+
+### Line
+
+`variant="line"` is a thin track with a round knob, for a toolbar or a player where the value is shown elsewhere or not at all. Here two `Slider.Step` buttons zoom out and in by 25%, and the number beside it reads the held `value`.
+
+<ComponentPreview name="slider/line" height={140}>
+
+```tsx lineNumbers
+'use client';
+
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Slider } from '@/components/panelui/slider';
+
+export default function SliderLine() {
+  const [zoom, setZoom] = useState(100);
+  return (
+    <div className="flex w-full max-w-sm items-center gap-3">
+      <Slider variant="line" label="Zoom" value={zoom} onValueChange={setZoom} min={25} max={400} step={5}>
+        <Slider.Step by={-25} aria-label="Zoom out">
+          <MinusIcon />
+        </Slider.Step>
+        <Slider.Step by={25} aria-label="Zoom in">
+          <PlusIcon />
+        </Slider.Step>
+      </Slider>
+      <span className="w-12 shrink-0 text-end text-sm tabular-nums text-muted-foreground">{zoom}%</span>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### From the centre
+
+`origin="center"` fills from the middle of the range towards the value, for a value that can go either way from nothing. A hairline marks the middle. Pass a `format` function to write the sign.
+
+<ComponentPreview name="slider/center" height={240}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider } from '@/components/panelui/slider';
+
+const signed = (digits: number, unit = '') => (v: number) =>
+  `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(digits)}${unit}`;
+
+export default function SliderCenter() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-2">
+      <Slider label="Exposure" origin="center" min={-3} max={3} step={0.1} defaultValue={0.7} format={signed(1, ' EV')} />
+      <Slider label="Contrast" origin="center" min={-100} max={100} defaultValue={-18} format={signed(0)} />
+      <Slider label="Warmth" origin="center" min={-100} max={100} defaultValue={32} format={signed(0)} color="warning" />
+      <Slider label="Tint" origin="center" min={-100} max={100} defaultValue={-12} format={signed(0)} color="success" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A range
+
+A `value` or `defaultValue` of two numbers draws two handles and fills between them. The value reads as both ends, each written by `format`. Here the part of a clip to keep, and the hours a studio is open.
+
+<ComponentPreview name="slider/range" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider } from '@/components/panelui/slider';
+
+const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
+const hour = (value: number) => `${Math.floor(value)}:${value % 1 ? '30' : '00'}`;
+
+export default function SliderRange() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-2">
+      <Slider label="Keep" min={0} max={214} defaultValue={[18, 162]} format={clock} color="info" />
+      <Slider label="Open" min={6} max={24} step={0.5} defaultValue={[8.5, 18]} format={hour} />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Steps
+
+With 12 steps or fewer, a notch on the top and bottom edges marks every step, so it is clear the value moves in jumps. The text runs between the notches and never crosses one. `ticks` turns them on or off by hand. A `format` function can name each step instead of numbering it.
+
+<ComponentPreview name="slider/steps" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider } from '@/components/panelui/slider';
+
+const QUALITY = ['Draft', 'Low', 'Medium', 'High', 'Best'];
+
+export default function SliderSteps() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-2">
+      <Slider label="Columns" min={1} max={12} defaultValue={4} />
+      <Slider label="Export quality" min={0} max={4} defaultValue={3} format={(v) => QUALITY[v] ?? ''} color="primary" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Colours
+
+`color` sets the fill and the handle. Keep `neutral` for a panel of settings, where a column of coloured bars would compete with the work beside it. Use a colour where the value carries a meaning, such as warmth or a level that becomes risky.
+
+<ComponentPreview name="slider/colors" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider, type SliderColor } from '@/components/panelui/slider';
+
+const COLORS: [SliderColor, number][] = [
+  ['neutral', 62],
+  ['primary', 48],
+  ['info', 71],
+  ['success', 36],
+  ['warning', 55],
+  ['destructive', 24],
+];
+
+export default function SliderColors() {
+  return (
+    <div className="grid w-full max-w-xl gap-x-6 gap-y-3 sm:grid-cols-2">
+      <div className="flex flex-col gap-2">
+        {COLORS.map(([color, value]) => (
+          <Slider key={color} label={color[0]!.toUpperCase() + color.slice(1)} color={color} defaultValue={value} />
+        ))}
+      </div>
+      <div className="flex flex-col justify-around gap-2">
+        {COLORS.map(([color, value]) => (
+          <Slider key={color} variant="line" label={color} color={color} defaultValue={value} />
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes
+
+`sm`, `md` and `lg` set the height of a `fill` slider and the size of its text. `md` matches the height of a small button.
+
+<ComponentPreview name="slider/sizes" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { Slider } from '@/components/panelui/slider';
+
+export default function SliderSizes() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-3">
+      <Slider size="sm" label="Small" defaultValue={30} />
+      <Slider size="md" label="Medium" defaultValue={50} />
+      <Slider size="lg" label="Large" defaultValue={70} />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Slider
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `Value` | — | The value, when the caller holds it. Two numbers make a range with two handles. |
+| `defaultValue` | `Value` | — | The value to start at, when the caller does not hold it. Default `min`. |
+| `onValueChange` | `(value: Value) => void` | — | Called with the new value while it changes, by a drag, a press, a key or a `Slider.Step`. |
+| `variant` | `SliderVariant` | `'fill'` | `fill` writes the name and value inside a bar; `line` is a thin track with a knob. Default `fill`. |
+| `label` | `string` | — | What it sets. Written inside a `fill` slider, and what a screen reader calls either kind. |
+| `format` | `Intl.NumberFormatOptions \| ((value: number) => string)` | — | How the value is written: number-format options such as `{ style: 'unit', unit: 'percent' }`, or a function from the number to a string for anything else, such as a multiplier written `1.40×`. Also what a screen reader reads. |
+| `origin` | `'start' \| 'center'` | `'start'` | Where the fill grows from. `center` fills outwards from the middle of the range. Default `start`. |
+| `color` | `SliderColor` | `neutral` | The colour of the fill and the handle. `neutral` by default. |
+| `size` | `SliderSize` | `md` | Height of a `fill` slider. Default `md`. |
+| `showValue` | `boolean` | `true` | Show the value at the end of a `fill` slider. Default true. |
+| `ticks` | `boolean` | — | Mark every step with a notch. Default: on when there are 12 steps or fewer. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+### Slider.Step
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `by` | `number` | — | How much one press moves the value. Negative steps down and sits before the track. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Pointer and keyboard
+
+A press away from the handle glides the fill there; a drag follows the pointer with no easing. Pulled past either end, the track stretches a few pixels and springs back on release.
+
+The arrow keys move by `step` and Page Up and Page Down by `largeStep`, 10 steps by default. Home and End go to `min` and `max`.
+
+### Writing the value
+
+`format` takes number-format options, such as `{ style: "unit", unit: "percent" }`, or a function from the number to a string. Either way it also writes what a screen reader reads, so a value written as `1.40×` is read as that rather than as 1.4.
+
+### Forms
+
+Give it a `name` and it submits its value with the form it is in. A range submits both numbers.
+
+With reduced motion turned on, the fill moves without gliding and the track does not stretch.
+
+### Server Components
+
+`Slider` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Slider.Step` off the import, so each part is also exported by name: `SliderStep` is `Slider.Step`.
+
+```tsx
+import { Slider, SliderStep } from "@/components/panelui/slider"
+```

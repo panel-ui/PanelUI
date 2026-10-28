@@ -586,3 +586,13 @@ export {
   type CanvasSpotlightProps,
   type CanvasContentProps,
 } from './components/canvas';
+export {
+  Slider,
+  SliderStep,
+  sliderVariants,
+  type SliderProps,
+  type SliderStepProps,
+  type SliderVariant,
+  type SliderSize,
+  type SliderColor,
+} from './components/slider';

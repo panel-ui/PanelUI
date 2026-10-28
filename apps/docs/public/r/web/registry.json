@@ -640,6 +640,36 @@
       ]
     },
     {
+      "name": "slider",
+      "type": "registry:component",
+      "title": "Slider",
+      "description": "A number set by dragging along a track, with its name and value written inside it.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/slider.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/slider.tsx"
+        }
+      ]
+    },
+    {
       "name": "soundwave",
       "type": "registry:component",
       "title": "Soundwave",

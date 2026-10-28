@@ -320,5 +320,14 @@
       "category": "actions",
       "title": "Button Group"
     }
+  ],
+  "slider": [
+    "Slider",
+    "A number set by dragging along a track, with its name and value written inside it.",
+    "react slider range input component settings panel",
+    {
+      "addedIn": "0.10.0",
+      "category": "forms"
+    }
   ]
 }

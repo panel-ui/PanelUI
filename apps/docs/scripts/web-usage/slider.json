@@ -1,0 +1,50 @@
+{
+  "slug": "slider",
+  "demo": "overview",
+  "demoOptions": { "height": 240 },
+  "intro": "Use it to set a number where the feel of the change matters more than the exact figure: a brush size, an opacity, a zoom. The value updates while the hand moves, so whatever it drives can follow live.\n\nThe default `fill` slider writes its name at the start of the track and its value at the end, so a panel of settings is a column of bars rather than labels, tracks and numbers to line up. Give every slider a `label`; it is also what a screen reader announces.\n\nFor a number that has to be typed exactly, such as a price or a page count, use an [Input](/docs/web/components/input). For a choice between a few named options, use [Tabs](/docs/web/components/tabs) or a [Select](/docs/web/components/select).",
+  "usage": "<Slider label=\"Opacity\" defaultValue={80} format={{ style: \"unit\", unit: \"percent\" }} />\n\n<Slider variant=\"line\" label=\"Zoom\" min={25} max={400} defaultValue={100}>\n  <Slider.Step by={-25} aria-label=\"Zoom out\">\n    <MinusIcon />\n  </Slider.Step>\n  <Slider.Step by={25} aria-label=\"Zoom in\">\n    <PlusIcon />\n  </Slider.Step>\n</Slider>",
+  "anatomy": "<Slider>\n  <Slider.Step />\n</Slider>",
+  "parts": {
+    "Step": "A button beside the track that moves the value by `by`. One with a negative `by` stands before the track and one with a positive `by` after it, wherever they are written. It is disabled at the end it moves towards, and does nothing on a range."
+  },
+  "examples": [
+    {
+      "title": "Line",
+      "description": "`variant=\"line\"` is a thin track with a round knob, for a toolbar or a player where the value is shown elsewhere or not at all. Here two `Slider.Step` buttons zoom out and in by 25%, and the number beside it reads the held `value`.",
+      "demo": "line",
+      "height": 140
+    },
+    {
+      "title": "From the centre",
+      "description": "`origin=\"center\"` fills from the middle of the range towards the value, for a value that can go either way from nothing. A hairline marks the middle. Pass a `format` function to write the sign.",
+      "demo": "center",
+      "height": 240
+    },
+    {
+      "title": "A range",
+      "description": "A `value` or `defaultValue` of two numbers draws two handles and fills between them. The value reads as both ends, each written by `format`. Here the part of a clip to keep, and the hours a studio is open.",
+      "demo": "range",
+      "height": 160
+    },
+    {
+      "title": "Steps",
+      "description": "With 12 steps or fewer, a notch on the top and bottom edges marks every step, so it is clear the value moves in jumps. The text runs between the notches and never crosses one. `ticks` turns them on or off by hand. A `format` function can name each step instead of numbering it.",
+      "demo": "steps",
+      "height": 160
+    },
+    {
+      "title": "Colours",
+      "description": "`color` sets the fill and the handle. Keep `neutral` for a panel of settings, where a column of coloured bars would compete with the work beside it. Use a colour where the value carries a meaning, such as warmth or a level that becomes risky.",
+      "demo": "colors",
+      "height": 300
+    },
+    {
+      "title": "Sizes",
+      "description": "`sm`, `md` and `lg` set the height of a `fill` slider and the size of its text. `md` matches the height of a small button.",
+      "demo": "sizes",
+      "height": 200
+    }
+  ],
+  "notes": "### Pointer and keyboard\n\nA press away from the handle glides the fill there; a drag follows the pointer with no easing. Pulled past either end, the track stretches a few pixels and springs back on release.\n\nThe arrow keys move by `step` and Page Up and Page Down by `largeStep`, 10 steps by default. Home and End go to `min` and `max`.\n\n### Writing the value\n\n`format` takes number-format options, such as `{ style: \"unit\", unit: \"percent\" }`, or a function from the number to a string. Either way it also writes what a screen reader reads, so a value written as `1.40×` is read as that rather than as 1.4.\n\n### Forms\n\nGive it a `name` and it submits its value with the form it is in. A range submits both numbers.\n\nWith reduced motion turned on, the fill moves without gliding and the track does not stretch."
+}

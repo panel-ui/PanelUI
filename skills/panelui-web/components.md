@@ -12,6 +12,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Input](components/input.md) — A single line to type into, with icons, units and buttons set inside its box.
 - [Label](components/label.md) — The name of a field, with its required mark, a hint and an action on one line.
 - [Select](components/select.md) — A button that opens a list of options and shows the one chosen.
+- [Slider](components/slider.md) — A number set by dragging along a track, with its name and value written inside it.
 - [Switch](components/switch.md) — On or off, for a setting that takes effect the moment it changes.
 - [Textarea](components/textarea.md) — A field for more than one line that grows as it is written in, up to a limit.
 

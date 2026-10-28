@@ -1,0 +1,35 @@
+{
+  "slug": "choice-cards",
+  "demo": "overview",
+  "demoOptions": { "height": 220 },
+  "intro": "Use it to choose one of a few options that are easier to see than to name: a pointer style, a canvas size, a background, an export quality. Each card leads with a picture of the option and its name sits under it.\n\nIt suits two to six options. Past that the pictures get too small to compare; use a [Select](/docs/web/components/select) with icons instead. For options that are only words, use [Tabs](/docs/web/components/tabs) or a radio group.\n\nGive the group an `aria-label`, or point `aria-labelledby` at its heading, so a screen reader says what is being chosen.",
+  "usage": "<ChoiceCards defaultValue=\"square\" aria-label=\"Canvas size\">\n  <ChoiceCards.Item value=\"square\">\n    <ChoiceCards.Media>\n      <SquareIcon />\n    </ChoiceCards.Media>\n    <ChoiceCards.Label>Square</ChoiceCards.Label>\n    <ChoiceCards.Description>1080 × 1080</ChoiceCards.Description>\n  </ChoiceCards.Item>\n</ChoiceCards>",
+  "anatomy": "<ChoiceCards>\n  <ChoiceCards.Item>\n    <ChoiceCards.Media />\n    <ChoiceCards.Label />\n    <ChoiceCards.Description />\n  </ChoiceCards.Item>\n</ChoiceCards>",
+  "parts": {
+    "Item": "One option. Its `value` is what the group is set to when it is chosen. The chosen card is ringed in the group's colour and a check appears in its corner.",
+    "Media": "The picture of the option: a drawing, an icon or an image, centred in a rounded frame at the group's `aspect`. An image fills it edge to edge. On the chosen card it grows slightly.",
+    "Label": "The option's name, under the picture. It is also what a screen reader calls the card.",
+    "Description": "A line under the name: what the option costs or what it is for. A screen reader reads it after the name."
+  },
+  "examples": [
+    {
+      "title": "Shapes",
+      "description": "`aspect` sets the shape of every card's picture. Here square pictures hold a frame drawn at each ratio, so the options can be compared at a glance.",
+      "demo": "aspect",
+      "height": 220
+    },
+    {
+      "title": "Images",
+      "description": "Anything that fills the media fills it to the edge, so a gradient, a photo or a video still works as the picture. `columns` sets how many cards stand in a row.",
+      "demo": "backgrounds",
+      "height": 200
+    },
+    {
+      "title": "With descriptions",
+      "description": "A `ChoiceCards.Description` under the label says what the option costs. `color` sets the ring and the check; here `info`.",
+      "demo": "descriptions",
+      "height": 220
+    }
+  ],
+  "notes": "### Keyboard\n\nThe group is one stop in the tab order. The arrow keys move the choice from card to card, and Space chooses the focused one.\n\n### Columns\n\nWithout `columns`, the cards share one row, up to four of them. Set `columns` for a grid, and use a narrower count on a small screen by passing it from your own breakpoint.\n\n### Forms\n\nGive it a `name` and it submits the chosen `value` with the form it is in. `required` stops the form being sent before a card is chosen.\n\nWith reduced motion turned on, the check and the picture change without moving."
+}

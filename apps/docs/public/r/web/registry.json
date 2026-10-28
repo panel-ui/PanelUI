@@ -180,6 +180,36 @@
       ]
     },
     {
+      "name": "choice-cards",
+      "type": "registry:component",
+      "title": "Choice Cards",
+      "description": "One option chosen from a few, each shown as a picture of what it does.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/choice-cards.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/choice-cards.tsx"
+        }
+      ]
+    },
+    {
       "name": "command-dock",
       "type": "registry:component",
       "title": "Command Dock",

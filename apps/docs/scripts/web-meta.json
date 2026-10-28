@@ -348,5 +348,15 @@
       "category": "forms",
       "title": "XY Pad"
     }
+  ],
+  "choice-cards": [
+    "ChoiceCards",
+    "One option chosen from a few, each shown as a picture of what it does.",
+    "react choice cards radio cards picker component",
+    {
+      "addedIn": "0.10.0",
+      "category": "forms",
+      "title": "Choice Cards"
+    }
   ]
 }

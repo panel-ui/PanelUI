@@ -10,6 +10,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Forms and input
 
+- [Choice Cards](components/choice-cards.md) — One option chosen from a few, each shown as a picture of what it does.
 - [Input](components/input.md) — A single line to type into, with icons, units and buttons set inside its box.
 - [Label](components/label.md) — The name of a field, with its required mark, a hint and an action on one line.
 - [Select](components/select.md) — A button that opens a list of options and shows the one chosen.

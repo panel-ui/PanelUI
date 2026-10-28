@@ -622,3 +622,17 @@ export {
   type XYPadPoint,
   type XYPadColor,
 } from './components/xy-pad';
+export {
+  ChoiceCards,
+  ChoiceCardsItem,
+  ChoiceCardsMedia,
+  ChoiceCardsLabel,
+  ChoiceCardsDescription,
+  choiceCardsVariants,
+  type ChoiceCardsProps,
+  type ChoiceCardsColor,
+  type ChoiceCardsItemProps,
+  type ChoiceCardsMediaProps,
+  type ChoiceCardsLabelProps,
+  type ChoiceCardsDescriptionProps,
+} from './components/choice-cards';

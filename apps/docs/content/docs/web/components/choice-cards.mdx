@@ -1,0 +1,320 @@
+---
+title: Choice Cards
+description: One option chosen from a few, each shown as a picture of what it does.
+status: new
+---
+
+<ComponentPreview name="choice-cards/overview" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { ChoiceCards } from '@/components/panelui/choice-cards';
+
+/** Four pointer styles, drawn at the size a recording would show them. */
+const POINTERS = [
+  {
+    value: 'arrow',
+    label: 'Arrow',
+    drawing: <path d="M14 10v26l7-6.5 4.5 10 4.5-2-4.5-9.5H35Z" />,
+  },
+  { value: 'dot', label: 'Dot', drawing: <circle cx="24" cy="24" r="7" /> },
+  {
+    value: 'halo',
+    label: 'Halo',
+    drawing: (
+      <>
+        <circle cx="24" cy="24" r="15" fillOpacity={0.22} stroke="none" />
+        <circle cx="24" cy="24" r="6" />
+      </>
+    ),
+  },
+  {
+    value: 'ring',
+    label: 'Ring',
+    drawing: (
+      <>
+        <circle cx="24" cy="24" r="11" fill="none" strokeWidth={3} className="stroke-current" />
+        <circle cx="24" cy="24" r="2.5" />
+      </>
+    ),
+  },
+];
+
+export default function ChoiceCardsOverview() {
+  return (
+    <ChoiceCards defaultValue="halo" aria-label="Pointer" className="max-w-md">
+      {POINTERS.map(({ value, label, drawing }) => (
+        <ChoiceCards.Item key={value} value={value}>
+          <ChoiceCards.Media>
+            <svg viewBox="0 0 48 48" className="size-12 fill-current stroke-background" strokeWidth={2}>
+              {drawing}
+            </svg>
+          </ChoiceCards.Media>
+          <ChoiceCards.Label>{label}</ChoiceCards.Label>
+        </ChoiceCards.Item>
+      ))}
+    </ChoiceCards>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to choose one of a few options that are easier to see than to name: a pointer style, a canvas size, a background, an export quality. Each card leads with a picture of the option and its name sits under it.
+
+It suits two to six options. Past that the pictures get too small to compare; use a [Select](/docs/web/components/select) with icons instead. For options that are only words, use [Tabs](/docs/web/components/tabs) or a radio group.
+
+Give the group an `aria-label`, or point `aria-labelledby` at its heading, so a screen reader says what is being chosen.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/choice-cards.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/choice-cards` instead of `@/components/panelui/choice-cards`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/choice-cards.tsx`:
+
+<RegistrySource name="choice-cards" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { ChoiceCards } from "@/components/panelui/choice-cards"
+```
+
+```tsx
+<ChoiceCards defaultValue="square" aria-label="Canvas size">
+  <ChoiceCards.Item value="square">
+    <ChoiceCards.Media>
+      <SquareIcon />
+    </ChoiceCards.Media>
+    <ChoiceCards.Label>Square</ChoiceCards.Label>
+    <ChoiceCards.Description>1080 × 1080</ChoiceCards.Description>
+  </ChoiceCards.Item>
+</ChoiceCards>
+```
+
+## Composition
+
+```tsx
+<ChoiceCards>
+  <ChoiceCards.Item>
+    <ChoiceCards.Media />
+    <ChoiceCards.Label />
+    <ChoiceCards.Description />
+  </ChoiceCards.Item>
+</ChoiceCards>
+```
+
+- **`ChoiceCards.Item`** — One option. Its `value` is what the group is set to when it is chosen. The chosen card is ringed in the group's colour and a check appears in its corner.
+- **`ChoiceCards.Media`** — The picture of the option: a drawing, an icon or an image, centred in a rounded frame at the group's `aspect`. An image fills it edge to edge. On the chosen card it grows slightly.
+- **`ChoiceCards.Label`** — The option's name, under the picture. It is also what a screen reader calls the card.
+- **`ChoiceCards.Description`** — A line under the name: what the option costs or what it is for. A screen reader reads it after the name.
+
+## Examples
+
+### Shapes
+
+`aspect` sets the shape of every card's picture. Here square pictures hold a frame drawn at each ratio, so the options can be compared at a glance.
+
+<ComponentPreview name="choice-cards/aspect" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { ChoiceCards } from '@/components/panelui/choice-cards';
+
+const RATIOS = [
+  { value: '16:9', label: 'Widescreen', width: 16, height: 9 },
+  { value: '4:5', label: 'Portrait post', width: 4, height: 5 },
+  { value: '1:1', label: 'Square', width: 1, height: 1 },
+  { value: '9:16', label: 'Story', width: 9, height: 16 },
+];
+
+export default function ChoiceCardsAspect() {
+  const [ratio, setRatio] = useState('16:9');
+  return (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <ChoiceCards value={ratio} onValueChange={setRatio} aria-label="Canvas size" aspect="1 / 1">
+        {RATIOS.map(({ value, label, width, height }) => {
+          const scale = 50 / Math.max(width, height);
+          return (
+            <ChoiceCards.Item key={value} value={value}>
+              <ChoiceCards.Media>
+                <span
+                  className="rounded-md border-2 border-current bg-current/10"
+                  style={{ width: width * scale, height: height * scale }}
+                />
+              </ChoiceCards.Media>
+              <ChoiceCards.Label>{label}</ChoiceCards.Label>
+              <ChoiceCards.Description className="tabular-nums">{value}</ChoiceCards.Description>
+            </ChoiceCards.Item>
+          );
+        })}
+      </ChoiceCards>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Images
+
+Anything that fills the media fills it to the edge, so a gradient, a photo or a video still works as the picture. `columns` sets how many cards stand in a row.
+
+<ComponentPreview name="choice-cards/backgrounds" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { ChoiceCards } from '@/components/panelui/choice-cards';
+
+const BACKGROUNDS = [
+  { value: 'dusk', label: 'Dusk', image: 'linear-gradient(140deg, var(--chart-1), var(--chart-4))' },
+  { value: 'lagoon', label: 'Lagoon', image: 'linear-gradient(140deg, var(--chart-2), var(--chart-3))' },
+  { value: 'ember', label: 'Ember', image: 'radial-gradient(circle at 30% 20%, var(--chart-5), var(--chart-1) 70%)' },
+  { value: 'mesh', label: 'Mesh', image: 'conic-gradient(from 200deg at 60% 40%, var(--chart-3), var(--chart-5), var(--chart-2), var(--chart-3))' },
+  {
+    value: 'none',
+    label: 'None',
+    image: 'repeating-conic-gradient(var(--muted) 0 25%, transparent 0 50%) 0 0 / 12px 12px',
+  },
+];
+
+export default function ChoiceCardsBackgrounds() {
+  return (
+    <ChoiceCards defaultValue="lagoon" columns={5} aspect="1 / 1" aria-label="Background" className="max-w-lg">
+      {BACKGROUNDS.map(({ value, label, image }) => (
+        <ChoiceCards.Item key={value} value={value}>
+          <ChoiceCards.Media>
+            <span className="size-full" style={{ background: image }} />
+          </ChoiceCards.Media>
+          <ChoiceCards.Label>{label}</ChoiceCards.Label>
+        </ChoiceCards.Item>
+      ))}
+    </ChoiceCards>
+  );
+}
+```
+
+</ComponentPreview>
+
+### With descriptions
+
+A `ChoiceCards.Description` under the label says what the option costs. `color` sets the ring and the check; here `info`.
+
+<ComponentPreview name="choice-cards/descriptions" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { ChoiceCards } from '@/components/panelui/choice-cards';
+
+const QUALITY = [
+  { value: '720', label: 'Draft', size: '720p', description: 'About 40 MB. Quick to send for review.' },
+  { value: '1080', label: 'Standard', size: '1080p', description: 'About 120 MB. Right for most sharing.' },
+  { value: '2160', label: 'Master', size: '4K', description: 'About 620 MB. For editing elsewhere.' },
+];
+
+export default function ChoiceCardsDescriptions() {
+  return (
+    <ChoiceCards defaultValue="1080" aspect="5 / 2" color="info" aria-label="Export quality" className="max-w-lg">
+      {QUALITY.map(({ value, label, size, description }) => (
+        <ChoiceCards.Item key={value} value={value}>
+          <ChoiceCards.Media>
+            <span className="text-2xl font-semibold tracking-tight tabular-nums">{size}</span>
+          </ChoiceCards.Media>
+          <ChoiceCards.Label>{label}</ChoiceCards.Label>
+          <ChoiceCards.Description>{description}</ChoiceCards.Description>
+        </ChoiceCards.Item>
+      ))}
+    </ChoiceCards>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### ChoiceCards
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `columns` | `number` | — | How many cards stand in a row. Default: one per item, up to four. |
+| `aspect` | `string` | `'4 / 3'` | The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. |
+| `color` | `ChoiceCardsColor` | `primary` | The colour of the ring and the check on the chosen card. Default `primary`. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+### ChoiceCards.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | What choosing this card sets the group's value to. |
+| `className` | `string` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Keyboard
+
+The group is one stop in the tab order. The arrow keys move the choice from card to card, and Space chooses the focused one.
+
+### Columns
+
+Without `columns`, the cards share one row, up to four of them. Set `columns` for a grid, and use a narrower count on a small screen by passing it from your own breakpoint.
+
+### Forms
+
+Give it a `name` and it submits the chosen `value` with the form it is in. `required` stops the form being sent before a card is chosen.
+
+With reduced motion turned on, the check and the picture change without moving.
+
+### Server Components
+
+`ChoiceCards` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ChoiceCards.Item` off the import, so each part is also exported by name: `ChoiceCardsItem` is `ChoiceCards.Item`, and so on for the others.
+
+```tsx
+import { ChoiceCards, ChoiceCardsItem, ChoiceCardsMedia, ChoiceCardsLabel, ChoiceCardsDescription } from "@/components/panelui/choice-cards"
+```

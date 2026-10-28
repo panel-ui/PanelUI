@@ -49,6 +49,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentProps,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
@@ -216,6 +217,10 @@ export interface SliderProps<Value extends SliderValue = number>
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
+const noop = () => () => {};
+const yes = () => true;
+const no = () => false;
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 const toPercent = (value: number, min: number, max: number) => ((clamp(value, min, max) - min) / (max - min)) * 100;
 /** Rounds away the float noise that repeated steps leave, such as 0.30000000000000004. */
@@ -264,11 +269,14 @@ function SliderRoot<Value extends SliderValue = number>({
     live.current.onValueChange?.(next as Value);
   }, []);
 
+  // The server cannot know the reader's locale, so the page is first written
+  // in a fixed one and switches to theirs once it is running in the browser.
+  const hydrated = useSyncExternalStore(noop, yes, no);
   const write = useMemo(() => {
     if (typeof format === 'function') return format;
-    const formatter = new Intl.NumberFormat(locale, format);
+    const formatter = new Intl.NumberFormat(locale ?? (hydrated ? undefined : 'en-US'), format);
     return (number: number) => formatter.format(number);
-  }, [format, locale]);
+  }, [format, locale, hydrated]);
 
   // The fill: from the start, from the middle, or between two handles.
   const percents = values.map((each) => toPercent(each, min, max));

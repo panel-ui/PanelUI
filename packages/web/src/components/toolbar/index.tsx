@@ -84,8 +84,9 @@ const toolbarVariants = tv({
       '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-(--toolbar-icon)',
       // A button that is only a caret is the options of the tool before it:
       // a slim chevron against that tool, with no fill of its own.
-      'has-[>[data-slot=toolbar-caret]:only-child]:w-4 has-[>[data-slot=toolbar-caret]:only-child]:min-w-0 has-[>[data-slot=toolbar-caret]:only-child]:px-0',
+      'has-[>[data-slot=toolbar-caret]:only-child]:w-3.5 has-[>[data-slot=toolbar-caret]:only-child]:min-w-0 has-[>[data-slot=toolbar-caret]:only-child]:px-0',
       'has-[>[data-slot=toolbar-caret]:only-child]:bg-transparent has-[>[data-slot=toolbar-caret]:only-child]:active:scale-100',
+      'has-[>[data-slot=toolbar-caret]:only-child]:data-popup-open:bg-transparent',
     ],
     // A chosen tool sits on the marker; the hover fill would hide it.
     tool: 'data-pressed:bg-transparent data-pressed:text-primary-foreground data-pressed:hover:bg-transparent',
@@ -94,8 +95,10 @@ const toolbarVariants = tv({
       'data-[orientation=horizontal]:mx-0 data-[orientation=horizontal]:my-1 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-[calc(var(--toolbar-item)*0.5)]',
     ],
     caret: [
-      'pointer-events-none -me-1 size-3 shrink-0 opacity-60 transition-[rotate,opacity] duration-200 [&_svg]:size-3',
-      'only:me-0 only:opacity-100 in-data-popup-open:rotate-180 motion-reduce:transition-none',
+      'pointer-events-none -me-1 flex size-3 shrink-0 items-center justify-center opacity-60 transition-opacity duration-150 [&_svg]:size-3',
+      // On its own it takes its button's colour: muted until the hand is on
+      // it or its menu is open.
+      'only:me-0 only:opacity-100 motion-reduce:transition-none',
     ],
     tooltip: [
       'flex origin-(--transform-origin) items-center gap-2 rounded-lg bg-foreground px-2 py-1 text-xs font-medium text-background shadow-md',
@@ -454,7 +457,7 @@ function ToolbarCaret({ className, children, ...props }: ToolbarCaretProps) {
     <span aria-hidden data-slot="toolbar-caret" className={slots.caret({ className })} {...props}>
       {children ?? (
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 4.75 6 7.75l3-3" />
+          <path d="M3.5 4.75 6 7.25l2.5-2.5" />
         </svg>
       )}
     </span>

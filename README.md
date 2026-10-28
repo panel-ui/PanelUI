@@ -54,7 +54,7 @@ in one coherent visual language, with light and dark themes out of the box.
 Pure TypeScript with no native modules, so it runs in **Expo Go** with no `prebuild`, no Xcode and
 no Android Studio.
 
-**New: PanelUI for the web.** [`panelui-web`](#panelui-for-the-web) is a collection of thirty-three
+**New: PanelUI for the web.** [`panelui-web`](#panelui-for-the-web) is a collection of forty
 components for React on the web, in the same visual language and drawn in your project's own
 theme: a prompt for an AI assistant, a board of cards you drag, a canvas of nodes and edges, a
 globe, KPI cards and more.
@@ -184,7 +184,7 @@ Plus the primitives: `PanelUIProvider`, `Portal`, `AnimatedPressable`, `useTheme
 
 `panelui-web` is a separate collection for React on the web: Next.js, Vite, React Router, or
 anything else that runs React 18 or newer with Tailwind CSS v4. It is not a port of the components
-above. It is thirty-three of its own, styled with Tailwind on the tokens a shadcn project already
+above. It is forty of its own, styled with Tailwind on the tokens a shadcn project already
 defines, so they take your colours and radius in light and dark.
 
 Copy a component's source into your project with the shadcn CLI. It lands in

@@ -824,6 +824,35 @@
           "target": "@components/panelui/toolbar.tsx"
         }
       ]
+    },
+    {
+      "name": "xy-pad",
+      "type": "registry:component",
+      "title": "XY Pad",
+      "description": "Two numbers set with one drag: a point moved across a field.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/xy-pad.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/xy-pad.tsx"
+        }
+      ]
     }
   ]
 }

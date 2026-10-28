@@ -1,0 +1,336 @@
+---
+title: XY Pad
+description: "Two numbers set with one drag: a point moved across a field."
+status: new
+---
+
+<ComponentPreview name="xy-pad/overview" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { XYPad } from '@/components/panelui/xy-pad';
+
+export default function XYPadOverview() {
+  return (
+    <XYPad label="Framing" defaultValue={{ x: 0.32, y: -0.18 }} className="max-w-sm">
+      <XYPad.Value />
+    </XYPad>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for two values that the hand thinks of as one place: where a subject sits in a frame, the position of a light, a pan or a balance between two pairs of things. One drag sets both, where two sliders would make the reader find the point by turning one knob and then the other.
+
+It needs room to be dragged across, so give it a width and let `aspect` set its height.
+
+For a single value, use a [Slider](/docs/web/components/slider). For values that need typing exactly, use two [Inputs](/docs/web/components/input).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/xy-pad.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/xy-pad` instead of `@/components/panelui/xy-pad`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/xy-pad.tsx`:
+
+<RegistrySource name="xy-pad" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { XYPad } from "@/components/panelui/xy-pad"
+```
+
+```tsx
+<XYPad label="Framing" defaultValue={{ x: 0.3, y: -0.2 }}>
+  <XYPad.Value />
+</XYPad>
+```
+
+## Composition
+
+```tsx
+<XYPad>
+  <XYPad.Value />
+</XYPad>
+```
+
+- **`XYPad.Value`** — The two values written out under the field, each by `format`. Leave it out when the values are shown elsewhere.
+
+## Examples
+
+### Joystick
+
+`snapBack` springs the point back to the centre when it is let go, for a value that only means something while it is held. Here it is a speed: the map scrolls in the direction it is held and stops when it is released.
+
+<ComponentPreview name="xy-pad/joystick" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { XYPad, type XYPadPoint } from '@/components/panelui/xy-pad';
+
+/** Held off centre, the map scrolls at that speed; let go and it stops. */
+export default function XYPadJoystick() {
+  const [speed, setSpeed] = useState<XYPadPoint>({ x: 0, y: 0 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const live = useRef(speed);
+  live.current = speed;
+
+  useEffect(() => {
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const seconds = (now - last) / 1000;
+      last = now;
+      const { x, y } = live.current;
+      if (x !== 0 || y !== 0) setOffset((at) => ({ x: at.x - x * 220 * seconds, y: at.y + y * 220 * seconds }));
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-4">
+      <XYPad
+        label="Pan"
+        snapBack
+        grid={6}
+        aspect="1 / 1"
+        color="warning"
+        value={speed}
+        onValueChange={setSpeed}
+        className="w-44 shrink-0"
+      />
+      <div
+        aria-hidden
+        className="relative size-44 shrink-0 overflow-hidden rounded-2xl bg-card ring-1 ring-border"
+        style={{
+          backgroundImage:
+            'linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          backgroundPosition: `${offset.x}px ${offset.y}px`,
+        }}
+      >
+        <span
+          className="absolute size-3 rounded-full bg-chart-2"
+          style={{ left: `calc(30% + ${offset.x % 400}px)`, top: `calc(40% + ${offset.y % 400}px)` }}
+        />
+        <span
+          className="absolute size-3 rounded-full bg-chart-4"
+          style={{ left: `calc(70% + ${(offset.x * 1.0) % 400}px)`, top: `calc(65% + ${offset.y % 400}px)` }}
+        />
+        <span className="absolute inset-0 m-auto size-2 rounded-full ring-2 ring-foreground/60" />
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A trail
+
+`trail` draws the last moves as a line that fades behind the point, and fades away once the point is left alone. Use it where the path matters as well as where it ends.
+
+<ComponentPreview name="xy-pad/trail" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { XYPad } from '@/components/panelui/xy-pad';
+
+export default function XYPadTrail() {
+  return (
+    <XYPad label="Motion path" trail aspect="1 / 1" color="primary" grid={10} className="max-w-64">
+      <XYPad.Value />
+    </XYPad>
+  );
+}
+```
+
+</ComponentPreview>
+
+### With sliders
+
+Hold the value and the pad works alongside other controls. Here two centre-origin [Sliders](/docs/web/components/slider) set the same point exactly, and the pad follows them.
+
+<ComponentPreview name="xy-pad/linked" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Slider } from '@/components/panelui/slider';
+import { XYPad, type XYPadPoint } from '@/components/panelui/xy-pad';
+
+const signed = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(2)}`;
+
+export default function XYPadLinked() {
+  const [light, setLight] = useState<XYPadPoint>({ x: -0.45, y: 0.6 });
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-2">
+      <XYPad label="Key light" value={light} onValueChange={setLight} color="success" aspect="4 / 3" />
+      <Slider
+        label="Across"
+        origin="center"
+        min={-1}
+        max={1}
+        step={0.01}
+        value={light.x}
+        onValueChange={(x) => setLight((at) => ({ ...at, x }))}
+        format={signed}
+        color="success"
+      />
+      <Slider
+        label="Height"
+        origin="center"
+        min={-1}
+        max={1}
+        step={0.01}
+        value={light.y}
+        onValueChange={(y) => setLight((at) => ({ ...at, y }))}
+        format={signed}
+        color="success"
+      />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### On a grid
+
+`snapToGrid` makes the point jump between the dots of the grid, and `grid` sets how many cells it has. With `x` and `y` set to whole-number ranges and a `format` that names each step, it picks one of a set of places.
+
+<ComponentPreview name="xy-pad/grid" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { XYPad, type XYPadPoint } from '@/components/panelui/xy-pad';
+
+const COLUMNS = ['Left', 'Centre-left', 'Centre', 'Centre-right', 'Right'];
+const ROWS = ['Bottom', 'Low', 'Middle', 'High', 'Top'];
+
+export default function XYPadGrid() {
+  const [anchor, setAnchor] = useState<XYPadPoint>({ x: 3, y: 3 });
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <XYPad
+        label="Anchor"
+        x={[0, 4]}
+        y={[0, 4]}
+        grid={4}
+        snapToGrid
+        aspect="1 / 1"
+        value={anchor}
+        onValueChange={setAnchor}
+        format={(v, axis) => (axis === 'x' ? COLUMNS : ROWS)[v] ?? ''}
+        className="w-48"
+      />
+      <p className="text-sm text-muted-foreground">
+        Pinned <span className="text-foreground">{ROWS[anchor.y]?.toLowerCase()}</span>,{' '}
+        <span className="text-foreground">{COLUMNS[anchor.x]?.toLowerCase()}</span>
+      </p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### XYPad
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `XYPadPoint` | — | Where the point is, when the caller holds it. |
+| `defaultValue` | `XYPadPoint` | — | Where it starts, when the caller does not hold it. Default the centre. |
+| `onValueChange` | `(value: XYPadPoint) => void` | — | Called with the new point while it moves. |
+| `onValueCommitted` | `(value: XYPadPoint) => void` | — | Called once a move ends: on release, or after a key press. |
+| `x` | `[number, number]` | — | The range of `x`, left to right. Default `[-1, 1]`. |
+| `y` | `[number, number]` | — | The range of `y`, bottom to top. Default `[-1, 1]`. |
+| `step` | `number` | `0.01` | The granularity of both values. Default `0.01`. |
+| `grid` | `number` | `8` | How many cells the dot grid has across. Default 8. |
+| `snapToGrid` | `boolean` | `false` | Snap the point to the dots of the grid. |
+| `snapBack` | `boolean` | `false` | Spring back to the centre on release, like a joystick. |
+| `trail` | `boolean` | `false` | Draw the last moves as a fading line behind the point. |
+| `color` | `XYPadColor` | `info` | The colour of the point, its guides and its trail. Default `info`. |
+| `aspect` | `string` | `'16 / 10'` | The shape of the field, as a CSS aspect ratio. Default `16 / 10`. |
+| `label` | `string` | — | What it sets. Read out with its values. |
+| `format` | `(value: number, axis: 'x' \| 'y') => string` | — | How each value is written, here and to a screen reader. Default two decimals. |
+| `disabled` | `boolean` | `false` | Turns it off. |
+| `name` | `string` | — | Submits `<name>.x` and `<name>.y` with a form. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Axes
+
+`x` runs from left to right and `y` from bottom to top, as on a chart, each from `-1` to `1` unless `x` or `y` sets another range. The hairlines mark zero on each axis that crosses it.
+
+### Pointer and keyboard
+
+A press anywhere in the field moves the point there, and a drag carries it. The arrow keys move it by `step`, ten steps with Shift, and Home puts it back in the centre.
+
+A screen reader reads both values together, written by `format`, after the `label`.
+
+### Forms
+
+Give it a `name` and it submits `name.x` and `name.y` with the form it is in.
+
+With reduced motion turned on, a spring back to the centre happens without moving through the field.
+
+### Server Components
+
+`XYPad` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `XYPad.Value` off the import, so each part is also exported by name: `XYPadValue` is `XYPad.Value`.
+
+```tsx
+import { XYPad, XYPadValue } from "@/components/panelui/xy-pad"
+```

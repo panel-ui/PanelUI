@@ -1,0 +1,38 @@
+{
+  "slug": "xy-pad",
+  "demo": "overview",
+  "demoOptions": { "height": 320 },
+  "intro": "Use it for two values that the hand thinks of as one place: where a subject sits in a frame, the position of a light, a pan or a balance between two pairs of things. One drag sets both, where two sliders would make the reader find the point by turning one knob and then the other.\n\nIt needs room to be dragged across, so give it a width and let `aspect` set its height.\n\nFor a single value, use a [Slider](/docs/web/components/slider). For values that need typing exactly, use two [Inputs](/docs/web/components/input).",
+  "usage": "<XYPad label=\"Framing\" defaultValue={{ x: 0.3, y: -0.2 }}>\n  <XYPad.Value />\n</XYPad>",
+  "anatomy": "<XYPad>\n  <XYPad.Value />\n</XYPad>",
+  "parts": {
+    "Value": "The two values written out under the field, each by `format`. Leave it out when the values are shown elsewhere."
+  },
+  "examples": [
+    {
+      "title": "Joystick",
+      "description": "`snapBack` springs the point back to the centre when it is let go, for a value that only means something while it is held. Here it is a speed: the map scrolls in the direction it is held and stops when it is released.",
+      "demo": "joystick",
+      "height": 300
+    },
+    {
+      "title": "A trail",
+      "description": "`trail` draws the last moves as a line that fades behind the point, and fades away once the point is left alone. Use it where the path matters as well as where it ends.",
+      "demo": "trail",
+      "height": 360
+    },
+    {
+      "title": "With sliders",
+      "description": "Hold the value and the pad works alongside other controls. Here two centre-origin [Sliders](/docs/web/components/slider) set the same point exactly, and the pad follows them.",
+      "demo": "linked",
+      "height": 380
+    },
+    {
+      "title": "On a grid",
+      "description": "`snapToGrid` makes the point jump between the dots of the grid, and `grid` sets how many cells it has. With `x` and `y` set to whole-number ranges and a `format` that names each step, it picks one of a set of places.",
+      "demo": "grid",
+      "height": 320
+    }
+  ],
+  "notes": "### Axes\n\n`x` runs from left to right and `y` from bottom to top, as on a chart, each from `-1` to `1` unless `x` or `y` sets another range. The hairlines mark zero on each axis that crosses it.\n\n### Pointer and keyboard\n\nA press anywhere in the field moves the point there, and a drag carries it. The arrow keys move it by `step`, ten steps with Shift, and Home puts it back in the centre.\n\nA screen reader reads both values together, written by `format`, after the `label`.\n\n### Forms\n\nGive it a `name` and it submits `name.x` and `name.y` with the form it is in.\n\nWith reduced motion turned on, a spring back to the centre happens without moving through the field."
+}

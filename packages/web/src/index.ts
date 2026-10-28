@@ -613,3 +613,12 @@ export {
   type ToolbarSeparatorProps,
   type ToolbarCaretProps,
 } from './components/toolbar';
+export {
+  XYPad,
+  XYPadValue,
+  xyPadVariants,
+  type XYPadProps,
+  type XYPadValueProps,
+  type XYPadPoint,
+  type XYPadColor,
+} from './components/xy-pad';

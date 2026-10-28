@@ -16,6 +16,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Slider](components/slider.md) — A number set by dragging along a track, with its name and value written inside it.
 - [Switch](components/switch.md) — On or off, for a setting that takes effect the moment it changes.
 - [Textarea](components/textarea.md) — A field for more than one line that grows as it is written in, up to a limit.
+- [XY Pad](components/xy-pad.md) — Two numbers set with one drag: a point moved across a field.
 
 ## Overlays
 

@@ -230,4 +230,10 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'toolbar/shortcuts': dynamic(() => import('./toolbar/shortcuts')),
   'toolbar/sizes': dynamic(() => import('./toolbar/sizes')),
   'toolbar/thumb': dynamic(() => import('./toolbar/thumb')),
+  'xy-pad/grid': dynamic(() => import('./xy-pad/grid')),
+  'xy-pad/joystick': dynamic(() => import('./xy-pad/joystick')),
+  'xy-pad/linked': dynamic(() => import('./xy-pad/linked')),
+  'xy-pad/overview': dynamic(() => import('./xy-pad/overview')),
+  'xy-pad/thumb': dynamic(() => import('./xy-pad/thumb')),
+  'xy-pad/trail': dynamic(() => import('./xy-pad/trail')),
 };

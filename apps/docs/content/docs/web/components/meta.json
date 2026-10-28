@@ -36,6 +36,7 @@
     "tabs",
     "textarea",
     "tilt-card",
-    "toolbar"
+    "toolbar",
+    "xy-pad"
   ]
 }

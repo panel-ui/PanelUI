@@ -338,5 +338,15 @@
       "addedIn": "0.10.0",
       "category": "actions"
     }
+  ],
+  "xy-pad": [
+    "XYPad",
+    "Two numbers set with one drag: a point moved across a field.",
+    "react xy pad 2d slider joystick position control",
+    {
+      "addedIn": "0.10.0",
+      "category": "forms",
+      "title": "XY Pad"
+    }
   ]
 }

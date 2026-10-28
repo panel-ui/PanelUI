@@ -376,5 +376,14 @@
       "addedIn": "0.10.0",
       "category": "media"
     }
+  ],
+  "workbench": [
+    "Workbench",
+    "The frame of an editor: a canvas with the work on it, a toolbar over it, an inspector beside it and a timeline under it.",
+    "react editor layout component design tool workspace canvas inspector timeline",
+    {
+      "addedIn": "0.10.0",
+      "category": "layout"
+    }
   ]
 }

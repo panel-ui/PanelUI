@@ -1,0 +1,39 @@
+{
+  "slug": "workbench",
+  "demo": "overview",
+  "demoOptions": { "height": 760 },
+  "full": true,
+  "intro": "Use it as the frame of an editor in the browser: a screen-recording editor, a poster designer, an animation tool. It lays out the canvas with the work on it, a toolbar floating over the canvas, an [Inspector](/docs/web/components/inspector) beside it, a sidebar before it and a [Timeline](/docs/web/components/timeline) under it. Use only the parts the editor needs; a column that is not there takes no room.\n\nIt fills the box it is given, so give it a height: `h-dvh` for a whole page, a fixed height in a layout.\n\nBelow 760 pixels wide, `compactBelow` by default, the inspector leaves its column and opens as a [Sheet](/docs/web/components/sheet) from the side; put a `Workbench.InspectorTrigger` in the bar to open it. Focus slides every panel away and gives the canvas the room, and `\\` toggles it.",
+  "usage": "<Workbench className=\"h-dvh\">\n  <Workbench.Bar>\n    <Toolbar>…</Toolbar>\n  </Workbench.Bar>\n  <Workbench.Canvas>\n    <Workbench.Artboard aspect=\"16 / 10\">…</Workbench.Artboard>\n  </Workbench.Canvas>\n  <Workbench.Inspector>\n    <Inspector>…</Inspector>\n  </Workbench.Inspector>\n  <Workbench.Timeline>\n    <Timeline duration={130}>…</Timeline>\n  </Workbench.Timeline>\n</Workbench>",
+  "anatomy": "<Workbench>\n  <Workbench.Bar>\n    <Toolbar>\n      <Workbench.InspectorTrigger />\n    </Toolbar>\n  </Workbench.Bar>\n  <Workbench.Sidebar />\n  <Workbench.Canvas>\n    <Workbench.Artboard />\n  </Workbench.Canvas>\n  <Workbench.Inspector>\n    <Inspector />\n  </Workbench.Inspector>\n  <Workbench.Timeline>\n    <Timeline />\n  </Workbench.Timeline>\n</Workbench>",
+  "parts": {
+    "Bar": "The strip floating at the top of the canvas, for a [Toolbar](/docs/web/components/toolbar). The canvas keeps the room under it clear, so the work is never behind it.",
+    "Sidebar": "A column before the canvas, for layers, pages or assets. It is left out on a narrow screen and slides away in focus.",
+    "Canvas": "The stage: a field of dots with the work centred on it.",
+    "Artboard": "The work, at the largest size its `aspect` fits on the canvas, with a shadow to stand off the dots.",
+    "Inspector": "The column after the canvas, for an Inspector. On a narrow screen the same children open in a sheet from the side, headed by `title`.",
+    "InspectorTrigger": "The button that opens the inspector's sheet. It only renders while the inspector is a sheet, so it can sit in the bar on every size.",
+    "Timeline": "The row under everything, for a Timeline. Dragging its top edge, or the arrow keys on it, makes it taller or shorter."
+  },
+  "examples": [
+    {
+      "title": "A poster",
+      "description": "A sidebar of layers before the canvas, whose eye buttons hide and show each part of the poster, and an inspector with no rail for colour and type. With no timeline, the canvas runs to the bottom.",
+      "demo": "poster",
+      "height": 680
+    },
+    {
+      "title": "Motion",
+      "description": "The canvas draws the work at the playhead's moment. Here each tween on the timeline moves a property of the card, so dragging a clip or the playhead changes what the canvas shows, and play runs the entrance.",
+      "demo": "motion",
+      "height": 640
+    },
+    {
+      "title": "A narrow screen",
+      "description": "Under `compactBelow` pixels wide the inspector is a sheet. The `Workbench.InspectorTrigger` in the bar appears with it and opens it; on a wider screen the trigger is not there and the inspector stands in its column.",
+      "demo": "narrow",
+      "height": 640
+    }
+  ],
+  "notes": "### Focus\n\n`\\` toggles focus while nothing is being typed; `focusShortcut={false}` turns that off. `focus`, `defaultFocus` and `onFocusChange` hold it, and `useWorkbench()` gives a toolbar button the same switch, as in the first example. Panels that have slid away cannot be reached with the keyboard.\n\n### Sizes\n\n`inspectorWidth` and `sidebarWidth` set the columns, 348 and 240 pixels by default; 348 fits an Inspector with its rail. `defaultTimelineHeight` sets where the timeline starts, and it can be dragged from 140 pixels up to 60% of the workbench.\n\n### Narrow screens\n\nThe width that decides is the workbench's own, not the window's, so a workbench in a pane changes with the pane.\n\nWith reduced motion turned on, panels appear and disappear without sliding."
+}

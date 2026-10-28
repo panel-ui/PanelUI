@@ -692,3 +692,23 @@ export {
   type TimelineWaveformProps,
   type TimelinePlayheadProps,
 } from './components/timeline';
+export {
+  Workbench,
+  WorkbenchBar,
+  WorkbenchSidebar,
+  WorkbenchCanvas,
+  WorkbenchArtboard,
+  WorkbenchInspector,
+  WorkbenchInspectorTrigger,
+  WorkbenchTimeline,
+  workbenchVariants,
+  useWorkbench,
+  type WorkbenchProps,
+  type WorkbenchBarProps,
+  type WorkbenchSidebarProps,
+  type WorkbenchCanvasProps,
+  type WorkbenchArtboardProps,
+  type WorkbenchInspectorProps,
+  type WorkbenchInspectorTriggerProps,
+  type WorkbenchTimelineProps,
+} from './components/workbench';

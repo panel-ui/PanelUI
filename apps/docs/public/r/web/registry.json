@@ -906,6 +906,25 @@
       ]
     },
     {
+      "name": "workbench",
+      "type": "registry:component",
+      "title": "Workbench",
+      "description": "The frame of an editor: a canvas with the work on it, a toolbar over it, an inspector beside it and a timeline under it.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/sheet.json"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/workbench.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/workbench.tsx"
+        }
+      ]
+    },
+    {
       "name": "xy-pad",
       "type": "registry:component",
       "title": "XY Pad",

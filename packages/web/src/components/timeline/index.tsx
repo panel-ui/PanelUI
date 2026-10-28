@@ -13,7 +13,7 @@
  *   <Timeline.Viewport>
  *     <Timeline.Ruler />
  *     <Timeline.Track label="Zooms">
- *       <Timeline.Clip start={12} end={20} color="chart-4" variant="block" onChange={…} />
+ *       <Timeline.Clip start={12} end={20} color="chart-2" variant="block" onChange={…} />
  *     </Timeline.Track>
  *     <Timeline.Playhead />
  *   </Timeline.Viewport>
@@ -137,9 +137,10 @@ const timelineVariants = tv({
       'group/timeline relative flex w-full min-w-0 flex-col overflow-hidden rounded-[22px] bg-popover text-popover-foreground select-none',
       'shadow-[0_10px_30px_-12px_rgb(0_0_0/0.3)] ring-1 ring-foreground/[0.06] dark:ring-foreground/10',
     ],
-    header: 'flex min-h-12 items-center gap-2 px-3 pt-1.5',
-    time: 'px-1 text-xs font-medium tabular-nums text-muted-foreground [&>b]:font-medium [&>b]:text-foreground',
-    zoom: 'ms-auto flex w-44 items-center',
+    header: 'flex min-h-12 min-w-0 items-center gap-2 px-3 pt-1.5',
+    time: 'shrink-0 px-1 text-xs font-medium whitespace-nowrap tabular-nums text-muted-foreground [&>b]:font-medium [&>b]:text-foreground',
+    // The first thing to give way on a narrow screen.
+    zoom: 'ms-auto flex w-44 min-w-24 shrink items-center',
     viewport: 'relative min-w-0 flex-1 overscroll-x-contain outline-none',
     content: 'relative isolate pb-3',
     scrollbar:

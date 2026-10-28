@@ -27,7 +27,7 @@ It needs a width to lay time across; the height follows the tracks. For a value 
   <Timeline.Viewport>
     <Timeline.Ruler />
     <Timeline.Track label="Zooms">
-      <Timeline.Clip color="chart-4" start={zoom.start} end={zoom.end} onChange={setZoom} />
+      <Timeline.Clip color="chart-2" start={zoom.start} end={zoom.end} onChange={setZoom} />
     </Timeline.Track>
     <Timeline.Track size="lg" label="Recording">
       <Timeline.Clip color="info" start={0} end={128}>
@@ -240,7 +240,7 @@ export default function TimelineOverview() {
         </Timeline.Track>
         <Timeline.Track label="Zooms">
           {zooms.map((zoom) => (
-            <Timeline.Clip key={zoom.id} label="Zoom" color="chart-4" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)}>
+            <Timeline.Clip key={zoom.id} label="Zoom" color="chart-2" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)}>
               {zoom.end - zoom.start >= 9 ? (
                 <Timeline.ClipLabel>
                   <ScanSearchIcon />

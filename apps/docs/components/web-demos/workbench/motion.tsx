@@ -10,9 +10,9 @@ type Tween = { name: string; color: TimelineColor; start: number; end: number; f
 
 const TWEENS: Tween[] = [
   { name: 'Opacity', color: 'chart-2', start: 0, end: 0.35, from: 0, to: 1 },
-  { name: 'Lift', color: 'chart-4', start: 0.05, end: 0.75, from: 48, to: 0 },
-  { name: 'Scale', color: 'chart-5', start: 0.15, end: 0.95, from: 0.86, to: 1 },
-  { name: 'Blur', color: 'chart-1', start: 0, end: 0.5, from: 10, to: 0 },
+  { name: 'Lift', color: 'info', start: 0.05, end: 0.75, from: 48, to: 0 },
+  { name: 'Scale', color: 'destructive', start: 0.15, end: 0.95, from: 0.86, to: 1 },
+  { name: 'Blur', color: 'warning', start: 0, end: 0.5, from: 10, to: 0 },
 ];
 
 /** Where a tween is at a time: eased out, so it arrives softly. */

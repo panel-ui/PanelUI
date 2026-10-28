@@ -13,8 +13,8 @@ export default function TimelineThumb() {
           <Timeline.Clip color="warning" start={24} end={34} />
         </Timeline.Track>
         <Timeline.Track>
-          <Timeline.Clip color="chart-4" start={8} end={14} />
-          <Timeline.Clip color="chart-4" start={26} end={31} />
+          <Timeline.Clip color="chart-2" start={8} end={14} />
+          <Timeline.Clip color="chart-2" start={26} end={31} />
         </Timeline.Track>
         <Timeline.Playhead showTime={false} />
       </Timeline.Viewport>

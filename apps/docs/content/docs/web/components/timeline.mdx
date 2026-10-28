@@ -90,7 +90,7 @@ export default function TimelineOverview() {
         </Timeline.Track>
         <Timeline.Track label="Zooms">
           {zooms.map((zoom) => (
-            <Timeline.Clip key={zoom.id} label="Zoom" color="chart-4" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)}>
+            <Timeline.Clip key={zoom.id} label="Zoom" color="chart-2" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)}>
               {zoom.end - zoom.start >= 9 ? (
                 <Timeline.ClipLabel>
                   <ScanSearchIcon />
@@ -191,7 +191,7 @@ import { Timeline } from "@/components/panelui/timeline"
   <Timeline.Viewport>
     <Timeline.Ruler />
     <Timeline.Track label="Zooms">
-      <Timeline.Clip color="chart-4" start={zoom.start} end={zoom.end} onChange={setZoom} />
+      <Timeline.Clip color="chart-2" start={zoom.start} end={zoom.end} onChange={setZoom} />
     </Timeline.Track>
     <Timeline.Track size="lg" label="Recording">
       <Timeline.Clip color="info" start={0} end={128}>
@@ -330,9 +330,9 @@ import { Timeline, type TimelineColor } from '@/components/panelui/timeline';
 /** Each property of a card's entrance, tweened over its own stretch of time. */
 const PROPERTIES: { name: string; color: TimelineColor; start: number; end: number }[] = [
   { name: 'Opacity', color: 'chart-2', start: 0, end: 0.4 },
-  { name: 'Lift', color: 'chart-4', start: 0.1, end: 0.9 },
-  { name: 'Scale', color: 'chart-5', start: 0.25, end: 1.1 },
-  { name: 'Blur', color: 'chart-1', start: 0, end: 0.6 },
+  { name: 'Lift', color: 'info', start: 0.1, end: 0.9 },
+  { name: 'Scale', color: 'destructive', start: 0.25, end: 1.1 },
+  { name: 'Blur', color: 'warning', start: 0, end: 0.6 },
 ];
 
 export default function TimelineMotion() {

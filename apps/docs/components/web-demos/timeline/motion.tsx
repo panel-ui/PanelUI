@@ -6,9 +6,9 @@ import { Timeline, type TimelineColor } from 'panelui-web/timeline';
 /** Each property of a card's entrance, tweened over its own stretch of time. */
 const PROPERTIES: { name: string; color: TimelineColor; start: number; end: number }[] = [
   { name: 'Opacity', color: 'chart-2', start: 0, end: 0.4 },
-  { name: 'Lift', color: 'chart-4', start: 0.1, end: 0.9 },
-  { name: 'Scale', color: 'chart-5', start: 0.25, end: 1.1 },
-  { name: 'Blur', color: 'chart-1', start: 0, end: 0.6 },
+  { name: 'Lift', color: 'info', start: 0.1, end: 0.9 },
+  { name: 'Scale', color: 'destructive', start: 0.25, end: 1.1 },
+  { name: 'Blur', color: 'warning', start: 0, end: 0.6 },
 ];
 
 export default function TimelineMotion() {

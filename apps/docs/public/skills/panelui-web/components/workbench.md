@@ -394,7 +394,7 @@ export default function WorkbenchOverview() {
             </Timeline.Track>
             <Timeline.Track label="Zooms">
               {zooms.map((zoom) => (
-                <Timeline.Clip key={zoom.id} label="Zoom" color="chart-4" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)} />
+                <Timeline.Clip key={zoom.id} label="Zoom" color="chart-2" start={zoom.start} end={zoom.end} onChange={update(setZooms, zoom.id)} />
               ))}
             </Timeline.Track>
             <Timeline.Track size="lg" label="Recording">

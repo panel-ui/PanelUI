@@ -53,7 +53,7 @@ For a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons
 - `Toolbar.Tool` — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
 - `Toolbar.Button` — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.
 - `Toolbar.Separator` — A short line between sets of controls that belong apart, such as the tools and the history buttons.
-- `Toolbar.Caret` — A small chevron beside an icon, saying the button opens more choices.
+- `Toolbar.Caret` — A small chevron saying a button opens more choices. Beside an icon it marks that button; alone in a `Toolbar.Button`, it makes that button a slim chevron against the tool before it, which turns over while its menu is open.
 
 ## Props
 
@@ -154,7 +154,7 @@ export default function ToolbarOverview() {
         <Toolbar.Tool value="rectangle" label="Rectangle" shortcut="R">
           <SquareIcon />
         </Toolbar.Tool>
-        <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
+        <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="E">
           <CircleIcon />
         </Toolbar.Tool>
         <Toolbar.Tool value="pen" label="Pen" shortcut="P">

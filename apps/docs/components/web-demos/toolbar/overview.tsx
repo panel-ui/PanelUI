@@ -30,7 +30,7 @@ export default function ToolbarOverview() {
         <Toolbar.Tool value="rectangle" label="Rectangle" shortcut="R">
           <SquareIcon />
         </Toolbar.Tool>
-        <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
+        <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="E">
           <CircleIcon />
         </Toolbar.Tool>
         <Toolbar.Tool value="pen" label="Pen" shortcut="P">

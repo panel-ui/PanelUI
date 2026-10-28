@@ -82,6 +82,10 @@ const toolbarVariants = tv({
       // Menus opened from the strip keep their button marked while open.
       'data-popup-open:bg-foreground/[0.08] data-popup-open:text-foreground',
       '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-(--toolbar-icon)',
+      // A button that is only a caret is the options of the tool before it:
+      // a slim chevron against that tool, with no fill of its own.
+      'has-[>[data-slot=toolbar-caret]:only-child]:w-4 has-[>[data-slot=toolbar-caret]:only-child]:min-w-0 has-[>[data-slot=toolbar-caret]:only-child]:px-0',
+      'has-[>[data-slot=toolbar-caret]:only-child]:bg-transparent has-[>[data-slot=toolbar-caret]:only-child]:active:scale-100',
     ],
     // A chosen tool sits on the marker; the hover fill would hide it.
     tool: 'data-pressed:bg-transparent data-pressed:text-primary-foreground data-pressed:hover:bg-transparent',
@@ -89,7 +93,10 @@ const toolbarVariants = tv({
       'mx-1 h-[calc(var(--toolbar-item)*0.5)] w-px shrink-0 rounded-full bg-foreground/15',
       'data-[orientation=horizontal]:mx-0 data-[orientation=horizontal]:my-1 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-[calc(var(--toolbar-item)*0.5)]',
     ],
-    caret: 'pointer-events-none -me-1 size-3 shrink-0 opacity-60 [&_svg]:size-3',
+    caret: [
+      'pointer-events-none -me-1 size-3 shrink-0 opacity-60 transition-[rotate,opacity] duration-200 [&_svg]:size-3',
+      'only:me-0 only:opacity-100 in-data-popup-open:rotate-180 motion-reduce:transition-none',
+    ],
     tooltip: [
       'flex origin-(--transform-origin) items-center gap-2 rounded-lg bg-foreground px-2 py-1 text-xs font-medium text-background shadow-md',
       'transition-[opacity,scale] duration-150 data-starting-style:scale-95 data-starting-style:opacity-0 data-ending-style:opacity-0',

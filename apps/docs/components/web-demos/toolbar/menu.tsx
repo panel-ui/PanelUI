@@ -7,7 +7,7 @@ import { Toolbar } from 'panelui-web/toolbar';
 
 const SHAPES = {
   rectangle: { label: 'Rectangle', shortcut: 'R', icon: SquareIcon },
-  ellipse: { label: 'Ellipse', shortcut: 'O', icon: CircleIcon },
+  ellipse: { label: 'Ellipse', shortcut: 'E', icon: CircleIcon },
   triangle: { label: 'Triangle', shortcut: '', icon: TriangleIcon },
   polygon: { label: 'Polygon', shortcut: '', icon: HexagonIcon },
   star: { label: 'Star', shortcut: '', icon: StarIcon },
@@ -30,8 +30,8 @@ export default function ToolbarMenu() {
           <Current />
         </Toolbar.Tool>
         <Menu>
-          <Toolbar.Button label="More shapes" render={<Menu.Trigger />} className="min-w-0 px-1">
-            <Toolbar.Caret className="me-0" />
+          <Toolbar.Button label="More shapes" render={<Menu.Trigger />}>
+            <Toolbar.Caret />
           </Toolbar.Button>
           <Menu.Content align="center">
             <Menu.RadioGroup

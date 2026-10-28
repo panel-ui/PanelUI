@@ -35,6 +35,7 @@
     "switch",
     "tabs",
     "textarea",
-    "tilt-card"
+    "tilt-card",
+    "toolbar"
   ]
 }

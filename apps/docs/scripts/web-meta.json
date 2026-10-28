@@ -329,5 +329,14 @@
       "addedIn": "0.10.0",
       "category": "forms"
     }
+  ],
+  "toolbar": [
+    "Toolbar",
+    "A strip of tools and actions for an editor, with one tool chosen at a time.",
+    "react toolbar component editor tools design app",
+    {
+      "addedIn": "0.10.0",
+      "category": "actions"
+    }
   ]
 }

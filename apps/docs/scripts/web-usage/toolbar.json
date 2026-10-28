@@ -1,0 +1,48 @@
+{
+  "slug": "toolbar",
+  "demo": "overview",
+  "demoOptions": { "height": 200 },
+  "intro": "Use it for the tools of an editor: a drawing canvas, a photo editor, a video timeline. It holds two kinds of control. A `Toolbar.Tool` is a mode, such as the pen or the select tool; exactly one in its `Toolbar.Group` is on until another is chosen. A `Toolbar.Button` is an action, such as undo, that does its job and leaves nothing on.\n\nGive every tool and button a `label`. The buttons show only icons, so the label is their tooltip and what a screen reader reads.\n\nFor a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons that act on one thing together, such as a split button, use [Button Group](/docs/web/components/button-group).",
+  "usage": "<Toolbar>\n  <Toolbar.Group defaultValue=\"select\" aria-label=\"Tools\">\n    <Toolbar.Tool value=\"select\" label=\"Select\" shortcut=\"V\">\n      <MousePointer2Icon />\n    </Toolbar.Tool>\n    <Toolbar.Tool value=\"pen\" label=\"Pen\" shortcut=\"P\">\n      <PenToolIcon />\n    </Toolbar.Tool>\n  </Toolbar.Group>\n  <Toolbar.Separator />\n  <Toolbar.Button label=\"Undo\" shortcut=\"⌘Z\" onClick={undo}>\n    <Undo2Icon />\n  </Toolbar.Button>\n</Toolbar>",
+  "anatomy": "<Toolbar>\n  <Toolbar.Group>\n    <Toolbar.Tool>\n      <Toolbar.Caret />\n    </Toolbar.Tool>\n  </Toolbar.Group>\n  <Toolbar.Separator />\n  <Toolbar.Button />\n</Toolbar>",
+  "parts": {
+    "Group": "Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one.",
+    "Tool": "One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.",
+    "Button": "An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.",
+    "Separator": "A short line between sets of controls that belong apart, such as the tools and the history buttons.",
+    "Caret": "A small chevron beside an icon, saying the button opens more choices."
+  },
+  "examples": [
+    {
+      "title": "A rail",
+      "description": "`orientation=\"vertical\"` stands the strip up beside a canvas. The marker moves up and down, the arrow keys follow the column, and tooltips open to the side.",
+      "demo": "rail",
+      "height": 380
+    },
+    {
+      "title": "A tool with options",
+      "description": "A narrow `Toolbar.Button` with a `Toolbar.Caret`, rendered as a `Menu.Trigger`, opens the shapes the tool can draw. The tool then shows the shape last chosen and draws it.",
+      "demo": "menu",
+      "height": 320
+    },
+    {
+      "title": "History and zoom",
+      "description": "Actions sit beside other controls in the same strip. Here a `line` [Slider](/docs/web/components/slider) zooms, each zoom the hand settles on is a step of history, and undo and redo are disabled at either end of it.",
+      "demo": "history",
+      "height": 180
+    },
+    {
+      "title": "Shortcuts",
+      "description": "With `shortcuts` on, a tool's single-key `shortcut` chooses it from anywhere on the page. Keys typed into a field, and keys pressed with ⌘, Ctrl or Alt, are left alone. Turn it on for the one toolbar that owns the page.",
+      "demo": "shortcuts",
+      "height": 220
+    },
+    {
+      "title": "Sizes",
+      "description": "`sm`, `md` and `lg` set the size of every button and icon in the strip, and the corners and padding with them.",
+      "demo": "sizes",
+      "height": 260
+    }
+  ],
+  "notes": "### Keyboard\n\nThe strip is one stop in the tab order. The arrow keys move along it, Home and End go to its ends, and Space or Enter chooses a tool or presses a button.\n\nA `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on. One written with a modifier, such as `⌘Z`, is only shown in the tooltip; handle that key yourself, because the page may already use it.\n\n### Floating or inline\n\n`floating`, the default, draws the strip on a raised surface of its own, for a strip laid over a canvas. `inline` draws the buttons only, for a strip inside a header or a panel that already has a surface.\n\nWith reduced motion turned on, the marker moves to the chosen tool without gliding."
+}

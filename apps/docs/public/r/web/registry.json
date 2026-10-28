@@ -806,6 +806,24 @@
           "target": "@components/panelui/tilt-card.tsx"
         }
       ]
+    },
+    {
+      "name": "toolbar",
+      "type": "registry:component",
+      "title": "Toolbar",
+      "description": "A strip of tools and actions for an editor, with one tool chosen at a time.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/toolbar.tsx"
+        }
+      ]
     }
   ]
 }

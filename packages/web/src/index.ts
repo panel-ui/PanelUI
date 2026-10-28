@@ -596,3 +596,20 @@ export {
   type SliderSize,
   type SliderColor,
 } from './components/slider';
+export {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarTool,
+  ToolbarButton,
+  ToolbarSeparator,
+  ToolbarCaret,
+  toolbarVariants,
+  type ToolbarProps,
+  type ToolbarVariant,
+  type ToolbarSize,
+  type ToolbarGroupProps,
+  type ToolbarToolProps,
+  type ToolbarButtonProps,
+  type ToolbarSeparatorProps,
+  type ToolbarCaretProps,
+} from './components/toolbar';

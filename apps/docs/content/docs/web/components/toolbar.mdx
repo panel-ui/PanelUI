@@ -1,0 +1,515 @@
+---
+title: Toolbar
+description: A strip of tools and actions for an editor, with one tool chosen at a time.
+status: new
+---
+
+<ComponentPreview name="toolbar/overview" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import {
+  CircleIcon,
+  FrameIcon,
+  HandIcon,
+  MessageCircleIcon,
+  MousePointer2Icon,
+  PenToolIcon,
+  Redo2Icon,
+  SquareIcon,
+  TypeIcon,
+  Undo2Icon,
+} from 'lucide-react';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+export default function ToolbarOverview() {
+  return (
+    <Toolbar>
+      <Toolbar.Group defaultValue="select" aria-label="Tools">
+        <Toolbar.Tool value="select" label="Select" shortcut="V">
+          <MousePointer2Icon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="hand" label="Pan" shortcut="H">
+          <HandIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="frame" label="Frame" shortcut="F">
+          <FrameIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="rectangle" label="Rectangle" shortcut="R">
+          <SquareIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
+          <CircleIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="pen" label="Pen" shortcut="P">
+          <PenToolIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="text" label="Text" shortcut="T">
+          <TypeIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="comment" label="Comment" shortcut="C">
+          <MessageCircleIcon />
+        </Toolbar.Tool>
+      </Toolbar.Group>
+      <Toolbar.Separator />
+      <Toolbar.Button label="Undo" shortcut="⌘Z">
+        <Undo2Icon />
+      </Toolbar.Button>
+      <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled>
+        <Redo2Icon />
+      </Toolbar.Button>
+    </Toolbar>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for the tools of an editor: a drawing canvas, a photo editor, a video timeline. It holds two kinds of control. A `Toolbar.Tool` is a mode, such as the pen or the select tool; exactly one in its `Toolbar.Group` is on until another is chosen. A `Toolbar.Button` is an action, such as undo, that does its job and leaves nothing on.
+
+Give every tool and button a `label`. The buttons show only icons, so the label is their tooltip and what a screen reader reads.
+
+For a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons that act on one thing together, such as a split button, use [Button Group](/docs/web/components/button-group).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/toolbar.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/toolbar` instead of `@/components/panelui/toolbar`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/toolbar.tsx`:
+
+<RegistrySource name="toolbar" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Toolbar } from "@/components/panelui/toolbar"
+```
+
+```tsx
+<Toolbar>
+  <Toolbar.Group defaultValue="select" aria-label="Tools">
+    <Toolbar.Tool value="select" label="Select" shortcut="V">
+      <MousePointer2Icon />
+    </Toolbar.Tool>
+    <Toolbar.Tool value="pen" label="Pen" shortcut="P">
+      <PenToolIcon />
+    </Toolbar.Tool>
+  </Toolbar.Group>
+  <Toolbar.Separator />
+  <Toolbar.Button label="Undo" shortcut="⌘Z" onClick={undo}>
+    <Undo2Icon />
+  </Toolbar.Button>
+</Toolbar>
+```
+
+## Composition
+
+```tsx
+<Toolbar>
+  <Toolbar.Group>
+    <Toolbar.Tool>
+      <Toolbar.Caret />
+    </Toolbar.Tool>
+  </Toolbar.Group>
+  <Toolbar.Separator />
+  <Toolbar.Button />
+</Toolbar>
+```
+
+- **`Toolbar.Group`** — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one.
+- **`Toolbar.Tool`** — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
+- **`Toolbar.Button`** — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.
+- **`Toolbar.Separator`** — A short line between sets of controls that belong apart, such as the tools and the history buttons.
+- **`Toolbar.Caret`** — A small chevron beside an icon, saying the button opens more choices.
+
+## Examples
+
+### A rail
+
+`orientation="vertical"` stands the strip up beside a canvas. The marker moves up and down, the arrow keys follow the column, and tooltips open to the side.
+
+<ComponentPreview name="toolbar/rail" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { BrushIcon, CropIcon, EraserIcon, PipetteIcon, Settings2Icon, SlidersHorizontalIcon, StampIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+const TOOLS = [
+  { value: 'crop', label: 'Crop and straighten', icon: CropIcon },
+  { value: 'adjust', label: 'Adjust', icon: SlidersHorizontalIcon },
+  { value: 'brush', label: 'Brush', icon: BrushIcon },
+  { value: 'erase', label: 'Erase', icon: EraserIcon },
+  { value: 'heal', label: 'Heal', icon: StampIcon },
+  { value: 'sample', label: 'Sample colour', icon: PipetteIcon },
+];
+
+export default function ToolbarRail() {
+  const [tool, setTool] = useState('adjust');
+  const current = TOOLS.find((each) => each.value === tool);
+  return (
+    <div className="flex items-center gap-6">
+      <Toolbar orientation="vertical" aria-label="Photo tools">
+        <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+          {TOOLS.map(({ value, label, icon: Icon }) => (
+            <Toolbar.Tool key={value} value={value} label={label}>
+              <Icon />
+            </Toolbar.Tool>
+          ))}
+        </Toolbar.Group>
+        <Toolbar.Separator />
+        <Toolbar.Button label="Editor settings">
+          <Settings2Icon />
+        </Toolbar.Button>
+      </Toolbar>
+      <p className="w-36 text-sm text-muted-foreground">
+        <span className="block text-foreground">{current?.label}</span>
+        tool chosen
+      </p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A tool with options
+
+A narrow `Toolbar.Button` with a `Toolbar.Caret`, rendered as a `Menu.Trigger`, opens the shapes the tool can draw. The tool then shows the shape last chosen and draws it.
+
+<ComponentPreview name="toolbar/menu" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { HexagonIcon, MousePointer2Icon, SquareIcon, StarIcon, TriangleIcon, TypeIcon, CircleIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Menu } from '@/components/panelui/menu';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+const SHAPES = {
+  rectangle: { label: 'Rectangle', shortcut: 'R', icon: SquareIcon },
+  ellipse: { label: 'Ellipse', shortcut: 'O', icon: CircleIcon },
+  triangle: { label: 'Triangle', shortcut: '', icon: TriangleIcon },
+  polygon: { label: 'Polygon', shortcut: '', icon: HexagonIcon },
+  star: { label: 'Star', shortcut: '', icon: StarIcon },
+};
+
+type Shape = keyof typeof SHAPES;
+
+export default function ToolbarMenu() {
+  const [tool, setTool] = useState('shape');
+  const [shape, setShape] = useState<Shape>('star');
+  const Current = SHAPES[shape].icon;
+  return (
+    <Toolbar>
+      <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+        <Toolbar.Tool value="select" label="Select" shortcut="V">
+          <MousePointer2Icon />
+        </Toolbar.Tool>
+        {/* The tool draws the last shape chosen; the caret beside it picks another. */}
+        <Toolbar.Tool value="shape" label={SHAPES[shape].label}>
+          <Current />
+        </Toolbar.Tool>
+        <Menu>
+          <Toolbar.Button label="More shapes" render={<Menu.Trigger />} className="min-w-0 px-1">
+            <Toolbar.Caret className="me-0" />
+          </Toolbar.Button>
+          <Menu.Content align="center">
+            <Menu.RadioGroup
+              value={shape}
+              onValueChange={(next) => {
+                setShape(next as Shape);
+                setTool('shape');
+              }}
+            >
+              {Object.entries(SHAPES).map(([value, { label, shortcut, icon: Icon }]) => (
+                <Menu.RadioItem key={value} value={value}>
+                  <Icon />
+                  {label}
+                  {shortcut ? <Menu.Shortcut>{shortcut}</Menu.Shortcut> : null}
+                </Menu.RadioItem>
+              ))}
+            </Menu.RadioGroup>
+          </Menu.Content>
+        </Menu>
+        <Toolbar.Tool value="text" label="Text" shortcut="T">
+          <TypeIcon />
+        </Toolbar.Tool>
+      </Toolbar.Group>
+    </Toolbar>
+  );
+}
+```
+
+</ComponentPreview>
+
+### History and zoom
+
+Actions sit beside other controls in the same strip. Here a `line` [Slider](/docs/web/components/slider) zooms, each zoom the hand settles on is a step of history, and undo and redo are disabled at either end of it.
+
+<ComponentPreview name="toolbar/history" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Redo2Icon, Undo2Icon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Slider } from '@/components/panelui/slider';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+/** Every zoom the hand settled on, so undo and redo walk back and forth through them. */
+export default function ToolbarHistory() {
+  const [steps, setSteps] = useState([100]);
+  const [at, setAt] = useState(0);
+  const zoom = steps[at]!;
+  const settle = (next: number) => {
+    if (next === zoom) return;
+    setSteps([...steps.slice(0, at + 1), next]);
+    setAt(at + 1);
+  };
+  const [dragging, setDragging] = useState<number | null>(null);
+
+  return (
+    <Toolbar size="sm" aria-label="View">
+      <Toolbar.Button label="Undo" shortcut="⌘Z" disabled={at === 0} onClick={() => setAt(at - 1)}>
+        <Undo2Icon />
+      </Toolbar.Button>
+      <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled={at === steps.length - 1} onClick={() => setAt(at + 1)}>
+        <Redo2Icon />
+      </Toolbar.Button>
+      <Toolbar.Separator />
+      <div className="flex w-56 items-center px-1">
+        <Slider
+          variant="line"
+          label="Zoom"
+          min={25}
+          max={400}
+          step={5}
+          value={dragging ?? zoom}
+          onValueChange={setDragging}
+          onValueCommitted={(value) => {
+            settle(value as number);
+            setDragging(null);
+          }}
+        >
+          <Slider.Step by={-25} aria-label="Zoom out" onClick={(event) => (event.preventDefault(), settle(Math.max(25, zoom - 25)))}>
+            <ZoomOutIcon />
+          </Slider.Step>
+          <Slider.Step by={25} aria-label="Zoom in" onClick={(event) => (event.preventDefault(), settle(Math.min(400, zoom + 25)))}>
+            <ZoomInIcon />
+          </Slider.Step>
+        </Slider>
+      </div>
+      <span className="w-12 pe-2 text-end text-xs tabular-nums text-muted-foreground">{dragging ?? zoom}%</span>
+    </Toolbar>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Shortcuts
+
+With `shortcuts` on, a tool's single-key `shortcut` chooses it from anywhere on the page. Keys typed into a field, and keys pressed with ⌘, Ctrl or Alt, are left alone. Turn it on for the one toolbar that owns the page.
+
+<ComponentPreview name="toolbar/shortcuts" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { EraserIcon, HighlighterIcon, LassoSelectIcon, PencilIcon, ShapesIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+const TOOLS = [
+  { value: 'lasso', label: 'Lasso', shortcut: 'L', icon: LassoSelectIcon },
+  { value: 'pencil', label: 'Pencil', shortcut: 'B', icon: PencilIcon },
+  { value: 'marker', label: 'Marker', shortcut: 'M', icon: HighlighterIcon },
+  { value: 'shapes', label: 'Shapes', shortcut: 'S', icon: ShapesIcon },
+  { value: 'eraser', label: 'Eraser', shortcut: 'E', icon: EraserIcon },
+];
+
+export default function ToolbarShortcuts() {
+  const [tool, setTool] = useState('pencil');
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <Toolbar shortcuts size="lg" aria-label="Sketch tools">
+        <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+          {TOOLS.map(({ value, label, shortcut, icon: Icon }) => (
+            <Toolbar.Tool key={value} value={value} label={label} shortcut={shortcut}>
+              <Icon />
+            </Toolbar.Tool>
+          ))}
+        </Toolbar.Group>
+      </Toolbar>
+      <p className="text-sm text-muted-foreground">
+        Press{' '}
+        {TOOLS.map(({ shortcut }) => (
+          <kbd key={shortcut} className="mx-0.5 rounded-md bg-muted px-1.5 py-0.5 font-sans text-xs text-foreground">
+            {shortcut}
+          </kbd>
+        ))}{' '}
+        anywhere on this page.
+      </p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes
+
+`sm`, `md` and `lg` set the size of every button and icon in the strip, and the corners and padding with them.
+
+<ComponentPreview name="toolbar/sizes" height={260}>
+
+```tsx lineNumbers
+'use client';
+
+import { AlignCenterIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, ItalicIcon } from 'lucide-react';
+import { Toolbar, type ToolbarSize } from '@/components/panelui/toolbar';
+
+const SIZES: ToolbarSize[] = ['sm', 'md', 'lg'];
+
+export default function ToolbarSizes() {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      {SIZES.map((size) => (
+        <Toolbar key={size} size={size} aria-label={`Text, ${size}`}>
+          <Toolbar.Button label="Bold">
+            <BoldIcon />
+          </Toolbar.Button>
+          <Toolbar.Button label="Italic">
+            <ItalicIcon />
+          </Toolbar.Button>
+          <Toolbar.Separator />
+          <Toolbar.Group defaultValue="left" aria-label="Alignment">
+            <Toolbar.Tool value="left" label="Align left">
+              <AlignLeftIcon />
+            </Toolbar.Tool>
+            <Toolbar.Tool value="center" label="Centre">
+              <AlignCenterIcon />
+            </Toolbar.Tool>
+            <Toolbar.Tool value="right" label="Align right">
+              <AlignRightIcon />
+            </Toolbar.Tool>
+          </Toolbar.Group>
+        </Toolbar>
+      ))}
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Toolbar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `ToolbarVariant` | `floating` | `floating` sits on a raised surface of its own; `inline` draws only the buttons. Default `floating`. |
+| `size` | `ToolbarSize` | `md` | The size of every button in it. Default `md`. |
+| `shortcuts` | `boolean` | `false` | Answer single-key shortcuts anywhere on the page: a key in a tool's or button's `shortcut` chooses that tool or presses that button. Keys typed into a field are left alone. Off by default; turn it on for the one toolbar that owns the page. |
+| `tooltipSide` | `'top' \| 'bottom' \| 'left' \| 'right'` | — | Which side of a button its tooltip opens on. Default below a row and beside a column. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+### Toolbar.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The chosen tool's `value`, when the caller holds it. |
+| `defaultValue` | `string` | — | The tool chosen at first, when the caller does not hold it. |
+| `onValueChange` | `(value: string) => void` | — | Called with the `value` of the tool that was chosen. |
+| `disabled` | `boolean` | — | Turns every tool in the group off. |
+
+### Toolbar.Tool
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | Names the tool in its group's `value`. |
+| `label` | `string` | — | What the tool is called: its tooltip, and what a screen reader reads. |
+| `shortcut` | `string` | — | The key that chooses it, shown in the tooltip, such as `V`. |
+
+### Toolbar.Button
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | What it does: its tooltip, and what a screen reader reads. |
+| `shortcut` | `string` | — | The key or keys that press it, shown in the tooltip, such as `⌘Z`. A single key is also answered. |
+| `render` | `ReactElement` | — | Another trigger to be the button, such as a `Menu.Trigger`, so a menu opens from the strip and keeps its place in the arrow-key order. |
+
+### Toolbar.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Keyboard
+
+The strip is one stop in the tab order. The arrow keys move along it, Home and End go to its ends, and Space or Enter chooses a tool or presses a button.
+
+A `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on. One written with a modifier, such as `⌘Z`, is only shown in the tooltip; handle that key yourself, because the page may already use it.
+
+### Floating or inline
+
+`floating`, the default, draws the strip on a raised surface of its own, for a strip laid over a canvas. `inline` draws the buttons only, for a strip inside a header or a panel that already has a surface.
+
+With reduced motion turned on, the marker moves to the chosen tool without gliding.
+
+### Server Components
+
+`Toolbar` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Toolbar.Group` off the import, so each part is also exported by name: `ToolbarGroup` is `Toolbar.Group`, and so on for the others.
+
+```tsx
+import { Toolbar, ToolbarGroup, ToolbarTool, ToolbarButton, ToolbarSeparator, ToolbarCaret } from "@/components/panelui/toolbar"
+```

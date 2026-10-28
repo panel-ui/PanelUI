@@ -223,4 +223,11 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'tilt-card/figures': dynamic(() => import('./tilt-card/figures')),
   'tilt-card/plain': dynamic(() => import('./tilt-card/plain')),
   'tilt-card/thumb': dynamic(() => import('./tilt-card/thumb')),
+  'toolbar/history': dynamic(() => import('./toolbar/history')),
+  'toolbar/menu': dynamic(() => import('./toolbar/menu')),
+  'toolbar/overview': dynamic(() => import('./toolbar/overview')),
+  'toolbar/rail': dynamic(() => import('./toolbar/rail')),
+  'toolbar/shortcuts': dynamic(() => import('./toolbar/shortcuts')),
+  'toolbar/sizes': dynamic(() => import('./toolbar/sizes')),
+  'toolbar/thumb': dynamic(() => import('./toolbar/thumb')),
 };

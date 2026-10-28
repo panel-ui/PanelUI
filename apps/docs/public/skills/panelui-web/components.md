@@ -6,6 +6,7 @@ Generated from the collection's source. Read a component's own file before using
 
 - [Button](components/button.md) — Something to press, in the weight its action deserves, with a spinner for while it works.
 - [Button Group](components/button-group.md) — Related buttons joined into one control, with separators, text cells and fields between them.
+- [Toolbar](components/toolbar.md) — A strip of tools and actions for an editor, with one tool chosen at a time.
 
 ## Forms and input
 

@@ -306,6 +306,9 @@ function TimelineRoot({
 
   const setTime = useCallback((next: number) => {
     const value = clamp(next, 0, live.current.duration);
+    // Seen by the playback loop at once, so a jump back to the start is not
+    // overwritten by the frame that was already on its way.
+    live.current.time = value;
     if (live.current.timeProp === undefined) setInnerTime(value);
     live.current.onTimeChange?.(value);
   }, []);

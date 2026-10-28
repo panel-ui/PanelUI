@@ -358,5 +358,14 @@
       "category": "forms",
       "title": "Choice Cards"
     }
+  ],
+  "inspector": [
+    "Inspector",
+    "The settings panel beside an editor's canvas: a rail of icons, each opening a page of titled sections.",
+    "react inspector panel properties panel settings sidebar design editor",
+    {
+      "addedIn": "0.10.0",
+      "category": "layout"
+    }
   ]
 }

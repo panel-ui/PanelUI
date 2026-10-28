@@ -1,0 +1,35 @@
+{
+  "slug": "inspector",
+  "demo": "overview",
+  "demoOptions": { "height": 560 },
+  "intro": "Use it for the settings beside an editor's canvas: the properties of what is selected, or the options of a recording, a photo or a page. The rail on the side holds one icon per page, and the panel shows the open page as titled sections.\n\nA section's title shares its line with one action: a [Switch](/docs/web/components/switch) that turns the whole section on, or a Reset that puts its values back. The controls under it are what that action applies to.\n\nWith only one page, leave the rail out and write the sections straight into the panel. For settings that belong to a form and are saved together, use a form with [Labels](/docs/web/components/label) instead.",
+  "usage": "<Inspector defaultValue=\"pointer\">\n  <Inspector.Rail>\n    <Inspector.Tab value=\"pointer\" label=\"Pointer\">\n      <MousePointer2Icon />\n    </Inspector.Tab>\n    <Inspector.Tab value=\"audio\" label=\"Audio\">\n      <Volume2Icon />\n    </Inspector.Tab>\n  </Inspector.Rail>\n  <Inspector.Panel className=\"h-[30rem]\">\n    <Inspector.Page value=\"pointer\">\n      <Inspector.Section>\n        <Inspector.SectionTitle>Click sound</Inspector.SectionTitle>\n        <Inspector.SectionAction>\n          <Switch size=\"sm\" label=\"Click sound\" />\n        </Inspector.SectionAction>\n        <Inspector.SectionContent>\n          <Slider label=\"Volume\" defaultValue={40} />\n        </Inspector.SectionContent>\n      </Inspector.Section>\n    </Inspector.Page>\n    <Inspector.Page value=\"audio\">…</Inspector.Page>\n  </Inspector.Panel>\n</Inspector>",
+  "anatomy": "<Inspector>\n  <Inspector.Rail>\n    <Inspector.Tab />\n    <Inspector.RailSeparator />\n  </Inspector.Rail>\n  <Inspector.Panel>\n    <Inspector.Page>\n      <Inspector.Section>\n        <Inspector.SectionTitle />\n        <Inspector.SectionAction />\n        <Inspector.SectionContent />\n      </Inspector.Section>\n      <Inspector.Separator />\n    </Inspector.Page>\n  </Inspector.Panel>\n</Inspector>",
+  "parts": {
+    "Rail": "The column of page icons, in a pill of its own beside the panel. A filled marker slides to the open page's icon.",
+    "Tab": "One page's icon. `value` names the `Inspector.Page` it opens, and `label` is its tooltip and its name for a screen reader.",
+    "RailSeparator": "A short line between groups of pages on the rail.",
+    "Panel": "The card the pages open in. Give it a height, such as `h-[30rem]`, and a longer page scrolls inside it with a thin bar. Without pages, its children are one page of sections.",
+    "Page": "What one tab opens. It arrives from the direction the marker moved.",
+    "Section": "A titled group of settings. `collapsible` folds it away by its title, and `defaultOpen` or `open` with `onOpenChange` hold whether it is open.",
+    "SectionTitle": "The section's name. In a collapsible section it is the button that folds it, with a chevron.",
+    "SectionAction": "One control at the end of the title's line: the switch for the section, or a Reset.",
+    "SectionContent": "The controls under the title, stacked with an even gap. In a collapsible section it opens and closes with an animated height.",
+    "Separator": "A hairline between sections about different things."
+  },
+  "examples": [
+    {
+      "title": "Sections that fold",
+      "description": "`collapsible` turns a section's title into the button that folds it away. `defaultOpen={false}` starts it closed, like the shadow here, whose switch still works while it is folded.",
+      "demo": "collapsible",
+      "height": 500
+    },
+    {
+      "title": "Reset",
+      "description": "A Reset in each section's action puts that section's values back and is disabled while there is nothing to undo. Centre-origin [Sliders](/docs/web/components/slider) show at a glance which values have moved.",
+      "demo": "adjustments",
+      "height": 500
+    }
+  ],
+  "notes": "### Keyboard\n\nThe rail is one stop in the tab order. The up and down arrows move between pages, and Tab goes on into the open page.\n\n### Height\n\nThe panel sizes to its page unless it is given a height. In an editor, give it the height of the canvas beside it, so switching pages does not move anything else on the screen.\n\nWith reduced motion turned on, the marker, the pages and folding sections change without moving."
+}

@@ -360,6 +360,24 @@
       ]
     },
     {
+      "name": "inspector",
+      "type": "registry:component",
+      "title": "Inspector",
+      "description": "The settings panel beside an editor's canvas: a rail of icons, each opening a page of titled sections.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/inspector.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/inspector.tsx"
+        }
+      ]
+    },
+    {
       "name": "kpi",
       "type": "registry:component",
       "title": "KPI",

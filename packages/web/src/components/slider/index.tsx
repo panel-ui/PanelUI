@@ -92,7 +92,8 @@ const sliderVariants = tv({
     // invisible: the handle above is what is seen.
     thumb: 'pointer-events-none size-px opacity-0',
     text: 'pointer-events-none absolute inset-0 flex items-center justify-between gap-3 px-3',
-    label: 'truncate text-muted-foreground',
+    // Lighter than muted, so the name reads on a coloured fill as well as on the track.
+    label: 'truncate text-foreground/70',
     value: 'shrink-0 tabular-nums text-foreground',
     step: [
       'inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground outline-none',
@@ -115,10 +116,9 @@ const sliderVariants = tv({
           '[--slider-notch:color-mix(in_oklab,var(--foreground)_22%,transparent)]',
         ],
         handle: [
-          'h-[calc(var(--slider-h)*0.44)] w-[3px] -translate-x-[calc(100%+5px)] rounded-full bg-(--slider-mark) opacity-60 rtl:translate-x-[calc(100%+5px)]',
-          // On the fill's starting edge (a range's lower end, or below the
-          // middle) it sits just inside the fill the other way.
-          'data-[edge=start]:translate-x-[5px] rtl:data-[edge=start]:-translate-x-[5px]',
+          // Centred on the value, so it stands on the same line as the fill's
+          // edge and the notch of the step it is on.
+          'h-[calc(var(--slider-h)*0.44)] w-[3px] -translate-x-1/2 rounded-full bg-(--slider-mark) opacity-60 rtl:translate-x-1/2',
           'group-hover/slider:h-[calc(var(--slider-h)*0.56)] group-hover/slider:opacity-100 group-data-moving/slider:h-[calc(var(--slider-h)*0.56)] group-data-moving/slider:opacity-100',
           'group-data-disabled/slider:opacity-40',
           // Where it would cross the name or the value, it steps out of the way:
@@ -277,12 +277,6 @@ function SliderRoot<Value extends SliderValue = number>({
     : origin === 'center'
       ? [Math.min(50, percents[0]!), Math.max(50, percents[0]!)]
       : [0, percents[0]!];
-  // Which edge of the fill each handle marks: the far one, unless it is a
-  // range's lower end or a value below the middle.
-  const lowest = range ? percents.indexOf(Math.min(...percents)) : -1;
-  const edges = percents.map((percent, at) =>
-    range ? (at === lowest ? 'start' : 'end') : origin === 'center' && percent < 50 ? 'start' : 'end'
-  );
 
   const count = (max - min) / step;
   const showTicks = ticks ?? (Number.isInteger(Math.round(count * 1e6) / 1e6) && count >= 2 && count <= MAX_TICKS);
@@ -336,7 +330,7 @@ function SliderRoot<Value extends SliderValue = number>({
   const labelRef = useRef<HTMLSpanElement>(null);
   const valueRef = useRef<HTMLSpanElement>(null);
   const [crowded, setCrowded] = useState<boolean[]>([]);
-  const percentKey = percents.map((percent, at) => `${percent}:${edges[at]}`).join(',');
+  const percentKey = percents.join(',');
   useIsomorphicLayoutEffect(() => {
     const box = controlElement;
     if (variant !== 'fill' || !box) return;
@@ -350,10 +344,9 @@ function SliderRoot<Value extends SliderValue = number>({
         return [start - 6, start + element.offsetWidth + 6] as const;
       };
       const zones = [span(labelRef.current), span(valueRef.current)].filter((zone) => zone !== null);
-      const next = percentKey.split(',').map((entry) => {
-        const [percent, edge] = entry.split(':');
+      const next = percentKey.split(',').map((percent) => {
         const x = (Number(percent) / 100) * width;
-        const at = edge === 'start' ? Math.min(x, width - 13) + 5 : Math.max(x, 13) - 8;
+        const at = Math.min(Math.max(x, 8), width - 8) - 1.5;
         return zones.some(([left, right]) => at + 3 > left && at < right);
       });
       setCrowded((last) => (last.length === next.length && last.every((each, i) => each === next[i]) ? last : next));
@@ -438,17 +431,14 @@ function SliderRoot<Value extends SliderValue = number>({
           </div>
           {values.map((each, at) => {
             const percent = toPercent(each, min, max);
-            const edge = edges[at];
-            // The fill's handle sits just inside the fill, so at either end it stays on the track.
-            const place =
-              variant !== 'fill' ? `${percent}%` : edge === 'start' ? `min(${percent}%, calc(100% - 13px))` : `max(${percent}%, 13px)`;
+            // At either end the fill's handle stays clear of the rounded corner.
+            const place = variant !== 'fill' ? `${percent}%` : `clamp(8px, ${percent}%, calc(100% - 8px))`;
             return (
               <span
                 key={at}
                 aria-hidden
                 data-slot="slider-handle"
                 data-crowded={crowded[at] ? '' : undefined}
-                data-edge={variant === 'fill' ? edge : undefined}
                 className={slots.handle()}
                 style={{ ['--slider-at' as string]: place } as CSSProperties}
               />

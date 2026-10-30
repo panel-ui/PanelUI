@@ -67,6 +67,22 @@ npx panelui-cli@latest update button --check
 Projects created before the lockfile are left untouched until an explicit `add <name> --overwrite`
 establishes the first trusted digest.
 
+### `remove <name...>`
+
+Deletes a component you added and takes it out of `panelui-lock.json`, so the project can go back to
+importing it from `panelui-native`. Only the names you pass are removed. A file that another added
+component still depends on stays, such as `text` when `button` is still installed.
+
+A file edited after it was added stays on disk and is no longer tracked. Pass `--overwrite` to delete
+it as well. npm packages the component installed are left in place, because other code may use them.
+
+```bash
+npx panelui-cli@latest remove checkbox --dry-run
+npx panelui-cli@latest remove checkbox
+```
+
+`--check` and `--dry-run` list what would be deleted and write nothing.
+
 ### `list [--type kind] [--search text] [--json]`
 
 Everything available, grouped as UI, charts, blocks, hooks, utilities and theme. Filters use generated
@@ -155,7 +171,7 @@ editor-launched sessions, add `--registry <url>` or `--cwd <dir>` to that server
 | Flag | Effect |
 | --- | --- |
 | `--yes`, `-y` | Accept every prompt |
-| `--overwrite` | Replace files that already exist |
+| `--overwrite` | Replace files that already exist; with `remove`, also delete files you edited |
 | `--check` | Check tracked files for updates without writing |
 | `--dry-run` | Show what would happen, write nothing |
 | `--cwd <dir>` | Run against another directory |

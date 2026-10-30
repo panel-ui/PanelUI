@@ -10,6 +10,7 @@ import { add, list } from '../src/add.mjs';
 import { diagnose, formatDoctor } from '../src/doctor.mjs';
 import { init } from '../src/init.mjs';
 import { mcp, mcpInit } from '../src/mcp.mjs';
+import { remove } from '../src/remove.mjs';
 import { update } from '../src/update.mjs';
 import { CliError, bold, dim, error, info, optionValue } from '../src/ui.mjs';
 
@@ -24,6 +25,7 @@ ${bold('Commands')}
                        In an existing one, set it up to receive components.
   add <name...>        Copy components in, with everything they depend on
   update [name...]     Diff and safely update unchanged component files
+  remove <name...>     Delete added components and their unshared files
   list                 Discover registry items; filter with --type or --search
   doctor               Check project setup without changing it
   mcp                  Run the MCP server, so an agent can read the registry
@@ -32,7 +34,8 @@ ${bold('Commands')}
 
 ${bold('Options')}
   --yes, -y            Accept every prompt
-  --overwrite          Replace files that already exist
+  --overwrite          Replace files that already exist; with remove,
+                       delete files that were edited too
   --check              Check for safe updates without writing
   --dry-run            Show what would happen, write nothing
   --cwd <dir>          Run against another directory
@@ -54,6 +57,7 @@ ${bold('Examples')}
   npx panelui-cli@latest add button
   npx panelui-cli@latest add item message --yes
   npx panelui-cli@latest update --check
+  npx panelui-cli@latest remove checkbox --dry-run
   npx panelui-cli@latest list --type chart --search bar
   npx panelui-cli@latest mcp init cursor
 `;
@@ -173,6 +177,10 @@ async function main() {
       break;
     case 'update':
       await update(rest, options);
+      break;
+    case 'remove':
+    case 'rm':
+      await remove(rest, options);
       break;
     case 'list':
     case 'ls':

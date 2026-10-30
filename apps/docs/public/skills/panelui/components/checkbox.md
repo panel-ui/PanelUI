@@ -38,7 +38,7 @@ import { Checkbox } from 'panelui-native';
 
 #### `CheckboxProps`
 
-Extends `VariantProps<typeof checkboxVariants>`.
+Extends `VariantProps<typeof checkboxVariants>, Omit< PressableProps, \| 'children' \| 'disabled' \| 'onPress' \| 'style' \| 'accessibilityRole' \| 'accessibilityState' >`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -47,8 +47,9 @@ Extends `VariantProps<typeof checkboxVariants>`.
 | `onCheckedChange` | `(checked: boolean) => void` | — | — |
 | `indeterminate` | `boolean` | — | A third, in-between state for a box that governs a group of others — some on, some off. It fills like a checked box but shows a dash rather than a tick, and announces itself as `mixed` to a screen reader. Pressing it resolves the ambiguity by turning the whole group on, so the press reports `true`. `indeterminate` overrides `checked` for what is drawn. |
 | `disabled` | `boolean` | — | — |
-| `label` | `string` | — | Optional label rendered next to the box; pressing it also toggles. |
+| `label` | `ReactNode` | — | Optional label rendered next to the box; pressing it also toggles. A string is the usual case. Pass text nodes instead to put a link inside the sentence — `<>I agree to the <Text onPress={open}>Terms</Text></>` — and the link's own press wins over the toggle. A screen reader cannot read a node as the checkbox's name, so pass `accessibilityLabel` with it. |
 | `labelClassName` | `string` | — | Classes for the label text, merged over the defaults — e.g. `text-black`. |
+| `contentClassName` | `string` | — | Classes for the view holding the label and description, merged over `flex-1 gap-0.5`. The default makes the text fill the row; pass `flex-none` to size it to the text when the checkbox shares a line with other content, such as a "Forgot password" link. |
 | `description` | `string` | — | Secondary line under the label, for extra context. |
 | `descriptionClassName` | `string` | — | Classes for the description text, merged over the defaults. |
 

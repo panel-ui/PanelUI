@@ -1,5 +1,5 @@
-import { forwardRef, useEffect } from 'react';
-import { Pressable, View } from 'react-native';
+import { forwardRef, useEffect, type ReactNode } from 'react';
+import { Pressable, View, type PressableProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -94,7 +94,17 @@ export type CheckboxSize = NonNullable<VariantProps<typeof checkboxVariants>['si
 /** The tick and the dash, sized to leave the same share of the box around them. */
 const GLYPH_SIZE: Record<CheckboxSize, number> = { xs: 8, sm: 10, md: 12, lg: 14, xl: 16 };
 
-export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
+export interface CheckboxProps
+  extends VariantProps<typeof checkboxVariants>,
+    Omit<
+      PressableProps,
+      | 'children'
+      | 'disabled'
+      | 'onPress'
+      | 'style'
+      | 'accessibilityRole'
+      | 'accessibilityState'
+    > {
   /**
    * Styles the pressable row — layout, border, fill. It does not reach the
    * label: text colour is not inherited from a view in React Native, so use
@@ -112,10 +122,24 @@ export interface CheckboxProps extends VariantProps<typeof checkboxVariants> {
    */
   indeterminate?: boolean;
   disabled?: boolean;
-  /** Optional label rendered next to the box; pressing it also toggles. */
-  label?: string;
+  /**
+   * Optional label rendered next to the box; pressing it also toggles.
+   *
+   * A string is the usual case. Pass text nodes instead to put a link inside
+   * the sentence — `<>I agree to the <Text onPress={open}>Terms</Text></>` —
+   * and the link's own press wins over the toggle. A screen reader cannot
+   * read a node as the checkbox's name, so pass `accessibilityLabel` with it.
+   */
+  label?: ReactNode;
   /** Classes for the label text, merged over the defaults — e.g. `text-black`. */
   labelClassName?: string;
+  /**
+   * Classes for the view holding the label and description, merged over
+   * `flex-1 gap-0.5`. The default makes the text fill the row; pass
+   * `flex-none` to size it to the text when the checkbox shares a line with
+   * other content, such as a "Forgot password" link.
+   */
+  contentClassName?: string;
   /** Secondary line under the label, for extra context. */
   description?: string;
   /** Classes for the description text, merged over the defaults. */
@@ -132,10 +156,13 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
       disabled,
       label,
       labelClassName,
+      contentClassName,
       description,
       descriptionClassName,
       variant,
       size = 'md',
+      accessibilityLabel,
+      ...rest
     },
     ref
   ) => {
@@ -172,6 +199,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
 
     return (
       <Pressable
+        {...rest}
         ref={ref}
         accessibilityRole="checkbox"
         // `mixed` is the a11y state for a box that governs a partly-on group;
@@ -180,7 +208,9 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
           checked: indeterminate ? 'mixed' : checked,
           disabled: !!disabled,
         }}
-        accessibilityLabel={label}
+        accessibilityLabel={
+          accessibilityLabel ?? (typeof label === 'string' ? label : undefined)
+        }
         accessibilityHint={description}
         disabled={disabled}
         // An indeterminate box resolves upward: the press turns the group on.
@@ -197,7 +227,7 @@ export const Checkbox = forwardRef<View, CheckboxProps>(
         {/* The card lays out content first so the box sits top-right. */}
         {variant === 'card' ? null : box}
         {label || description ? (
-          <View className={slots.content()}>
+          <View className={slots.content({ className: contentClassName })}>
             {label ? (
               <Text className={slots.label({ className: labelClassName })}>{label}</Text>
             ) : null}

@@ -39,6 +39,16 @@
       }
     },
     {
+      "title": "Sharing a line",
+      "description": "The label fills the rest of the row by default, so a link placed beside the checkbox gets pushed to the edge and the empty space toggles the box. `contentClassName=\"flex-none\"` sizes the label to its text, and only the box and the words toggle.",
+      "code": "<View className=\"flex-row items-center justify-between\">\n  <Checkbox\n    checked={remember}\n    onCheckedChange={setRemember}\n    label=\"Remember me\"\n    contentClassName=\"flex-none\"\n  />\n  <Button variant=\"ghost\" size=\"sm\" onPress={resetPassword}>\n    Forgot password?\n  </Button>\n</View>"
+    },
+    {
+      "title": "A link inside the label",
+      "description": "`label` takes text nodes as well as a string. A nested `Text` with its own `onPress` opens the link without toggling the box. A screen reader cannot use a node as the checkbox's name, so pass `accessibilityLabel` alongside it.",
+      "code": "<Checkbox\n  checked={agreed}\n  onCheckedChange={setAgreed}\n  accessibilityLabel=\"I agree to the Terms and Privacy Policy\"\n  label={\n    <>\n      I agree to the{' '}\n      <Text className=\"text-primary underline\" onPress={openTerms}>\n        Terms\n      </Text>{' '}\n      and{' '}\n      <Text className=\"text-primary underline\" onPress={openPrivacy}>\n        Privacy Policy\n      </Text>\n    </>\n  }\n/>"
+    },
+    {
       "title": "Styling the label",
       "description": "`className` styles the row, not the text inside it: React Native does not pass a text colour down from a view. Colour or size the label with `labelClassName`, and the description with `descriptionClassName`.",
       "code": "<Checkbox\n  variant=\"card\"\n  checked={express}\n  onCheckedChange={setExpress}\n  label=\"Express delivery\"\n  description=\"Arrives tomorrow\"\n  className=\"bg-white\"\n  labelClassName=\"text-black\"\n  descriptionClassName=\"text-neutral-500\"\n/>"

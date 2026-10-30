@@ -99,7 +99,14 @@ const dialogVariants = tv({
     scrollbar:
       'my-2 me-1 flex w-1.5 opacity-0 transition-opacity delay-300 data-hovering:opacity-100 data-hovering:delay-0 data-scrolling:opacity-100 data-scrolling:delay-0',
     thumb: 'relative flex-1 rounded-full bg-foreground/20',
-    footer: 'flex shrink-0 items-center',
+    footer: [
+      'flex shrink-0 items-center',
+      // The footer sits on a tinted surface, and the secondary fill is a tint
+      // too, so the button all but disappears into it. There it takes the
+      // panel's own surface instead, which keeps it lighter than the band.
+      '*:data-[variant=secondary]:bg-popover *:data-[variant=secondary]:shadow-xs',
+      '*:data-[variant=secondary]:hover:not-disabled:bg-[color-mix(in_oklab,var(--popover),var(--foreground)_5%)]',
+    ],
     close: [
       'absolute end-4 top-4 z-10 inline-flex size-8 cursor-pointer items-center justify-center rounded-full',
       'bg-muted text-muted-foreground outline-none transition-[background-color,color,scale] duration-150',

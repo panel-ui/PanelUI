@@ -9,6 +9,32 @@ the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [0.116.0] — 2026-10-31
+
+### Added
+
+- **Checkbox on a shared line.** `contentClassName` styles the view around the label and
+  description, which fills the row by default. `contentClassName="flex-none"` sizes it to its text,
+  so a checkbox can sit beside a "Forgot password" link and only the box and its words toggle it.
+  `label` now takes text nodes as well as a string, so a sentence can carry its own links — a
+  nested `Text` with an `onPress` opens the link without toggling the box. Pass
+  `accessibilityLabel` with a node label, because a screen reader cannot name the checkbox from
+  one. The row also passes through `Pressable` props such as `hitSlop` and `testID`.
+  ([#250](https://github.com/panel-ui/PanelUI/issues/250))
+
+### Fixed
+
+- **A lifted field settles when the keyboard is dismissed.** With `avoidKeyboard`, tapping outside
+  to close the keyboard could leave the lower of two fields stuck part-way up. Stopping the lift
+  loop took a frame or more, and during that time the loop overwrote the animation sending the
+  field home. The loop now stops on the UI thread in the same frame the settle starts.
+  ([#252](https://github.com/panel-ui/PanelUI/issues/252))
+
+### Docs
+
+- The Checkbox page has Sharing a line and A link inside the label examples.
+- The CLI page covers the new `remove` command in `panelui-cli` 0.8.0.
+
 ## [0.115.0] — 2026-10-25
 
 ### Added

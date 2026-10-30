@@ -169,7 +169,7 @@
     "Animated checkbox, as a row or a selectable card.",
     "react native checkbox",
     {
-      "updatedIn": "0.109.0",
+      "updatedIn": "0.116.0",
       "category": "forms"
     }
   ],

@@ -259,8 +259,14 @@ export function useKeyboardAvoidance({
    * frame, so that is subtracted back out to recover the honest resting edge.
    * Without it the callback would chase its own output down the screen.
    */
+  const following = useSharedValue(false);
   const track = useFrameCallback(() => {
     'worklet';
+    // Stopping the callback goes through the JS thread and takes a frame or
+    // more. Until it lands, a write here would replace the settle animation
+    // and leave the element frozen part-way up, so the loop checks the
+    // UI-thread flag first.
+    if (!following.value) return;
     const keyboardHeight = Math.abs(rawHeight.value);
     if (keyboardHeight === 0) return;
     if (!laidOut.value) return;
@@ -290,6 +296,7 @@ export function useKeyboardAvoidance({
     () => isActive.value && Math.abs(rawHeight.value) > 0,
     (shouldTrack, wasTracking) => {
       if (shouldTrack === wasTracking) return;
+      following.value = shouldTrack;
       runOnJS(setTracking)(shouldTrack);
 
       // A keyboard opening is the other place the guard is put back, for the

@@ -182,7 +182,7 @@ The usual shape. `Feedback.Trigger` opens it, and `render` makes your own button
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Feedback } from '@/components/panelui/feedback';
 
 export default function FeedbackDialog() {
@@ -226,7 +226,7 @@ export default function FeedbackDialog() {
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Feedback } from '@/components/panelui/feedback';
 
 export default function FeedbackBlur() {
@@ -270,7 +270,7 @@ Because `Submit` leaves the dialog open, a failed request can say so in the pane
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Feedback } from '@/components/panelui/feedback';
 
 /** Stands in for a request. It fails once, so there is a failure to look at. */
@@ -340,7 +340,7 @@ Anything can go in the panel above the field. Here a tag is enough to send on it
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { cn } from '@/lib/utils';
 import { Feedback } from '@/components/panelui/feedback';
 
@@ -418,7 +418,7 @@ Two steps in one dialog. Asking for the score first gives the sentence something
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { cn } from '@/lib/utils';
 import { Feedback } from '@/components/panelui/feedback';
 
@@ -496,7 +496,7 @@ Pass `value` and `onValueChange` to hold the message yourself. It survives the d
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Feedback } from '@/components/panelui/feedback';
 
 /** Short answers are rarely useful ones. */

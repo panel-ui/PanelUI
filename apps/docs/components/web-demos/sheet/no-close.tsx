@@ -1,7 +1,7 @@
 'use client';
 
 import { MicIcon, MonitorIcon, MousePointer2Icon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Sheet } from 'panelui-web/sheet';
 
 const CAPTURED = [

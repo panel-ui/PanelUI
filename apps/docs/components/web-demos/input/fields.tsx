@@ -1,4 +1,4 @@
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field } from 'panelui-web/field';
 import { MailIcon, SearchIcon } from 'lucide-react';
 import { Input } from 'panelui-web/input';
 
@@ -15,17 +15,17 @@ export default function InputFields() {
         </Input.Addon>
       </Input.Group>
       <Field>
-        <FieldLabel>Work email</FieldLabel>
+        <Field.Label>Work email</Field.Label>
         <Input.Group>
           <Input.Addon>
             <MailIcon />
           </Input.Addon>
           <Input type="email" placeholder="you@company.com" />
         </Input.Group>
-        <FieldDescription>We send the receipt here.</FieldDescription>
+        <Field.Description>We send the receipt here.</Field.Description>
       </Field>
       <Field>
-        <FieldLabel>Display name</FieldLabel>
+        <Field.Label>Display name</Field.Label>
         <Input defaultValue="Rosa Okafor" />
       </Field>
     </div>

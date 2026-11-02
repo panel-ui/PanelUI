@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Feedback } from 'panelui-web/feedback';
 
 /** Short answers are rarely useful ones. */

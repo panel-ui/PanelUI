@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { RollingNumber } from 'panelui-web/rolling-number';
 import { Stat } from 'panelui-web/stat';
 

@@ -1,9 +1,9 @@
 'use client';
 
 import { FileTextIcon, UserPlusIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
 import { Frame } from 'panelui-web/frame';
 import { Sheet } from 'panelui-web/sheet';
 
@@ -60,7 +60,7 @@ export default function SheetHeaderTrigger() {
           <Sheet.Header title="Share “Site survey.pdf”" description="People you add can open and comment." />
           <Sheet.Body>
             <Field>
-              <FieldLabel>Email</FieldLabel>
+              <Field.Label>Email</Field.Label>
               <Input type="email" placeholder="name@harbour.works" />
             </Field>
           </Sheet.Body>

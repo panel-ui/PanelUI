@@ -6,7 +6,7 @@ description: A single line to type into, with icons, units and buttons set insid
 <ComponentPreview name="input/fields" height={340}>
 
 ```tsx lineNumbers
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field } from '@/components/panelui/field';
 import { MailIcon, SearchIcon } from 'lucide-react';
 import { Input } from '@/components/panelui/input';
 
@@ -23,17 +23,17 @@ export default function InputFields() {
         </Input.Addon>
       </Input.Group>
       <Field>
-        <FieldLabel>Work email</FieldLabel>
+        <Field.Label>Work email</Field.Label>
         <Input.Group>
           <Input.Addon>
             <MailIcon />
           </Input.Addon>
           <Input type="email" placeholder="you@company.com" />
         </Input.Group>
-        <FieldDescription>We send the receipt here.</FieldDescription>
+        <Field.Description>We send the receipt here.</Field.Description>
       </Field>
       <Field>
-        <FieldLabel>Display name</FieldLabel>
+        <Field.Label>Display name</Field.Label>
         <Input defaultValue="Rosa Okafor" />
       </Field>
     </div>
@@ -77,7 +77,7 @@ Import from `panelui-web/input` instead of `@/components/panelui/input`. Tailwin
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 

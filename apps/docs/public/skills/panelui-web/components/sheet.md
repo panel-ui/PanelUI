@@ -196,12 +196,12 @@ A deck fills the height it is given, so put it in a sheet that has one: a side s
 ```tsx
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Radio, RadioGroup } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+import { Switch } from '@/components/panelui/switch';
+import { Textarea } from '@/components/panelui/textarea';
 import { Sheet } from '@/components/panelui/sheet';
 
 export default function SheetEvent() {
@@ -216,22 +216,27 @@ export default function SheetEvent() {
         <Sheet.Body className="flex flex-col gap-6">
           <RadioGroup defaultValue="going" aria-label="Your answer">
             <Label>
-              <Radio value="going" /> Going
+              <Radio value="going" />
+              <Label.Text>Going</Label.Text>
             </Label>
             <Label>
-              <Radio value="maybe" /> Maybe
+              <Radio value="maybe" />
+              <Label.Text>Maybe</Label.Text>
             </Label>
             <Label>
-              <Radio value="declined" /> Can’t make it
+              <Radio value="declined" />
+              <Label.Text>Can’t make it</Label.Text>
             </Label>
           </RadioGroup>
           <Field>
-            <FieldLabel>Note to Noor</FieldLabel>
+            <Field.Label>Note to Noor</Field.Label>
             <Textarea placeholder="Running ten minutes late, start without me." />
           </Field>
-          <Label className="justify-between">
-            Remind me 15 minutes before
-            <Switch defaultChecked />
+          <Label>
+            <Label.Text>Remind me 15 minutes before</Label.Text>
+            <Label.Action>
+              <Switch defaultChecked />
+            </Label.Action>
           </Label>
         </Sheet.Body>
         <Sheet.Footer>

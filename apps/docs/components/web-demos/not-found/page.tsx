@@ -1,7 +1,7 @@
 'use client';
 
 import { NotFound } from 'panelui-web/not-found';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 
 export default function NotFoundPage() {
   return (

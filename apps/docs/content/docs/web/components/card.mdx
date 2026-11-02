@@ -6,9 +6,9 @@ description: A surface that holds one thing, with a heading, an action beside it
 <ComponentPreview name="card/form" height={460}>
 
 ```tsx lineNumbers
-import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
 import { Card } from '@/components/panelui/card';
 
 export default function CardForm() {
@@ -26,13 +26,13 @@ export default function CardForm() {
       <Card.Content>
         <form id="create-workspace" className="flex flex-col gap-5">
           <Field>
-            <FieldLabel>Work email</FieldLabel>
+            <Field.Label>Work email</Field.Label>
             <Input type="email" placeholder="you@company.com" required />
           </Field>
           <Field>
-            <FieldLabel>Workspace name</FieldLabel>
+            <Field.Label>Workspace name</Field.Label>
             <Input placeholder="Northwind Studio" required />
-            <FieldDescription>You can change it at any time.</FieldDescription>
+            <Field.Description>You can change it at any time.</Field.Description>
           </Field>
         </form>
       </Card.Content>
@@ -162,7 +162,7 @@ import { Card } from "@/components/panelui/card"
 <ComponentPreview name="card/sizes" height={220}>
 
 ```tsx lineNumbers
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/panelui/badge';
 import { Card } from '@/components/panelui/card';
 
 function Report({ size }: { size: 'default' | 'sm' }) {
@@ -199,8 +199,8 @@ A `plain` footer continues the card. A `panel` footer is a band set into its bot
 <ComponentPreview name="card/footer" height={300}>
 
 ```tsx lineNumbers
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Input } from '@/components/panelui/input';
 import { Card } from '@/components/panelui/card';
 
 export default function CardFooterVariants() {
@@ -242,8 +242,8 @@ A picture placed first in the card reaches its edges. Give the card `overflow-hi
 <ComponentPreview name="card/image" height={480}>
 
 ```tsx lineNumbers
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/panelui/badge';
+import { Button } from '@/components/panelui/button';
 import { Card } from '@/components/panelui/card';
 
 export default function CardImage() {
@@ -279,7 +279,7 @@ export default function CardImage() {
 <ComponentPreview name="card/list" height={200}>
 
 ```tsx lineNumbers
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/panelui/badge';
 import { Card } from '@/components/panelui/card';
 
 const PROJECTS = [

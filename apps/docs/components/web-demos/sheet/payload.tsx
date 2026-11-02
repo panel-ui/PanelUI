@@ -1,7 +1,7 @@
 'use client';
 
 import { PhoneIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Frame } from 'panelui-web/frame';
 import { Sheet } from 'panelui-web/sheet';
 

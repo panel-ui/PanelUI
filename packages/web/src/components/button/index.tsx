@@ -20,8 +20,15 @@
  * `loading` sets a spinner over the label and stops presses. The label stays
  * in place, hidden, so the width does not change: a button that resizes as it
  * is pressed moves whatever sits beside it.
+ *
+ * ## A link that looks like a button
+ *
+ * An action that goes to another page is a link, whatever it looks like, so
+ * that it opens in a new tab and reads as a link to a screen reader. Pass the
+ * link as `render` and the button's look is put on it:
+ * `<Button render={<a href="/" />}>Home</Button>`.
  */
-import type { ComponentProps } from 'react';
+import { cloneElement, type ComponentProps, type ReactElement } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const buttonVariants = tv({
@@ -74,6 +81,12 @@ export interface ButtonProps extends ComponentProps<'button'> {
   shape?: 'default' | 'pill';
   /** Shows a spinner over the label, sets `aria-busy` and stops presses, keeping the width. */
   loading?: boolean;
+  /**
+   * An element to draw the button as, such as `<a href="/" />` or a router's
+   * link. It takes the button's classes and children; `type`, `disabled` and
+   * `loading` do not apply to it.
+   */
+  render?: ReactElement<Record<string, unknown>>;
 }
 
 function Spinner() {
@@ -103,8 +116,19 @@ function ButtonRoot({
   type = 'button',
   className,
   children,
+  render,
   ...props
 }: ButtonProps) {
+  if (render) {
+    const own = render.props as { className?: string };
+    return cloneElement(render, {
+      ...props,
+      'data-slot': 'button',
+      'data-variant': variant ?? 'default',
+      className: buttonVariants({ variant, size, shape, className: [className, own.className] }),
+      children,
+    });
+  }
   return (
     <button
       type={type}

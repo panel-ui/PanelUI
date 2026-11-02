@@ -712,3 +712,64 @@ export {
   type WorkbenchInspectorTriggerProps,
   type WorkbenchTimelineProps,
 } from './components/workbench';
+export { Badge, type BadgeProps, type BadgeVariant, type BadgeSize } from './components/badge';
+export {
+  Chip,
+  ChipGroup,
+  type ChipProps,
+  type ChipToggleProps,
+  type ChipRemovableProps,
+  type ChipGroupProps,
+  type ChipSize,
+  type ChipColor,
+} from './components/chip';
+export {
+  Checkbox,
+  CheckboxGroup,
+  type CheckboxProps,
+  type CheckboxGroupProps,
+  type CheckboxSize,
+  type CheckboxColor,
+} from './components/checkbox';
+export {
+  RadioGroup,
+  RadioGroupItem,
+  Radio,
+  RadioCard,
+  RadioGroupCard,
+  RadioGroupCardBody,
+  RadioGroupCardTitle,
+  RadioGroupCardDescription,
+  RadioGroupCardAside,
+  type RadioCardProps,
+  type RadioCardAppearance,
+  type RadioGroupProps,
+  type RadioProps,
+  type RadioSize,
+  type RadioColor,
+} from './components/radio-group';
+export {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+  type FieldProps,
+  type FieldLabelProps,
+  type FieldDescriptionProps,
+  type FieldErrorProps,
+} from './components/field';
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  type TableProps,
+  type TableHeadProps,
+  type TableCellProps,
+  type TableDensity,
+  type TableAlign,
+} from './components/table';

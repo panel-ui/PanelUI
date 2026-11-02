@@ -94,9 +94,9 @@ Every part also takes the props of the element it renders, and a `className`.
 ## Example
 
 ```tsx
-import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
 import { Card } from '@/components/panelui/card';
 
 export default function CardForm() {
@@ -114,13 +114,13 @@ export default function CardForm() {
       <Card.Content>
         <form id="create-workspace" className="flex flex-col gap-5">
           <Field>
-            <FieldLabel>Work email</FieldLabel>
+            <Field.Label>Work email</Field.Label>
             <Input type="email" placeholder="you@company.com" required />
           </Field>
           <Field>
-            <FieldLabel>Workspace name</FieldLabel>
+            <Field.Label>Workspace name</Field.Label>
             <Input placeholder="Northwind Studio" required />
-            <FieldDescription>You can change it at any time.</FieldDescription>
+            <Field.Description>You can change it at any time.</Field.Description>
           </Field>
         </form>
       </Card.Content>

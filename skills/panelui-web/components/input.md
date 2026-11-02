@@ -90,7 +90,7 @@ A disabled input is faded and cannot be focused. In a group the whole group fade
 ## Example
 
 ```tsx
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field } from '@/components/panelui/field';
 import { MailIcon, SearchIcon } from 'lucide-react';
 import { Input } from '@/components/panelui/input';
 
@@ -107,17 +107,17 @@ export default function InputFields() {
         </Input.Addon>
       </Input.Group>
       <Field>
-        <FieldLabel>Work email</FieldLabel>
+        <Field.Label>Work email</Field.Label>
         <Input.Group>
           <Input.Addon>
             <MailIcon />
           </Input.Addon>
           <Input type="email" placeholder="you@company.com" />
         </Input.Group>
-        <FieldDescription>We send the receipt here.</FieldDescription>
+        <Field.Description>We send the receipt here.</Field.Description>
       </Field>
       <Field>
-        <FieldLabel>Display name</FieldLabel>
+        <Field.Label>Display name</Field.Label>
         <Input defaultValue="Rosa Okafor" />
       </Field>
     </div>

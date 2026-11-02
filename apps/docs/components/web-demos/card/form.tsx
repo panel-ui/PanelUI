@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
 import { Card } from 'panelui-web/card';
 
 export default function CardForm() {
@@ -18,13 +18,13 @@ export default function CardForm() {
       <Card.Content>
         <form id="create-workspace" className="flex flex-col gap-5">
           <Field>
-            <FieldLabel>Work email</FieldLabel>
+            <Field.Label>Work email</Field.Label>
             <Input type="email" placeholder="you@company.com" required />
           </Field>
           <Field>
-            <FieldLabel>Workspace name</FieldLabel>
+            <Field.Label>Workspace name</Field.Label>
             <Input placeholder="Northwind Studio" required />
-            <FieldDescription>You can change it at any time.</FieldDescription>
+            <Field.Description>You can change it at any time.</Field.Description>
           </Field>
         </form>
       </Card.Content>

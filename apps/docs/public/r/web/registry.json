@@ -83,6 +83,35 @@
       ]
     },
     {
+      "name": "badge",
+      "type": "registry:component",
+      "title": "Badge",
+      "description": "A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/badge.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/badge.tsx"
+        }
+      ]
+    },
+    {
       "name": "bar-picker",
       "type": "registry:component",
       "title": "Bar Picker",
@@ -176,6 +205,64 @@
           "path": "components/panelui/card.tsx",
           "type": "registry:component",
           "target": "@components/panelui/card.tsx"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:component",
+      "title": "Checkbox",
+      "description": "One choice that is on or off, with a tick that draws itself and a parent box for a group.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/checkbox.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/checkbox.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chip",
+      "type": "registry:component",
+      "title": "Chip",
+      "description": "A pill that can be pressed: a filter turned on and off, or an added value with a × to take it out.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/chip.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/chip.tsx"
         }
       ]
     },
@@ -292,6 +379,26 @@
       ]
     },
     {
+      "name": "field",
+      "type": "registry:component",
+      "title": "Field",
+      "description": "A form control with its label, a line of help and its error, wired to each other.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/label.json"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/field.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/field.tsx"
+        }
+      ]
+    },
+    {
       "name": "flow",
       "type": "registry:component",
       "title": "Flow",
@@ -348,6 +455,7 @@
       "title": "Input",
       "description": "A single line to type into, with icons, units and buttons set inside its box.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -598,6 +706,34 @@
       ]
     },
     {
+      "name": "radio-group",
+      "type": "registry:component",
+      "title": "Radio Group",
+      "description": "One choice from a short list, with every option visible and the arrow keys moving between them.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/radio-group.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/radio-group.tsx"
+        }
+      ]
+    },
+    {
       "name": "range-meter",
       "type": "registry:component",
       "title": "Range Meter",
@@ -792,6 +928,23 @@
       ]
     },
     {
+      "name": "table",
+      "type": "registry:component",
+      "title": "Table",
+      "description": "Rows of records with the same columns, with numbers aligned and a header that stays pinned.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/table.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/table.tsx"
+        }
+      ]
+    },
+    {
       "name": "tabs",
       "type": "registry:component",
       "title": "Tabs",
@@ -815,6 +968,7 @@
       "title": "Textarea",
       "description": "A field for more than one line that grows as it is written in, up to a limit.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],

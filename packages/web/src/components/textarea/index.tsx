@@ -22,7 +22,13 @@
  *
  * `variant="ghost"` drops the border, background and ring, for a field set
  * inside something that already draws them, such as a card or a composer.
+ *
+ * ## Inside a Field
+ *
+ * Put in a `Field`, it takes the field's label, description and error without
+ * ids passed by hand, and turns invalid when the field does.
  */
+import { Field as BaseField } from '@base-ui/react/field';
 import { useCallback, useLayoutEffect, useRef, type ComponentProps, type Ref } from 'react';
 import { tv } from 'tailwind-variants';
 
@@ -119,22 +125,29 @@ function TextareaRoot({
   // Before paint, so a value that was already there never shows at the wrong height.
   useLayoutEffect(fit, [fit, value]);
 
+  const control = {
+    'data-slot': 'textarea',
+    rows: autoResize ? minRows : rows,
+    value,
+    onInput: (event: Parameters<NonNullable<TextareaProps['onInput']>>[0]) => {
+      onInput?.(event);
+      fit();
+    },
+    className: textareaVariants({ variant, size, autoResize, className }),
+    style,
+    ...props,
+  };
+
+  // Rendered through the field's control, so a Field around it can label,
+  // describe and validate it. Outside a Field it is a plain textarea.
   return (
-    <textarea
-      ref={(node) => {
-        field.current = node;
-        setRef(ref, node);
+    <BaseField.Control
+      ref={(node: HTMLElement | null) => {
+        field.current = node as HTMLTextAreaElement | null;
+        setRef(ref, node as HTMLTextAreaElement | null);
       }}
-      data-slot="textarea"
-      rows={autoResize ? minRows : rows}
-      value={value}
-      onInput={(event) => {
-        onInput?.(event);
-        fit();
-      }}
-      className={textareaVariants({ variant, size, autoResize, className })}
-      style={style}
-      {...props}
+      render={<textarea />}
+      {...(control as unknown as BaseField.Control.Props)}
     />
   );
 }

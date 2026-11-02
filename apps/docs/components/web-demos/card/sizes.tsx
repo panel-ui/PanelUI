@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from 'panelui-web/badge';
 import { Card } from 'panelui-web/card';
 
 function Report({ size }: { size: 'default' | 'sm' }) {

@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
 import { Sheet } from 'panelui-web/sheet';
 
 export default function SheetThumb() {
@@ -13,7 +13,7 @@ export default function SheetThumb() {
           <Sheet.Header title="Edit profile" description="Shown on your public page." />
           <Sheet.Body>
             <Field>
-              <FieldLabel>Name</FieldLabel>
+              <Field.Label>Name</Field.Label>
               <Input defaultValue="Noor Haddad" tabIndex={-1} />
             </Field>
           </Sheet.Body>

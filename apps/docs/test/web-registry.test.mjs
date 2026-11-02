@@ -72,6 +72,25 @@ test('demos import the package, and pages show the path a project has', () => {
   }
 });
 
+test('demos are built from panelui-web, never from the docs site\'s own ui folder', () => {
+  // A page copies its demo's source onto the screen, so a component imported
+  // from the site's `@/components/ui` reads as one the package provides, and
+  // a reader who installs the package finds it missing.
+  const root = path.join(docs, 'components/web-demos');
+  const walk = (directory) =>
+    fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory() ? walk(path.join(directory, entry.name)) : [path.join(directory, entry.name)]
+    );
+  for (const file of walk(root).filter((name) => name.endsWith('.tsx'))) {
+    const source = fs.readFileSync(file, 'utf8');
+    assert.doesNotMatch(
+      source,
+      /from ['"]@\/components\/ui\//,
+      `${path.relative(root, file)} imports from @/components/ui; use the panelui-web component`
+    );
+  }
+});
+
 test('every demo a page names is in the generated map', () => {
   const map = read('components/web-demos/index.generated.tsx');
   for (const slug of slugs) {

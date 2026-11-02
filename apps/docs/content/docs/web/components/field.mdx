@@ -1,0 +1,279 @@
+---
+title: Field
+description: A form control with its label, a line of help and its error, wired to each other.
+status: new
+---
+
+<ComponentPreview name="field/overview" height={180}>
+
+```tsx lineNumbers
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
+
+export default function FieldOverview() {
+  return (
+    <Field className="max-w-xs">
+      <Field.Label>Company name</Field.Label>
+      <Input placeholder="Larkspur Joinery" />
+      <Field.Description>Printed on every invoice you send.</Field.Description>
+    </Field>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use a field around a form control to give it a label, a line of help and an error message, all tied to the control for screen readers without ids passed by hand.
+
+Input, Textarea, Select, Checkbox, Radio Group and Switch all work inside a field. `Field.Label` is a [Label](/docs/web/components/label), so `required`, `optional` and the label's parts work in it.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/field.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/field` instead of `@/components/panelui/field`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Add the component it is built on: [Label](/docs/web/components/label).
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/field.tsx`:
+
+<RegistrySource name="field" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Field } from "@/components/panelui/field"
+```
+
+```tsx
+<Field name="email">
+  <Field.Label>Work email</Field.Label>
+  <Input type="email" required />
+  <Field.Description>We send the receipt here.</Field.Description>
+  <Field.Error match="valueMissing">Enter an email address.</Field.Error>
+</Field>
+```
+
+## Composition
+
+```tsx
+<Field>
+  <Field.Label />
+  {/* the control */}
+  <Field.Description />
+  <Field.Error />
+</Field>
+```
+
+## Examples
+
+### Validation
+
+The browser's checks (`required`, `type="email"`, `minLength`) run when the control is left, not on every key. `Field.Error` with `match` shows a message for one of them. While an error shows, the description is hidden.
+
+<ComponentPreview name="field/validation" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
+
+export default function FieldValidation() {
+  return (
+    <form className="flex w-full max-w-xs flex-col gap-5" onSubmit={(event) => event.preventDefault()}>
+      <Field name="email">
+        <Field.Label required>Billing email</Field.Label>
+        <Input type="email" required placeholder="accounts@company.com" />
+        <Field.Description>Leave the field to check it.</Field.Description>
+        <Field.Error match="valueMissing">Enter an email address.</Field.Error>
+        <Field.Error match="typeMismatch">That is not an email address.</Field.Error>
+      </Field>
+      <Field name="vat">
+        <Field.Label optional>VAT number</Field.Label>
+        <Input minLength={9} placeholder="GB123456789" />
+        <Field.Error match="tooShort">A VAT number is at least nine characters.</Field.Error>
+      </Field>
+      <Button type="submit">Save details</Button>
+    </form>
+  );
+}
+```
+
+</ComponentPreview>
+
+### An error from the server
+
+Set `invalid` for an error the browser cannot find, such as a name already taken. A `Field.Error` with no `match` shows whenever the field is invalid.
+
+<ComponentPreview name="field/server" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
+
+const TAKEN = ['studio', 'admin', 'larkspur'];
+
+export default function FieldServer() {
+  const [handle, setHandle] = useState('larkspur');
+  const [checked, setChecked] = useState('larkspur');
+  const taken = TAKEN.includes(checked.trim().toLowerCase());
+
+  return (
+    <form
+      className="flex w-full max-w-xs flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setChecked(handle);
+      }}
+    >
+      <Field invalid={taken}>
+        <Field.Label>Workspace address</Field.Label>
+        <Input value={handle} onChange={(event) => setHandle(event.target.value)} />
+        <Field.Description>panel.so/{handle || 'your-name'}</Field.Description>
+        <Field.Error>That address is taken. Try another.</Field.Error>
+      </Field>
+      <Button type="submit" variant="outline">
+        Check it
+      </Button>
+    </form>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Other controls
+
+A Select, a Textarea and a Switch, each in a field. For a switch, put it in the label's `Label.Action`.
+
+<ComponentPreview name="field/controls" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { Field } from '@/components/panelui/field';
+import { Label } from '@/components/panelui/label';
+import { Select } from '@/components/panelui/select';
+import { Switch } from '@/components/panelui/switch';
+import { Textarea } from '@/components/panelui/textarea';
+
+const ROOMS = [
+  { value: 'studio', label: 'The studio' },
+  { value: 'garden', label: 'Garden room' },
+  { value: 'loft', label: 'Loft' },
+];
+
+export default function FieldControls() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-5">
+      <Field>
+        <Field.Label>Room</Field.Label>
+        <Select items={ROOMS} defaultValue="garden">
+          <Select.Trigger>
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Content>
+            {ROOMS.map((room) => (
+              <Select.Item key={room.value} value={room.value}>
+                {room.label}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
+      </Field>
+      <Field>
+        <Field.Label>Notes for the host</Field.Label>
+        <Textarea placeholder="Arriving by bike, is there a rack?" />
+      </Field>
+      <Field>
+        <Field.Label>
+          <Label.Text>Send me a reminder</Label.Text>
+          <Label.Action>
+            <Switch defaultChecked />
+          </Label.Action>
+        </Field.Label>
+      </Field>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Field
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Field.Error
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Field.Error
+
+With no children, it shows the browser's own message for the failed check.
+
+### Disabled
+
+`disabled` on the field disables its control and fades its label.

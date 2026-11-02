@@ -1,9 +1,9 @@
 'use client';
 
 import { UsersRoundIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
 import { Frame } from 'panelui-web/frame';
 import { Sheet, type SheetSide } from 'panelui-web/sheet';
 
@@ -17,7 +17,7 @@ function Workspace({ side }: { side: SheetSide }) {
         <Sheet.Header title="Workspace" description="Northwind Studio · 12 members" />
         <Sheet.Body className="flex flex-col gap-6">
           <Field>
-            <FieldLabel>Workspace name</FieldLabel>
+            <Field.Label>Workspace name</Field.Label>
             <Input defaultValue="Northwind Studio" />
           </Field>
           <Frame variant="plain">
@@ -43,7 +43,7 @@ function Workspace({ side }: { side: SheetSide }) {
           <Sheet.Header title="Invite people" description="They join as members and can be promoted later." />
           <Sheet.Body>
             <Field>
-              <FieldLabel>Email</FieldLabel>
+              <Field.Label>Email</Field.Label>
               <Input type="email" placeholder="name@northwind.studio" />
             </Field>
           </Sheet.Body>

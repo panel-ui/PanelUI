@@ -44,6 +44,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `size` | `ButtonSize` | `md` | Its height and padding. The `icon` sizes are square, for a button that holds only an icon. Default `md`. |
 | `shape` | `'default' \| 'pill'` | `default` | `pill` rounds the ends fully. Default `default`. |
 | `loading` | `boolean` | `false` | Shows a spinner over the label, sets `aria-busy` and stops presses, keeping the width. |
+| `render` | `ReactElement<Record<string, unknown>>` | — | An element to draw the button as, such as `<a href="/" />` or a router's link. It takes the button's classes and children; `type`, `disabled` and `loading` do not apply to it. |
 
 ## Notes
 

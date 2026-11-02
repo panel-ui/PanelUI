@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Sheet } from 'panelui-web/sheet';
 
 const GROUPS = [

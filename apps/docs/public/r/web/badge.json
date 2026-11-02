@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "badge",
+  "type": "registry:component",
+  "title": "Badge",
+  "description": "A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.",
+  "dependencies": [
+    "tailwind-variants"
+  ],
+  "registryDependencies": [],
+  "cssVars": {
+    "light": {
+      "success": "oklch(0.696 0.17 162.48)",
+      "warning": "oklch(0.769 0.188 70.08)",
+      "info": "oklch(0.623 0.214 259.815)"
+    },
+    "dark": {
+      "success": "oklch(0.696 0.17 162.48)",
+      "warning": "oklch(0.769 0.188 70.08)",
+      "info": "oklch(0.623 0.214 259.815)"
+    }
+  },
+  "files": [
+    {
+      "path": "components/panelui/badge.tsx",
+      "type": "registry:component",
+      "target": "@components/panelui/badge.tsx",
+      "content": "/**\n * Badge — a short label that says what state something is in, or what kind of thing it is.\n *\n * ```tsx\n * <Badge>New</Badge>\n * <Badge variant=\"success\" dot>Operational</Badge>\n * <Badge variant=\"info\" dot=\"pulse\">Building</Badge>\n * ```\n *\n * ## Status colours are tinted, not filled\n *\n * A status badge sits inside a row of other text, and a solid green or red\n * block pulls the eye away from the row it belongs to. `success`, `info`,\n * `warning` and `destructive` draw their colour as a light tint with text in\n * the same hue, so a column of them reads as a column of states rather than a\n * column of buttons. `default` is the one solid badge, for the single thing on\n * a screen that should be seen first.\n *\n * ## The dot says it is live\n *\n * `dot` puts a small mark before the text in the badge's colour. `dot=\"pulse\"`\n * makes it breathe, for a state that is still changing — a build running, a\n * call connected — and stops once the state settles. The pulse is off for\n * readers who ask for reduced motion.\n *\n * A badge is not a control. For a label that can be pressed, removed or\n * toggled, use Chip.\n */\nimport type { ComponentProps } from 'react';\nimport { tv } from 'tailwind-variants';\n\nexport type BadgeVariant = 'default' | 'secondary' | 'outline' | 'success' | 'info' | 'warning' | 'destructive';\nexport type BadgeSize = 'sm' | 'md' | 'lg';\n\nconst badgeVariants = tv({\n  slots: {\n    root: [\n      'inline-flex w-fit shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border font-medium',\n      'tabular-nums [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3.5',\n    ],\n    dot: 'relative inline-flex size-1.5 shrink-0 rounded-full bg-current',\n    halo: 'absolute inset-0 rounded-full bg-current opacity-60 animate-ping motion-reduce:hidden',\n  },\n  variants: {\n    variant: {\n      default: { root: 'border-transparent bg-primary text-primary-foreground' },\n      secondary: { root: 'border-transparent bg-secondary text-secondary-foreground' },\n      outline: { root: 'border-border bg-transparent text-foreground', dot: 'text-muted-foreground' },\n      // The four states share one recipe, read from --badge-color.\n      success: { root: '[--badge-color:var(--success)]' },\n      info: { root: '[--badge-color:var(--info)]' },\n      warning: { root: '[--badge-color:var(--warning)]' },\n      destructive: { root: '[--badge-color:var(--destructive)]' },\n    },\n    tinted: {\n      true: {\n        root: [\n          'border-[color-mix(in_oklab,var(--badge-color)_22%,var(--background))]',\n          'bg-[color-mix(in_oklab,var(--badge-color)_10%,var(--background))] dark:bg-[color-mix(in_oklab,var(--badge-color)_16%,var(--background))]',\n          // Text in the badge's own hue, pulled towards the foreground so it stays legible on the tint.\n          'text-[color-mix(in_oklab,var(--badge-color),var(--foreground)_30%)]',\n        ],\n        dot: 'text-(--badge-color)',\n      },\n    },\n    size: {\n      sm: { root: 'h-5 px-1.5 text-[0.6875rem] leading-none' },\n      md: { root: 'h-6 px-2 text-xs leading-none' },\n      lg: { root: 'h-7 px-2.5 text-[0.8125rem] leading-none' },\n    },\n  },\n  defaultVariants: { variant: 'default', size: 'md', tinted: false },\n});\n\nconst TINTED: ReadonlySet<BadgeVariant> = new Set(['success', 'info', 'warning', 'destructive']);\n\nexport interface BadgeProps extends ComponentProps<'span'> {\n  /**\n   * What it means. `default` is solid, for the one thing that should be seen\n   * first; the four states are tinted in their theme colour. Default `default`.\n   */\n  variant?: BadgeVariant;\n  /** Its height and text size. Default `md`. */\n  size?: BadgeSize;\n  /**\n   * A dot before the text in the badge's colour. `'pulse'` makes it breathe,\n   * for a state that is still changing.\n   */\n  dot?: boolean | 'pulse';\n}\n\n/** A short label for a state or a kind. Renders a `<span>`. */\nfunction Badge({ variant = 'default', size = 'md', dot = false, className, children, ...props }: BadgeProps) {\n  const slots = badgeVariants({ variant, size, tinted: TINTED.has(variant) });\n  return (\n    <span data-slot=\"badge\" data-variant={variant} className={slots.root({ className })} {...props}>\n      {dot ? (\n        <span data-slot=\"badge-dot\" aria-hidden=\"true\" className={slots.dot()}>\n          {dot === 'pulse' ? <span className={slots.halo()} /> : null}\n        </span>\n      ) : null}\n      {children}\n    </span>\n  );\n}\nBadge.displayName = 'Badge';\n\nexport { Badge };\n"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "slug": "chip",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 160
+  },
+  "intro": "Use chips for a row of filters that each turn on and off, or for values someone has added, such as tags or recipients, that they can take out again.\n\nA chip in a `Chip.Group` is a toggle, and the group holds the values that are on as one array. Given `onRemove`, a chip is a removable value instead, and it is not a toggle.\n\nFor a label that is never pressed, use [Badge](/docs/web/components/badge). For a choice of one from a few that applies at once, [Tabs](/docs/web/components/tabs) or a [Button Group](/docs/web/components/button-group) may read better.",
+  "usage": "<Chip.Group defaultValue={['open']} aria-label=\"Show\">\n  <Chip value=\"open\">Open</Chip>\n  <Chip value=\"merged\">Merged</Chip>\n</Chip.Group>\n\n<Chip onRemove={() => remove('design')}>design</Chip>",
+  "anatomy": "<Chip.Group>\n  <Chip />\n</Chip.Group>",
+  "examples": [
+    {
+      "title": "One at a time",
+      "description": "`multiple={false}` makes the group hold a single value. Ignore an empty change, as here, if one must always be on.",
+      "demo": "single",
+      "height": 180
+    },
+    {
+      "title": "Removable",
+      "description": "`onRemove` adds a × that takes the value out. Backspace or Delete on the × removes it too. Its accessible name is \"Remove\" and the chip's text, or `removeLabel`.",
+      "demo": "removable",
+      "height": 200
+    },
+    {
+      "title": "Colours",
+      "description": "`color` sets the tint a chip takes when it is on. Keep `primary` for filters; use a status colour where the filter itself means one.",
+      "demo": "colors",
+      "height": 160
+    }
+  ],
+  "notes": "### Motion\n\nWhen a chip turns on, a tick slides in at its start and the label moves over to make room for it. With reduced motion turned on, the tick appears in place.\n\n### Keyboard\n\nEach chip is a button with `aria-pressed`. Tab moves between them, and Space or Enter turns one on or off."
+}

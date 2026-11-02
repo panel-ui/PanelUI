@@ -1,0 +1,265 @@
+---
+title: Checkbox
+description: One choice that is on or off, with a tick that draws itself and a parent box for a group.
+status: new
+---
+
+<ComponentPreview name="checkbox/overview" height={200}>
+
+```tsx lineNumbers
+import { Checkbox } from '@/components/panelui/checkbox';
+import { Label } from '@/components/panelui/label';
+
+export default function CheckboxOverview() {
+  return (
+    <div className="flex w-full max-w-xs flex-col gap-3">
+      <Label>
+        <Checkbox defaultChecked />
+        <Label.Text>Keep me signed in</Label.Text>
+      </Label>
+      <Label>
+        <Checkbox />
+        <Label.Text>Send me the monthly digest</Label.Text>
+      </Label>
+      <Label>
+        <Checkbox disabled />
+        <Label.Text>Share usage data</Label.Text>
+        <Label.Hint>Admins only</Label.Hint>
+      </Label>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use a checkbox for a choice that applies when a form is sent, such as accepting terms, or for picking any number of items from a list.
+
+For a setting that takes effect the moment it changes, use a [Switch](/docs/web/components/switch). For one choice out of several, use a [Radio Group](/docs/web/components/radio-group).
+
+Give every checkbox a name. Wrap it in a [Label](/docs/web/components/label), or pass `label` when its name is shown elsewhere.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/checkbox.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/checkbox` instead of `@/components/panelui/checkbox`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/checkbox.tsx`:
+
+<RegistrySource name="checkbox" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Checkbox } from "@/components/panelui/checkbox"
+```
+
+```tsx
+<Label>
+  <Checkbox defaultChecked />
+  <Label.Text>Email me a receipt</Label.Text>
+</Label>
+```
+
+## Composition
+
+```tsx
+<Checkbox.Group>
+  <Checkbox parent />
+  <Checkbox value="…" />
+</Checkbox.Group>
+```
+
+## Examples
+
+### Select all
+
+In a `Checkbox.Group` with `allValues`, a checkbox marked `parent` is checked when every member is, shows a dash when some are, and checks or clears them all when pressed.
+
+<ComponentPreview name="checkbox/parent" height={240}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Checkbox } from '@/components/panelui/checkbox';
+import { Label } from '@/components/panelui/label';
+
+const ROOMS = [
+  { value: 'kitchen', label: 'Kitchen lights' },
+  { value: 'hall', label: 'Hallway lights' },
+  { value: 'porch', label: 'Porch light' },
+];
+
+export default function CheckboxParent() {
+  const [on, setOn] = useState(['hall']);
+  return (
+    <Checkbox.Group
+      value={on}
+      onValueChange={setOn}
+      allValues={ROOMS.map((room) => room.value)}
+      aria-labelledby="rooms-heading"
+      className="w-full max-w-xs"
+    >
+      <Label id="rooms-heading">
+        <Checkbox parent />
+        <Label.Text>Turn off at midnight</Label.Text>
+        <Label.Hint>
+          {on.length} of {ROOMS.length}
+        </Label.Hint>
+      </Label>
+      <div className="flex flex-col gap-3 ps-6">
+        {ROOMS.map((room) => (
+          <Label key={room.value}>
+            <Checkbox value={room.value} />
+            <Label.Text>{room.label}</Label.Text>
+          </Label>
+        ))}
+      </div>
+    </Checkbox.Group>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes and colours
+
+`sm`, `md` and `lg`. `indeterminate` draws a dash. `color` sets the fill: use `destructive` for a box whose meaning is that something will be lost.
+
+<ComponentPreview name="checkbox/colors" height={220}>
+
+```tsx lineNumbers
+import { Checkbox } from '@/components/panelui/checkbox';
+import { Label } from '@/components/panelui/label';
+
+export default function CheckboxColors() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-4">
+        <Checkbox size="sm" defaultChecked label="Small" />
+        <Checkbox size="md" defaultChecked label="Medium" />
+        <Checkbox size="lg" defaultChecked label="Large" />
+        <Checkbox size="lg" indeterminate label="Some" />
+      </div>
+      <Label>
+        <Checkbox color="success" defaultChecked />
+        <Label.Text>Mark as reviewed</Label.Text>
+      </Label>
+      <Label>
+        <Checkbox color="destructive" />
+        <Label.Text>Delete the old exports too</Label.Text>
+      </Label>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Required
+
+In a [Field](/docs/web/components/field), a `required` checkbox shows the field's error when the form is sent unticked.
+
+<ComponentPreview name="checkbox/form" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Checkbox } from '@/components/panelui/checkbox';
+import { Field } from '@/components/panelui/field';
+import { Label } from '@/components/panelui/label';
+
+export default function CheckboxForm() {
+  const [sent, setSent] = useState(false);
+  return (
+    <form
+      className="flex w-full max-w-xs flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setSent(true);
+      }}
+    >
+      <Field name="terms">
+        <Field.Label>
+          <Checkbox name="terms" required />
+          <Label.Text>I have read the hire agreement</Label.Text>
+        </Field.Label>
+        <Field.Error match="valueMissing">Tick the box to book the van.</Field.Error>
+      </Field>
+      <Button type="submit">{sent ? 'Booked' : 'Book the van'}</Button>
+    </form>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Checkbox
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `CheckboxSize` | `md` | Default `md`. |
+| `color` | `CheckboxColor` | `primary` | The colour it fills with when checked. `primary` by default. |
+| `label` | `string` | — | What a screen reader calls it, when there is no visible label tied to it. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+### Checkbox.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Motion
+
+The tick is drawn as a line, the way a pen makes it, and is drawn back out when unchecked. With reduced motion turned on, it appears at once.
+
+### In a form
+
+Pass `name` and the checkbox submits with the form. `value` sets what it submits, and is what a `Checkbox.Group` holds.

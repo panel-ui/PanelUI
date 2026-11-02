@@ -385,5 +385,60 @@
       "addedIn": "0.10.0",
       "category": "layout"
     }
+  ],
+  "badge": [
+    "Badge",
+    "A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.",
+    "react badge status label tag component",
+    {
+      "addedIn": "0.11.0",
+      "category": "data"
+    }
+  ],
+  "chip": [
+    "Chip",
+    "A pill that can be pressed: a filter turned on and off, or an added value with a × to take it out.",
+    "react chip filter toggle tag removable component",
+    {
+      "addedIn": "0.11.0",
+      "category": "forms"
+    }
+  ],
+  "checkbox": [
+    "Checkbox",
+    "One choice that is on or off, with a tick that draws itself and a parent box for a group.",
+    "react checkbox indeterminate group component",
+    {
+      "addedIn": "0.11.0",
+      "category": "forms"
+    }
+  ],
+  "radio-group": [
+    "RadioGroup",
+    "One choice from a short list, with every option visible and the arrow keys moving between them.",
+    "react radio group radio button component",
+    {
+      "addedIn": "0.11.0",
+      "category": "forms",
+      "title": "Radio Group"
+    }
+  ],
+  "field": [
+    "Field",
+    "A form control with its label, a line of help and its error, wired to each other.",
+    "react form field label description error validation component",
+    {
+      "addedIn": "0.11.0",
+      "category": "forms"
+    }
+  ],
+  "table": [
+    "Table",
+    "Rows of records with the same columns, with numbers aligned and a header that stays pinned.",
+    "react table data grid rows columns component",
+    {
+      "addedIn": "0.11.0",
+      "category": "data"
+    }
   ]
 }

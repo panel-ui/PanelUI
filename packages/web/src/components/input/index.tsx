@@ -20,8 +20,14 @@
  * and its addons together, so an icon or a unit reads as part of the field and
  * the ring goes round the whole of it. Pressing an addon that is not a button
  * moves focus into the input.
+ *
+ * ## Inside a Field
+ *
+ * Put in a `Field`, the input takes the field's label, description and error
+ * without ids passed by hand, and turns invalid when the field does.
  */
-import type { ComponentProps, MouseEvent } from 'react';
+import { Input as BaseInput } from '@base-ui/react/input';
+import type { ComponentProps, MouseEvent, Ref } from 'react';
 import { tv } from 'tailwind-variants';
 
 const inputVariants = tv({
@@ -86,11 +92,12 @@ export interface InputProps extends Omit<ComponentProps<'input'>, 'size'> {
 }
 
 /** A single-line field. Every attribute of `<input>` passes through. */
-function InputRoot({ size, className, type = 'text', ...props }: InputProps) {
+function InputRoot({ size, className, type = 'text', ref, ...props }: InputProps) {
   return (
-    <input
+    <BaseInput
       type={type}
       data-slot="input"
+      ref={ref as Ref<HTMLElement>}
       className={inputVariants({ size }).input({ className })}
       {...props}
     />

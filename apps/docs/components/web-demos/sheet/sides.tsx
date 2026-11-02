@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Sheet, type SheetSide } from 'panelui-web/sheet';
 
 const SIDES: SheetSide[] = ['top', 'right', 'bottom', 'left'];

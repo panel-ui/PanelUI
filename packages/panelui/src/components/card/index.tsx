@@ -26,6 +26,7 @@ import { View, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '../../utils/cn';
 import { Text, type TextProps } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const footerVariants = tv({
   base: 'flex-row items-center gap-2',
@@ -57,7 +58,7 @@ export interface CardFooterProps
   extends CardProps,
     VariantProps<typeof footerVariants> {}
 
-const CardRoot = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
+const CardRoot = forwardRef<ViewRef, CardProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
     className={cn('rounded-2xl border border-border bg-card shadow-sm', className)}
@@ -66,12 +67,12 @@ const CardRoot = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
 ));
 CardRoot.displayName = 'Card';
 
-const CardHeader = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
+const CardHeader = forwardRef<ViewRef, CardProps>(({ className, ...props }, ref) => (
   <View ref={ref} className={cn('gap-1.5 p-6', className)} {...props} />
 ));
 CardHeader.displayName = 'Card.Header';
 
-const CardTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
+const CardTitle = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => (
     <Text
       ref={ref}
@@ -84,19 +85,19 @@ const CardTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
 );
 CardTitle.displayName = 'Card.Title';
 
-const CardDescription = forwardRef<React.ElementRef<typeof Text>, TextProps>(
+const CardDescription = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => (
     <Text ref={ref} size="sm" muted className={className} {...props} />
   )
 );
 CardDescription.displayName = 'Card.Description';
 
-const CardContent = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
+const CardContent = forwardRef<ViewRef, CardProps>(({ className, ...props }, ref) => (
   <View ref={ref} className={cn('p-6 pt-0', className)} {...props} />
 ));
 CardContent.displayName = 'Card.Content';
 
-const CardFooter = forwardRef<View, CardFooterProps>(
+const CardFooter = forwardRef<ViewRef, CardFooterProps>(
   ({ className, variant, ...props }, ref) => (
     <View ref={ref} className={cn(footerVariants({ variant }), className)} {...props} />
   )

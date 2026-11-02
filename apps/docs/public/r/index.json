@@ -8,6 +8,7 @@
     "description": "Collapsible sections with single or multiple selection.",
     "registryDependencies": [
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/accordion"
@@ -66,6 +67,7 @@
     "registryDependencies": [
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/alert"
@@ -79,6 +81,7 @@
     "description": "Status pill whose icon and label roll over when the status changes.",
     "registryDependencies": [
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/animated-badge"
@@ -90,7 +93,9 @@
     "group": "components",
     "stability": "stable",
     "description": "Pressable with UI-thread press feedback.",
-    "registryDependencies": []
+    "registryDependencies": [
+      "refs"
+    ]
   },
   {
     "name": "area-chart",
@@ -118,6 +123,7 @@
       "animated-pressable",
       "cn",
       "item",
+      "refs",
       "shimmer",
       "text"
     ],
@@ -132,6 +138,7 @@
     "description": "User image with an initials fallback, a badge overlay, and a stack for a group of them.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/avatar"
@@ -158,6 +165,7 @@
     "stability": "stable",
     "description": "Compact status label, dot, or notification count.",
     "registryDependencies": [
+      "refs",
       "text"
     ],
     "docsPath": "components/badge"
@@ -228,6 +236,7 @@
       "animated-pressable",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/breadcrumb"
@@ -277,6 +286,7 @@
       "cn",
       "icons",
       "native",
+      "refs",
       "spinner",
       "text"
     ],
@@ -290,7 +300,8 @@
     "stability": "stable",
     "description": "Several buttons drawn as one control — a segmented run, a split action, a toolbar.",
     "registryDependencies": [
-      "button"
+      "button",
+      "refs"
     ],
     "docsPath": "components/button-group"
   },
@@ -351,6 +362,7 @@
     "description": "Content surface with header, body and footer.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/card"
@@ -397,6 +409,7 @@
     "description": "Animated checkbox, as a row or a selectable card.",
     "registryDependencies": [
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/checkbox"
@@ -413,6 +426,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/chip"
@@ -477,6 +491,7 @@
     "registryDependencies": [
       "collapse",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/collapsible"
@@ -502,6 +517,7 @@
       "color",
       "haptics",
       "popover",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -575,6 +591,7 @@
     "description": "The time left until a moment, ticking down to it.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/countdown"
@@ -637,6 +654,7 @@
     "registryDependencies": [
       "cn",
       "portal",
+      "refs",
       "scrim",
       "text",
       "use-back-handler"
@@ -682,6 +700,7 @@
     "stability": "stable",
     "description": "Placeholder for a list or screen with no content.",
     "registryDependencies": [
+      "refs",
       "text"
     ],
     "docsPath": "components/empty-state"
@@ -700,6 +719,7 @@
       "haptics",
       "icons",
       "native",
+      "refs",
       "scrim",
       "text",
       "use-back-handler"
@@ -719,6 +739,7 @@
       "icons",
       "keyboard-avoider",
       "portal",
+      "refs",
       "scrim",
       "text",
       "use-back-handler"
@@ -734,6 +755,7 @@
     "description": "Layout and validation-state kit a form control composes into.",
     "registryDependencies": [
       "label",
+      "refs",
       "separator",
       "text"
     ],
@@ -755,6 +777,7 @@
       "icons",
       "image-viewer",
       "menu",
+      "refs",
       "text"
     ],
     "docsPath": "components/file-upload"
@@ -776,7 +799,8 @@
     "stability": "stable",
     "description": "Two faces of one card, and a turn between them.",
     "registryDependencies": [
-      "cn"
+      "cn",
+      "refs"
     ],
     "docsPath": "components/flip-card"
   },
@@ -824,6 +848,7 @@
     "registryDependencies": [
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/frame"
@@ -853,6 +878,7 @@
     "description": "The iOS system material, drawn where it exists and a solid surface everywhere else.",
     "registryDependencies": [
       "cn",
+      "refs",
       "scrim",
       "use-theme"
     ]
@@ -867,6 +893,7 @@
     "registryDependencies": [
       "animated-pressable",
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/grid-item"
@@ -891,6 +918,7 @@
       "chart-accessibility",
       "cn",
       "date",
+      "refs",
       "text"
     ],
     "docsPath": "charts/heatmap-chart"
@@ -965,6 +993,7 @@
       "icons",
       "keyboard-avoider",
       "label",
+      "refs",
       "text",
       "use-keyboard-avoidance"
     ],
@@ -979,6 +1008,7 @@
     "description": "Input with leading and trailing decorators.",
     "registryDependencies": [
       "input",
+      "refs",
       "text"
     ],
     "docsPath": "components/input-group"
@@ -993,6 +1023,7 @@
     "registryDependencies": [
       "animated-pressable",
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/item"
@@ -1022,6 +1053,7 @@
       "icons",
       "line-chart",
       "progress",
+      "refs",
       "surface",
       "text"
     ],
@@ -1035,6 +1067,7 @@
     "stability": "stable",
     "description": "Form field label with required, invalid and disabled states.",
     "registryDependencies": [
+      "refs",
       "text"
     ],
     "docsPath": "components/label"
@@ -1050,6 +1083,7 @@
       "avatar",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/leaderboard"
@@ -1123,6 +1157,7 @@
       "button-group",
       "cn",
       "icons",
+      "refs",
       "response",
       "text",
       "textarea"
@@ -1140,6 +1175,7 @@
       "animated-pressable",
       "cn",
       "icons",
+      "refs",
       "separator",
       "shimmer",
       "text"
@@ -1188,6 +1224,7 @@
       "animated-pressable",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/message"
@@ -1215,6 +1252,7 @@
     "stability": "stable",
     "description": "A measurement on a fixed scale, coloured by where it falls.",
     "registryDependencies": [
+      "refs",
       "text"
     ],
     "docsPath": "components/meter"
@@ -1267,6 +1305,7 @@
       "haptics",
       "icons",
       "label",
+      "refs",
       "text"
     ],
     "docsPath": "components/number-input"
@@ -1279,6 +1318,7 @@
     "stability": "stable",
     "description": "One-time-code field drawn as a row of separate cells.",
     "registryDependencies": [
+      "refs",
       "text"
     ],
     "docsPath": "components/otp-input"
@@ -1295,6 +1335,7 @@
       "avatar",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/page-header"
@@ -1311,6 +1352,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -1393,6 +1435,7 @@
       "dialog",
       "frame",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/planner"
@@ -1480,6 +1523,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text",
       "use-previous"
     ],
@@ -1494,6 +1538,7 @@
     "description": "Determinate and indeterminate progress bar.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -1509,6 +1554,7 @@
     "registryDependencies": [
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/progress-button"
@@ -1538,6 +1584,7 @@
     "registryDependencies": [
       "cn",
       "popover",
+      "refs",
       "text"
     ],
     "docsPath": "components/qr-code"
@@ -1555,6 +1602,7 @@
       "frame",
       "icons",
       "input",
+      "refs",
       "text"
     ],
     "docsPath": "components/questionnaire"
@@ -1583,6 +1631,7 @@
     "description": "Single-select list of options.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/radio-group"
@@ -1598,6 +1647,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/rating"
@@ -1617,6 +1667,15 @@
       "text"
     ],
     "docsPath": "ai-components/reasoning"
+  },
+  {
+    "name": "refs",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "The types a forwarded ref points at, the same on every React Native version.",
+    "registryDependencies": []
   },
   {
     "name": "response",
@@ -1735,6 +1794,7 @@
     "description": "A screen title that hands over to a compact bar as the page scrolls.",
     "registryDependencies": [
       "cn",
+      "refs",
       "scrim",
       "text",
       "use-theme"
@@ -1775,6 +1835,7 @@
       "icons",
       "input",
       "keyboard-avoider",
+      "refs",
       "spinner",
       "text",
       "use-keyboard"
@@ -1859,6 +1920,7 @@
     "description": "Horizontal or vertical rule between content, optionally labelled.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/separator"
@@ -1945,6 +2007,7 @@
     "registryDependencies": [
       "haptics",
       "native",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -2061,6 +2124,7 @@
       "controllable-state",
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/stack-card"
@@ -2074,6 +2138,7 @@
     "description": "Stepper for multi-step flows.",
     "registryDependencies": [
       "icons",
+      "refs",
       "spinner",
       "text"
     ],
@@ -2089,6 +2154,7 @@
     "registryDependencies": [
       "animated-pressable",
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/support"
@@ -2100,7 +2166,9 @@
     "group": "components",
     "stability": "stable",
     "description": "Elevated container with a variant ladder.",
-    "registryDependencies": [],
+    "registryDependencies": [
+      "refs"
+    ],
     "docsPath": "components/surface"
   },
   {
@@ -2115,6 +2183,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -2131,6 +2200,7 @@
       "field",
       "haptics",
       "native",
+      "refs",
       "use-direction"
     ],
     "docsPath": "components/switch"
@@ -2148,6 +2218,7 @@
       "frame",
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/table"
@@ -2178,6 +2249,7 @@
       "haptics",
       "icons",
       "label",
+      "refs",
       "text"
     ],
     "docsPath": "components/tag-input"
@@ -2232,6 +2304,7 @@
     "registryDependencies": [
       "keyboard-avoider",
       "label",
+      "refs",
       "text",
       "use-keyboard-avoidance"
     ],
@@ -2309,6 +2382,7 @@
     "registryDependencies": [
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/timeline"
@@ -2341,6 +2415,7 @@
       "cn",
       "haptics",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/toggle-button"
@@ -2385,6 +2460,7 @@
     "description": "A hierarchy you can open a level at a time.",
     "registryDependencies": [
       "icons",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -2414,6 +2490,7 @@
     "description": "Semantic text presets.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text"
     ],
     "docsPath": "components/typography"

@@ -40,6 +40,7 @@ import { tv } from 'tailwind-variants';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { Label, type LabelProps } from '../label';
 import { Separator } from '../separator';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const fieldVariants = tv({
   slots: {
@@ -107,7 +108,7 @@ export interface FieldProps extends ViewProps {
   children?: ReactNode;
 }
 
-const FieldRoot = forwardRef<View, FieldProps>(
+const FieldRoot = forwardRef<ViewRef, FieldProps>(
   (
     {
       className,
@@ -158,7 +159,7 @@ export interface FieldContentProps extends ViewProps {
   children?: ReactNode;
 }
 
-const FieldContent = forwardRef<View, FieldContentProps>(
+const FieldContent = forwardRef<ViewRef, FieldContentProps>(
   ({ className, ...props }, ref) => {
     const { content } = fieldVariants();
     return <View ref={ref} className={content({ className })} {...props} />;
@@ -168,7 +169,7 @@ FieldContent.displayName = 'Field.Content';
 
 export interface FieldLabelProps extends LabelProps {}
 
-const FieldLabel = forwardRef<View, FieldLabelProps>(
+const FieldLabel = forwardRef<ViewRef, FieldLabelProps>(
   ({ isRequired, isInvalid, isDisabled, nativeID, ...props }, ref) => {
     const ctx = useContext(FieldContext);
     return (
@@ -189,7 +190,7 @@ export interface FieldDescriptionProps extends TextProps {
   className?: string;
 }
 
-const FieldDescription = forwardRef<RNText, FieldDescriptionProps>(
+const FieldDescription = forwardRef<TextRef, FieldDescriptionProps>(
   ({ className, nativeID, ...props }, ref) => {
     const { disabled, relationshipIds } = useContext(FieldContext);
     const { description } = fieldVariants({ disabled });
@@ -217,7 +218,7 @@ export interface FieldErrorProps extends Omit<ViewProps, 'children'> {
   children?: ReactNode;
 }
 
-const FieldError = forwardRef<View, FieldErrorProps>(
+const FieldError = forwardRef<ViewRef, FieldErrorProps>(
   ({ className, errors, children, nativeID, ...props }, ref) => {
     const { relationshipIds } = useContext(FieldContext);
     const messages = useMemo(() => {
@@ -275,7 +276,7 @@ export interface FieldSetProps extends ViewProps {
   children?: ReactNode;
 }
 
-const FieldSet = forwardRef<View, FieldSetProps>(
+const FieldSet = forwardRef<ViewRef, FieldSetProps>(
   ({ className, ...props }, ref) => {
     const { set } = fieldVariants();
     return <View ref={ref} {...props} role="group" className={set({ className })} />;
@@ -289,7 +290,7 @@ export interface FieldLegendProps extends TextProps {
   variant?: 'legend' | 'label';
 }
 
-const FieldLegend = forwardRef<RNText, FieldLegendProps>(
+const FieldLegend = forwardRef<TextRef, FieldLegendProps>(
   ({ className, variant = 'legend', ...props }, ref) => {
     const { legend } = fieldVariants({ legendVariant: variant });
     return (
@@ -304,7 +305,7 @@ export interface FieldGroupProps extends ViewProps {
   children?: ReactNode;
 }
 
-const FieldGroup = forwardRef<View, FieldGroupProps>(
+const FieldGroup = forwardRef<ViewRef, FieldGroupProps>(
   ({ className, ...props }, ref) => {
     const { group } = fieldVariants();
     return <View ref={ref} className={group({ className })} {...props} />;
@@ -318,7 +319,7 @@ export interface FieldSeparatorProps extends ViewProps {
   children?: ReactNode;
 }
 
-const FieldSeparator = forwardRef<View, FieldSeparatorProps>(
+const FieldSeparator = forwardRef<ViewRef, FieldSeparatorProps>(
   ({ className, children, ...props }, ref) => {
     const { separator, separatorLabel } = fieldVariants();
     return (
@@ -340,7 +341,7 @@ export interface FieldTitleProps extends TextProps {
   className?: string;
 }
 
-const FieldTitle = forwardRef<RNText, FieldTitleProps>(
+const FieldTitle = forwardRef<TextRef, FieldTitleProps>(
   ({ className, nativeID, ...props }, ref) => {
     const { title } = fieldVariants();
     const { relationshipIds } = useContext(FieldContext);

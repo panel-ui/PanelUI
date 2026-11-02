@@ -237,10 +237,10 @@
     "registry": {
       "componentItems": 141,
       "blockItems": 4,
-      "supportItems": 37,
-      "totalItems": 182,
+      "supportItems": 38,
+      "totalItems": 183,
       "byType": {
-        "registry:ui": 157,
+        "registry:ui": 158,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1,
@@ -254,7 +254,7 @@
       "interactiveItems": 7
     },
     "registrySupport": {
-      "primitives": 14,
+      "primitives": 15,
       "icons": 1,
       "providers": 1,
       "hooks": 13,

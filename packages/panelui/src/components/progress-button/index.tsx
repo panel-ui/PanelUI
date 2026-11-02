@@ -84,6 +84,7 @@ import {
   releaseDuration,
   resolveHoldDuration,
 } from './progress-button-hold';
+import type { ViewRef } from '../../primitives/refs';
 
 /** How many steps the reduced-motion fill advances in. */
 const REDUCED_STEPS = 5;
@@ -324,7 +325,7 @@ export interface ProgressButtonProps
   children?: ReactNode;
 }
 
-const ProgressButtonRoot = forwardRef<View, ProgressButtonProps>(function ProgressButtonRoot(
+const ProgressButtonRoot = forwardRef<ViewRef, ProgressButtonProps>(function ProgressButtonRoot(
   {
     className,
     variant = 'primary',

@@ -113,6 +113,7 @@ import {
   type FileUploadSource,
   type FileUploadStatus,
 } from './file-upload-core';
+import type { ViewRef } from '../../primitives/refs';
 
 export {
   describeRules as describeFileUploadRules,
@@ -901,7 +902,7 @@ export interface FileUploadDropzoneProps extends Omit<AnimatedPressableProps, 'c
  * picks something that is not. When a pick is turned away, the reason replaces
  * that line until the next pick.
  */
-const FileUploadDropzone = forwardRef<View, FileUploadDropzoneProps>(
+const FileUploadDropzone = forwardRef<ViewRef, FileUploadDropzoneProps>(
   ({ className, title, description, icon, children, ...props }, ref) => {
     const { accept, maxSize, maxFiles, multiple, disabled, invalid, canAddMore, rejections, files } =
       useFileUpload();
@@ -1098,7 +1099,7 @@ export interface FileUploadListProps extends ViewProps {
 }
 
 /** Every file as a row, in the order it was added. */
-const FileUploadList = forwardRef<View, FileUploadListProps>(
+const FileUploadList = forwardRef<ViewRef, FileUploadListProps>(
   ({ className, horizontal = false, size, renderItem, empty, ...props }, ref) => {
     const { files } = useFileUpload();
     if (files.length === 0) return empty ? <>{empty}</> : null;
@@ -1299,7 +1300,7 @@ export interface FileUploadGridProps extends ViewProps {
  * while it uploads. The add tile counts against `maxFiles`, so the limit is
  * visible before anybody hits it.
  */
-const FileUploadGrid = forwardRef<View, FileUploadGridProps>(
+const FileUploadGrid = forwardRef<ViewRef, FileUploadGridProps>(
   (
     {
       className,

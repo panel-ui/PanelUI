@@ -127,6 +127,7 @@ import { cn } from '../../utils/cn';
 import { Button, type ButtonProps } from '../button';
 import { Frame } from '../frame';
 import { Input, type InputProps } from '../input';
+import type { TextInputRef, ViewRef } from '../../primitives/refs';
 
 /** How long the body takes to settle into the next question's height. */
 const HEIGHT_DURATION = 240;
@@ -1520,7 +1521,7 @@ export interface QuestionnaireChoiceProps {
  * One fixed answer — the whole row is the target, with the indicator reading
  * as confirmation rather than as the thing to aim at.
  */
-const QuestionnaireChoice = forwardRef<View, QuestionnaireChoiceProps>(
+const QuestionnaireChoice = forwardRef<ViewRef, QuestionnaireChoiceProps>(
   ({ className, value, label, description, disabled, children }, ref) => {
     const { answers, toggleAnswer } = useQuestionnaire('Questionnaire.Choice');
     const item = useQuestionnaireItem('Questionnaire.Choice');
@@ -1609,7 +1610,7 @@ export interface QuestionnaireInputProps
  * empties it and typing clears the choice — one answer to one question, with
  * neither part having to know about the other.
  */
-const QuestionnaireInput = forwardRef<TextInput, QuestionnaireInputProps>(
+const QuestionnaireInput = forwardRef<TextInputRef, QuestionnaireInputProps>(
   ({ className, ...props }, ref) => {
     const { answers, setAnswer } = useQuestionnaire('Questionnaire.Input');
     const item = useQuestionnaireItem('Questionnaire.Input');

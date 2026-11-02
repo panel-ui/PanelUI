@@ -21,6 +21,7 @@
 import { forwardRef } from 'react';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
+import type { ViewRef } from '../../primitives/refs';
 
 const surfaceVariants = tv({
   base: 'overflow-hidden rounded-3xl',
@@ -69,7 +70,7 @@ export interface SurfaceProps
   padding?: 'none' | 'sm' | 'default' | 'lg';
 }
 
-export const Surface = forwardRef<View, SurfaceProps>(
+export const Surface = forwardRef<ViewRef, SurfaceProps>(
   ({ className, variant, padding, bordered, elevated, style, ...props }, ref) => (
     <View
       ref={ref}

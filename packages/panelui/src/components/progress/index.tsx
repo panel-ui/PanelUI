@@ -15,6 +15,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { useDirectionSign } from '../../hooks/use-direction';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 const SPRING = { damping: 20, stiffness: 180, mass: 0.6 } as const;
 /** Fraction of the track covered by the sliding bar in indeterminate mode. */
@@ -172,7 +173,7 @@ function formatValue(
  * than springing to it, and the indeterminate bar pulses in place rather than
  * crossing the track.
  */
-export const Progress = forwardRef<View, ProgressProps>(
+export const Progress = forwardRef<ViewRef, ProgressProps>(
   (
     {
       className,

@@ -18,6 +18,7 @@ import { Scrim } from '../../primitives/scrim';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { useBackHandler } from '../../hooks/use-back-handler';
 import { cn } from '../../utils/cn';
+import type { TextRef } from '../../primitives/refs';
 
 interface DialogContextValue {
   open: boolean;
@@ -149,7 +150,7 @@ function DialogContent({
   );
 }
 
-const DialogTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
+const DialogTitle = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => (
     <Text
       ref={ref}
@@ -162,7 +163,7 @@ const DialogTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
 );
 DialogTitle.displayName = 'Dialog.Title';
 
-const DialogDescription = forwardRef<React.ElementRef<typeof Text>, TextProps>(
+const DialogDescription = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => (
     <Text ref={ref} size="sm" muted className={className} {...props} />
   )

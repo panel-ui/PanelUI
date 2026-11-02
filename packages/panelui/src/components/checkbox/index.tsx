@@ -10,6 +10,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { CheckIcon, MinusIcon } from '../../icons';
 import { Text } from '../../primitives/text';
+import type { ViewRef } from '../../primitives/refs';
 
 const checkboxVariants = tv({
   slots: {
@@ -146,7 +147,7 @@ export interface CheckboxProps
   descriptionClassName?: string;
 }
 
-export const Checkbox = forwardRef<View, CheckboxProps>(
+export const Checkbox = forwardRef<ViewRef, CheckboxProps>(
   (
     {
       className,

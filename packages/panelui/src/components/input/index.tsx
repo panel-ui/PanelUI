@@ -60,6 +60,7 @@ import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text, textChildren } from '../../primitives/text';
 import { Label } from '../label';
 import { inputContentPadding } from './input-content-padding';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Long enough to read as a transition, short enough not to lag a fast tab. */
 const FOCUS_DURATION = 150;
@@ -214,7 +215,7 @@ export interface InputProps
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
-export const Input = forwardRef<TextInput, InputProps>(
+export const Input = forwardRef<TextInputRef, InputProps>(
   (
     {
       className,

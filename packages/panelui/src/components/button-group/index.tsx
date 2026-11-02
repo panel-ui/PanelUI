@@ -59,6 +59,7 @@ import {
   type ButtonSize,
   type ButtonVariant,
 } from '../button';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Which way the run reads. */
 export type ButtonGroupOrientation = 'horizontal' | 'vertical';
@@ -135,7 +136,7 @@ export interface ButtonGroupProps
   children?: ReactNode;
 }
 
-const ButtonGroupRoot = forwardRef<View, ButtonGroupProps>(
+const ButtonGroupRoot = forwardRef<ViewRef, ButtonGroupProps>(
   (
     {
       className,

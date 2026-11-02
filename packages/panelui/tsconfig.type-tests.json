@@ -6,7 +6,7 @@
       "panelui-native/hooks/*": ["./src/hooks/*.ts"],
       "panelui-native/provider": ["./src/providers/panel-ui-provider.tsx"],
       "panelui-native/theme": ["./src/theme/use-theme.ts"],
-      "panelui-native/primitives/*": ["./src/primitives/*.tsx"],
+      "panelui-native/primitives/*": ["./src/primitives/*.tsx", "./src/primitives/*.ts"],
       "panelui-native/utils/*": ["./src/utils/*.ts"]
     }
   },

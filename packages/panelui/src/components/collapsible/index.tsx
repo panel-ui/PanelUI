@@ -66,6 +66,7 @@ import { tv } from 'tailwind-variants';
 import { ChevronDownIcon } from '../../icons';
 import { Collapse } from '../../primitives/collapse';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type CollapsibleVariant = 'default' | 'surface' | 'ghost';
 
@@ -124,7 +125,7 @@ export interface CollapsibleProps extends ViewProps {
   children?: ReactNode;
 }
 
-const CollapsibleRoot = forwardRef<View, CollapsibleProps>(
+const CollapsibleRoot = forwardRef<ViewRef, CollapsibleProps>(
   (
     {
       className,
@@ -172,7 +173,7 @@ export interface CollapsibleTriggerProps extends Omit<PressableProps, 'children'
 }
 
 /** The pressable header row. Bare strings are wrapped in the title style. */
-const CollapsibleTrigger = forwardRef<View, CollapsibleTriggerProps>(
+const CollapsibleTrigger = forwardRef<ViewRef, CollapsibleTriggerProps>(
   ({ className, children, onPress, ...props }, ref) => {
     const { open, toggle, isDisabled, variant } = useCollapsible('Collapsible.Trigger');
     const { trigger, title } = collapsibleVariants({ variant });
@@ -199,7 +200,7 @@ const CollapsibleTrigger = forwardRef<View, CollapsibleTriggerProps>(
 );
 CollapsibleTrigger.displayName = 'Collapsible.Trigger';
 
-const CollapsibleTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const CollapsibleTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { variant } = useCollapsible('Collapsible.Title');
   const { title } = collapsibleVariants({ variant });
   return <Text ref={ref} className={title({ className })} {...props} />;
@@ -213,7 +214,7 @@ export interface CollapsibleIndicatorProps extends ViewProps {
 }
 
 /** Chevron that rotates 180° while the body is open. */
-const CollapsibleIndicator = forwardRef<View, CollapsibleIndicatorProps>(
+const CollapsibleIndicator = forwardRef<ViewRef, CollapsibleIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { open, variant } = useCollapsible('Collapsible.Indicator');
     const { indicator } = collapsibleVariants({ variant });
@@ -256,7 +257,7 @@ export interface CollapsibleContentProps extends ViewProps {
  * tree as well as from the eye, because a screen reader reading out a section
  * that is not on screen is worse than one that skips it.
  */
-const CollapsibleContent = forwardRef<View, CollapsibleContentProps>(
+const CollapsibleContent = forwardRef<ViewRef, CollapsibleContentProps>(
   ({ className, children, ...props }, ref) => {
     const { open, variant } = useCollapsible('Collapsible.Content');
     const { content, contentText } = collapsibleVariants({ variant });

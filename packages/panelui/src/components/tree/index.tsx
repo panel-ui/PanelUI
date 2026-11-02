@@ -72,6 +72,7 @@ import { useCSSVariable } from 'uniwind';
 import { ChevronRightIcon, IconColorProvider } from '../../icons';
 import { useDirection } from '../../hooks/use-direction';
 import { Text, type TextProps } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type TreeSize = 'sm' | 'default';
 
@@ -193,7 +194,7 @@ export interface TreeProps extends ViewProps {
   children?: ReactNode;
 }
 
-const TreeRoot = forwardRef<View, TreeProps>(
+const TreeRoot = forwardRef<ViewRef, TreeProps>(
   (
     {
       className,
@@ -319,7 +320,7 @@ export interface TreeItemProps extends ViewProps {
  * is a leaf that renders a chevron-sized gap in place of the chevron so its
  * label still lines up with its siblings'.
  */
-const TreeItem = forwardRef<View, TreeItemProps>(
+const TreeItem = forwardRef<ViewRef, TreeItemProps>(
   ({ className, value, isDisabled = false, hasChildren, children, ...props }, ref) => {
     const { expanded, selected } = useTree('Tree.Item');
     const parent = useContext(TreeItemContext);
@@ -374,7 +375,7 @@ export interface TreeTriggerProps extends Omit<PressableProps, 'children'> {
  * with its expanded and selected state attached — is the description that
  * actually survives to the user.
  */
-const TreeTrigger = forwardRef<View, TreeTriggerProps>(
+const TreeTrigger = forwardRef<ViewRef, TreeTriggerProps>(
   ({ className, onPress, disabled = false, children, ...props }, ref) => {
     const { toggleExpanded, select, selectionMode, expandOnPress, size } =
       useTree('Tree.Trigger');
@@ -432,7 +433,7 @@ export interface TreeIndicatorProps extends ViewProps {
  * On a leaf it becomes an empty box of the same size rather than disappearing,
  * so a leaf's label starts where its siblings' labels do.
  */
-const TreeIndicator = forwardRef<View, TreeIndicatorProps>(
+const TreeIndicator = forwardRef<ViewRef, TreeIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { toggleExpanded, size } = useTree('Tree.Indicator');
     const { value, isExpanded, isDisabled, isBranch } = useTreeItem('Tree.Indicator');
@@ -484,7 +485,7 @@ export interface TreeIconProps extends ViewProps {
 }
 
 /** The leading glyph, between the chevron and the label. */
-const TreeIcon = forwardRef<View, TreeIconProps>(({ className, ...props }, ref) => {
+const TreeIcon = forwardRef<ViewRef, TreeIconProps>(({ className, ...props }, ref) => {
   const { size } = useTree('Tree.Icon');
   const { icon } = treeVariants({ size });
   return <View ref={ref} className={icon({ className })} {...props} />;
@@ -492,7 +493,7 @@ const TreeIcon = forwardRef<View, TreeIconProps>(({ className, ...props }, ref) 
 TreeIcon.displayName = 'Tree.Icon';
 
 /** The row's text. Takes the selected colour with the rest of the row. */
-const TreeLabel = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const TreeLabel = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { size } = useTree('Tree.Label');
   const { isSelected } = useTreeItem('Tree.Label');
   const { label } = treeVariants({ size, isSelected });
@@ -506,7 +507,7 @@ export interface TreeActionsProps extends ViewProps {
 }
 
 /** The trailing slot: a count, a badge, a menu button for the node. */
-const TreeActions = forwardRef<View, TreeActionsProps>(({ className, ...props }, ref) => {
+const TreeActions = forwardRef<ViewRef, TreeActionsProps>(({ className, ...props }, ref) => {
   const { actions } = treeVariants();
   return <View ref={ref} className={actions({ className })} {...props} />;
 });
@@ -529,7 +530,7 @@ export interface TreeGroupProps extends ViewProps {
  * start-edge border: an indent that always fell on the left would run the wrong
  * way in a right-to-left subtree and put every level further from its parent.
  */
-const TreeGroup = forwardRef<View, TreeGroupProps>(
+const TreeGroup = forwardRef<ViewRef, TreeGroupProps>(
   ({ className, children, ...props }, ref) => {
     const { showLines, indent } = useTree('Tree.Group');
     const { isExpanded } = useTreeItem('Tree.Group');

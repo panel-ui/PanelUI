@@ -28,6 +28,7 @@ import {
   type InputGroupDecoratorOwner,
   type InputGroupDecoratorSide,
 } from './input-group-measurements';
+import type { TextInputRef, ViewRef } from '../../primitives/refs';
 
 const inputGroupVariants = tv({
   slots: {
@@ -70,7 +71,7 @@ export interface InputGroupProps extends ViewProps {
   children?: ReactNode;
 }
 
-const InputGroupRoot = forwardRef<View, InputGroupProps>(
+const InputGroupRoot = forwardRef<ViewRef, InputGroupProps>(
   ({ className, isDisabled = false, children, ...props }, ref) => {
     const { root } = inputGroupVariants();
     const { prefixWidth, suffixWidth, measureDecorator, removeDecorator } =
@@ -117,7 +118,7 @@ export interface InputGroupDecoratorProps extends ViewProps {
 
 /** Builds Prefix/Suffix, which differ only in which side they measure. */
 function createDecorator(side: 'prefix' | 'suffix') {
-  const Decorator = forwardRef<View, InputGroupDecoratorProps>(
+  const Decorator = forwardRef<ViewRef, InputGroupDecoratorProps>(
     ({ className, isDecorative = false, onLayout, children, ...props }, ref) => {
       const group = useInputGroup();
       const slots = inputGroupVariants({ isDisabled: group?.isDisabled ?? false });
@@ -163,7 +164,7 @@ export type InputGroupInputProps = InputProps;
  * The Input itself. Receives left/right padding matching the measured
  * decorator widths, so its text always clears them.
  */
-const InputGroupInput = forwardRef<TextInput, InputGroupInputProps>(
+const InputGroupInput = forwardRef<TextInputRef, InputGroupInputProps>(
   ({ style, disabled, ...props }, ref) => {
     const group = useInputGroup();
 

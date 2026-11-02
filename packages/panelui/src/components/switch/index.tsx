@@ -11,6 +11,7 @@ import { useDirectionSign } from '../../hooks/use-direction';
 import { NativeHost, getNativeUI } from '../../native';
 import { selectionTick } from '../../utils/haptics';
 import { useFieldLabelledBy } from '../field';
+import type { ViewRef } from '../../primitives/refs';
 
 const SPRING = { damping: 18, stiffness: 250, mass: 0.5 } as const;
 
@@ -100,7 +101,7 @@ export interface SwitchProps
  */
 const NATIVE_TOGGLE_HEIGHT = 32;
 
-export const Switch = forwardRef<View, SwitchProps>(
+export const Switch = forwardRef<ViewRef, SwitchProps>(
   (
     {
       className,

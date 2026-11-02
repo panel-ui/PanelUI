@@ -45,6 +45,7 @@ import { useDirectionSign } from '../../hooks/use-direction';
 import { NativeHost, getNativeUI } from '../../native';
 import { Text } from '../../primitives/text';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 /**
  * Springs the thumb onto its resting step after a drag or a track tap. Drags
@@ -201,7 +202,7 @@ function recordStep(last: Record<Thumb, number>, thumb: Thumb, next: number) {
   return true;
 }
 
-export const Slider = forwardRef<View, SliderProps>(
+export const Slider = forwardRef<ViewRef, SliderProps>(
   (
     {
       className,

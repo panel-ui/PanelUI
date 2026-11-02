@@ -62,6 +62,7 @@ import {
 } from '../../primitives/animated-pressable';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 type GridItemSize = 'default' | 'sm';
 
@@ -191,7 +192,7 @@ function findSpot(
  * The grid. Measures its own width, places its tiles, and stands as tall as the
  * rows they ended up needing.
  */
-const GridItemGroup = forwardRef<View, GridItemGroupProps>(
+const GridItemGroup = forwardRef<ViewRef, GridItemGroupProps>(
   (
     {
       className,
@@ -311,7 +312,7 @@ export interface GridItemProps
  * Renders as a pressable when given `onPress`, and as a plain view otherwise,
  * so a tile that is only showing a number does not announce itself as a button.
  */
-const GridItemRoot = forwardRef<View, GridItemProps>(
+const GridItemRoot = forwardRef<ViewRef, GridItemProps>(
   (
     {
       className,
@@ -374,7 +375,7 @@ export interface GridItemBackgroundProps extends ViewProps {
  * grid read as a bento grid rather than as a wall of stat cards, and it is the
  * one part that is meant to be cropped: the tile clips it.
  */
-const GridItemBackground = forwardRef<View, GridItemBackgroundProps>(
+const GridItemBackground = forwardRef<ViewRef, GridItemBackgroundProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -397,7 +398,7 @@ export interface GridItemMediaProps
 }
 
 /** Leading slot: an icon tile, a thumbnail, or an avatar passed through. */
-const GridItemMedia = forwardRef<View, GridItemMediaProps>(
+const GridItemMedia = forwardRef<ViewRef, GridItemMediaProps>(
   ({ className, variant, size, children, ...props }, ref) => {
     const grid = useContext(GridItemContext);
 
@@ -419,7 +420,7 @@ export interface GridItemTitleProps extends TextProps {
 }
 
 /** What the tile is of. Quiet, because the number under it is the message. */
-const GridItemTitle = forwardRef<React.ElementRef<typeof Text>, GridItemTitleProps>(
+const GridItemTitle = forwardRef<TextRef, GridItemTitleProps>(
   ({ className, ...props }, ref) => {
     const { size } = useContext(GridItemContext);
     const { title } = gridItemVariants({ size });
@@ -434,7 +435,7 @@ export interface GridItemValueProps extends TextProps {
 }
 
 /** The figure. The largest thing on the tile, and the reason it is there. */
-const GridItemValue = forwardRef<React.ElementRef<typeof Text>, GridItemValueProps>(
+const GridItemValue = forwardRef<TextRef, GridItemValueProps>(
   ({ className, ...props }, ref) => {
     const { size } = useContext(GridItemContext);
     const { value } = gridItemVariants({ size });
@@ -449,7 +450,7 @@ export interface GridItemDescriptionProps extends TextProps {
 }
 
 const GridItemDescription = forwardRef<
-  React.ElementRef<typeof Text>,
+  TextRef,
   GridItemDescriptionProps
 >(({ className, ...props }, ref) => {
   const { size } = useContext(GridItemContext);
@@ -471,7 +472,7 @@ export interface GridItemFooterProps extends ViewProps {
  * pushing the footer down with the space left over pins it to the bottom
  * without taking it out of the layout the rest of the tile is sharing.
  */
-const GridItemFooter = forwardRef<View, GridItemFooterProps>(
+const GridItemFooter = forwardRef<ViewRef, GridItemFooterProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -490,7 +491,7 @@ export interface GridItemActionsProps extends ViewProps {
 }
 
 /** Trailing slot: buttons, a chip, a chevron. */
-const GridItemActions = forwardRef<View, GridItemActionsProps>(
+const GridItemActions = forwardRef<ViewRef, GridItemActionsProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}

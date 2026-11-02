@@ -97,6 +97,7 @@ import {
   type EditResult,
   type EditorSelection,
 } from './markdown-transforms';
+import type { TextInputRef, ViewRef } from '../../primitives/refs';
 
 export type { EditorSelection, EditResult } from './markdown-transforms';
 
@@ -652,7 +653,7 @@ export interface MarkdownEditorToolbarProps extends Omit<ViewProps, 'children'> 
  * here is a toggle, and a toggle that looks the same in both states is a toggle
  * nobody discovers is one.
  */
-const MarkdownEditorToolbar = forwardRef<View, MarkdownEditorToolbarProps>(
+const MarkdownEditorToolbar = forwardRef<ViewRef, MarkdownEditorToolbarProps>(
   (
     {
       className,
@@ -784,7 +785,7 @@ export interface MarkdownEditorInputProps
  * Renders nothing while the preview is up. Unmounted rather than hidden: a
  * field kept alive behind the preview keeps the keyboard up with it.
  */
-const MarkdownEditorInput = forwardRef<TextInput, MarkdownEditorInputProps>(
+const MarkdownEditorInput = forwardRef<TextInputRef, MarkdownEditorInputProps>(
   ({ className, rows = 8, ...props }, ref) => {
     const {
       value,
@@ -874,7 +875,7 @@ export interface MarkdownEditorPreviewProps extends Omit<ViewProps, 'children'> 
  * Renders nothing while the field is up, which is what makes the two one pane
  * rather than two.
  */
-const MarkdownEditorPreview = forwardRef<View, MarkdownEditorPreviewProps>(
+const MarkdownEditorPreview = forwardRef<ViewRef, MarkdownEditorPreviewProps>(
   ({ className, emptyText = 'Nothing to preview yet.', ...props }, ref) => {
     const { value, mode } = useMarkdownEditor('MarkdownEditor.Preview');
     const slots = markdownEditorVariants();

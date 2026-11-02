@@ -76,6 +76,7 @@ import { Scrim } from '../../primitives/scrim';
 import { Text, textChildren, type TextProps } from '../../primitives/text';
 import { useBackHandler } from '../../hooks/use-back-handler';
 import { cn } from '../../utils/cn';
+import type { TextInputRef, TextRef, ViewRef } from '../../primitives/refs';
 
 /**
  * The shell's padding, in points, and the corner it draws.
@@ -340,7 +341,7 @@ export interface FeedbackPanelProps extends ViewProps {
 }
 
 /** The well set into the shell: the title, the ✕ and the field. */
-const FeedbackPanel = forwardRef<View, FeedbackPanelProps>(
+const FeedbackPanel = forwardRef<ViewRef, FeedbackPanelProps>(
   ({ className, children, ...props }, ref) => {
     const slots = feedbackVariants();
     return (
@@ -357,7 +358,7 @@ const FeedbackPanel = forwardRef<View, FeedbackPanelProps>(
 );
 FeedbackPanel.displayName = 'Feedback.Panel';
 
-const FeedbackTitle = forwardRef<React.ElementRef<typeof Text>, TextProps>(
+const FeedbackTitle = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const slots = feedbackVariants();
     return <Text ref={ref} className={slots.title({ className })} {...props} />;
@@ -420,7 +421,7 @@ export interface FeedbackFieldProps
  * accent there, and a field that overrides it is a field that looks like it
  * belongs to a different phone.
  */
-const FeedbackField = forwardRef<TextInput, FeedbackFieldProps>(
+const FeedbackField = forwardRef<TextInputRef, FeedbackFieldProps>(
   (
     {
       className,
@@ -463,7 +464,7 @@ export interface FeedbackFooterProps extends ViewProps {
 }
 
 /** The action row, in the band under the panel. */
-const FeedbackFooter = forwardRef<View, FeedbackFooterProps>(
+const FeedbackFooter = forwardRef<ViewRef, FeedbackFooterProps>(
   ({ className, children, style, ...props }, ref) => {
     const slots = feedbackVariants();
     return (

@@ -52,6 +52,7 @@ import { Platform, StyleSheet, View, type StyleProp, type ViewProps, type ViewSt
 import { useThemeMode } from '../theme/use-theme';
 import { cn } from '../utils/cn';
 import { useReduceTransparency } from './scrim';
+import type { ViewRef } from './refs';
 
 /** How the material treats what is behind it. */
 export type GlassVariant = 'regular' | 'clear';
@@ -265,7 +266,7 @@ export interface GlassContainerProps extends ViewProps {
  * like one thing dividing rather than several things arriving. A plain view
  * wherever the material is not drawn, so it can be written unconditionally.
  */
-export const GlassContainer = forwardRef<View, GlassContainerProps>(
+export const GlassContainer = forwardRef<ViewRef, GlassContainerProps>(
   ({ spacing, className, style, children, ...props }, ref) => {
     const material = useGlassMaterial();
     if (material && GlassContainerView) {

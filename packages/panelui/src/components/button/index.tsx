@@ -11,6 +11,7 @@ import { cn } from '../../utils/cn';
 import { IconColorProvider } from '../../icons';
 import { NativeHost, getNativeUI, getSwiftUIModifiers } from '../../native';
 import { Spinner, type SpinnerProps } from '../spinner';
+import type { ViewRef } from '../../primitives/refs';
 
 const buttonVariants = tv({
   slots: {
@@ -345,7 +346,7 @@ const NATIVE_VARIANT: Record<
   social: 'outlined',
 };
 
-export const Button = forwardRef<View, ButtonProps>(
+export const Button = forwardRef<ViewRef, ButtonProps>(
   (
     {
       children,

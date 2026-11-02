@@ -148,6 +148,7 @@ import { Scrim } from '../../primitives/scrim';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Which corner the button sits in. */
 export type FabPlacement = 'bottom-right' | 'bottom-center' | 'bottom-left';
@@ -415,7 +416,7 @@ export interface FabProps
   accessibilityLabel?: string;
 }
 
-const FabRoot = forwardRef<View, FabProps>(
+const FabRoot = forwardRef<ViewRef, FabProps>(
   (
     {
       className,
@@ -662,7 +663,7 @@ export interface FabGroupProps extends Omit<ViewProps, 'children'> {
  * screen's root container: it is what `offset` is measured from and what the
  * scrim covers.
  */
-const FabGroup = forwardRef<View, FabGroupProps>(
+const FabGroup = forwardRef<ViewRef, FabGroupProps>(
   (
     {
       className,
@@ -1351,7 +1352,7 @@ export interface FabActionProps extends Omit<ViewProps, 'children'> {
  * whatever the action just did is the wrong default: the dial is a menu, and a
  * menu that stays up after a choice reads as the choice not having registered.
  */
-const FabAction = forwardRef<View, FabActionProps>(
+const FabAction = forwardRef<ViewRef, FabActionProps>(
   (
     {
       className,

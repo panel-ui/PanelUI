@@ -65,6 +65,7 @@ import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { BadgeCheckIcon, IconColorProvider } from '../../icons';
 import { Avatar, AVATAR_SIZE_POINTS, type AvatarProps, type AvatarSizeName } from '../avatar';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 /** Height of a cover that is not given one. Two lines of nothing, and enough
  * of a band for a face to sit half over. */
@@ -186,7 +187,7 @@ export interface PageHeaderRootProps extends PageHeaderProps {
   align?: PageHeaderAlign;
 }
 
-const PageHeaderRoot = forwardRef<View, PageHeaderRootProps>(
+const PageHeaderRoot = forwardRef<ViewRef, PageHeaderRootProps>(
   ({ className, variant = 'card', align = 'center', children, ...props }, ref) => {
     // Whether the avatar has anything to overlap. Read off the children rather
     // than asked for, because a caller who has written a cover should not also
@@ -233,7 +234,7 @@ export interface PageHeaderCoverProps extends ViewProps {
  * The banner. An image when given one, a gradient when not — a header with no
  * banner still has to read as a header, and an empty band reads as a bug.
  */
-const PageHeaderCover = forwardRef<View, PageHeaderCoverProps>(
+const PageHeaderCover = forwardRef<ViewRef, PageHeaderCoverProps>(
   ({ className, source, height = COVER_HEIGHT, colors, alt, style, children, ...props }, ref) => {
     const { variant } = usePageHeader('PageHeader.Cover');
     const from = useCSSVariable(GRADIENT[0]);
@@ -315,7 +316,7 @@ export interface PageHeaderAvatarProps extends Omit<AvatarProps, 'size' | 'child
  * pinned to the top corner, where an unread count belongs. A verification mark
  * belongs at the bottom, beside the name it is vouching for.
  */
-const PageHeaderAvatar = forwardRef<View, PageHeaderAvatarProps>(
+const PageHeaderAvatar = forwardRef<ViewRef, PageHeaderAvatarProps>(
   (
     {
       className,
@@ -401,7 +402,7 @@ export interface PageHeaderRowProps extends PageHeaderProps {
  * The face, and whatever sits beside it. For the profile that puts its counts
  * next to the picture rather than under the name.
  */
-const PageHeaderRow = forwardRef<View, PageHeaderRowProps>(
+const PageHeaderRow = forwardRef<ViewRef, PageHeaderRowProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Row');
     return (
@@ -422,7 +423,7 @@ export interface PageHeaderContentProps extends PageHeaderProps {
 }
 
 /** The text block: the name, the handle, and anything under them. */
-const PageHeaderContent = forwardRef<View, PageHeaderContentProps>(
+const PageHeaderContent = forwardRef<ViewRef, PageHeaderContentProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Content');
     return (
@@ -439,7 +440,7 @@ const PageHeaderContent = forwardRef<View, PageHeaderContentProps>(
 PageHeaderContent.displayName = 'PageHeader.Content';
 
 /** Whose page it is. Announces itself as a heading. */
-const PageHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => (
+const PageHeaderTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => (
   <Text
     {...props}
     ref={ref}
@@ -452,7 +453,7 @@ const PageHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }, 
 PageHeaderTitle.displayName = 'PageHeader.Title';
 
 /** The handle, the email, the bio — the quiet line under the name. */
-const PageHeaderDescription = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => (
+const PageHeaderDescription = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => (
   <Text {...props} ref={ref} size="sm" muted className={className} />
 ));
 PageHeaderDescription.displayName = 'PageHeader.Description';
@@ -466,7 +467,7 @@ export interface PageHeaderMetaProps extends PageHeaderProps {
 /**
  * One fact about the account — a link, a location, the month it was opened.
  */
-const PageHeaderMeta = forwardRef<View, PageHeaderMetaProps>(
+const PageHeaderMeta = forwardRef<ViewRef, PageHeaderMetaProps>(
   ({ className, icon, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Meta');
     const muted = useCSSVariable('--color-muted-foreground');
@@ -516,7 +517,7 @@ export interface PageHeaderStatsProps extends PageHeaderProps {
  * the name and the buttons are on, and the row reads as very slightly wrong
  * without it being obvious why.
  */
-const PageHeaderStats = forwardRef<View, PageHeaderStatsProps>(
+const PageHeaderStats = forwardRef<ViewRef, PageHeaderStatsProps>(
   ({ className, layout = 'stacked', divided, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Stats');
     const stacked = layout === 'stacked';
@@ -575,7 +576,7 @@ export interface PageHeaderStatProps extends Omit<PressableProps, 'children'> {
  * One count. Announced as a single thing — "533 Followers" — because a figure
  * and its label read apart are two pieces of nothing.
  */
-const PageHeaderStat = forwardRef<View, PageHeaderStatProps>(
+const PageHeaderStat = forwardRef<ViewRef, PageHeaderStatProps>(
   ({ className, value, label, divided, onPress, accessibilityLabel, ...props }, ref) => {
     const layout = useContext(PageHeaderStatsContext);
     const inline = layout === 'inline';
@@ -644,7 +645,7 @@ export interface PageHeaderActionsProps extends PageHeaderProps {
  * What you can do about the account. Give the buttons `className="flex-1"` for
  * the pair that splits the width evenly.
  */
-const PageHeaderActions = forwardRef<View, PageHeaderActionsProps>(
+const PageHeaderActions = forwardRef<ViewRef, PageHeaderActionsProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, align } = usePageHeader('PageHeader.Actions');
     return (

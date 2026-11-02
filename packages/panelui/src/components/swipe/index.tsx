@@ -65,6 +65,7 @@ import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 const SPRING = { damping: 22, stiffness: 220, mass: 0.7 } as const;
 
@@ -164,7 +165,7 @@ export interface SwipeGroupProps extends ViewProps {
  * to that row's shared value, so opening a row costs the springs it starts and
  * no React work at all.
  */
-const SwipeGroup = forwardRef<View, SwipeGroupProps>(
+const SwipeGroup = forwardRef<ViewRef, SwipeGroupProps>(
   ({ className, children, exclusive = true, ...props }, ref) => {
     /*
      * A ref rather than state: membership changes as rows mount and unmount,
@@ -321,7 +322,7 @@ export interface SwipeActionProps
  * One tile behind the row. Sized by its own content down to a minimum wide
  * enough to hit, so a one-word action and a two-word one still line up.
  */
-const SwipeAction = forwardRef<View, SwipeActionProps>(
+const SwipeAction = forwardRef<ViewRef, SwipeActionProps>(
   (
     {
       className,
@@ -417,10 +418,10 @@ export interface SwipePanelProps extends Omit<ViewProps, 'children'> {
  * caller says which side an action belongs to, and it keeps both sides
  * readable in source rather than hidden inside two render props.
  */
-const SwipeStart = forwardRef<View, SwipePanelProps>(() => null);
+const SwipeStart = forwardRef<ViewRef, SwipePanelProps>(() => null);
 SwipeStart.displayName = 'Swipe.Start';
 
-const SwipeEnd = forwardRef<View, SwipePanelProps>(() => null);
+const SwipeEnd = forwardRef<ViewRef, SwipePanelProps>(() => null);
 SwipeEnd.displayName = 'Swipe.End';
 
 /* -------------------------------------------------------------------------- */

@@ -48,6 +48,7 @@ import {
   normalizeRatingPrecision,
   normalizeRatingValue,
 } from './rating-inputs';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Springs the fill onto its resting value after a tap or the end of a drag. */
 const SPRING = { damping: 18, stiffness: 220, mass: 0.6 } as const;
@@ -194,7 +195,7 @@ function Star({
   );
 }
 
-export const Rating = forwardRef<View, RatingProps>(
+export const Rating = forwardRef<ViewRef, RatingProps>(
   (
     {
       className,

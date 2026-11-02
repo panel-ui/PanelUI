@@ -43,6 +43,7 @@ import {
   type CountdownPart,
   type CountdownUnit,
 } from './countdown-time';
+import type { ViewRef } from '../../primitives/refs';
 
 export type { CountdownUnit } from './countdown-time';
 
@@ -222,7 +223,7 @@ function Digits({
   );
 }
 
-const CountdownRoot = forwardRef<View, CountdownProps>(function Countdown(
+const CountdownRoot = forwardRef<ViewRef, CountdownProps>(function Countdown(
   {
     className,
     to,

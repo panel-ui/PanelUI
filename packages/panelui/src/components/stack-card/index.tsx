@@ -126,6 +126,7 @@ import {
   tiltAngle,
   type StackCardDirection,
 } from './stack-card-geometry';
+import type { ViewRef } from '../../primitives/refs';
 
 export type { StackCardDirection } from './stack-card-geometry';
 
@@ -1097,7 +1098,7 @@ export interface StackCardCardProps extends ViewProps {
  * content already reads as a deck, and restyled from `className` like anything
  * else. It fills the pile on both axes: the pile's box is the card's size.
  */
-const StackCardCard = forwardRef<View, StackCardCardProps>(({ className, ...props }, ref) => (
+const StackCardCard = forwardRef<ViewRef, StackCardCardProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
     {...props}
@@ -1186,7 +1187,7 @@ export interface StackCardStampProps
  * point, since the haptic is off for a lot of people and silent on most
  * Android hardware.
  */
-const StackCardStamp = forwardRef<View, StackCardStampProps>(
+const StackCardStamp = forwardRef<ViewRef, StackCardStampProps>(
   (
     {
       className,
@@ -1255,7 +1256,7 @@ export interface StackCardEmptyProps extends ViewProps {
  * is the right answer when something else on the screen already says the queue
  * is finished.
  */
-const StackCardEmpty = forwardRef<View, StackCardEmptyProps>(({ className, ...props }, ref) => (
+const StackCardEmpty = forwardRef<ViewRef, StackCardEmptyProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
     {...props}
@@ -1279,7 +1280,7 @@ export interface StackCardActionsProps extends ViewProps {
  * The row of buttons under the pile. Laid out after it rather than over it, so
  * the buttons are not competing with the card for the same touches.
  */
-const StackCardActions = forwardRef<View, StackCardActionsProps>(
+const StackCardActions = forwardRef<ViewRef, StackCardActionsProps>(
   ({ className, ...props }, ref) => (
     <View
       ref={ref}
@@ -1346,7 +1347,7 @@ export interface StackCardActionProps
  * button that still looks pressable over an exhausted deck is the commonest
  * way one of these ends up feeling broken.
  */
-const StackCardAction = forwardRef<View, StackCardActionProps>(
+const StackCardAction = forwardRef<ViewRef, StackCardActionProps>(
   ({ className, action, icon, label, color = 'default', size = 'md', onPress, ...props }, ref) => {
     const context = useStackCardContext('StackCard.Action');
     const slots = actionVariants({ color, size });

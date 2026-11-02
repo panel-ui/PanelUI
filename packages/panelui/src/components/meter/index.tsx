@@ -19,6 +19,7 @@ import {
   type MeterColor,
   type MeterThreshold,
 } from './meter-scale';
+import type { ViewRef } from '../../primitives/refs';
 
 const SPRING = {
   damping: 20,
@@ -193,7 +194,7 @@ function Segment({ index, lit, className, reducedMotion }: SegmentProps) {
  * it is why `label` matters: the role will not distinguish a reading from a
  * task, and the name is what does.
  */
-export const Meter = forwardRef<View, MeterProps>(
+export const Meter = forwardRef<ViewRef, MeterProps>(
   (
     {
       className,

@@ -49,6 +49,7 @@ import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { Avatar } from '../avatar';
 import { podiumHeights, rankEntries, type Ranked } from './leaderboard-rank';
+import type { ViewRef } from '../../primitives/refs';
 
 export { rankEntries } from './leaderboard-rank';
 export type { Ranked as LeaderboardRanked } from './leaderboard-rank';
@@ -326,7 +327,7 @@ function ChangeLabel({ change }: { change: number | undefined }) {
  * `limit` for a long board, and `highlightId` to keep the viewer's own row in
  * sight when the limit cuts them off.
  */
-const LeaderboardRoot = forwardRef<View, LeaderboardProps>(function Leaderboard(
+const LeaderboardRoot = forwardRef<ViewRef, LeaderboardProps>(function Leaderboard(
   {
     className,
     data,

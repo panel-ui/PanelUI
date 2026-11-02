@@ -36,6 +36,7 @@ import { IconColorProvider } from '../../icons';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const messageVariants = tv({
   slots: {
@@ -121,7 +122,7 @@ export interface MessageProps
   children?: ReactNode;
 }
 
-const MessageRoot = forwardRef<View, MessageProps>(
+const MessageRoot = forwardRef<ViewRef, MessageProps>(
   ({ className, align, stacked = false, onLongPress, children, ...props }, ref) => {
     const group = useContext(GroupContext);
     const resolvedAlign = align ?? group?.align ?? 'start';
@@ -166,7 +167,7 @@ export interface MessageGroupProps extends ViewProps {
  * marks every message after the first as `stacked`, so only the first shows an
  * avatar and the rest stay aligned with it.
  */
-const MessageGroup = forwardRef<View, MessageGroupProps>(
+const MessageGroup = forwardRef<ViewRef, MessageGroupProps>(
   ({ className, align = 'start', children, ...props }, ref) => {
     const { group } = messageVariants({ align });
 
@@ -200,7 +201,7 @@ export interface MessageAvatarProps extends ViewProps {
  * left empty, which keeps the bubbles in a column instead of letting the
  * second one slide under the first one's avatar.
  */
-const MessageAvatar = forwardRef<View, MessageAvatarProps>(
+const MessageAvatar = forwardRef<ViewRef, MessageAvatarProps>(
   ({ className, children, ...props }, ref) => {
     const { stacked } = useMessageContext();
     const { avatar } = messageVariants();
@@ -220,7 +221,7 @@ export interface MessageContentProps extends ViewProps {
 }
 
 /** Column holding the header, bubble and footer. */
-const MessageContent = forwardRef<View, MessageContentProps>(
+const MessageContent = forwardRef<ViewRef, MessageContentProps>(
   ({ className, children, ...props }, ref) => {
     const { align } = useMessageContext();
     const { content } = messageVariants({ align });
@@ -239,7 +240,7 @@ export interface MessageHeaderProps extends TextProps {
 }
 
 /** Sender name or timestamp above the bubble. */
-const MessageHeader = forwardRef<React.ElementRef<typeof Text>, MessageHeaderProps>(
+const MessageHeader = forwardRef<TextRef, MessageHeaderProps>(
   ({ className, ...props }, ref) => {
     const { align } = useMessageContext();
     const { header } = messageVariants({ align });
@@ -255,7 +256,7 @@ export interface MessageBubbleProps extends ViewProps {
 }
 
 /** The speech bubble. Takes its colour and squared corner from `align`. */
-const MessageBubble = forwardRef<View, MessageBubbleProps>(
+const MessageBubble = forwardRef<ViewRef, MessageBubbleProps>(
   ({ className, children, ...props }, ref) => {
     const { align } = useMessageContext();
     const { bubble } = messageVariants({ align });
@@ -289,7 +290,7 @@ export interface MessageBubbleContentProps extends TextProps {
 
 /** Text inside the bubble, in whichever colour reads against it. */
 const MessageBubbleContent = forwardRef<
-  React.ElementRef<typeof Text>,
+  TextRef,
   MessageBubbleContentProps
 >(({ className, ...props }, ref) => {
   const { align } = useMessageContext();
@@ -304,7 +305,7 @@ export interface MessageFooterProps extends TextProps {
 }
 
 /** Delivery state, timestamp or actions below the bubble. */
-const MessageFooter = forwardRef<React.ElementRef<typeof Text>, MessageFooterProps>(
+const MessageFooter = forwardRef<TextRef, MessageFooterProps>(
   ({ className, ...props }, ref) => {
     const { align } = useMessageContext();
     const { footer } = messageVariants({ align });
@@ -320,7 +321,7 @@ export interface MessageActionsProps extends ViewProps {
 }
 
 /** Row of controls under the bubble — copy, retry, feedback. */
-const MessageActions = forwardRef<View, MessageActionsProps>(
+const MessageActions = forwardRef<ViewRef, MessageActionsProps>(
   ({ className, children, ...props }, ref) => {
     const { align } = useMessageContext();
 

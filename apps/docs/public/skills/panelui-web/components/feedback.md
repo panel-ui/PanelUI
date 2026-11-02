@@ -96,14 +96,21 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `inline` | `boolean` | `false` | Draw it in the page instead of over it: no backdrop, no trigger, always there. For a feedback box that is part of the page, such as the end of an article. `open` is ignored, and Cancel and the close button only report through `onOpenChange`. |
-| `blur` | `boolean` | `false` | Frost the page behind the dialog instead of only dimming it. |
+| `inline` | `boolean` | — | Draw it in the page instead of over it: no backdrop, no trigger, always there. For a feedback box that is part of the page, such as the end of an article. `open` is ignored, and Cancel and the close button only report through `onOpenChange`. |
+| `blur` | `boolean` | — | Frost the page behind the dialog instead of only dimming it. |
+
+#### `FeedbackPanelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: slots.panel({ className }) }, props),` | **required** | — |
 
 #### `FeedbackCloseProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `label` | `string` | — | How the button announces itself to a screen reader. |
+| `label` | `string` | `'Close'` | How the button announces itself to a screen reader. |
 
 #### `FeedbackFieldProps`
 
@@ -129,6 +136,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `startLabel` | `ReactNode` | — | The word under the lowest score. |
 | `endLabel` | `ReactNode` | — | The word under the highest score. |
 | `minHeight` | `number` | — | The least height it takes, in pixels. Match the field's `minHeight` on the step that follows, so the dialog keeps its size between the two. |
+
+#### `FeedbackFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: slots.footer({ className }) }, props),` | **required** | — |
 
 #### `FeedbackSubmitProps`
 

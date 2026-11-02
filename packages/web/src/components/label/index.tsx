@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Label — the name of a field, and the line it sits on.
  *
@@ -34,6 +36,12 @@
  */
 import type { ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const labelVariants = tv({
   slots: {
@@ -91,36 +99,55 @@ function LabelRoot({
   disabled = false,
   className,
   children,
+  render,
   ...props
-}: LabelProps) {
+}: LabelProps & RenderProp<'label'>) {
   const slots = labelVariants();
   const plain = typeof children === 'string' || typeof children === 'number';
-  return (
-    <label
-      data-slot="label"
-      data-required={required ? '' : undefined}
-      data-invalid={invalid ? '' : undefined}
-      data-disabled={disabled ? '' : undefined}
-      className={slots.root({ className })}
-      {...props}
-    >
-      {plain ? <LabelText>{children}</LabelText> : children}
-      {optional ? <LabelHint>Optional</LabelHint> : null}
-    </label>
-  );
+  return useRender({
+    defaultTagName: 'label',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'label',
+        'data-required': required ? '' : undefined,
+        'data-invalid': invalid ? '' : undefined,
+        'data-disabled': disabled ? '' : undefined,
+        className: slots.root({ className }),
+        children: (
+          <>
+            {plain ? <LabelText>{children}</LabelText> : children}
+            {optional ? <LabelHint>Optional</LabelHint> : null}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 LabelRoot.displayName = 'Label';
 
 export interface LabelTextProps extends ComponentProps<'span'> {}
 
 /** The field's name. It truncates rather than pushing the action off the line. */
-function LabelText({ className, children, ...props }: LabelTextProps) {
+function LabelText({ className, children, render, ...props }: LabelTextProps & RenderProp<'span'>) {
   const slots = labelVariants();
-  return (
-    <span data-slot="label-text" className={slots.text({ className })} {...props}>
-      <span className={slots.textInner()}>{children}</span>
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'label-text',
+        className: slots.text({ className }),
+        children: (
+          <>
+            <span className={slots.textInner()}>{children}</span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 LabelText.displayName = 'Label.Text';
 
@@ -130,16 +157,24 @@ export interface LabelHintProps extends ComponentProps<'span'> {}
  * A quieter word or two after the name: a limit, a format, a unit. On an
  * invalid field it takes the destructive colour, so it can say what is wrong.
  */
-function LabelHint({ className, ...props }: LabelHintProps) {
-  return <span data-slot="label-hint" className={labelVariants().hint({ className })} {...props} />;
+function LabelHint({ className, render, ...props }: LabelHintProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'label-hint', className: labelVariants().hint({ className }) }, props),
+  });
 }
 LabelHint.displayName = 'Label.Hint';
 
 export interface LabelActionProps extends ComponentProps<'span'> {}
 
 /** Pushed to the far end of the line: a link, a count, a small button. */
-function LabelAction({ className, ...props }: LabelActionProps) {
-  return <span data-slot="label-action" className={labelVariants().action({ className })} {...props} />;
+function LabelAction({ className, render, ...props }: LabelActionProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'label-action', className: labelVariants().action({ className }) }, props),
+  });
 }
 LabelAction.displayName = 'Label.Action';
 

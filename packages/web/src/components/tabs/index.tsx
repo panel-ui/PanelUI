@@ -40,6 +40,12 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { createContext, useContext, useEffect, useRef, type ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type TabsVariant = 'segmented' | 'underline' | 'pills';
 
@@ -119,9 +125,9 @@ const tabsVariants = tv({
       },
       pills: {
         list: 'w-fit gap-1',
-        trigger: 'h-8 rounded-full px-3.5 hover:bg-muted data-active:text-primary-foreground data-active:hover:bg-transparent',
-        badge:
-          'in-data-active:bg-primary-foreground/20 in-data-active:text-primary-foreground',
+        trigger:
+          'h-8 rounded-full px-3.5 hover:bg-muted data-active:text-primary-foreground data-active:hover:bg-transparent',
+        badge: 'in-data-active:bg-primary-foreground/20 in-data-active:text-primary-foreground',
         indicator: [
           'top-(--active-tab-top) left-(--active-tab-left) h-(--active-tab-height) w-(--active-tab-width) rounded-full bg-primary',
           `transition-[left,top,width,height] duration-300 ${EASE} motion-reduce:transition-none`,
@@ -218,9 +224,13 @@ TabsTrigger.displayName = 'Tabs.Trigger';
 export interface TabsBadgeProps extends ComponentProps<'span'> {}
 
 /** A count beside a tab's label: unread, open, waiting. */
-function TabsBadge({ className, ...props }: TabsBadgeProps) {
+function TabsBadge({ className, render, ...props }: TabsBadgeProps & RenderProp<'span'>) {
   const slots = tabsVariants({ variant: useContext(VariantContext) });
-  return <span data-slot="tabs-badge" className={slots.badge({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'tabs-badge', className: slots.badge({ className }) }, props),
+  });
 }
 TabsBadge.displayName = 'Tabs.Badge';
 

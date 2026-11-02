@@ -91,7 +91,7 @@ Import from `panelui-web/soundwave` instead of `@/components/panelui/soundwave`.
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -1160,6 +1160,13 @@ export default function SoundwaveAmbient() {
 | `trackColor` | `SoundwaveColor` | — | The colour of the unlit dots in `dots` and `ring`, and of the part of a recording not yet played in `bars`. Defaults to the ink, faint. |
 | `paused` | `boolean` | `false` | Hold the current frame. |
 | `label` | `string` | — | What a screen reader calls it. Defaults to the state: "Listening". |
+
+### Soundwave.Center
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'soundwave-center', className: soundwaveVariants().center({ className }) }, props),` | — |  |
 
 ### useAudioLevel(source, options)
 

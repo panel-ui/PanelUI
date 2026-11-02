@@ -69,6 +69,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `as` | `'h2' \| 'h3' \| 'h4' \| 'p'` | — | The heading level, to fit the page around the card. Default `h3`. |
 
+#### `TiltCardDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 ## In a Server Component
 
 `TiltCard` is a client component. A Server Component cannot read `TiltCard.Layer` off the import, so import each part by name: `TiltCardLayer`, `TiltCardTitle`, `TiltCardDescription`.

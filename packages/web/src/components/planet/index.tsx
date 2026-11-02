@@ -60,6 +60,12 @@ import {
 } from 'react';
 import { tv } from 'tailwind-variants';
 import { LAND, LAND_COLUMNS, LAND_ROWS } from './land';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const planetVariants = tv({
   slots: {
@@ -167,10 +173,7 @@ function isLand(latitude: number, longitude: number): boolean {
     for (let i = 0; i < decoded.length; i += 1) landBits[i] = decoded.charCodeAt(i);
   }
   const row = Math.min(LAND_ROWS - 1, Math.max(0, Math.floor(((90 - latitude) / 180) * LAND_ROWS)));
-  const column = Math.min(
-    LAND_COLUMNS - 1,
-    Math.max(0, Math.floor(((longitude + 180) / 360) * LAND_COLUMNS))
-  );
+  const column = Math.min(LAND_COLUMNS - 1, Math.max(0, Math.floor(((longitude + 180) / 360) * LAND_COLUMNS)));
   const cell = row * LAND_COLUMNS + column;
   return ((landBits[cell >> 3] ?? 0) & (1 << (cell & 7))) !== 0;
 }
@@ -707,8 +710,9 @@ function PlanetGlobe({
   className,
   color = 'primary',
   label = 'Globe',
+  render,
   ...props
-}: PlanetGlobeProps) {
+}: PlanetGlobeProps & RenderProp<'div'>) {
   const slots = planetVariants({ glow: color });
   const planet = usePlanetContext('Planet.Globe');
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -738,8 +742,7 @@ function PlanetGlobe({
       listeners,
       onSettle: (rotation) => {
         setSettled((current) =>
-          Math.round(current[0]) === Math.round(rotation[0]) &&
-          Math.round(current[1]) === Math.round(rotation[1])
+          Math.round(current[0]) === Math.round(rotation[0]) && Math.round(current[1]) === Math.round(rotation[1])
             ? current
             : rotation
         );
@@ -806,32 +809,37 @@ function PlanetGlobe({
   const longitude = Math.round(settled[0]);
   const side = longitude === 0 ? '' : longitude > 0 ? ' east' : ' west';
 
-  return (
-    <div
-      // A slider, because that is what it is to a keyboard: one value, the
-      // longitude facing you, moved with the arrow keys.
-      role={planet.interactive ? 'slider' : 'img'}
-      aria-label={label}
-      aria-orientation={planet.interactive ? 'horizontal' : undefined}
-      aria-valuemin={planet.interactive ? -180 : undefined}
-      aria-valuemax={planet.interactive ? 180 : undefined}
-      aria-valuenow={planet.interactive ? longitude : undefined}
-      aria-valuetext={planet.interactive ? `Centred on ${Math.abs(longitude)} degrees${side}` : undefined}
-      tabIndex={planet.interactive ? 0 : undefined}
-      className={slots.globe({ className })}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onPointerEnter={() => engine.current?.setHover(true)}
-      onPointerLeave={() => engine.current?.setHover(false)}
-      onKeyDown={onKeyDown}
-      {...props}
-    >
-      <canvas ref={canvas} aria-hidden="true" className={slots.canvas()} />
-      <div className={slots.markers()}>{children}</div>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: planet.interactive ? 'slider' : 'img',
+        'aria-label': label,
+        'aria-orientation': planet.interactive ? 'horizontal' : undefined,
+        'aria-valuemin': planet.interactive ? -180 : undefined,
+        'aria-valuemax': planet.interactive ? 180 : undefined,
+        'aria-valuenow': planet.interactive ? longitude : undefined,
+        'aria-valuetext': planet.interactive ? `Centred on ${Math.abs(longitude)} degrees${side}` : undefined,
+        tabIndex: planet.interactive ? 0 : undefined,
+        className: slots.globe({ className }),
+        onPointerDown: onPointerDown,
+        onPointerMove: onPointerMove,
+        onPointerUp: endDrag,
+        onPointerCancel: endDrag,
+        onPointerEnter: () => engine.current?.setHover(true),
+        onPointerLeave: () => engine.current?.setHover(false),
+        onKeyDown: onKeyDown,
+        children: (
+          <>
+            <canvas ref={canvas} aria-hidden="true" className={slots.canvas()} />
+            <div className={slots.markers()}>{children}</div>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 PlanetGlobe.displayName = 'Planet.Globe';
 
@@ -842,8 +850,7 @@ PlanetGlobe.displayName = 'Planet.Globe';
 /** Which of the theme's roles a marker's dot is drawn in. */
 export type PlanetMarkerColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
 
-export interface PlanetMarkerProps
-  extends Omit<ComponentProps<'div'>, 'children' | 'color' | 'onClick'> {
+export interface PlanetMarkerProps extends Omit<ComponentProps<'div'>, 'children' | 'color' | 'onClick'> {
   /** Degrees north of the equator. South is negative. */
   lat: number;
   /** Degrees east of Greenwich. West is negative. */
@@ -888,8 +895,9 @@ function PlanetMarker({
   className,
   labelClassName,
   children,
+  render,
   ...props
-}: PlanetMarkerProps) {
+}: PlanetMarkerProps & RenderProp<'div'>) {
   const slots = planetVariants({ color, selected });
   const planet = usePlanetContext('Planet.Marker');
   const element = useRef<HTMLDivElement>(null);
@@ -920,9 +928,7 @@ function PlanetMarker({
       {label !== undefined && label !== null ? (
         <span className={slots.label({ className: labelClassName })}>
           {label}
-          {count !== undefined && count !== null ? (
-            <span className={slots.count()}>{count}</span>
-          ) : null}
+          {count !== undefined && count !== null ? <span className={slots.count()}>{count}</span> : null}
         </span>
       ) : null}
       {pulse ? <span aria-hidden="true" className={slots.pulse()} /> : null}
@@ -936,27 +942,39 @@ function PlanetMarker({
     </>
   );
 
-  return (
-    <div ref={element} data-planet-marker="" className={slots.marker({ className })} {...props}>
-      {onClick ? (
-        <button
-          type="button"
-          aria-label={name ?? (typeof label === 'string' ? label : undefined)}
-          aria-pressed={selected}
-          className={slots.press()}
-          onClick={onClick}
-          // Kept from the globe, which would otherwise take the press as the
-          // start of a drag and the click would never arrive.
-          onPointerDown={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-        >
-          {body}
-        </button>
-      ) : (
-        body
-      )}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: element,
+        'data-planet-marker': '',
+        className: slots.marker({ className }),
+        children: (
+          <>
+            {onClick ? (
+              <button
+                type="button"
+                aria-label={name ?? (typeof label === 'string' ? label : undefined)}
+                aria-pressed={selected}
+                className={slots.press()}
+                onClick={onClick}
+                // Kept from the globe, which would otherwise take the press as the
+                // start of a drag and the click would never arrive.
+                onPointerDown={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                {body}
+              </button>
+            ) : (
+              body
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 PlanetMarker.displayName = 'Planet.Marker';
 
@@ -986,33 +1004,43 @@ const Arrow = ({ flipped }: { flipped?: boolean }) => (
   </svg>
 );
 
-function PlanetControls({ step = 60, className, children, ...props }: PlanetControlsProps) {
+function PlanetControls({ step = 60, className, children, render, ...props }: PlanetControlsProps & RenderProp<'div'>) {
   const slots = planetVariants();
   const planet = usePlanetContext('Planet.Controls');
 
-  return (
-    <div role="group" aria-label="Turn the globe" className={slots.controls({ className })} {...props}>
-      <button
-        type="button"
-        aria-label="Turn west"
-        className={slots.control()}
-        onClick={() => planet.rotateBy(-step)}
-      >
-        <Arrow flipped />
-      </button>
-      {children !== undefined && children !== null ? (
-        <span className={slots.caption()}>{children}</span>
-      ) : null}
-      <button
-        type="button"
-        aria-label="Turn east"
-        className={slots.control()}
-        onClick={() => planet.rotateBy(step)}
-      >
-        <Arrow />
-      </button>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'group',
+        'aria-label': 'Turn the globe',
+        className: slots.controls({ className }),
+        children: (
+          <>
+            <button
+              type="button"
+              aria-label="Turn west"
+              className={slots.control()}
+              onClick={() => planet.rotateBy(-step)}
+            >
+              <Arrow flipped />
+            </button>
+            {children !== undefined && children !== null ? <span className={slots.caption()}>{children}</span> : null}
+            <button
+              type="button"
+              aria-label="Turn east"
+              className={slots.control()}
+              onClick={() => planet.rotateBy(step)}
+            >
+              <Arrow />
+            </button>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 PlanetControls.displayName = 'Planet.Controls';
 
@@ -1026,8 +1054,12 @@ export interface PlanetListProps extends ComponentProps<'ul'> {}
  * The places on the globe as a list, in two columns, for picking one by name.
  * Put it beside or under the globe and turn the globe to whatever is picked.
  */
-function PlanetList({ className, ...props }: PlanetListProps) {
-  return <ul data-slot="planet-list" className={planetVariants().list({ className })} {...props} />;
+function PlanetList({ className, render, ...props }: PlanetListProps & RenderProp<'ul'>) {
+  return useRender({
+    defaultTagName: 'ul',
+    render,
+    props: mergeProps({ 'data-slot': 'planet-list', className: planetVariants().list({ className }) }, props),
+  });
 }
 PlanetList.displayName = 'Planet.List';
 
@@ -1044,17 +1076,30 @@ function PlanetListItem({
   selected = false,
   className,
   children,
+  render,
   ...props
-}: PlanetListItemProps) {
+}: PlanetListItemProps & RenderProp<'button'>) {
   const slots = planetVariants({ color });
-  return (
-    <li data-slot="planet-list-item">
-      <button type="button" aria-pressed={selected} className={slots.listItem({ className })} {...props}>
-        <span aria-hidden="true" className={slots.listDot()} />
-        <span className={slots.listName()}>{children}</span>
-      </button>
-    </li>
-  );
+  // `render` draws the row's button as something else, such as a link to the place.
+  const button = useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: render ? undefined : ('button' as const),
+        'aria-pressed': selected,
+        className: slots.listItem({ className }),
+        children: (
+          <>
+            <span aria-hidden="true" className={slots.listDot()} />
+            <span className={slots.listName()}>{children}</span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
+  return <li data-slot="planet-list-item">{button}</li>;
 }
 PlanetListItem.displayName = 'Planet.ListItem';
 

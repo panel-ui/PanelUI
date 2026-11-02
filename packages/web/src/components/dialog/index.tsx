@@ -69,6 +69,13 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const dialogVariants = tv({
   slots: {
@@ -118,8 +125,7 @@ const dialogVariants = tv({
     // side, and a heading or a row reaching into it shows through the thumb.
     list: '-mx-2 flex flex-col outline-none',
     listGroup: 'flex flex-col [&+&]:mt-2',
-    listGroupLabel:
-      'sticky top-0 z-10 bg-popover px-2 pb-1.5 pt-2 text-xs font-medium text-muted-foreground',
+    listGroupLabel: 'sticky top-0 z-10 bg-popover px-2 pb-1.5 pt-2 text-xs font-medium text-muted-foreground',
     listItem: [
       'flex h-10 shrink-0 cursor-pointer select-none items-center gap-3 rounded-xl px-2 text-sm outline-none',
       // Room for the pinned heading above it when the arrow keys scroll it into view.
@@ -195,13 +201,7 @@ export interface DialogProps {
   dismissible?: boolean;
 }
 
-function DialogRoot({
-  children,
-  open,
-  defaultOpen,
-  onOpenChange,
-  dismissible = true,
-}: DialogProps) {
+function DialogRoot({ children, open, defaultOpen, onOpenChange, dismissible = true }: DialogProps) {
   return (
     <Primitive.Root
       open={open}
@@ -319,16 +319,34 @@ export interface DialogHeaderProps extends Omit<ComponentProps<'div'>, 'title'> 
 }
 
 /** The heading block. It leaves room for the close button beside the title. */
-function DialogHeader({ title, description, className, children, ...props }: DialogHeaderProps) {
+function DialogHeader({
+  title,
+  description,
+  className,
+  children,
+  render,
+  ...props
+}: DialogHeaderProps & RenderProp<'div'>) {
   const { showClose, variant } = useContext(DialogContext);
   const slots = dialogVariants({ variant });
-  return (
-    <div data-slot="dialog-header" className={slots.header({ className: [showClose && 'pe-14', className] })} {...props}>
-      {title !== undefined ? <DialogTitle>{title}</DialogTitle> : null}
-      {description !== undefined ? <DialogDescription>{description}</DialogDescription> : null}
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'dialog-header',
+        className: slots.header({ className: [showClose && 'pe-14', className] }),
+        children: (
+          <>
+            {title !== undefined ? <DialogTitle>{title}</DialogTitle> : null}
+            {description !== undefined ? <DialogDescription>{description}</DialogDescription> : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DialogHeader.displayName = 'Dialog.Header';
 
@@ -350,7 +368,9 @@ function DialogDescription({ className, ...props }: DialogDescriptionProps) {
   const { inline } = useContext(DialogContext);
   const slots = dialogVariants();
   if (inline) return <p data-slot="dialog-description" className={slots.description({ className })} {...props} />;
-  return <Primitive.Description data-slot="dialog-description" className={slots.description({ className })} {...props} />;
+  return (
+    <Primitive.Description data-slot="dialog-description" className={slots.description({ className })} {...props} />
+  );
 }
 DialogDescription.displayName = 'Dialog.Description';
 
@@ -386,9 +406,16 @@ export interface DialogFooterProps extends ComponentProps<'div'> {}
  * equal pills; in `plain` they sit at the end of a ruled strip. Keep it a
  * direct child of `Dialog.Content`, so the band can find it.
  */
-function DialogFooter({ className, ...props }: DialogFooterProps) {
+function DialogFooter({ className, render, ...props }: DialogFooterProps & RenderProp<'div'>) {
   const { variant } = useContext(DialogContext);
-  return <div data-slot="dialog-footer" className={dialogVariants({ variant }).footer({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'dialog-footer', className: dialogVariants({ variant }).footer({ className }) },
+      props
+    ),
+  });
 }
 DialogFooter.displayName = 'Dialog.Footer';
 
@@ -400,15 +427,17 @@ export interface DialogCloseProps extends ComponentProps<'button'> {
 }
 
 /** Closes the dialog. */
-function DialogClose({
-  render,
-  icon = false,
-  children,
-  ...props
-}: DialogCloseProps) {
+function DialogClose({ render, icon = false, children, ...props }: DialogCloseProps) {
   const { inline } = useContext(DialogContext);
   const content = icon ? (
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+    >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>
   ) : (
@@ -435,10 +464,11 @@ export interface DialogListProps extends ComponentProps<'div'> {}
  * A list of one-line choices in the body. The arrow keys, Home and End move
  * between its items, and it opens scrolled to the selected one.
  */
-function DialogList({ className, onKeyDown, children, ...props }: DialogListProps) {
+function DialogList({ className, onKeyDown, children, render, ...props }: DialogListProps & RenderProp<'div'>) {
   const list = useRef<HTMLDivElement>(null);
-  const items = () =>
-    [...(list.current?.querySelectorAll<HTMLElement>('[data-slot=dialog-list-item]:not([aria-disabled=true])') ?? [])];
+  const items = () => [
+    ...(list.current?.querySelectorAll<HTMLElement>('[data-slot=dialog-list-item]:not([aria-disabled=true])') ?? []),
+  ];
 
   useEffect(() => {
     const all = items();
@@ -467,11 +497,21 @@ function DialogList({ className, onKeyDown, children, ...props }: DialogListProp
     next.focus();
   };
 
-  return (
-    <div ref={list} role="listbox" data-slot="dialog-list" className={dialogVariants().list({ className })} onKeyDown={move} {...props}>
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: list,
+        role: 'listbox',
+        'data-slot': 'dialog-list',
+        className: dialogVariants().list({ className }),
+        onKeyDown: move,
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
 }
 DialogList.displayName = 'Dialog.List';
 
@@ -481,17 +521,30 @@ export interface DialogListGroupProps extends Omit<ComponentProps<'div'>, 'title
 }
 
 /** A run of items in `Dialog.List` under a heading of their own. */
-function DialogListGroup({ label, className, children, ...props }: DialogListGroupProps) {
+function DialogListGroup({ label, className, children, render, ...props }: DialogListGroupProps & RenderProp<'div'>) {
   const slots = dialogVariants();
   const id = useId();
-  return (
-    <div role="group" aria-labelledby={id} data-slot="dialog-list-group" className={slots.listGroup({ className })} {...props}>
-      <div id={id} className={slots.listGroupLabel()}>
-        {label}
-      </div>
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'group',
+        'aria-labelledby': id,
+        'data-slot': 'dialog-list-group',
+        className: slots.listGroup({ className }),
+        children: (
+          <>
+            <div id={id} className={slots.listGroupLabel()}>
+              {label}
+            </div>
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DialogListGroup.displayName = 'Dialog.ListGroup';
 
@@ -516,42 +569,57 @@ function DialogListItem({
   onClick,
   onKeyDown,
   children,
+  render,
   ...props
-}: DialogListItemProps) {
+}: DialogListItemProps & RenderProp<'div'>) {
   const slots = dialogVariants();
-  return (
-    <div
-      role="option"
-      aria-selected={selected}
-      aria-disabled={disabled || undefined}
-      tabIndex={selected ? 0 : -1}
-      data-slot="dialog-list-item"
-      data-selected={selected ? '' : undefined}
-      className={slots.listItem({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!disabled) onSelect?.();
-      }}
-      onKeyDown={(event) => {
-        onKeyDown?.(event);
-        if ((event.key === 'Enter' || event.key === ' ') && !disabled) {
-          event.preventDefault();
-          onSelect?.();
-        }
-      }}
-      {...props}
-    >
-      <span className={slots.listItemLabel()}>{children}</span>
-      {meta !== undefined ? <span className={slots.listItemMeta()}>{meta}</span> : null}
-      <span aria-hidden="true" className={slots.listItemCheck()}>
-        {selected ? (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m5 12.5 4.5 4.5L19 7.5" />
-          </svg>
-        ) : null}
-      </span>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'option',
+        'aria-selected': selected,
+        'aria-disabled': disabled || undefined,
+        tabIndex: selected ? 0 : -1,
+        'data-slot': 'dialog-list-item',
+        'data-selected': selected ? '' : undefined,
+        className: slots.listItem({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLDivElement>) => {
+          onClick?.(event);
+          if (!disabled) onSelect?.();
+        },
+        onKeyDown: (event: ReactTypes.KeyboardEvent<HTMLDivElement>) => {
+          onKeyDown?.(event);
+          if ((event.key === 'Enter' || event.key === ' ') && !disabled) {
+            event.preventDefault();
+            onSelect?.();
+          }
+        },
+        children: (
+          <>
+            <span className={slots.listItemLabel()}>{children}</span>
+            {meta !== undefined ? <span className={slots.listItemMeta()}>{meta}</span> : null}
+            <span aria-hidden="true" className={slots.listItemCheck()}>
+              {selected ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m5 12.5 4.5 4.5L19 7.5" />
+                </svg>
+              ) : null}
+            </span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DialogListItem.displayName = 'Dialog.ListItem';
 

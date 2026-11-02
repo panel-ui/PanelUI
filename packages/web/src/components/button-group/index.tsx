@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ButtonGroup — related actions held together in one control.
  *
@@ -35,6 +37,12 @@
  */
 import type { ComponentProps } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /*
  * Which of the three a group is depends on what it holds, so the rules below
@@ -118,9 +126,7 @@ export const buttonGroupVariants = tv({
   defaultVariants: { orientation: 'horizontal', size: 'md' },
 });
 
-export type ButtonGroupOrientation = NonNullable<
-  VariantProps<typeof buttonGroupVariants>['orientation']
->;
+export type ButtonGroupOrientation = NonNullable<VariantProps<typeof buttonGroupVariants>['orientation']>;
 export type ButtonGroupTextSize = NonNullable<VariantProps<typeof buttonGroupVariants>['size']>;
 
 export interface ButtonGroupProps extends ComponentProps<'div'> {
@@ -132,16 +138,25 @@ export interface ButtonGroupProps extends ComponentProps<'div'> {
  * The group. It is a `role="group"`, so give it an `aria-label` that names
  * what its actions have in common.
  */
-function ButtonGroupRoot({ orientation = 'horizontal', className, ...props }: ButtonGroupProps) {
-  return (
-    <div
-      role="group"
-      data-slot="button-group"
-      data-orientation={orientation}
-      className={buttonGroupVariants({ orientation }).root({ className })}
-      {...props}
-    />
-  );
+function ButtonGroupRoot({
+  orientation = 'horizontal',
+  className,
+  render,
+  ...props
+}: ButtonGroupProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'group',
+        'data-slot': 'button-group',
+        'data-orientation': orientation,
+        className: buttonGroupVariants({ orientation }).root({ className }),
+      },
+      props
+    ),
+  });
 }
 ButtonGroupRoot.displayName = 'ButtonGroup';
 
@@ -163,20 +178,25 @@ export interface ButtonGroupSeparatorProps extends ComponentProps<'span'> {
 function ButtonGroupSeparator({
   orientation = 'vertical',
   className,
+  render,
   ...props
-}: ButtonGroupSeparatorProps) {
+}: ButtonGroupSeparatorProps & RenderProp<'span'>) {
   const slots = buttonGroupVariants({
     orientation: orientation === 'vertical' ? 'horizontal' : 'vertical',
   });
-  return (
-    <span
-      aria-hidden="true"
-      data-slot="button-group-separator"
-      data-orientation={orientation}
-      className={slots.separator({ className })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'aria-hidden': 'true',
+        'data-slot': 'button-group-separator',
+        'data-orientation': orientation,
+        className: slots.separator({ className }),
+      },
+      props
+    ),
+  });
 }
 ButtonGroupSeparator.displayName = 'ButtonGroup.Separator';
 
@@ -189,14 +209,15 @@ export interface ButtonGroupTextProps extends ComponentProps<'div'> {
  * A cell that is read rather than pressed: a prefix such as `https://`, a unit,
  * or the value a pair of buttons changes.
  */
-function ButtonGroupText({ size, className, ...props }: ButtonGroupTextProps) {
-  return (
-    <div
-      data-slot="button-group-text"
-      className={buttonGroupVariants({ size }).text({ className })}
-      {...props}
-    />
-  );
+function ButtonGroupText({ size, className, render, ...props }: ButtonGroupTextProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'button-group-text', className: buttonGroupVariants({ size }).text({ className }) },
+      props
+    ),
+  });
 }
 ButtonGroupText.displayName = 'ButtonGroup.Text';
 

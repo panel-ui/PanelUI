@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Badge — a short label that says what state something is in, or what kind of thing it is.
  *
@@ -28,6 +30,12 @@
  */
 import type { ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type BadgeVariant = 'default' | 'secondary' | 'outline' | 'success' | 'info' | 'warning' | 'destructive';
 export type BadgeSize = 'sm' | 'md' | 'lg';
@@ -90,18 +98,38 @@ export interface BadgeProps extends ComponentProps<'span'> {
 }
 
 /** A short label for a state or a kind. Renders a `<span>`. */
-function Badge({ variant = 'default', size = 'md', dot = false, className, children, ...props }: BadgeProps) {
+function Badge({
+  variant = 'default',
+  size = 'md',
+  dot = false,
+  className,
+  children,
+  render,
+  ...props
+}: BadgeProps & RenderProp<'span'>) {
   const slots = badgeVariants({ variant, size, tinted: TINTED.has(variant) });
-  return (
-    <span data-slot="badge" data-variant={variant} className={slots.root({ className })} {...props}>
-      {dot ? (
-        <span data-slot="badge-dot" aria-hidden="true" className={slots.dot()}>
-          {dot === 'pulse' ? <span className={slots.halo()} /> : null}
-        </span>
-      ) : null}
-      {children}
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'badge',
+        'data-variant': variant,
+        className: slots.root({ className }),
+        children: (
+          <>
+            {dot ? (
+              <span data-slot="badge-dot" aria-hidden="true" className={slots.dot()}>
+                {dot === 'pulse' ? <span className={slots.halo()} /> : null}
+              </span>
+            ) : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 Badge.displayName = 'Badge';
 

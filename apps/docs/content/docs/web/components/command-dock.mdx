@@ -98,7 +98,7 @@ Import from `panelui-web/command-dock` instead of `@/components/panelui/command-
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -234,6 +234,27 @@ export default function CommandDockChoose() {
 | `busy` | `boolean` | `false` | While true, the field cannot be sent again and `CommandDock.Status` is shown. |
 | `closedWidth` | `string` | `'9rem'` | How wide it is while closed, as a CSS length. |
 
+### CommandDock.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'button',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `ref` | `ref,` | — |  |
+| `type` | `'button',` | — |  |
+| `className` | `commandDockVariants({ open: dock.open }).trigger({ className }),` | — |  |
+| `onClick` | `(event: ReactTypes.MouseEvent<HTMLButtonElement>) => {` | — |  |
+
+### CommandDock.Panel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `ref` | `ref,` | — |  |
+| `id` | `dock.panelId,` | — |  |
+| `className` | `commandDockVariants().panel({ className }),` | — |  |
+
 ### CommandDock.Input
 
 | Prop | Type | Default | Description |
@@ -244,13 +265,27 @@ export default function CommandDockChoose() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | — | What a screen reader calls the list of rows. |
+| `label` | `string` | `'Results'` | What a screen reader calls the list of rows. |
 
 ### CommandDock.Row
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `onSelect` | `() => void` | — | Called when the row is pressed. Passing this makes the row a button. |
+
+### CommandDock.RowTitle
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### CommandDock.RowMeta
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

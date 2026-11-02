@@ -78,6 +78,27 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `labels` | `string[]` | — | The name written beside each row, first row first. An empty string leaves a row unnamed. Default Monday to Sunday with every other name left out. |
 
+#### `DayGridCaptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `DayGridTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'day-grid-title', className: dayGridVariants().title({ className }) }, props),` | **required** | — |
+
+#### `DayGridDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 ## In a Server Component
 
 `DayGrid` is a client component. A Server Component cannot read `DayGrid.Legend` off the import, so import each part by name: `DayGridLegend`, `DayGridWeekdays`, `DayGridCaption`, `DayGridTitle`, `DayGridDescription`.

@@ -109,7 +109,7 @@ Import from `panelui-web/day-grid` instead of `@/components/panelui/day-grid`. T
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -280,6 +280,27 @@ export default function DayGridColours() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `labels` | `string[]` | — | The name written beside each row, first row first. An empty string leaves a row unnamed. Default Monday to Sunday with every other name left out. |
+
+### DayGrid.Caption
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### DayGrid.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'day-grid-title', className: dayGridVariants().title({ className }) }, props),` | — |  |
+
+### DayGrid.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

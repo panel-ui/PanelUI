@@ -62,6 +62,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `string` | `'Reading'` | What a screen reader calls it. |
 | `valueText` | `string` | — | What a screen reader says for the value: "240 milliseconds". |
 
+#### `RangeMeterLabelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 #### `RangeMeterScaleProps`
 
 | Prop | Type | Default | What it does |

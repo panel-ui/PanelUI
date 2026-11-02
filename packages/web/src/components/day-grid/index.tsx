@@ -43,6 +43,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** How much happened on a day: 0 is nothing, 4 is the most. */
 export type DayLevel = 0 | 1 | 2 | 3 | 4;
@@ -121,8 +127,7 @@ const LENS_REACH = 2.4;
 /** Milliseconds between one diagonal of dots arriving and the next. */
 const STAGGER = 22;
 
-export interface DayGridProps
-  extends Omit<ComponentProps<'div'>, 'children' | 'onChange' | 'color'> {
+export interface DayGridProps extends Omit<ComponentProps<'div'>, 'children' | 'onChange' | 'color'> {
   /** The days, in order. They fill the grid row by row. */
   cells: DayCell[];
   /** Cells per row. Seven makes each row a week. */
@@ -161,8 +166,9 @@ function DayGridRoot({
   style,
   onPointerMove,
   onPointerLeave,
+  render,
   ...props
-}: DayGridProps) {
+}: DayGridProps & RenderProp<'div'>) {
   const slots = dayGridVariants({ color });
   const root = useRef<HTMLDivElement>(null);
   const nodes = useRef<(HTMLElement | null)[]>([]);
@@ -209,10 +215,7 @@ function DayGridRoot({
       nodes.current.forEach((node, index) => {
         if (!node) return;
         const box = node.getBoundingClientRect();
-        const distance = Math.hypot(
-          clientX - (box.left + box.width / 2),
-          clientY - (box.top + box.height / 2)
-        );
+        const distance = Math.hypot(clientX - (box.left + box.width / 2), clientY - (box.top + box.height / 2));
         if (!still) {
           const near = Math.max(0, 1 - distance / (box.width * LENS_REACH));
           // Eased, so the swell has a soft edge and a round top.
@@ -330,50 +333,57 @@ function DayGridRoot({
     onValueChange(next);
   };
 
-  return (
-    <div
-      ref={root}
-      role="group"
-      aria-label={summary}
-      className={slots.root({ className })}
-      style={layout}
-      onPointerMove={moveLens}
-      onPointerLeave={leave}
-      {...props}
-    >
-      {cells.map((cell, index) => {
-        const part = dayGridVariants({
-          level: cell.level,
-          interactive: true,
-          selected: value === index,
-        });
-        return (
-          <button
-            key={index}
-            ref={(node) => {
-              nodes.current[index] = node;
-            }}
-            type="button"
-            aria-label={cell.label ?? `Day ${index + 1}, level ${cell.level} of 4`}
-            aria-pressed={value === index}
-            tabIndex={index === focusable ? 0 : -1}
-            onClick={() => onValueChange(index)}
-            onKeyDown={(event) => onKeyDown(event, index)}
-            onFocus={(event) => {
-              // Only for focus that came from the keyboard: a click focuses
-              // too, and the pointer is already showing that day's tag.
-              if (event.currentTarget.matches(':focus-visible')) setPointed(index);
-            }}
-            onBlur={() => setPointed((current) => (current === index ? null : current))}
-            className={part.cell()}
-          >
-            <span className={part.dot()} style={dotStyle(index)} />
-          </button>
-        );
-      })}
-      {tag}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: root,
+        role: 'group',
+        'aria-label': summary,
+        className: slots.root({ className }),
+        style: layout,
+        onPointerMove: moveLens,
+        onPointerLeave: leave,
+        children: (
+          <>
+            {cells.map((cell, index) => {
+              const part = dayGridVariants({
+                level: cell.level,
+                interactive: true,
+                selected: value === index,
+              });
+              return (
+                <button
+                  key={index}
+                  ref={(node) => {
+                    nodes.current[index] = node;
+                  }}
+                  type="button"
+                  aria-label={cell.label ?? `Day ${index + 1}, level ${cell.level} of 4`}
+                  aria-pressed={value === index}
+                  tabIndex={index === focusable ? 0 : -1}
+                  onClick={() => onValueChange(index)}
+                  onKeyDown={(event) => onKeyDown(event, index)}
+                  onFocus={(event) => {
+                    // Only for focus that came from the keyboard: a click focuses
+                    // too, and the pointer is already showing that day's tag.
+                    if (event.currentTarget.matches(':focus-visible')) setPointed(index);
+                  }}
+                  onBlur={() => setPointed((current) => (current === index ? null : current))}
+                  className={part.cell()}
+                >
+                  <span className={part.dot()} style={dotStyle(index)} />
+                </button>
+              );
+            })}
+            {tag}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DayGridRoot.displayName = 'DayGrid';
 
@@ -392,20 +402,31 @@ function DayGridLegend({
   less = 'Less',
   more = 'More',
   className,
+  render,
   ...props
-}: DayGridLegendProps) {
+}: DayGridLegendProps & RenderProp<'div'>) {
   const slots = dayGridVariants({ color });
-  return (
-    <div className={slots.legend({ className })} {...props}>
-      <span>{less}</span>
-      {LEVELS.map((level) => (
-        <span key={level} aria-hidden="true" className={slots.swatch()}>
-          <span className={dayGridVariants({ level }).dot({ className: 'shadow-none' })} />
-        </span>
-      ))}
-      <span>{more}</span>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        className: slots.legend({ className }),
+        children: (
+          <>
+            <span>{less}</span>
+            {LEVELS.map((level) => (
+              <span key={level} aria-hidden="true" className={slots.swatch()}>
+                <span className={dayGridVariants({ level }).dot({ className: 'shadow-none' })} />
+              </span>
+            ))}
+            <span>{more}</span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DayGridLegend.displayName = 'DayGrid.Legend';
 
@@ -426,24 +447,32 @@ function DayGridWeekdays({
   labels = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'],
   className,
   style,
+  render,
   ...props
-}: DayGridWeekdaysProps) {
+}: DayGridWeekdaysProps & RenderProp<'div'>) {
   const slots = dayGridVariants();
-  return (
-    <div
-      aria-hidden="true"
-      data-slot="day-grid-weekdays"
-      className={slots.weekdays({ className })}
-      style={{ gridTemplateRows: `repeat(${labels.length}, minmax(0, 1fr))`, ...style }}
-      {...props}
-    >
-      {labels.map((day, index) => (
-        <span key={index} className={slots.weekday()}>
-          {day}
-        </span>
-      ))}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'aria-hidden': 'true',
+        'data-slot': 'day-grid-weekdays',
+        className: slots.weekdays({ className }),
+        style: { gridTemplateRows: `repeat(${labels.length}, minmax(0, 1fr))`, ...style },
+        children: (
+          <>
+            {labels.map((day, index) => (
+              <span key={index} className={slots.weekday()}>
+                {day}
+              </span>
+            ))}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 DayGridWeekdays.displayName = 'DayGrid.Weekdays';
 
@@ -453,33 +482,42 @@ export interface DayGridCaptionProps extends ComponentProps<'div'> {}
  * What the picked day holds, written out beside the grid: a `DayGrid.Title`
  * over a `DayGrid.Description`. Read out politely each time the pick changes.
  */
-function DayGridCaption({ className, ...props }: DayGridCaptionProps) {
-  return (
-    <div
-      aria-live="polite"
-      data-slot="day-grid-caption"
-      className={dayGridVariants().caption({ className })}
-      {...props}
-    />
-  );
+function DayGridCaption({ className, render, ...props }: DayGridCaptionProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'aria-live': 'polite', 'data-slot': 'day-grid-caption', className: dayGridVariants().caption({ className }) },
+      props
+    ),
+  });
 }
 DayGridCaption.displayName = 'DayGrid.Caption';
 
 export interface DayGridTitleProps extends ComponentProps<'p'> {}
 
 /** The picked day's figure: "17 merged". */
-function DayGridTitle({ className, ...props }: DayGridTitleProps) {
-  return <p data-slot="day-grid-title" className={dayGridVariants().title({ className })} {...props} />;
+function DayGridTitle({ className, render, ...props }: DayGridTitleProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps({ 'data-slot': 'day-grid-title', className: dayGridVariants().title({ className }) }, props),
+  });
 }
 DayGridTitle.displayName = 'DayGrid.Title';
 
 export interface DayGridDescriptionProps extends ComponentProps<'p'> {}
 
 /** The picked day's date, quieter, under its figure. */
-function DayGridDescription({ className, ...props }: DayGridDescriptionProps) {
-  return (
-    <p data-slot="day-grid-description" className={dayGridVariants().description({ className })} {...props} />
-  );
+function DayGridDescription({ className, render, ...props }: DayGridDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'day-grid-description', className: dayGridVariants().description({ className }) },
+      props
+    ),
+  });
 }
 DayGridDescription.displayName = 'DayGrid.Description';
 

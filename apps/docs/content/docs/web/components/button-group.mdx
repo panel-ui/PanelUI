@@ -69,7 +69,7 @@ Import from `panelui-web/button-group` instead of `@/components/panelui/button-g
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -395,7 +395,7 @@ export default function ButtonGroupText() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orientation` | `ButtonGroupOrientation` | `horizontal` | Lay the children out in a row or a column. Default `horizontal`. |
+| `orientation` | `ButtonGroupOrientation` | `'horizontal'` | Lay the children out in a row or a column. Default `horizontal`. |
 
 ### ButtonGroup.Separator
 
@@ -428,3 +428,11 @@ Only direct children take part. Wrap a button in another element and that elemen
 ### Server Components
 
 It holds no state, so a Server Component can render it.
+
+### Server Components
+
+`ButtonGroup` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ButtonGroup.Separator` off the import, so each part is also exported by name: `ButtonGroupSeparator` is `ButtonGroup.Separator`, and so on for the others.
+
+```tsx
+import { ButtonGroup, ButtonGroupSeparator, ButtonGroupText } from "@/components/panelui/button-group"
+```

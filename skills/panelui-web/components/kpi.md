@@ -69,7 +69,14 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `surface` | `boolean` | — | Draws the metric as a card of its own. Leave it off inside a frame or a group. |
+| `surface` | `boolean` | `false` | Draws the metric as a card of its own. Leave it off inside a frame or a group. |
+
+#### `KpiHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: kpiVariants().header({ className }) }, props),` | **required** | — |
 
 #### `KpiIconProps`
 
@@ -77,11 +84,39 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `tone` | `KpiTone` | `neutral` | How the tile is coloured: by good or bad news, or left neutral. |
 
+#### `KpiTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-kpi-title': '', className: kpiVariants().title({ className }) }, props),` | **required** | — |
+
+#### `KpiActionsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: kpiVariants().actions({ className }) }, props),` | **required** | — |
+
 #### `KpiContentProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `layout` | `'below' \| 'inline'` | `below` | `inline` puts a chart beside the number in a fixed box; `below` leaves it under everything. |
+
+#### `KpiStatProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: kpiVariants().stat({ className }) }, props),` | **required** | — |
+
+#### `KpiValueProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: kpiVariants().value({ className }) }, props),` | **required** | — |
 
 #### `KpiTrendProps`
 
@@ -115,12 +150,30 @@ Every part also takes the props of the element it renders, and a `className`.
 | `showValueLabel` | `boolean` | `false` | Writes the percentage at the end of the row over the bar. |
 | `color` | `KpiColor` | `'primary'` | Which of the theme's roles the bar is drawn in. |
 
+#### `KpiFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: kpiVariants().footer({ className }) }, props),` | **required** | — |
+
+#### `KpiSeparatorProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ role: 'separator', className: kpiVariants().separator({ className }) }, props),` | **required** | — |
+
 #### `KpiGroupProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `orientation` | `'horizontal' \| 'vertical'` | — | Side by side with upright rules, or stacked with level ones. |
-| `surface` | `boolean` | — | Draws the group as a card of its own, for a group not already inside one. |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Side by side with upright rules, or stacked with level ones. |
+| `surface` | `boolean` | `false` | Draws the group as a card of its own, for a group not already inside one. |
+
+## In a Server Component
+
+`Kpi` is a client component. A Server Component cannot read `Kpi.Header` off the import, so import each part by name: `KpiHeader`, `KpiIcon`, `KpiTitle`, `KpiActions`, `KpiContent`, `KpiStat`, `KpiValue`, `KpiTrend`, `KpiChart`, `KpiProgress`, `KpiFooter`, `KpiSeparator`, `KpiGroup`.
 
 ## Notes
 

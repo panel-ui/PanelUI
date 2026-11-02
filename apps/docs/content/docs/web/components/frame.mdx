@@ -83,7 +83,7 @@ Import from `panelui-web/frame` instead of `@/components/panelui/frame`. Tailwin
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -408,11 +408,39 @@ export default function FramePlain() {
 | --- | --- | --- | --- |
 | `variant` | `FrameVariant` | `default` | `default` sets the panel in a tray. `band` holds a bordered card in a thin muted band, for a widget showing one figure or chart, and its panel draws no rule between its children. `inset` floats the panel in a recessed band and gives `Frame.Footer` somewhere to sit. `plain` drops the shell, for a frame inside a container that already draws its own edge. |
 
+### Frame.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-header', className: frameVariants().header({ className }) }, props),` | — |  |
+
 ### Frame.Title
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `as` | `'h2' \| 'h3' \| 'h4' \| 'p'` | — | The heading level in a header. Default `h3`; a row title is always a `p`. |
+
+### Frame.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Frame.Action
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-action', className: frameVariants().action({ className }) }, props),` | — |  |
+
+### Frame.Panel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-panel', className: frameVariants().panel({ className }) }, props),` | — |  |
 
 ### Frame.Row
 
@@ -422,13 +450,41 @@ export default function FramePlain() {
 | `target` | `string` | — | Where a link row opens, as on an `<a>`. |
 | `rel` | `string` | — | The relationship of a link row's target, as on an `<a>`. |
 | `onClick` | `MouseEventHandler<HTMLElement>` | — | Make the row a button that calls this. Ignored when `href` is set. |
-| `chevron` | `boolean` | — | A trailing chevron, for a row that leads somewhere. |
+| `chevron` | `boolean` | `false` | A trailing chevron, for a row that leads somewhere. |
+
+### Frame.Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-media', className: frameVariants().media({ className }) }, props),` | — |  |
+
+### Frame.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-content', className: frameVariants().content({ className }) }, props),` | — |  |
+
+### Frame.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-actions', className: frameVariants().actions({ className }) }, props),` | — |  |
 
 ### Frame.Section
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `title` | `ReactNode` | — | The heading over the section's rows. |
+
+### Frame.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'frame-footer', className: frameVariants().footer({ className }) }, props),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 
@@ -439,3 +495,11 @@ The panel draws a hairline between each of its children, so rows never need to k
 Under `band` and `inset` the panel's corners are the shell's less the band, so the two curves stay concentric.
 
 The variant reaches the parts through a data attribute and CSS rather than React context, which is what keeps the frame a server component.
+
+### Server Components
+
+`Frame` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Frame.Header` off the import, so each part is also exported by name: `FrameHeader` is `Frame.Header`, and so on for the others.
+
+```tsx
+import { Frame, FrameHeader, FrameTitle, FrameDescription, FrameAction, FramePanel, FrameRow, FrameMedia, FrameContent, FrameActions, FrameSection, FrameFooter } from "@/components/panelui/frame"
+```

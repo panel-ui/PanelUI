@@ -29,6 +29,12 @@
 import { Input as BaseInput } from '@base-ui/react/input';
 import type { ComponentProps, MouseEvent, Ref } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const inputVariants = tv({
   slots: {
@@ -111,16 +117,20 @@ export interface InputGroupProps extends ComponentProps<'div'> {
 }
 
 /** Draws one box round an input and its addons. */
-function InputGroup({ size, className, ...props }: InputGroupProps) {
-  return (
-    <div
-      role="group"
-      data-slot="input-group"
-      data-size={size ?? 'md'}
-      className={inputVariants({ size }).group({ className })}
-      {...props}
-    />
-  );
+function InputGroup({ size, className, render, ...props }: InputGroupProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'group',
+        'data-slot': 'input-group',
+        'data-size': size ?? 'md',
+        className: inputVariants({ size }).group({ className }),
+      },
+      props
+    ),
+  });
 }
 InputGroup.displayName = 'Input.Group';
 
@@ -130,7 +140,7 @@ export interface InputAddonProps extends ComponentProps<'div'> {
 }
 
 /** An icon, unit, shortcut or button beside the input, inside its box. */
-function InputAddon({ align, className, onMouseDown, ...props }: InputAddonProps) {
+function InputAddon({ align, className, onMouseDown, render, ...props }: InputAddonProps & RenderProp<'div'>) {
   // A press on the addon's own surface is a press on the field. A button or
   // link inside it is left to do what it does.
   const focusField = (event: MouseEvent<HTMLDivElement>) => {
@@ -142,15 +152,19 @@ function InputAddon({ align, className, onMouseDown, ...props }: InputAddonProps
     event.preventDefault();
     input.focus();
   };
-  return (
-    <div
-      data-slot="input-addon"
-      data-align={align ?? 'start'}
-      className={inputVariants({ align }).addon({ className })}
-      onMouseDown={focusField}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'input-addon',
+        'data-align': align ?? 'start',
+        className: inputVariants({ align }).addon({ className }),
+        onMouseDown: focusField,
+      },
+      props
+    ),
+  });
 }
 InputAddon.displayName = 'Input.Addon';
 

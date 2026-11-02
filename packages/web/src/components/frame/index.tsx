@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Frame — a widget shell: a panel of rows sitting in a tray, with the tray's
  * one exposed strip along the top carrying the title.
@@ -56,6 +58,12 @@
  */
 import type { ComponentProps, MouseEventHandler, ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /*
  * `inset` geometry. The panel's radius is the shell's less the shell's padding,
@@ -110,8 +118,7 @@ const frameVariants = tv({
     content: 'flex min-w-0 flex-1 flex-col gap-0.5',
     actions: 'flex shrink-0 items-center gap-1.5',
     section: 'flex flex-col divide-y',
-    sectionTitle:
-      'bg-muted/40 px-4 pt-2.5 pb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground',
+    sectionTitle: 'bg-muted/40 px-4 pt-2.5 pb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground',
     footer: [
       'flex items-center gap-2 px-4 pt-3 pb-3.5',
       // Under `inset` the band is a row of equal decisions: equal widths, full pills.
@@ -159,9 +166,13 @@ export interface FrameProps extends ComponentProps<'div'> {
   variant?: FrameVariant;
 }
 
-function FrameRoot({ variant = 'default', className, ...props }: FrameProps) {
+function FrameRoot({ variant = 'default', className, render, ...props }: FrameProps & RenderProp<'div'>) {
   const slots = frameVariants({ variant });
-  return <div data-slot="frame" data-variant={variant} className={slots.root({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame', 'data-variant': variant, className: slots.root({ className }) }, props),
+  });
 }
 FrameRoot.displayName = 'Frame';
 
@@ -171,8 +182,12 @@ export interface FrameHeaderProps extends ComponentProps<'div'> {}
  * The strip of shell above the panel: a title, an optional description under
  * it, and `Frame.Action` on the trailing side.
  */
-function FrameHeader({ className, ...props }: FrameHeaderProps) {
-  return <div data-slot="frame-header" className={frameVariants().header({ className })} {...props} />;
+function FrameHeader({ className, render, ...props }: FrameHeaderProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-header', className: frameVariants().header({ className }) }, props),
+  });
 }
 FrameHeader.displayName = 'Frame.Header';
 
@@ -190,26 +205,39 @@ FrameTitle.displayName = 'Frame.Title';
 export interface FrameDescriptionProps extends ComponentProps<'p'> {}
 
 /** A line under a title, in the header or in a row. */
-function FrameDescription({ className, ...props }: FrameDescriptionProps) {
-  return (
-    <p data-slot="frame-description" className={frameVariants().description({ className })} {...props} />
-  );
+function FrameDescription({ className, render, ...props }: FrameDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'frame-description', className: frameVariants().description({ className }) },
+      props
+    ),
+  });
 }
 FrameDescription.displayName = 'Frame.Description';
 
 export interface FrameActionProps extends ComponentProps<'div'> {}
 
 /** The header's trailing side: a short status, a link, a small button. */
-function FrameAction({ className, ...props }: FrameActionProps) {
-  return <div data-slot="frame-action" className={frameVariants().action({ className })} {...props} />;
+function FrameAction({ className, render, ...props }: FrameActionProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-action', className: frameVariants().action({ className }) }, props),
+  });
 }
 FrameAction.displayName = 'Frame.Action';
 
 export interface FramePanelProps extends ComponentProps<'div'> {}
 
 /** The card the rows sit on. It draws the hairline between its children, except under `band`. */
-function FramePanel({ className, ...props }: FramePanelProps) {
-  return <div data-slot="frame-panel" className={frameVariants().panel({ className })} {...props} />;
+function FramePanel({ className, render, ...props }: FramePanelProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-panel', className: frameVariants().panel({ className }) }, props),
+  });
 }
 FramePanel.displayName = 'Frame.Panel';
 
@@ -227,7 +255,16 @@ export interface FrameRowProps extends Omit<ComponentProps<'div'>, 'onClick'> {
 }
 
 const Chevron = ({ className }: { className: string }) => (
-  <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="m9 6 6 6-6 6" />
   </svg>
 );
@@ -236,7 +273,16 @@ const Chevron = ({ className }: { className: string }) => (
  * One line of the panel: `Frame.Media`, `Frame.Content` and `Frame.Actions`
  * side by side. With `href` it is a link and with `onClick` a button.
  */
-function FrameRow({ className, children, chevron = false, href, target, rel, ...props }: FrameRowProps) {
+function FrameRow({
+  className,
+  children,
+  chevron = false,
+  href,
+  target,
+  rel,
+  render,
+  ...props
+}: FrameRowProps & RenderProp<'div'>) {
   const slots = frameVariants();
   const inside = (
     <>
@@ -271,19 +317,26 @@ function FrameRow({ className, children, chevron = false, href, target, rel, ...
       </button>
     );
   }
-  return (
-    <div data-slot="frame-row" className={slots.row({ className })} {...props}>
-      {inside}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'frame-row', className: slots.row({ className }), children: <>{inside}</> },
+      props
+    ),
+  });
 }
 FrameRow.displayName = 'Frame.Row';
 
 export interface FrameMediaProps extends ComponentProps<'div'> {}
 
 /** A row's leading icon, avatar or picture. Holds its size. */
-function FrameMedia({ className, ...props }: FrameMediaProps) {
-  return <div data-slot="frame-media" className={frameVariants().media({ className })} {...props} />;
+function FrameMedia({ className, render, ...props }: FrameMediaProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-media', className: frameVariants().media({ className }) }, props),
+  });
 }
 FrameMedia.displayName = 'Frame.Media';
 
@@ -294,16 +347,24 @@ export interface FrameContentProps extends ComponentProps<'div'> {}
  * what the media and actions leave and may shrink past its content, which is
  * what keeps a long line from pushing the rest of the row off the edge.
  */
-function FrameContent({ className, ...props }: FrameContentProps) {
-  return <div data-slot="frame-content" className={frameVariants().content({ className })} {...props} />;
+function FrameContent({ className, render, ...props }: FrameContentProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-content', className: frameVariants().content({ className }) }, props),
+  });
 }
 FrameContent.displayName = 'Frame.Content';
 
 export interface FrameActionsProps extends ComponentProps<'div'> {}
 
 /** A row's trailing side: a badge, a value, a switch, a small button. Holds its size. */
-function FrameActions({ className, ...props }: FrameActionsProps) {
-  return <div data-slot="frame-actions" className={frameVariants().actions({ className })} {...props} />;
+function FrameActions({ className, render, ...props }: FrameActionsProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-actions', className: frameVariants().actions({ className }) }, props),
+  });
 }
 FrameActions.displayName = 'Frame.Actions';
 
@@ -313,14 +374,25 @@ export interface FrameSectionProps extends Omit<ComponentProps<'section'>, 'titl
 }
 
 /** A labelled group of rows, for a panel holding more than one. */
-function FrameSection({ title, className, children, ...props }: FrameSectionProps) {
+function FrameSection({ title, className, children, render, ...props }: FrameSectionProps & RenderProp<'section'>) {
   const slots = frameVariants();
-  return (
-    <section data-slot="frame-section" className={slots.section({ className })} {...props}>
-      {title !== undefined ? <h4 className={slots.sectionTitle()}>{title}</h4> : null}
-      {children}
-    </section>
-  );
+  return useRender({
+    defaultTagName: 'section',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'frame-section',
+        className: slots.section({ className }),
+        children: (
+          <>
+            {title !== undefined ? <h4 className={slots.sectionTitle()}>{title}</h4> : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 FrameSection.displayName = 'Frame.Section';
 
@@ -330,8 +402,12 @@ export interface FrameFooterProps extends ComponentProps<'div'> {}
  * The strip below the panel. Under `inset` its children become equal pills in
  * the recessed band, the shape a row of decisions takes.
  */
-function FrameFooter({ className, ...props }: FrameFooterProps) {
-  return <div data-slot="frame-footer" className={frameVariants().footer({ className })} {...props} />;
+function FrameFooter({ className, render, ...props }: FrameFooterProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'frame-footer', className: frameVariants().footer({ className }) }, props),
+  });
 }
 FrameFooter.displayName = 'Frame.Footer';
 

@@ -50,7 +50,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `viewport` | `CanvasViewport` | `{ x: 0, y: 0, zoom: 1 }` | Where the canvas is looking, as `{ x, y, zoom }`. Pass what a Flow reports from `onViewportChange`, and the pattern pans and scales with the graph. Default `{ x: 0, y: 0, zoom: 1 }`. |
+| `viewport` | `CanvasViewport` | — | Where the canvas is looking, as `{ x, y, zoom }`. Pass what a Flow reports from `onViewportChange`, and the pattern pans and scales with the graph. Default `{ x: 0, y: 0, zoom: 1 }`. |
 
 #### `CanvasPatternProps`
 
@@ -69,6 +69,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `radius` | `number` | `100` | How far the light reaches from its centre, in pixels. Default `100`. |
 | `position` | `{ x: number; y: number }` | — | Holds the light at a point, in pixels from the canvas's top left corner, instead of following the pointer. |
+
+#### `CanvasContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'canvas-content', className: canvasVariants().content({ className }) }, props),` | **required** | — |
 
 ## In a Server Component
 

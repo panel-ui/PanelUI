@@ -55,6 +55,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type ToolbarVariant = 'floating' | 'inline';
 export type ToolbarSize = 'sm' | 'md' | 'lg';
@@ -118,9 +124,15 @@ const toolbarVariants = tv({
       inline: {},
     },
     size: {
-      sm: { root: '[--toolbar-item:1.75rem] [--toolbar-icon:0.875rem] [--toolbar-radius:0.5rem] [--toolbar-pad:0.25rem]' },
-      md: { root: '[--toolbar-item:2.25rem] [--toolbar-icon:1.125rem] [--toolbar-radius:0.75rem] [--toolbar-pad:0.3125rem]' },
-      lg: { root: '[--toolbar-item:2.75rem] [--toolbar-icon:1.25rem] [--toolbar-radius:0.875rem] [--toolbar-pad:0.375rem]' },
+      sm: {
+        root: '[--toolbar-item:1.75rem] [--toolbar-icon:0.875rem] [--toolbar-radius:0.5rem] [--toolbar-pad:0.25rem]',
+      },
+      md: {
+        root: '[--toolbar-item:2.25rem] [--toolbar-icon:1.125rem] [--toolbar-radius:0.75rem] [--toolbar-pad:0.3125rem]',
+      },
+      lg: {
+        root: '[--toolbar-item:2.75rem] [--toolbar-icon:1.25rem] [--toolbar-radius:0.875rem] [--toolbar-pad:0.375rem]',
+      },
     },
   },
   defaultVariants: { variant: 'floating', size: 'md' },
@@ -145,7 +157,9 @@ function useToolbar(part: string) {
 /** Whether a key press belongs to something being typed into. */
 function typing(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
-  return Boolean(target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]'));
+  return Boolean(
+    target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]')
+  );
 }
 
 /** The key a shortcut is pressed with, when it is one key on its own: "V" is, "⌘Z" is not. */
@@ -238,8 +252,7 @@ interface GroupContextValue {
 
 const GroupContext = createContext<GroupContextValue | null>(null);
 
-export interface ToolbarGroupProps
-  extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'dir'> {
+export interface ToolbarGroupProps extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'dir'> {
   /** The chosen tool's `value`, when the caller holds it. */
   value?: string;
   /** The tool chosen at first, when the caller does not hold it. */
@@ -451,17 +464,36 @@ ToolbarSeparator.displayName = 'Toolbar.Separator';
 export interface ToolbarCaretProps extends ComponentProps<'span'> {}
 
 /** A small chevron after a tool's icon, saying it opens more choices. */
-function ToolbarCaret({ className, children, ...props }: ToolbarCaretProps) {
+function ToolbarCaret({ className, children, render, ...props }: ToolbarCaretProps & RenderProp<'span'>) {
   const slots = toolbarVariants();
-  return (
-    <span aria-hidden data-slot="toolbar-caret" className={slots.caret({ className })} {...props}>
-      {children ?? (
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3.5 4.75 6 7.25l2.5-2.5" />
-        </svg>
-      )}
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'aria-hidden': true,
+        'data-slot': 'toolbar-caret',
+        className: slots.caret({ className }),
+        children: (
+          <>
+            {children ?? (
+              <svg
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3.5 4.75 6 7.25l2.5-2.5" />
+              </svg>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 ToolbarCaret.displayName = 'Toolbar.Caret';
 

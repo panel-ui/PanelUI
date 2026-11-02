@@ -26,6 +26,12 @@
  */
 import { useMemo, type ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const rollingNumberVariants = tv({
   slots: {
@@ -71,10 +77,7 @@ interface Piece {
 function piecesOf(parts: Intl.NumberFormatPart[]): Piece[] {
   // Whole digits are counted from the decimal point, so the units column is
   // the same column whatever is in front of it.
-  let whole = parts.reduce(
-    (count, part) => (part.type === 'integer' ? count + part.value.length : count),
-    0
-  );
+  let whole = parts.reduce((count, part) => (part.type === 'integer' ? count + part.value.length : count), 0);
   let fraction = 0;
   const pieces: Piece[] = [];
 
@@ -102,8 +105,9 @@ export function RollingNumber({
   locales = 'en-US',
   duration = 600,
   className,
+  render,
   ...props
-}: RollingNumberProps) {
+}: RollingNumberProps & RenderProp<'span'>) {
   const slots = rollingNumberVariants();
 
   // The options object is usually written inline, so it is new on every
@@ -120,37 +124,47 @@ export function RollingNumber({
     return { label: parts.map((part) => part.value).join(''), pieces: piecesOf(parts) };
   }, [formatter, value]);
 
-  return (
-    <span className={slots.root({ className })} {...props}>
-      {/* What a screen reader gets: the number, once, as it is written. */}
-      <span className="sr-only">{label}</span>
-      {pieces.map((piece) =>
-        piece.digit === null ? (
-          <span key={piece.key} aria-hidden="true">
-            {piece.text}
-          </span>
-        ) : (
-          <span key={piece.key} aria-hidden="true" className={slots.column()}>
-            <span className="invisible">0</span>
-            <span className={slots.window()}>
-              <span
-                className={slots.strip()}
-                style={{
-                  transform: `translateY(${-piece.digit * 10}%)`,
-                  transitionDuration: `${duration}ms`,
-                }}
-              >
-                {DIGITS.map((digit) => (
-                  <span key={digit} className={slots.digit()}>
-                    {digit}
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        className: slots.root({ className }),
+        children: (
+          <>
+            {/* What a screen reader gets: the number, once, as it is written. */}
+            <span className="sr-only">{label}</span>
+            {pieces.map((piece) =>
+              piece.digit === null ? (
+                <span key={piece.key} aria-hidden="true">
+                  {piece.text}
+                </span>
+              ) : (
+                <span key={piece.key} aria-hidden="true" className={slots.column()}>
+                  <span className="invisible">0</span>
+                  <span className={slots.window()}>
+                    <span
+                      className={slots.strip()}
+                      style={{
+                        transform: `translateY(${-piece.digit * 10}%)`,
+                        transitionDuration: `${duration}ms`,
+                      }}
+                    >
+                      {DIGITS.map((digit) => (
+                        <span key={digit} className={slots.digit()}>
+                          {digit}
+                        </span>
+                      ))}
+                    </span>
                   </span>
-                ))}
-              </span>
-            </span>
-          </span>
-        )
-      )}
-    </span>
-  );
+                </span>
+              )
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 RollingNumber.displayName = 'RollingNumber';

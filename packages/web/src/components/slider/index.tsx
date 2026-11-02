@@ -56,6 +56,13 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type SliderVariant = 'fill' | 'line';
 export type SliderSize = 'sm' | 'md' | 'lg';
@@ -84,7 +91,8 @@ const sliderVariants = tv({
       `transition-[inset-inline-start,width] ${GLIDE} group-data-moving/slider:duration-0 motion-reduce:transition-none`,
     ],
     tick: 'pointer-events-none absolute -translate-x-1/2 rtl:translate-x-1/2',
-    center: 'pointer-events-none absolute inset-y-1.5 start-1/2 w-px -translate-x-1/2 bg-foreground/20 rtl:translate-x-1/2',
+    center:
+      'pointer-events-none absolute inset-y-1.5 start-1/2 w-px -translate-x-1/2 bg-foreground/20 rtl:translate-x-1/2',
     handle: [
       'pointer-events-none absolute top-1/2 start-(--slider-at) -translate-y-1/2',
       `transition-[inset-inline-start,height,width,background-color,scale] ${GLIDE} group-data-moving/slider:duration-0 motion-reduce:transition-none`,
@@ -141,11 +149,19 @@ const sliderVariants = tv({
       },
     },
     color: {
-      neutral: { root: '[--slider-fill:color-mix(in_oklab,var(--foreground)_11%,transparent)] [--slider-mark:var(--foreground)]' },
-      primary: { root: '[--slider-fill:color-mix(in_oklab,var(--primary)_24%,transparent)] [--slider-mark:var(--primary)]' },
+      neutral: {
+        root: '[--slider-fill:color-mix(in_oklab,var(--foreground)_11%,transparent)] [--slider-mark:var(--foreground)]',
+      },
+      primary: {
+        root: '[--slider-fill:color-mix(in_oklab,var(--primary)_24%,transparent)] [--slider-mark:var(--primary)]',
+      },
       info: { root: '[--slider-fill:color-mix(in_oklab,var(--info)_26%,transparent)] [--slider-mark:var(--info)]' },
-      success: { root: '[--slider-fill:color-mix(in_oklab,var(--success)_26%,transparent)] [--slider-mark:var(--success)]' },
-      warning: { root: '[--slider-fill:color-mix(in_oklab,var(--warning)_28%,transparent)] [--slider-mark:var(--warning)]' },
+      success: {
+        root: '[--slider-fill:color-mix(in_oklab,var(--success)_26%,transparent)] [--slider-mark:var(--success)]',
+      },
+      warning: {
+        root: '[--slider-fill:color-mix(in_oklab,var(--warning)_28%,transparent)] [--slider-mark:var(--warning)]',
+      },
       destructive: {
         root: '[--slider-fill:color-mix(in_oklab,var(--destructive)_24%,transparent)] [--slider-mark:var(--destructive)]',
       },
@@ -174,11 +190,10 @@ interface SliderContextValue {
 
 const SliderContext = createContext<SliderContextValue | null>(null);
 
-export interface SliderProps<Value extends SliderValue = number>
-  extends Omit<
-    BaseSlider.Root.Props<Value>,
-    'className' | 'style' | 'format' | 'orientation' | 'children' | 'render' | 'onValueChange' | 'value' | 'defaultValue'
-  > {
+export interface SliderProps<Value extends SliderValue = number> extends Omit<
+  BaseSlider.Root.Props<Value>,
+  'className' | 'style' | 'format' | 'orientation' | 'children' | 'render' | 'onValueChange' | 'value' | 'defaultValue'
+> {
   /** The value, when the caller holds it. Two numbers make a range with two handles. */
   value?: Value;
   /** The value to start at, when the caller does not hold it. Default `min`. */
@@ -315,7 +330,8 @@ function SliderRoot<Value extends SliderValue = number>({
       if (Math.hypot(next.clientX - startX, next.clientY - startY) > DRAG_SLOP) {
         root.current?.setAttribute('data-moving', '');
       }
-      const past = next.clientX < box.left ? next.clientX - box.left : next.clientX > box.right ? next.clientX - box.right : 0;
+      const past =
+        next.clientX < box.left ? next.clientX - box.left : next.clientX > box.right ? next.clientX - box.right : 0;
       // Eases off, so the further the pointer goes the less the track follows.
       const give = Math.sign(past) * STRETCH * Math.sqrt(Math.min(Math.max(Math.abs(past) - 12, 0) / 200, 1));
       setStretch(rtl ? -give : give);
@@ -512,24 +528,28 @@ export interface SliderStepProps extends Omit<ComponentProps<'button'>, 'childre
  * in on either side of a zoom slider. It is disabled at the end it moves
  * towards.
  */
-function SliderStep({ by, className, disabled, onClick, ...props }: SliderStepProps) {
+function SliderStep({ by, className, disabled, onClick, render, ...props }: SliderStepProps & RenderProp<'button'>) {
   const slider = useContext(SliderContext);
   if (!slider) throw new Error('Slider.Step must be used inside a <Slider>.');
   const slots = sliderVariants();
   const stuck = by < 0 ? slider.atMin : slider.atMax;
-  return (
-    <button
-      type="button"
-      data-slot="slider-step"
-      disabled={disabled || slider.disabled || stuck}
-      className={slots.step({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) slider.nudge(by);
-      }}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        'data-slot': 'slider-step',
+        disabled: disabled || slider.disabled || stuck,
+        className: slots.step({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) slider.nudge(by);
+        },
+      },
+      props
+    ),
+  });
 }
 SliderStep.displayName = 'Slider.Step';
 

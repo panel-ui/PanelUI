@@ -151,7 +151,7 @@ Import from `panelui-web/planet` instead of `@/components/panelui/planet`. Tailw
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -403,6 +403,13 @@ export default function PlanetFlyTo() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `step` | `number` | — | Degrees of longitude one press turns the globe. |
+
+### Planet.List
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'ul',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'planet-list', className: planetVariants().list({ className }) }, props),` | — |  |
 
 ### Planet.ListItem
 

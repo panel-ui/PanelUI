@@ -155,7 +155,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `label` | `string` | — | What a screen reader calls it, after its place: "3 of 8, Harbour at dawn". An image's `alt` usually says it already. |
-| `aspect` | `string` | `'16 / 9'` | Its shape in a column, overriding `Sheet.Slides`' `aspect`. |
+| `aspect` | `string` | — | Its shape in a column, overriding `Sheet.Slides`' `aspect`. |
 
 ## In a Server Component
 

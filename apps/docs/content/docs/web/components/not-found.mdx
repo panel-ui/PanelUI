@@ -66,7 +66,7 @@ Import from `panelui-web/not-found` instead of `@/components/panelui/not-found`.
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -256,6 +256,20 @@ export default function NotFoundServerError() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `as` | `'h1' \| 'h2' \| 'h3'` | — | The heading level. A page that is only this one message wants `h1`. |
+
+### NotFound.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### NotFound.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

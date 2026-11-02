@@ -51,6 +51,13 @@ import {
 } from 'react';
 import { tv } from 'tailwind-variants';
 import { Sheet } from '../sheet';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const EASE = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
 
@@ -216,7 +223,10 @@ function WorkbenchRoot({
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key !== '\\' || event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented) return;
       const target = event.target;
-      if (target instanceof Element && target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')) {
+      if (
+        target instanceof Element &&
+        target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]')
+      ) {
         return;
       }
       event.preventDefault();
@@ -288,38 +298,50 @@ function usePresence(register: (present: boolean) => void) {
 export interface WorkbenchBarProps extends ComponentProps<'div'> {}
 
 /** The strip floating at the top of the canvas, for a toolbar. */
-function WorkbenchBar({ className, ...props }: WorkbenchBarProps) {
+function WorkbenchBar({ className, render, ...props }: WorkbenchBarProps & RenderProp<'div'>) {
   useWorkbenchContext('Workbench.Bar');
   const slots = workbenchVariants();
-  return <div data-slot="workbench-bar" className={slots.bar({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'workbench-bar', className: slots.bar({ className }) }, props),
+  });
 }
 WorkbenchBar.displayName = 'Workbench.Bar';
 
 export interface WorkbenchSidebarProps extends ComponentProps<'aside'> {}
 
 /** A column before the canvas, for layers, pages or assets. It is hidden on a narrow screen and in focus. */
-function WorkbenchSidebar({ className, ...props }: WorkbenchSidebarProps) {
+function WorkbenchSidebar({ className, render, ...props }: WorkbenchSidebarProps & RenderProp<'aside'>) {
   const workbench = useWorkbenchContext('Workbench.Sidebar');
   usePresence(workbench.hasSidebar);
   const slots = workbenchVariants();
-  return (
-    <aside
-      data-slot="workbench-sidebar"
-      inert={workbench.focus || workbench.compact || undefined}
-      className={slots.sidebar({ className })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'aside',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'workbench-sidebar',
+        inert: workbench.focus || workbench.compact || undefined,
+        className: slots.sidebar({ className }),
+      },
+      props
+    ),
+  });
 }
 WorkbenchSidebar.displayName = 'Workbench.Sidebar';
 
 export interface WorkbenchCanvasProps extends ComponentProps<'div'> {}
 
 /** The stage in the middle: a field of dots with the work centred on it. */
-function WorkbenchCanvas({ className, ...props }: WorkbenchCanvasProps) {
+function WorkbenchCanvas({ className, render, ...props }: WorkbenchCanvasProps & RenderProp<'div'>) {
   useWorkbenchContext('Workbench.Canvas');
   const slots = workbenchVariants();
-  return <div data-slot="workbench-canvas" className={slots.canvas({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'workbench-canvas', className: slots.canvas({ className }) }, props),
+  });
 }
 WorkbenchCanvas.displayName = 'Workbench.Canvas';
 
@@ -329,17 +351,27 @@ export interface WorkbenchArtboardProps extends ComponentProps<'div'> {
 }
 
 /** The work itself: as large as its shape fits on the canvas, clear of the floating bar. */
-function WorkbenchArtboard({ aspect = '16 / 9', className, style, ...props }: WorkbenchArtboardProps) {
+function WorkbenchArtboard({
+  aspect = '16 / 9',
+  className,
+  style,
+  render,
+  ...props
+}: WorkbenchArtboardProps & RenderProp<'div'>) {
   const slots = workbenchVariants();
   const [wide, tall] = aspect.split('/').map((part) => Number(part.trim()) || 1);
-  return (
-    <div
-      data-slot="workbench-artboard"
-      className={slots.artboard({ className })}
-      style={{ ...style, '--wb-aspect': aspect, '--wb-ratio': (wide ?? 1) / (tall ?? 1) } as CSSProperties}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'workbench-artboard',
+        className: slots.artboard({ className }),
+        style: { ...style, '--wb-aspect': aspect, '--wb-ratio': (wide ?? 1) / (tall ?? 1) } as CSSProperties,
+      },
+      props
+    ),
+  });
 }
 WorkbenchArtboard.displayName = 'Workbench.Artboard';
 
@@ -353,7 +385,13 @@ export interface WorkbenchInspectorProps extends ComponentProps<'div'> {
  * The column after the canvas, for an `Inspector`. On a narrow screen the
  * same children open in a sheet from the side instead.
  */
-function WorkbenchInspector({ title = 'Inspector', className, children, ...props }: WorkbenchInspectorProps) {
+function WorkbenchInspector({
+  title = 'Inspector',
+  className,
+  children,
+  render,
+  ...props
+}: WorkbenchInspectorProps & RenderProp<'div'>) {
   const workbench = useWorkbenchContext('Workbench.Inspector');
   usePresence(workbench.hasInspector);
   const slots = workbenchVariants();
@@ -369,11 +407,19 @@ function WorkbenchInspector({ title = 'Inspector', className, children, ...props
       </Sheet>
     );
   }
-  return (
-    <div data-slot="workbench-inspector" inert={workbench.focus || undefined} className={slots.inspector({ className })} {...props}>
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'workbench-inspector',
+        inert: workbench.focus || undefined,
+        className: slots.inspector({ className }),
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
 }
 WorkbenchInspector.displayName = 'Workbench.Inspector';
 
@@ -384,33 +430,54 @@ export interface WorkbenchInspectorTriggerProps extends ComponentProps<'button'>
  * only there when the inspector is a sheet, so put it where it belongs on
  * either size: in the bar, beside the tools.
  */
-function WorkbenchInspectorTrigger({ className, children, onClick, ...props }: WorkbenchInspectorTriggerProps) {
+function WorkbenchInspectorTrigger({
+  className,
+  children,
+  onClick,
+  render,
+  ...props
+}: WorkbenchInspectorTriggerProps & RenderProp<'button'>) {
   const workbench = useWorkbenchContext('Workbench.InspectorTrigger');
   const slots = workbenchVariants();
   if (!workbench.compact) return null;
-  return (
-    <button
-      type="button"
-      data-slot="workbench-inspector-trigger"
-      aria-label="Open inspector"
-      aria-expanded={workbench.inspectorOpen}
-      className={slots.trigger({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) workbench.setInspectorOpen(true);
-      }}
-      {...props}
-    >
-      {children ?? (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
-          <circle cx="16" cy="6" r="2" />
-          <circle cx="10" cy="12" r="2" />
-          <circle cx="18" cy="18" r="2" />
-        </svg>
-      )}
-    </button>
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        'data-slot': 'workbench-inspector-trigger',
+        'aria-label': 'Open inspector',
+        'aria-expanded': workbench.inspectorOpen,
+        className: slots.trigger({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) workbench.setInspectorOpen(true);
+        },
+        children: (
+          <>
+            {children ?? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+                <circle cx="16" cy="6" r="2" />
+                <circle cx="10" cy="12" r="2" />
+                <circle cx="18" cy="18" r="2" />
+              </svg>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 WorkbenchInspectorTrigger.displayName = 'Workbench.InspectorTrigger';
 
@@ -422,7 +489,14 @@ export interface WorkbenchTimelineProps extends ComponentProps<'div'> {
 }
 
 /** The row under everything, for a `Timeline`. Its top edge drags to resize it. */
-function WorkbenchTimeline({ resizable = true, minHeight = 140, className, children, ...props }: WorkbenchTimelineProps) {
+function WorkbenchTimeline({
+  resizable = true,
+  minHeight = 140,
+  className,
+  children,
+  render,
+  ...props
+}: WorkbenchTimelineProps & RenderProp<'div'>) {
   const workbench = useWorkbenchContext('Workbench.Timeline');
   usePresence(workbench.hasTimeline);
   const slots = workbenchVariants();
@@ -439,7 +513,9 @@ function WorkbenchTimeline({ resizable = true, minHeight = 140, className, child
     workbench.setResizing(true);
     const target = event.currentTarget;
     const move = (next: PointerEvent) =>
-      workbench.setTimelineHeight(Math.round(Math.min(Math.max(startHeight + startY - next.clientY, minHeight), maxHeight())));
+      workbench.setTimelineHeight(
+        Math.round(Math.min(Math.max(startHeight + startY - next.clientY, minHeight), maxHeight()))
+      );
     const end = () => {
       setActive(false);
       workbench.setResizing(false);
@@ -459,26 +535,38 @@ function WorkbenchTimeline({ resizable = true, minHeight = 140, className, child
     workbench.setTimelineHeight(Math.min(Math.max(workbench.timelineHeight + by, minHeight), maxHeight()));
   };
 
-  return (
-    <div data-slot="workbench-timeline" inert={workbench.focus || undefined} className={slots.timeline({ className })} {...props}>
-      {resizable ? (
-        <div
-          role="separator"
-          tabIndex={0}
-          aria-orientation="horizontal"
-          aria-label="Timeline height"
-          aria-valuenow={workbench.timelineHeight}
-          aria-valuemin={minHeight}
-          data-slot="workbench-resize"
-          data-active={active ? '' : undefined}
-          className={slots.resize()}
-          onPointerDown={drag}
-          onKeyDown={keys}
-        />
-      ) : null}
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'workbench-timeline',
+        inert: workbench.focus || undefined,
+        className: slots.timeline({ className }),
+        children: (
+          <>
+            {resizable ? (
+              <div
+                role="separator"
+                tabIndex={0}
+                aria-orientation="horizontal"
+                aria-label="Timeline height"
+                aria-valuenow={workbench.timelineHeight}
+                aria-valuemin={minHeight}
+                data-slot="workbench-resize"
+                data-active={active ? '' : undefined}
+                className={slots.resize()}
+                onPointerDown={drag}
+                onKeyDown={keys}
+              />
+            ) : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 WorkbenchTimeline.displayName = 'Workbench.Timeline';
 

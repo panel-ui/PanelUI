@@ -60,7 +60,7 @@ Import from `panelui-web/alert` instead of `@/components/panelui/alert`. Tailwin
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -371,6 +371,35 @@ export default function AlertBanner() {
 | `defaultOpen` | `boolean` | `true` | Whether it starts shown, when the caller does not hold it. Default `true`. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when `Alert.Close` asks for it to close. |
 
+### Alert.Icon
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `alertVariants().icon({ className }),` | — |  |
+
+### Alert.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'alert-title', className: alertVariants().title({ className }) }, props),` | — |  |
+
+### Alert.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Alert.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'alert-actions', className: alertVariants().actions({ className }) }, props),` | — |  |
+
 ### Alert.Details
 
 | Prop | Type | Default | Description |
@@ -379,6 +408,13 @@ export default function AlertBanner() {
 | `open` | `boolean` | — | Whether the list is open, when the caller holds that. |
 | `defaultOpen` | `boolean` | `false` | Whether the list starts open, when the caller does not hold it. Default `false`. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the line is pressed to open or close the list. |
+
+### Alert.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'li',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'alert-item', className: alertVariants().item({ className }) }, props),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

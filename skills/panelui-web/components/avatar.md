@@ -78,8 +78,8 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `max` | `number` | — | How many to show. The rest are counted in a last circle that lists them. |
-| `size` | `AvatarSize` | — | The size of every avatar in it. Default `md`. |
-| `shape` | `AvatarShape` | `circle` | The shape of every avatar in it. Default `circle`. |
+| `size` | `AvatarSize` | `'md'` | The size of every avatar in it. Default `md`. |
+| `shape` | `AvatarShape` | `'circle'` | The shape of every avatar in it. Default `circle`. |
 | `label` | `string` | — | What a screen reader calls the group, such as "Members". |
 
 ## In a Server Component

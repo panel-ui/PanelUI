@@ -38,7 +38,7 @@ test('an entry that holds state or handles events is a client module', () => {
   // in the reader's project. One that needs neither is left as it is, so it
   // can be rendered on the server and costs the page no JavaScript.
   const CLIENT_ONLY =
-    /\buse(?:State|Effect|LayoutEffect|Ref|Memo|Callback|Context|Id|ImperativeHandle|Reducer|SyncExternalStore)\(|\bcreateContext\(|\bon[A-Z]\w*=\{/;
+    /\buse(?:State|Effect|LayoutEffect|Ref|Memo|Callback|Context|Id|ImperativeHandle|Reducer|SyncExternalStore|Render)\(|\bcreateContext\(|\bon[A-Z]\w*=\{/;
   let server = 0;
   for (const slug of slugs) {
     const entry = fs.readFileSync(path.join(components, slug, 'index.tsx'), 'utf8');

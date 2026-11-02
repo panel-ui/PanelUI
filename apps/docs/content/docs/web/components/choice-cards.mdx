@@ -281,7 +281,7 @@ export default function ChoiceCardsDescriptions() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `columns` | `number` | — | How many cards stand in a row. Default: one per item, up to four. |
-| `aspect` | `string` | `'4 / 3'` | The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. |
+| `aspect` | `string` | — | The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. |
 | `color` | `ChoiceCardsColor` | `primary` | The colour of the ring and the check on the chosen card. Default `primary`. |
 | `className` | `string` | — |  |
 | `style` | `CSSProperties` | — |  |
@@ -292,6 +292,29 @@ export default function ChoiceCardsDescriptions() {
 | --- | --- | --- | --- |
 | `value` | `string` | — | What choosing this card sets the group's value to. |
 | `className` | `string` | — |  |
+
+### ChoiceCards.Media
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### ChoiceCards.Label
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ id: labelId, 'data-slot': 'choice-cards-label', className: slots.label({ className }) }, props),` | — |  |
+
+### ChoiceCards.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `id` | `descriptionId,` | — |  |
+| `className` | `slots.description({ className: ['-mt-1.5 px-1.5 pb-1', className] }),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

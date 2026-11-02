@@ -129,19 +129,54 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `ReactNode` | — | Written in the corner of the group. |
 | `size` | `{ width: number; height: number }` | — | A fixed size for the group. Give one when it holds `Flow.Node`s, which are placed inside it rather than laid out by it, so they do not size it. |
 
+#### `FlowNodeHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'flow-node-header', className: flowVariants().nodeHeader({ className }) }, props),` | **required** | — |
+
+#### `FlowNodeContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `FlowNodeTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'flow-node-title', className: flowVariants().nodeTitle({ className }) }, props),` | **required** | — |
+
+#### `FlowNodeDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 #### `FlowNodeBadgeProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `color` | `FlowColor \| 'muted'` | — | Which of the theme's roles it is tinted with. `muted` is grey. Default `muted`. |
 
+#### `FlowGroupItemProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'flow-group-item', className: flowVariants().groupItem({ className }) }, props),` | **required** | — |
+
 #### `FlowHandleProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `id` | `string` | — | A name for this handle, so an edge can be joined to it and not only to the node. |
-| `position` | `FlowSide` | `'bottom-right'` | Which face of the node it sits on. |
-| `offset` | `number` | — | How far along that face, from 0 to 1. |
+| `position` | `FlowSide` | `'right'` | Which face of the node it sits on. |
+| `offset` | `number` | `0.5` | How far along that face, from 0 to 1. |
 
 #### `FlowEdgeProps`
 

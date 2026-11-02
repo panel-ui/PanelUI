@@ -58,6 +58,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type MessageFrom = 'user' | 'assistant';
 
@@ -121,7 +127,8 @@ const messageVariants = tv({
     attachment: 'flex items-center gap-2.5 overflow-hidden rounded-xl border bg-background text-xs',
     attachmentImage: 'size-20 object-cover',
     attachmentFile: 'h-14 max-w-60 py-2 pe-3.5 ps-2',
-    attachmentGlyph: 'flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-4',
+    attachmentGlyph:
+      'flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-4',
     attachmentName: 'block truncate font-medium text-foreground',
     attachmentMeta: 'block truncate text-muted-foreground',
   },
@@ -213,35 +220,60 @@ MessageGroup.displayName = 'Message.Group';
 export interface MessageAvatarProps extends ComponentProps<'div'> {}
 
 /** Who it is from, beside the turn's first line. Leave it empty to keep the space. */
-function MessageAvatar({ className, ...props }: MessageAvatarProps) {
-  return <div data-slot="message-avatar" className={messageVariants().avatar({ className })} {...props} />;
+function MessageAvatar({ className, render, ...props }: MessageAvatarProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'message-avatar', className: messageVariants().avatar({ className }) }, props),
+  });
 }
 MessageAvatar.displayName = 'Message.Avatar';
 
 export interface MessageContentProps extends ComponentProps<'div'> {}
 
 /** The column with the header, the bubble, the attachments and the actions. */
-function MessageContent({ className, ...props }: MessageContentProps) {
+function MessageContent({ className, render, ...props }: MessageContentProps & RenderProp<'div'>) {
   const { from } = useContext(MessageContext);
-  return <div data-slot="message-content" className={messageVariants({ from }).content({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'message-content', className: messageVariants({ from }).content({ className }) },
+      props
+    ),
+  });
 }
 MessageContent.displayName = 'Message.Content';
 
 export interface MessageHeaderProps extends ComponentProps<'div'> {}
 
 /** A line above the turn: a name in `<strong>`, a time, a model. */
-function MessageHeader({ className, ...props }: MessageHeaderProps) {
+function MessageHeader({ className, render, ...props }: MessageHeaderProps & RenderProp<'div'>) {
   const { from } = useContext(MessageContext);
-  return <div data-slot="message-header" className={messageVariants({ from }).header({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'message-header', className: messageVariants({ from }).header({ className }) },
+      props
+    ),
+  });
 }
 MessageHeader.displayName = 'Message.Header';
 
 export interface MessageBubbleProps extends ComponentProps<'div'> {}
 
 /** The surface of a person's turn. On the assistant's it draws nothing, and the text is the page's. */
-function MessageBubble({ className, ...props }: MessageBubbleProps) {
+function MessageBubble({ className, render, ...props }: MessageBubbleProps & RenderProp<'div'>) {
   const { from } = useContext(MessageContext);
-  return <div data-slot="message-bubble" className={messageVariants({ from }).bubble({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'message-bubble', className: messageVariants({ from }).bubble({ className }) },
+      props
+    ),
+  });
 }
 MessageBubble.displayName = 'Message.Bubble';
 
@@ -251,26 +283,45 @@ export interface MessageBubbleContentProps extends ComponentProps<'div'> {}
  * The text. Paragraphs, lists, inline code, code blocks and headings inside
  * it are set as prose, so rendered Markdown can go straight in.
  */
-function MessageBubbleContent({ className, children, ...props }: MessageBubbleContentProps) {
+function MessageBubbleContent({
+  className,
+  children,
+  render,
+  ...props
+}: MessageBubbleContentProps & RenderProp<'div'>) {
   const { from, streaming } = useContext(MessageContext);
   const slots = messageVariants({ from });
   // The caret follows the last word: after the text itself, or inside the last block.
   const plain = typeof children === 'string' || typeof children === 'number';
   const caret = streaming ? (plain ? slots.caret() : slots.caretLast()) : undefined;
-  return (
-    <div data-slot="message-bubble-content" className={slots.bubbleContent({ className: [caret, className] })} {...props}>
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'message-bubble-content',
+        className: slots.bubbleContent({ className: [caret, className] }),
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
 }
 MessageBubbleContent.displayName = 'Message.BubbleContent';
 
 export interface MessageFooterProps extends ComponentProps<'div'> {}
 
 /** A line under the turn: sent, read, a model and how long it took. */
-function MessageFooter({ className, ...props }: MessageFooterProps) {
+function MessageFooter({ className, render, ...props }: MessageFooterProps & RenderProp<'div'>) {
   const { from } = useContext(MessageContext);
-  return <div data-slot="message-footer" className={messageVariants({ from }).footer({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'message-footer', className: messageVariants({ from }).footer({ className }) },
+      props
+    ),
+  });
 }
 MessageFooter.displayName = 'Message.Footer';
 
@@ -370,33 +421,53 @@ export interface MessageBranchProps extends Omit<ComponentProps<'div'>, 'onChang
 }
 
 /** "‹ 2 / 3 ›": steps between the versions of an answer that was retried or edited. */
-function MessageBranch({ count, index, onIndexChange, className, ...props }: MessageBranchProps) {
+function MessageBranch({
+  count,
+  index,
+  onIndexChange,
+  className,
+  render,
+  ...props
+}: MessageBranchProps & RenderProp<'div'>) {
   const slots = messageVariants();
-  return (
-    <div role="group" aria-label="Versions" data-slot="message-branch" className={slots.branch({ className })} {...props}>
-      <button
-        type="button"
-        aria-label="Previous version"
-        className={slots.branchButton()}
-        disabled={index <= 0}
-        onClick={() => onIndexChange(index - 1)}
-      >
-        <ChevronGlyph flip />
-      </button>
-      <span aria-live="polite" className="min-w-9 text-center">
-        {index + 1} / {count}
-      </span>
-      <button
-        type="button"
-        aria-label="Next version"
-        className={slots.branchButton()}
-        disabled={index >= count - 1}
-        onClick={() => onIndexChange(index + 1)}
-      >
-        <ChevronGlyph />
-      </button>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'group',
+        'aria-label': 'Versions',
+        'data-slot': 'message-branch',
+        className: slots.branch({ className }),
+        children: (
+          <>
+            <button
+              type="button"
+              aria-label="Previous version"
+              className={slots.branchButton()}
+              disabled={index <= 0}
+              onClick={() => onIndexChange(index - 1)}
+            >
+              <ChevronGlyph flip />
+            </button>
+            <span aria-live="polite" className="min-w-9 text-center">
+              {index + 1} / {count}
+            </span>
+            <button
+              type="button"
+              aria-label="Next version"
+              className={slots.branchButton()}
+              disabled={index >= count - 1}
+              onClick={() => onIndexChange(index + 1)}
+            >
+              <ChevronGlyph />
+            </button>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 MessageBranch.displayName = 'Message.Branch';
 
@@ -426,11 +497,16 @@ MessageStatus.displayName = 'Message.Status';
 export interface MessageAttachmentsProps extends ComponentProps<'div'> {}
 
 /** The files sent with a turn, above its bubble. */
-function MessageAttachments({ className, ...props }: MessageAttachmentsProps) {
+function MessageAttachments({ className, render, ...props }: MessageAttachmentsProps & RenderProp<'div'>) {
   const { from } = useContext(MessageContext);
-  return (
-    <div data-slot="message-attachments" className={messageVariants({ from }).attachments({ className })} {...props} />
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'message-attachments', className: messageVariants({ from }).attachments({ className }) },
+      props
+    ),
+  });
 }
 MessageAttachments.displayName = 'Message.Attachments';
 
@@ -446,7 +522,15 @@ export interface MessageAttachmentProps extends Omit<ComponentProps<'div'>, 'chi
 }
 
 /** One sent file: a picture, or a card with a glyph, the name and its size. */
-function MessageAttachment({ name, src, meta, icon, className, ...props }: MessageAttachmentProps) {
+function MessageAttachment({
+  name,
+  src,
+  meta,
+  icon,
+  className,
+  render,
+  ...props
+}: MessageAttachmentProps & RenderProp<'div'>) {
   const slots = messageVariants();
   if (src) {
     return (
@@ -455,19 +539,26 @@ function MessageAttachment({ name, src, meta, icon, className, ...props }: Messa
       </div>
     );
   }
-  return (
-    <div
-      data-slot="message-attachment"
-      className={slots.attachment({ className: [slots.attachmentFile(), className] })}
-      {...props}
-    >
-      <span className={slots.attachmentGlyph()}>{icon ?? <FileGlyph />}</span>
-      <span className="min-w-0">
-        <span className={slots.attachmentName()}>{name}</span>
-        {meta ? <span className={slots.attachmentMeta()}>{meta}</span> : null}
-      </span>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'message-attachment',
+        className: slots.attachment({ className: [slots.attachmentFile(), className] }),
+        children: (
+          <>
+            <span className={slots.attachmentGlyph()}>{icon ?? <FileGlyph />}</span>
+            <span className="min-w-0">
+              <span className={slots.attachmentName()}>{name}</span>
+              {meta ? <span className={slots.attachmentMeta()}>{meta}</span> : null}
+            </span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 MessageAttachment.displayName = 'Message.Attachment';
 
@@ -502,7 +593,12 @@ function CheckGlyph() {
 
 function ChevronGlyph({ flip = false }: { flip?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...STROKE} className={flip ? '-scale-x-100 rtl:scale-x-100' : 'rtl:-scale-x-100'}>
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      {...STROKE}
+      className={flip ? '-scale-x-100 rtl:scale-x-100' : 'rtl:-scale-x-100'}
+    >
       <path d="M9 6l6 6-6 6" />
     </svg>
   );

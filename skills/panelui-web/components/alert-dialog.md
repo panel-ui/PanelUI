@@ -67,9 +67,9 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `open` | `boolean` | — | Whether it is open, when the caller holds that. |
-| `defaultOpen` | `boolean` | `false` | Whether it starts open, when the caller does not hold it. |
+| `defaultOpen` | `boolean` | — | Whether it starts open, when the caller does not hold it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
-| `dismissible` | `boolean` | `true` | Whether a press outside it closes it, as Cancel would. Escape always does. Default `true`. |
+| `dismissible` | `boolean` | — | Whether a press outside it closes it, as Cancel would. Escape always does. Default `true`. |
 
 #### `AlertDialogTriggerProps`
 
@@ -85,6 +85,21 @@ Every part also takes the props of the element it renders, and a `className`.
 | `size` | `'default' \| 'sm'` | `'default'` | `sm` is narrower, with the question centred over the answers. Default `default`. |
 | `blur` | `boolean` | `false` | Frost the page behind the dialog instead of only dimming it. |
 | `inline` | `boolean` | `false` | Draw it in the page instead of over it: no backdrop, no trigger, always there. For previews; `open` is ignored. |
+
+#### `AlertDialogMediaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `alertDialogVariants().media({ className }),` | **required** | — |
+
+#### `AlertDialogFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
 
 #### `AlertDialogActionProps`
 

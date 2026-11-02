@@ -57,6 +57,13 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const commandDockVariants = tv({
   slots: {
@@ -76,8 +83,7 @@ const commandDockVariants = tv({
     // was, and the two fade through each other.
     panel: '-mt-11 flex flex-col',
     form: 'flex h-11 items-center gap-2 pe-1.5 ps-4 transition-opacity duration-200 motion-reduce:transition-none',
-    input:
-      'h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground',
+    input: 'h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground',
     submit:
       'inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground outline-none transition-[opacity,scale] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-95 disabled:cursor-default disabled:opacity-30 [&_svg]:size-4',
     // Two rows of a grid, the second going from no height to its own, which
@@ -262,49 +268,56 @@ function useInert<T extends HTMLElement>(inert: boolean) {
 export interface CommandDockTriggerProps extends ComponentProps<'button'> {}
 
 /** The closed form: a button that opens the dock. */
-function CommandDockTrigger({ className, onClick, ...props }: CommandDockTriggerProps) {
+function CommandDockTrigger({ className, onClick, render, ...props }: CommandDockTriggerProps & RenderProp<'button'>) {
   const dock = useDock('CommandDock.Trigger');
   const ref = useInert<HTMLButtonElement>(dock.open);
-  return (
-    <button
-      ref={ref}
-      type="button"
-      data-dock-trigger=""
-      aria-expanded={dock.open}
-      aria-controls={dock.panelId}
-      className={commandDockVariants({ open: dock.open }).trigger({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) dock.setOpen(true);
-      }}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        ref: ref,
+        type: 'button',
+        'data-dock-trigger': '',
+        'aria-expanded': dock.open,
+        'aria-controls': dock.panelId,
+        className: commandDockVariants({ open: dock.open }).trigger({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) dock.setOpen(true);
+        },
+      },
+      props
+    ),
+  });
 }
 CommandDockTrigger.displayName = 'CommandDock.Trigger';
 
 export interface CommandDockPanelProps extends ComponentProps<'div'> {}
 
 /** The open form: the field, and the rows under it. */
-function CommandDockPanel({ className, ...props }: CommandDockPanelProps) {
+function CommandDockPanel({ className, render, ...props }: CommandDockPanelProps & RenderProp<'div'>) {
   const dock = useDock('CommandDock.Panel');
   // Kept in the page while closed, so it can be seen folding away. Inert, so
   // nothing in it can be reached while it cannot be seen.
   const ref = useInert<HTMLDivElement>(!dock.open);
-  return (
-    <div
-      ref={ref}
-      id={dock.panelId}
-      data-open={dock.open ? '' : undefined}
-      className={commandDockVariants().panel({ className })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: ref,
+        id: dock.panelId,
+        'data-open': dock.open ? '' : undefined,
+        className: commandDockVariants().panel({ className }),
+      },
+      props
+    ),
+  });
 }
 CommandDockPanel.displayName = 'CommandDock.Panel';
 
-export interface CommandDockInputProps
-  extends Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'type'> {
+export interface CommandDockInputProps extends Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'type'> {
   /** What a screen reader calls the send button. */
   submitLabel?: string;
 }
@@ -371,19 +384,37 @@ export interface CommandDockResultsProps extends ComponentProps<'div'> {
 }
 
 /** Where the rows go. It takes no room until there is something in it. */
-function CommandDockResults({ className, label = 'Results', children, ...props }: CommandDockResultsProps) {
+function CommandDockResults({
+  className,
+  label = 'Results',
+  children,
+  render,
+  ...props
+}: CommandDockResultsProps & RenderProp<'div'>) {
   const dock = useDock('CommandDock.Results');
   const rows = Array.isArray(children) ? children.flat().filter(Boolean).length : children ? 1 : 0;
   // Closed, it folds away whatever it holds.
   const filled = dock.open && (rows > 0 || dock.busy);
   const slots = commandDockVariants({ filled });
+  const element = useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'list',
+        'aria-label': label,
+        'aria-live': 'polite',
+        className: slots.resultsInner({ className }),
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
   return (
     <div className={slots.results()}>
       <div className={slots.resultsClip()}>
         {/* Polite: rows are read as they arrive, without cutting in on typing. */}
-        <div role="list" aria-label={label} aria-live="polite" className={slots.resultsInner({ className })} {...props}>
-          {children}
-        </div>
+        {element}
       </div>
     </div>
   );
@@ -396,39 +427,63 @@ export interface CommandDockRowProps extends ComponentProps<'div'> {
 }
 
 /** One row of the answer. It slides in when it is added. */
-function CommandDockRow({ className, onSelect, children, ...props }: CommandDockRowProps) {
+function CommandDockRow({ className, onSelect, children, render, ...props }: CommandDockRowProps & RenderProp<'div'>) {
   const slots = commandDockVariants({ interactive: onSelect !== undefined });
-  return (
-    <div role="listitem" {...props}>
-      {onSelect ? (
-        <button type="button" onClick={onSelect} className={slots.row({ className: ['w-full text-start', className] })}>
-          {children}
-        </button>
-      ) : (
-        <div className={slots.row({ className })}>{children}</div>
-      )}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'listitem',
+        children: (
+          <>
+            {onSelect ? (
+              <button
+                type="button"
+                onClick={onSelect}
+                className={slots.row({ className: ['w-full text-start', className] })}
+              >
+                {children}
+              </button>
+            ) : (
+              <div className={slots.row({ className })}>{children}</div>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 CommandDockRow.displayName = 'CommandDock.Row';
 
 export interface CommandDockRowTitleProps extends ComponentProps<'span'> {}
 
 /** What a row is, in a line that takes the row's spare width and truncates. */
-function CommandDockRowTitle({ className, ...props }: CommandDockRowTitleProps) {
-  return (
-    <span data-slot="command-dock-row-title" className={commandDockVariants().rowTitle({ className })} {...props} />
-  );
+function CommandDockRowTitle({ className, render, ...props }: CommandDockRowTitleProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'command-dock-row-title', className: commandDockVariants().rowTitle({ className }) },
+      props
+    ),
+  });
 }
 CommandDockRowTitle.displayName = 'CommandDock.RowTitle';
 
 export interface CommandDockRowMetaProps extends ComponentProps<'span'> {}
 
 /** Something short at the end of a row, quieter than its title: a date, a place. */
-function CommandDockRowMeta({ className, ...props }: CommandDockRowMetaProps) {
-  return (
-    <span data-slot="command-dock-row-meta" className={commandDockVariants().rowMeta({ className })} {...props} />
-  );
+function CommandDockRowMeta({ className, render, ...props }: CommandDockRowMetaProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'command-dock-row-meta', className: commandDockVariants().rowMeta({ className }) },
+      props
+    ),
+  });
 }
 CommandDockRowMeta.displayName = 'CommandDock.RowMeta';
 
@@ -437,18 +492,34 @@ export interface CommandDockStatusProps extends ComponentProps<'div'> {
 }
 
 /** Shown under the rows while `busy`: three dots, and words if you give it some. */
-function CommandDockStatus({ className, children = 'Working', ...props }: CommandDockStatusProps) {
+function CommandDockStatus({
+  className,
+  children = 'Working',
+  render,
+  ...props
+}: CommandDockStatusProps & RenderProp<'div'>) {
   const slots = commandDockVariants();
-  return (
-    <div role="status" className={slots.status({ className })} {...props}>
-      <span aria-hidden="true" className={slots.dots()}>
-        <span className={slots.dot()} />
-        <span className={slots.dot({ className: '[animation-delay:150ms]' })} />
-        <span className={slots.dot({ className: '[animation-delay:300ms]' })} />
-      </span>
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'status',
+        className: slots.status({ className }),
+        children: (
+          <>
+            <span aria-hidden="true" className={slots.dots()}>
+              <span className={slots.dot()} />
+              <span className={slots.dot({ className: '[animation-delay:150ms]' })} />
+              <span className={slots.dot({ className: '[animation-delay:300ms]' })} />
+            </span>
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 CommandDockStatus.displayName = 'CommandDock.Status';
 

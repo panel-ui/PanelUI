@@ -57,6 +57,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** Which of the theme's roles a part is drawn in. */
 export type LaneBoardColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
@@ -240,8 +246,7 @@ function whereIs<T extends LaneBoardCard>(lanes: LaneBoardLane<T>[], id: string)
   return null;
 }
 
-export interface LaneBoardProps<T extends LaneBoardCard>
-  extends Omit<ComponentProps<'div'>, 'children' | 'onChange'> {
+export interface LaneBoardProps<T extends LaneBoardCard> extends Omit<ComponentProps<'div'>, 'children' | 'onChange'> {
   /** The lanes and their cards, when the caller holds them. */
   lanes?: LaneBoardLane<T>[];
   /** The lanes to begin with, when the caller does not hold them. */
@@ -278,8 +283,9 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   height = '28rem',
   className,
   style,
+  render,
   ...props
-}: LaneBoardProps<T>) {
+}: LaneBoardProps<T> & RenderProp<'div'>) {
   const slots = laneBoardVariants();
   const [internal, setInternal] = useState<LaneBoardLane<T>[]>(defaultLanes ?? []);
   const settled = controlled ?? internal;
@@ -299,9 +305,7 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   const sections = useRef(new Map<string, HTMLElement>());
   /** Each lane's scroller, which moves up and down. */
   const viewports = useRef(new Map<string, HTMLElement>());
-  const places = useRef(
-    new Map<string, { x: number; y: number; height: number; lane: string }>()
-  );
+  const places = useRef(new Map<string, { x: number; y: number; height: number; lane: string }>());
   /** Everything about a pointer drag that changes too often to be state. */
   const drag = useRef<{
     id: string;
@@ -644,9 +648,7 @@ function LaneBoardRoot<T extends LaneBoardCard>({
       event.preventDefault();
       setDraft(settled);
       setCarry({ id: card.id, by: 'keys' });
-      setSaid(
-        `Picked up ${cardName(card)}. Arrow keys move it, Space sets it down, Escape puts it back.`
-      );
+      setSaid(`Picked up ${cardName(card)}. Arrow keys move it, Space sets it down, Escape puts it back.`);
       return;
     }
 
@@ -699,133 +701,126 @@ function LaneBoardRoot<T extends LaneBoardCard>({
   const carried = carry ? whereIs(shown, carry.id) : null;
   const carriedLane = carried ? shown.find((lane) => lane.id === carried.lane) : undefined;
 
-  return (
-    <div
-      ref={root}
-      role="group"
-      aria-label={label}
-      className={slots.root({ className })}
-      style={{ height: height === 'auto' ? undefined : height, ...style } as CSSProperties}
-      {...props}
-    >
-      <ScrollArea.Root className={slots.board()}>
-        <ScrollArea.Viewport ref={scroller} className={slots.boardViewport()}>
-          <div className={slots.lanes()}>
-            {shown.map((lane) => (
-              <section
-                key={lane.id}
-                ref={(node) => {
-                  if (node) sections.current.set(lane.id, node);
-                  else sections.current.delete(lane.id);
-                }}
-                aria-label={typeof lane.title === 'string' ? lane.title : undefined}
-                data-over={carried?.lane === lane.id ? '' : undefined}
-                className={laneBoardVariants({ over: carried?.lane === lane.id }).lane()}
-              >
-                <header className={slots.laneHeader()}>
-                  <div className={slots.laneHeading()}>
-                    {lane.color ? (
-                      <span
-                        aria-hidden="true"
-                        className={laneBoardVariants({ color: lane.color }).laneDot()}
-                      />
-                    ) : null}
-                    <h3 className={slots.laneTitle()}>{lane.title}</h3>
-                  </div>
-                  <span
-                    className={laneBoardVariants({
-                      full: lane.limit !== undefined && lane.cards.length > lane.limit,
-                    }).laneCount()}
-                  >
-                    {lane.limit === undefined
-                      ? lane.cards.length
-                      : `${lane.cards.length}/${lane.limit}`}
-                  </span>
-                </header>
-                <ScrollArea.Root className={slots.laneScroller()}>
-                  <ScrollArea.Viewport
-                    ref={(node: HTMLDivElement | null) => {
-                      if (node) viewports.current.set(lane.id, node);
-                      else viewports.current.delete(lane.id);
-                    }}
-                    className={slots.laneViewport()}
-                  >
-                    <ol className={slots.list()}>
-                      {lane.cards.map((card) => {
-                        const isCarried = carry?.id === card.id;
-                        const state = !isCarried
-                          ? 'rest'
-                          : carry.by === 'pointer'
-                            ? 'placeholder'
-                            : 'held';
-                        return (
-                          <li
-                            key={card.id}
-                            ref={(node) => {
-                              if (node) cards.current.set(card.id, node);
-                              else cards.current.delete(card.id);
-                            }}
-                            tabIndex={0}
-                            aria-roledescription="Card that can be moved"
-                            aria-label={cardName(card)}
-                            data-card={card.id}
-                            data-carried={isCarried ? carry.by : undefined}
-                            className={laneBoardVariants({ state }).card()}
-                            onPointerDown={(event) => onPointerDown(event, card.id)}
-                            onKeyDown={(event) => onKeyDown(event, card)}
-                            onBlur={() => {
-                              // Focus leaving a card held with the keyboard puts it
-                              // back: nothing is steering it any more.
-                              if (
-                                carry?.by === 'keys' &&
-                                carry.id === card.id &&
-                                !cards.current.get(card.id)?.matches(':focus')
-                              ) {
-                                requestAnimationFrame(() => {
-                                  if (document.activeElement !== cards.current.get(card.id)) {
-                                    setDraft(null);
-                                    setCarry(null);
-                                  }
-                                });
-                              }
-                            }}
-                          >
-                            {renderCard(card, { lane, carried: isCarried })}
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </ScrollArea.Viewport>
-                  <ScrollArea.Scrollbar orientation="vertical" className={slots.scrollbar()}>
-                    <ScrollArea.Thumb className={slots.thumb()} />
-                  </ScrollArea.Scrollbar>
-                </ScrollArea.Root>
-                <div className={slots.laneFooter()}>{renderLaneFooter?.(lane)}</div>
-              </section>
-            ))}
-          </div>
-        </ScrollArea.Viewport>
-        <ScrollArea.Scrollbar orientation="horizontal" className={slots.scrollbar()}>
-          <ScrollArea.Thumb className={slots.thumb()} />
-        </ScrollArea.Scrollbar>
-      </ScrollArea.Root>
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: root,
+        role: 'group',
+        'aria-label': label,
+        className: slots.root({ className }),
+        style: { height: height === 'auto' ? undefined : height, ...style } as CSSProperties,
+        children: (
+          <>
+            <ScrollArea.Root className={slots.board()}>
+              <ScrollArea.Viewport ref={scroller} className={slots.boardViewport()}>
+                <div className={slots.lanes()}>
+                  {shown.map((lane) => (
+                    <section
+                      key={lane.id}
+                      ref={(node) => {
+                        if (node) sections.current.set(lane.id, node);
+                        else sections.current.delete(lane.id);
+                      }}
+                      aria-label={typeof lane.title === 'string' ? lane.title : undefined}
+                      data-over={carried?.lane === lane.id ? '' : undefined}
+                      className={laneBoardVariants({ over: carried?.lane === lane.id }).lane()}
+                    >
+                      <header className={slots.laneHeader()}>
+                        <div className={slots.laneHeading()}>
+                          {lane.color ? (
+                            <span aria-hidden="true" className={laneBoardVariants({ color: lane.color }).laneDot()} />
+                          ) : null}
+                          <h3 className={slots.laneTitle()}>{lane.title}</h3>
+                        </div>
+                        <span
+                          className={laneBoardVariants({
+                            full: lane.limit !== undefined && lane.cards.length > lane.limit,
+                          }).laneCount()}
+                        >
+                          {lane.limit === undefined ? lane.cards.length : `${lane.cards.length}/${lane.limit}`}
+                        </span>
+                      </header>
+                      <ScrollArea.Root className={slots.laneScroller()}>
+                        <ScrollArea.Viewport
+                          ref={(node: HTMLDivElement | null) => {
+                            if (node) viewports.current.set(lane.id, node);
+                            else viewports.current.delete(lane.id);
+                          }}
+                          className={slots.laneViewport()}
+                        >
+                          <ol className={slots.list()}>
+                            {lane.cards.map((card) => {
+                              const isCarried = carry?.id === card.id;
+                              const state = !isCarried ? 'rest' : carry.by === 'pointer' ? 'placeholder' : 'held';
+                              return (
+                                <li
+                                  key={card.id}
+                                  ref={(node) => {
+                                    if (node) cards.current.set(card.id, node);
+                                    else cards.current.delete(card.id);
+                                  }}
+                                  tabIndex={0}
+                                  aria-roledescription="Card that can be moved"
+                                  aria-label={cardName(card)}
+                                  data-card={card.id}
+                                  data-carried={isCarried ? carry.by : undefined}
+                                  className={laneBoardVariants({ state }).card()}
+                                  onPointerDown={(event) => onPointerDown(event, card.id)}
+                                  onKeyDown={(event) => onKeyDown(event, card)}
+                                  onBlur={() => {
+                                    // Focus leaving a card held with the keyboard puts it
+                                    // back: nothing is steering it any more.
+                                    if (
+                                      carry?.by === 'keys' &&
+                                      carry.id === card.id &&
+                                      !cards.current.get(card.id)?.matches(':focus')
+                                    ) {
+                                      requestAnimationFrame(() => {
+                                        if (document.activeElement !== cards.current.get(card.id)) {
+                                          setDraft(null);
+                                          setCarry(null);
+                                        }
+                                      });
+                                    }
+                                  }}
+                                >
+                                  {renderCard(card, { lane, carried: isCarried })}
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        </ScrollArea.Viewport>
+                        <ScrollArea.Scrollbar orientation="vertical" className={slots.scrollbar()}>
+                          <ScrollArea.Thumb className={slots.thumb()} />
+                        </ScrollArea.Scrollbar>
+                      </ScrollArea.Root>
+                      <div className={slots.laneFooter()}>{renderLaneFooter?.(lane)}</div>
+                    </section>
+                  ))}
+                </div>
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar orientation="horizontal" className={slots.scrollbar()}>
+                <ScrollArea.Thumb className={slots.thumb()} />
+              </ScrollArea.Scrollbar>
+            </ScrollArea.Root>
 
-      {carry?.by === 'pointer' && carried && carriedLane ? (
-        <div
-          ref={overlay}
-          aria-hidden="true"
-          className={slots.overlay()}
-          style={{ width: drag.current?.width }}
-        >
-          {renderCard(carried.card, { lane: carriedLane, carried: true })}
-        </div>
-      ) : null}
+            {carry?.by === 'pointer' && carried && carriedLane ? (
+              <div ref={overlay} aria-hidden="true" className={slots.overlay()} style={{ width: drag.current?.width }}>
+                {renderCard(carried.card, { lane: carriedLane, carried: true })}
+              </div>
+            ) : null}
 
-      <span aria-live="assertive" className="sr-only">
-        {said}
-      </span>
-    </div>
-  );
+            <span aria-live="assertive" className="sr-only">
+              {said}
+            </span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 LaneBoardRoot.displayName = 'LaneBoard';
 
@@ -836,24 +831,36 @@ LaneBoardRoot.displayName = 'LaneBoard';
 export interface LaneBoardTitleProps extends ComponentProps<'div'> {}
 
 /** A card's name. */
-function LaneBoardTitle({ className, ...props }: LaneBoardTitleProps) {
-  return <div className={laneBoardVariants().title({ className })} {...props} />;
+function LaneBoardTitle({ className, render, ...props }: LaneBoardTitleProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: laneBoardVariants().title({ className }) }, props),
+  });
 }
 LaneBoardTitle.displayName = 'LaneBoard.Title';
 
 export interface LaneBoardCodeProps extends ComponentProps<'div'> {}
 
 /** A card's reference, in a fixed-width face so a column of them lines up. */
-function LaneBoardCode({ className, ...props }: LaneBoardCodeProps) {
-  return <div className={laneBoardVariants().code({ className })} {...props} />;
+function LaneBoardCode({ className, render, ...props }: LaneBoardCodeProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: laneBoardVariants().code({ className }) }, props),
+  });
 }
 LaneBoardCode.displayName = 'LaneBoard.Code';
 
 export interface LaneBoardRowProps extends ComponentProps<'div'> {}
 
 /** The last line of a card: something at each end. */
-function LaneBoardRow({ className, ...props }: LaneBoardRowProps) {
-  return <div className={laneBoardVariants().row({ className })} {...props} />;
+function LaneBoardRow({ className, render, ...props }: LaneBoardRowProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: laneBoardVariants().row({ className }) }, props),
+  });
 }
 LaneBoardRow.displayName = 'LaneBoard.Row';
 
@@ -875,21 +882,29 @@ function LaneBoardSteps({
   color = 'primary',
   label = 'Progress',
   className,
+  render,
   ...props
-}: LaneBoardStepsProps) {
+}: LaneBoardStepsProps & RenderProp<'div'>) {
   const slots = laneBoardVariants({ color });
-  return (
-    <div
-      role="img"
-      aria-label={`${label}: ${value} of ${max}`}
-      className={slots.steps({ className })}
-      {...props}
-    >
-      {Array.from({ length: max }, (_, index) => (
-        <span key={index} className={laneBoardVariants({ lit: index < value }).step()} />
-      ))}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'img',
+        'aria-label': `${label}: ${value} of ${max}`,
+        className: slots.steps({ className }),
+        children: (
+          <>
+            {Array.from({ length: max }, (_, index) => (
+              <span key={index} className={laneBoardVariants({ lit: index < value }).step()} />
+            ))}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 LaneBoardSteps.displayName = 'LaneBoard.Steps';
 
@@ -899,24 +914,39 @@ export interface LaneBoardTagProps extends Omit<ComponentProps<'span'>, 'color'>
 }
 
 /** A word in a pill, for a card's state. */
-function LaneBoardTag({ color = 'primary', className, ...props }: LaneBoardTagProps) {
-  return <span className={laneBoardVariants({ color }).tag({ className })} {...props} />;
+function LaneBoardTag({ color = 'primary', className, render, ...props }: LaneBoardTagProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ className: laneBoardVariants({ color }).tag({ className }) }, props),
+  });
 }
 LaneBoardTag.displayName = 'LaneBoard.Tag';
 
 export interface LaneBoardMetaProps extends ComponentProps<'span'> {}
 
 /** A short figure at the end of a card's last line: a time, a count. */
-function LaneBoardMeta({ className, ...props }: LaneBoardMetaProps) {
-  return <span className={laneBoardVariants().meta({ className })} {...props} />;
+function LaneBoardMeta({ className, render, ...props }: LaneBoardMetaProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ className: laneBoardVariants().meta({ className }) }, props),
+  });
 }
 LaneBoardMeta.displayName = 'LaneBoard.Meta';
 
 export interface LaneBoardAvatarProps extends ComponentProps<'span'> {}
 
 /** Who a card belongs to, as initials in a small circle. */
-function LaneBoardAvatar({ className, ...props }: LaneBoardAvatarProps) {
-  return <span data-slot="lane-board-avatar" className={laneBoardVariants().avatar({ className })} {...props} />;
+function LaneBoardAvatar({ className, render, ...props }: LaneBoardAvatarProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'lane-board-avatar', className: laneBoardVariants().avatar({ className }) },
+      props
+    ),
+  });
 }
 LaneBoardAvatar.displayName = 'LaneBoard.Avatar';
 
@@ -932,12 +962,4 @@ export const LaneBoard = Object.assign(LaneBoardRoot, {
 
 /* By name as well, for a Server Component, which cannot dot into a client
    module. */
-export {
-  LaneBoardTitle,
-  LaneBoardCode,
-  LaneBoardRow,
-  LaneBoardSteps,
-  LaneBoardTag,
-  LaneBoardMeta,
-  LaneBoardAvatar,
-};
+export { LaneBoardTitle, LaneBoardCode, LaneBoardRow, LaneBoardSteps, LaneBoardTag, LaneBoardMeta, LaneBoardAvatar };

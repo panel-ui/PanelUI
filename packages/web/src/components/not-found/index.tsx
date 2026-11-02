@@ -46,14 +46,15 @@
  * while something is moving. The canvas reads its colours from the theme each
  * time it draws, so a change of theme needs nothing from the page.
  */
-import {
-  useEffect,
-  useRef,
-  type ComponentProps,
-  type CSSProperties,
-} from 'react';
+import { useEffect, useRef, type ComponentProps, type CSSProperties } from 'react';
 import { tv } from 'tailwind-variants';
 import { GLYPH_COLUMNS, GLYPH_ROWS, ICONS, digitGlyph, type Glyph } from './glyphs';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** How the digit near the pointer reacts. */
 export type NotFoundEffect = 'scatter' | 'dissolve' | 'scramble';
@@ -349,7 +350,11 @@ function createEngine({ canvas, code, fill, highlight, effect: initialEffect, am
 
   const startScramble = (digit: Digit) => {
     const centre = centreOf(digit);
-    const from = byAngle(digit.cells.map((cell) => ({ x: cell.hx, y: cell.hy, cell })), centre.x, centre.y);
+    const from = byAngle(
+      digit.cells.map((cell) => ({ x: cell.hx, y: cell.hy, cell })),
+      centre.x,
+      centre.y
+    );
     const icon = ICONS[digit.icon % ICONS.length]!;
     const to = byAngle(
       cellsOf(icon, digit.left, 0).map((cell) => ({ x: cell.hx, y: cell.hy })),
@@ -456,7 +461,12 @@ function createEngine({ canvas, code, fill, highlight, effect: initialEffect, am
             cell.x += cell.vx * h;
             cell.y += cell.vy * h;
           }
-          if (!digit.active && Math.abs(cell.x - tx) < 0.004 && Math.abs(cell.y - ty) < 0.004 && Math.abs(cell.vx) + Math.abs(cell.vy) < 0.02) {
+          if (
+            !digit.active &&
+            Math.abs(cell.x - tx) < 0.004 &&
+            Math.abs(cell.y - ty) < 0.004 &&
+            Math.abs(cell.vx) + Math.abs(cell.vy) < 0.02
+          ) {
             cell.x = tx;
             cell.y = ty;
             cell.vx = 0;
@@ -688,7 +698,14 @@ function createEngine({ canvas, code, fill, highlight, effect: initialEffect, am
     track(event);
     // Anywhere over the canvas the pointer lights cells, so a frame is wanted
     // even when no digit is close enough to react.
-    if (pointer && pointer.x > -HEAT_RADIUS && pointer.x < columns + HEAT_RADIUS && pointer.y > -HEAT_RADIUS && pointer.y < GLYPH_ROWS + PAD_Y * 2 + HEAT_RADIUS) invalidate();
+    if (
+      pointer &&
+      pointer.x > -HEAT_RADIUS &&
+      pointer.x < columns + HEAT_RADIUS &&
+      pointer.y > -HEAT_RADIUS &&
+      pointer.y < GLYPH_ROWS + PAD_Y * 2 + HEAT_RADIUS
+    )
+      invalidate();
     const { index, distance } = nearest();
     const current = digits.findIndex((digit) => digit.active);
     if (index !== -1 && distance <= APPROACH) activate(index);
@@ -834,14 +851,32 @@ const backdropStyle: CSSProperties = {
 };
 
 /** The column the code, the title, the description and the actions stand in, centred. */
-function NotFoundRoot({ backdrop = true, className, children, ...props }: NotFoundProps) {
+function NotFoundRoot({ backdrop = true, className, children, render, ...props }: NotFoundProps & RenderProp<'div'>) {
   const slots = notFoundVariants({ backdrop });
-  return (
-    <div data-slot="not-found" className={slots.root({ className })} {...props}>
-      {backdrop ? <span aria-hidden="true" data-slot="not-found-backdrop" className={slots.backdrop()} style={backdropStyle} /> : null}
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'not-found',
+        className: slots.root({ className }),
+        children: (
+          <>
+            {backdrop ? (
+              <span
+                aria-hidden="true"
+                data-slot="not-found-backdrop"
+                className={slots.backdrop()}
+                style={backdropStyle}
+              />
+            ) : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 NotFoundRoot.displayName = 'NotFound';
 
@@ -880,8 +915,9 @@ function NotFoundCode({
   label,
   className,
   style,
+  render,
   ...props
-}: NotFoundCodeProps) {
+}: NotFoundCodeProps & RenderProp<'div'>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const effectRef = useRef(effect);
@@ -917,18 +953,25 @@ function NotFoundCode({
     height: `${(1 + (2 * PAD_Y) / GLYPH_ROWS) * 100}%`,
   };
 
-  return (
-    <div
-      data-slot="not-found-code"
-      role="img"
-      aria-label={label ?? `Error ${code}`}
-      className={slots.code({ className })}
-      style={{ aspectRatio: `${columns} / ${GLYPH_ROWS}`, ...style }}
-      {...props}
-    >
-      <canvas ref={canvasRef} aria-hidden="true" className={slots.canvas()} style={canvasStyle} />
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'not-found-code',
+        role: 'img',
+        'aria-label': label ?? `Error ${code}`,
+        className: slots.code({ className }),
+        style: { aspectRatio: `${columns} / ${GLYPH_ROWS}`, ...style },
+        children: (
+          <>
+            <canvas ref={canvasRef} aria-hidden="true" className={slots.canvas()} style={canvasStyle} />
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 NotFoundCode.displayName = 'NotFound.Code';
 
@@ -946,16 +989,30 @@ NotFoundTitle.displayName = 'NotFound.Title';
 export interface NotFoundDescriptionProps extends ComponentProps<'p'> {}
 
 /** A line on what to do next. */
-function NotFoundDescription({ className, ...props }: NotFoundDescriptionProps) {
-  return <p data-slot="not-found-description" className={notFoundVariants().description({ className })} {...props} />;
+function NotFoundDescription({ className, render, ...props }: NotFoundDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'not-found-description', className: notFoundVariants().description({ className }) },
+      props
+    ),
+  });
 }
 NotFoundDescription.displayName = 'NotFound.Description';
 
 export interface NotFoundActionsProps extends ComponentProps<'div'> {}
 
 /** The ways out: links or buttons in a row that wraps on a narrow screen. */
-function NotFoundActions({ className, ...props }: NotFoundActionsProps) {
-  return <div data-slot="not-found-actions" className={notFoundVariants().actions({ className })} {...props} />;
+function NotFoundActions({ className, render, ...props }: NotFoundActionsProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'not-found-actions', className: notFoundVariants().actions({ className }) },
+      props
+    ),
+  });
 }
 NotFoundActions.displayName = 'NotFound.Actions';
 

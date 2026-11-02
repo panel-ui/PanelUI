@@ -101,6 +101,14 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 
+#### `ToolbarCaretProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.caret({ className }),` | **required** | — |
+
 ## In a Server Component
 
 `Toolbar` is a client component. A Server Component cannot read `Toolbar.Group` off the import, so import each part by name: `ToolbarGroup`, `ToolbarTool`, `ToolbarButton`, `ToolbarSeparator`, `ToolbarCaret`.

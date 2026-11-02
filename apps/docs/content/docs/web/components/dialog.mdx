@@ -749,7 +749,7 @@ export default function DialogNested() {
 | `open` | `boolean` | — | Whether it is open, when the caller holds that. |
 | `defaultOpen` | `boolean` | — | Whether it starts open, when the caller does not hold it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
-| `dismissible` | `boolean` | `true` | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
+| `dismissible` | `boolean` | — | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
 
 ### Dialog.Trigger
 
@@ -774,12 +774,30 @@ export default function DialogNested() {
 | `title` | `ReactNode` | — | The heading. It is also what the dialog is announced as. |
 | `description` | `ReactNode` | — | A line under the heading. |
 
+### Dialog.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
 ### Dialog.Close
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `render` | `ReactElement` | — | Your own element to close the dialog with, such as a Cancel button. |
-| `icon` | `boolean` | `false` | Draw the cross glyph. Set for you on the built-in close button. |
+| `icon` | `boolean` | — | Draw the cross glyph. Set for you on the built-in close button. |
+
+### Dialog.List
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `ref` | `list,` | — |  |
+| `role` | `'listbox',` | — |  |
+| `className` | `dialogVariants().list({ className }),` | — |  |
+| `onKeyDown` | `move,` | — |  |
 
 ### Dialog.ListGroup
 

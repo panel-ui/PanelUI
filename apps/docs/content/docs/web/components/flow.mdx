@@ -157,7 +157,7 @@ Import from `panelui-web/flow` instead of `@/components/panelui/flow`. Tailwind 
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -967,19 +967,54 @@ export default function FlowGroups() {
 | `label` | `ReactNode` | — | Written in the corner of the group. |
 | `size` | `{ width: number; height: number }` | — | A fixed size for the group. Give one when it holds `Flow.Node`s, which are placed inside it rather than laid out by it, so they do not size it. |
 
+### Flow.NodeHeader
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'flow-node-header', className: flowVariants().nodeHeader({ className }) }, props),` | — |  |
+
+### Flow.NodeContent
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Flow.NodeTitle
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'flow-node-title', className: flowVariants().nodeTitle({ className }) }, props),` | — |  |
+
+### Flow.NodeDescription
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
 ### Flow.NodeBadge
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `color` | `FlowColor \| 'muted'` | — | Which of the theme's roles it is tinted with. `muted` is grey. Default `muted`. |
 
+### Flow.GroupItem
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'flow-group-item', className: flowVariants().groupItem({ className }) }, props),` | — |  |
+
 ### Flow.Handle
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `id` | `string` | — | A name for this handle, so an edge can be joined to it and not only to the node. |
-| `position` | `FlowSide` | `'bottom-right'` | Which face of the node it sits on. |
-| `offset` | `number` | — | How far along that face, from 0 to 1. |
+| `position` | `FlowSide` | `'right'` | Which face of the node it sits on. |
+| `offset` | `number` | `0.5` | How far along that face, from 0 to 1. |
 
 ### Flow.Edge
 

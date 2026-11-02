@@ -103,7 +103,7 @@ Import from `panelui-web/range-meter` instead of `@/components/panelui/range-met
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -248,6 +248,13 @@ export default function RangeMeterBrightness() {
 | `formatValue` | `(value: number) => ReactNode` | — | Writes the number in the tag. Defaults to the value as it is. |
 | `label` | `string` | `'Reading'` | What a screen reader calls it. |
 | `valueText` | `string` | — | What a screen reader says for the value: "240 milliseconds". |
+
+### RangeMeter.Label
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 ### RangeMeter.Scale
 

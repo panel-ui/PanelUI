@@ -191,7 +191,7 @@ Import from `panelui-web/prompt` instead of `@/components/panelui/prompt`. Tailw
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -1094,11 +1094,33 @@ export default function PromptAttachments() {
 | --- | --- | --- | --- |
 | `onSelect` | `() => void` | — | Called when it is pressed. Passing this makes the item a button. |
 
+### Prompt.Hint
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `promptVariants().hint({ className }),` | — |  |
+
 ### Prompt.Field
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `layout` | `'stacked' \| 'inline'` | — | `stacked` puts the text above a footer. `inline` puts every part in one row, the text between them, for a one-line composer; the row wraps as the text grows. Default `stacked`. |
+| `layout` | `'stacked' \| 'inline'` | `'stacked'` | `stacked` puts the text above a footer. `inline` puts every part in one row, the text between them, for a one-line composer; the row wraps as the text grows. Default `stacked`. |
+
+### Prompt.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'prompt-footer', className: promptVariants().footer({ className }) }, props),` | — |  |
+
+### Prompt.Tools
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'prompt-tools', className: promptVariants().tools({ className }) }, props),` | — |  |
 
 ### Prompt.Tool
 
@@ -1131,9 +1153,9 @@ export default function PromptAttachments() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | `'Model'` | What a screen reader and the tooltip call the button. Default `Add`. |
+| `label` | `string` | `'Add'` | What a screen reader and the tooltip call the button. Default `Add`. |
 | `icon` | `ReactNode` | — | Replaces the plus on the button. |
-| `width` | `'auto' \| 'field'` | — | `field` opens the menu as wide as the field, lined up with it, for items with descriptions. Default `auto`. |
+| `width` | `'auto' \| 'field'` | `'auto'` | `field` opens the menu as wide as the field, lined up with it, for items with descriptions. Default `auto`. |
 
 ### Prompt.AttachItem
 
@@ -1174,10 +1196,10 @@ export default function PromptAttachments() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `items` | `readonly PromptCommandItem[]` | — | The commands. |
-| `trigger` | `string` | — | The character that opens the list when the field starts with it. Default `/`. |
+| `trigger` | `string` | `'/'` | The character that opens the list when the field starts with it. Default `/`. |
 | `onSelect` | `(item: PromptCommandItem) => void` | — | Called with the command chosen. With it, the field is cleared and the command is yours to show; without it, the command is written into the field. |
-| `label` | `ReactNode` | `'Model'` | The heading over the list. Default `Commands`. |
-| `maxHeight` | `string` | `'10rem'` | How tall the list grows before it scrolls, as a CSS length. Default `12rem`. |
+| `label` | `ReactNode` | `'Commands'` | The heading over the list. Default `Commands`. |
+| `maxHeight` | `string` | `'12rem'` | How tall the list grows before it scrolls, as a CSS length. Default `12rem`. |
 
 ### Prompt.Recorder
 

@@ -72,6 +72,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `paused` | `boolean` | `false` | Hold the current frame. |
 | `label` | `string` | — | What a screen reader calls it. Defaults to the state: "Listening". |
 
+#### `SoundwaveCenterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'soundwave-center', className: soundwaveVariants().center({ className }) }, props),` | **required** | — |
+
 #### `AudioLevelOptions`
 
 | Prop | Type | Default | What it does |

@@ -82,24 +82,47 @@ Every part also takes the props of the element it renders, and a `className`.
 | `sidebarWidth` | `number` | `240` | The sidebar's width in pixels. Default 240. |
 | `defaultTimelineHeight` | `number` | `232` | The timeline's height in pixels to start at. Default 232. |
 
+#### `WorkbenchBarProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'workbench-bar', className: slots.bar({ className }) }, props),` | **required** | — |
+
+#### `WorkbenchSidebarProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'aside',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `inert` | `workbench.focus \|\| workbench.compact \|\| undefined,` | **required** | — |
+| `className` | `slots.sidebar({ className }),` | **required** | — |
+
+#### `WorkbenchCanvasProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'workbench-canvas', className: slots.canvas({ className }) }, props),` | **required** | — |
+
 #### `WorkbenchArtboardProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `aspect` | `string` | — | The work's shape, as a CSS aspect ratio such as `16 / 9` or `4 / 5`. Default `16 / 9`. |
+| `aspect` | `string` | `'16 / 9'` | The work's shape, as a CSS aspect ratio such as `16 / 9` or `4 / 5`. Default `16 / 9`. |
 
 #### `WorkbenchInspectorProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `title` | `string` | — | The sheet's heading on a narrow screen, read out when it opens. Default `Inspector`. |
+| `title` | `string` | `'Inspector'` | The sheet's heading on a narrow screen, read out when it opens. Default `Inspector`. |
 
 #### `WorkbenchTimelineProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `resizable` | `boolean` | — | Let its top edge be dragged to make it taller or shorter. Default true. |
-| `minHeight` | `number` | — | The shortest it can be dragged to, in pixels. Default 140. |
+| `resizable` | `boolean` | `true` | Let its top edge be dragged to make it taller or shorter. Default true. |
+| `minHeight` | `number` | `140` | The shortest it can be dragged to, in pixels. Default 140. |
 
 ## In a Server Component
 

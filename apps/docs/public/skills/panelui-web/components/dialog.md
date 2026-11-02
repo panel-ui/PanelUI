@@ -83,7 +83,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `open` | `boolean` | — | Whether it is open, when the caller holds that. |
 | `defaultOpen` | `boolean` | — | Whether it starts open, when the caller does not hold it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
-| `dismissible` | `boolean` | `true` | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
+| `dismissible` | `boolean` | — | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
 
 #### `DialogTriggerProps`
 
@@ -108,12 +108,30 @@ Every part also takes the props of the element it renders, and a `className`.
 | `title` | `ReactNode` | — | The heading. It is also what the dialog is announced as. |
 | `description` | `ReactNode` | — | A line under the heading. |
 
+#### `DialogFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 #### `DialogCloseProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `render` | `ReactElement` | — | Your own element to close the dialog with, such as a Cancel button. |
-| `icon` | `boolean` | `false` | Draw the cross glyph. Set for you on the built-in close button. |
+| `icon` | `boolean` | — | Draw the cross glyph. Set for you on the built-in close button. |
+
+#### `DialogListProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `ref` | `list,` | **required** | — |
+| `role` | `'listbox',` | **required** | — |
+| `className` | `dialogVariants().list({ className }),` | **required** | — |
+| `onKeyDown` | `move,` | **required** | — |
 
 #### `DialogListGroupProps`
 

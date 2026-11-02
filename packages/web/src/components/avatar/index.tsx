@@ -51,6 +51,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type AvatarShape = 'circle' | 'square';
@@ -263,8 +269,9 @@ function AvatarRoot({
   className,
   style,
   children,
+  render,
   ...props
-}: AvatarProps) {
+}: AvatarProps & RenderProp<'span'>) {
   const group = useContext(GroupContext);
   const overlapped = useContext(OverlappedContext);
   const resolvedSize = size ?? group?.size ?? 'md';
@@ -278,36 +285,43 @@ function AvatarRoot({
   const status = badge?.props.label ?? (badge?.props.status ? STATUS_LABEL[badge.props.status] : undefined);
   const label = [alt ?? name, status].filter(Boolean).join(', ') || undefined;
 
-  return (
-    <span
-      data-slot="avatar"
-      data-size={resolvedSize}
-      data-shape={resolvedShape}
-      role={label ? 'img' : undefined}
-      aria-label={label}
-      className={slots.root({ className })}
-      style={{
-        ['--avatar-size' as string]: SIZE[resolvedSize],
-        // Here and not on the badge, so the face's cut and the badge's place can both read it.
-        ['--badge-size' as string]: 'max(0.5rem, calc(var(--avatar-size) * 0.28))',
-        ...style,
-      }}
-      {...props}
-    >
-      <BaseAvatar.Root
-        data-slot="avatar-face"
-        aria-hidden="true"
-        className={slots.face()}
-        style={maskStyle(resolvedShape, badge !== undefined, overlapped)}
-      >
-        {src ? <BaseAvatar.Image src={src} alt="" className={slots.image()} /> : null}
-        <BaseAvatar.Fallback className={slots.fallback()}>
-          {fallback ?? (name ? initialsOf(name) : <PersonGlyph />)}
-        </BaseAvatar.Fallback>
-      </BaseAvatar.Root>
-      {children}
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'avatar',
+        'data-size': resolvedSize,
+        'data-shape': resolvedShape,
+        role: label ? 'img' : undefined,
+        'aria-label': label,
+        className: slots.root({ className }),
+        style: {
+          ['--avatar-size' as string]: SIZE[resolvedSize],
+          // Here and not on the badge, so the face's cut and the badge's place can both read it.
+          ['--badge-size' as string]: 'max(0.5rem, calc(var(--avatar-size) * 0.28))',
+          ...style,
+        },
+        children: (
+          <>
+            <BaseAvatar.Root
+              data-slot="avatar-face"
+              aria-hidden="true"
+              className={slots.face()}
+              style={maskStyle(resolvedShape, badge !== undefined, overlapped)}
+            >
+              {src ? <BaseAvatar.Image src={src} alt="" className={slots.image()} /> : null}
+              <BaseAvatar.Fallback className={slots.fallback()}>
+                {fallback ?? (name ? initialsOf(name) : <PersonGlyph />)}
+              </BaseAvatar.Fallback>
+            </BaseAvatar.Root>
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 AvatarRoot.displayName = 'Avatar';
 
@@ -339,17 +353,28 @@ export interface AvatarBadgeProps extends Omit<ComponentProps<'span'>, 'color'> 
  * A dot or a small icon on the avatar's lower trailing edge. The avatar is
  * cut away round it, so it reads on any background.
  */
-function AvatarBadge({ status, color, label: _label, className, ...props }: AvatarBadgeProps) {
+function AvatarBadge({
+  status,
+  color,
+  label: _label,
+  className,
+  render,
+  ...props
+}: AvatarBadgeProps & RenderProp<'span'>) {
   const slots = avatarVariants({ status, color: status ? undefined : (color ?? 'muted') });
-  return (
-    <span
-      aria-hidden="true"
-      data-slot="avatar-badge"
-      data-status={status}
-      className={slots.badge({ className })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'aria-hidden': 'true',
+        'data-slot': 'avatar-badge',
+        'data-status': status,
+        className: slots.badge({ className }),
+      },
+      props
+    ),
+  });
 }
 AvatarBadge.displayName = 'Avatar.Badge';
 
@@ -369,7 +394,16 @@ export interface AvatarGroupProps extends ComponentProps<'div'> {
 }
 
 /** A row of overlapping avatars, that opens up when it is hovered or focused. */
-function AvatarGroup({ max, size = 'md', shape = 'circle', label, className, style, children, ...props }: AvatarGroupProps) {
+function AvatarGroup({
+  max,
+  size = 'md',
+  shape = 'circle',
+  label,
+  className,
+  style,
+  children,
+  ...props
+}: AvatarGroupProps) {
   const slots = avatarVariants({ shape });
   const context = useMemo(() => ({ size, shape }), [size, shape]);
   const all = Children.toArray(children).filter(isValidElement) as ReactElement<AvatarProps>[];

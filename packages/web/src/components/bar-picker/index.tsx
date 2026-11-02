@@ -27,15 +27,14 @@
  * yours to show beside it, large: a column of eight lights cannot be read to
  * the unit, but one number can.
  */
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export interface BarPickerBar {
   /** Written under the column: "Mon", "W3". Keep it to a few characters. */
@@ -83,15 +82,16 @@ const barPickerVariants = tv({
       on: { segment: 'bg-[var(--pu-color)]' },
       // The highest light of the picked column.
       peak: {
-        segment:
-          'bg-[var(--pu-color)] shadow-[0_0_16px_color-mix(in_oklab,var(--pu-color)_65%,transparent)]',
+        segment: 'bg-[var(--pu-color)] shadow-[0_0_16px_color-mix(in_oklab,var(--pu-color)_65%,transparent)]',
       },
     },
   },
 });
 
-export interface BarPickerProps
-  extends Omit<ComponentProps<'div'>, 'children' | 'onChange' | 'defaultValue' | 'color'> {
+export interface BarPickerProps extends Omit<
+  ComponentProps<'div'>,
+  'children' | 'onChange' | 'defaultValue' | 'color'
+> {
   /** The columns, left to right. */
   data: BarPickerBar[];
   /** The value a fully lit column stands for. Defaults to the largest in `data`. */
@@ -126,8 +126,9 @@ export function BarPicker({
   formatValue = (bar) => String(bar),
   label = 'Values',
   className,
+  render,
   ...props
-}: BarPickerProps) {
+}: BarPickerProps & RenderProp<'div'>) {
   const slots = barPickerVariants({ color });
   const [internal, setInternal] = useState(defaultValue);
   const picked = clampIndex(value ?? internal, data.length);
@@ -168,60 +169,70 @@ export function BarPicker({
     pick(next);
   };
 
-  return (
-    <div role="radiogroup" aria-label={label} className={slots.root({ className })} {...props}>
-      {data.map((bar, index) => {
-        const selected = index === picked;
-        const part = barPickerVariants({ selected });
-        const name = bar.name ?? (typeof bar.label === 'string' ? bar.label : `Bar ${index + 1}`);
-        // How many lights the value reaches. Any value above zero lights at
-        // least one, so a small value is a mark and not an empty column.
-        const share = Math.min(1, Math.max(0, bar.value / ceiling));
-        const reached = !lit || bar.value <= 0 ? 0 : Math.max(1, Math.round(share * count));
-        return (
-          <button
-            key={index}
-            ref={(node) => {
-              refs.current[index] = node;
-            }}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            aria-label={`${name}: ${formatValue(bar.value)}`}
-            tabIndex={selected ? 0 : -1}
-            onClick={() => pick(index)}
-            onKeyDown={(event) => onKeyDown(event, index)}
-            className={part.column()}
-          >
-            <span className={slots.stack()}>
-              {Array.from({ length: count }, (_, level) => {
-                const on = level < reached;
-                const light = !on ? 'off' : !selected ? 'dim' : level === reached - 1 ? 'peak' : 'on';
-                return (
-                  <span
-                    key={level}
-                    className={barPickerVariants({ light }).segment()}
-                    style={{
-                      // Bottom first, so a column is seen filling upwards.
-                      transitionDelay: on ? `${level * STAGGER}ms` : undefined,
-                      // The picked column brightens towards its top.
-                      opacity:
-                        light === 'on'
-                          ? Number((0.5 + 0.5 * ((level + 1) / reached)).toFixed(3))
-                          : undefined,
-                    }}
-                  />
-                );
-              })}
-            </span>
-            <span aria-hidden="true" className={part.label()}>
-              {bar.label}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: 'radiogroup',
+        'aria-label': label,
+        className: slots.root({ className }),
+        children: (
+          <>
+            {data.map((bar, index) => {
+              const selected = index === picked;
+              const part = barPickerVariants({ selected });
+              const name = bar.name ?? (typeof bar.label === 'string' ? bar.label : `Bar ${index + 1}`);
+              // How many lights the value reaches. Any value above zero lights at
+              // least one, so a small value is a mark and not an empty column.
+              const share = Math.min(1, Math.max(0, bar.value / ceiling));
+              const reached = !lit || bar.value <= 0 ? 0 : Math.max(1, Math.round(share * count));
+              return (
+                <button
+                  key={index}
+                  ref={(node) => {
+                    refs.current[index] = node;
+                  }}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  aria-label={`${name}: ${formatValue(bar.value)}`}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => pick(index)}
+                  onKeyDown={(event) => onKeyDown(event, index)}
+                  className={part.column()}
+                >
+                  <span className={slots.stack()}>
+                    {Array.from({ length: count }, (_, level) => {
+                      const on = level < reached;
+                      const light = !on ? 'off' : !selected ? 'dim' : level === reached - 1 ? 'peak' : 'on';
+                      return (
+                        <span
+                          key={level}
+                          className={barPickerVariants({ light }).segment()}
+                          style={{
+                            // Bottom first, so a column is seen filling upwards.
+                            transitionDelay: on ? `${level * STAGGER}ms` : undefined,
+                            // The picked column brightens towards its top.
+                            opacity:
+                              light === 'on' ? Number((0.5 + 0.5 * ((level + 1) / reached)).toFixed(3)) : undefined,
+                          }}
+                        />
+                      );
+                    })}
+                  </span>
+                  <span aria-hidden="true" className={part.label()}>
+                    {bar.label}
+                  </span>
+                </button>
+              );
+            })}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 BarPicker.displayName = 'BarPicker';
 

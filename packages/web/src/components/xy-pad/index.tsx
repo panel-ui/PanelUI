@@ -44,6 +44,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type XYPadColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
 
@@ -506,22 +512,34 @@ function Dots({
 export interface XYPadValueProps extends ComponentProps<'div'> {}
 
 /** The two values written out, under the field. */
-function XYPadValue({ className, ...props }: XYPadValueProps) {
+function XYPadValue({ className, render, ...props }: XYPadValueProps & RenderProp<'div'>) {
   const pad = useContext(PadContext);
   if (!pad) throw new Error('XYPad.Value must be used inside an <XYPad>.');
   const slots = xyPadVariants();
-  return (
-    <div aria-hidden data-slot="xy-pad-value" className={slots.value({ className })} {...props}>
-      <span>
-        <span className={slots.axisName()}>X</span>
-        {pad.write('x', pad.value.x)}
-      </span>
-      <span>
-        <span className={slots.axisName()}>Y</span>
-        {pad.write('y', pad.value.y)}
-      </span>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'aria-hidden': true,
+        'data-slot': 'xy-pad-value',
+        className: slots.value({ className }),
+        children: (
+          <>
+            <span>
+              <span className={slots.axisName()}>X</span>
+              {pad.write('x', pad.value.x)}
+            </span>
+            <span>
+              <span className={slots.axisName()}>Y</span>
+              {pad.write('y', pad.value.y)}
+            </span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 XYPadValue.displayName = 'XYPad.Value';
 

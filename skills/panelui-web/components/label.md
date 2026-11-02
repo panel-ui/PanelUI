@@ -60,6 +60,32 @@ Every part also takes the props of the element it renders, and a `className`.
 | `invalid` | `boolean` | `false` | Turns the label to the destructive colour. Needed when the label is tied to its control by `htmlFor`; a label wrapped round its control reads it. |
 | `disabled` | `boolean` | `false` | Fades the label. As with `invalid`, a wrapped control is read on its own. |
 
+#### `LabelTextProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.text({ className }),` | **required** | — |
+
+#### `LabelHintProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'label-hint', className: labelVariants().hint({ className }) }, props),` | **required** | — |
+
+#### `LabelActionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'label-action', className: labelVariants().action({ className }) }, props),` | **required** | — |
+
+## In a Server Component
+
+`Label` is a client component. A Server Component cannot read `Label.Text` off the import, so import each part by name: `LabelText`, `LabelHint`, `LabelAction`.
+
 ## Notes
 
 #### Required and optional

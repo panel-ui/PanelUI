@@ -56,17 +56,56 @@ For a metric with a trend, a sparkline or progress towards a target, use [Kpi](/
 
 Every part also takes the props of the element it renders, and a `className`.
 
+#### `StatProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'stat', className: statVariants().root({ className }) }, props),` | **required** | — |
+
+#### `StatContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'stat-content', className: statVariants().content({ className }) }, props),` | **required** | — |
+
 #### `StatLabelProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `weight` | `'normal' \| 'medium'` | — | `medium` sets the label in a heavier weight, for a figure that stands on its own rather than at the top of a panel that is already titled. Default `normal`. |
 
+#### `StatDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'stat-description', className: statVariants().description({ className }) }, props),` | **required** | — |
+
 #### `StatValueProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `size` | `'sm' \| 'md' \| 'lg'` | — | `sm` is 2xl, `md` 3xl and `lg` 4xl. Default `lg`. |
+
+#### `StatUnitProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'stat-unit', className: statVariants().unit({ className }) }, props),` | **required** | — |
+
+#### `StatBadgeProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'stat-badge', className: statVariants().badge({ className }) }, props),` | **required** | — |
+
+## In a Server Component
+
+`Stat` is a client component. A Server Component cannot read `Stat.Content` off the import, so import each part by name: `StatContent`, `StatLabel`, `StatDescription`, `StatValue`, `StatUnit`, `StatBadge`.
 
 ## Notes
 

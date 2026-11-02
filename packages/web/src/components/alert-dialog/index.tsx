@@ -64,6 +64,12 @@ import {
 } from 'react';
 import { tv } from 'tailwind-variants';
 import { Button, type ButtonProps } from '../button';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** The theme role the dialog's media is drawn in, which also sets its action's default colour. */
 export type AlertDialogTone = 'neutral' | 'info' | 'success' | 'warning' | 'destructive';
@@ -127,13 +133,17 @@ const alertDialogVariants = tv({
     {
       weight: 'soft',
       actionTone: 'primary',
-      className: { action: 'bg-foreground/10 text-foreground hover:not-disabled:bg-foreground/15 hover:not-disabled:text-foreground' },
+      className: {
+        action:
+          'bg-foreground/10 text-foreground hover:not-disabled:bg-foreground/15 hover:not-disabled:text-foreground',
+      },
     },
     {
       weight: 'soft',
       actionTone: 'neutral',
       className: {
-        action: 'bg-foreground/10 text-muted-foreground hover:not-disabled:bg-foreground/15 hover:not-disabled:text-foreground',
+        action:
+          'bg-foreground/10 text-muted-foreground hover:not-disabled:bg-foreground/15 hover:not-disabled:text-foreground',
       },
     },
     {
@@ -179,13 +189,7 @@ export interface AlertDialogProps {
   dismissible?: boolean;
 }
 
-function AlertDialogRoot({
-  children,
-  open,
-  defaultOpen = false,
-  onOpenChange,
-  dismissible = true,
-}: AlertDialogProps) {
+function AlertDialogRoot({ children, open, defaultOpen = false, onOpenChange, dismissible = true }: AlertDialogProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const resolvedOpen = open ?? internalOpen;
   const [busy, setBusy] = useState(false);
@@ -315,8 +319,19 @@ AlertDialogContent.displayName = 'AlertDialog.Content';
 export interface AlertDialogMediaProps extends ComponentProps<'div'> {}
 
 /** A glyph in a disc of the dialog's tone, above the title. */
-function AlertDialogMedia({ className, ...props }: AlertDialogMediaProps) {
-  return <div data-slot="alert-dialog-media" aria-hidden="true" className={alertDialogVariants().media({ className })} {...props} />;
+function AlertDialogMedia({ className, render, ...props }: AlertDialogMediaProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'alert-dialog-media',
+        'aria-hidden': 'true',
+        className: alertDialogVariants().media({ className }),
+      },
+      props
+    ),
+  });
 }
 AlertDialogMedia.displayName = 'AlertDialog.Media';
 
@@ -338,7 +353,13 @@ function AlertDialogDescription({ className, ...props }: AlertDialogDescriptionP
   const { inline } = useAlertDialog('AlertDialog.Description');
   const slots = alertDialogVariants();
   if (inline) return <p data-slot="alert-dialog-description" className={slots.description({ className })} {...props} />;
-  return <Primitive.Description data-slot="alert-dialog-description" className={slots.description({ className })} {...props} />;
+  return (
+    <Primitive.Description
+      data-slot="alert-dialog-description"
+      className={slots.description({ className })}
+      {...props}
+    />
+  );
 }
 AlertDialogDescription.displayName = 'AlertDialog.Description';
 
@@ -348,8 +369,15 @@ export interface AlertDialogFooterProps extends ComponentProps<'div'> {}
  * The answers, side by side at equal widths in the band under the panel.
  * Keep it a direct child of `AlertDialog.Content`, so the band can find it.
  */
-function AlertDialogFooter({ className, ...props }: AlertDialogFooterProps) {
-  return <div data-slot="alert-dialog-footer" className={alertDialogVariants().footer({ className })} {...props} />;
+function AlertDialogFooter({ className, render, ...props }: AlertDialogFooterProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'alert-dialog-footer', className: alertDialogVariants().footer({ className }) },
+      props
+    ),
+  });
 }
 AlertDialogFooter.displayName = 'AlertDialog.Footer';
 

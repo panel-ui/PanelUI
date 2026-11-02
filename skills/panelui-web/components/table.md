@@ -80,6 +80,10 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `align` | `TableAlign` | `start` | Where the content sits. Match the column's head. `end` also gives the digits equal widths. Default `start`. |
 
+## In a Server Component
+
+`Table` is a client component. A Server Component cannot read `Table.Header` off the import, so import each part by name: `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`.
+
 ## Notes
 
 #### Numbers

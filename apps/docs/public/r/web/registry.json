@@ -146,6 +146,7 @@
       "title": "Button",
       "description": "Something to press, in the weight its action deserves, with a spinner for while it works.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -1038,6 +1039,46 @@
           "path": "components/panelui/timeline.tsx",
           "type": "registry:component",
           "target": "@components/panelui/timeline.tsx"
+        }
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "A short message that leaves on its own, with a title that changes through dither.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/toast/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/toast/index.tsx"
+        },
+        {
+          "path": "components/panelui/toast/dither-text.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/toast/dither-text.tsx"
+        },
+        {
+          "path": "components/panelui/toast/dither.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/toast/dither.tsx"
         }
       ]
     },

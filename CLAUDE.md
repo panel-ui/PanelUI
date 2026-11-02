@@ -444,6 +444,11 @@ day of guessing at it:
 | Expo Go 57.0.5 | 0.86.0 | 0.10.0 | 4.5.0 | 2.32.0 |
 | Expo Go 57.0.6 | 0.86.2 | 0.10.1 | 4.5.1 | 2.32.0 |
 | Expo Go 57.0.9 | 0.86.2 | 0.10.1 | 4.5.1 | 2.32.0 |
+| Expo Go 58.0.7 | 0.88.0 | not in the strings | not in the strings | 3.3.0 |
+
+For 58.0.7 the worklets and reanimated versions are not in the binary's strings; they were pinned
+to the SDK's own (0.13.0, 4.7.1) and confirmed by running the example, which aborts at start-up on
+a mismatch. The same client is what the App Store serves for SDK 58 (2026-11-02).
 
 Measured, not read off a manifest — and the measurement is the point, because
 **`api.expo.dev/v2/versions/latest` reports `facebookReactNativeVersion: 0.86.3` for SDK 57 and

@@ -181,12 +181,12 @@
     "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
-    "react": "19.2.3",
+    "react": "19.3.0",
     "react-native-builder-bob": "^0.43.0",
-    "react-native-gesture-handler": "2.32.0",
-    "react-native-reanimated": "4.5.1",
-    "react-native-worklets": "0.10.1",
-    "react-test-renderer": "19.2.3"
+    "react-native-gesture-handler": "3.3.0",
+    "react-native-reanimated": "4.7.1",
+    "react-native-worklets": "0.13.0",
+    "react-test-renderer": "19.3.0"
   },
   "react-native-builder-bob": {
     "source": "src",

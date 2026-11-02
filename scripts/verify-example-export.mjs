@@ -60,12 +60,26 @@ function sourceOwner(source) {
   return 'workspace/other';
 }
 
+/**
+ * Every source in a map with its content, from a plain map or an indexed one.
+ * Expo 58's export writes an indexed map, its modules split across `sections`
+ * that each carry a map of their own; Expo 57's wrote one flat list.
+ */
+function sourcesOf(sourceMap) {
+  if (Array.isArray(sourceMap.sections)) {
+    return sourceMap.sections.flatMap((section) => (section.map ? sourcesOf(section.map) : []));
+  }
+  return (sourceMap.sources ?? []).map((source, index) => ({
+    source,
+    content: sourceMap.sourcesContent?.[index] ?? '',
+  }));
+}
+
 export function measureSourceAttribution(sourceMap) {
   const groups = new Map();
   const routes = [];
-  for (let index = 0; index < sourceMap.sources.length; index += 1) {
-    const source = sourceMap.sources[index];
-    const sourceBytes = Buffer.byteLength(sourceMap.sourcesContent?.[index] ?? '');
+  for (const { source, content } of sourcesOf(sourceMap)) {
+    const sourceBytes = Buffer.byteLength(content);
     const owner = sourceOwner(source);
     const group = groups.get(owner) ?? { name: owner, modules: 0, sourceBytes: 0 };
     group.modules += 1;

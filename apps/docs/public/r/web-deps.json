@@ -1,0 +1,15 @@
+{
+  "name": "web-deps",
+  "type": "registry:ui",
+  "description": "Passes a Reanimated dependency list on the web only, where it is used.",
+  "registryDependencies": [],
+  "dependencies": [],
+  "optionalDependencies": [],
+  "files": [
+    {
+      "path": "ui/web-deps.ts",
+      "type": "registry:ui",
+      "content": "import { Platform } from 'react-native';\n\n/**\n * A dependency list for a Reanimated hook, on the web only.\n *\n * On iOS and Android the Babel plugin works out what a worklet closes over,\n * and Reanimated ignores a dependency list there; from 4.7 it also warns about\n * one in development. On the web there is no plugin, and the list is how the\n * hook knows to rebuild. Passing the list through this keeps the web right and\n * the native console quiet.\n */\nexport function webDeps(deps: unknown[]): unknown[] | undefined {\n  return Platform.OS === 'web' ? deps : undefined;\n}\n"
+    }
+  ]
+}

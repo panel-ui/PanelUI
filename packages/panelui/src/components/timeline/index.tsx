@@ -80,6 +80,7 @@ import { IconColorProvider } from '../../icons';
 import { selectionTick } from '../../utils/haptics';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { TIMELINE_WIDE_COLUMN, timelineColumnOffsets, timelineColumnWidth } from './timeline-geometry';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
@@ -498,7 +499,7 @@ export interface TimelineProps extends ViewProps {
   children?: ReactNode;
 }
 
-const TimelineRoot = forwardRef<View, TimelineProps>(
+const TimelineRoot = forwardRef<ViewRef, TimelineProps>(
   (
     {
       className,
@@ -765,7 +766,7 @@ export interface TimelineItemProps extends ViewProps {
   children?: ReactNode;
 }
 
-const TimelineItem = forwardRef<View, TimelineItemProps>(
+const TimelineItem = forwardRef<ViewRef, TimelineItemProps>(
   (
     {
       className,
@@ -893,7 +894,7 @@ TimelineItem.displayName = 'Timeline.Item';
  * Right-aligned meta column to the left of the rail — a time, a category, a
  * person. Place it before `Timeline.Indicator`.
  */
-const TimelineAside = forwardRef<View, ViewProps & { className?: string }>(
+const TimelineAside = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, style, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Aside');
     const { aside } = timelineVariants({ variant, orientation });
@@ -934,7 +935,7 @@ export interface TimelineIndicatorProps extends ViewProps {
  * reads against this node, so an icon inside follows the theme instead of
  * disappearing when the fill inverts.
  */
-const TimelineIndicator = forwardRef<View, TimelineIndicatorProps>(
+const TimelineIndicator = forwardRef<ViewRef, TimelineIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Indicator');
     const { step, completed, tone, showSeparator } =
@@ -1030,7 +1031,7 @@ TimelineIndicator.displayName = 'Timeline.Indicator';
  * wrapped in the card panel, while the spacing between items stays outside it
  * so the connector runs unbroken.
  */
-const TimelineContent = forwardRef<View, ViewProps & { className?: string }>(
+const TimelineContent = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, children, style, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Content');
     const { completed, tone } = useTimelineItem('Timeline.Content');
@@ -1069,7 +1070,7 @@ const TimelineContent = forwardRef<View, ViewProps & { className?: string }>(
 TimelineContent.displayName = 'Timeline.Content';
 
 /** Title row: heading on the left, `Timeline.Trailing` on the right. */
-const TimelineHeader = forwardRef<View, ViewProps & { className?: string }>(
+const TimelineHeader = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Header');
     const { header } = timelineVariants({ variant, orientation });
@@ -1079,7 +1080,7 @@ const TimelineHeader = forwardRef<View, ViewProps & { className?: string }>(
 TimelineHeader.displayName = 'Timeline.Header';
 
 /** Wraps a title and anything stacked under it inside the header row. */
-const TimelineHeading = forwardRef<View, ViewProps & { className?: string }>(
+const TimelineHeading = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Heading');
     const { heading } = timelineVariants({ variant, orientation });
@@ -1088,7 +1089,7 @@ const TimelineHeading = forwardRef<View, ViewProps & { className?: string }>(
 );
 TimelineHeading.displayName = 'Timeline.Heading';
 
-const TimelineDate = forwardRef<RNText, TextProps>(({ className, style, ...props }, ref) => {
+const TimelineDate = forwardRef<TextRef, TextProps>(({ className, style, ...props }, ref) => {
   const { variant, orientation } = useTimeline('Timeline.Date');
   const { date } = timelineVariants({ variant, orientation });
   const ink = useColumnInk('Timeline.Date');
@@ -1102,7 +1103,7 @@ const TimelineDate = forwardRef<RNText, TextProps>(({ className, style, ...props
 TimelineDate.displayName = 'Timeline.Date';
 
 /** Category line in the aside, coloured by the item's tone. */
-const TimelineLabel = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const TimelineLabel = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { variant, orientation } = useTimeline('Timeline.Label');
   const { tone } = useTimelineItem('Timeline.Label');
   const { label } = timelineVariants({ variant, tone, orientation });
@@ -1111,7 +1112,7 @@ const TimelineLabel = forwardRef<RNText, TextProps>(({ className, ...props }, re
 TimelineLabel.displayName = 'Timeline.Label';
 
 /** Muted supporting line — a person's name, a source. */
-const TimelineMeta = forwardRef<RNText, TextProps>(({ className, style, ...props }, ref) => {
+const TimelineMeta = forwardRef<TextRef, TextProps>(({ className, style, ...props }, ref) => {
   const { variant, orientation } = useTimeline('Timeline.Meta');
   const { meta } = timelineVariants({ variant, orientation });
   const ink = useColumnInk('Timeline.Meta');
@@ -1124,7 +1125,7 @@ const TimelineMeta = forwardRef<RNText, TextProps>(({ className, style, ...props
 });
 TimelineMeta.displayName = 'Timeline.Meta';
 
-const TimelineTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const TimelineTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { variant, orientation } = useTimeline('Timeline.Title');
   const { title } = timelineVariants({ variant, orientation });
   return <Text ref={ref} className={title({ className })} {...props} />;
@@ -1132,7 +1133,7 @@ const TimelineTitle = forwardRef<RNText, TextProps>(({ className, ...props }, re
 TimelineTitle.displayName = 'Timeline.Title';
 
 /** Right-hand slot in the header row — a timestamp, usually. */
-const TimelineTrailing = forwardRef<RNText, TextProps>(
+const TimelineTrailing = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Trailing');
     const { trailing } = timelineVariants({ variant, orientation });
@@ -1141,7 +1142,7 @@ const TimelineTrailing = forwardRef<RNText, TextProps>(
 );
 TimelineTrailing.displayName = 'Timeline.Trailing';
 
-const TimelineDescription = forwardRef<RNText, TextProps>(
+const TimelineDescription = forwardRef<TextRef, TextProps>(
   ({ className, style, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Description');
     const { content } = timelineVariants({ variant, orientation });
@@ -1162,7 +1163,7 @@ const TimelineDescription = forwardRef<RNText, TextProps>(
 TimelineDescription.displayName = 'Timeline.Description';
 
 /** Bordered strip of label/value pairs under a title. */
-const TimelineStats = forwardRef<View, ViewProps & { className?: string }>(
+const TimelineStats = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Stats');
     const { stats } = timelineVariants({ variant, orientation });
@@ -1177,7 +1178,7 @@ export interface TimelineStatProps extends ViewProps {
   value: string;
 }
 
-const TimelineStat = forwardRef<View, TimelineStatProps>(
+const TimelineStat = forwardRef<ViewRef, TimelineStatProps>(
   ({ className, label, value, ...props }, ref) => {
     const { variant, orientation } = useTimeline('Timeline.Stat');
     const { statLabel, statValue } = timelineVariants({ variant, orientation });
@@ -1232,7 +1233,7 @@ export interface TimelineMastheadProps extends ViewProps {
  * run rather than to any column in it — and a column is the only thing a
  * horizontal `Timeline` lays out.
  */
-const TimelineMasthead = forwardRef<View, TimelineMastheadProps>(
+const TimelineMasthead = forwardRef<ViewRef, TimelineMastheadProps>(
   ({ className, media, label, title, children, ...props }, ref) => {
     const { masthead, mastheadMedia, mastheadLabel, mastheadTitle } = timelineVariants({
       orientation: 'horizontal',

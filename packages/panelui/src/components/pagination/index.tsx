@@ -58,6 +58,7 @@ import {
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type PaginationVariant = 'numbers' | 'compact' | 'simple';
 export type PaginationSize = 'sm' | 'default';
@@ -238,7 +239,7 @@ export interface PaginationProps
   children?: ReactNode;
 }
 
-const PaginationRoot = forwardRef<View, PaginationProps>(
+const PaginationRoot = forwardRef<ViewRef, PaginationProps>(
   (
     {
       className,
@@ -366,7 +367,7 @@ export interface PaginationItemProps
  * One numbered target. Announced as a selected button when it is the page you
  * are on, so the current page is spoken as state rather than only painted.
  */
-const PaginationItem = forwardRef<View, PaginationItemProps>(
+const PaginationItem = forwardRef<ViewRef, PaginationItemProps>(
   ({ className, labelClassName, page, children, onPress, ...props }, ref) => {
     const { page: current, size, disabled, goTo } = usePagination('Pagination.Item');
     const isCurrent = page === current;
@@ -497,7 +498,7 @@ export interface PaginationEllipsisProps
  * the end the gap is on — which is why the two ellipses are told apart: a jump
  * that always went forwards would strand anyone reading the row right to left.
  */
-const PaginationEllipsis = forwardRef<View, PaginationEllipsisProps>(
+const PaginationEllipsis = forwardRef<ViewRef, PaginationEllipsisProps>(
   ({ className, direction = 1, jump = 5, disabled: disabledProp, onPress, ...props }, ref) => {
     const { page, size, disabled, goTo } = usePagination('Pagination.Ellipsis');
     const color = useCSSVariable('--color-muted-foreground');
@@ -542,7 +543,7 @@ export interface PaginationSummaryProps extends TextProps {
  * for the sentence and the sentence would need translating. `Pagination.Status`
  * is the place for words.
  */
-const PaginationSummary = forwardRef<React.ElementRef<typeof Text>, PaginationSummaryProps>(
+const PaginationSummary = forwardRef<TextRef, PaginationSummaryProps>(
   ({ className, ...props }, ref) => {
     const { page, count, size } = usePagination('Pagination.Summary');
     const { summary } = paginationVariants({ size });
@@ -579,7 +580,7 @@ export interface PaginationStatusProps extends TextProps {
  * question people actually have, which is how much is left. Given `children`
  * it renders those instead, for a set whose size is not known yet.
  */
-const PaginationStatus = forwardRef<React.ElementRef<typeof Text>, PaginationStatusProps>(
+const PaginationStatus = forwardRef<TextRef, PaginationStatusProps>(
   ({ className, page: ownPage, pageSize, total, children, ...props }, ref) => {
     const context = useContext(PaginationContext);
     const size = context?.size ?? 'default';

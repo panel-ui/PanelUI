@@ -75,6 +75,7 @@ import {
 } from '../../primitives/chart-accessibility';
 import { cn } from '../../utils/cn';
 import { normalizeWeekStart, startOfDay } from '../../utils/date';
+import type { ViewRef } from '../../primitives/refs';
 
 
 /**
@@ -402,7 +403,7 @@ export interface HeatmapChartProps extends ViewProps, ChartAccessibilityProps<He
   children?: ReactNode;
 }
 
-const HeatmapChartRoot = forwardRef<View, HeatmapChartProps>(function HeatmapChartRoot(
+const HeatmapChartRoot = forwardRef<ViewRef, HeatmapChartProps>(function HeatmapChartRoot(
   {
     className,
     data,

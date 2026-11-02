@@ -41,6 +41,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Whether anyone is at the other end. */
 export type SupportAvailability = 'online' | 'away' | 'offline';
@@ -142,7 +143,7 @@ export interface SupportProps extends ViewProps {
   children?: ReactNode;
 }
 
-const SupportRoot = forwardRef<View, SupportProps>(function SupportRoot(
+const SupportRoot = forwardRef<ViewRef, SupportProps>(function SupportRoot(
   { className, availability = 'online', children, ...props },
   ref
 ) {
@@ -170,7 +171,7 @@ export interface SupportHeaderProps extends ViewProps {
 }
 
 /** The screen's title, and room beside it for whoever is answering. */
-const SupportHeader = forwardRef<View, SupportHeaderProps>(function SupportHeader(
+const SupportHeader = forwardRef<ViewRef, SupportHeaderProps>(function SupportHeader(
   { className, title, description, children, ...props },
   ref
 ) {
@@ -213,7 +214,7 @@ export interface SupportStatusProps extends ViewProps {
 }
 
 /** Whether anyone is there, and how long an answer takes. */
-const SupportStatus = forwardRef<View, SupportStatusProps>(function SupportStatus(
+const SupportStatus = forwardRef<ViewRef, SupportStatusProps>(function SupportStatus(
   { className, availability: availabilityProp, replyTime, children, ...props },
   ref
 ) {
@@ -252,7 +253,7 @@ export interface SupportGroupProps extends ViewProps {
 
 /** A titled run of rows. Shared by Channels, Conversations and Articles. */
 function group(name: string) {
-  const Group = forwardRef<View, SupportGroupProps>(function Group(
+  const Group = forwardRef<ViewRef, SupportGroupProps>(function Group(
     { className, title, children, ...props },
     ref
   ) {
@@ -293,7 +294,7 @@ export interface SupportChannelProps extends Omit<ViewProps, 'children'> {
  * it costs you in waiting — and a grid of icons with one word under each puts
  * the reader in front of a quiz about which one is right.
  */
-const SupportChannel = forwardRef<View, SupportChannelProps>(function SupportChannel(
+const SupportChannel = forwardRef<ViewRef, SupportChannelProps>(function SupportChannel(
   { className, icon, label, description, detail, disabled = false, onPress, ...props },
   ref
 ) {
@@ -353,7 +354,7 @@ export interface SupportTopicsProps extends ViewProps {
  * without one, and the ones that need it are the ones routing to different
  * teams. Single-select: a request goes to one queue.
  */
-const SupportTopics = forwardRef<View, SupportTopicsProps>(function SupportTopics(
+const SupportTopics = forwardRef<ViewRef, SupportTopicsProps>(function SupportTopics(
   { className, title, value: valueProp, defaultValue = null, onValueChange, children, ...props },
   ref
 ) {
@@ -402,7 +403,7 @@ export interface SupportTopicProps extends Omit<ViewProps, 'children'> {
 }
 
 /** One thing the problem could be about. */
-const SupportTopic = forwardRef<View, SupportTopicProps>(function SupportTopic(
+const SupportTopic = forwardRef<ViewRef, SupportTopicProps>(function SupportTopic(
   { className, value, icon, label, description, disabled = false, onPress, ...props },
   ref
 ) {
@@ -467,7 +468,7 @@ export interface SupportConversationProps extends Omit<ViewProps, 'children'> {
 }
 
 /** One request the reader already made, and what has happened to it. */
-const SupportConversation = forwardRef<View, SupportConversationProps>(
+const SupportConversation = forwardRef<ViewRef, SupportConversationProps>(
   function SupportConversation(
     {
       className,
@@ -561,7 +562,7 @@ export interface SupportArticleProps extends Omit<ViewProps, 'children'> {
 }
 
 /** A page from the help centre, for the questions that have a written answer. */
-const SupportArticle = forwardRef<View, SupportArticleProps>(function SupportArticle(
+const SupportArticle = forwardRef<ViewRef, SupportArticleProps>(function SupportArticle(
   { className, icon, title, collection, onPress, ...props },
   ref
 ) {
@@ -618,7 +619,7 @@ export interface SupportAgentProps extends Omit<ViewProps, 'children' | 'role'> 
  * sitting beside it, because the two answer the same question and the live one
  * wins.
  */
-const SupportAgent = forwardRef<View, SupportAgentProps>(function SupportAgent(
+const SupportAgent = forwardRef<ViewRef, SupportAgentProps>(function SupportAgent(
   { className, avatar, name, role, availability: availabilityProp, typing = false, ...props },
   ref
 ) {
@@ -664,7 +665,7 @@ export interface SupportTicketProps extends Omit<ViewProps, 'children'> {
 }
 
 /** The request this thread belongs to, pinned above it. */
-const SupportTicket = forwardRef<View, SupportTicketProps>(function SupportTicket(
+const SupportTicket = forwardRef<ViewRef, SupportTicketProps>(function SupportTicket(
   { className, reference, subject, status = 'open', ...props },
   ref
 ) {
@@ -714,7 +715,7 @@ export interface SupportHandoffProps extends ViewProps {
  * between them, leaves the reader working out who they are talking to from the
  * writing style.
  */
-const SupportHandoff = forwardRef<View, SupportHandoffProps>(function SupportHandoff(
+const SupportHandoff = forwardRef<ViewRef, SupportHandoffProps>(function SupportHandoff(
   { className, icon, children, ...props },
   ref
 ) {
@@ -748,7 +749,7 @@ export interface SupportNoteProps extends ViewProps {
  * somebody is deciding whether it is worth typing, and an expectation set four
  * screens ago is not one they still have in mind.
  */
-const SupportNote = forwardRef<View, SupportNoteProps>(function SupportNote(
+const SupportNote = forwardRef<ViewRef, SupportNoteProps>(function SupportNote(
   { className, children, ...props },
   ref
 ) {
@@ -774,7 +775,7 @@ export interface SupportRepliesProps extends ViewProps {
 }
 
 /** The suggested answers under a turn. */
-const SupportReplies = forwardRef<View, SupportRepliesProps>(function SupportReplies(
+const SupportReplies = forwardRef<ViewRef, SupportRepliesProps>(function SupportReplies(
   { className, children, ...props },
   ref
 ) {
@@ -804,7 +805,7 @@ export interface SupportReplyProps extends Omit<ViewProps, 'children'> {
  * screen from the first turn, and a component that makes it easy to put there
  * is a component that gets it put there.
  */
-const SupportReply = forwardRef<View, SupportReplyProps>(function SupportReply(
+const SupportReply = forwardRef<ViewRef, SupportReplyProps>(function SupportReply(
   { className, value, label, disabled = false, onPress, ...props },
   ref
 ) {
@@ -838,7 +839,7 @@ export interface SupportResolutionProps extends ViewProps {
 }
 
 /** Whether it actually helped, asked at the end of a thread. */
-const SupportResolution = forwardRef<View, SupportResolutionProps>(
+const SupportResolution = forwardRef<ViewRef, SupportResolutionProps>(
   function SupportResolution({ className, title = 'Did this solve it?', children, ...props }, ref) {
     const { resolution } = supportVariants();
 

@@ -51,6 +51,7 @@ import { CheckIcon } from '../../icons';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { Spinner } from '../spinner';
 import { stepsTriggerDisabled } from './steps-trigger';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type StepState = 'active' | 'completed' | 'inactive' | 'loading';
 export type StepsOrientation = 'horizontal' | 'vertical';
@@ -174,7 +175,7 @@ export interface StepsProps extends ViewProps {
   children?: ReactNode;
 }
 
-const StepsRoot = forwardRef<View, StepsProps>(
+const StepsRoot = forwardRef<ViewRef, StepsProps>(
   (
     {
       className,
@@ -251,7 +252,7 @@ export interface StepsItemProps extends ViewProps {
   children?: ReactNode;
 }
 
-const StepsItem = forwardRef<View, StepsItemProps>(
+const StepsItem = forwardRef<ViewRef, StepsItemProps>(
   (
     { className, step, completed = false, disabled = false, loading = false, children, ...props },
     ref
@@ -314,7 +315,7 @@ const STATE_WORDS: Record<StepState, string> = {
 };
 
 /** Makes its item selectable. Omit it for a read-only stepper. */
-const StepsTrigger = forwardRef<View, StepsTriggerProps>(
+const StepsTrigger = forwardRef<ViewRef, StepsTriggerProps>(
   (
     {
       className,
@@ -378,7 +379,7 @@ export interface StepsIndicatorProps extends ViewProps {
  * The circle. Shows the step number, a check once completed, or a spinner
  * while loading.
  */
-const StepsIndicator = forwardRef<View, StepsIndicatorProps>(
+const StepsIndicator = forwardRef<ViewRef, StepsIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { orientation } = useSteps('Steps.Indicator');
     const { step, state, isLoading } = useStepItem('Steps.Indicator');
@@ -408,7 +409,7 @@ const StepsIndicator = forwardRef<View, StepsIndicatorProps>(
 );
 StepsIndicator.displayName = 'Steps.Indicator';
 
-const StepsTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const StepsTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { orientation } = useSteps('Steps.Title');
   const { state } = useStepItem('Steps.Title');
   const { title } = stepsVariants({ orientation, state });
@@ -416,7 +417,7 @@ const StepsTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) 
 });
 StepsTitle.displayName = 'Steps.Title';
 
-const StepsDescription = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const StepsDescription = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { orientation } = useSteps('Steps.Description');
   const { state } = useStepItem('Steps.Description');
   const { description } = stepsVariants({ orientation, state });
@@ -437,7 +438,7 @@ export interface StepsSeparatorProps extends ViewProps {
  * second. It belongs inside a `Steps.Item` either way, so it can read that
  * item's state: the connector after step 1 goes solid when step 1 is done.
  */
-const StepsSeparator = forwardRef<View, StepsSeparatorProps>(
+const StepsSeparator = forwardRef<ViewRef, StepsSeparatorProps>(
   ({ className, ...props }, ref) => {
     const { orientation } = useSteps('Steps.Separator');
     const { state } = useStepItem('Steps.Separator');

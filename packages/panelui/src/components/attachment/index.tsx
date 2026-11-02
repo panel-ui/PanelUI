@@ -35,6 +35,7 @@ import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { Item } from '../item';
 import { Shimmer } from '../shimmer';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type AttachmentState = 'idle' | 'uploading' | 'processing' | 'error' | 'done';
 type AttachmentSize = 'default' | 'sm' | 'xs';
@@ -86,7 +87,7 @@ export interface AttachmentProps
   children?: ReactNode;
 }
 
-const AttachmentRoot = forwardRef<View, AttachmentProps>(
+const AttachmentRoot = forwardRef<ViewRef, AttachmentProps>(
   (
     { className, state = 'done', size = 'default', orientation, progress, children, ...props },
     ref
@@ -132,7 +133,7 @@ export interface AttachmentGroupProps extends ViewProps {
 }
 
 /** A row (or column) of attachments — the same stack `Item.Group` provides. */
-const AttachmentGroup = forwardRef<View, AttachmentGroupProps>(
+const AttachmentGroup = forwardRef<ViewRef, AttachmentGroupProps>(
   ({ className, orientation = 'vertical', children, ...props }, ref) => (
     <Item.Group ref={ref} orientation={orientation} className={className} {...props}>
       {children}
@@ -149,7 +150,7 @@ export interface AttachmentMediaProps extends ViewProps {
 }
 
 /** Leading slot — a file-type icon tile, or an image thumbnail. */
-const AttachmentMedia = forwardRef<View, AttachmentMediaProps>(
+const AttachmentMedia = forwardRef<ViewRef, AttachmentMediaProps>(
   ({ className, variant = 'icon', children, ...props }, ref) => (
     <Item.Media ref={ref} variant={variant} className={className} {...props}>
       {children}
@@ -163,7 +164,7 @@ export interface AttachmentContentProps extends ViewProps {
   children?: ReactNode;
 }
 
-const AttachmentContent = forwardRef<View, AttachmentContentProps>(
+const AttachmentContent = forwardRef<ViewRef, AttachmentContentProps>(
   ({ className, children, ...props }, ref) => (
     <Item.Content ref={ref} className={className} {...props}>
       {children}
@@ -178,7 +179,7 @@ export interface AttachmentTitleProps extends TextProps {
 }
 
 /** The file name. Shimmers while the file is uploading or processing. */
-const AttachmentTitle = forwardRef<React.ElementRef<typeof Text>, AttachmentTitleProps>(
+const AttachmentTitle = forwardRef<TextRef, AttachmentTitleProps>(
   ({ className, children, ...props }, ref) => {
     const { state } = useContext(AttachmentContext);
 
@@ -207,7 +208,7 @@ export interface AttachmentDescriptionProps extends TextProps {
 
 /** File type, size or status. Tints destructive on `error`. */
 const AttachmentDescription = forwardRef<
-  React.ElementRef<typeof Text>,
+  TextRef,
   AttachmentDescriptionProps
 >(({ className, children, ...props }, ref) => {
   const { state } = useContext(AttachmentContext);
@@ -229,7 +230,7 @@ export interface AttachmentActionsProps extends ViewProps {
   children?: ReactNode;
 }
 
-const AttachmentActions = forwardRef<View, AttachmentActionsProps>(
+const AttachmentActions = forwardRef<ViewRef, AttachmentActionsProps>(
   ({ className, children, ...props }, ref) => (
     <Item.Actions ref={ref} className={className} {...props}>
       {children}
@@ -249,7 +250,7 @@ export interface AttachmentActionProps
  * A single icon button in the actions slot — remove, retry, download. An icon
  * on its own says nothing to a screen reader, so the label is required.
  */
-const AttachmentAction = forwardRef<View, AttachmentActionProps>(
+const AttachmentAction = forwardRef<ViewRef, AttachmentActionProps>(
   ({ className, accessibilityLabel, children, ...props }, ref) => (
     <AnimatedPressable
       ref={ref}

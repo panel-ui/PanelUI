@@ -93,6 +93,7 @@ import { tv } from 'tailwind-variants';
 import { ChevronRightIcon } from '../../icons';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 /**
  * The `inset` shell's geometry. Numbers rather than classes, because an
@@ -191,7 +192,7 @@ export interface FrameRootProps extends FrameProps {
   variant?: FrameVariant;
 }
 
-const FrameRoot = forwardRef<View, FrameRootProps>(
+const FrameRoot = forwardRef<ViewRef, FrameRootProps>(
   ({ className, variant = 'default', children, style, ...props }, ref) => {
     const slots = frameVariants({ variant });
     const inset = variant === 'inset';
@@ -225,7 +226,7 @@ export interface FrameHeaderProps extends FrameProps {
  * the left, `Frame.Action` on the right. Add `className="flex-col items-start"`
  * when you want a description underneath.
  */
-const FrameHeader = forwardRef<View, FrameHeaderProps>(
+const FrameHeader = forwardRef<ViewRef, FrameHeaderProps>(
   ({ className, ...props }, ref) => {
     // `min-w-0` on nothing here — the title itself takes the flexible side, so
     // a long one truncates instead of shoving the action off the edge.
@@ -251,7 +252,7 @@ FrameHeader.displayName = 'Frame.Header';
  * colour and medium weight, and truncates to one line rather than pushing the
  * row's trailing slot out of view. Pass `numberOfLines` to override either way.
  */
-const FrameTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const FrameTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const inRow = useContext(FrameSlotContext);
 
   if (inRow) {
@@ -281,7 +282,7 @@ export interface FrameActionProps extends FrameProps {
  * Trailing slot on the header row — a column label, a count, a button, a badge.
  * Plain strings render as muted text; anything else renders as-is.
  */
-const FrameAction = forwardRef<View, FrameActionProps>(
+const FrameAction = forwardRef<ViewRef, FrameActionProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -302,7 +303,7 @@ FrameAction.displayName = 'Frame.Action';
  * Secondary line under the title — in a column-wrapped header, or under a row's
  * title inside `Frame.Content`, where it drops a size and wraps to two lines.
  */
-const FrameDescription = forwardRef<RNText, TextProps>(
+const FrameDescription = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const inRow = useContext(FrameSlotContext);
 
@@ -328,7 +329,7 @@ export interface FrameMediaProps extends FrameProps {
  * Leading slot on a row — an icon, an avatar, a status dot. Holds its size, so
  * whatever it holds is never squeezed by the text beside it.
  */
-const FrameMedia = forwardRef<View, FrameMediaProps>(
+const FrameMedia = forwardRef<ViewRef, FrameMediaProps>(
   ({ className, ...props }, ref) => (
     <View
       ref={ref}
@@ -349,7 +350,7 @@ export interface FrameContentProps extends FrameProps {
  * allowed to shrink past its content, which is what keeps a long line from
  * pushing the rest of the row off the edge.
  */
-const FrameContent = forwardRef<View, FrameContentProps>(
+const FrameContent = forwardRef<ViewRef, FrameContentProps>(
   ({ className, children, ...props }, ref) => (
     // `min-w-0` is the whole trick: a flex child's minimum size is its content
     // unless told otherwise, so `flex-1` alone still refuses to go narrower
@@ -369,7 +370,7 @@ export interface FrameActionsProps extends FrameProps {
  * Trailing slot on a row — a chip, a value, a switch, a small button. Holds its
  * size, so it stays readable however long the content beside it runs.
  */
-const FrameActions = forwardRef<View, FrameActionsProps>(
+const FrameActions = forwardRef<ViewRef, FrameActionsProps>(
   ({ className, ...props }, ref) => (
     <View
       ref={ref}
@@ -419,7 +420,7 @@ export interface FramePanelProps extends FrameProps {
  * with the header strip above it. Under `inset` it floats clear of all four
  * instead, at the radius that keeps it concentric with the shell.
  */
-const FramePanel = forwardRef<View, FramePanelProps>(
+const FramePanel = forwardRef<ViewRef, FramePanelProps>(
   ({ className, dividers = true, children, style, ...props }, ref) => {
     const variant = useContext(FrameVariantContext);
     return (
@@ -464,7 +465,7 @@ export interface FrameRowProps extends Omit<PressableProps, 'children'>, Dividab
  * pressable — press feedback, a button role — rather than a View with a
  * handler bolted on.
  */
-const FrameRow = forwardRef<View, FrameRowProps>(
+const FrameRow = forwardRef<ViewRef, FrameRowProps>(
   (
     { className, divided, chevron, wrap, align = 'center', children, onPress, ...props },
     ref
@@ -520,7 +521,7 @@ export interface FrameSectionProps extends FrameProps, Dividable {
  * one group. It divides its own rows the way the panel does, so the two nest
  * without either having to know about the other.
  */
-const FrameSection = forwardRef<View, FrameSectionProps>(
+const FrameSection = forwardRef<ViewRef, FrameSectionProps>(
   ({ className, title, divided, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -577,7 +578,7 @@ function pillChildren(children: ReactNode) {
  * as things to press. Under the other two variants the panel stops being flush
  * at the bottom, which is what having a footer means there.
  */
-const FrameFooter = forwardRef<View, FrameFooterProps>(
+const FrameFooter = forwardRef<ViewRef, FrameFooterProps>(
   ({ className, style, children, ...props }, ref) => {
     const variant = useContext(FrameVariantContext);
     const inset = variant === 'inset';

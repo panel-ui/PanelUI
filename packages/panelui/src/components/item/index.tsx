@@ -30,6 +30,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { AnimatedPressable, type AnimatedPressableProps } from '../../primitives/animated-pressable';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 type ItemSize = 'default' | 'sm' | 'xs';
 type ItemOrientation = 'horizontal' | 'vertical';
@@ -129,7 +130,7 @@ export interface ItemProps
  * Renders as a pressable when given `onPress`, and as a plain view otherwise,
  * so a static row does not announce itself as a button.
  */
-const ItemRoot = forwardRef<View, ItemProps>(
+const ItemRoot = forwardRef<ViewRef, ItemProps>(
   (
     {
       className,
@@ -187,7 +188,7 @@ export interface ItemGroupProps extends ViewProps {
 }
 
 /** Stack of items. Pair with `Item.Separator` between them. */
-const ItemGroup = forwardRef<View, ItemGroupProps>(
+const ItemGroup = forwardRef<ViewRef, ItemGroupProps>(
   ({ className, orientation = 'vertical', children, ...props }, ref) => (
     <View
       ref={ref}
@@ -213,7 +214,7 @@ export interface ItemSeparatorProps extends ViewProps {
 }
 
 /** Hairline between rows in a group. */
-const ItemSeparator = forwardRef<View, ItemSeparatorProps>(
+const ItemSeparator = forwardRef<ViewRef, ItemSeparatorProps>(
   ({ className, orientation = 'vertical', ...props }, ref) => (
     <View
       ref={ref}
@@ -236,7 +237,7 @@ export interface ItemMediaProps
 }
 
 /** Leading slot: an icon tile, a thumbnail, or an avatar passed through. */
-const ItemMedia = forwardRef<View, ItemMediaProps>(
+const ItemMedia = forwardRef<ViewRef, ItemMediaProps>(
   ({ className, variant, size, children, ...props }, ref) => {
     const item = useContext(ItemContext);
 
@@ -263,7 +264,7 @@ export interface ItemContentProps extends ViewProps {
  * actions stay pinned to the trailing edge; in a vertical one it just fills
  * the width, because there is nothing beside it to push against.
  */
-const ItemContent = forwardRef<View, ItemContentProps>(
+const ItemContent = forwardRef<ViewRef, ItemContentProps>(
   ({ className, children, ...props }, ref) => {
     const { orientation } = useContext(ItemContext);
 
@@ -288,7 +289,7 @@ export interface ItemTitleProps extends TextProps {
   className?: string;
 }
 
-const ItemTitle = forwardRef<React.ElementRef<typeof Text>, ItemTitleProps>(
+const ItemTitle = forwardRef<TextRef, ItemTitleProps>(
   ({ className, ...props }, ref) => {
     const { size } = useContext(ItemContext);
     const { title } = itemVariants({ size });
@@ -303,7 +304,7 @@ export interface ItemDescriptionProps extends TextProps {
 }
 
 const ItemDescription = forwardRef<
-  React.ElementRef<typeof Text>,
+  TextRef,
   ItemDescriptionProps
 >(({ className, ...props }, ref) => {
   const { size } = useContext(ItemContext);
@@ -319,7 +320,7 @@ export interface ItemActionsProps extends ViewProps {
 }
 
 /** Trailing slot: buttons, a chevron, a switch. */
-const ItemActions = forwardRef<View, ItemActionsProps>(
+const ItemActions = forwardRef<ViewRef, ItemActionsProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -342,7 +343,7 @@ export interface ItemHeaderProps extends ViewProps {
  * row. Needs `orientation="vertical"` on the item, since a strip only makes
  * sense once the item stacks.
  */
-const ItemHeader = forwardRef<View, ItemHeaderProps>(
+const ItemHeader = forwardRef<ViewRef, ItemHeaderProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -361,7 +362,7 @@ export interface ItemFooterProps extends ViewProps {
 }
 
 /** Full-width strip below the row's main content. */
-const ItemFooter = forwardRef<View, ItemFooterProps>(
+const ItemFooter = forwardRef<ViewRef, ItemFooterProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}

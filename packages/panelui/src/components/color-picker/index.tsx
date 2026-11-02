@@ -109,6 +109,7 @@ import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
 import { Popover, type PopoverContentProps } from '../popover';
 import { enabledColorPickerAction } from './color-picker-accessibility';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Settles a thumb that was moved by something other than a finger. */
 const TIMING = { duration: 140 } as const;
@@ -287,7 +288,7 @@ export interface ColorPickerProps extends Omit<ColorPickerVariantProps, 'disable
   children: ReactNode;
 }
 
-const ColorPickerRoot = forwardRef<View, ColorPickerProps>(
+const ColorPickerRoot = forwardRef<ViewRef, ColorPickerProps>(
   (
     {
       className,
@@ -499,7 +500,7 @@ export interface ColorPickerAreaProps {
   thumbClassName?: string;
 }
 
-const ColorPickerArea = forwardRef<View, ColorPickerAreaProps>(
+const ColorPickerArea = forwardRef<ViewRef, ColorPickerAreaProps>(
   ({ className, height, thumbClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Area');
     const slots = colorPickerVariants({ size: ctx.size });
@@ -754,7 +755,7 @@ export interface ColorPickerHueProps {
   thumbClassName?: string;
 }
 
-const ColorPickerHue = forwardRef<View, ColorPickerHueProps>(
+const ColorPickerHue = forwardRef<ViewRef, ColorPickerHueProps>(
   ({ className, thumbClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Hue');
     const sign = useDirectionSign();
@@ -864,7 +865,7 @@ export interface ColorPickerAlphaProps {
   thumbClassName?: string;
 }
 
-const ColorPickerAlpha = forwardRef<View, ColorPickerAlphaProps>(
+const ColorPickerAlpha = forwardRef<ViewRef, ColorPickerAlphaProps>(
   ({ className, thumbClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Alpha');
     const sign = useDirectionSign();
@@ -1015,7 +1016,7 @@ export interface ColorPickerPreviewProps {
   children?: ReactNode;
 }
 
-const ColorPickerPreview = forwardRef<View, ColorPickerPreviewProps>(
+const ColorPickerPreview = forwardRef<ViewRef, ColorPickerPreviewProps>(
   ({ className, showValue = false, swatchClassName, valueClassName, children }, ref) => {
     const ctx = useColorPicker('ColorPicker.Preview');
     const slots = colorPickerVariants({ size: ctx.size });
@@ -1096,7 +1097,7 @@ export interface ColorPickerSwatchesProps {
   swatchClassName?: string;
 }
 
-const ColorPickerSwatches = forwardRef<View, ColorPickerSwatchesProps>(
+const ColorPickerSwatches = forwardRef<ViewRef, ColorPickerSwatchesProps>(
   ({ className, colors, swatchSize, swatchClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Swatches');
     const slots = colorPickerVariants({ size: ctx.size });
@@ -1234,7 +1235,7 @@ export interface ColorPickerFieldProps {
  * JavaScript when the rounded string actually changes, the same as `Preview`.
  * A drag through a hundred frames of the same hex costs one render.
  */
-const ColorPickerField = forwardRef<View, ColorPickerFieldProps>(
+const ColorPickerField = forwardRef<ViewRef, ColorPickerFieldProps>(
   ({ className, label, showValue = true, swatchClassName, onPress, children }, ref) => {
     const ctx = useColorPicker('ColorPicker.Field');
     const slots = colorPickerVariants({ size: ctx.size });
@@ -1360,7 +1361,7 @@ export interface ColorPickerChannelProps {
  * first and only sent when the rounded value changes, so a slow drag across a
  * hue track sends 360 updates rather than one per frame.
  */
-const ColorPickerChannelReadout = forwardRef<View, ColorPickerChannelProps>(
+const ColorPickerChannelReadout = forwardRef<ViewRef, ColorPickerChannelProps>(
   ({ className, channel, label, format }, ref) => {
     const ctx = useColorPicker('ColorPicker.Channel');
     const slots = colorPickerVariants({ size: ctx.size });
@@ -1420,7 +1421,7 @@ export interface ColorPickerBrightnessProps {
  * around it never needs this. A wheel carries hue and saturation instead, and
  * leaves brightness with nowhere to live — this is where it goes.
  */
-const ColorPickerBrightness = forwardRef<View, ColorPickerBrightnessProps>(
+const ColorPickerBrightness = forwardRef<ViewRef, ColorPickerBrightnessProps>(
   ({ className, thumbClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Brightness');
     const sign = useDirectionSign();
@@ -1593,7 +1594,7 @@ export interface ColorPickerWheelProps {
  * which way round the spectrum runs would only make the same colour sit
  * somewhere else.
  */
-const ColorPickerWheel = forwardRef<View, ColorPickerWheelProps>(
+const ColorPickerWheel = forwardRef<ViewRef, ColorPickerWheelProps>(
   ({ className, size, thumbClassName }, ref) => {
     const ctx = useColorPicker('ColorPicker.Wheel');
     const slots = colorPickerVariants({ size: ctx.size });

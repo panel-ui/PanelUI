@@ -49,6 +49,7 @@ import {
 } from '../../primitives/animated-pressable';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 type BreadcrumbSize = 'sm' | 'default';
 
@@ -93,7 +94,7 @@ export interface BreadcrumbProps extends ViewProps {
  * The trail's landmark. Labelled for assistive tech so the row is announced as
  * "Breadcrumb" rather than an anonymous run of links.
  */
-const BreadcrumbRoot = forwardRef<View, BreadcrumbProps>(
+const BreadcrumbRoot = forwardRef<ViewRef, BreadcrumbProps>(
   ({ className, size = 'default', separator, children, ...props }, ref) => (
     <BreadcrumbContext.Provider value={{ size, separator: separator ?? null }}>
       <View
@@ -137,7 +138,7 @@ const COLLAPSE = Symbol('breadcrumb-collapse');
  * The crumb row. It owns the separators — one between every pair of crumbs and
  * none at the ends — and the collapsing, so a caller only ever lists items.
  */
-const BreadcrumbList = forwardRef<View, BreadcrumbListProps>(
+const BreadcrumbList = forwardRef<ViewRef, BreadcrumbListProps>(
   (
     {
       className,
@@ -195,7 +196,7 @@ export interface BreadcrumbItemProps extends ViewProps {
 }
 
 /** One crumb: wraps a link or the current page. */
-const BreadcrumbItem = forwardRef<View, BreadcrumbItemProps>(
+const BreadcrumbItem = forwardRef<ViewRef, BreadcrumbItemProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -222,7 +223,7 @@ export interface BreadcrumbLinkProps
  * trail. A string child is wrapped in the crumb text style; anything else
  * renders as given.
  */
-const BreadcrumbLink = forwardRef<View, BreadcrumbLinkProps>(
+const BreadcrumbLink = forwardRef<ViewRef, BreadcrumbLinkProps>(
   ({ className, textClassName, children, ...props }, ref) => {
     const { size } = useBreadcrumb();
 
@@ -255,7 +256,7 @@ export interface BreadcrumbPageProps extends TextProps {
  * marks it as the destination, and it is painted in the full foreground so the
  * trail resolves to it.
  */
-const BreadcrumbPage = forwardRef<React.ElementRef<typeof Text>, BreadcrumbPageProps>(
+const BreadcrumbPage = forwardRef<TextRef, BreadcrumbPageProps>(
   ({ className, ...props }, ref) => {
     const { size } = useBreadcrumb();
 
@@ -284,7 +285,7 @@ export interface BreadcrumbSeparatorProps extends ViewProps {
  * only for the rare hand-assembled trail. Hidden from screen readers — the
  * order of the crumbs already conveys the hierarchy.
  */
-const BreadcrumbSeparator = forwardRef<View, BreadcrumbSeparatorProps>(
+const BreadcrumbSeparator = forwardRef<ViewRef, BreadcrumbSeparatorProps>(
   ({ className, children, ...props }, ref) => {
     const { separator } = useBreadcrumb();
     const rawTint = useCSSVariable('--color-muted-foreground');
@@ -318,7 +319,7 @@ export interface BreadcrumbEllipsisProps
  * for a menu of the hidden steps. Labelled "Show more" so the collapse is not
  * silent to assistive tech.
  */
-const BreadcrumbEllipsis = forwardRef<View, BreadcrumbEllipsisProps>(
+const BreadcrumbEllipsis = forwardRef<ViewRef, BreadcrumbEllipsisProps>(
   ({ className, onPress, ...props }, ref) => {
     const rawTint = useCSSVariable('--color-muted-foreground');
     const tint = typeof rawTint === 'string' ? rawTint : undefined;

@@ -29,6 +29,7 @@ import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { Separator } from '../separator';
 import { Shimmer } from '../shimmer';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 type MarkerVariant = 'default' | 'border' | 'separator';
 
@@ -80,7 +81,7 @@ export interface MarkerProps
  * Renders as a pressable when given `onPress` and as a plain view otherwise,
  * so a marker that does nothing does not announce itself as a button.
  */
-const MarkerRoot = forwardRef<View, MarkerProps>(
+const MarkerRoot = forwardRef<ViewRef, MarkerProps>(
   ({ className, variant = 'default', disabled, children, onPress, ...props }, ref) => {
     const { root } = markerVariants({ variant, disabled: !!disabled });
 
@@ -134,7 +135,7 @@ export interface MarkerIconProps extends ViewProps {
  * Decorative leading slot. Hidden from screen readers — the icon repeats what
  * the content already says, and announcing it twice is noise.
  */
-const MarkerIcon = forwardRef<View, MarkerIconProps>(
+const MarkerIcon = forwardRef<ViewRef, MarkerIconProps>(
   ({ className, children, ...props }, ref) => {
     // Icons here take the muted foreground, so a marker reads as chrome next to
     // a message rather than competing with it.
@@ -168,7 +169,7 @@ export interface MarkerContentProps extends TextProps {
   children?: ReactNode;
 }
 
-const MarkerContent = forwardRef<RNText, MarkerContentProps>(
+const MarkerContent = forwardRef<TextRef, MarkerContentProps>(
   ({ className, shimmer, children, ...props }, ref) => {
     const variant = useContext(MarkerContext);
     const { content } = markerVariants({ variant });

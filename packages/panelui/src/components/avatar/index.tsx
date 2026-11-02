@@ -23,6 +23,7 @@ import {
   type AvatarSizeName,
 } from './avatar-group';
 import { avatarSourceIdentity } from './avatar-source';
+import type { ViewRef } from '../../primitives/refs';
 
 const avatarVariants = tv({
   slots: {
@@ -67,7 +68,7 @@ export interface AvatarProps extends ViewProps, VariantProps<typeof avatarVarian
   imageProps?: Omit<ImageProps, 'source'>;
 }
 
-const AvatarRoot = forwardRef<View, AvatarProps>(
+const AvatarRoot = forwardRef<ViewRef, AvatarProps>(
   ({ className, size, source, fallback, imageProps, children, ...props }, ref) => {
     const [failedSource, setFailedSource] = useState<string>();
     const { root, image, fallback: fallbackSlot } = avatarVariants({ size });
@@ -128,7 +129,7 @@ export interface AvatarBadgeProps extends ViewProps {
  * The ring is `border-background` so the badge separates from the image
  * whatever surface the avatar sits on.
  */
-const AvatarBadge = forwardRef<View, AvatarBadgeProps>(
+const AvatarBadge = forwardRef<ViewRef, AvatarBadgeProps>(
   ({ className, children, ...props }, ref) => (
     <View
       ref={ref}
@@ -184,7 +185,7 @@ export interface AvatarGroupProps extends ViewProps {
  * </Avatar.Group>
  * ```
  */
-const AvatarGroup = forwardRef<View, AvatarGroupProps>(
+const AvatarGroup = forwardRef<ViewRef, AvatarGroupProps>(
   ({ className, size = 'md', max, total, overlap, children, ...props }, ref) => {
     const faces = Children.toArray(children).filter(isValidElement) as ReactElement<AvatarProps>[];
     const { visible, overflow } = avatarGroupCount(faces.length, max, total);

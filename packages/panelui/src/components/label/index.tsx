@@ -17,6 +17,7 @@ import {
 import { View, type Text as RNText, type ViewProps } from 'react-native';
 import { tv } from 'tailwind-variants';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const labelVariants = tv({
   slots: {
@@ -59,7 +60,7 @@ export interface LabelProps extends ViewProps {
   children?: ReactNode;
 }
 
-const LabelRoot = forwardRef<View, LabelProps>(
+const LabelRoot = forwardRef<ViewRef, LabelProps>(
   (
     {
       className,
@@ -100,7 +101,7 @@ export interface LabelTextProps extends TextProps {
   asteriskClassName?: string;
 }
 
-const LabelText = forwardRef<RNText, LabelTextProps>(
+const LabelText = forwardRef<TextRef, LabelTextProps>(
   ({ className, asteriskClassName, children, ...props }, ref) => {
     const { isRequired, isInvalid, isDisabled } = useContext(LabelContext);
     const { text, asterisk } = labelVariants({ isDisabled, isInvalid });

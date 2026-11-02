@@ -161,6 +161,7 @@ import {
   scheduleSearchBarDebounce,
   type SearchBarDebounceTimer,
 } from './search-bar-debounce';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Matches the field's own focus crossfade, so the row settles as one thing. */
 const CANCEL_DURATION = 180;
@@ -529,7 +530,7 @@ export interface SearchBarProps
   children?: ReactNode;
 }
 
-const SearchBarRoot = forwardRef<TextInput, SearchBarProps>(
+const SearchBarRoot = forwardRef<TextInputRef, SearchBarProps>(
   (
     {
       value: valueProp,

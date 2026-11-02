@@ -12,6 +12,7 @@ import { useCSSVariable } from 'uniwind';
 import { cn } from '../../utils/cn';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { AlertTriangleIcon, CheckCircleIcon, InfoIcon } from '../../icons';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const alertVariants = tv({
   slots: {
@@ -83,7 +84,7 @@ export interface AlertProps extends ViewProps, VariantProps<typeof alertVariants
   children?: ReactNode;
 }
 
-const AlertRoot = forwardRef<View, AlertProps>(
+const AlertRoot = forwardRef<ViewRef, AlertProps>(
   ({ className, variant = 'default', icon, children, ...props }, ref) => {
     const { root, indicator, content } = alertVariants({ variant });
 
@@ -122,7 +123,7 @@ export interface AlertIndicatorProps extends ViewProps {
  * Leading status icon. Resolves both the icon and its colour from the parent
  * Alert's variant, so it follows the active theme.
  */
-const AlertIndicator = forwardRef<View, AlertIndicatorProps>(
+const AlertIndicator = forwardRef<ViewRef, AlertIndicatorProps>(
   ({ className, iconProps, children, ...props }, ref) => {
     const variant = useContext(AlertContext);
     const { indicator } = alertVariants({ variant });
@@ -142,7 +143,7 @@ const AlertIndicator = forwardRef<View, AlertIndicatorProps>(
 AlertIndicator.displayName = 'Alert.Indicator';
 
 /** Flex-1 wrapper for Alert.Title and Alert.Description. */
-const AlertContent = forwardRef<View, ViewProps & { className?: string }>(
+const AlertContent = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const variant = useContext(AlertContext);
     const { content } = alertVariants({ variant });
@@ -151,7 +152,7 @@ const AlertContent = forwardRef<View, ViewProps & { className?: string }>(
 );
 AlertContent.displayName = 'Alert.Content';
 
-const AlertTitle = forwardRef<RNText, TextProps>(
+const AlertTitle = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const variant = useContext(AlertContext);
     const { title } = alertVariants({ variant });
@@ -160,7 +161,7 @@ const AlertTitle = forwardRef<RNText, TextProps>(
 );
 AlertTitle.displayName = 'Alert.Title';
 
-const AlertDescription = forwardRef<RNText, TextProps>(
+const AlertDescription = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const variant = useContext(AlertContext);
     const { description } = alertVariants({ variant });

@@ -27,6 +27,7 @@ import { View, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 const separatorVariants = tv({
   base: 'bg-border',
@@ -81,7 +82,7 @@ export interface SeparatorProps
   labelClassName?: string;
 }
 
-export const Separator = forwardRef<View, SeparatorProps>(
+export const Separator = forwardRef<ViewRef, SeparatorProps>(
   (
     {
       className,

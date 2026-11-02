@@ -136,6 +136,7 @@ import {
   isCrossing,
   snapTarget,
 } from './scroll-header-math';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 /**
  * Height of the pinned bar, in points, before the device's top inset is added.
@@ -302,7 +303,7 @@ export interface ScrollHeaderProps extends ViewProps {
  * The band, and the scroller it sits over. Everything that is not a part is
  * treated as the scrollable child.
  */
-const ScrollHeaderRoot = forwardRef<View, ScrollHeaderProps>(
+const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
   (
     {
       className,
@@ -594,7 +595,7 @@ export interface ScrollHeaderBarProps extends ViewProps {
  * block leaves, which is what makes the change read as one crossfade rather
  * than two things happening at once.
  */
-const ScrollHeaderBar = forwardRef<View, ScrollHeaderBarProps>(
+const ScrollHeaderBar = forwardRef<ViewRef, ScrollHeaderBarProps>(
   (
     {
       className,
@@ -672,7 +673,7 @@ export interface ScrollHeaderLargeProps extends ViewProps {
  * collapses over, so whatever is put in it — a title, a search field, a row of
  * chips — sets the scroll distance rather than a prop having to agree with it.
  */
-const ScrollHeaderLarge = forwardRef<View, ScrollHeaderLargeProps>(
+const ScrollHeaderLarge = forwardRef<ViewRef, ScrollHeaderLargeProps>(
   ({ className, onLayout, children, ...props }, ref) => {
     const { progress, measureLarge, collapsed } = useScrollHeader('ScrollHeader.Large');
     const { large } = scrollHeaderVariants();
@@ -717,7 +718,7 @@ ScrollHeaderLarge.displayName = 'ScrollHeader.Large';
  * The screen's title. Written in both halves and styled from whichever it is
  * in: large and at rest in the block, compact and fading in on the bar.
  */
-const ScrollHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const ScrollHeaderTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { progress, largeHeight, collapsed, hasLarge } = useScrollHeader('ScrollHeader.Title');
   const slot = useContext(ScrollHeaderSlotContext);
 
@@ -769,7 +770,7 @@ const ScrollHeaderTitle = forwardRef<RNText, TextProps>(({ className, ...props }
 ScrollHeaderTitle.displayName = 'ScrollHeader.Title';
 
 /** The quiet line under the title — a count, a byline, a date. */
-const ScrollHeaderDescription = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => (
+const ScrollHeaderDescription = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => (
   <Text {...props} ref={ref} size="sm" muted className={className} />
 ));
 ScrollHeaderDescription.displayName = 'ScrollHeader.Description';
@@ -783,7 +784,7 @@ export interface ScrollHeaderActionsProps extends ViewProps {
  * The controls at the trailing end of the bar. They stay put and stay
  * reachable — only the bar's surface and title are part of the transition.
  */
-const ScrollHeaderActions = forwardRef<View, ScrollHeaderActionsProps>(
+const ScrollHeaderActions = forwardRef<ViewRef, ScrollHeaderActionsProps>(
   ({ className, children, ...props }, ref) => {
     const { actions } = scrollHeaderVariants();
     return (
@@ -815,7 +816,7 @@ export interface ScrollHeaderCoverProps extends ViewProps {
  * band's height is its height, which is why it stretches on an over-scroll by
  * being laid out larger rather than by being scaled up and going soft.
  */
-const ScrollHeaderCover = forwardRef<View, ScrollHeaderCoverProps>(
+const ScrollHeaderCover = forwardRef<ViewRef, ScrollHeaderCoverProps>(
   (
     {
       className,

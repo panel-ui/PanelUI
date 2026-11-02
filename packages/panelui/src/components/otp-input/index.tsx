@@ -39,6 +39,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { Text } from '../../primitives/text';
 import { resolveOtpEditable } from './otp-input-state';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Long enough to read as a transition, short enough not to lag a fast type. */
 const FOCUS_DURATION = 150;
@@ -230,7 +231,7 @@ function sanitize(raw: string, length: number, type: 'numeric' | 'text'): string
   return filtered.slice(0, length);
 }
 
-export const OtpInput = forwardRef<TextInput, OtpInputProps>(
+export const OtpInput = forwardRef<TextInputRef, OtpInputProps>(
   (
     {
       className,

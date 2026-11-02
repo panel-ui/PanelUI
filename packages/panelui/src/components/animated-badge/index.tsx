@@ -76,6 +76,7 @@ import {
 } from '../../icons';
 import { IconColorProvider } from '../../icons';
 import { Text, textChildren, textLabel } from '../../primitives/text';
+import type { ViewRef } from '../../primitives/refs';
 
 /** How long the pulse takes to swell and settle again, in milliseconds. */
 const PULSE_DURATION = 800;
@@ -242,7 +243,7 @@ export interface AnimatedBadgeProps
   labelClassName?: string;
 }
 
-export const AnimatedBadge = forwardRef<View, AnimatedBadgeProps>(
+export const AnimatedBadge = forwardRef<ViewRef, AnimatedBadgeProps>(
   (
     {
       status: statusProp = 'neutral',

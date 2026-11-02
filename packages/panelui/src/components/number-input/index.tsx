@@ -37,6 +37,7 @@ import { selectionTick } from '../../utils/haptics';
 import { Label } from '../label';
 import { normalize, precisionOf } from './number-input-math';
 import { createRepeater } from './number-input-repeat';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Wait before a held button starts repeating — a tap must not trip it. */
 const REPEAT_DELAY = 400;
@@ -163,7 +164,7 @@ export interface NumberInputProps
  * A number stepped by buttons or typed by hand, reconciled to one clamped,
  * step-snapped value. See the file header for why it keeps both affordances.
  */
-export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+export const NumberInput = forwardRef<TextInputRef, NumberInputProps>(
   (
     {
       className,

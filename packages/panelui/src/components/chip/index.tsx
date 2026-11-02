@@ -41,6 +41,7 @@ import {
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 const chipVariants = tv({
   slots: {
@@ -188,7 +189,7 @@ export interface ChipProps
   haptics?: boolean;
 }
 
-const ChipRoot = forwardRef<View, ChipProps>(
+const ChipRoot = forwardRef<ViewRef, ChipProps>(
   (
     {
       children,

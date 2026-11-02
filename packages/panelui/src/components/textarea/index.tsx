@@ -40,6 +40,7 @@ import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text } from '../../primitives/text';
 import { Label } from '../label';
 import { textareaIsDisabled } from './textarea-disabled';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Long enough to read as a transition, short enough not to lag a fast tab. */
 const FOCUS_DURATION = 150;
@@ -167,7 +168,7 @@ export interface TextareaProps
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
-export const Textarea = forwardRef<TextInput, TextareaProps>(
+export const Textarea = forwardRef<TextInputRef, TextareaProps>(
   (
     {
       className,

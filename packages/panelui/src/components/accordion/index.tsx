@@ -52,6 +52,7 @@ import Animated, {
 import { tv } from 'tailwind-variants';
 import { ChevronDownIcon } from '../../icons';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 export type AccordionVariant =
   | 'default'
@@ -165,7 +166,7 @@ export interface AccordionProps extends ViewProps {
 const toArray = (value: string | string[] | undefined): string[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
 
-const AccordionRoot = forwardRef<View, AccordionProps>(
+const AccordionRoot = forwardRef<ViewRef, AccordionProps>(
   (
     {
       className,
@@ -247,7 +248,7 @@ export interface AccordionItemProps extends ViewProps {
   children?: ReactNode;
 }
 
-const AccordionItem = forwardRef<View, AccordionItemProps>(
+const AccordionItem = forwardRef<ViewRef, AccordionItemProps>(
   ({ className, value, isDisabled = false, children, ...props }, ref) => {
     const { expanded, variant } = useAccordion('Accordion.Item');
     const reducedMotion = useReducedMotion();
@@ -281,7 +282,7 @@ export interface AccordionTriggerProps extends Omit<PressableProps, 'children'> 
 }
 
 /** The pressable header row. Bare strings are wrapped in the title style. */
-const AccordionTrigger = forwardRef<View, AccordionTriggerProps>(
+const AccordionTrigger = forwardRef<ViewRef, AccordionTriggerProps>(
   ({ className, children, onPress, disabled = false, ...props }, ref) => {
     const { toggle, variant } = useAccordion('Accordion.Trigger');
     const { value, isExpanded, isDisabled } = useAccordionItem('Accordion.Trigger');
@@ -317,7 +318,7 @@ export interface AccordionIndicatorProps extends ViewProps {
 }
 
 /** Chevron that rotates 180° while the item is open. */
-const AccordionIndicator = forwardRef<View, AccordionIndicatorProps>(
+const AccordionIndicator = forwardRef<ViewRef, AccordionIndicatorProps>(
   ({ className, children, ...props }, ref) => {
     const { variant } = useAccordion('Accordion.Indicator');
     const { isExpanded } = useAccordionItem('Accordion.Indicator');
@@ -385,7 +386,7 @@ export interface AccordionContentProps extends ViewProps {
  * accessibility tree, though, so it is explicitly taken out of that too;
  * otherwise a screen reader would read out a section the eye cannot see.
  */
-const AccordionContent = forwardRef<View, AccordionContentProps>(
+const AccordionContent = forwardRef<ViewRef, AccordionContentProps>(
   ({ className, keepMounted, children, ...props }, ref) => {
     const { variant, keepMounted: keepMountedDefault } = useAccordion('Accordion.Content');
     const { isExpanded } = useAccordionItem('Accordion.Content');
@@ -414,7 +415,7 @@ const AccordionContent = forwardRef<View, AccordionContentProps>(
 );
 AccordionContent.displayName = 'Accordion.Content';
 
-const AccordionTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const AccordionTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { variant } = useAccordion('Accordion.Title');
   const { title } = accordionVariants({ variant });
   return <Text ref={ref} className={title({ className })} {...props} />;

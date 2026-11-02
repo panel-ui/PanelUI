@@ -84,6 +84,7 @@ import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
 import { Avatar } from '../avatar';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Long enough to see the value move, short enough to keep up with a fast tap. */
 const COUNT_DURATION = 160;
@@ -187,7 +188,7 @@ export interface PostProps
   children?: ReactNode;
 }
 
-const PostRoot = forwardRef<View, PostProps>(
+const PostRoot = forwardRef<ViewRef, PostProps>(
   ({ className, variant = 'feed', size = 'default', onPress, children, ...props }, ref) => {
     const { root } = postVariants({ variant, size });
     const context = useMemo(() => ({ variant, size }), [variant, size]);
@@ -236,7 +237,7 @@ export interface PostHeaderProps extends ViewProps {
  * menu stays in the corner as a long display name wraps rather than riding down
  * with it.
  */
-const PostHeader = forwardRef<View, PostHeaderProps>(
+const PostHeader = forwardRef<ViewRef, PostHeaderProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, size } = usePost();
     const { header } = postVariants({ variant, size });
@@ -290,7 +291,7 @@ export interface PostAuthorProps extends Omit<ViewProps, 'children'> {
  * which is the difference between a timeline row and a card: a dense row cannot
  * afford a second line, and a card looks starved without one.
  */
-const PostAuthor = forwardRef<View, PostAuthorProps>(
+const PostAuthor = forwardRef<ViewRef, PostAuthorProps>(
   (
     { className, name, handle, avatar, fallback, verified, timestamp, children, ...props },
     ref
@@ -396,7 +397,7 @@ export interface PostActionProps extends ViewProps {
 }
 
 /** The header's trailing slot — an overflow menu, a follow button, a badge. */
-const PostAction = forwardRef<View, PostActionProps>(
+const PostAction = forwardRef<ViewRef, PostActionProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, size } = usePost();
     const { action } = postVariants({ variant, size });
@@ -426,7 +427,7 @@ export interface PostCommunityProps extends Omit<ViewProps, 'children'> {
  * post's subject is the headline — the group is where it came from, not who
  * said it.
  */
-const PostCommunity = forwardRef<View, PostCommunityProps>(
+const PostCommunity = forwardRef<ViewRef, PostCommunityProps>(
   ({ className, name, avatar, meta, children, ...props }, ref) => {
     const { variant, size } = usePost();
     const {
@@ -471,7 +472,7 @@ export interface PostTitleProps extends ViewProps {
 }
 
 /** The headline of a post whose subject is a headline rather than a person. */
-const PostTitle = forwardRef<View, PostTitleProps>(
+const PostTitle = forwardRef<ViewRef, PostTitleProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, size } = usePost();
     const { title } = postVariants({ variant, size });
@@ -506,7 +507,7 @@ export interface PostBodyProps extends Omit<ViewProps, 'children'> {
  * A non-string child is left entirely alone: it has already been laid out by
  * someone who knew more than we do.
  */
-const PostBody = forwardRef<View, PostBodyProps>(
+const PostBody = forwardRef<ViewRef, PostBodyProps>(
   (
     { className, numberOfLines, onTagPress, onMentionPress, children, ...props },
     ref
@@ -621,7 +622,7 @@ const SCRIM_COLOURS: readonly [string, string, string] = [
  * whose heights are decided by whatever was uploaded scrolls like a broken
  * staircase. The image covers the box and is cropped by it.
  */
-const PostMedia = forwardRef<View, PostMediaProps>(
+const PostMedia = forwardRef<ViewRef, PostMediaProps>(
   (
     {
       className,
@@ -714,7 +715,7 @@ export interface PostFooterProps extends ViewProps {
 }
 
 /** The row of counts and controls under the post. */
-const PostFooter = forwardRef<View, PostFooterProps>(
+const PostFooter = forwardRef<ViewRef, PostFooterProps>(
   ({ className, children, ...props }, ref) => {
     const { variant, size } = usePost();
     const { footer } = postVariants({ variant, size });
@@ -759,7 +760,7 @@ export interface PostStatProps extends Omit<PressableProps, 'children' | 'style'
  * Repainting the digits in place is indistinguishable from a re-render, which
  * is the doubt this exists to remove.
  */
-const PostStat = forwardRef<View, PostStatProps>(
+const PostStat = forwardRef<ViewRef, PostStatProps>(
   (
     {
       className,
@@ -961,7 +962,7 @@ export interface PostVotesProps extends Omit<ViewProps, 'children'> {
  * score is a thing people change their minds about, and a vote that cannot be
  * withdrawn is one they think twice before casting.
  */
-const PostVotes = forwardRef<View, PostVotesProps>(
+const PostVotes = forwardRef<ViewRef, PostVotesProps>(
   (
     {
       className,

@@ -63,6 +63,7 @@ const ALIAS = {
 const SUPPORT_DESCRIPTIONS = {
   text: 'Themed text with a size, weight and muted scale. Most components build on it.',
   portal: 'Renders content above everything else. Required by every overlay.',
+  refs: 'The types a forwarded ref points at, the same on every React Native version.',
   'animated-pressable': 'Pressable with UI-thread press feedback.',
   'keyboard-avoider': 'View that lifts itself clear of the software keyboard.',
   scrim: 'The backdrop behind an overlay — a dim, or a blur when expo-blur is installed.',

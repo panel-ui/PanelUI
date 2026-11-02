@@ -119,6 +119,7 @@ import {
   usePlannerSelectionLifecycle,
 } from './planner-lifecycle';
 import { millisecondsUntilNextLocalDay } from './planner-today';
+import type { ViewRef } from '../../primitives/refs';
 
 /**
  * How many of a day's entries a cell draws before it stops and counts.
@@ -474,7 +475,7 @@ export interface PlannerProps extends Omit<ViewProps, 'children'> {
   children?: ReactNode;
 }
 
-const PlannerRoot = forwardRef<View, PlannerProps>(
+const PlannerRoot = forwardRef<ViewRef, PlannerProps>(
   (
     {
       className,

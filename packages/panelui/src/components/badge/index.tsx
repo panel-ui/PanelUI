@@ -2,6 +2,7 @@ import { forwardRef, type ReactNode } from 'react';
 import { View, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Text, textChildren } from '../../primitives/text';
+import type { ViewRef } from '../../primitives/refs';
 
 const badgeVariants = tv({
   slots: {
@@ -77,7 +78,7 @@ export interface BadgeProps
   count?: number;
 }
 
-export const Badge = forwardRef<View, BadgeProps>(
+export const Badge = forwardRef<ViewRef, BadgeProps>(
   ({ children, className, labelClassName, variant, shape, size, count, ...props }, ref) => {
     const resolvedShape = shape ?? (count !== undefined ? 'count' : 'default');
     const { root, label } = badgeVariants({ variant, shape: resolvedShape, size });

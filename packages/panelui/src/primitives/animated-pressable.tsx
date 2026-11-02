@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useResolveClassNames } from 'uniwind';
+import type { ViewRef } from './refs';
 
 const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
@@ -44,7 +45,7 @@ export interface AnimatedPressableProps extends PressableProps {
  * from 1. Keep `pressOpacity` either 1 or not for the life of a component:
  * the style's keys follow it.
  */
-export const AnimatedPressable = forwardRef<View, AnimatedPressableProps>(
+export const AnimatedPressable = forwardRef<ViewRef, AnimatedPressableProps>(
   (
     {
       pressScale = 0.97,

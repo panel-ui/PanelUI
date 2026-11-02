@@ -81,6 +81,7 @@ import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
 import { Frame } from '../frame';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 /** Long enough to read as the arrow turning over, short enough not to lag a tap. */
 const SORT_DURATION = 160;
@@ -250,7 +251,7 @@ export interface TableProps extends ViewProps, VariantProps<typeof tableVariants
   children?: ReactNode;
 }
 
-const TableRoot = forwardRef<View, TableProps>(
+const TableRoot = forwardRef<ViewRef, TableProps>(
   (
     { className, variant, size = 'default', striped = false, columns, children, ...props },
     ref
@@ -297,7 +298,7 @@ export interface TableHeaderProps extends ViewProps {
 }
 
 /** The band of column headers. Draws the rule that separates it from the body. */
-const TableHeader = forwardRef<View, TableHeaderProps>(
+const TableHeader = forwardRef<ViewRef, TableHeaderProps>(
   ({ className, children, ...props }, ref) => {
     const rows = useSectionRows(children, 'header');
 
@@ -321,7 +322,7 @@ export interface TableBodyProps extends ViewProps {
 }
 
 /** The data rows. Renders every child it is given — see `FlatList` for long tables. */
-const TableBody = forwardRef<View, TableBodyProps>(
+const TableBody = forwardRef<ViewRef, TableBodyProps>(
   ({ className, children, ...props }, ref) => {
     const rows = useSectionRows(children, 'body');
 
@@ -340,7 +341,7 @@ export interface TableFooterProps extends ViewProps {
 }
 
 /** Totals band. Tinted and ruled off, because a sum is not another row of data. */
-const TableFooter = forwardRef<View, TableFooterProps>(
+const TableFooter = forwardRef<ViewRef, TableFooterProps>(
   ({ className, children, ...props }, ref) => {
     const rows = useSectionRows(children, 'footer');
 
@@ -382,7 +383,7 @@ export interface TableRowProps
  * Renders as a pressable when given `onPress`, and as a plain view otherwise,
  * so a table you only read does not announce every row as a button.
  */
-const TableRow = forwardRef<View, TableRowProps>(
+const TableRow = forwardRef<ViewRef, TableRowProps>(
   ({ className, selected, disabled, index, last, children, onPress, ...props }, ref) => {
     const { size, striped, columns } = useContext(TableContext);
     const row = useContext(TableRowContext);
@@ -500,7 +501,7 @@ export interface TableHeadProps extends Omit<ViewProps, 'children'> {
  * the press; which column, which way and in what order stay with the caller,
  * because the data being sorted is theirs.
  */
-const TableHead = forwardRef<View, TableHeadProps>(
+const TableHead = forwardRef<ViewRef, TableHeadProps>(
   (
     {
       className,
@@ -647,7 +648,7 @@ export interface TableCellProps extends ViewProps {
  * row of strings needs no `Text` around each one; anything else — a Badge, an
  * Avatar, a Button — is rendered as given.
  */
-const TableCell = forwardRef<View, TableCellProps>(
+const TableCell = forwardRef<ViewRef, TableCellProps>(
   (
     {
       className,
@@ -695,7 +696,7 @@ export interface TableCaptionProps extends TextProps {
  * Place it after the body: a caption read before the columns is a heading, and
  * a heading is not this component's job.
  */
-const TableCaption = forwardRef<React.ElementRef<typeof Text>, TableCaptionProps>(
+const TableCaption = forwardRef<TextRef, TableCaptionProps>(
   ({ className, ...props }, ref) => {
     const { size } = useContext(TableContext);
     const { caption } = tableVariants({ size });
@@ -715,7 +716,7 @@ export interface TableEmptyProps extends ViewProps {
  * and no rows under it looks broken rather than empty, and the header is worth
  * keeping: it says what would be there.
  */
-const TableEmpty = forwardRef<View, TableEmptyProps>(
+const TableEmpty = forwardRef<ViewRef, TableEmptyProps>(
   ({ className, children, ...props }, ref) => {
     const { size } = useContext(TableContext);
     const { caption } = tableVariants({ size });
@@ -780,7 +781,7 @@ export interface TableFrameProps extends Omit<ViewProps, 'children'> {
  * </Table.Frame>
  * ```
  */
-const TableFrame = forwardRef<View, TableFrameProps>(
+const TableFrame = forwardRef<ViewRef, TableFrameProps>(
   (
     {
       className,

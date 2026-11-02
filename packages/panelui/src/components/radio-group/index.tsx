@@ -37,6 +37,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from '../../utils/cn';
 import { Text, textChildren } from '../../primitives/text';
 import { requestRadioValueChange } from './radio-group-value';
+import type { ViewRef } from '../../primitives/refs';
 
 type RadioVariant = 'dot' | 'card';
 type RadioOrientation = 'vertical' | 'horizontal';
@@ -168,7 +169,7 @@ export interface RadioGroupProps extends ViewProps {
   children: ReactNode;
 }
 
-const RadioGroupRoot = forwardRef<View, RadioGroupProps>(
+const RadioGroupRoot = forwardRef<ViewRef, RadioGroupProps>(
   (
     {
       className,
@@ -233,7 +234,7 @@ export interface RadioGroupItemProps {
   children?: ReactNode;
 }
 
-const RadioGroupItem = forwardRef<View, RadioGroupItemProps>(
+const RadioGroupItem = forwardRef<ViewRef, RadioGroupItemProps>(
   (
     {
       className,

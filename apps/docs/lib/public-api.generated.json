@@ -1,10 +1,10 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1497,
+    "exports": 1500,
     "values": 374,
-    "types": 1123,
-    "modules": 168,
+    "types": 1126,
+    "modules": 169,
     "components": 141,
     "hooks": 13
   },
@@ -6722,6 +6722,25 @@
           {
             "name": "PortalProvider",
             "kind": "value"
+          }
+        ]
+      },
+      {
+        "source": "primitives/refs.ts",
+        "slug": "refs",
+        "category": "foundations",
+        "symbols": [
+          {
+            "name": "ViewRef",
+            "kind": "type"
+          },
+          {
+            "name": "TextRef",
+            "kind": "type"
+          },
+          {
+            "name": "TextInputRef",
+            "kind": "type"
           }
         ]
       },

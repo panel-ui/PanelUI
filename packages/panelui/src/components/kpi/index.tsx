@@ -37,6 +37,7 @@ import { type SeriesColorIndex } from '../../utils/chart';
 import { LineChart, type LineChartDatum } from '../line-chart';
 import { Progress } from '../progress';
 import { Surface } from '../surface';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Height of the sparkline when nothing else is said. */
 const CHART_HEIGHT = 56;
@@ -192,7 +193,7 @@ export interface KpiProps extends Omit<ViewProps, 'children'> {
   children: ReactNode;
 }
 
-const KpiRoot = forwardRef<View, KpiProps>(function KpiRoot(
+const KpiRoot = forwardRef<ViewRef, KpiProps>(function KpiRoot(
   { className, colorIndex = 1, goodDirection = 'up', surface = true, children, ...props },
   ref
 ) {
@@ -628,7 +629,7 @@ export interface KpiGroupProps extends ViewProps {
  * caller, because "between" is the one thing a list of siblings cannot express
  * — a trailing rule after the last card is the mistake this exists to prevent.
  */
-const KpiGroup = forwardRef<View, KpiGroupProps>(function KpiGroup(
+const KpiGroup = forwardRef<ViewRef, KpiGroupProps>(function KpiGroup(
   { className, orientation = 'horizontal', separated = true, children, ...props },
   ref
 ) {

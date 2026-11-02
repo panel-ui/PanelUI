@@ -65,6 +65,7 @@ import { selectionTick } from '../../utils/haptics';
 import { Chip, type ChipSize, type ChipVariant } from '../chip';
 import { Label } from '../label';
 import { reconcileMarkedTag, type MarkedTag } from './tag-input-state';
+import type { TextInputRef } from '../../primitives/refs';
 
 /** Matches Input and Combobox, so the three read as the same control focused. */
 const FOCUS_DURATION = 150;
@@ -244,7 +245,7 @@ export interface TagInputProps
   haptics?: boolean;
 }
 
-export const TagInput = forwardRef<TextInput, TagInputProps>(
+export const TagInput = forwardRef<TextInputRef, TagInputProps>(
   (
     {
       className,

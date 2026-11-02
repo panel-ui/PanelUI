@@ -27,6 +27,7 @@ import { View, type Text as RNText, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 const typographyVariants = tv({
   base: 'text-foreground',
@@ -144,7 +145,7 @@ const HEADING_LEVEL: Record<HeadingType, number> = {
   h6: 6,
 };
 
-const TypographyRoot = forwardRef<RNText, TypographyProps>(
+const TypographyRoot = forwardRef<TextRef, TypographyProps>(
   (
     { className, type, muted, weight, align, transform, underline, italic, strike, ...props },
     ref
@@ -173,7 +174,7 @@ export interface TypographyHeadingProps extends Omit<TypographyProps, 'type'> {
 }
 
 /** Heading text, wired up with the matching accessibility heading level. */
-const TypographyHeading = forwardRef<RNText, TypographyHeadingProps>(
+const TypographyHeading = forwardRef<TextRef, TypographyHeadingProps>(
   (
     { className, type = 'h2', muted, weight, align, transform, underline, italic, strike, ...props },
     ref
@@ -203,7 +204,7 @@ export interface TypographyParagraphProps extends Omit<TypographyProps, 'type'> 
   type?: ParagraphType;
 }
 
-const TypographyParagraph = forwardRef<RNText, TypographyParagraphProps>(
+const TypographyParagraph = forwardRef<TextRef, TypographyParagraphProps>(
   (
     { className, type = 'body', muted, weight, align, transform, underline, italic, strike, ...props },
     ref
@@ -233,7 +234,7 @@ export interface TypographyCodeProps extends Omit<TypographyProps, 'type'> {
 }
 
 /** Inline code on a muted surface. */
-const TypographyCode = forwardRef<View, TypographyCodeProps & Pick<ViewProps, 'testID'>>(
+const TypographyCode = forwardRef<ViewRef, TypographyCodeProps & Pick<ViewProps, 'testID'>>(
   ({ className, containerClassName, muted, testID, ...props }, ref) => (
     <View
       ref={ref}
@@ -257,7 +258,7 @@ export interface TypographyBlockquoteProps extends Omit<TypographyProps, 'type'>
  * The rule uses `border-s`, so it moves to the right-hand side under a
  * right-to-left `Direction` without the quote having to know.
  */
-const TypographyBlockquote = forwardRef<View, TypographyBlockquoteProps>(
+const TypographyBlockquote = forwardRef<ViewRef, TypographyBlockquoteProps>(
   ({ className, containerClassName, muted, weight, align, transform, underline, italic = true, strike, children, ...props }, ref) => (
     <View ref={ref} className={cn('border-s-2 border-border ps-4', containerClassName)}>
       <Text
@@ -296,7 +297,7 @@ export interface TypographyListProps extends ViewProps {
  * only the list knows whether it is a bullet or a number — and only the list
  * knows which number.
  */
-const TypographyList = forwardRef<View, TypographyListProps>(
+const TypographyList = forwardRef<ViewRef, TypographyListProps>(
   ({ className, ordered = false, children, ...props }, ref) => (
     <View ref={ref} {...props} accessibilityRole="list" className={cn('gap-2', className)}>
       {Children.map(children, (child, index) => (
@@ -321,7 +322,7 @@ export interface TypographyListItemProps extends Omit<TypographyProps, 'type'> {
 }
 
 /** One line of a list. The marker beside it belongs to the list. */
-const TypographyListItem = forwardRef<RNText, TypographyListItemProps>(
+const TypographyListItem = forwardRef<TextRef, TypographyListItemProps>(
   (
     { className, type = 'body', muted, weight, align, transform, underline, italic, strike, ...props },
     ref

@@ -78,6 +78,7 @@ import {
   type QRCodeEyeFrameShape,
   type QRCodeModuleShape,
 } from './qr-shapes';
+import type { ViewRef } from '../../primitives/refs';
 
 export type { ErrorCorrectionLevel };
 export type { QRCodeModuleShape, QRCodeEyeFrameShape, QRCodeEyeBallShape };
@@ -212,7 +213,7 @@ export interface QRCodeProps extends Omit<ViewProps, 'children'>, QrCodeVariantP
   children?: ReactNode;
 }
 
-const QRCodeRoot = forwardRef<View, QRCodeProps>(
+const QRCodeRoot = forwardRef<ViewRef, QRCodeProps>(
   (
     {
       className,
@@ -329,7 +330,7 @@ export interface QRCodeCanvasProps extends Omit<ViewProps, 'children'> {
 const PLATE = '#ffffff';
 const MODULE = '#111111';
 
-const QRCodeCanvas = forwardRef<View, QRCodeCanvasProps>(
+const QRCodeCanvas = forwardRef<ViewRef, QRCodeCanvasProps>(
   (
     {
       className,
@@ -476,7 +477,7 @@ export interface QRCodeFrameProps extends ViewProps {
  * The tray the code sits in — the same widget shell the charts use: a titled
  * strip, and a card flush inside it holding the thing itself.
  */
-const QRCodeFrame = forwardRef<View, QRCodeFrameProps>(
+const QRCodeFrame = forwardRef<ViewRef, QRCodeFrameProps>(
   ({ className, children, ...props }, ref) => {
     const { slots } = useQRCode('QRCode.Frame');
     return (
@@ -498,7 +499,7 @@ export interface QRCodeHeaderProps extends ViewProps {
  * side and `QRCode.Action` the end, so a long title truncates rather than
  * shoving the trailing slot off the edge.
  */
-const QRCodeHeader = forwardRef<View, QRCodeHeaderProps>(
+const QRCodeHeader = forwardRef<ViewRef, QRCodeHeaderProps>(
   ({ className, children, ...props }, ref) => {
     const { slots } = useQRCode('QRCode.Header');
     return (
@@ -535,7 +536,7 @@ export interface QRCodeActionProps extends ViewProps {
  * The trailing slot on the header row — an expiry, a count, a button. A plain
  * string draws as muted text; anything else draws as itself.
  */
-const QRCodeAction = forwardRef<View, QRCodeActionProps>(
+const QRCodeAction = forwardRef<ViewRef, QRCodeActionProps>(
   ({ className, children, ...props }, ref) => {
     useQRCode('QRCode.Action');
     return (
@@ -567,7 +568,7 @@ export interface QRCodePanelProps extends ViewProps {
  * logo positions itself against, so a `QRCode.Logo` belongs in here beside the
  * canvas rather than anywhere else.
  */
-const QRCodePanel = forwardRef<View, QRCodePanelProps>(
+const QRCodePanel = forwardRef<ViewRef, QRCodePanelProps>(
   ({ className, children, ...props }, ref) => {
     const { slots } = useQRCode('QRCode.Panel');
     return (
@@ -683,7 +684,7 @@ function hasLogo(children: ReactNode): boolean {
  * Its presence is what clears the square, and what raises the error-correction
  * level if the one asked for could not afford it.
  */
-const QRCodeLogo = forwardRef<View, QRCodeLogoProps>(
+const QRCodeLogo = forwardRef<ViewRef, QRCodeLogoProps>(
   ({ className, children, ...props }, ref) => {
     const { size, matrix } = useQRCode('QRCode.Logo');
     if (!matrix) return null;

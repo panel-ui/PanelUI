@@ -70,6 +70,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { tv } from 'tailwind-variants';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 /**
  * How the card settles on a face.
@@ -184,7 +185,7 @@ export interface FlipCardProps extends Omit<ViewProps, 'children'> {
   className?: string;
 }
 
-const FlipCardRoot = forwardRef<View, FlipCardProps>(
+const FlipCardRoot = forwardRef<ViewRef, FlipCardProps>(
   (
     {
       children,
@@ -385,7 +386,7 @@ export interface FlipCardFaceProps extends ViewProps {
 }
 
 /** The face showing at rest. Its size is the card's size. */
-const FlipCardFront = forwardRef<View, FlipCardFaceProps>(({ className, ...props }, ref) => (
+const FlipCardFront = forwardRef<ViewRef, FlipCardFaceProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
     // The backface is the first of the two mechanisms that hide a face turned
@@ -400,7 +401,7 @@ const FlipCardFront = forwardRef<View, FlipCardFaceProps>(({ className, ...props
 ));
 
 /** The face revealed by the turn, laid over the front. */
-const FlipCardBack = forwardRef<View, FlipCardFaceProps>(({ className, ...props }, ref) => (
+const FlipCardBack = forwardRef<ViewRef, FlipCardFaceProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
     style={{ backfaceVisibility: 'hidden' }}

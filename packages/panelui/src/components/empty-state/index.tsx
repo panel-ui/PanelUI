@@ -10,6 +10,7 @@ import { createContext, forwardRef, useContext, type ReactNode } from 'react';
 import { View, type Text as RNText, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
+import type { TextRef, ViewRef } from '../../primitives/refs';
 
 type EmptyStateSize = 'sm' | 'default' | 'lg';
 
@@ -87,7 +88,7 @@ export interface EmptyStateProps
   children?: ReactNode;
 }
 
-const EmptyStateRoot = forwardRef<View, EmptyStateProps>(
+const EmptyStateRoot = forwardRef<ViewRef, EmptyStateProps>(
   ({ className, variant, size = 'default', ...props }, ref) => {
     const { root } = emptyStateVariants({ variant, size });
     return (
@@ -100,7 +101,7 @@ const EmptyStateRoot = forwardRef<View, EmptyStateProps>(
 EmptyStateRoot.displayName = 'EmptyState';
 
 /** Groups Media, Title and Description into one centered column. */
-const EmptyStateHeader = forwardRef<View, EmptyStateProps>(
+const EmptyStateHeader = forwardRef<ViewRef, EmptyStateProps>(
   ({ className, ...props }, ref) => {
     const { header } = emptyStateVariants();
     return <View ref={ref} className={header({ className })} {...props} />;
@@ -119,7 +120,7 @@ export interface EmptyStateMediaProps
  * Visual anchor above the title. `variant="icon"` frames the child in a small
  * card with two rotated ghost cards fanned out behind it.
  */
-const EmptyStateMedia = forwardRef<View, EmptyStateMediaProps>(
+const EmptyStateMedia = forwardRef<ViewRef, EmptyStateMediaProps>(
   ({ className, variant = 'default', children, ...props }, ref) => {
     const { size } = useContext(EmptyStateContext);
     const { wrapper, card, ghost } = mediaVariants({ variant, size });
@@ -147,14 +148,14 @@ const EmptyStateMedia = forwardRef<View, EmptyStateMediaProps>(
 );
 EmptyStateMedia.displayName = 'EmptyState.Media';
 
-const EmptyStateTitle = forwardRef<RNText, TextProps>(({ className, ...props }, ref) => {
+const EmptyStateTitle = forwardRef<TextRef, TextProps>(({ className, ...props }, ref) => {
   const { size } = useContext(EmptyStateContext);
   const { title } = emptyStateVariants({ size });
   return <Text ref={ref} className={title({ className })} {...props} />;
 });
 EmptyStateTitle.displayName = 'EmptyState.Title';
 
-const EmptyStateDescription = forwardRef<RNText, TextProps>(
+const EmptyStateDescription = forwardRef<TextRef, TextProps>(
   ({ className, ...props }, ref) => {
     const { size } = useContext(EmptyStateContext);
     const { description } = emptyStateVariants({ size });
@@ -164,7 +165,7 @@ const EmptyStateDescription = forwardRef<RNText, TextProps>(
 EmptyStateDescription.displayName = 'EmptyState.Description';
 
 /** Slot below the header, for actions such as a primary button. */
-const EmptyStateContent = forwardRef<View, ViewProps & { className?: string }>(
+const EmptyStateContent = forwardRef<ViewRef, ViewProps & { className?: string }>(
   ({ className, ...props }, ref) => {
     const { content } = emptyStateVariants();
     return <View ref={ref} className={content({ className })} {...props} />;

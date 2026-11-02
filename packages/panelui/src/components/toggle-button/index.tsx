@@ -45,6 +45,7 @@ import {
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 const toggleVariants = tv({
   slots: {
@@ -141,7 +142,7 @@ export interface ToggleButtonGroupProps extends ViewProps {
   children: ReactNode;
 }
 
-const ToggleButtonGroup = forwardRef<View, ToggleButtonGroupProps>(
+const ToggleButtonGroup = forwardRef<ViewRef, ToggleButtonGroupProps>(
   (
     {
       className,
@@ -265,7 +266,7 @@ export interface ToggleButtonProps
   unselectedClassName?: string;
 }
 
-const ToggleButtonRoot = forwardRef<View, ToggleButtonProps>(
+const ToggleButtonRoot = forwardRef<ViewRef, ToggleButtonProps>(
   (
     {
       children,

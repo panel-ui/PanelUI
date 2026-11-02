@@ -206,7 +206,11 @@ const decorative = (
 /** The default line weight. See the note on weight above. */
 const STROKE = 2;
 
-interface IconDefaults {
+/**
+ * The defaults a glyph is drawn with when the caller passes nothing.
+ * The second argument to `icon()`.
+ */
+export interface IconDefaults {
   /** Both dimensions at the size this glyph is normally drawn. */
   size: number;
   /** The colour used when neither a prop nor a provider supplies one. */
@@ -222,12 +226,24 @@ interface IconDefaults {
 /**
  * Builds one icon from a glyph and the defaults it is normally drawn with.
  *
+ * Exported so an app can add a glyph the set does not carry, and have it
+ * behave exactly like the built-in icons: the same colour order (prop, then
+ * `IconColorProvider`, then the default), the same line weight, the same
+ * right-to-left mirror and the same `filled` toggle.
+ *
+ * ```tsx
+ * import HgViewOffIcon from '@hugeicons/core-free-icons/ViewOffIcon';
+ * import { icon } from 'panelui-native/icons';
+ *
+ * export const EyeOffIcon = icon(HgViewOffIcon, { size: 16, color: '#737373' });
+ * ```
+ *
  * A factory rather than seventy near-identical components: what varies between
  * them is data, and what does not — the colour order, the weight default, the
  * mirror, the fill toggle, the prop passthrough — is worth having in exactly
  * one place, where a fix reaches the whole set at once.
  */
-function icon(glyph: IconSvgElement, defaults: IconDefaults) {
+export function icon(glyph: IconSvgElement, defaults: IconDefaults) {
   function Icon({
     size = defaults.size,
     color,
@@ -273,6 +289,9 @@ function icon(glyph: IconSvgElement, defaults: IconDefaults) {
 
   return Icon;
 }
+
+/** Another name for `icon()`, for code that prefers the `create` prefix. */
+export const createIcon = icon;
 
 /* -------------------------------------------------------------------------- */
 /* Chrome                                                                   */

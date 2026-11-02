@@ -375,3 +375,11 @@ The chosen radio's dot grows in with a small overshoot, and the one it leaves sh
 ### Reduced motion
 
 The dither card's sweep and the dot's overshoot are skipped; the chosen card is filled at once.
+
+### Server Components
+
+`RadioGroup` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `RadioGroup.Item` off the import, so each part is also exported by name: `RadioGroupItem` is `RadioGroup.Item`, and so on for the others.
+
+```tsx
+import { RadioGroup, RadioGroupItem, RadioGroupCard, RadioGroupCardBody, RadioGroupCardTitle, RadioGroupCardDescription, RadioGroupCardAside } from "@/components/panelui/radio-group"
+```

@@ -53,6 +53,13 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** The theme role an alert is drawn in. */
 export type AlertTone = 'neutral' | 'info' | 'success' | 'warning' | 'destructive';
@@ -61,7 +68,8 @@ export type AlertTone = 'neutral' | 'info' | 'success' | 'warning' | 'destructiv
 export type AlertVariant = 'default' | 'plain' | 'banner';
 
 /** The fold every opening and closing here uses, the one the Prompt's bands use. */
-const FOLD = 'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none';
+const FOLD =
+  'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none';
 
 const alertVariants = tv({
   slots: {
@@ -323,33 +331,63 @@ const GLYPHS: Record<AlertTone, ReactNode> = {
 export interface AlertIconProps extends ComponentProps<'span'> {}
 
 /** The glyph at the start, in the tone's colour. Without children it draws the tone's own. */
-function AlertIcon({ className, children, ...props }: AlertIconProps) {
+function AlertIcon({ className, children, render, ...props }: AlertIconProps & RenderProp<'span'>) {
   const { tone } = useAlert('Alert.Icon');
-  return (
-    <span data-slot="alert-icon" aria-hidden="true" className={alertVariants().icon({ className })} {...props}>
-      {children ?? (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          {GLYPHS[tone]}
-        </svg>
-      )}
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'alert-icon',
+        'aria-hidden': 'true',
+        className: alertVariants().icon({ className }),
+        children: (
+          <>
+            {children ?? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {GLYPHS[tone]}
+              </svg>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 AlertIcon.displayName = 'Alert.Icon';
 
 export interface AlertTitleProps extends ComponentProps<'div'> {}
 
 /** What happened, in a few words. */
-function AlertTitle({ className, ...props }: AlertTitleProps) {
-  return <div data-slot="alert-title" className={alertVariants().title({ className })} {...props} />;
+function AlertTitle({ className, render, ...props }: AlertTitleProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'alert-title', className: alertVariants().title({ className }) }, props),
+  });
 }
 AlertTitle.displayName = 'Alert.Title';
 
 export interface AlertDescriptionProps extends ComponentProps<'div'> {}
 
 /** The sentence under the title: why, and what follows from it. A link in it is underlined. */
-function AlertDescription({ className, ...props }: AlertDescriptionProps) {
-  return <div data-slot="alert-description" className={alertVariants().description({ className })} {...props} />;
+function AlertDescription({ className, render, ...props }: AlertDescriptionProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'alert-description', className: alertVariants().description({ className }) },
+      props
+    ),
+  });
 }
 AlertDescription.displayName = 'Alert.Description';
 
@@ -360,33 +398,57 @@ export interface AlertActionsProps extends ComponentProps<'div'> {}
  * its end; in `plain` under the words; in `banner` at the end of the line.
  * Keep it a direct child of `Alert`, so the tray can find it.
  */
-function AlertActions({ className, ...props }: AlertActionsProps) {
-  return <div data-slot="alert-actions" className={alertVariants().actions({ className })} {...props} />;
+function AlertActions({ className, render, ...props }: AlertActionsProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'alert-actions', className: alertVariants().actions({ className }) }, props),
+  });
 }
 AlertActions.displayName = 'Alert.Actions';
 
 export interface AlertCloseProps extends ComponentProps<'button'> {}
 
 /** A round cross at the end that folds the alert away. */
-function AlertClose({ className, onClick, 'aria-label': label = 'Dismiss', ...props }: AlertCloseProps) {
+function AlertClose({
+  className,
+  onClick,
+  'aria-label': label = 'Dismiss',
+  render,
+  ...props
+}: AlertCloseProps & RenderProp<'button'>) {
   const { setOpen } = useAlert('Alert.Close');
-  return (
-    <button
-      type="button"
-      data-slot="alert-close"
-      aria-label={label}
-      className={alertVariants().close({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) setOpen(false);
-      }}
-      {...props}
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-        <path d="M6 6l12 12M18 6L6 18" />
-      </svg>
-    </button>
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        'data-slot': 'alert-close',
+        'aria-label': label,
+        className: alertVariants().close({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) setOpen(false);
+        },
+        children: (
+          <>
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 AlertClose.displayName = 'Alert.Close';
 
@@ -413,8 +475,9 @@ function AlertDetails({
   onOpenChange,
   className,
   children,
+  render,
   ...props
-}: AlertDetailsProps) {
+}: AlertDetailsProps & RenderProp<'div'>) {
   useAlert('Alert.Details');
   const slots = alertVariants();
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -430,40 +493,62 @@ function AlertDetails({
     onOpenChange?.(!expanded);
   };
 
-  return (
-    <div data-slot="alert-details" data-open={expanded ? '' : undefined} className={slots.details({ className })} {...props}>
-      <button type="button" aria-expanded={expanded} aria-controls={listId} onClick={toggle} className={slots.detailsToggle()}>
-        {label}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={slots.detailsChevron({ className: expanded ? 'rotate-180' : undefined })}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      <div className={[FOLD, expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] opacity-0'].join(' ')}>
-        <div ref={clip} className="min-h-0 overflow-hidden">
-          <ul id={listId} className={slots.detailsList()}>
-            {children}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'alert-details',
+        'data-open': expanded ? '' : undefined,
+        className: slots.details({ className }),
+        children: (
+          <>
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={listId}
+              onClick={toggle}
+              className={slots.detailsToggle()}
+            >
+              {label}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={slots.detailsChevron({ className: expanded ? 'rotate-180' : undefined })}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div className={[FOLD, expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] opacity-0'].join(' ')}>
+              <div ref={clip} className="min-h-0 overflow-hidden">
+                <ul id={listId} className={slots.detailsList()}>
+                  {children}
+                </ul>
+              </div>
+            </div>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 AlertDetails.displayName = 'Alert.Details';
 
 export interface AlertItemProps extends ComponentProps<'li'> {}
 
 /** One entry in `Alert.Details`, marked with a dot in the alert's tone. */
-function AlertItem({ className, ...props }: AlertItemProps) {
-  return <li data-slot="alert-item" className={alertVariants().item({ className })} {...props} />;
+function AlertItem({ className, render, ...props }: AlertItemProps & RenderProp<'li'>) {
+  return useRender({
+    defaultTagName: 'li',
+    render,
+    props: mergeProps({ 'data-slot': 'alert-item', className: alertVariants().item({ className }) }, props),
+  });
 }
 AlertItem.displayName = 'Alert.Item';
 

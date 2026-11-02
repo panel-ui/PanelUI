@@ -1,0 +1,80 @@
+---
+title: Composition
+description: Drawing any part as another element, or as another component, with the render prop.
+---
+
+Every PanelUI web component is built on Base UI, a headless library that supplies the behaviour:
+focus, keyboard handling, ARIA attributes, dismissal and state. PanelUI supplies the look.
+
+## The render prop
+
+Every part of every component takes `render`. It replaces the element the part draws with the one
+you pass, and puts the part's classes, attributes and event handlers on it.
+
+Use it when the element has to be something else. The common case is a link that looks like a
+button:
+
+```tsx
+import { Button } from '@/components/panelui/button';
+
+<Button render={<a href="/pricing" />}>See pricing</Button>
+```
+
+The result is an `<a>`, so it opens in a new tab, and a screen reader announces it as a link.
+It keeps the button's look and focus ring.
+
+A router's link works the same way:
+
+```tsx
+import Link from 'next/link';
+
+<Button variant="outline" render={<Link href="/settings" />}>
+  Settings
+</Button>
+```
+
+## Changing the element of a part
+
+The same prop changes which element a part draws, without restyling it. For example, use an
+`h2` where the page's outline needs one:
+
+```tsx
+<Card>
+  <Card.Header>
+    <Card.Title render={<h2 />}>Billing</Card.Title>
+  </Card.Header>
+</Card>
+```
+
+## A function, for state
+
+`render` also takes a function of the props and the part's state. It returns the element to
+draw. Spread the props onto that element, or the part loses its behaviour:
+
+```tsx
+<Button
+  render={(props, state) => (
+    <a {...props} href="/export" aria-disabled={state.disabled || undefined} />
+  )}
+  nativeButton={false}
+>
+  Export
+</Button>
+```
+
+Button takes `nativeButton={false}` with a function, because it cannot tell from a function
+whether the result is a `<button>`. With an element, it can tell, and sets it for you.
+
+## Props are merged, not replaced
+
+The props on the element you pass are merged with the part's:
+
+- `className` values are joined.
+- `style` objects are combined.
+- Event handlers all run; neither replaces the other.
+- For any other prop, the one on your element wins.
+
+## Server Components
+
+Parts that take `render` are client components, because the prop is applied with a hook. They
+render on the server as usual, and are hydrated on the client.

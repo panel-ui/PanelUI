@@ -33,12 +33,14 @@
  * follow a finger, and it holds still for anyone who has asked their system
  * for reduced motion. Whatever the card says is in its contents.
  */
-import {
-  useRef,
-  type ComponentProps,
-  type PointerEvent as ReactPointerEvent,
-} from 'react';
+import { useRef, type ComponentProps, type PointerEvent as ReactPointerEvent } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** Which of the theme's roles the light under the pointer is drawn in. */
 export type TiltCardColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
@@ -93,8 +95,9 @@ function TiltCardRoot({
   children,
   onPointerMove,
   onPointerLeave,
+  render,
   ...props
-}: TiltCardProps) {
+}: TiltCardProps & RenderProp<'div'>) {
   const slots = tiltCardVariants({ color });
   const root = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
@@ -133,20 +136,27 @@ function TiltCardRoot({
     for (const name of ['--pu-rx', '--pu-ry', '--pu-px', '--pu-py']) node.style.removeProperty(name);
   };
 
-  return (
-    <div
-      ref={root}
-      className={slots.root({ className })}
-      onPointerMove={lean}
-      onPointerLeave={settle}
-      {...props}
-    >
-      <div className={slots.card({ className: cardClassName })}>
-        {children}
-        {glare ? <span aria-hidden="true" className={slots.glare()} /> : null}
-      </div>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: root,
+        className: slots.root({ className }),
+        onPointerMove: lean,
+        onPointerLeave: settle,
+        children: (
+          <>
+            <div className={slots.card({ className: cardClassName })}>
+              {children}
+              {glare ? <span aria-hidden="true" className={slots.glare()} /> : null}
+            </div>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 TiltCardRoot.displayName = 'TiltCard';
 
@@ -156,14 +166,15 @@ export interface TiltCardLayerProps extends ComponentProps<'div'> {
 }
 
 /** Something lifted off the card, which moves against it as the card leans. */
-function TiltCardLayer({ depth = 16, className, style, ...props }: TiltCardLayerProps) {
-  return (
-    <div
-      className={tiltCardVariants().layer({ className })}
-      style={{ ['--pu-depth' as string]: depth, ...style }}
-      {...props}
-    />
-  );
+function TiltCardLayer({ depth = 16, className, style, render, ...props }: TiltCardLayerProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { className: tiltCardVariants().layer({ className }), style: { ['--pu-depth' as string]: depth, ...style } },
+      props
+    ),
+  });
 }
 TiltCardLayer.displayName = 'TiltCard.Layer';
 
@@ -181,10 +192,15 @@ TiltCardTitle.displayName = 'TiltCard.Title';
 export interface TiltCardDescriptionProps extends ComponentProps<'p'> {}
 
 /** A line or two of body text, under the title. */
-function TiltCardDescription({ className, ...props }: TiltCardDescriptionProps) {
-  return (
-    <p data-slot="tilt-card-description" className={tiltCardVariants().description({ className })} {...props} />
-  );
+function TiltCardDescription({ className, render, ...props }: TiltCardDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'tilt-card-description', className: tiltCardVariants().description({ className }) },
+      props
+    ),
+  });
 }
 TiltCardDescription.displayName = 'TiltCard.Description';
 

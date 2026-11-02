@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Card — a surface that holds one thing: a plan, a setting, a summary.
  *
@@ -33,8 +35,14 @@
  * `size` or with the parts present is done in CSS, so a page of cards costs no
  * JavaScript.
  */
-import type { ComponentProps, ElementType } from 'react';
+import type { ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const cardVariants = tv({
   slots: {
@@ -50,7 +58,8 @@ const cardVariants = tv({
     // beside it instead of underneath it.
     action: 'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
     // `first:` for a card with no header, which would otherwise start flush.
-    content: 'px-6 pb-6 first:pt-6 group-data-[size=sm]/card:px-4 group-data-[size=sm]/card:pb-4 group-data-[size=sm]/card:first:pt-4',
+    content:
+      'px-6 pb-6 first:pt-6 group-data-[size=sm]/card:px-4 group-data-[size=sm]/card:pb-4 group-data-[size=sm]/card:first:pt-4',
     footer: 'flex items-center gap-2',
   },
   variants: {
@@ -83,19 +92,26 @@ export interface CardProps extends ComponentProps<'div'> {
   as?: 'div' | 'article' | 'section' | 'li';
 }
 
-function CardRoot({ size = 'default', as: Element = 'div', className, ...props }: CardProps) {
+function CardRoot({ size = 'default', as = 'div', render, className, ...props }: CardProps & RenderProp<'div'>) {
   const slots = cardVariants();
-  const Tag = Element as ElementType;
-  return <Tag data-slot="card" data-size={size} className={slots.root({ className })} {...props} />;
+  return useRender({
+    defaultTagName: as,
+    render,
+    props: mergeProps({ 'data-slot': 'card', 'data-size': size, className: slots.root({ className }) }, props),
+  });
 }
 CardRoot.displayName = 'Card';
 
 export interface CardHeaderProps extends ComponentProps<'div'> {}
 
 /** The title, the line under it, and the action beside them. */
-function CardHeader({ className, ...props }: CardHeaderProps) {
+function CardHeader({ className, render, ...props }: CardHeaderProps & RenderProp<'div'>) {
   const slots = cardVariants();
-  return <div data-slot="card-header" className={slots.header({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'card-header', className: slots.header({ className }) }, props),
+  });
 }
 CardHeader.displayName = 'Card.Header';
 
@@ -105,37 +121,52 @@ export interface CardTitleProps extends ComponentProps<'h3'> {
 }
 
 /** What the card is about. A heading, so the page outline includes it. */
-function CardTitle({ as: Element = 'h3', className, ...props }: CardTitleProps) {
+function CardTitle({ as = 'h3', render, className, ...props }: CardTitleProps & RenderProp<'h3'>) {
   const slots = cardVariants();
-  const Tag = Element as ElementType;
-  return <Tag data-slot="card-title" className={slots.title({ className })} {...props} />;
+  return useRender({
+    defaultTagName: as,
+    render,
+    props: mergeProps({ 'data-slot': 'card-title', className: slots.title({ className }) }, props),
+  });
 }
 CardTitle.displayName = 'Card.Title';
 
 export interface CardDescriptionProps extends ComponentProps<'p'> {}
 
 /** A line under the title. */
-function CardDescription({ className, ...props }: CardDescriptionProps) {
+function CardDescription({ className, render, ...props }: CardDescriptionProps & RenderProp<'p'>) {
   const slots = cardVariants();
-  return <p data-slot="card-description" className={slots.description({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps({ 'data-slot': 'card-description', className: slots.description({ className }) }, props),
+  });
 }
 CardDescription.displayName = 'Card.Description';
 
 export interface CardActionProps extends ComponentProps<'div'> {}
 
 /** A control for the whole card, held in the header's top trailing corner. */
-function CardAction({ className, ...props }: CardActionProps) {
+function CardAction({ className, render, ...props }: CardActionProps & RenderProp<'div'>) {
   const slots = cardVariants();
-  return <div data-slot="card-action" className={slots.action({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'card-action', className: slots.action({ className }) }, props),
+  });
 }
 CardAction.displayName = 'Card.Action';
 
 export interface CardContentProps extends ComponentProps<'div'> {}
 
 /** The body. */
-function CardContent({ className, ...props }: CardContentProps) {
+function CardContent({ className, render, ...props }: CardContentProps & RenderProp<'div'>) {
   const slots = cardVariants();
-  return <div data-slot="card-content" className={slots.content({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'card-content', className: slots.content({ className }) }, props),
+  });
 }
 CardContent.displayName = 'Card.Content';
 
@@ -148,9 +179,13 @@ export interface CardFooterProps extends ComponentProps<'div'> {
 }
 
 /** The row at the bottom, usually the card's actions. */
-function CardFooter({ variant = 'plain', className, ...props }: CardFooterProps) {
+function CardFooter({ variant = 'plain', className, render, ...props }: CardFooterProps & RenderProp<'div'>) {
   const slots = cardVariants({ footer: variant });
-  return <div data-slot="card-footer" className={slots.footer({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'card-footer', className: slots.footer({ className }) }, props),
+  });
 }
 CardFooter.displayName = 'Card.Footer';
 

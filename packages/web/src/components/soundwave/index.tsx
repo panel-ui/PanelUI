@@ -52,6 +52,12 @@ import {
   type RefObject,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type SoundwaveVariant = 'pills' | 'bars' | 'line' | 'ambient' | 'dots' | 'radial' | 'ring';
 
@@ -287,8 +293,7 @@ function paintDots(g: Geometry, f: Frame): Paint {
      * it. Supplied `levels` are drawn as given.
      */
     const centre = Math.sin((Math.PI * (c + 0.5)) / columns);
-    const value =
-      g.levels?.length || g.scrolling ? raw : Math.pow(raw, 0.6) * (0.3 + 0.7 * Math.pow(centre, 0.7));
+    const value = g.levels?.length || g.scrolling ? raw : Math.pow(raw, 0.6) * (0.3 + 0.7 * Math.pow(centre, 0.7));
     // How many dots out from the middle (or up from the bottom) are lit. The
     // part of a dot left over lights the next one faintly, so the outline
     // moves smoothly rather than a whole dot at a time.
@@ -427,7 +432,6 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : us
 
 const isRef = (value: unknown): value is RefObject<number | null> =>
   typeof value === 'object' && value !== null && 'current' in value;
-
 
 /* -------------------------------------------------------------------------- */
 /* Component                                                                  */
@@ -603,8 +607,9 @@ function SoundwaveRoot({
   className,
   style,
   children,
+  render,
   ...props
-}: SoundwaveProps) {
+}: SoundwaveProps & RenderProp<'div'>) {
   const sourceLevel = useAudioLevel(source);
   const level = source ? sourceLevel : levelProp;
   const defaults = DEFAULTS[variant];
@@ -625,8 +630,7 @@ function SoundwaveRoot({
 
   // Strips take the width of their container; the rest know their own.
   const [measured, setMeasured] = useState(0);
-  const width =
-    variant === 'pills' ? count * w + (count - 1) * gap : round ? h : strip ? measured : 0;
+  const width = variant === 'pills' ? count * w + (count - 1) * gap : round ? h : strip ? measured : 0;
 
   useIsomorphicLayoutEffect(() => {
     const node = root.current;
@@ -792,68 +796,86 @@ function SoundwaveRoot({
     />
   );
 
-  return (
-    <div
-      ref={root}
-      role="img"
-      aria-label={label ?? STATE_LABEL[state]}
-      data-slot="soundwave"
-      data-variant={variant}
-      data-state={state}
-      className={slots.root({ className })}
-      style={rootStyle}
-      {...props}
-    >
-      {variant === 'ambient' ? (
-        <>
-          <div aria-hidden="true" className={slots.bloom()} />
-          <div aria-hidden="true" className={slots.rim()} />
-        </>
-      ) : (
-        <>
-          {variant === 'radial' ? (
-            <div ref={glow} aria-hidden="true" className={slots.glow()} style={{ opacity: 0.25 + (painted.glow ?? 0) * 0.75 }} />
-          ) : null}
-          {width > 0 ? (
-            <svg aria-hidden="true" width={width} height={h} viewBox={`0 0 ${width} ${h}`} className={slots.svg()}>
-              {gradient?.length ? (
-                <defs>
-                  <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="0">
-                    {gradient.map((role, index) => (
-                      <stop
-                        key={`${role}-${index}`}
-                        offset={gradient.length === 1 ? 0 : index / (gradient.length - 1)}
-                        style={{ stopColor: COLOR_VAR[role] }}
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: root,
+        role: 'img',
+        'aria-label': label ?? STATE_LABEL[state],
+        'data-slot': 'soundwave',
+        'data-variant': variant,
+        'data-state': state,
+        className: slots.root({ className }),
+        style: rootStyle,
+        children: (
+          <>
+            {variant === 'ambient' ? (
+              <>
+                <div aria-hidden="true" className={slots.bloom()} />
+                <div aria-hidden="true" className={slots.rim()} />
+              </>
+            ) : (
+              <>
+                {variant === 'radial' ? (
+                  <div
+                    ref={glow}
+                    aria-hidden="true"
+                    className={slots.glow()}
+                    style={{ opacity: 0.25 + (painted.glow ?? 0) * 0.75 }}
+                  />
+                ) : null}
+                {width > 0 ? (
+                  <svg
+                    aria-hidden="true"
+                    width={width}
+                    height={h}
+                    viewBox={`0 0 ${width} ${h}`}
+                    className={slots.svg()}
+                  >
+                    {gradient?.length ? (
+                      <defs>
+                        <linearGradient id={gradientId} x1="0" x2="1" y1="0" y2="0">
+                          {gradient.map((role, index) => (
+                            <stop
+                              key={`${role}-${index}`}
+                              offset={gradient.length === 1 ? 0 : index / (gradient.length - 1)}
+                              style={{ stopColor: COLOR_VAR[role] }}
+                            />
+                          ))}
+                        </linearGradient>
+                      </defs>
+                    ) : null}
+                    {variant === 'dots' || variant === 'ring' ? layer('track', { stroke: track }) : null}
+                    {variant === 'radial' ? (
+                      <circle
+                        cx={h / 2}
+                        cy={h / 2}
+                        r={h * HOLE}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeOpacity={0.22}
+                        strokeWidth={1.5}
                       />
-                    ))}
-                  </linearGradient>
-                </defs>
-              ) : null}
-              {variant === 'dots' || variant === 'ring' ? layer('track', { stroke: track }) : null}
-              {variant === 'radial' ? (
-                <circle
-                  cx={h / 2}
-                  cy={h / 2}
-                  r={h * HOLE}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeOpacity={0.22}
-                  strokeWidth={1.5}
-                />
-              ) : null}
-              {variant === 'radial' ? layer('tip', { opacity: 0.42 }) : null}
-              {variant === 'dots' || variant === 'ring' ? layer('edge', { opacity: 0.45 }) : null}
-              {variant === 'bars' || variant === 'dots'
-                ? layer('rest', trackColor && variant === 'bars' ? { stroke: track } : { opacity: UNPLAYED })
-                : null}
-              {layer('ink')}
-            </svg>
-          ) : null}
-          {children}
-        </>
-      )}
-    </div>
-  );
+                    ) : null}
+                    {variant === 'radial' ? layer('tip', { opacity: 0.42 }) : null}
+                    {variant === 'dots' || variant === 'ring' ? layer('edge', { opacity: 0.45 }) : null}
+                    {variant === 'bars' || variant === 'dots'
+                      ? layer('rest', trackColor && variant === 'bars' ? { stroke: track } : { opacity: UNPLAYED })
+                      : null}
+                    {layer('ink')}
+                  </svg>
+                ) : null}
+                {children}
+              </>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 SoundwaveRoot.displayName = 'Soundwave';
 
@@ -863,8 +885,12 @@ export interface SoundwaveCenterProps extends ComponentProps<'div'> {}
  * What sits in the hole of a `radial` or `ring` wave: a person's avatar, a
  * figure, a button. It is sized to the hole and centred in it.
  */
-function SoundwaveCenter({ className, ...props }: SoundwaveCenterProps) {
-  return <div data-slot="soundwave-center" className={soundwaveVariants().center({ className })} {...props} />;
+function SoundwaveCenter({ className, render, ...props }: SoundwaveCenterProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'soundwave-center', className: soundwaveVariants().center({ className }) }, props),
+  });
 }
 SoundwaveCenter.displayName = 'Soundwave.Center';
 
@@ -953,7 +979,8 @@ export function useAudioLevel(
     input.connect(analyser);
     const samples = new Float32Array(analyser.fftSize);
     const resume = () => void context.resume().catch(() => {});
-    const element = typeof MediaStream !== 'undefined' && source instanceof MediaStream ? null : (source as HTMLMediaElement);
+    const element =
+      typeof MediaStream !== 'undefined' && source instanceof MediaStream ? null : (source as HTMLMediaElement);
     element?.addEventListener('play', resume);
     let frame = 0;
     const read = () => {

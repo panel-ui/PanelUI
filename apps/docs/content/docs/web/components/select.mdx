@@ -319,6 +319,13 @@ export default function SelectTriggers() {
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 
+### Select.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
@@ -334,3 +341,11 @@ Give the root a `name` and the chosen value is sent with the form it is in, as a
 ### Controlled
 
 `value` and `onValueChange` on the root hold the choice from outside. `onValueChange` is called with the option's `value`, or `null` when the choice is cleared.
+
+### Server Components
+
+`Select` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Select.Trigger` off the import, so each part is also exported by name: `SelectTrigger` is `Select.Trigger`, and so on for the others.
+
+```tsx
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectGroupLabel, SelectSeparator } from "@/components/panelui/select"
+```

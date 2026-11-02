@@ -60,6 +60,14 @@ Every part also takes the props of the element it renders, and a `className`.
 | `disabled` | `boolean` | `false` | Turns it off. |
 | `name` | `string` | — | Submits `<name>.x` and `<name>.y` with a form. |
 
+#### `XYPadValueProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.value({ className }),` | **required** | — |
+
 ## In a Server Component
 
 `XYPad` is a client component. A Server Component cannot read `XYPad.Value` off the import, so import each part by name: `XYPadValue`.

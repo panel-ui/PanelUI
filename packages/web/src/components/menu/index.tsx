@@ -45,6 +45,12 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const menuVariants = tv({
   slots: {
@@ -164,7 +170,15 @@ function MenuItem({ variant, className, ...props }: MenuItemProps) {
 MenuItem.displayName = 'Menu.Item';
 
 const Check = () => (
-  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.25"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M20 6 9 17l-5-5" />
   </svg>
 );
@@ -195,7 +209,9 @@ export interface MenuRadioGroupProps extends BaseMenu.RadioGroup.Props {
 
 /** Radio items of which one is chosen. Takes `value` and `onValueChange`. */
 function MenuRadioGroup({ className, ...props }: MenuRadioGroupProps) {
-  return <BaseMenu.RadioGroup data-slot="menu-radio-group" className={menuVariants().group({ className })} {...props} />;
+  return (
+    <BaseMenu.RadioGroup data-slot="menu-radio-group" className={menuVariants().group({ className })} {...props} />
+  );
 }
 MenuRadioGroup.displayName = 'Menu.RadioGroup';
 
@@ -247,7 +263,16 @@ function MenuSubTrigger({ className, children, end, openOnHover = true, delay = 
       {children}
       <span className={slots.end()}>
         {end}
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={slots.chevron({ className: end ? 'ms-2' : undefined })}>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={slots.chevron({ className: end ? 'ms-2' : undefined })}
+        >
           <path d="m9 18 6-6-6-6" />
         </svg>
       </span>
@@ -262,7 +287,13 @@ export interface MenuSubContentProps extends Omit<MenuContentProps, 'side'> {
 }
 
 /** The submenu's list, opened beside its row with the first item level with it. */
-function MenuSubContent({ side = 'inline-end', align = 'start', sideOffset = 6, alignOffset = -5, ...props }: MenuSubContentProps) {
+function MenuSubContent({
+  side = 'inline-end',
+  align = 'start',
+  sideOffset = 6,
+  alignOffset = -5,
+  ...props
+}: MenuSubContentProps) {
   return <MenuContent side={side} align={align} sideOffset={sideOffset} alignOffset={alignOffset} {...props} />;
 }
 MenuSubContent.displayName = 'Menu.SubContent';
@@ -283,39 +314,60 @@ export interface MenuGroupLabelProps extends BaseMenu.GroupLabel.Props {
 
 /** The heading of a group. Screen readers announce the group by it. */
 function MenuGroupLabel({ className, ...props }: MenuGroupLabelProps) {
-  return <BaseMenu.GroupLabel data-slot="menu-group-label" className={menuVariants().groupLabel({ className })} {...props} />;
+  return (
+    <BaseMenu.GroupLabel data-slot="menu-group-label" className={menuVariants().groupLabel({ className })} {...props} />
+  );
 }
 MenuGroupLabel.displayName = 'Menu.GroupLabel';
 
 export interface MenuSeparatorProps extends ComponentProps<'div'> {}
 
 /** A rule between groups of items. */
-function MenuSeparator({ className, ...props }: MenuSeparatorProps) {
-  return <div role="separator" data-slot="menu-separator" className={menuVariants().separator({ className })} {...props} />;
+function MenuSeparator({ className, render, ...props }: MenuSeparatorProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { role: 'separator', 'data-slot': 'menu-separator', className: menuVariants().separator({ className }) },
+      props
+    ),
+  });
 }
 MenuSeparator.displayName = 'Menu.Separator';
 
 export interface MenuDescriptionProps extends ComponentProps<'span'> {}
 
 /** What an item does, in quieter words after its label. */
-function MenuDescription({ className, ...props }: MenuDescriptionProps) {
-  return <span data-slot="menu-description" className={menuVariants().description({ className })} {...props} />;
+function MenuDescription({ className, render, ...props }: MenuDescriptionProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'menu-description', className: menuVariants().description({ className }) }, props),
+  });
 }
 MenuDescription.displayName = 'Menu.Description';
 
 export interface MenuShortcutProps extends ComponentProps<'kbd'> {}
 
 /** The keys for an item, at its end. It only shows them: wire the keys up where the action lives. */
-function MenuShortcut({ className, ...props }: MenuShortcutProps) {
-  return <kbd data-slot="menu-shortcut" className={menuVariants().shortcut({ className })} {...props} />;
+function MenuShortcut({ className, render, ...props }: MenuShortcutProps & RenderProp<'kbd'>) {
+  return useRender({
+    defaultTagName: 'kbd',
+    render,
+    props: mergeProps({ 'data-slot': 'menu-shortcut', className: menuVariants().shortcut({ className }) }, props),
+  });
 }
 MenuShortcut.displayName = 'Menu.Shortcut';
 
 export interface MenuBadgeProps extends ComponentProps<'span'> {}
 
 /** A small count or flag at an item's end: how many need attention, or that something is new. */
-function MenuBadge({ className, ...props }: MenuBadgeProps) {
-  return <span data-slot="menu-badge" className={menuVariants().badge({ className })} {...props} />;
+function MenuBadge({ className, render, ...props }: MenuBadgeProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'menu-badge', className: menuVariants().badge({ className }) }, props),
+  });
 }
 MenuBadge.displayName = 'Menu.Badge';
 

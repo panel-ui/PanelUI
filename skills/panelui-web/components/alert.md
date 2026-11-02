@@ -69,6 +69,35 @@ Every part also takes the props of the element it renders, and a `className`.
 | `defaultOpen` | `boolean` | `true` | Whether it starts shown, when the caller does not hold it. Default `true`. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when `Alert.Close` asks for it to close. |
 
+#### `AlertIconProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `alertVariants().icon({ className }),` | **required** | — |
+
+#### `AlertTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'alert-title', className: alertVariants().title({ className }) }, props),` | **required** | — |
+
+#### `AlertDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `AlertActionsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'alert-actions', className: alertVariants().actions({ className }) }, props),` | **required** | — |
+
 #### `AlertDetailsProps`
 
 | Prop | Type | Default | What it does |
@@ -77,6 +106,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `open` | `boolean` | — | Whether the list is open, when the caller holds that. |
 | `defaultOpen` | `boolean` | `false` | Whether the list starts open, when the caller does not hold it. Default `false`. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the line is pressed to open or close the list. |
+
+#### `AlertItemProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'li',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'alert-item', className: alertVariants().item({ className }) }, props),` | **required** | — |
 
 ## In a Server Component
 

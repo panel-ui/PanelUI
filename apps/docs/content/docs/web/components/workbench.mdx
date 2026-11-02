@@ -335,7 +335,7 @@ Import from `panelui-web/workbench` instead of `@/components/panelui/workbench`.
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -816,24 +816,47 @@ export default function WorkbenchNarrow() {
 | `sidebarWidth` | `number` | `240` | The sidebar's width in pixels. Default 240. |
 | `defaultTimelineHeight` | `number` | `232` | The timeline's height in pixels to start at. Default 232. |
 
+### Workbench.Bar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'workbench-bar', className: slots.bar({ className }) }, props),` | — |  |
+
+### Workbench.Sidebar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'aside',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `inert` | `workbench.focus \|\| workbench.compact \|\| undefined,` | — |  |
+| `className` | `slots.sidebar({ className }),` | — |  |
+
+### Workbench.Canvas
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'workbench-canvas', className: slots.canvas({ className }) }, props),` | — |  |
+
 ### Workbench.Artboard
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `aspect` | `string` | — | The work's shape, as a CSS aspect ratio such as `16 / 9` or `4 / 5`. Default `16 / 9`. |
+| `aspect` | `string` | `'16 / 9'` | The work's shape, as a CSS aspect ratio such as `16 / 9` or `4 / 5`. Default `16 / 9`. |
 
 ### Workbench.Inspector
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `title` | `string` | — | The sheet's heading on a narrow screen, read out when it opens. Default `Inspector`. |
+| `title` | `string` | `'Inspector'` | The sheet's heading on a narrow screen, read out when it opens. Default `Inspector`. |
 
 ### Workbench.Timeline
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `resizable` | `boolean` | — | Let its top edge be dragged to make it taller or shorter. Default true. |
-| `minHeight` | `number` | — | The shortest it can be dragged to, in pixels. Default 140. |
+| `resizable` | `boolean` | `true` | Let its top edge be dragged to make it taller or shorter. Default true. |
+| `minHeight` | `number` | `140` | The shortest it can be dragged to, in pixels. Default 140. |
 
 Every part also takes the props of the element it renders, and a `className`.
 

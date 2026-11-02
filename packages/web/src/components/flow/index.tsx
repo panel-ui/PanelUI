@@ -74,6 +74,13 @@ import {
   type FlowRect,
   type FlowSide,
 } from './flow-paths';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type FlowEdgeVariant = 'bezier' | 'smoothstep' | 'step' | 'straight';
 
@@ -121,8 +128,7 @@ const flowVariants = tv({
     node: 'absolute left-0 top-0 z-10 cursor-grab rounded-2xl border bg-card text-card-foreground shadow-sm outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing',
     group:
       'absolute left-0 top-0 cursor-grab rounded-3xl border border-dashed bg-muted/40 p-3 pt-8 outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing',
-    groupLabel:
-      'absolute start-4 top-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground',
+    groupLabel: 'absolute start-4 top-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground',
     // What goes inside a node. The padding is on the parts, so a header can
     // draw its rule from edge to edge.
     nodeHeader: 'flex items-center justify-between gap-3 border-b px-4 py-2.5',
@@ -704,10 +710,9 @@ function useMovable({
   onPress,
   onDelete,
   moveStep,
-}: Pick<
-  FlowNodeProps,
-  'id' | 'position' | 'draggable' | 'confine' | 'pinned' | 'onPress' | 'onDelete' | 'moveStep'
-> & { group: string | null }) {
+}: Pick<FlowNodeProps, 'id' | 'position' | 'draggable' | 'confine' | 'pinned' | 'onPress' | 'onDelete' | 'moveStep'> & {
+  group: string | null;
+}) {
   const flow = useFlow('Flow.Node');
   const element = useRef<HTMLDivElement>(null);
   const { place, measure, forget } = flow;
@@ -751,7 +756,9 @@ function useMovable({
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     // A handle starts a connection, and a control inside a node is pressed.
-    if ((event.target as HTMLElement).closest('[data-flow-handle], button, a, input, textarea, select, [data-no-drag]')) {
+    if (
+      (event.target as HTMLElement).closest('[data-flow-handle], button, a, input, textarea, select, [data-no-drag]')
+    ) {
       return;
     }
     // A pinned node lets the press through to the group it is in, which
@@ -925,34 +932,54 @@ FlowGroup.displayName = 'Flow.Group';
 export interface FlowNodeHeaderProps extends ComponentProps<'div'> {}
 
 /** A strip across the top of a node, ruled off from the rest: a step number and a state. */
-function FlowNodeHeader({ className, ...props }: FlowNodeHeaderProps) {
-  return <div data-slot="flow-node-header" className={flowVariants().nodeHeader({ className })} {...props} />;
+function FlowNodeHeader({ className, render, ...props }: FlowNodeHeaderProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'flow-node-header', className: flowVariants().nodeHeader({ className }) }, props),
+  });
 }
 FlowNodeHeader.displayName = 'Flow.NodeHeader';
 
 export interface FlowNodeContentProps extends ComponentProps<'div'> {}
 
 /** The body of a node, with the node's padding: a title over a description. */
-function FlowNodeContent({ className, ...props }: FlowNodeContentProps) {
-  return <div data-slot="flow-node-content" className={flowVariants().nodeContent({ className })} {...props} />;
+function FlowNodeContent({ className, render, ...props }: FlowNodeContentProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'flow-node-content', className: flowVariants().nodeContent({ className }) },
+      props
+    ),
+  });
 }
 FlowNodeContent.displayName = 'Flow.NodeContent';
 
 export interface FlowNodeTitleProps extends ComponentProps<'p'> {}
 
 /** What the node is. */
-function FlowNodeTitle({ className, ...props }: FlowNodeTitleProps) {
-  return <p data-slot="flow-node-title" className={flowVariants().nodeTitle({ className })} {...props} />;
+function FlowNodeTitle({ className, render, ...props }: FlowNodeTitleProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps({ 'data-slot': 'flow-node-title', className: flowVariants().nodeTitle({ className }) }, props),
+  });
 }
 FlowNodeTitle.displayName = 'Flow.NodeTitle';
 
 export interface FlowNodeDescriptionProps extends ComponentProps<'p'> {}
 
 /** A quieter line about the node. Smaller inside a `Flow.GroupItem`. */
-function FlowNodeDescription({ className, ...props }: FlowNodeDescriptionProps) {
-  return (
-    <p data-slot="flow-node-description" className={flowVariants().nodeDescription({ className })} {...props} />
-  );
+function FlowNodeDescription({ className, render, ...props }: FlowNodeDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'flow-node-description', className: flowVariants().nodeDescription({ className }) },
+      props
+    ),
+  });
 }
 FlowNodeDescription.displayName = 'Flow.NodeDescription';
 
@@ -962,10 +989,15 @@ export interface FlowNodeBadgeProps extends Omit<ComponentProps<'span'>, 'color'
 }
 
 /** A word in a pill, for a node's state: done, now, waiting. */
-function FlowNodeBadge({ color = 'muted', className, ...props }: FlowNodeBadgeProps) {
-  return (
-    <span data-slot="flow-node-badge" className={flowVariants({ color }).nodeBadge({ className })} {...props} />
-  );
+function FlowNodeBadge({ color = 'muted', className, render, ...props }: FlowNodeBadgeProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'flow-node-badge', className: flowVariants({ color }).nodeBadge({ className }) },
+      props
+    ),
+  });
 }
 FlowNodeBadge.displayName = 'Flow.NodeBadge';
 
@@ -975,8 +1007,12 @@ export interface FlowGroupItemProps extends ComponentProps<'div'> {}
  * One thing inside a `Flow.Group` that is not a node of its own: an icon
  * beside a `Flow.NodeContent`. It moves with the group and edges cannot join it.
  */
-function FlowGroupItem({ className, ...props }: FlowGroupItemProps) {
-  return <div data-slot="flow-group-item" className={flowVariants().groupItem({ className })} {...props} />;
+function FlowGroupItem({ className, render, ...props }: FlowGroupItemProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'flow-group-item', className: flowVariants().groupItem({ className }) }, props),
+  });
 }
 FlowGroupItem.displayName = 'Flow.GroupItem';
 
@@ -1001,7 +1037,15 @@ const SIDE_STYLE: Record<FlowSide, (offset: number) => { left: string; top: stri
 };
 
 /** A point on a node's edge that a connection can be drawn from, or dropped on. */
-function FlowHandle({ id, position = 'right', offset = 0.5, className, style, ...props }: FlowHandleProps) {
+function FlowHandle({
+  id,
+  position = 'right',
+  offset = 0.5,
+  className,
+  style,
+  render,
+  ...props
+}: FlowHandleProps & RenderProp<'span'>) {
   const flow = useFlow('Flow.Handle');
   const node = useContext(NodeContext);
   if (node === null) throw new Error('Flow.Handle must be used inside a <Flow.Node>.');
@@ -1013,21 +1057,25 @@ function FlowHandle({ id, position = 'right', offset = 0.5, className, style, ..
     return () => setHandle(node, key, null);
   }, [node, id, position, offset, setHandle]);
 
-  return (
-    <span
-      data-flow-handle={id ?? ''}
-      aria-hidden="true"
-      className={flowVariants().handle({ className })}
-      style={{ ...SIDE_STYLE[position](offset), ...style }}
-      onPointerDown={(event) => {
-        if (event.button !== 0) return;
-        event.stopPropagation();
-        event.preventDefault();
-        connectFrom(node, { id, side: position, offset }, event);
-      }}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        'data-flow-handle': id ?? '',
+        'aria-hidden': 'true',
+        className: flowVariants().handle({ className }),
+        style: { ...SIDE_STYLE[position](offset), ...style },
+        onPointerDown: (event: ReactTypes.PointerEvent<HTMLSpanElement>) => {
+          if (event.button !== 0) return;
+          event.stopPropagation();
+          event.preventDefault();
+          connectFrom(node, { id, side: position, offset }, event);
+        },
+      },
+      props
+    ),
+  });
 }
 FlowHandle.displayName = 'Flow.Handle';
 
@@ -1143,11 +1191,7 @@ function FlowEdge({
         ) : null}
       </path>
       {arrow ? (
-        <path
-          d={arrowHeadPath(tip, direction.x, direction.y, head)}
-          fill="currentColor"
-          opacity={color ? 1 : 0.7}
-        />
+        <path d={arrowHeadPath(tip, direction.x, direction.y, head)} fill="currentColor" opacity={color ? 1 : 0.7} />
       ) : null}
     </svg>
   );
@@ -1280,7 +1324,15 @@ function FlowMiniMap({
         className="size-full"
       >
         {boxes.map((box, index) => (
-          <rect key={index} x={box.x} y={box.y} width={box.width} height={box.height} rx="10" className="fill-muted-foreground/40" />
+          <rect
+            key={index}
+            x={box.x}
+            y={box.y}
+            width={box.width}
+            height={box.height}
+            rx="10"
+            className="fill-muted-foreground/40"
+          />
         ))}
         <rect
           x={view.x}

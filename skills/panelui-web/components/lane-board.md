@@ -83,6 +83,27 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `string` | `'Board'` | What a screen reader calls the board. |
 | `height` | `number \| string` | `'28rem'` | How tall the board is: a number of pixels, or any CSS length. Lanes fill it, and one with more cards than fit scrolls. `'auto'` lets the board grow with its longest lane. |
 
+#### `LaneBoardTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: laneBoardVariants().title({ className }) }, props),` | **required** | — |
+
+#### `LaneBoardCodeProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: laneBoardVariants().code({ className }) }, props),` | **required** | — |
+
+#### `LaneBoardRowProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ className: laneBoardVariants().row({ className }) }, props),` | **required** | — |
+
 #### `LaneBoardStepsProps`
 
 | Prop | Type | Default | What it does |
@@ -97,6 +118,20 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `color` | `LaneBoardColor` | `primary` | Which of the theme's roles the tag is drawn in. |
+
+#### `LaneBoardMetaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ className: laneBoardVariants().meta({ className }) }, props),` | **required** | — |
+
+#### `LaneBoardAvatarProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
 
 ## In a Server Component
 

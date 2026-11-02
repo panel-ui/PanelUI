@@ -73,6 +73,20 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `as` | `'h1' \| 'h2' \| 'h3'` | — | The heading level. A page that is only this one message wants `h1`. |
 
+#### `NotFoundDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `NotFoundActionsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 ## In a Server Component
 
 `NotFound` is a client component. A Server Component cannot read `NotFound.Code` off the import, so import each part by name: `NotFoundCode`, `NotFoundTitle`, `NotFoundDescription`, `NotFoundActions`.

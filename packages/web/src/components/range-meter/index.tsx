@@ -45,6 +45,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** Which of the theme's roles the lit ticks and the tag are drawn in. */
 export type RangeMeterColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
@@ -149,8 +155,9 @@ function RangeMeterRoot({
   valueText,
   className,
   children,
+  render,
   ...props
-}: RangeMeterProps) {
+}: RangeMeterProps & RenderProp<'div'>) {
   const interactive = onValueChange !== undefined;
   const slots = rangeMeterVariants({ color, interactive, marked: marker !== undefined });
   const ruler = useRef<HTMLDivElement>(null);
@@ -219,70 +226,77 @@ function RangeMeterRoot({
     onValueChange(clamp(Number(next.toFixed(places)), min, max));
   };
 
-  return (
-    <div
-      role={interactive ? 'slider' : 'meter'}
-      aria-label={label}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      aria-valuenow={value}
-      aria-valuetext={valueText}
-      aria-orientation={interactive ? 'horizontal' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      className={slots.root({ className })}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onKeyDown={onKeyDown}
-      {...props}
-    >
-      <span
-        data-tag=""
-        className={slots.tag()}
-        style={{
-          insetInlineStart: `${(share * 100).toFixed(2)}%`,
-          // Hung by the same share of its own width as the point is along the
-          // ruler, which keeps it over the point and inside the ends.
-          translate: `calc(${share.toFixed(4)} * -100% * var(--pu-dir, 1))`,
-        }}
-      >
-        {children}
-        {formatValue ? formatValue(value) : value}
-      </span>
-
-      <div ref={ruler} aria-hidden="true" className={slots.ruler()}>
-        {Array.from({ length: count }, (_, index) => {
-          const distance = (index - at) / SPREAD;
-          // A bell: full height at the reading, resting height a few ticks out.
-          const rise = Math.exp(-distance * distance);
-          const lit = index <= at + 0.001;
-          const part = rangeMeterVariants({ lit, crest: index === crest });
-          return (
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        role: interactive ? 'slider' : 'meter',
+        'aria-label': label,
+        'aria-valuemin': min,
+        'aria-valuemax': max,
+        'aria-valuenow': value,
+        'aria-valuetext': valueText,
+        'aria-orientation': interactive ? 'horizontal' : undefined,
+        tabIndex: interactive ? 0 : undefined,
+        className: slots.root({ className }),
+        onPointerDown: onPointerDown,
+        onPointerMove: onPointerMove,
+        onPointerUp: endDrag,
+        onPointerCancel: endDrag,
+        onKeyDown: onKeyDown,
+        children: (
+          <>
             <span
-              key={index}
-              className={part.tick()}
+              data-tag=""
+              className={slots.tag()}
               style={{
-                // Rounded, so the server and the browser write the same
-                // string for it and the page hydrates without a mismatch.
-                height: `${((REST + (1 - REST) * rise) * 100).toFixed(1)}%`,
-                // Lit ticks brighten towards the reading, like a tail behind it.
-                opacity: lit
-                  ? Number((0.35 + 0.65 * (crest === 0 ? 1 : Math.min(1, index / crest))).toFixed(3))
-                  : undefined,
+                insetInlineStart: `${(share * 100).toFixed(2)}%`,
+                // Hung by the same share of its own width as the point is along the
+                // ruler, which keeps it over the point and inside the ends.
+                translate: `calc(${share.toFixed(4)} * -100% * var(--pu-dir, 1))`,
               }}
-            />
-          );
-        })}
-        {marker !== undefined ? (
-          <span
-            className={slots.marker()}
-            style={{ insetInlineStart: `${(clamp((marker - min) / span, 0, 1) * 100).toFixed(2)}%` }}
-          />
-        ) : null}
-      </div>
-    </div>
-  );
+            >
+              {children}
+              {formatValue ? formatValue(value) : value}
+            </span>
+
+            <div ref={ruler} aria-hidden="true" className={slots.ruler()}>
+              {Array.from({ length: count }, (_, index) => {
+                const distance = (index - at) / SPREAD;
+                // A bell: full height at the reading, resting height a few ticks out.
+                const rise = Math.exp(-distance * distance);
+                const lit = index <= at + 0.001;
+                const part = rangeMeterVariants({ lit, crest: index === crest });
+                return (
+                  <span
+                    key={index}
+                    className={part.tick()}
+                    style={{
+                      // Rounded, so the server and the browser write the same
+                      // string for it and the page hydrates without a mismatch.
+                      height: `${((REST + (1 - REST) * rise) * 100).toFixed(1)}%`,
+                      // Lit ticks brighten towards the reading, like a tail behind it.
+                      opacity: lit
+                        ? Number((0.35 + 0.65 * (crest === 0 ? 1 : Math.min(1, index / crest))).toFixed(3))
+                        : undefined,
+                    }}
+                  />
+                );
+              })}
+              {marker !== undefined ? (
+                <span
+                  className={slots.marker()}
+                  style={{ insetInlineStart: `${(clamp((marker - min) / span, 0, 1) * 100).toFixed(2)}%` }}
+                />
+              ) : null}
+            </div>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 RangeMeterRoot.displayName = 'RangeMeter';
 
@@ -292,8 +306,15 @@ export interface RangeMeterLabelProps extends ComponentProps<'p'> {}
  * The meter's name, written over it. The meter's own `label` is what a screen
  * reader says; this is what everyone else reads.
  */
-function RangeMeterLabel({ className, ...props }: RangeMeterLabelProps) {
-  return <p data-slot="range-meter-label" className={rangeMeterVariants().label({ className })} {...props} />;
+function RangeMeterLabel({ className, render, ...props }: RangeMeterLabelProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'range-meter-label', className: rangeMeterVariants().label({ className }) },
+      props
+    ),
+  });
 }
 RangeMeterLabel.displayName = 'RangeMeter.Label';
 
@@ -305,13 +326,24 @@ export interface RangeMeterScaleProps extends Omit<ComponentProps<'div'>, 'child
 }
 
 /** What the two ends of the ruler stand for, written under it at either side. */
-function RangeMeterScale({ start, end, className, ...props }: RangeMeterScaleProps) {
-  return (
-    <div data-slot="range-meter-scale" className={rangeMeterVariants().scale({ className })} {...props}>
-      <span>{start}</span>
-      <span>{end}</span>
-    </div>
-  );
+function RangeMeterScale({ start, end, className, render, ...props }: RangeMeterScaleProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'range-meter-scale',
+        className: rangeMeterVariants().scale({ className }),
+        children: (
+          <>
+            <span>{start}</span>
+            <span>{end}</span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 RangeMeterScale.displayName = 'RangeMeter.Scale';
 

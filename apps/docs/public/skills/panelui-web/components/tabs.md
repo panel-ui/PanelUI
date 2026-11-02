@@ -72,6 +72,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 
+#### `TabsBadgeProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'tabs-badge', className: slots.badge({ className }) }, props),` | **required** | — |
+
 #### `TabsContentProps`
 
 | Prop | Type | Default | What it does |

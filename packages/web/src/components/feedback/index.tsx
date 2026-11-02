@@ -59,6 +59,13 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type * as ReactTypes from 'react';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const feedbackVariants = tv({
   slots: {
@@ -143,8 +150,7 @@ const feedbackVariants = tv({
       tone: 'submit',
       disabled: true,
       class: {
-        action:
-          'bg-foreground/[0.04] font-medium text-muted-foreground/50 hover:bg-foreground/[0.04]',
+        action: 'bg-foreground/[0.04] font-medium text-muted-foreground/50 hover:bg-foreground/[0.04]',
       },
     },
     { tone: 'cancel', disabled: true, class: { action: 'opacity-45' } },
@@ -282,13 +288,7 @@ export interface FeedbackContentProps extends Omit<ComponentProps<'div'>, 'child
 }
 
 /** The shell: the darker band, and everything set in it. */
-function FeedbackContent({
-  inline = false,
-  blur = false,
-  className,
-  children,
-  ...props
-}: FeedbackContentProps) {
+function FeedbackContent({ inline = false, blur = false, className, children, ...props }: FeedbackContentProps) {
   const feedback = useFeedback('Feedback.Content');
   const slots = feedbackVariants({ blur });
   const context = useMemo(() => ({ ...feedback, inline }), [feedback, inline]);
@@ -321,9 +321,13 @@ FeedbackContent.displayName = 'Feedback.Content';
 export interface FeedbackPanelProps extends ComponentProps<'div'> {}
 
 /** The well set into the shell: the title, the close button and the field. */
-function FeedbackPanel({ className, ...props }: FeedbackPanelProps) {
+function FeedbackPanel({ className, render, ...props }: FeedbackPanelProps & RenderProp<'div'>) {
   const slots = feedbackVariants();
-  return <div className={slots.panel({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: slots.panel({ className }) }, props),
+  });
 }
 FeedbackPanel.displayName = 'Feedback.Panel';
 
@@ -344,38 +348,50 @@ export interface FeedbackCloseProps extends Omit<ComponentProps<'button'>, 'chil
 }
 
 /** The ✕ in the panel's corner. */
-function FeedbackClose({ label = 'Close', className, onClick, ...props }: FeedbackCloseProps) {
+function FeedbackClose({
+  label = 'Close',
+  className,
+  onClick,
+  render,
+  ...props
+}: FeedbackCloseProps & RenderProp<'button'>) {
   const { setOpen } = useFeedback('Feedback.Close');
   const slots = feedbackVariants();
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className={slots.close({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) setOpen(false);
-      }}
-      {...props}
-    >
-      <svg
-        viewBox="0 0 10 10"
-        aria-hidden="true"
-        className="size-2.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      >
-        <path d="M2 2l6 6M8 2l-6 6" />
-      </svg>
-    </button>
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        'aria-label': label,
+        className: slots.close({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) setOpen(false);
+        },
+        children: (
+          <>
+            <svg
+              viewBox="0 0 10 10"
+              aria-hidden="true"
+              className="size-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            >
+              <path d="M2 2l6 6M8 2l-6 6" />
+            </svg>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 FeedbackClose.displayName = 'Feedback.Close';
 
-export interface FeedbackFieldProps
-  extends Omit<ComponentProps<'textarea'>, 'value' | 'defaultValue' | 'onChange'> {
+export interface FeedbackFieldProps extends Omit<ComponentProps<'textarea'>, 'value' | 'defaultValue' | 'onChange'> {
   /** The message. Leave unset to let the dialog hold it. */
   value?: string;
   /** Called with the message each time it changes. */
@@ -483,16 +499,20 @@ export interface FeedbackMessageProps extends ComponentProps<'p'> {
 }
 
 /** A short line under the field. Figures in it keep their width as they change. */
-function FeedbackMessage({ tone = 'muted', className, ...props }: FeedbackMessageProps) {
+function FeedbackMessage({ tone = 'muted', className, render, ...props }: FeedbackMessageProps & RenderProp<'p'>) {
   const slots = feedbackVariants({ messageTone: tone });
-  return (
-    <p
-      role={tone === 'destructive' ? 'alert' : undefined}
-      aria-live={tone === 'destructive' ? undefined : 'polite'}
-      className={slots.message({ className })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      {
+        role: tone === 'destructive' ? 'alert' : undefined,
+        'aria-live': tone === 'destructive' ? undefined : 'polite',
+        className: slots.message({ className }),
+      },
+      props
+    ),
+  });
 }
 FeedbackMessage.displayName = 'Feedback.Message';
 
@@ -524,41 +544,57 @@ function FeedbackRating({
   minHeight,
   className,
   style,
+  render,
   ...props
-}: FeedbackRatingProps) {
+}: FeedbackRatingProps & RenderProp<'div'>) {
   const slots = feedbackVariants();
-  return (
-    <div className={slots.rating({ className })} style={{ minHeight, ...style }} {...props}>
-      <div className={slots.ratingScores()}>
-        {Array.from({ length: max }, (_, index) => index + 1).map((value) => (
-          <button
-            key={value}
-            type="button"
-            aria-label={`${value} out of ${max}`}
-            onClick={() => onValueChange?.(value)}
-            className={slots.ratingScore()}
-          >
-            {value}
-          </button>
-        ))}
-      </div>
-      {startLabel !== undefined || endLabel !== undefined ? (
-        <div className={slots.ratingEnds()}>
-          <span>{startLabel}</span>
-          <span>{endLabel}</span>
-        </div>
-      ) : null}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        className: slots.rating({ className }),
+        style: { minHeight, ...style },
+        children: (
+          <>
+            <div className={slots.ratingScores()}>
+              {Array.from({ length: max }, (_, index) => index + 1).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-label={`${value} out of ${max}`}
+                  onClick={() => onValueChange?.(value)}
+                  className={slots.ratingScore()}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+            {startLabel !== undefined || endLabel !== undefined ? (
+              <div className={slots.ratingEnds()}>
+                <span>{startLabel}</span>
+                <span>{endLabel}</span>
+              </div>
+            ) : null}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 FeedbackRating.displayName = 'Feedback.Rating';
 
 export interface FeedbackFooterProps extends ComponentProps<'div'> {}
 
 /** The action row, in the band under the panel. */
-function FeedbackFooter({ className, ...props }: FeedbackFooterProps) {
+function FeedbackFooter({ className, render, ...props }: FeedbackFooterProps & RenderProp<'div'>) {
   const slots = feedbackVariants();
-  return <div className={slots.footer({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: slots.footer({ className }) }, props),
+  });
 }
 FeedbackFooter.displayName = 'Feedback.Footer';
 
@@ -570,24 +606,28 @@ function FeedbackCancel({
   className,
   disabled,
   onClick,
+  render,
   ...props
-}: FeedbackActionProps) {
+}: FeedbackActionProps & RenderProp<'button'>) {
   const { setOpen } = useFeedback('Feedback.Cancel');
   const slots = feedbackVariants({ tone: 'cancel', disabled: !!disabled });
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      className={slots.action({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) setOpen(false);
-      }}
-      {...props}
-    >
-      {children}
-    </button>
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        disabled: disabled,
+        className: slots.action({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) setOpen(false);
+        },
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
 }
 FeedbackCancel.displayName = 'Feedback.Cancel';
 
@@ -606,8 +646,9 @@ function FeedbackSubmit({
   disabled,
   onClick,
   onSubmit,
+  render,
   ...props
-}: FeedbackSubmitProps) {
+}: FeedbackSubmitProps & RenderProp<'button'>) {
   const feedback = useFeedback('Feedback.Submit');
   // Empty feedback is worse than none: it is sent by somebody who believes
   // they said something.
@@ -618,20 +659,23 @@ function FeedbackSubmit({
   // sends what is in the field now and not what was there when it mounted.
   feedback.submit.current = inert ? null : () => onSubmit?.(feedback.value);
 
-  return (
-    <button
-      type="button"
-      disabled={inert}
-      className={slots.action({ className })}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) onSubmit?.(feedback.value);
-      }}
-      {...props}
-    >
-      {children}
-    </button>
-  );
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        type: 'button',
+        disabled: inert,
+        className: slots.action({ className }),
+        onClick: (event: ReactTypes.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(event);
+          if (!event.defaultPrevented) onSubmit?.(feedback.value);
+        },
+        children: <>{children}</>,
+      },
+      props
+    ),
+  });
 }
 FeedbackSubmit.displayName = 'Feedback.Submit';
 

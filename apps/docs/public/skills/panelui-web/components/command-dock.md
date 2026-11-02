@@ -79,6 +79,27 @@ Every part also takes the props of the element it renders, and a `className`.
 | `busy` | `boolean` | `false` | While true, the field cannot be sent again and `CommandDock.Status` is shown. |
 | `closedWidth` | `string` | `'9rem'` | How wide it is while closed, as a CSS length. |
 
+#### `CommandDockTriggerProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'button',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `ref` | `ref,` | **required** | — |
+| `type` | `'button',` | **required** | — |
+| `className` | `commandDockVariants({ open: dock.open }).trigger({ className }),` | **required** | — |
+| `onClick` | `(event: ReactTypes.MouseEvent<HTMLButtonElement>) => {` | **required** | — |
+
+#### `CommandDockPanelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `ref` | `ref,` | **required** | — |
+| `id` | `dock.panelId,` | **required** | — |
+| `className` | `commandDockVariants().panel({ className }),` | **required** | — |
+
 #### `CommandDockInputProps`
 
 | Prop | Type | Default | What it does |
@@ -89,13 +110,27 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `label` | `string` | — | What a screen reader calls the list of rows. |
+| `label` | `string` | `'Results'` | What a screen reader calls the list of rows. |
 
 #### `CommandDockRowProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `onSelect` | `() => void` | — | Called when the row is pressed. Passing this makes the row a button. |
+
+#### `CommandDockRowTitleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `CommandDockRowMetaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
 
 ## In a Server Component
 

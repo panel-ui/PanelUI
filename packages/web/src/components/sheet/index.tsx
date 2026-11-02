@@ -87,6 +87,12 @@ import {
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /*
  * One curve for every movement: the sheet arriving, the one behind it stepping
@@ -474,20 +480,13 @@ function SheetFrame({
         onOpenChange={(next, details) => {
           // The primitive has a switch for a press outside and none for
           // Escape or a swipe, so those are refused here.
-          if (
-            !next &&
-            !dismissible &&
-            details.reason !== 'close-press' &&
-            details.reason !== 'imperative-action'
-          ) {
+          if (!next && !dismissible && details.reason !== 'close-press' && details.reason !== 'imperative-action') {
             return;
           }
           setOpen(next);
         }}
       >
-        {typeof children === 'function'
-          ? ({ payload }: { payload: unknown }) => children(payload)
-          : children}
+        {typeof children === 'function' ? ({ payload }: { payload: unknown }) => children(payload) : children}
       </Drawer.Root>
     </SheetContext.Provider>
   );
@@ -703,16 +702,33 @@ export interface SheetHeaderProps extends Omit<ComponentProps<'div'>, 'title'> {
  * The heading block. It leaves room for the close button beside the title,
  * so the two share the top line instead of stacking.
  */
-function SheetHeader({ title, description, className, children, ...props }: SheetHeaderProps) {
+function SheetHeader({
+  title,
+  description,
+  className,
+  children,
+  render,
+  ...props
+}: SheetHeaderProps & RenderProp<'div'>) {
   const { showClose } = useSheet('Sheet.Header');
   const slots = sheetVariants();
-  return (
-    <div className={slots.header({ className: [showClose && 'pe-14', className] })} {...props}>
-      {title !== undefined ? <SheetTitle>{title}</SheetTitle> : null}
-      {description !== undefined ? <SheetDescription>{description}</SheetDescription> : null}
-      {children}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        className: slots.header({ className: [showClose && 'pe-14', className] }),
+        children: (
+          <>
+            {title !== undefined ? <SheetTitle>{title}</SheetTitle> : null}
+            {description !== undefined ? <SheetDescription>{description}</SheetDescription> : null}
+            {children}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 SheetHeader.displayName = 'Sheet.Header';
 
@@ -734,9 +750,7 @@ function SheetDescription({ className, ...props }: SheetDescriptionProps) {
   const { inline } = useSheet('Sheet.Description');
   const slots = sheetVariants();
   if (inline) return <p className={slots.description({ className })} {...props} />;
-  return (
-    <Drawer.Content render={<Drawer.Description className={slots.description({ className })} {...props} />} />
-  );
+  return <Drawer.Content render={<Drawer.Description className={slots.description({ className })} {...props} />} />;
 }
 SheetDescription.displayName = 'Sheet.Description';
 
@@ -1083,9 +1097,7 @@ function SheetSlides({
           aria-label={label}
           onKeyDown={keys}
           className={slots.slidesViewport({
-            className: snap
-              ? 'min-h-[min(60dvh,32rem)] snap-y snap-mandatory [container-type:size]'
-              : undefined,
+            className: snap ? 'min-h-[min(60dvh,32rem)] snap-y snap-mandatory [container-type:size]' : undefined,
           })}
         >
           <ScrollArea.Content className={slots.slidesContent({ className: snap ? 'py-1.5' : 'gap-2 pb-3 pt-1' })}>
@@ -1121,7 +1133,15 @@ export interface SheetSlideProps extends ComponentProps<'div'> {
 }
 
 /** One slide: a rounded frame that fills with an image, a video or anything drawn. */
-function SheetSlide({ label, aspect, className, style, children, ...props }: SheetSlideProps) {
+function SheetSlide({
+  label,
+  aspect,
+  className,
+  style,
+  children,
+  render,
+  ...props
+}: SheetSlideProps & RenderProp<'div'>) {
   const slides = useContext(SlidesContext);
   if (!slides) throw new Error('Sheet.Slide must be used inside <Sheet.Slides>.');
   const at = useContext(SlideIndexContext);
@@ -1172,28 +1192,44 @@ function SheetSlide({ label, aspect, className, style, children, ...props }: She
     </div>
   );
 
-  return (
-    <div data-slot="sheet-slide" data-index={at} data-selected={selected ? '' : undefined} className={slots.slideRow()} {...props}>
-      <span aria-hidden="true" className={slots.slideNumber({ className: selected ? 'text-[var(--info)]' : undefined })}>
-        {at + 1}
-      </span>
-      {slides.pressable ? (
-        <button
-          type="button"
-          aria-label={label ? name : `Slide ${place}`}
-          aria-current={selected ? 'true' : undefined}
-          className={slots.slideButton()}
-          onClick={() => slides.choose(at)}
-        >
-          {frame}
-        </button>
-      ) : (
-        <div role="group" aria-roledescription="slide" aria-label={name}>
-          {frame}
-        </div>
-      )}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'sheet-slide',
+        'data-index': at,
+        'data-selected': selected ? '' : undefined,
+        className: slots.slideRow(),
+        children: (
+          <>
+            <span
+              aria-hidden="true"
+              className={slots.slideNumber({ className: selected ? 'text-[var(--info)]' : undefined })}
+            >
+              {at + 1}
+            </span>
+            {slides.pressable ? (
+              <button
+                type="button"
+                aria-label={label ? name : `Slide ${place}`}
+                aria-current={selected ? 'true' : undefined}
+                className={slots.slideButton()}
+                onClick={() => slides.choose(at)}
+              >
+                {frame}
+              </button>
+            ) : (
+              <div role="group" aria-roledescription="slide" aria-label={name}>
+                {frame}
+              </div>
+            )}
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 SheetSlide.displayName = 'Sheet.Slide';
 

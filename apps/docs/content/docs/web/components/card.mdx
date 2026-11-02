@@ -87,7 +87,7 @@ Import from `panelui-web/card` instead of `@/components/panelui/card`. Tailwind 
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -318,11 +318,39 @@ export default function CardList() {
 | `size` | `'default' \| 'sm'` | — | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
 | `as` | `'div' \| 'article' \| 'section' \| 'li'` | — | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
 
+### Card.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'card-header', className: slots.header({ className }) }, props),` | — |  |
+
 ### Card.Title
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | — | The heading level, to fit the page around the card. Default `h3`. |
+
+### Card.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'card-description', className: slots.description({ className }) }, props),` | — |  |
+
+### Card.Action
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'card-action', className: slots.action({ className }) }, props),` | — |  |
+
+### Card.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'card-content', className: slots.content({ className }) }, props),` | — |  |
 
 ### Card.Footer
 
@@ -337,3 +365,11 @@ Every part also takes the props of the element it renders, and a `className`.
 `as` on the card renders it as a `div`, `article`, `section` or `li`. Use `article` for a card that makes sense on its own and `li` inside a list.
 
 `Card.Title` is a heading so the page outline includes it. Set its level with `as`, from `h2` to `h4`, or `div` for a card that should stay out of the outline.
+
+### Server Components
+
+`Card` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Card.Header` off the import, so each part is also exported by name: `CardHeader` is `Card.Header`, and so on for the others.
+
+```tsx
+import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "@/components/panelui/card"
+```

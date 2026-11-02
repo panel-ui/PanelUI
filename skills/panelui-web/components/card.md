@@ -73,17 +73,49 @@ Every part also takes the props of the element it renders, and a `className`.
 | `size` | `'default' \| 'sm'` | — | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
 | `as` | `'div' \| 'article' \| 'section' \| 'li'` | — | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
 
+#### `CardHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'card-header', className: slots.header({ className }) }, props),` | **required** | — |
+
 #### `CardTitleProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | — | The heading level, to fit the page around the card. Default `h3`. |
 
+#### `CardDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'card-description', className: slots.description({ className }) }, props),` | **required** | — |
+
+#### `CardActionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'card-action', className: slots.action({ className }) }, props),` | **required** | — |
+
+#### `CardContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'card-content', className: slots.content({ className }) }, props),` | **required** | — |
+
 #### `CardFooterProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `variant` | `'plain' \| 'panel'` | — | `plain` continues the card. `panel` is a darker band set into its bottom, for actions. Default `plain`. |
+
+## In a Server Component
+
+`Card` is a client component. A Server Component cannot read `Card.Header` off the import, so import each part by name: `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`.
 
 ## Notes
 

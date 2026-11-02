@@ -77,6 +77,10 @@ Every part also takes the props of the element it renders, and a `className`.
 | `className` | `string` | — | — |
 | `style` | `CSSProperties` | — | — |
 
+## In a Server Component
+
+`RadioGroup` is a client component. A Server Component cannot read `RadioGroup.Item` off the import, so import each part by name: `RadioGroupItem`, `RadioGroupCard`, `RadioGroupCardBody`, `RadioGroupCardTitle`, `RadioGroupCardDescription`, `RadioGroupCardAside`.
+
 ## Notes
 
 #### Keyboard

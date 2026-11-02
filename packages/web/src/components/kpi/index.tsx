@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Kpi — one number, and what it is doing.
  *
@@ -43,6 +45,12 @@
  */
 import type { ComponentProps, ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 /** Which of the theme's roles a chart or a bar is drawn in. */
 export type KpiColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
@@ -126,8 +134,7 @@ const kpiVariants = tv({
       // The padding is on the children and not the rule, so the rule reaches
       // the full height or width of the panel.
       horizontal: {
-        group:
-          'flex-row items-stretch divide-x *:min-w-0 *:flex-1 *:px-4 *:first:ps-0 *:last:pe-0',
+        group: 'flex-row items-stretch divide-x *:min-w-0 *:flex-1 *:px-4 *:first:ps-0 *:last:pe-0',
       },
       vertical: { group: 'flex-col divide-y *:py-4 *:first:pt-0 *:last:pb-0' },
     },
@@ -154,16 +161,24 @@ export interface KpiProps extends ComponentProps<'div'> {
   surface?: boolean;
 }
 
-function KpiRoot({ surface = false, className, ...props }: KpiProps) {
-  return <div className={kpiVariants({ surface }).root({ className })} {...props} />;
+function KpiRoot({ surface = false, className, render, ...props }: KpiProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants({ surface }).root({ className }) }, props),
+  });
 }
 KpiRoot.displayName = 'Kpi';
 
 export interface KpiHeaderProps extends ComponentProps<'div'> {}
 
 /** The row over the number: an icon, the title, and anything at the end. */
-function KpiHeader({ className, ...props }: KpiHeaderProps) {
-  return <div className={kpiVariants().header({ className })} {...props} />;
+function KpiHeader({ className, render, ...props }: KpiHeaderProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants().header({ className }) }, props),
+  });
 }
 KpiHeader.displayName = 'Kpi.Header';
 
@@ -173,24 +188,36 @@ export interface KpiIconProps extends ComponentProps<'span'> {
 }
 
 /** A small tile for an icon, at the start of the header. */
-function KpiIcon({ tone = 'neutral', className, ...props }: KpiIconProps) {
-  return <span aria-hidden="true" className={kpiVariants({ tone }).icon({ className })} {...props} />;
+function KpiIcon({ tone = 'neutral', className, render, ...props }: KpiIconProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'aria-hidden': 'true', className: kpiVariants({ tone }).icon({ className }) }, props),
+  });
 }
 KpiIcon.displayName = 'Kpi.Icon';
 
 export interface KpiTitleProps extends ComponentProps<'div'> {}
 
 /** What the number measures. */
-function KpiTitle({ className, ...props }: KpiTitleProps) {
-  return <div data-kpi-title="" className={kpiVariants().title({ className })} {...props} />;
+function KpiTitle({ className, render, ...props }: KpiTitleProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-kpi-title': '', className: kpiVariants().title({ className }) }, props),
+  });
 }
 KpiTitle.displayName = 'Kpi.Title';
 
 export interface KpiActionsProps extends ComponentProps<'div'> {}
 
 /** Whatever belongs at the end of the header: a period, a badge, a button. */
-function KpiActions({ className, ...props }: KpiActionsProps) {
-  return <div className={kpiVariants().actions({ className })} {...props} />;
+function KpiActions({ className, render, ...props }: KpiActionsProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants().actions({ className }) }, props),
+  });
 }
 KpiActions.displayName = 'Kpi.Actions';
 
@@ -200,24 +227,36 @@ export interface KpiContentProps extends ComponentProps<'div'> {
 }
 
 /** The row the number is in, with a trend or a chart at its other end. */
-function KpiContent({ layout = 'below', className, ...props }: KpiContentProps) {
-  return <div className={kpiVariants({ layout }).content({ className })} {...props} />;
+function KpiContent({ layout = 'below', className, render, ...props }: KpiContentProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants({ layout }).content({ className }) }, props),
+  });
 }
 KpiContent.displayName = 'Kpi.Content';
 
 export interface KpiStatProps extends ComponentProps<'div'> {}
 
 /** Title, value and trend stacked as one block, for a row with a chart beside it. */
-function KpiStat({ className, ...props }: KpiStatProps) {
-  return <div className={kpiVariants().stat({ className })} {...props} />;
+function KpiStat({ className, render, ...props }: KpiStatProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants().stat({ className }) }, props),
+  });
 }
 KpiStat.displayName = 'Kpi.Stat';
 
 export interface KpiValueProps extends ComponentProps<'div'> {}
 
 /** The number. */
-function KpiValue({ className, ...props }: KpiValueProps) {
-  return <div className={kpiVariants().value({ className })} {...props} />;
+function KpiValue({ className, render, ...props }: KpiValueProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants().value({ className }) }, props),
+  });
 }
 KpiValue.displayName = 'Kpi.Value';
 
@@ -248,8 +287,9 @@ function KpiTrend({
   caption,
   threshold = 0,
   className,
+  render,
   ...props
-}: KpiTrendProps) {
+}: KpiTrendProps & RenderProp<'span'>) {
   const flat = Math.abs(value) <= threshold;
   const rising = value > 0;
   const tone: KpiTone = flat
@@ -268,35 +308,47 @@ function KpiTrend({
       `${rising ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toFixed(1)}%`;
   const spoken = `${flat ? 'No change' : rising ? 'Up' : 'Down'} ${Math.abs(value).toFixed(1)} percent${caption ? `, ${caption}` : ''}`;
 
-  return (
-    <span role="img" aria-label={spoken} className={slots.trend({ className })} {...props}>
-      {/* No arrow in `text`: the sign is already in front of the number. */}
-      {variant === 'badge' ? (
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="size-3"
-        >
-          {flat ? (
-            <path d="M5 12h14" />
-          ) : rising ? (
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          ) : (
-            <path d="M12 5v14M19 12l-7 7-7-7" />
-          )}
-        </svg>
-      ) : null}
-      <span aria-hidden="true">
-        {label}
-        {caption ? <span className={slots.caption()}> {caption}</span> : null}
-      </span>
-    </span>
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        role: 'img',
+        'aria-label': spoken,
+        className: slots.trend({ className }),
+        children: (
+          <>
+            {/* No arrow in `text`: the sign is already in front of the number. */}
+            {variant === 'badge' ? (
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-3"
+              >
+                {flat ? (
+                  <path d="M5 12h14" />
+                ) : rising ? (
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                ) : (
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                )}
+              </svg>
+            ) : null}
+            <span aria-hidden="true">
+              {label}
+              {caption ? <span className={slots.caption()}> {caption}</span> : null}
+            </span>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 KpiTrend.displayName = 'Kpi.Trend';
 
@@ -353,8 +405,9 @@ function KpiChart({
   strokeWidth = 2,
   className,
   style,
+  render,
   ...props
-}: KpiChartProps) {
+}: KpiChartProps & RenderProp<'svg'>) {
   const slots = kpiVariants({ color });
   const low = Math.min(...data);
   const high = Math.max(...data);
@@ -368,40 +421,47 @@ function KpiChart({
   ]);
   const line = linePath(points);
 
-  return (
-    <svg
-      role="img"
-      aria-label="Trend"
-      viewBox={`0 0 ${GRID_WIDTH} ${GRID_HEIGHT}`}
-      preserveAspectRatio="none"
-      className={slots.chart({ className })}
-      style={{
-        height: height ?? (inline ? INLINE_HEIGHT : 56),
-        ...(inline ? { width: INLINE_WIDTH, flex: 'none' } : null),
-        ...style,
-      }}
-      {...props}
-    >
-      {filled && line ? (
-        <path
-          d={`${line} L${GRID_WIDTH} ${GRID_HEIGHT} L0 ${GRID_HEIGHT} Z`}
-          fill="var(--pu-color)"
-          opacity="0.12"
-        />
-      ) : null}
-      <path
-        d={line}
-        fill="none"
-        stroke="var(--pu-color)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        // The grid is stretched to the chart's size. Without this the line
-        // would be stretched with it, thick across and thin up and down.
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
+  return useRender({
+    defaultTagName: 'svg',
+    render,
+    props: mergeProps(
+      {
+        role: 'img',
+        'aria-label': 'Trend',
+        viewBox: `0 0 ${GRID_WIDTH} ${GRID_HEIGHT}`,
+        preserveAspectRatio: 'none',
+        className: slots.chart({ className }),
+        style: {
+          height: height ?? (inline ? INLINE_HEIGHT : 56),
+          ...(inline ? { width: INLINE_WIDTH, flex: 'none' } : null),
+          ...style,
+        },
+        children: (
+          <>
+            {filled && line ? (
+              <path
+                d={`${line} L${GRID_WIDTH} ${GRID_HEIGHT} L0 ${GRID_HEIGHT} Z`}
+                fill="var(--pu-color)"
+                opacity="0.12"
+              />
+            ) : null}
+            <path
+              d={line}
+              fill="none"
+              stroke="var(--pu-color)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              // The grid is stretched to the chart's size. Without this the line
+              // would be stretched with it, thick across and thin up and down.
+              vectorEffect="non-scaling-stroke"
+            />
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 KpiChart.displayName = 'Kpi.Chart';
 
@@ -426,47 +486,66 @@ function KpiProgress({
   showValueLabel = false,
   color = 'primary',
   className,
+  render,
   ...props
-}: KpiProgressProps) {
+}: KpiProgressProps & RenderProp<'div'>) {
   const slots = kpiVariants({ color });
   const share = Math.min(1, Math.max(0, maxValue === 0 ? 0 : value / maxValue));
   const percent = Math.round(share * 100);
-  return (
-    <div className={slots.progress({ className })} {...props}>
-      {label !== undefined || showValueLabel ? (
-        <div className={slots.progressHeader()}>
-          <span className="font-medium">{label}</span>
-          {showValueLabel ? <span className="text-muted-foreground">{percent}%</span> : null}
-        </div>
-      ) : null}
-      <div
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={maxValue}
-        aria-valuenow={value}
-        aria-label={typeof label === 'string' ? label : 'Progress'}
-        className={slots.progressTrack()}
-      >
-        <div className={slots.progressFill()} style={{ width: `${percent}%` }} />
-      </div>
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        className: slots.progress({ className }),
+        children: (
+          <>
+            {label !== undefined || showValueLabel ? (
+              <div className={slots.progressHeader()}>
+                <span className="font-medium">{label}</span>
+                {showValueLabel ? <span className="text-muted-foreground">{percent}%</span> : null}
+              </div>
+            ) : null}
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={maxValue}
+              aria-valuenow={value}
+              aria-label={typeof label === 'string' ? label : 'Progress'}
+              className={slots.progressTrack()}
+            >
+              <div className={slots.progressFill()} style={{ width: `${percent}%` }} />
+            </div>
+          </>
+        ),
+      },
+      props
+    ),
+  });
 }
 KpiProgress.displayName = 'Kpi.Progress';
 
 export interface KpiFooterProps extends ComponentProps<'div'> {}
 
 /** A quiet line under everything: when it was measured, how long is left. */
-function KpiFooter({ className, ...props }: KpiFooterProps) {
-  return <div className={kpiVariants().footer({ className })} {...props} />;
+function KpiFooter({ className, render, ...props }: KpiFooterProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants().footer({ className }) }, props),
+  });
 }
 KpiFooter.displayName = 'Kpi.Footer';
 
 export interface KpiSeparatorProps extends ComponentProps<'div'> {}
 
 /** A rule between two parts of one card. */
-function KpiSeparator({ className, ...props }: KpiSeparatorProps) {
-  return <div role="separator" className={kpiVariants().separator({ className })} {...props} />;
+function KpiSeparator({ className, render, ...props }: KpiSeparatorProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ role: 'separator', className: kpiVariants().separator({ className }) }, props),
+  });
 }
 KpiSeparator.displayName = 'Kpi.Separator';
 
@@ -478,8 +557,18 @@ export interface KpiGroupProps extends ComponentProps<'div'> {
 }
 
 /** Several metrics as one panel, with a rule between each and the next. */
-function KpiGroup({ orientation = 'horizontal', surface = false, className, ...props }: KpiGroupProps) {
-  return <div className={kpiVariants({ orientation, surface }).group({ className })} {...props} />;
+function KpiGroup({
+  orientation = 'horizontal',
+  surface = false,
+  className,
+  render,
+  ...props
+}: KpiGroupProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ className: kpiVariants({ orientation, surface }).group({ className }) }, props),
+  });
 }
 KpiGroup.displayName = 'Kpi.Group';
 

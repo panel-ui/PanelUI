@@ -86,11 +86,39 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `variant` | `FrameVariant` | `default` | `default` sets the panel in a tray. `band` holds a bordered card in a thin muted band, for a widget showing one figure or chart, and its panel draws no rule between its children. `inset` floats the panel in a recessed band and gives `Frame.Footer` somewhere to sit. `plain` drops the shell, for a frame inside a container that already draws its own edge. |
 
+#### `FrameHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-header', className: frameVariants().header({ className }) }, props),` | **required** | — |
+
 #### `FrameTitleProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `as` | `'h2' \| 'h3' \| 'h4' \| 'p'` | — | The heading level in a header. Default `h3`; a row title is always a `p`. |
+
+#### `FrameDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `FrameActionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-action', className: frameVariants().action({ className }) }, props),` | **required** | — |
+
+#### `FramePanelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-panel', className: frameVariants().panel({ className }) }, props),` | **required** | — |
 
 #### `FrameRowProps`
 
@@ -100,13 +128,45 @@ Every part also takes the props of the element it renders, and a `className`.
 | `target` | `string` | — | Where a link row opens, as on an `<a>`. |
 | `rel` | `string` | — | The relationship of a link row's target, as on an `<a>`. |
 | `onClick` | `MouseEventHandler<HTMLElement>` | — | Make the row a button that calls this. Ignored when `href` is set. |
-| `chevron` | `boolean` | — | A trailing chevron, for a row that leads somewhere. |
+| `chevron` | `boolean` | `false` | A trailing chevron, for a row that leads somewhere. |
+
+#### `FrameMediaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-media', className: frameVariants().media({ className }) }, props),` | **required** | — |
+
+#### `FrameContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-content', className: frameVariants().content({ className }) }, props),` | **required** | — |
+
+#### `FrameActionsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-actions', className: frameVariants().actions({ className }) }, props),` | **required** | — |
 
 #### `FrameSectionProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `title` | `ReactNode` | — | The heading over the section's rows. |
+
+#### `FrameFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'frame-footer', className: frameVariants().footer({ className }) }, props),` | **required** | — |
+
+## In a Server Component
+
+`Frame` is a client component. A Server Component cannot read `Frame.Header` off the import, so import each part by name: `FrameHeader`, `FrameTitle`, `FrameDescription`, `FrameAction`, `FramePanel`, `FrameRow`, `FrameMedia`, `FrameContent`, `FrameActions`, `FrameSection`, `FrameFooter`.
 
 ## Notes
 

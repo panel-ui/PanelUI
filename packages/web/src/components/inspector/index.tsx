@@ -43,6 +43,12 @@ import { Tabs } from '@base-ui/react/tabs';
 import { Tooltip } from '@base-ui/react/tooltip';
 import { createContext, useContext, type ComponentProps, type CSSProperties, type ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const EASE = 'ease-[cubic-bezier(0.3,1.2,0.4,1)]';
 
@@ -183,9 +189,16 @@ InspectorTab.displayName = 'Inspector.Tab';
 export interface InspectorRailSeparatorProps extends ComponentProps<'span'> {}
 
 /** A short line between groups of pages on the rail. */
-function InspectorRailSeparator({ className, ...props }: InspectorRailSeparatorProps) {
+function InspectorRailSeparator({ className, render, ...props }: InspectorRailSeparatorProps & RenderProp<'span'>) {
   const slots = inspectorVariants();
-  return <span aria-hidden data-slot="inspector-rail-separator" className={slots.railSeparator({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'aria-hidden': true, 'data-slot': 'inspector-rail-separator', className: slots.railSeparator({ className }) },
+      props
+    ),
+  });
 }
 InspectorRailSeparator.displayName = 'Inspector.RailSeparator';
 
@@ -196,13 +209,20 @@ export interface InspectorPanelProps extends ComponentProps<'div'> {}
  * page longer than that scrolls inside it. Without pages, its children are
  * one page of sections.
  */
-function InspectorPanel({ className, children, ...props }: InspectorPanelProps) {
+function InspectorPanel({ className, children, render, ...props }: InspectorPanelProps & RenderProp<'div'>) {
   const slots = inspectorVariants();
-  return (
-    <div data-slot="inspector-panel" className={slots.panel({ className })} {...props}>
-      {hasPages(children) ? children : <Scroll>{children}</Scroll>}
-    </div>
-  );
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'inspector-panel',
+        className: slots.panel({ className }),
+        children: <>{hasPages(children) ? children : <Scroll>{children}</Scroll>}</>,
+      },
+      props
+    ),
+  });
 }
 InspectorPanel.displayName = 'Inspector.Panel';
 
@@ -317,9 +337,21 @@ function InspectorSectionTitle({ className, children, ...props }: InspectorSecti
   }
   return (
     <h3 className="col-start-1 row-start-1 m-0">
-      <Collapsible.Trigger data-slot="inspector-section-trigger" className={slots.sectionTitle({ className: ['w-full', className] })}>
+      <Collapsible.Trigger
+        data-slot="inspector-section-trigger"
+        className={slots.sectionTitle({ className: ['w-full', className] })}
+      >
         {children}
-        <svg viewBox="0 0 16 16" aria-hidden className={slots.chevron()} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          viewBox="0 0 16 16"
+          aria-hidden
+          className={slots.chevron()}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="m4 10 4-4 4 4" />
         </svg>
       </Collapsible.Trigger>
@@ -331,10 +363,17 @@ InspectorSectionTitle.displayName = 'Inspector.SectionTitle';
 export interface InspectorSectionActionProps extends ComponentProps<'div'> {}
 
 /** What sits at the end of the title's line: the switch for the whole section, or a Reset. */
-function InspectorSectionAction({ className, ...props }: InspectorSectionActionProps) {
+function InspectorSectionAction({ className, render, ...props }: InspectorSectionActionProps & RenderProp<'div'>) {
   useSection('Inspector.SectionAction');
   const slots = inspectorVariants();
-  return <div data-slot="inspector-section-action" className={slots.sectionAction({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'inspector-section-action', className: slots.sectionAction({ className }) },
+      props
+    ),
+  });
 }
 InspectorSectionAction.displayName = 'Inspector.SectionAction';
 
@@ -352,7 +391,11 @@ function InspectorSectionContent({ className, children, ...props }: InspectorSec
     );
   }
   return (
-    <Collapsible.Panel data-slot="inspector-section-panel" className={slots.sectionContent({ className })} style={props.style as CSSProperties}>
+    <Collapsible.Panel
+      data-slot="inspector-section-panel"
+      className={slots.sectionContent({ className })}
+      style={props.style as CSSProperties}
+    >
       {children}
     </Collapsible.Panel>
   );
@@ -362,9 +405,16 @@ InspectorSectionContent.displayName = 'Inspector.SectionContent';
 export interface InspectorSeparatorProps extends ComponentProps<'div'> {}
 
 /** A hairline between sections that belong to different things. */
-function InspectorSeparator({ className, ...props }: InspectorSeparatorProps) {
+function InspectorSeparator({ className, render, ...props }: InspectorSeparatorProps & RenderProp<'div'>) {
   const slots = inspectorVariants();
-  return <div role="separator" data-slot="inspector-separator" className={slots.separator({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { role: 'separator', 'data-slot': 'inspector-separator', className: slots.separator({ className }) },
+      props
+    ),
+  });
 }
 InspectorSeparator.displayName = 'Inspector.Separator';
 

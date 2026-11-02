@@ -82,7 +82,7 @@ Import from `panelui-web/stat` instead of `@/components/panelui/stat`. Tailwind 
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -179,17 +179,52 @@ export default function StatSizes() {
 
 ## API Reference
 
+### Stat
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'stat', className: statVariants().root({ className }) }, props),` | — |  |
+
+### Stat.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'stat-content', className: statVariants().content({ className }) }, props),` | — |  |
+
 ### Stat.Label
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `weight` | `'normal' \| 'medium'` | — | `medium` sets the label in a heavier weight, for a figure that stands on its own rather than at the top of a panel that is already titled. Default `normal`. |
 
+### Stat.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'stat-description', className: statVariants().description({ className }) }, props),` | — |  |
+
 ### Stat.Value
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `size` | `'sm' \| 'md' \| 'lg'` | — | `sm` is 2xl, `md` 3xl and `lg` 4xl. Default `lg`. |
+
+### Stat.Unit
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'stat-unit', className: statVariants().unit({ className }) }, props),` | — |  |
+
+### Stat.Badge
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'stat-badge', className: statVariants().badge({ className }) }, props),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 
@@ -206,3 +241,11 @@ Give `Stat` `aria-live="polite"` when the number changes as somebody uses the ch
 ### Server Components
 
 It holds no state and handles no events, so a Server Component can render it, dotted parts and all.
+
+### Server Components
+
+`Stat` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Stat.Content` off the import, so each part is also exported by name: `StatContent` is `Stat.Content`, and so on for the others.
+
+```tsx
+import { Stat, StatContent, StatLabel, StatDescription, StatValue, StatUnit, StatBadge } from "@/components/panelui/stat"
+```

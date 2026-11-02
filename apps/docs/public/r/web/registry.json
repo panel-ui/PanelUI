@@ -9,6 +9,7 @@
       "title": "Alert",
       "description": "A message set into the page that stays until it is dealt with, as a card in a tray of its tone.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -88,6 +89,7 @@
       "title": "Badge",
       "description": "A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -117,6 +119,7 @@
       "title": "Bar Picker",
       "description": "A short run of values as columns of lights, one column picked.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -164,6 +167,7 @@
       "title": "Button Group",
       "description": "Related buttons joined into one control, with separators, text cells and fields between them.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -181,6 +185,7 @@
       "title": "Canvas",
       "description": "A surface of dots, lines or crosses for other components to sit on, with a light that can follow the pointer.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -198,6 +203,7 @@
       "title": "Card",
       "description": "A surface that holds one thing, with a heading, an action beside it and a footer.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -303,6 +309,7 @@
       "title": "Command Dock",
       "description": "A small button that opens into a field, with the answer arriving under it a row at a time.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -320,6 +327,7 @@
       "title": "Day Grid",
       "description": "A run of days as a field of dots, each sized by how much happened on it.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -405,6 +413,7 @@
       "title": "Flow",
       "description": "A canvas of nodes joined by edges, that you pan, zoom and rearrange.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -439,6 +448,7 @@
       "title": "Frame",
       "description": "A panel of rows set into a tray, with the tray's top strip carrying the title.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -492,6 +502,7 @@
       "title": "KPI",
       "description": "One number and what it is doing: its change, its shape over time, its progress to a target.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -521,6 +532,7 @@
       "title": "Label",
       "description": "The name of a field, with its required mark, a hint and an action on one line.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -612,6 +624,7 @@
       "title": "Not Found",
       "description": "An error code drawn in pixels that come apart near the pointer, with a title and a way out.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -646,6 +659,7 @@
       "title": "Planet",
       "description": "The world as dots on a globe you can turn, with markers pinned to it.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -680,6 +694,7 @@
       "title": "Prompt",
       "description": "A field for writing to an assistant, with its files, model and tools in one card.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [
@@ -740,6 +755,7 @@
       "title": "Range Meter",
       "description": "A reading on a ruler of ticks that rises where the value is, with the number above it.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -769,6 +785,7 @@
       "title": "Rolling Number",
       "description": "A number whose digits roll to their new values.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -860,6 +877,7 @@
       "title": "Soundwave",
       "description": "A voice drawn while an app listens: capsules, bars, a line, a field of dots, spokes round a person, or rings of dots.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -889,6 +907,7 @@
       "title": "Stat",
       "description": "One figure written large, with a label over it, a unit after it and a badge beside it.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -934,6 +953,7 @@
       "title": "Table",
       "description": "Rows of records with the same columns, with numbers aligned and a header that stays pinned.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -987,6 +1007,7 @@
       "title": "Tilt Card",
       "description": "A card that leans towards the pointer, with layers inside it that move by their depth.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],
@@ -1106,6 +1127,7 @@
       "title": "Workbench",
       "description": "The frame of an editor: a canvas with the work on it, a toolbar over it, an inspector beside it and a timeline under it.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [
@@ -1125,6 +1147,7 @@
       "title": "XY Pad",
       "description": "Two numbers set with one drag: a point moved across a field.",
       "dependencies": [
+        "@base-ui/react",
         "tailwind-variants"
       ],
       "registryDependencies": [],

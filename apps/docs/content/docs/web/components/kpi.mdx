@@ -97,7 +97,7 @@ Import from `panelui-web/kpi` instead of `@/components/panelui/kpi`. Tailwind ne
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -303,7 +303,14 @@ export default function KpiPanel() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `surface` | `boolean` | — | Draws the metric as a card of its own. Leave it off inside a frame or a group. |
+| `surface` | `boolean` | `false` | Draws the metric as a card of its own. Leave it off inside a frame or a group. |
+
+### Kpi.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: kpiVariants().header({ className }) }, props),` | — |  |
 
 ### Kpi.Icon
 
@@ -311,11 +318,39 @@ export default function KpiPanel() {
 | --- | --- | --- | --- |
 | `tone` | `KpiTone` | `neutral` | How the tile is coloured: by good or bad news, or left neutral. |
 
+### Kpi.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-kpi-title': '', className: kpiVariants().title({ className }) }, props),` | — |  |
+
+### Kpi.Actions
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: kpiVariants().actions({ className }) }, props),` | — |  |
+
 ### Kpi.Content
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `layout` | `'below' \| 'inline'` | `below` | `inline` puts a chart beside the number in a fixed box; `below` leaves it under everything. |
+
+### Kpi.Stat
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: kpiVariants().stat({ className }) }, props),` | — |  |
+
+### Kpi.Value
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: kpiVariants().value({ className }) }, props),` | — |  |
 
 ### Kpi.Trend
 
@@ -349,12 +384,26 @@ export default function KpiPanel() {
 | `showValueLabel` | `boolean` | `false` | Writes the percentage at the end of the row over the bar. |
 | `color` | `KpiColor` | `'primary'` | Which of the theme's roles the bar is drawn in. |
 
+### Kpi.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: kpiVariants().footer({ className }) }, props),` | — |  |
+
+### Kpi.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ role: 'separator', className: kpiVariants().separator({ className }) }, props),` | — |  |
+
 ### Kpi.Group
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orientation` | `'horizontal' \| 'vertical'` | — | Side by side with upright rules, or stacked with level ones. |
-| `surface` | `boolean` | — | Draws the group as a card of its own, for a group not already inside one. |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Side by side with upright rules, or stacked with level ones. |
+| `surface` | `boolean` | `false` | Draws the group as a card of its own, for a group not already inside one. |
 
 Every part also takes the props of the element it renders, and a `className`.
 
@@ -387,3 +436,11 @@ The change is written as a signed percentage with one decimal. `format` is given
 ### Server Components
 
 KPI holds no state, so it is not a client module. It can be rendered from a Server Component as written, and it adds no JavaScript to the page.
+
+### Server Components
+
+`Kpi` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Kpi.Header` off the import, so each part is also exported by name: `KpiHeader` is `Kpi.Header`, and so on for the others.
+
+```tsx
+import { Kpi, KpiHeader, KpiIcon, KpiTitle, KpiActions, KpiContent, KpiStat, KpiValue, KpiTrend, KpiChart, KpiProgress, KpiFooter, KpiSeparator, KpiGroup } from "@/components/panelui/kpi"
+```

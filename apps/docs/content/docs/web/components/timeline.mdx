@@ -443,11 +443,36 @@ export default function TimelineReadOnly() {
 | `snap` | `boolean` | `true` | Snap clip edges to other edges, the playhead and the ends. Default true. |
 | `readOnly` | `boolean` | `false` | Show it without letting clips be moved or trimmed. The playhead still moves. |
 
+### Timeline.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'timeline-header', className: slots.header({ className }) }, props),` | — |  |
+
 ### Timeline.Time
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `showDuration` | `boolean` | — | Show the length after the time, as `1:32 / 2:30`. Default true. |
+
+### Timeline.Zoom
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `slots.zoom({ className }),` | — |  |
+
+### Timeline.Ruler
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `slots.ruler({ className }),` | — |  |
+| `onPointerDown` | `scrub,` | — |  |
+| `onPointerMove` | `(event: ReactTypes.PointerEvent<HTMLDivElement>) => {` | — |  |
 
 ### Timeline.Track
 
@@ -469,6 +494,13 @@ export default function TimelineReadOnly() {
 | `color` | `TimelineColor` | `'primary'` | Its colour, from the theme. Default `primary`. |
 | `label` | `string` | — | What a screen reader calls it, before its times. |
 
+### Timeline.ClipLabel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'timeline-clip-label', className: slots.clipLabel({ className }) }, props),` | — |  |
+
 ### Timeline.Waveform
 
 | Prop | Type | Default | Description |
@@ -480,7 +512,7 @@ export default function TimelineReadOnly() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `color` | `TimelineColor` | `'primary'` | The colour of the line and its head. Default `primary`. |
-| `showTime` | `boolean` | — | Write the time in the head. Default true. |
+| `showTime` | `boolean` | `true` | Write the time in the head. Default true. |
 
 Every part also takes the props of the element it renders, and a `className`.
 

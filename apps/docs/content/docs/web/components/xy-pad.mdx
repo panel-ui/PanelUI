@@ -56,7 +56,7 @@ Import from `panelui-web/xy-pad` instead of `@/components/panelui/xy-pad`. Tailw
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -306,6 +306,14 @@ export default function XYPadGrid() {
 | `format` | `(value: number, axis: 'x' \| 'y') => string` | — | How each value is written, here and to a screen reader. Default two decimals. |
 | `disabled` | `boolean` | `false` | Turns it off. |
 | `name` | `string` | — | Submits `<name>.x` and `<name>.y` with a form. |
+
+### XYPad.Value
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `slots.value({ className }),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

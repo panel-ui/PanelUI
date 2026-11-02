@@ -56,7 +56,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `columns` | `number` | — | How many cards stand in a row. Default: one per item, up to four. |
-| `aspect` | `string` | `'4 / 3'` | The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. |
+| `aspect` | `string` | — | The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. |
 | `color` | `ChoiceCardsColor` | `primary` | The colour of the ring and the check on the chosen card. Default `primary`. |
 | `className` | `string` | — | — |
 | `style` | `CSSProperties` | — | — |
@@ -67,6 +67,29 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `value` | `string` | **required** | What choosing this card sets the group's value to. |
 | `className` | `string` | — | — |
+
+#### `ChoiceCardsMediaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `ChoiceCardsLabelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ id: labelId, 'data-slot': 'choice-cards-label', className: slots.label({ className }) }, props),` | **required** | — |
+
+#### `ChoiceCardsDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `id` | `descriptionId,` | **required** | — |
+| `className` | `slots.description({ className: ['-mt-1.5 px-1.5 pb-1', className] }),` | **required** | — |
 
 ## In a Server Component
 

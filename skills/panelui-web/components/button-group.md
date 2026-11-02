@@ -49,7 +49,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `orientation` | `ButtonGroupOrientation` | `horizontal` | Lay the children out in a row or a column. Default `horizontal`. |
+| `orientation` | `ButtonGroupOrientation` | `'horizontal'` | Lay the children out in a row or a column. Default `horizontal`. |
 
 #### `ButtonGroupSeparatorProps`
 
@@ -62,6 +62,10 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `size` | `ButtonGroupTextSize` | `md` | The height, matching the buttons and fields beside it. Default `md`. |
+
+## In a Server Component
+
+`ButtonGroup` is a client component. A Server Component cannot read `ButtonGroup.Separator` off the import, so import each part by name: `ButtonGroupSeparator`, `ButtonGroupText`.
 
 ## Notes
 

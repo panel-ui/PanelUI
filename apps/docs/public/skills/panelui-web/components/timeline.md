@@ -95,11 +95,36 @@ Every part also takes the props of the element it renders, and a `className`.
 | `snap` | `boolean` | `true` | Snap clip edges to other edges, the playhead and the ends. Default true. |
 | `readOnly` | `boolean` | `false` | Show it without letting clips be moved or trimmed. The playhead still moves. |
 
+#### `TimelineHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'timeline-header', className: slots.header({ className }) }, props),` | **required** | — |
+
 #### `TimelineTimeProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `showDuration` | `boolean` | — | Show the length after the time, as `1:32 / 2:30`. Default true. |
+
+#### `TimelineZoomProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.zoom({ className }),` | **required** | — |
+
+#### `TimelineRulerProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.ruler({ className }),` | **required** | — |
+| `onPointerDown` | `scrub,` | **required** | — |
+| `onPointerMove` | `(event: ReactTypes.PointerEvent<HTMLDivElement>) => {` | **required** | — |
 
 #### `TimelineTrackProps`
 
@@ -121,6 +146,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `color` | `TimelineColor` | `'primary'` | Its colour, from the theme. Default `primary`. |
 | `label` | `string` | — | What a screen reader calls it, before its times. |
 
+#### `TimelineClipLabelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'timeline-clip-label', className: slots.clipLabel({ className }) }, props),` | **required** | — |
+
 #### `TimelineWaveformProps`
 
 | Prop | Type | Default | What it does |
@@ -132,7 +164,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `color` | `TimelineColor` | `'primary'` | The colour of the line and its head. Default `primary`. |
-| `showTime` | `boolean` | — | Write the time in the head. Default true. |
+| `showTime` | `boolean` | `true` | Write the time in the head. Default true. |
 
 ## In a Server Component
 

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Radio Group — one choice from a short list, all of it visible at once.
  *
@@ -41,13 +43,20 @@ import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type RadioSize = 'sm' | 'md' | 'lg';
 export type RadioColor = 'primary' | 'success' | 'info' | 'destructive';
 
 const radioVariants = tv({
   slots: {
-    group: 'flex gap-3 data-[orientation=vertical]:flex-col data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:flex-wrap',
+    group:
+      'flex gap-3 data-[orientation=vertical]:flex-col data-[orientation=horizontal]:flex-row data-[orientation=horizontal]:flex-wrap',
     root: [
       'group/radio relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full border outline-none',
       'border-input bg-background shadow-xs dark:bg-input/30',
@@ -116,7 +125,13 @@ export interface RadioProps extends Omit<BaseRadio.Root.Props<string>, 'classNam
 function Radio({ size = 'md', color, label, className, ...props }: RadioProps) {
   const slots = radioVariants({ size, color });
   return (
-    <BaseRadio.Root data-slot="radio" data-size={size} aria-label={label} className={slots.root({ className })} {...props}>
+    <BaseRadio.Root
+      data-slot="radio"
+      data-size={size}
+      aria-label={label}
+      className={slots.root({ className })}
+      {...props}
+    >
       <BaseRadio.Indicator data-slot="radio-indicator" keepMounted className={slots.indicator()} />
     </BaseRadio.Root>
   );
@@ -222,7 +237,12 @@ export interface RadioCardProps extends Omit<BaseRadio.Root.Props<string>, 'clas
 function RadioCard({ appearance = 'outline', color, className, children, ...props }: RadioCardProps) {
   const slots = cardVariants({ appearance, color });
   return (
-    <BaseRadio.Root data-slot="radio-card" data-appearance={appearance} className={slots.card({ className })} {...props}>
+    <BaseRadio.Root
+      data-slot="radio-card"
+      data-appearance={appearance}
+      className={slots.card({ className })}
+      {...props}
+    >
       {appearance === 'dither' ? (
         <span aria-hidden="true" className={slots.ramp()}>
           {RAMP.map((band) => (
@@ -240,26 +260,45 @@ function RadioCard({ appearance = 'outline', color, className, children, ...prop
 RadioCard.displayName = 'RadioGroup.Card';
 
 /** Holds a card's title and description, beside the radio. */
-function RadioCardBody({ className, ...props }: ComponentProps<'span'>) {
-  return <span data-slot="radio-card-body" className={cardVariants().body({ className })} {...props} />;
+function RadioCardBody({ className, render, ...props }: ComponentProps<'span'> & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'radio-card-body', className: cardVariants().body({ className }) }, props),
+  });
 }
 RadioCardBody.displayName = 'RadioGroup.CardBody';
 
 /** The option's name. */
-function RadioCardTitle({ className, ...props }: ComponentProps<'span'>) {
-  return <span data-slot="radio-card-title" className={cardVariants().title({ className })} {...props} />;
+function RadioCardTitle({ className, render, ...props }: ComponentProps<'span'> & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'radio-card-title', className: cardVariants().title({ className }) }, props),
+  });
 }
 RadioCardTitle.displayName = 'RadioGroup.CardTitle';
 
 /** A line under the name saying what the option means. */
-function RadioCardDescription({ className, ...props }: ComponentProps<'span'>) {
-  return <span data-slot="radio-card-description" className={cardVariants().description({ className })} {...props} />;
+function RadioCardDescription({ className, render, ...props }: ComponentProps<'span'> & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'radio-card-description', className: cardVariants().description({ className }) },
+      props
+    ),
+  });
 }
 RadioCardDescription.displayName = 'RadioGroup.CardDescription';
 
 /** Pushed to the far end of the card: a price, a duration, a badge. */
-function RadioCardAside({ className, ...props }: ComponentProps<'span'>) {
-  return <span data-slot="radio-card-aside" className={cardVariants().aside({ className })} {...props} />;
+function RadioCardAside({ className, render, ...props }: ComponentProps<'span'> & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'radio-card-aside', className: cardVariants().aside({ className }) }, props),
+  });
 }
 RadioCardAside.displayName = 'RadioGroup.CardAside';
 

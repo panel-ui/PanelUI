@@ -78,7 +78,7 @@ Import from `panelui-web/table` instead of `@/components/panelui/table`. Tailwin
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -333,3 +333,11 @@ Every part also takes the props of the element it renders, and a `className`.
 ### Accessibility
 
 Every part is the native table element, and `Table.Head` has `scope="col"`, so a screen reader announces each cell's column. `Table.Caption` names the table.
+
+### Server Components
+
+`Table` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Table.Header` off the import, so each part is also exported by name: `TableHeader` is `Table.Header`, and so on for the others.
+
+```tsx
+import { Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell, TableCaption } from "@/components/panelui/table"
+```

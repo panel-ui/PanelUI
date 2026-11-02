@@ -496,6 +496,21 @@ export default function InspectorAdjustments() {
 | `label` | `string` | — | What the page is called: the tab's tooltip and its name for a screen reader. |
 | `className` | `string` | — |  |
 
+### Inspector.RailSeparator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Inspector.Panel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `slots.panel({ className }),` | — |  |
+
 ### Inspector.Page
 
 | Prop | Type | Default | Description |
@@ -510,6 +525,20 @@ export default function InspectorAdjustments() {
 | `defaultOpen` | `boolean` | `true` | Whether a collapsible section starts open. Default true. |
 | `open` | `boolean` | — | Whether a collapsible section is open, when the caller holds it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when a collapsible section opens or closes. |
+
+### Inspector.SectionAction
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Inspector.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

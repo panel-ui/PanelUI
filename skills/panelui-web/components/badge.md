@@ -30,9 +30,9 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `variant` | `BadgeVariant` | `default` | What it means. `default` is solid, for the one thing that should be seen first; the four states are tinted in their theme colour. Default `default`. |
-| `size` | `BadgeSize` | `md` | Its height and text size. Default `md`. |
-| `dot` | `boolean \| 'pulse'` | — | A dot before the text in the badge's colour. `'pulse'` makes it breathe, for a state that is still changing. |
+| `variant` | `BadgeVariant` | `'default'` | What it means. `default` is solid, for the one thing that should be seen first; the four states are tinted in their theme colour. Default `default`. |
+| `size` | `BadgeSize` | `'md'` | Its height and text size. Default `md`. |
+| `dot` | `boolean \| 'pulse'` | `false` | A dot before the text in the badge's colour. `'pulse'` makes it breathe, for a state that is still changing. |
 
 ## Notes
 

@@ -562,6 +562,41 @@ export default function MessageChat() {
 | --- | --- | --- | --- |
 | `from` | `MessageFrom` | `assistant` | Who wrote every turn in it. |
 
+### Message.Avatar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'message-avatar', className: messageVariants().avatar({ className }) }, props),` | — |  |
+
+### Message.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Message.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Message.Bubble
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Message.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
 ### Message.Actions
 
 | Prop | Type | Default | Description |
@@ -583,6 +618,13 @@ export default function MessageChat() {
 | `count` | `number` | — | How many versions of the answer there are. |
 | `index` | `number` | — | Which one is shown, from 0. |
 | `onIndexChange` | `(index: number) => void` | — | Called with the index of the version asked for. |
+
+### Message.Attachments
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 ### Message.Attachment
 

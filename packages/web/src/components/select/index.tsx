@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Select — a button that opens a list of options, one of which is chosen.
  *
@@ -40,6 +42,12 @@
 import { Select as BaseSelect } from '@base-ui/react/select';
 import type { ComponentProps, ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const selectVariants = tv({
   slots: {
@@ -87,7 +95,8 @@ const selectVariants = tv({
           'rounded-lg border border-input bg-background shadow-xs hover:bg-accent/40 data-popup-open:border-ring dark:bg-input/30',
       },
       ghost: {
-        trigger: 'rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground',
+        trigger:
+          'rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground',
       },
       pill: {
         trigger:
@@ -133,8 +142,20 @@ function Chevron({ variant }: { variant: SelectTriggerProps['variant'] }) {
   // A field shows both directions, since its list can open either way over it.
   // A chip shows one, and turns over while its list is open.
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      {variant === 'default' || variant === undefined ? <path d="m7 15 5 5 5-5M7 9l5-5 5 5" /> : <path d="m6 9 6 6 6-6" />}
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {variant === 'default' || variant === undefined ? (
+        <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />
+      ) : (
+        <path d="m6 9 6 6 6-6" />
+      )}
     </svg>
   );
 }
@@ -148,7 +169,9 @@ function SelectTrigger({ variant, size, icon, className, children, ...props }: S
       {icon === null ? null : (
         <BaseSelect.Icon
           data-slot="select-icon"
-          className={slots.icon({ className: variant === 'default' || variant === undefined ? 'rotate-0!' : undefined })}
+          className={slots.icon({
+            className: variant === 'default' || variant === undefined ? 'rotate-0!' : undefined,
+          })}
         >
           {icon ?? <Chevron variant={variant} />}
         </BaseSelect.Icon>
@@ -238,7 +261,15 @@ function SelectItem({ description, icon, className, children, ...props }: Select
       </span>
       <span className={slots.indicator()}>
         <BaseSelect.ItemIndicator className="flex">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </BaseSelect.ItemIndicator>
@@ -265,7 +296,11 @@ export interface SelectGroupLabelProps extends BaseSelect.GroupLabel.Props {
 /** The heading of a group. Screen readers announce the group by it. */
 function SelectGroupLabel({ className, ...props }: SelectGroupLabelProps) {
   return (
-    <BaseSelect.GroupLabel data-slot="select-group-label" className={selectVariants().groupLabel({ className })} {...props} />
+    <BaseSelect.GroupLabel
+      data-slot="select-group-label"
+      className={selectVariants().groupLabel({ className })}
+      {...props}
+    />
   );
 }
 SelectGroupLabel.displayName = 'Select.GroupLabel';
@@ -273,8 +308,15 @@ SelectGroupLabel.displayName = 'Select.GroupLabel';
 export interface SelectSeparatorProps extends ComponentProps<'div'> {}
 
 /** A rule between groups of options. */
-function SelectSeparator({ className, ...props }: SelectSeparatorProps) {
-  return <div role="separator" data-slot="select-separator" className={selectVariants().separator({ className })} {...props} />;
+function SelectSeparator({ className, render, ...props }: SelectSeparatorProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { role: 'separator', 'data-slot': 'select-separator', className: selectVariants().separator({ className }) },
+      props
+    ),
+  });
 }
 SelectSeparator.displayName = 'Select.Separator';
 

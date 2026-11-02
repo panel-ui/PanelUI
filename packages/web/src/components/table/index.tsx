@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Table — rows of records with the same columns, to be read across and compared down.
  *
@@ -43,6 +45,12 @@
  */
 import type { ComponentProps, CSSProperties } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const tableVariants = tv({
   // The parts are rendered apart from the table, so the table's own settings
@@ -108,9 +116,15 @@ function TableRoot({
   maxHeight,
   containerClassName,
   className,
+  render,
   ...props
-}: TableProps) {
+}: TableProps & RenderProp<'table'>) {
   const slots = tableVariants();
+  const element = useRender({
+    defaultTagName: 'table',
+    render,
+    props: mergeProps({ 'data-slot': 'table', className: slots.table({ className }) }, props),
+  });
   return (
     <div
       data-slot="table-container"
@@ -121,53 +135,69 @@ function TableRoot({
       className={slots.container({ className: containerClassName })}
       style={maxHeight != null ? { maxHeight } : undefined}
     >
-      <table data-slot="table" className={slots.table({ className })} {...props} />
+      {element}
     </div>
   );
 }
 TableRoot.displayName = 'Table';
 
 /** The header row group. Pinned while the body scrolls, when the table has a `maxHeight`. */
-function TableHeader({ className, ...props }: ComponentProps<'thead'>) {
+function TableHeader({ className, render, ...props }: ComponentProps<'thead'> & RenderProp<'thead'>) {
   const slots = tableVariants();
-  return (
-    <thead
-      data-slot="table-header"
-      className={slots.header({
-        className: [
-          'in-data-[sticky]:sticky in-data-[sticky]:top-0 in-data-[sticky]:z-10 in-data-[sticky]:bg-background',
-          className,
-        ],
-      })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'thead',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'table-header',
+        className: slots.header({
+          className: [
+            'in-data-[sticky]:sticky in-data-[sticky]:top-0 in-data-[sticky]:z-10 in-data-[sticky]:bg-background',
+            className,
+          ],
+        }),
+      },
+      props
+    ),
+  });
 }
 TableHeader.displayName = 'Table.Header';
 
 /** The rows of data. */
-function TableBody({ className, ...props }: ComponentProps<'tbody'>) {
-  return (
-    <tbody
-      data-slot="table-body"
-      className={tableVariants().body({
-        className: ['in-data-[striped]:[&>tr:nth-child(even)]:bg-muted/40', className],
-      })}
-      {...props}
-    />
-  );
+function TableBody({ className, render, ...props }: ComponentProps<'tbody'> & RenderProp<'tbody'>) {
+  return useRender({
+    defaultTagName: 'tbody',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'table-body',
+        className: tableVariants().body({
+          className: ['in-data-[striped]:[&>tr:nth-child(even)]:bg-muted/40', className],
+        }),
+      },
+      props
+    ),
+  });
 }
 TableBody.displayName = 'Table.Body';
 
 /** Totals under the body. */
-function TableFooter({ className, ...props }: ComponentProps<'tfoot'>) {
-  return <tfoot data-slot="table-footer" className={tableVariants().footer({ className })} {...props} />;
+function TableFooter({ className, render, ...props }: ComponentProps<'tfoot'> & RenderProp<'tfoot'>) {
+  return useRender({
+    defaultTagName: 'tfoot',
+    render,
+    props: mergeProps({ 'data-slot': 'table-footer', className: tableVariants().footer({ className }) }, props),
+  });
 }
 TableFooter.displayName = 'Table.Footer';
 
 /** One row. `aria-selected` shades it as chosen. */
-function TableRow({ className, ...props }: ComponentProps<'tr'>) {
-  return <tr data-slot="table-row" className={tableVariants().row({ className })} {...props} />;
+function TableRow({ className, render, ...props }: ComponentProps<'tr'> & RenderProp<'tr'>) {
+  return useRender({
+    defaultTagName: 'tr',
+    render,
+    props: mergeProps({ 'data-slot': 'table-row', className: tableVariants().row({ className }) }, props),
+  });
 }
 TableRow.displayName = 'Table.Row';
 
@@ -177,15 +207,19 @@ export interface TableHeadProps extends Omit<ComponentProps<'th'>, 'align'> {
 }
 
 /** A column's heading. */
-function TableHead({ align = 'start', className, ...props }: TableHeadProps) {
-  return (
-    <th
-      data-slot="table-head"
-      scope="col"
-      className={tableVariants({ align }).head({ className: ['in-data-[density=compact]:h-8', className] })}
-      {...props}
-    />
-  );
+function TableHead({ align = 'start', className, render, ...props }: TableHeadProps & RenderProp<'th'>) {
+  return useRender({
+    defaultTagName: 'th',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'table-head',
+        scope: 'col',
+        className: tableVariants({ align }).head({ className: ['in-data-[density=compact]:h-8', className] }),
+      },
+      props
+    ),
+  });
 }
 TableHead.displayName = 'Table.Head';
 
@@ -195,22 +229,30 @@ export interface TableCellProps extends Omit<ComponentProps<'td'>, 'align'> {
 }
 
 /** One cell. */
-function TableCell({ align = 'start', className, ...props }: TableCellProps) {
-  return (
-    <td
-      data-slot="table-cell"
-      className={tableVariants({ align }).cell({
-        className: ['py-3 in-data-[density=compact]:py-1.5', className],
-      })}
-      {...props}
-    />
-  );
+function TableCell({ align = 'start', className, render, ...props }: TableCellProps & RenderProp<'td'>) {
+  return useRender({
+    defaultTagName: 'td',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'table-cell',
+        className: tableVariants({ align }).cell({
+          className: ['py-3 in-data-[density=compact]:py-1.5', className],
+        }),
+      },
+      props
+    ),
+  });
 }
 TableCell.displayName = 'Table.Cell';
 
 /** What the table is, under it. Read first by a screen reader. */
-function TableCaption({ className, ...props }: ComponentProps<'caption'>) {
-  return <caption data-slot="table-caption" className={tableVariants().caption({ className })} {...props} />;
+function TableCaption({ className, render, ...props }: ComponentProps<'caption'> & RenderProp<'caption'>) {
+  return useRender({
+    defaultTagName: 'caption',
+    render,
+    props: mergeProps({ 'data-slot': 'table-caption', className: tableVariants().caption({ className }) }, props),
+  });
 }
 TableCaption.displayName = 'Table.Caption';
 

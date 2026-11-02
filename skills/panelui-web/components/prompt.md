@@ -151,11 +151,33 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `onSelect` | `() => void` | — | Called when it is pressed. Passing this makes the item a button. |
 
+#### `PromptHintProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'p',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `promptVariants().hint({ className }),` | **required** | — |
+
 #### `PromptFieldProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `layout` | `'stacked' \| 'inline'` | — | `stacked` puts the text above a footer. `inline` puts every part in one row, the text between them, for a one-line composer; the row wraps as the text grows. Default `stacked`. |
+| `layout` | `'stacked' \| 'inline'` | `'stacked'` | `stacked` puts the text above a footer. `inline` puts every part in one row, the text between them, for a one-line composer; the row wraps as the text grows. Default `stacked`. |
+
+#### `PromptFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'prompt-footer', className: promptVariants().footer({ className }) }, props),` | **required** | — |
+
+#### `PromptToolsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'prompt-tools', className: promptVariants().tools({ className }) }, props),` | **required** | — |
 
 #### `PromptToolProps`
 
@@ -188,9 +210,9 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `label` | `string` | `'Model'` | What a screen reader and the tooltip call the button. Default `Add`. |
+| `label` | `string` | `'Add'` | What a screen reader and the tooltip call the button. Default `Add`. |
 | `icon` | `ReactNode` | — | Replaces the plus on the button. |
-| `width` | `'auto' \| 'field'` | — | `field` opens the menu as wide as the field, lined up with it, for items with descriptions. Default `auto`. |
+| `width` | `'auto' \| 'field'` | `'auto'` | `field` opens the menu as wide as the field, lined up with it, for items with descriptions. Default `auto`. |
 
 #### `PromptAttachItemProps`
 
@@ -231,10 +253,10 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `items` | `readonly PromptCommandItem[]` | **required** | The commands. |
-| `trigger` | `string` | — | The character that opens the list when the field starts with it. Default `/`. |
+| `trigger` | `string` | `'/'` | The character that opens the list when the field starts with it. Default `/`. |
 | `onSelect` | `(item: PromptCommandItem) => void` | — | Called with the command chosen. With it, the field is cleared and the command is yours to show; without it, the command is written into the field. |
-| `label` | `ReactNode` | `'Model'` | The heading over the list. Default `Commands`. |
-| `maxHeight` | `string` | `'10rem'` | How tall the list grows before it scrolls, as a CSS length. Default `12rem`. |
+| `label` | `ReactNode` | `'Commands'` | The heading over the list. Default `Commands`. |
+| `maxHeight` | `string` | `'12rem'` | How tall the list grows before it scrolls, as a CSS length. Default `12rem`. |
 
 #### `PromptRecorderProps`
 

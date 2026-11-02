@@ -89,7 +89,7 @@ Import from `panelui-web/label` instead of `@/components/panelui/label`. Tailwin
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
 
 </Step>
 
@@ -303,6 +303,28 @@ export default function LabelControls() {
 | `invalid` | `boolean` | `false` | Turns the label to the destructive colour. Needed when the label is tied to its control by `htmlFor`; a label wrapped round its control reads it. |
 | `disabled` | `boolean` | `false` | Fades the label. As with `invalid`, a wrapped control is read on its own. |
 
+### Label.Text
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
+| `className` | `slots.text({ className }),` | — |  |
+
+### Label.Hint
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'label-hint', className: labelVariants().hint({ className }) }, props),` | — |  |
+
+### Label.Action
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'label-action', className: labelVariants().action({ className }) }, props),` | — |  |
+
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
@@ -318,3 +340,11 @@ Every part also takes the props of the element it renders, and a `className`.
 ### It renders on the server
 
 `Label` has no client JavaScript. Its state reaches its parts through data attributes and CSS.
+
+### Server Components
+
+`Label` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Label.Text` off the import, so each part is also exported by name: `LabelText` is `Label.Text`, and so on for the others.
+
+```tsx
+import { Label, LabelText, LabelHint, LabelAction } from "@/components/panelui/label"
+```

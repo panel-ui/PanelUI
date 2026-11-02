@@ -31,6 +31,12 @@ import { Radio } from '@base-ui/react/radio';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import { createContext, useContext, useId, type ComponentProps, type CSSProperties, type ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type ChoiceCardsColor = 'primary' | 'info' | 'success' | 'warning' | 'destructive';
 
@@ -84,8 +90,7 @@ interface ItemContextValue {
 
 const ItemContext = createContext<ItemContextValue | null>(null);
 
-export interface ChoiceCardsProps
-  extends Omit<RadioGroup.Props<string>, 'className' | 'style' | 'children'> {
+export interface ChoiceCardsProps extends Omit<RadioGroup.Props<string>, 'className' | 'style' | 'children'> {
   /** How many cards stand in a row. Default: one per item, up to four. */
   columns?: number;
   /** The shape of every card's picture, as a CSS aspect ratio. Default `4 / 3`. */
@@ -101,15 +106,7 @@ export interface ChoiceCardsProps
  * The cards, of which one is chosen. `value` and `onValueChange`, or
  * `defaultValue`, hold which; `name` submits it with a form.
  */
-function ChoiceCardsRoot({
-  columns,
-  aspect = '4 / 3',
-  color,
-  className,
-  style,
-  children,
-  ...props
-}: ChoiceCardsProps) {
+function ChoiceCardsRoot({ columns, aspect = '4 / 3', color, className, style, children, ...props }: ChoiceCardsProps) {
   const slots = choiceCardsVariants({ color });
   const count = Array.isArray(children) ? children.filter(Boolean).length : 1;
   const across = columns ?? Math.min(Math.max(count, 1), 4);
@@ -153,7 +150,15 @@ function ChoiceCardsItem({ className, children, ...props }: ChoiceCardsItemProps
         {...props}
       >
         <span aria-hidden data-slot="choice-cards-check" className={slots.check()}>
-          <svg viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 12 12"
+            className="size-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M2.75 6.25 5 8.5l4.25-5" />
           </svg>
         </span>
@@ -167,9 +172,16 @@ ChoiceCardsItem.displayName = 'ChoiceCards.Item';
 export interface ChoiceCardsMediaProps extends ComponentProps<'span'> {}
 
 /** The picture of the option: a drawing, an icon or an image, centred in a rounded frame. */
-function ChoiceCardsMedia({ className, ...props }: ChoiceCardsMediaProps) {
+function ChoiceCardsMedia({ className, render, ...props }: ChoiceCardsMediaProps & RenderProp<'span'>) {
   const slots = choiceCardsVariants();
-  return <span aria-hidden data-slot="choice-cards-media" className={slots.media({ className })} {...props} />;
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'aria-hidden': true, 'data-slot': 'choice-cards-media', className: slots.media({ className }) },
+      props
+    ),
+  });
 }
 ChoiceCardsMedia.displayName = 'ChoiceCards.Media';
 
@@ -183,12 +195,17 @@ function useItem(part: string) {
 export interface ChoiceCardsLabelProps extends ComponentProps<'span'> {}
 
 /** The option's name, under its picture. It is what a screen reader calls the card. */
-function ChoiceCardsLabel({ className, ...props }: ChoiceCardsLabelProps) {
+function ChoiceCardsLabel({ className, render, ...props }: ChoiceCardsLabelProps & RenderProp<'span'>) {
   const { labelId } = useItem('ChoiceCards.Label');
   const slots = choiceCardsVariants();
+  const element = useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ id: labelId, 'data-slot': 'choice-cards-label', className: slots.label({ className }) }, props),
+  });
   return (
     <span data-slot="choice-cards-text" className={slots.text()}>
-      <span id={labelId} data-slot="choice-cards-label" className={slots.label({ className })} {...props} />
+      {element}
     </span>
   );
 }
@@ -197,17 +214,21 @@ ChoiceCardsLabel.displayName = 'ChoiceCards.Label';
 export interface ChoiceCardsDescriptionProps extends ComponentProps<'span'> {}
 
 /** A line under the label: what the option costs or does. */
-function ChoiceCardsDescription({ className, ...props }: ChoiceCardsDescriptionProps) {
+function ChoiceCardsDescription({ className, render, ...props }: ChoiceCardsDescriptionProps & RenderProp<'span'>) {
   const { descriptionId } = useItem('ChoiceCards.Description');
   const slots = choiceCardsVariants();
-  return (
-    <span
-      id={descriptionId}
-      data-slot="choice-cards-description"
-      className={slots.description({ className: ['-mt-1.5 px-1.5 pb-1', className] })}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      {
+        id: descriptionId,
+        'data-slot': 'choice-cards-description',
+        className: slots.description({ className: ['-mt-1.5 px-1.5 pb-1', className] }),
+      },
+      props
+    ),
+  });
 }
 ChoiceCardsDescription.displayName = 'ChoiceCards.Description';
 

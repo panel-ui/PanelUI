@@ -95,6 +95,41 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `from` | `MessageFrom` | `assistant` | Who wrote every turn in it. |
 
+#### `MessageAvatarProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'message-avatar', className: messageVariants().avatar({ className }) }, props),` | **required** | — |
+
+#### `MessageContentProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `MessageHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `MessageBubbleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `MessageFooterProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
 #### `MessageActionsProps`
 
 | Prop | Type | Default | What it does |
@@ -116,6 +151,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `count` | `number` | **required** | How many versions of the answer there are. |
 | `index` | `number` | **required** | Which one is shown, from 0. |
 | `onIndexChange` | `(index: number) => void` | **required** | Called with the index of the version asked for. |
+
+#### `MessageAttachmentsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
 
 #### `MessageAttachmentProps`
 

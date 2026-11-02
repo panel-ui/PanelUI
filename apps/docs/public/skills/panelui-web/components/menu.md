@@ -124,7 +124,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `side` | `BaseMenu.Positioner.Props['side']` | `'bottom'` | Default `inline-end`: to the right in a left-to-right page. |
+| `side` | `BaseMenu.Positioner.Props['side']` | `'inline-end'` | Default `inline-end`: to the right in a left-to-right page. |
 
 #### `MenuGroupProps`
 
@@ -137,6 +137,34 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
+
+#### `MenuSeparatorProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `MenuDescriptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'menu-description', className: menuVariants().description({ className }) }, props),` | **required** | — |
+
+#### `MenuShortcutProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'kbd',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'menu-shortcut', className: menuVariants().shortcut({ className }) }, props),` | **required** | — |
+
+#### `MenuBadgeProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'menu-badge', className: menuVariants().badge({ className }) }, props),` | **required** | — |
 
 ## In a Server Component
 

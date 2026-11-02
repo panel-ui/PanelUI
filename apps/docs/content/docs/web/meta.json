@@ -1,6 +1,6 @@
 {
   "title": "Web",
-  "description": "Components for React, built on shadcn",
+  "description": "Components for React, built on Base UI",
   "root": true,
   "pages": [
     "---Get started---",
@@ -10,6 +10,7 @@
     "mcp",
     "skills",
     "style",
+    "composition",
     "theme",
     "---Components---",
     "...components"

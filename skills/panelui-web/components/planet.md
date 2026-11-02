@@ -89,6 +89,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `step` | `number` | — | Degrees of longitude one press turns the globe. |
 
+#### `PlanetListProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'ul',` | **required** | — |
+| `props` | `mergeProps({ 'data-slot': 'planet-list', className: planetVariants().list({ className }) }, props),` | **required** | — |
+
 #### `PlanetListItemProps`
 
 | Prop | Type | Default | What it does |

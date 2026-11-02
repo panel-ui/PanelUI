@@ -569,14 +569,21 @@ export default function FeedbackDraft() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `inline` | `boolean` | `false` | Draw it in the page instead of over it: no backdrop, no trigger, always there. For a feedback box that is part of the page, such as the end of an article. `open` is ignored, and Cancel and the close button only report through `onOpenChange`. |
-| `blur` | `boolean` | `false` | Frost the page behind the dialog instead of only dimming it. |
+| `inline` | `boolean` | — | Draw it in the page instead of over it: no backdrop, no trigger, always there. For a feedback box that is part of the page, such as the end of an article. `open` is ignored, and Cancel and the close button only report through `onOpenChange`. |
+| `blur` | `boolean` | — | Frost the page behind the dialog instead of only dimming it. |
+
+### Feedback.Panel
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: slots.panel({ className }) }, props),` | — |  |
 
 ### Feedback.Close
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | — | How the button announces itself to a screen reader. |
+| `label` | `string` | `'Close'` | How the button announces itself to a screen reader. |
 
 ### Feedback.Field
 
@@ -602,6 +609,13 @@ export default function FeedbackDraft() {
 | `startLabel` | `ReactNode` | — | The word under the lowest score. |
 | `endLabel` | `ReactNode` | — | The word under the highest score. |
 | `minHeight` | `number` | — | The least height it takes, in pixels. Match the field's `minHeight` on the step that follows, so the dialog keeps its size between the two. |
+
+### Feedback.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: slots.footer({ className }) }, props),` | — |  |
 
 ### Feedback.Submit
 

@@ -412,6 +412,27 @@ export default function LaneBoardRules() {
 | `label` | `string` | `'Board'` | What a screen reader calls the board. |
 | `height` | `number \| string` | `'28rem'` | How tall the board is: a number of pixels, or any CSS length. Lanes fill it, and one with more cards than fit scrolls. `'auto'` lets the board grow with its longest lane. |
 
+### LaneBoard.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: laneBoardVariants().title({ className }) }, props),` | — |  |
+
+### LaneBoard.Code
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: laneBoardVariants().code({ className }) }, props),` | — |  |
+
+### LaneBoard.Row
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps({ className: laneBoardVariants().row({ className }) }, props),` | — |  |
+
 ### LaneBoard.Steps
 
 | Prop | Type | Default | Description |
@@ -426,6 +447,20 @@ export default function LaneBoardRules() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `color` | `LaneBoardColor` | `primary` | Which of the theme's roles the tag is drawn in. |
+
+### LaneBoard.Meta
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ className: laneBoardVariants().meta({ className }) }, props),` | — |  |
+
+### LaneBoard.Avatar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps(` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

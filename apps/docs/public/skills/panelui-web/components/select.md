@@ -108,6 +108,17 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 
+#### `SelectSeparatorProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+## In a Server Component
+
+`Select` is a client component. A Server Component cannot read `Select.Trigger` off the import, so import each part by name: `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem`, `SelectGroup`, `SelectGroupLabel`, `SelectSeparator`.
+
 ## Notes
 
 #### Keyboard

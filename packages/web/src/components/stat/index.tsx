@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Stat — one figure written large, with what it is and what it means.
  *
@@ -39,6 +41,12 @@
  */
 import type { ComponentProps } from 'react';
 import { tv } from 'tailwind-variants';
+import { mergeProps } from '@base-ui/react/merge-props';
+import { useRender } from '@base-ui/react/use-render';
+import type { ElementType as RenderElementType } from 'react';
+
+/** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
+type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 const statVariants = tv({
   slots: {
@@ -70,16 +78,24 @@ const statVariants = tv({
 export interface StatProps extends ComponentProps<'div'> {}
 
 /** A row: the label and value on the leading side, a badge on the trailing one. */
-function StatRoot({ className, ...props }: StatProps) {
-  return <div data-slot="stat" className={statVariants().root({ className })} {...props} />;
+function StatRoot({ className, render, ...props }: StatProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'stat', className: statVariants().root({ className }) }, props),
+  });
 }
 StatRoot.displayName = 'Stat';
 
 export interface StatContentProps extends ComponentProps<'div'> {}
 
 /** The label and the value, stacked. Used on its own when there is no badge. */
-function StatContent({ className, ...props }: StatContentProps) {
-  return <div data-slot="stat-content" className={statVariants().content({ className })} {...props} />;
+function StatContent({ className, render, ...props }: StatContentProps & RenderProp<'div'>) {
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps({ 'data-slot': 'stat-content', className: statVariants().content({ className }) }, props),
+  });
 }
 StatContent.displayName = 'Stat.Content';
 
@@ -93,18 +109,24 @@ export interface StatLabelProps extends ComponentProps<'p'> {
 }
 
 /** What is measured, in a quiet line over the value. */
-function StatLabel({ weight = 'normal', className, ...props }: StatLabelProps) {
-  return <p data-slot="stat-label" className={statVariants({ weight }).label({ className })} {...props} />;
+function StatLabel({ weight = 'normal', className, render, ...props }: StatLabelProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps({ 'data-slot': 'stat-label', className: statVariants({ weight }).label({ className }) }, props),
+  });
 }
 StatLabel.displayName = 'Stat.Label';
 
 export interface StatDescriptionProps extends ComponentProps<'p'> {}
 
 /** What the reading means, in words: "Answering slowly". Written under the label. */
-function StatDescription({ className, ...props }: StatDescriptionProps) {
-  return (
-    <p data-slot="stat-description" className={statVariants().description({ className })} {...props} />
-  );
+function StatDescription({ className, render, ...props }: StatDescriptionProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps({ 'data-slot': 'stat-description', className: statVariants().description({ className }) }, props),
+  });
 }
 StatDescription.displayName = 'Stat.Description';
 
@@ -114,31 +136,39 @@ export interface StatValueProps extends ComponentProps<'p'> {
 }
 
 /** The figure. Put a `Stat.Unit` inside it, after the number. */
-function StatValue({ size = 'lg', className, ...props }: StatValueProps) {
-  return (
-    <p
-      data-slot="stat-value"
-      data-size={size}
-      className={statVariants({ size }).value({ className })}
-      {...props}
-    />
-  );
+function StatValue({ size = 'lg', className, render, ...props }: StatValueProps & RenderProp<'p'>) {
+  return useRender({
+    defaultTagName: 'p',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'stat-value', 'data-size': size, className: statVariants({ size }).value({ className }) },
+      props
+    ),
+  });
 }
 StatValue.displayName = 'Stat.Value';
 
 export interface StatUnitProps extends ComponentProps<'span'> {}
 
 /** The unit after the number, smaller and quieter, sized from the value it is in. */
-function StatUnit({ className, ...props }: StatUnitProps) {
-  return <span data-slot="stat-unit" className={statVariants().unit({ className })} {...props} />;
+function StatUnit({ className, render, ...props }: StatUnitProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'stat-unit', className: statVariants().unit({ className }) }, props),
+  });
 }
 StatUnit.displayName = 'Stat.Unit';
 
 export interface StatBadgeProps extends ComponentProps<'span'> {}
 
 /** How the reading stands, in a pill on the row's trailing side. */
-function StatBadge({ className, ...props }: StatBadgeProps) {
-  return <span data-slot="stat-badge" className={statVariants().badge({ className })} {...props} />;
+function StatBadge({ className, render, ...props }: StatBadgeProps & RenderProp<'span'>) {
+  return useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps({ 'data-slot': 'stat-badge', className: statVariants().badge({ className }) }, props),
+  });
 }
 StatBadge.displayName = 'Stat.Badge';
 

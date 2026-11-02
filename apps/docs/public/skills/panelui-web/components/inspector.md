@@ -100,6 +100,21 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `string` | **required** | What the page is called: the tab's tooltip and its name for a screen reader. |
 | `className` | `string` | — | — |
 
+#### `InspectorRailSeparatorProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `InspectorPanelProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+| `className` | `slots.panel({ className }),` | **required** | — |
+
 #### `InspectorPageProps`
 
 | Prop | Type | Default | What it does |
@@ -114,6 +129,20 @@ Every part also takes the props of the element it renders, and a `className`.
 | `defaultOpen` | `boolean` | `true` | Whether a collapsible section starts open. Default true. |
 | `open` | `boolean` | — | Whether a collapsible section is open, when the caller holds it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when a collapsible section opens or closes. |
+
+#### `InspectorSectionActionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
+
+#### `InspectorSeparatorProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | **required** | — |
+| `props` | `mergeProps(` | **required** | — |
 
 ## In a Server Component
 

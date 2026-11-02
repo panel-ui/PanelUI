@@ -542,7 +542,7 @@ export default function MenuDetails() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `side` | `BaseMenu.Positioner.Props['side']` | `'bottom'` | Default `inline-end`: to the right in a left-to-right page. |
+| `side` | `BaseMenu.Positioner.Props['side']` | `'inline-end'` | Default `inline-end`: to the right in a left-to-right page. |
 
 ### Menu.Group
 
@@ -555,6 +555,34 @@ export default function MenuDetails() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
+
+### Menu.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Menu.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'menu-description', className: menuVariants().description({ className }) }, props),` | — |  |
+
+### Menu.Shortcut
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'kbd',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'menu-shortcut', className: menuVariants().shortcut({ className }) }, props),` | — |  |
+
+### Menu.Badge
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'span',` | — |  |
+| `props` | `mergeProps({ 'data-slot': 'menu-badge', className: menuVariants().badge({ className }) }, props),` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
 

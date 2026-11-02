@@ -65,6 +65,7 @@ import {
   type AnimatedRef,
   type SharedValue,
 } from 'react-native-reanimated';
+import type { ViewRef } from '../primitives/refs';
 
 /** How long a lifted element takes to settle back after it stops being active. */
 const SETTLE_DURATION = 200;
@@ -108,7 +109,7 @@ export interface UseKeyboardAvoidanceOptions {
 
 export interface UseKeyboardAvoidanceResult {
   /** Attach to the element that should stay visible. */
-  ref: AnimatedRef<View>;
+  ref: AnimatedRef<ViewRef>;
   /** Attach to the same element, so a re-layout at rest cannot leave it offset. */
   onLayout: (event: LayoutChangeEvent) => void;
   /** Apply to the same element. */
@@ -193,7 +194,7 @@ export function useKeyboardAvoidance({
   offset = 16,
   bottomInset = 0,
 }: UseKeyboardAvoidanceOptions = {}): UseKeyboardAvoidanceResult {
-  const ref = useAnimatedRef<View>();
+  const ref = useAnimatedRef<ViewRef>();
   const rawHeight = useKeyboardHeight();
   const { height: screenHeight } = useWindowDimensions();
 

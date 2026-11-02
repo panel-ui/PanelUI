@@ -79,6 +79,7 @@ import {
   type CalendarSystem,
   type DateLocale,
 } from '../../utils/date';
+import type { ScrollViewRef } from '../../primitives/refs';
 
 export type CalendarMode = 'single' | 'multiple' | 'range';
 export type CalendarCaptionLayout = 'label' | 'dropdown';
@@ -769,7 +770,7 @@ function CaptionDropdown({
   onSelect: (index: number) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const list = useRef<ScrollView>(null);
+  const list = useRef<ScrollViewRef>(null);
   /*
    * The check is given a colour rather than left to its own fallback, which is
    * white — right inside a filled control, invisible on this panel.

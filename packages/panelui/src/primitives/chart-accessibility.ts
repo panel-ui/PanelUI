@@ -1,4 +1,5 @@
 import { createElement } from 'react';
+import type { ViewProps } from 'react-native';
 
 /**
  * The largest text scale a chart's axis labels follow: iOS's biggest size before
@@ -8,11 +9,14 @@ import { createElement } from 'react';
  */
 export const CHART_AXIS_MAX_FONT_SCALE = 1.353;
 
-export interface ChartAccessibilityProps<Datum> {
-  /** Spoken summary. Defaults to the chart family and number of data entries. */
-  accessibilityLabel?: string;
-  /** Additional guidance spoken after the chart summary. */
-  accessibilityHint?: string;
+/*
+ * `accessibilityLabel` and `accessibilityHint` come from ViewProps, which every
+ * chart also extends, rather than being declared again here: React Native 0.88
+ * declares them read-only, and two declarations that differ by that fail to merge.
+ * A chart's label defaults to its family and number of data entries, and the
+ * hint is spoken after that summary.
+ */
+export interface ChartAccessibilityProps<Datum> extends Pick<ViewProps, 'accessibilityLabel' | 'accessibilityHint'> {
   /** Overrides the spoken label for one data entry. */
   accessibilityLabelForDatum?: (datum: Datum, index: number) => string;
   /** Makes each data entry actionable without making the SVG geometry focusable. */

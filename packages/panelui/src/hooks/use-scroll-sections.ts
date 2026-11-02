@@ -37,6 +37,7 @@ import type {
   ScrollView,
 } from 'react-native';
 import { useSharedValue, type SharedValue } from 'react-native-reanimated';
+import type { ScrollViewRef } from '../primitives/refs';
 
 export interface UseScrollSectionsOptions {
   /** Section ids, in the order they appear down the page. */
@@ -71,7 +72,7 @@ export interface ScrollSectionsPosition {
 
 export interface UseScrollSectionsResult {
   /** Attach to the ScrollView, so `scrollTo` has something to drive. */
-  ref: React.RefObject<ScrollView | null>;
+  ref: React.RefObject<ScrollViewRef | null>;
   /** The section being read. */
   active: string | undefined;
   /**
@@ -106,7 +107,7 @@ export function useScrollSections({
   endThreshold = 24,
   scrollPadding = 0,
 }: UseScrollSectionsOptions): UseScrollSectionsResult {
-  const ref = useRef<ScrollView | null>(null);
+  const ref = useRef<ScrollViewRef | null>(null);
   const offsets = useRef<Record<string, number>>({});
   const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [active, setActive] = useState<string | undefined>(ids[0]);

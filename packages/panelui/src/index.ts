@@ -36,7 +36,7 @@ export { Text, type TextProps } from './primitives/text';
 // What a forwarded ref points at. Name these instead of `View`, `Text` or
 // `TextInput` as a ref's type: they compile on every React Native version the
 // library supports, where the component names stopped being types in 0.88.
-export type { ViewRef, TextRef, TextInputRef } from './primitives/refs';
+export type { ViewRef, TextRef, TextInputRef, ScrollViewRef } from './primitives/refs';
 export { Collapse, type CollapseProps } from './primitives/collapse';
 export {
   KeyboardAvoider,

@@ -98,7 +98,7 @@ export default function ComponentListScreen() {
         // Only over the whole catalogue. Above a filtered list it is a door to
         // ten charts sitting on top of the two results somebody searched for,
         // and above an empty one it is a door over the words "nothing matches".
-        ListHeaderComponent={query.trim() ? null : <AllChartsRow tint={tint} />}
+        ListHeaderComponent={query.trim() ? undefined : <AllChartsRow tint={tint} />}
         ItemSeparatorComponent={() => <View className="mx-5 h-px bg-border" />}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

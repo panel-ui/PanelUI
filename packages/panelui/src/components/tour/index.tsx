@@ -79,6 +79,7 @@ import {
   nextTourCardMeasurement,
   type TourCardMeasurement,
 } from './tour-card-measurement';
+import type { ViewRef } from '../../primitives/refs';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -137,7 +138,7 @@ interface TourStepEntry {
   padding?: number;
   radius?: number;
   placement?: TourPlacement;
-  target: RefObject<View | null>;
+  target: RefObject<ViewRef | null>;
 }
 
 interface TourContextValue {
@@ -905,7 +906,7 @@ function TourStep({
   ...props
 }: TourStepProps) {
   const { register, unregister } = useTour('Tour.Step');
-  const target = useRef<View>(null);
+  const target = useRef<ViewRef>(null);
 
   const entry = useMemo<TourStepEntry>(
     () => ({

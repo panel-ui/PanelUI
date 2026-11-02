@@ -98,6 +98,7 @@ import {
   type Size,
   type SourceCrop,
 } from './avatar-cropper-math';
+import type { ViewRef } from '../../primitives/refs';
 
 export type { CropShape as AvatarCropperShape, SourceCrop as AvatarCrop };
 
@@ -633,7 +634,7 @@ function ExportStage({
   left: number;
   top: number;
 }) {
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewRef>(null);
   const started = useRef(false);
   const side = frame.mask;
   const { width, height } = frame.image;

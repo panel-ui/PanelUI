@@ -45,7 +45,6 @@ import {
   TextInput,
   View,
   type NativeSyntheticEvent,
-  type TextInputKeyPressEventData,
   type TextInputProps,
 } from 'react-native';
 import Animated, {
@@ -65,7 +64,7 @@ import { selectionTick } from '../../utils/haptics';
 import { Chip, type ChipSize, type ChipVariant } from '../chip';
 import { Label } from '../label';
 import { reconcileMarkedTag, type MarkedTag } from './tag-input-state';
-import type { TextInputRef } from '../../primitives/refs';
+import type { KeyPressEvent, TextInputRef } from '../../primitives/refs';
 
 /** Matches Input and Combobox, so the three read as the same control focused. */
 const FOCUS_DURATION = 150;
@@ -285,8 +284,8 @@ export const TagInput = forwardRef<TextInputRef, TagInputProps>(
     },
     ref
   ) => {
-    const inputRef = useRef<TextInput>(null);
-    useImperativeHandle(ref, () => inputRef.current as TextInput);
+    const inputRef = useRef<TextInputRef>(null);
+    useImperativeHandle(ref, () => inputRef.current as TextInputRef);
 
     const [ownTags, setOwnTags] = useState<string[]>(defaultValue ?? []);
     const tags = value ?? ownTags;
@@ -410,7 +409,7 @@ export const TagInput = forwardRef<TextInputRef, TagInputProps>(
     );
 
     const handleKeyPress = useCallback(
-      (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      (event: KeyPressEvent) => {
         onKeyPress?.(event);
         if (event.nativeEvent.key !== 'Backspace') {
           setMarked(null);

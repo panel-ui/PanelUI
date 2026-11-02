@@ -74,7 +74,6 @@ import Animated, {
   measure,
   runOnJS,
   scrollTo,
-  useAnimatedRef,
   useAnimatedStyle,
   useDerivedValue,
   useFrameCallback,
@@ -90,6 +89,7 @@ import { GripVerticalIcon, IconColorProvider } from '../../icons';
 import { cn } from '../../utils/cn';
 import { impactKnock, selectionTick } from '../../utils/haptics';
 import { moveWithPinned, stepWithPinned } from './reorder';
+import { webDeps } from '../../primitives/web-deps';
 
 /**
  * Rows getting out of the way of the one being carried. Quick, because they
@@ -595,19 +595,17 @@ function SortableRoot({
       at += (map[id] ?? 0) + gap;
     }
     return result;
-  }, [gap]);
+  }, webDeps([gap]));
 
   /* ---------------------------------------------------------------------- */
   /* Autoscroll                                                             */
   /* ---------------------------------------------------------------------- */
 
   /*
-   * A ref of its own so `useScrollViewOffset` always has one to hold. It is
-   * never attached to anything, and the hook is happy with a ref that resolves
-   * to nothing — which is exactly the case where there is no scrolling to do.
+   * With no scroller there is nothing to follow, so the hook is given no ref
+   * rather than one attached to nothing, which Reanimated warns about.
    */
-  const fallbackRef = useAnimatedRef<Animated.ScrollView>();
-  const scrollOffset = useScrollViewOffset(scrollRef ?? fallbackRef);
+  const scrollOffset = useScrollViewOffset(scrollRef ?? null);
 
   /**
    * Where the scroller stood when the drag began. The row follows the finger,

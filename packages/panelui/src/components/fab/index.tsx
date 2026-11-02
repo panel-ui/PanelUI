@@ -149,6 +149,7 @@ import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
 import type { ViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
 
 /** Which corner the button sits in. */
 export type FabPlacement = 'bottom-right' | 'bottom-center' | 'bottom-left';
@@ -763,7 +764,7 @@ const FabGroup = forwardRef<ViewRef, FabGroupProps>(
         withSpring(open ? 1 : 0, OPEN_SPRING, (finished) => {
           if (finished && !open) runOnJS(settle)();
         }),
-      [open, settle]
+      webDeps([open, settle])
     );
     const present = open || closing;
 

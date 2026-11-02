@@ -88,7 +88,7 @@ interface GlassViewProps extends ViewProps {
 
 interface GlassContainerViewProps extends ViewProps {
   spacing?: number;
-  ref?: React.Ref<View>;
+  ref?: React.Ref<ViewRef>;
 }
 
 interface GlassModule {

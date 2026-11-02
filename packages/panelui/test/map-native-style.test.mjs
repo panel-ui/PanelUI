@@ -141,3 +141,21 @@ test('every property the spec lists as unsupported on native is handled', async 
     );
   }
 });
+
+test('a layer opacity folds into the feature opacity when both are numbers', () => {
+  const style = adaptStyleForNative({
+    version: 8,
+    sources: {},
+    layers: [
+      { id: 'water', type: 'fill', paint: { 'fill-layer-opacity': 0.5, 'fill-opacity': 0.8 } },
+      { id: 'roads', type: 'line', paint: { 'line-layer-opacity': ['get', 'o'], 'line-opacity': 0.4 } },
+      { id: 'labels', type: 'symbol', layout: { 'symbol-height-offset': 12, 'text-field': 'x' } },
+    ],
+  });
+  assert.equal(style.layers[0].paint['fill-opacity'], 0.4);
+  assert.ok(!('fill-layer-opacity' in style.layers[0].paint));
+  // An expression has no safe translation: dropped, and the feature opacity is left alone.
+  assert.equal(style.layers[1].paint['line-opacity'], 0.4);
+  assert.ok(!('line-layer-opacity' in style.layers[1].paint));
+  assert.deepEqual(style.layers[2].layout, { 'text-field': 'x' });
+});

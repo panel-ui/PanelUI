@@ -106,6 +106,7 @@ import {
   type ContextMenuInvocation,
   type ContextMenuKeyDownEvent,
 } from './context-menu-invocation';
+import type { ViewRef } from '../../primitives/refs';
 
 /**
  * How long the target is held before the menu opens.
@@ -365,7 +366,7 @@ function ContextMenuTrigger({
 }: ContextMenuTriggerProps) {
   const { setOpen, anchorTo } = usePopoverAnchor('ContextMenu.Trigger');
   const { setTarget, setContent, hasPreview } = useContextMenu('ContextMenu.Trigger');
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewRef>(null);
 
   /*
    * A preview overrules `anchor`, and has to.

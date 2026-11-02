@@ -21,7 +21,6 @@ import {
 import {
   AppState,
   View,
-  type AppStateStatus,
   type ViewProps,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -604,7 +603,8 @@ export function ToastViewport() {
      * has decided, and a toast raised in that window would otherwise have its
      * countdown parked with nothing coming to restart it.
      */
-    const syncTimers = (state: AppStateStatus) => {
+    // `string`, not AppStateStatus: React Native 0.88 types `currentState` as a plain string.
+    const syncTimers = (state: string | null | undefined) => {
       if (state === 'background' || state === 'inactive') toastStore.pauseTimers();
       else toastStore.resumeTimers();
     };

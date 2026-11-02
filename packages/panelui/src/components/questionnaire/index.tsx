@@ -913,7 +913,7 @@ function QuestionnaireBody({
   // height outright instead of growing into it from nothing.
   const height = useSharedValue(-1);
   const drag = useSharedValue(0);
-  const paneRef = useRef<View>(null);
+  const paneRef = useRef<ViewRef>(null);
 
   /*
    * Until the first question has been measured the pane stays in the flow, so

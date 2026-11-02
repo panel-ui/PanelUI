@@ -16,6 +16,13 @@
  * - `resampling` becomes `raster-resampling` on a raster layer. Hillshade and
  *   color-relief layers have no older name for it, so there it is dropped and
  *   the layer keeps the default.
+ * - `symbol-height-offset` and `symbol-height-anchor`, which lift a label off
+ *   the ground in a tilted view, are dropped. Native has nothing like them;
+ *   without them the label sits on the ground, as it did before they existed.
+ * - `fill-layer-opacity` and `line-layer-opacity` fade a whole layer. A plain
+ *   number is folded into `fill-opacity` or `line-opacity` when that is a plain
+ *   number too, which looks the same for a layer whose features do not overlap;
+ *   anything else is dropped and the layer draws at its own opacity.
  * - A tiled source with neither `url` nor `tiles` is removed. Hosted styles use
  *   one to carry attribution text. Native cannot parse it, and it draws
  *   nothing either way.
@@ -48,9 +55,17 @@ const OVERLAP = new Map<unknown, boolean>([
   ['cooperative', false],
 ]);
 
+/** Layout properties native cannot parse and has no older name for. */
+const DROPPED_LAYOUT = ['symbol-height-offset', 'symbol-height-anchor'];
+
 /** The layout with `-overlap` translated, or `null` when it has none. */
 function adaptLayout(layout: Json): Json | null {
   let next: Json | null = null;
+  for (const key of DROPPED_LAYOUT) {
+    if (!(key in layout)) continue;
+    next ??= { ...layout };
+    delete next[key];
+  }
   for (const kind of ['icon', 'text']) {
     const key = `${kind}-overlap`;
     if (!(key in layout)) continue;
@@ -65,11 +80,23 @@ function adaptLayout(layout: Json): Json | null {
   return next;
 }
 
-/** The paint with `resampling` translated, or `null` when it has none. */
+/** The paint with `resampling` and the layer opacities translated, or `null` when it has none. */
 function adaptPaint(type: unknown, paint: Json): Json | null {
-  if (!('resampling' in paint)) return null;
-  const { resampling, ...next } = paint;
-  if (type === 'raster') next['raster-resampling'] = resampling;
+  let next: Json | null = null;
+  if ('resampling' in paint) {
+    const { resampling, ...rest } = paint;
+    if (type === 'raster') rest['raster-resampling'] = resampling;
+    next = rest;
+  }
+  for (const kind of ['fill', 'line']) {
+    const key = `${kind}-layer-opacity`;
+    if (!(key in paint)) continue;
+    next ??= { ...paint };
+    const layer = next[key];
+    const own = next[`${kind}-opacity`] ?? 1;
+    delete next[key];
+    if (typeof layer === 'number' && typeof own === 'number') next[`${kind}-opacity`] = own * layer;
+  }
   return next;
 }
 

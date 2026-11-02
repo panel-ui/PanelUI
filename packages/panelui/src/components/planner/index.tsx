@@ -76,7 +76,6 @@ import {
   Platform,
   Pressable,
   View,
-  type ViewToken,
   type ViewProps,
 } from 'react-native';
 import { tv } from 'tailwind-variants';
@@ -119,7 +118,7 @@ import {
   usePlannerSelectionLifecycle,
 } from './planner-lifecycle';
 import { millisecondsUntilNextLocalDay } from './planner-today';
-import type { ViewRef } from '../../primitives/refs';
+import type { ViewRef, ViewTokenOf } from '../../primitives/refs';
 
 /**
  * How many of a day's entries a cell draws before it stops and counts.
@@ -836,7 +835,7 @@ interface PlannerGridKeyDownEvent {
 interface PlannerGridNavigationContextValue {
   activeIndex: number;
   indexByDay: ReadonlyMap<number, number>;
-  register: (index: number, node: View | null) => void;
+  register: (index: number, node: ViewRef | null) => void;
   focus: (index: number, event: PlannerGridKeyDownEvent) => void;
   makeActive: (index: number) => void;
 }
@@ -894,8 +893,8 @@ function PlannerGrid({ className, renderDay }: PlannerGridProps) {
     indexByDay.get(today.getTime()) ??
     dates.findIndex(isInMonth);
   const activeIndex = storedIndex ?? Math.max(0, preferredIndex);
-  const refs = useRef(new Map<number, View>());
-  const register = useCallback((index: number, node: View | null) => {
+  const refs = useRef(new Map<number, ViewRef>());
+  const register = useCallback((index: number, node: ViewRef | null) => {
     if (node) refs.current.set(index, node);
     else refs.current.delete(index);
   }, []);
@@ -1012,7 +1011,7 @@ function PlannerDay({ date, renderDay }: PlannerDayProps) {
   };
   const gridIndex = navigation?.indexByDay.get(date.getTime());
   const setRef = useCallback(
-    (node: View | null) => {
+    (node: ViewRef | null) => {
       if (gridIndex !== undefined) registerGridCell?.(gridIndex, node);
     },
     [gridIndex, registerGridCell]
@@ -1419,7 +1418,7 @@ function PlannerScroller({
    * month change from reporting that same month straight back.
    */
   const reported = useRef(month.getTime());
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewTokenOf<unknown>[] }) => {
     const first = viewableItems[0]?.item as Date | undefined;
     if (!first) return;
     const next = startOfCalendarMonth(weekAnchor(first), system, locale);

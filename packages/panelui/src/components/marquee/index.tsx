@@ -82,6 +82,7 @@ import {
   marqueeCopyCount,
   normalizeMarqueeSpeed,
 } from './marquee-math';
+import { webDeps } from '../../primitives/web-deps';
 
 export type MarqueeDirection = 'horizontal' | 'vertical';
 
@@ -242,7 +243,7 @@ function MarqueeRoot({
     return {
       transform: [horizontal ? { translateX: travel } : { translateY: travel }],
     };
-  }, [horizontal, reverse, flip]);
+  }, webDeps([horizontal, reverse, flip]));
 
   // The container's own measurement is what sizes the loop, so an `onLayout`
   // passed in is called alongside it rather than replacing it.

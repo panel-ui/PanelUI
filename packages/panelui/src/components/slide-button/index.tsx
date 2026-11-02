@@ -76,6 +76,7 @@ import {
   VELOCITY_LOOKAHEAD,
   resolveThreshold,
 } from './slide-button-track';
+import type { ViewRef } from '../../primitives/refs';
 
 /**
  * How the handle settles when it is let go, in either direction.
@@ -278,7 +279,7 @@ function SlideButtonRoot(
     children,
     ...props
   }: SlideButtonProps,
-  ref: React.Ref<View>
+  ref: React.Ref<ViewRef>
 ) {
   const reducedMotion = useReducedMotion();
   const sign = useDirectionSign();

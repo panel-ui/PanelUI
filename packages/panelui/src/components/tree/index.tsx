@@ -73,6 +73,7 @@ import { ChevronRightIcon, IconColorProvider } from '../../icons';
 import { useDirection } from '../../hooks/use-direction';
 import { Text, type TextProps } from '../../primitives/text';
 import type { TextRef, ViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
 
 export type TreeSize = 'sm' | 'default';
 
@@ -449,7 +450,7 @@ const TreeIndicator = forwardRef<ViewRef, TreeIndicatorProps>(
     const openRotation = direction === 'rtl' ? -90 : 90;
     const rotation = useDerivedValue(
       () => withTiming(isExpanded ? openRotation : 0, { duration: TRANSITION_DURATION }),
-      [isExpanded, openRotation]
+      webDeps([isExpanded, openRotation])
     );
     const rotationStyle = useAnimatedStyle(() => ({
       transform: [{ rotate: `${rotation.value}deg` }],

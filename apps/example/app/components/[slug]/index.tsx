@@ -13,6 +13,7 @@ import {
 import { ScreenHeader } from '../../../src/components/screen-header';
 import type { ComponentEntry, Demo } from '../../../src/data/components';
 import { useComponentEntry } from '../../../src/data/use-component-entry';
+import type { ScrollViewRef } from 'panelui-native';
 
 /**
  * A demo that needs the whole screen gets a row here instead of being rendered
@@ -165,7 +166,7 @@ function PagerLayout({
 }) {
   const [page, setPage] = useState(0);
   const [pageHeight, setPageHeight] = useState(0);
-  const scroller = useRef<ScrollView>(null);
+  const scroller = useRef<ScrollViewRef>(null);
   /*
    * A page centres its demo in the viewport, which is the wrong place to be
    * once a field on it takes focus: the keyboard covers the bottom half, and

@@ -97,6 +97,7 @@ import {
 import { Button } from '../button';
 import { Dialog } from '../dialog';
 import { Popover } from '../popover';
+import type { ScrollViewRef } from '../../primitives/refs';
 
 export type { HourCycle, TimeValue };
 
@@ -833,7 +834,7 @@ function RulerFace({
   readout = 'default',
 }: FaceProps) {
   const slots = timePickerVariants({ readout });
-  const ref = useRef<ScrollView>(null);
+  const ref = useRef<ScrollViewRef>(null);
   const { times, index } = useBoundedTimes(minuteStep, minTime, maxTime, value);
   const resting = useRef(index);
   /*

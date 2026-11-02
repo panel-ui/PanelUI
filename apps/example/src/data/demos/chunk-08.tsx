@@ -12,6 +12,7 @@ import Wifi01Icon from "@hugeicons/core-free-icons/Wifi01Icon";
 import { Alert, Avatar, Badge, Button, Card, CheckIcon, Chip, CircularText, FlipCard, FolderIcon, Input, Item, Label, QRCode, RadioGroup, Rating, Select, SelectionMode, SectionRail, Separator, Shimmer, Skeleton, Slider, Spinner, Surface, Text, TextAnimation, ToggleButton, ToggleButtonGroup, TrashIcon, cn, hasNativeUI, useScrollSections } from "panelui-native";
 import { useCSSVariable } from 'uniwind';
 import type { ComponentEntry } from '../component-types';
+import type { ScrollViewRef } from 'panelui-native';
 
 /** The same two options at each size, each group holding its own choice. */
 function RadioGroupSizesDemo() {
@@ -623,7 +624,7 @@ const PAGER_SECTIONS = [
  */
 function SectionRailPagerVersion() {
   const [page, setPage] = useState(0);
-  const scroller = useRef<ScrollView>(null);
+  const scroller = useRef<ScrollViewRef>(null);
 
   /*
    * The page height is the scroll view's own, measured — not the window's.

@@ -69,6 +69,7 @@ import { tv } from 'tailwind-variants';
 import { Portal } from '../../primitives/portal';
 import { Text, type TextProps } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Gap between the trigger and the label. */
 const DEFAULT_OFFSET = 6;
@@ -294,7 +295,7 @@ export interface TooltipTriggerProps {
  */
 function TooltipTrigger({ className, children }: TooltipTriggerProps) {
   const { open, show, hide, setTrigger, openOn, label } = useTooltip('Tooltip.Trigger');
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewRef>(null);
 
   const measureThenShow = () => {
     // Measured on every open rather than on layout: the trigger may have

@@ -132,8 +132,6 @@ import {
   useWindowDimensions,
   type LayoutChangeEvent,
   type NativeSyntheticEvent,
-  type TextInputKeyPressEventData,
-  type TextInputSubmitEditingEventData,
   type ViewProps,
   type ViewStyle,
 } from 'react-native';
@@ -161,7 +159,7 @@ import {
   scheduleSearchBarDebounce,
   type SearchBarDebounceTimer,
 } from './search-bar-debounce';
-import type { TextInputRef } from '../../primitives/refs';
+import type { KeyPressEvent, SubmitEditingEvent, TextInputRef, ViewRef } from '../../primitives/refs';
 
 /** Matches the field's own focus crossfade, so the row settles as one thing. */
 const CANCEL_DURATION = 180;
@@ -573,8 +571,8 @@ const SearchBarRoot = forwardRef<TextInputRef, SearchBarProps>(
     const text = controlled ? valueProp : internal;
 
     const [focused, setFocused] = useState(false);
-    const inputRef = useRef<TextInput | null>(null);
-    useImperativeHandle(ref, () => inputRef.current as TextInput, []);
+    const inputRef = useRef<TextInputRef | null>(null);
+    useImperativeHandle(ref, () => inputRef.current as TextInputRef, []);
 
     /*
      * Counted rather than tested for truthiness: `{results.map(…)}` over an
@@ -727,7 +725,7 @@ const SearchBarRoot = forwardRef<TextInputRef, SearchBarProps>(
     );
 
     const handleKeyPress = useCallback(
-      (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+      (event: KeyPressEvent) => {
         // Only on an empty field: while there is a query, backspace is editing
         // it, and eating a token instead would delete something nobody aimed at.
         if (event.nativeEvent.key === 'Backspace' && text.length === 0) {
@@ -739,7 +737,7 @@ const SearchBarRoot = forwardRef<TextInputRef, SearchBarProps>(
     );
 
     const handleSubmit = useCallback(
-      (event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+      (event: SubmitEditingEvent) => {
         if (disabled) return;
         // A return key is somebody saying they are done waiting, so the
         // pending pause is spent rather than waited out.
@@ -811,7 +809,7 @@ const SearchBarRoot = forwardRef<TextInputRef, SearchBarProps>(
     useEffect(() => {
       keyboardUp.current = keyboardHeight > 0;
     }, [keyboardHeight]);
-    const anchorRef = useRef<View | null>(null);
+    const anchorRef = useRef<ViewRef | null>(null);
     const [anchorBox, setAnchorBox] = useState<{
       top: number;
       height: number;

@@ -127,6 +127,7 @@ import {
   type StackCardDirection,
 } from './stack-card-geometry';
 import type { ViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
 
 export type { StackCardDirection } from './stack-card-geometry';
 
@@ -434,7 +435,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
 
     const release = useDerivedValue(
       () => releaseProgress(allowed, x.value, y.value, width.value, height.value, threshold),
-      [allowed, threshold]
+      webDeps([allowed, threshold])
     );
 
     /*
@@ -692,7 +693,7 @@ const StackCardRoot = forwardRef<StackCardHandle, StackCardProps>(
         if (wasPast === null || past === wasPast || !past) return;
         runOnJS(tick)(haptics);
       },
-      [haptics]
+      webDeps([haptics])
     );
 
     /**

@@ -63,6 +63,7 @@ import {
   resolveLayout,
   type SplitterConstraint,
 } from './splitter-math';
+import { webDeps } from '../../primitives/web-deps';
 
 export type SplitterOrientation = 'horizontal' | 'vertical';
 
@@ -346,7 +347,7 @@ function SplitterPanel({ className, children, style, ...props }: SplitterPanelPr
   const animatedStyle = useAnimatedStyle(() => {
     const size = (context.available.value * (context.layout.value[index] ?? 0)) / 100;
     return horizontal ? { width: size } : { height: size };
-  }, [index, horizontal]);
+  }, webDeps([index, horizontal]));
 
   // Nothing is measured on the first frame, and a pane sized from a container of
   // zero is a pane nobody can see. Until the measurement lands, a definite flex
@@ -511,7 +512,7 @@ function SplitterHandle({
       opacity: 1,
       transform: horizontal ? [{ translateX: shift * sign }] : [{ translateY: shift }],
     };
-  }, [boundary, horizontal, sign]);
+  }, webDeps([boundary, horizontal, sign]));
 
   // A step moves the seam along the layout, not along the screen, so it is the
   // one piece of this that the reading direction does not touch: incrementing

@@ -14,6 +14,7 @@ import { CircleButton } from "../../components/screen-header";
 import { PanelsideActionsBlock, PanelsideAssistantBlock, PanelsideChatBlock, PanelsideCurveBlock, PanelsideDockedBlock, PanelsideNativeBlock, PanelsideNavigateBlock, PanelsideOverlayBlock } from "../../components/panelside-blocks";
 import { useCSSVariable } from "uniwind";
 import type { ComponentEntry } from '../component-types';
+import type { ScrollViewRef } from 'panelui-native';
 
 /** Two series side by side, which is what a bar chart is for. */
 /** Padding the header needs to line up inside a `Frame.Panel`, which has none. */
@@ -327,7 +328,7 @@ function TourInteractiveDemo() {
  */
 function TourScrollingDemo() {
   const [running, setRunning] = useState(false);
-  const scroller = useRef<ScrollView>(null);
+  const scroller = useRef<ScrollViewRef>(null);
   const insets = useSafeAreaInsets();
 
   // Where each step sits down the content, filled in as the rows lay out. A

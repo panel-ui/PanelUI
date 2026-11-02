@@ -71,6 +71,8 @@ import { tv } from 'tailwind-variants';
 import { useDirectionSign } from '../../hooks/use-direction';
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ScrollViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
 
 const SPRING = { damping: 24, stiffness: 300, mass: 0.7 } as const;
 
@@ -736,7 +738,7 @@ function TabsPager({
    */
   const strip = useAnimatedStyle(
     () => ({ transform: [{ translateX: -position.value * width * sign }] }),
-    [width, sign]
+    webDeps([width, sign])
   );
 
   const onLayout = useCallback((event: LayoutChangeEvent) => {
@@ -880,7 +882,7 @@ function TabsList({
 }: TabsListProps) {
   const { variant, value, layouts } = useTabs('Tabs.List');
   const { list } = tabsVariants({ variant });
-  const scroller = useRef<ScrollView>(null);
+  const scroller = useRef<ScrollViewRef>(null);
 
   /*
    * Where the row should be, kept as a ref rather than only applied once.

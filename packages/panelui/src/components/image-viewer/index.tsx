@@ -119,6 +119,7 @@ import {
   type Rect,
   type Size,
 } from './image-viewer-geometry';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Space between two pages of a gallery, so a page turn reads as two pictures. */
 const PAGE_GAP = 16;
@@ -475,7 +476,7 @@ function ImageViewerTrigger({
 }: ImageViewerTriggerProps) {
   const { store, hiddenId, openItem } = useViewer('ImageViewer.Trigger');
   const id = useId();
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewRef>(null);
   const orderRef = useRef<number | null>(null);
   orderRef.current ??= store.nextOrder();
 

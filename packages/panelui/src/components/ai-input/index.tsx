@@ -102,6 +102,7 @@ import { Button } from '../button';
 import { Soundwave } from '../soundwave';
 import { Switch } from '../switch';
 import { AI_INPUT_METRICS, growthBounds, type AIInputSize } from './ai-input-growth';
+import type { ViewRef } from '../../primitives/refs';
 
 /** What the app is doing, which is what the trailing button offers to do next. */
 export type AIInputStatus = 'ready' | 'recording' | 'submitted' | 'streaming';
@@ -1429,7 +1430,7 @@ function AIInputSheetBody({
 }) {
   const { width } = useWindowDimensions();
   const height = useSharedValue(-1);
-  const paneRef = useRef<View>(null);
+  const paneRef = useRef<ViewRef>(null);
 
   /*
    * Whether the screen is lifted out of the flow onto its own layer.

@@ -635,6 +635,10 @@ a release, and at what version? Use `AskUserQuestion` with the version you would
 new components, parts, props or tokens; patch for fixes that leave the API alone — so answering is
 one keystroke. Offer "no release yet" as an option, and take it as the end of the task.
 
+**`panelui-native` is stable from 1.0.0 (2026-11-02).** A larger update is a minor release
+(1.2.0, 1.3.0) and a smaller one a patch (1.2.1). A major version moves only when the user asks
+for one. `panelui-web`, `panelui-cli` and `create-panelui-app` keep their own version lines.
+
 If the answer is yes, then and only then:
 
 1. Bump the version in `packages/panelui/package.json`, `.claude-plugin/plugin.json` and the

@@ -3,11 +3,52 @@
 Notable changes to [`panelui-native`](https://www.npmjs.com/package/panelui-native).
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project
-follows [semantic versioning](https://semver.org/spec/v2.0.0.html) — while the major version is
-`0`, a minor bump is where new components, parts and tokens land, and a patch is a fix that leaves
-the API alone.
+follows [semantic versioning](https://semver.org/spec/v2.0.0.html). From 1.0.0, a minor release
+(1.1.0, 1.2.0) is where new components, parts, props and tokens land, and a patch (1.1.1) is a
+fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
+
+## [1.0.0] — 2026-11-02
+
+The first stable release, after two months of beta. Nothing is removed and no existing API
+changes meaning, so an app on 0.116.0 upgrades without edits. From here, minor releases add
+and patches fix.
+
+### Added
+
+- **Expo SDK 58.** The library runs on React Native 0.88, Reanimated 4.7 and Gesture
+  Handler 3, and still on SDK 57. The example app and both `create-panelui-app` templates are
+  on SDK 58. To move an app, run `npx expo install expo@^58` and then `npx expo install --fix`.
+- **Ref types that work on every React Native version.** `ViewRef`, `TextRef`, `TextInputRef`
+  and `ScrollViewRef` name what a component's ref points at. React Native 0.88 declares `View`,
+  `Text` and `TextInput` as function components, so `useRef<TextInput>` no longer compiles
+  there. `useRef<TextInputRef>` compiles on 0.86 and 0.88 and keeps `focus()`, `clear()` and
+  `isFocused()`. Every component's ref uses them. Reported by @techzealot in
+  [#257](https://github.com/panel-ui/PanelUI/issues/257).
+- **Your own icons, built like ours.** `icon()` (also exported as `createIcon`) and its
+  `IconDefaults` type are exported from `panelui-native/icons`. A glyph the set does not carry
+  then takes colour from the provider, mirrors in right-to-left layouts and draws filled, as
+  the built-in ones do. Reported by @techzealot in
+  [#256](https://github.com/panel-ui/PanelUI/issues/256).
+
+### Fixed
+
+- **No Reanimated warnings on SDK 58.** Reanimated 4.7 warns in development when a hook is given
+  a dependency list on iOS or Android, where the list is ignored. Animated hooks now receive
+  the list only on the web, and Sortable no longer hands Reanimated a scroll ref that is
+  attached to nothing.
+- **Hosted map styles keep all their layers.** Newer styles use `symbol-height-offset`,
+  `symbol-height-anchor`, `fill-layer-opacity` and `line-layer-opacity`. Native cannot parse
+  them and dropped any layer that used one. Map now removes the first two, and folds the layer
+  opacities into the feature opacity where both are plain numbers.
+- Chart props type-check on React Native 0.88, which declares the accessibility props
+  read-only.
+
+### Docs
+
+- Installation and Troubleshooting name SDK 58 and React Native 0.88.
+- Customising icons has an "Adding a glyph to the built-in set" section.
 
 ## [0.116.0] — 2026-10-31
 

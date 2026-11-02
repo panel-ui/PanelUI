@@ -1,0 +1,377 @@
+---
+title: Radio Group
+description: One choice from a short list, with every option visible and the arrow keys moving between them.
+status: new
+---
+
+<ComponentPreview name="radio-group/overview" height={200}>
+
+```tsx lineNumbers
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+
+export default function RadioGroupOverview() {
+  return (
+    <RadioGroup defaultValue="standard" aria-label="Delivery" className="w-full max-w-xs">
+      <Label>
+        <Radio value="standard" />
+        <Label.Text>Standard</Label.Text>
+        <Label.Action>3–5 days · Free</Label.Action>
+      </Label>
+      <Label>
+        <Radio value="express" />
+        <Label.Text>Express</Label.Text>
+        <Label.Action>Next day · £6</Label.Action>
+      </Label>
+      <Label>
+        <Radio value="collect" />
+        <Label.Text>Collect in store</Label.Text>
+        <Label.Action>Today · Free</Label.Action>
+      </Label>
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use a radio group for one choice out of two to about seven options, where seeing every option at once helps someone choose.
+
+For options that each need a line of description or a price, use `RadioGroup.Card`. For options best chosen by a picture, use [Choice Cards](/docs/web/components/choice-cards). For more than about seven, use a [Select](/docs/web/components/select). For a choice that applies at once without a form, use [Tabs](/docs/web/components/tabs).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/radio-group.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/radio-group` instead of `@/components/panelui/radio-group`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/radio-group.tsx`:
+
+<RegistrySource name="radio-group" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { RadioGroup } from "@/components/panelui/radio-group"
+```
+
+```tsx
+<RadioGroup defaultValue="standard" aria-label="Delivery">
+  <Label>
+    <Radio value="standard" />
+    <Label.Text>Standard</Label.Text>
+  </Label>
+  <Label>
+    <Radio value="express" />
+    <Label.Text>Express</Label.Text>
+  </Label>
+</RadioGroup>
+```
+
+## Composition
+
+```tsx
+<RadioGroup>
+  <Radio />
+</RadioGroup>
+
+<RadioGroup>
+  <RadioGroup.Card>
+    <RadioGroup.CardBody>
+      <RadioGroup.CardTitle />
+      <RadioGroup.CardDescription />
+    </RadioGroup.CardBody>
+    <RadioGroup.CardAside />
+  </RadioGroup.Card>
+</RadioGroup>
+```
+
+## Examples
+
+### In a row
+
+`orientation="horizontal"` sets the radios side by side, and the left and right arrow keys move the choice.
+
+<ComponentPreview name="radio-group/horizontal" height={120}>
+
+```tsx lineNumbers
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+
+export default function RadioGroupHorizontal() {
+  return (
+    <RadioGroup orientation="horizontal" defaultValue="monthly" aria-label="Billing" className="gap-5">
+      <Label className="w-auto">
+        <Radio value="monthly" />
+        <Label.Text>Monthly</Label.Text>
+      </Label>
+      <Label className="w-auto">
+        <Radio value="yearly" />
+        <Label.Text>Yearly</Label.Text>
+      </Label>
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Cards
+
+`RadioGroup.Card` puts each option in a card with the radio inside it, for options that need a line of description or a price beside the name. The whole card is the target. The default `outline` rings the chosen card.
+
+<ComponentPreview name="radio-group/cards" height={280}>
+
+```tsx lineNumbers
+import { RadioGroup } from '@/components/panelui/radio-group';
+
+const PLANS = [
+  { value: 'hobby', title: 'Hobby', description: 'One project, community support', price: 'Free' },
+  { value: 'studio', title: 'Studio', description: 'Ten projects, custom domains', price: '£12/mo' },
+  { value: 'agency', title: 'Agency', description: 'Unlimited projects, client handover', price: '£39/mo' },
+];
+
+export default function RadioGroupCards() {
+  return (
+    <RadioGroup defaultValue="studio" aria-label="Plan" className="w-full max-w-sm">
+      {PLANS.map((plan) => (
+        <RadioGroup.Card key={plan.value} value={plan.value}>
+          <RadioGroup.CardBody>
+            <RadioGroup.CardTitle>{plan.title}</RadioGroup.CardTitle>
+            <RadioGroup.CardDescription>{plan.description}</RadioGroup.CardDescription>
+          </RadioGroup.CardBody>
+          <RadioGroup.CardAside>{plan.price}</RadioGroup.CardAside>
+        </RadioGroup.Card>
+      ))}
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Filled cards
+
+`appearance="filled"` tints the chosen card in its `color`. Cards can sit in a row; a disabled one stays visible so the reader can see it is taken.
+
+<ComponentPreview name="radio-group/cards-filled" height={200}>
+
+```tsx lineNumbers
+import { RadioGroup } from '@/components/panelui/radio-group';
+
+const SLOTS = [
+  { value: 'morning', title: 'Morning', description: '8:00 – 12:00', note: '3 left' },
+  { value: 'afternoon', title: 'Afternoon', description: '12:00 – 17:00', note: '1 left' },
+  { value: 'evening', title: 'Evening', description: '17:00 – 20:00', note: 'Full' },
+];
+
+export default function RadioGroupCardsFilled() {
+  return (
+    <RadioGroup defaultValue="morning" aria-label="Delivery slot" orientation="horizontal" className="grid w-full max-w-lg grid-cols-3">
+      {SLOTS.map((slot) => (
+        <RadioGroup.Card
+          key={slot.value}
+          value={slot.value}
+          appearance="filled"
+          color="success"
+          disabled={slot.note === 'Full'}
+          className="flex-col"
+        >
+          <RadioGroup.CardBody>
+            <RadioGroup.CardTitle>{slot.title}</RadioGroup.CardTitle>
+            <RadioGroup.CardDescription>{slot.description}</RadioGroup.CardDescription>
+            <RadioGroup.CardDescription>{slot.note}</RadioGroup.CardDescription>
+          </RadioGroup.CardBody>
+        </RadioGroup.Card>
+      ))}
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Dither cards
+
+`appearance="dither"` fills the chosen card from its far edge with an ordered dither in its colour, densest at the edge and thinning before it reaches the text. It sweeps in as the card is chosen and out as it is left.
+
+<ComponentPreview name="radio-group/cards-dither" height={260}>
+
+```tsx lineNumbers
+import { RadioGroup } from '@/components/panelui/radio-group';
+
+const REGIONS = [
+  { value: 'lhr', title: 'London', description: 'eu-west · 12 ms from you', latency: '12 ms' },
+  { value: 'fra', title: 'Frankfurt', description: 'eu-central · 21 ms from you', latency: '21 ms' },
+  { value: 'iad', title: 'Virginia', description: 'us-east · 78 ms from you', latency: '78 ms' },
+];
+
+export default function RadioGroupCardsDither() {
+  return (
+    <RadioGroup defaultValue="lhr" aria-label="Region" className="w-full max-w-sm">
+      {REGIONS.map((region) => (
+        <RadioGroup.Card key={region.value} value={region.value} appearance="dither" color="info">
+          <RadioGroup.CardBody>
+            <RadioGroup.CardTitle>{region.title}</RadioGroup.CardTitle>
+            <RadioGroup.CardDescription>{region.description}</RadioGroup.CardDescription>
+          </RadioGroup.CardBody>
+        </RadioGroup.Card>
+      ))}
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes and colours
+
+`sm`, `md` and `lg`, and a `color` for the chosen radio. Use `destructive` for the option that loses something.
+
+<ComponentPreview name="radio-group/colors" height={200}>
+
+```tsx lineNumbers
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+
+export default function RadioGroupColors() {
+  return (
+    <div className="flex flex-col gap-5">
+      <RadioGroup orientation="horizontal" defaultValue="md" aria-label="Sizes" className="items-center gap-4">
+        <Radio value="sm" size="sm" label="Small" />
+        <Radio value="md" size="md" label="Medium" />
+        <Radio value="lg" size="lg" label="Large" />
+      </RadioGroup>
+      <RadioGroup defaultValue="keep" aria-label="When the trial ends">
+        <Label>
+          <Radio value="keep" color="success" />
+          <Label.Text>Keep my workspace</Label.Text>
+        </Label>
+        <Label>
+          <Radio value="delete" color="destructive" />
+          <Label.Text>Delete everything</Label.Text>
+        </Label>
+      </RadioGroup>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A disabled option
+
+`disabled` on one radio leaves the rest usable. Say why with a `Label.Hint`.
+
+<ComponentPreview name="radio-group/disabled" height={200}>
+
+```tsx lineNumbers
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+
+export default function RadioGroupDisabled() {
+  return (
+    <RadioGroup defaultValue="eu" aria-label="Data region" className="w-full max-w-xs">
+      <Label>
+        <Radio value="eu" />
+        <Label.Text>Europe</Label.Text>
+      </Label>
+      <Label>
+        <Radio value="us" />
+        <Label.Text>United States</Label.Text>
+      </Label>
+      <Label>
+        <Radio value="apac" disabled />
+        <Label.Text>Asia Pacific</Label.Text>
+        <Label.Hint>Coming in spring</Label.Hint>
+      </Label>
+    </RadioGroup>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### RadioGroup
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `'vertical' \| 'horizontal'` | — | Whether the radios stack or sit in a row. Also sets which arrow keys move the choice. Default `vertical`. |
+| `className` | `string` | — |  |
+
+### RadioGroup.Radio
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `RadioSize` | `md` | Default `md`. |
+| `color` | `RadioColor` | `primary` | The colour of the chosen radio. `primary` by default. |
+| `label` | `string` | — | What a screen reader calls it, when there is no visible label tied to it. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+### RadioGroup.RadioCard
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `appearance` | `RadioCardAppearance` | — | How the chosen card is marked: a ring, a tint, or a dither ramp from the far edge. The ramp draws where `RadioGroup.CardAside` would sit, so leave the aside out of a `dither` card. Default `outline`. |
+| `color` | `RadioColor` | `primary` | The colour the chosen card is marked in. `primary` by default. |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Keyboard
+
+The group is one Tab stop. Inside it, the arrow keys move the choice to the next radio, as a native radio group does.
+
+### Motion
+
+The chosen radio's dot grows in with a small overshoot, and the one it leaves shrinks. With reduced motion turned on, both change at once.
+
+### Exports
+
+`Radio` is also exported as `RadioGroup.Item` and `RadioGroupItem`. The card parts are also exported by name, such as `RadioGroupCard` and `RadioGroupCardTitle`, for a Server Component.
+
+### Reduced motion
+
+The dither card's sweep and the dot's overshoot are skipped; the chosen card is filled at once.

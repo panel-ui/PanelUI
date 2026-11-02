@@ -1,0 +1,215 @@
+---
+title: Badge
+description: A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.
+status: new
+---
+
+<ComponentPreview name="badge/overview" height={160}>
+
+```tsx lineNumbers
+import { Badge } from '@/components/panelui/badge';
+
+export default function BadgeOverview() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <Badge>New</Badge>
+      <Badge variant="secondary">Draft</Badge>
+      <Badge variant="outline">v2.4</Badge>
+      <Badge variant="success" dot>
+        Paid
+      </Badge>
+      <Badge variant="info" dot="pulse">
+        Syncing
+      </Badge>
+      <Badge variant="warning" dot>
+        Due Friday
+      </Badge>
+      <Badge variant="destructive" dot>
+        Overdue
+      </Badge>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use a badge to label a state (paid, overdue, building) or a kind (draft, beta, a version number) next to the thing it describes.
+
+A badge is not a control. It cannot be pressed, toggled or removed. For a label that does any of those, use [Chip](/docs/web/components/chip).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/badge.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/badge` instead of `@/components/panelui/badge`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/badge.tsx`:
+
+<RegistrySource name="badge" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Badge } from "@/components/panelui/badge"
+```
+
+```tsx
+<Badge>New</Badge>
+<Badge variant="success" dot>Paid</Badge>
+<Badge variant="info" dot="pulse">Syncing</Badge>
+```
+
+## Examples
+
+### Statuses
+
+`success`, `info`, `warning` and `destructive` are drawn as a tint with text in the same colour, so a column of them reads as states rather than buttons. `dot="pulse"` is for a state that is still changing; use a plain `dot` once it settles.
+
+<ComponentPreview name="badge/statuses" height={240}>
+
+```tsx lineNumbers
+import { Badge } from '@/components/panelui/badge';
+
+const RUNS = [
+  { name: 'Nightly backup', status: 'Running', variant: 'info' as const, live: true },
+  { name: 'Image resize queue', status: 'Healthy', variant: 'success' as const, live: false },
+  { name: 'Invoice export', status: 'Retrying', variant: 'warning' as const, live: true },
+  { name: 'Search reindex', status: 'Stopped', variant: 'destructive' as const, live: false },
+];
+
+export default function BadgeStatuses() {
+  return (
+    <ul className="flex w-full max-w-sm flex-col divide-y text-sm">
+      {RUNS.map((run) => (
+        <li key={run.name} className="flex items-center justify-between gap-4 py-2.5">
+          <span>{run.name}</span>
+          <Badge variant={run.variant} dot={run.live ? 'pulse' : true}>
+            {run.status}
+          </Badge>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sizes
+
+`sm`, `md` and `lg`. Use `sm` inside a dense table row.
+
+<ComponentPreview name="badge/sizes" height={140}>
+
+```tsx lineNumbers
+import { Badge } from '@/components/panelui/badge';
+
+export default function BadgeSizes() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <Badge size="sm" variant="secondary">
+        Small
+      </Badge>
+      <Badge size="md" variant="secondary">
+        Medium
+      </Badge>
+      <Badge size="lg" variant="secondary">
+        Large
+      </Badge>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### With an icon
+
+An icon placed before the text is sized to the badge.
+
+<ComponentPreview name="badge/icons" height={140}>
+
+```tsx lineNumbers
+import { Badge } from '@/components/panelui/badge';
+import { LeafIcon, LockIcon, SparklesIcon } from 'lucide-react';
+
+export default function BadgeIcons() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <Badge variant="outline">
+        <LockIcon />
+        Private
+      </Badge>
+      <Badge variant="success">
+        <LeafIcon />
+        Low carbon
+      </Badge>
+      <Badge>
+        <SparklesIcon />
+        Pro
+      </Badge>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Badge
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `BadgeVariant` | `default` | What it means. `default` is solid, for the one thing that should be seen first; the four states are tinted in their theme colour. Default `default`. |
+| `size` | `BadgeSize` | `md` | Its height and text size. Default `md`. |
+| `dot` | `boolean \| 'pulse'` | — | A dot before the text in the badge's colour. `'pulse'` makes it breathe, for a state that is still changing. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Choosing a variant
+
+`default` is solid. Keep it for the one badge on a screen that should be seen first. `secondary` and `outline` are for kinds, the four colours for states.
+
+### Reduced motion
+
+The pulse does not run when the reader has asked for reduced motion. The dot stays.

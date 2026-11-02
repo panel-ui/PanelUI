@@ -1,11 +1,11 @@
 import { GitBranchIcon, RocketIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from 'panelui-web/badge';
 import { Frame } from 'panelui-web/frame';
 
 const DEPLOYS = [
   { ref: 'main · a41c2e9', where: 'Production · 2 minutes ago', status: 'Ready', tone: 'success' as const, prod: true },
   { ref: 'feature/sheet · 7d02b11', where: 'Preview · 9 minutes ago', status: 'Building', tone: 'info' as const, prod: false },
-  { ref: 'main · e5c90af', where: 'Production · 3 hours ago', status: 'Failed', tone: 'error' as const, prod: true },
+  { ref: 'main · e5c90af', where: 'Production · 3 hours ago', status: 'Failed', tone: 'destructive' as const, prod: true },
   { ref: 'docs/hero · 19bf3a4', where: 'Preview · 5 hours ago', status: 'Ready', tone: 'success' as const, prod: false },
 ];
 

@@ -7,13 +7,13 @@ description: A panel of rows set into a tray, with the tray's top strip carrying
 
 ```tsx lineNumbers
 import { GitBranchIcon, RocketIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/panelui/badge';
 import { Frame } from '@/components/panelui/frame';
 
 const DEPLOYS = [
   { ref: 'main · a41c2e9', where: 'Production · 2 minutes ago', status: 'Ready', tone: 'success' as const, prod: true },
   { ref: 'feature/sheet · 7d02b11', where: 'Preview · 9 minutes ago', status: 'Building', tone: 'info' as const, prod: false },
-  { ref: 'main · e5c90af', where: 'Production · 3 hours ago', status: 'Failed', tone: 'error' as const, prod: true },
+  { ref: 'main · e5c90af', where: 'Production · 3 hours ago', status: 'Failed', tone: 'destructive' as const, prod: true },
   { ref: 'docs/hero · 19bf3a4', where: 'Preview · 5 hours ago', status: 'Ready', tone: 'success' as const, prod: false },
 ];
 
@@ -210,8 +210,8 @@ The panel floats in a recessed band, and the band below it holds the footer's ac
 <ComponentPreview name="frame/inset" height={320}>
 
 ```tsx lineNumbers
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/panelui/button';
+import { Switch } from '@/components/panelui/switch';
 import { Frame } from '@/components/panelui/frame';
 
 export default function FrameInset() {
@@ -300,22 +300,22 @@ export default function FrameLinks() {
 <ComponentPreview name="frame/sections" height={360}>
 
 ```tsx lineNumbers
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from '@/components/panelui/avatar';
 import { Frame } from '@/components/panelui/frame';
 
 const DAYS = [
   {
     day: 'Today',
     events: [
-      { who: 'IF', text: 'Ife commented on Checkout redesign', when: '10:42' },
-      { who: 'TM', text: 'Tomás moved Search ranking to Blocked', when: '09:15' },
+      { who: 'Ife Adeyemi', text: 'Ife commented on Checkout redesign', when: '10:42' },
+      { who: 'Tomás Mendes', text: 'Tomás moved Search ranking to Blocked', when: '09:15' },
     ],
   },
   {
     day: 'Yesterday',
     events: [
-      { who: 'HK', text: 'Hana shipped Onboarding emails', when: '17:30' },
-      { who: 'NH', text: 'Noor invited Pavel to Payments', when: '11:02' },
+      { who: 'Hana Kato', text: 'Hana shipped Onboarding emails', when: '17:30' },
+      { who: 'Noor Haddad', text: 'Noor invited Pavel to Payments', when: '11:02' },
     ],
   },
 ];
@@ -333,9 +333,7 @@ export default function FrameSections() {
             {events.map((event) => (
               <Frame.Row key={event.text}>
                 <Frame.Media>
-                  <Avatar className="size-8">
-                    <AvatarFallback className="text-xs">{event.who}</AvatarFallback>
-                  </Avatar>
+                  <Avatar name={event.who} size="sm" />
                 </Frame.Media>
                 <Frame.Content>
                   <Frame.Title as="p">{event.text}</Frame.Title>
@@ -360,7 +358,7 @@ export default function FrameSections() {
 <ComponentPreview name="frame/plain" height={320}>
 
 ```tsx lineNumbers
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/panelui/badge';
 import { Card } from '@/components/panelui/card';
 import { Frame } from '@/components/panelui/frame';
 

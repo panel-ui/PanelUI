@@ -119,7 +119,7 @@ The band draws 30 frames a second while the code is on screen, a few hundred cel
 'use client';
 
 import { NotFound } from '@/components/panelui/not-found';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 
 export default function NotFoundPage() {
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field } from 'panelui-web/field';
 import { Select } from 'panelui-web/select';
 
 const PLANS = [
@@ -13,7 +13,7 @@ const PLANS = [
 export default function SelectPlans() {
   return (
     <Field className="w-full max-w-xs">
-      <FieldLabel>Plan</FieldLabel>
+      <Field.Label>Plan</Field.Label>
       <Select items={PLANS} defaultValue="team">
         <Select.Trigger>
           <Select.Value placeholder="Pick a plan" />
@@ -26,7 +26,7 @@ export default function SelectPlans() {
           ))}
         </Select.Content>
       </Select>
-      <FieldDescription>You can change plan at the end of any month.</FieldDescription>
+      <Field.Description>You can change plan at the end of any month.</Field.Description>
     </Field>
   );
 }

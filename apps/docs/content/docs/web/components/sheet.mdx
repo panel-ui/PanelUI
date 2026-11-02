@@ -9,12 +9,12 @@ status: updated
 ```tsx lineNumbers
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Radio, RadioGroup } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Label } from '@/components/panelui/label';
+import { Radio, RadioGroup } from '@/components/panelui/radio-group';
+import { Switch } from '@/components/panelui/switch';
+import { Textarea } from '@/components/panelui/textarea';
 import { Sheet } from '@/components/panelui/sheet';
 
 export default function SheetEvent() {
@@ -29,22 +29,27 @@ export default function SheetEvent() {
         <Sheet.Body className="flex flex-col gap-6">
           <RadioGroup defaultValue="going" aria-label="Your answer">
             <Label>
-              <Radio value="going" /> Going
+              <Radio value="going" />
+              <Label.Text>Going</Label.Text>
             </Label>
             <Label>
-              <Radio value="maybe" /> Maybe
+              <Radio value="maybe" />
+              <Label.Text>Maybe</Label.Text>
             </Label>
             <Label>
-              <Radio value="declined" /> Can’t make it
+              <Radio value="declined" />
+              <Label.Text>Can’t make it</Label.Text>
             </Label>
           </RadioGroup>
           <Field>
-            <FieldLabel>Note to Noor</FieldLabel>
+            <Field.Label>Note to Noor</Field.Label>
             <Textarea placeholder="Running ten minutes late, start without me." />
           </Field>
-          <Label className="justify-between">
-            Remind me 15 minutes before
-            <Switch defaultChecked />
+          <Label>
+            <Label.Text>Remind me 15 minutes before</Label.Text>
+            <Label.Action>
+              <Switch defaultChecked />
+            </Label.Action>
           </Label>
         </Sheet.Body>
         <Sheet.Footer>
@@ -193,7 +198,7 @@ import { Sheet } from "@/components/panelui/sheet"
 ```tsx lineNumbers
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Sheet, type SheetSide } from '@/components/panelui/sheet';
 
 const SIDES: SheetSide[] = ['top', 'right', 'bottom', 'left'];
@@ -234,7 +239,7 @@ With a mouse, the title, description, body and footer are for reading: a double-
 
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Sheet } from '@/components/panelui/sheet';
 
 const CODES = ['7KQ2-M9XD', 'HV4T-28PL', 'Q0RS-6WNE', 'ZB3J-T1YC', 'LM8F-UA5K', 'D6GX-4PEQ', 'W2NH-9VRB', 'C5YT-KJ70'];
@@ -296,7 +301,7 @@ Write a bare `<Sheet.Close />` where the close button should go. Here it is firs
 ```tsx lineNumbers
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Sheet } from '@/components/panelui/sheet';
 
 const GROUPS = [
@@ -355,7 +360,7 @@ export default function SheetOwnClose() {
 'use client';
 
 import { MicIcon, MonitorIcon, MousePointer2Icon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Sheet } from '@/components/panelui/sheet';
 
 const CAPTURED = [
@@ -579,11 +584,11 @@ Declare the second sheet as `Sheet.Next` inside the first, and give a `Sheet.Tri
 'use client';
 
 import { ImageIcon, LogOutIcon, UsersRoundIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
+import { Label } from '@/components/panelui/label';
+import { Switch } from '@/components/panelui/switch';
 import { Frame } from '@/components/panelui/frame';
 import { Sheet } from '@/components/panelui/sheet';
 
@@ -613,12 +618,14 @@ export default function SheetNested() {
         <Sheet.Header title="Album settings" description="Shared with five people · 214 photos" />
         <Sheet.Body className="flex flex-col gap-6">
           <Field>
-            <FieldLabel>Name</FieldLabel>
+            <Field.Label>Name</Field.Label>
             <Input defaultValue="Porto, May" />
           </Field>
-          <Label className="w-full justify-between">
-            Let others add photos
-            <Switch defaultChecked />
+          <Label>
+            <Label.Text>Let others add photos</Label.Text>
+            <Label.Action>
+              <Switch defaultChecked />
+            </Label.Action>
           </Label>
           {/* Each row opens a sheet of its own. They sit wherever the layout wants them. */}
           <Frame variant="plain">
@@ -642,7 +649,7 @@ export default function SheetNested() {
               </Sheet.Trigger>
             </Frame.Panel>
           </Frame>
-          <Sheet.Trigger to="leave" render={<Button variant="destructive-outline" />}>
+          <Sheet.Trigger to="leave" render={<Button variant="destructive" />}>
             <LogOutIcon />
             Leave album
           </Sheet.Trigger>
@@ -721,7 +728,7 @@ A trigger's `payload` reaches the `Sheet.Next` it opens. Give the sheet a functi
 'use client';
 
 import { PhoneIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Frame } from '@/components/panelui/frame';
 import { Sheet } from '@/components/panelui/sheet';
 
@@ -814,9 +821,9 @@ A trigger in the header, beside the title, for an action on the whole sheet's su
 'use client';
 
 import { FileTextIcon, UserPlusIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
 import { Frame } from '@/components/panelui/frame';
 import { Sheet } from '@/components/panelui/sheet';
 
@@ -873,7 +880,7 @@ export default function SheetHeaderTrigger() {
           <Sheet.Header title="Share “Site survey.pdf”" description="People you add can open and comment." />
           <Sheet.Body>
             <Field>
-              <FieldLabel>Email</FieldLabel>
+              <Field.Label>Email</Field.Label>
               <Input type="email" placeholder="name@harbour.works" />
             </Field>
           </Sheet.Body>
@@ -899,9 +906,9 @@ A `Sheet.Next` can hold its own `Sheet.Next`. Here an item opens from the order,
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
 import { Frame } from '@/components/panelui/frame';
 import { Sheet } from '@/components/panelui/sheet';
 
@@ -958,17 +965,17 @@ export default function SheetDeep() {
               <Sheet.Header title={item.name} description={`${money(item.price)} each`} />
               <Sheet.Body className="flex flex-col gap-4">
                 <Field>
-                  <FieldLabel>Quantity</FieldLabel>
+                  <Field.Label>Quantity</Field.Label>
                   <Input type="number" min={1} defaultValue={item.quantity} />
                 </Field>
                 <Field>
-                  <FieldLabel>Note for the picker</FieldLabel>
+                  <Field.Label>Note for the picker</Field.Label>
                   <Input placeholder="A substitute is fine" />
                 </Field>
               </Sheet.Body>
               <Sheet.Footer>
                 <Sheet.Close render={<Button size="lg" />}>Save</Sheet.Close>
-                <Sheet.Trigger to="remove" payload={item} render={<Button size="lg" variant="destructive-outline" />}>
+                <Sheet.Trigger to="remove" payload={item} render={<Button size="lg" variant="destructive" />}>
                   Remove from order
                 </Sheet.Trigger>
               </Sheet.Footer>
@@ -1019,9 +1026,9 @@ Stacking works from every side. A `Sheet.Next` rises from the edge of the sheet 
 'use client';
 
 import { UsersRoundIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/panelui/button';
+import { Field } from '@/components/panelui/field';
+import { Input } from '@/components/panelui/input';
 import { Frame } from '@/components/panelui/frame';
 import { Sheet, type SheetSide } from '@/components/panelui/sheet';
 
@@ -1035,7 +1042,7 @@ function Workspace({ side }: { side: SheetSide }) {
         <Sheet.Header title="Workspace" description="Northwind Studio · 12 members" />
         <Sheet.Body className="flex flex-col gap-6">
           <Field>
-            <FieldLabel>Workspace name</FieldLabel>
+            <Field.Label>Workspace name</Field.Label>
             <Input defaultValue="Northwind Studio" />
           </Field>
           <Frame variant="plain">
@@ -1061,7 +1068,7 @@ function Workspace({ side }: { side: SheetSide }) {
           <Sheet.Header title="Invite people" description="They join as members and can be promoted later." />
           <Sheet.Body>
             <Field>
-              <FieldLabel>Email</FieldLabel>
+              <Field.Label>Email</Field.Label>
               <Input type="email" placeholder="name@northwind.studio" />
             </Field>
           </Sheet.Body>
@@ -1096,8 +1103,8 @@ Everything inside `Sheet.Stage` steps back slightly while a sheet is open, so th
 ```tsx lineNumbers
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/panelui/button';
+import { Table } from '@/components/panelui/table';
 import { Card } from '@/components/panelui/card';
 import { Sheet } from '@/components/panelui/sheet';
 
@@ -1122,15 +1129,15 @@ export default function SheetStageDemo() {
             </Card.Header>
             <Card.Content>
               <Table>
-                <TableBody>
+                <Table.Body>
                   {ACTIVITY.map((row) => (
-                    <TableRow key={row.name}>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{row.date}</TableCell>
-                      <TableCell className="text-end tabular-nums">{row.amount}</TableCell>
-                    </TableRow>
+                    <Table.Row key={row.name}>
+                      <Table.Cell>{row.name}</Table.Cell>
+                      <Table.Cell className="text-muted-foreground">{row.date}</Table.Cell>
+                      <Table.Cell className="text-end tabular-nums">{row.amount}</Table.Cell>
+                    </Table.Row>
                   ))}
-                </TableBody>
+                </Table.Body>
               </Table>
             </Card.Content>
           </Card>

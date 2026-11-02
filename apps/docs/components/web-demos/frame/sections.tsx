@@ -1,19 +1,19 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from 'panelui-web/avatar';
 import { Frame } from 'panelui-web/frame';
 
 const DAYS = [
   {
     day: 'Today',
     events: [
-      { who: 'IF', text: 'Ife commented on Checkout redesign', when: '10:42' },
-      { who: 'TM', text: 'Tomás moved Search ranking to Blocked', when: '09:15' },
+      { who: 'Ife Adeyemi', text: 'Ife commented on Checkout redesign', when: '10:42' },
+      { who: 'Tomás Mendes', text: 'Tomás moved Search ranking to Blocked', when: '09:15' },
     ],
   },
   {
     day: 'Yesterday',
     events: [
-      { who: 'HK', text: 'Hana shipped Onboarding emails', when: '17:30' },
-      { who: 'NH', text: 'Noor invited Pavel to Payments', when: '11:02' },
+      { who: 'Hana Kato', text: 'Hana shipped Onboarding emails', when: '17:30' },
+      { who: 'Noor Haddad', text: 'Noor invited Pavel to Payments', when: '11:02' },
     ],
   },
 ];
@@ -31,9 +31,7 @@ export default function FrameSections() {
             {events.map((event) => (
               <Frame.Row key={event.text}>
                 <Frame.Media>
-                  <Avatar className="size-8">
-                    <AvatarFallback className="text-xs">{event.who}</AvatarFallback>
-                  </Avatar>
+                  <Avatar name={event.who} size="sm" />
                 </Frame.Media>
                 <Frame.Content>
                   <Frame.Title as="p">{event.text}</Frame.Title>

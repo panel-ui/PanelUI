@@ -1,0 +1,30 @@
+{
+  "slug": "badge",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 160
+  },
+  "intro": "Use a badge to label a state (paid, overdue, building) or a kind (draft, beta, a version number) next to the thing it describes.\n\nA badge is not a control. It cannot be pressed, toggled or removed. For a label that does any of those, use [Chip](/docs/web/components/chip).",
+  "usage": "<Badge>New</Badge>\n<Badge variant=\"success\" dot>Paid</Badge>\n<Badge variant=\"info\" dot=\"pulse\">Syncing</Badge>",
+  "examples": [
+    {
+      "title": "Statuses",
+      "description": "`success`, `info`, `warning` and `destructive` are drawn as a tint with text in the same colour, so a column of them reads as states rather than buttons. `dot=\"pulse\"` is for a state that is still changing; use a plain `dot` once it settles.",
+      "demo": "statuses",
+      "height": 240
+    },
+    {
+      "title": "Sizes",
+      "description": "`sm`, `md` and `lg`. Use `sm` inside a dense table row.",
+      "demo": "sizes",
+      "height": 140
+    },
+    {
+      "title": "With an icon",
+      "description": "An icon placed before the text is sized to the badge.",
+      "demo": "icons",
+      "height": 140
+    }
+  ],
+  "notes": "### Choosing a variant\n\n`default` is solid. Keep it for the one badge on a screen that should be seen first. `secondary` and `outline` are for kinds, the four colours for states.\n\n### Reduced motion\n\nThe pulse does not run when the reader has asked for reduced motion. The dot stays."
+}

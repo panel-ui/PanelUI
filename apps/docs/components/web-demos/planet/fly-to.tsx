@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Planet, type PlanetHandle } from 'panelui-web/planet';
 
 const CITIES = [

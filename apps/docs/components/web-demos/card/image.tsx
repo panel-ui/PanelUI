@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from 'panelui-web/badge';
+import { Button } from 'panelui-web/button';
 import { Card } from 'panelui-web/card';
 
 export default function CardImage() {

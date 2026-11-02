@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Flow, type FlowConnection } from 'panelui-web/flow';
 
 /** Each step, and where it sits: across a wide screen, down a narrow one. */

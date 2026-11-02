@@ -1,11 +1,11 @@
 'use client';
 
 import { ImageIcon, LogOutIcon, UsersRoundIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
+import { Label } from 'panelui-web/label';
+import { Switch } from 'panelui-web/switch';
 import { Frame } from 'panelui-web/frame';
 import { Sheet } from 'panelui-web/sheet';
 
@@ -35,12 +35,14 @@ export default function SheetNested() {
         <Sheet.Header title="Album settings" description="Shared with five people · 214 photos" />
         <Sheet.Body className="flex flex-col gap-6">
           <Field>
-            <FieldLabel>Name</FieldLabel>
+            <Field.Label>Name</Field.Label>
             <Input defaultValue="Porto, May" />
           </Field>
-          <Label className="w-full justify-between">
-            Let others add photos
-            <Switch defaultChecked />
+          <Label>
+            <Label.Text>Let others add photos</Label.Text>
+            <Label.Action>
+              <Switch defaultChecked />
+            </Label.Action>
           </Label>
           {/* Each row opens a sheet of its own. They sit wherever the layout wants them. */}
           <Frame variant="plain">
@@ -64,7 +66,7 @@ export default function SheetNested() {
               </Sheet.Trigger>
             </Frame.Panel>
           </Frame>
-          <Sheet.Trigger to="leave" render={<Button variant="destructive-outline" />}>
+          <Sheet.Trigger to="leave" render={<Button variant="destructive" />}>
             <LogOutIcon />
             Leave album
           </Sheet.Trigger>

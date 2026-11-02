@@ -1,7 +1,7 @@
 'use client';
 
 import { BellIcon, CreditCardIcon, ShieldIcon, UserRoundIcon } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from 'panelui-web/switch';
 import { Input } from 'panelui-web/input';
 import { Label } from 'panelui-web/label';
 import { Tabs } from 'panelui-web/tabs';

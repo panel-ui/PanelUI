@@ -10,9 +10,13 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Forms and input
 
+- [Checkbox](components/checkbox.md) — One choice that is on or off, with a tick that draws itself and a parent box for a group.
+- [Chip](components/chip.md) — A pill that can be pressed: a filter turned on and off, or an added value with a × to take it out.
 - [Choice Cards](components/choice-cards.md) — One option chosen from a few, each shown as a picture of what it does.
+- [Field](components/field.md) — A form control with its label, a line of help and its error, wired to each other.
 - [Input](components/input.md) — A single line to type into, with icons, units and buttons set inside its box.
 - [Label](components/label.md) — The name of a field, with its required mark, a hint and an action on one line.
+- [Radio Group](components/radio-group.md) — One choice from a short list, with every option visible and the arrow keys moving between them.
 - [Select](components/select.md) — A button that opens a list of options and shows the one chosen.
 - [Slider](components/slider.md) — A number set by dragging along a track, with its name and value written inside it.
 - [Switch](components/switch.md) — On or off, for a setting that takes effect the moment it changes.
@@ -44,6 +48,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Data
 
 - [Avatar](components/avatar.md) — A person or a team as a picture, or their initials in a colour of their own, with a badge and a group that opens up.
+- [Badge](components/badge.md) — A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.
 - [Bar Picker](components/bar-picker.md) — A short run of values as columns of lights, one column picked.
 - [Day Grid](components/day-grid.md) — A run of days as a field of dots, each sized by how much happened on it.
 - [Flow](components/flow.md) — A canvas of nodes joined by edges, that you pan, zoom and rearrange.
@@ -52,6 +57,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Range Meter](components/range-meter.md) — A reading on a ruler of ticks that rises where the value is, with the number above it.
 - [Rolling Number](components/rolling-number.md) — A number whose digits roll to their new values.
 - [Stat](components/stat.md) — One figure written large, with a label over it, a unit after it and a badge beside it.
+- [Table](components/table.md) — Rows of records with the same columns, with numbers aligned and a header that stays pinned.
 
 ## Feedback and status
 

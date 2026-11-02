@@ -229,7 +229,7 @@ A group's children are ordinary elements, laid out however you like inside it. T
 'use client';
 
 import { useCallback, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/panelui/button';
 import { Flow } from '@/components/panelui/flow';
 
 /** An article on its way to being published. */

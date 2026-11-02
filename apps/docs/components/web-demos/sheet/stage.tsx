@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Button } from 'panelui-web/button';
+import { Table } from 'panelui-web/table';
 import { Card } from 'panelui-web/card';
 import { Sheet } from 'panelui-web/sheet';
 
@@ -26,15 +26,15 @@ export default function SheetStageDemo() {
             </Card.Header>
             <Card.Content>
               <Table>
-                <TableBody>
+                <Table.Body>
                   {ACTIVITY.map((row) => (
-                    <TableRow key={row.name}>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{row.date}</TableCell>
-                      <TableCell className="text-end tabular-nums">{row.amount}</TableCell>
-                    </TableRow>
+                    <Table.Row key={row.name}>
+                      <Table.Cell>{row.name}</Table.Cell>
+                      <Table.Cell className="text-muted-foreground">{row.date}</Table.Cell>
+                      <Table.Cell className="text-end tabular-nums">{row.amount}</Table.Cell>
+                    </Table.Row>
                   ))}
-                </TableBody>
+                </Table.Body>
               </Table>
             </Card.Content>
           </Card>

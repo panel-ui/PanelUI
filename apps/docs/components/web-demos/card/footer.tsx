@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Input } from 'panelui-web/input';
 import { Card } from 'panelui-web/card';
 
 export default function CardFooterVariants() {

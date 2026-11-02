@@ -1,0 +1,49 @@
+{
+  "slug": "radio-group",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use a radio group for one choice out of two to about seven options, where seeing every option at once helps someone choose.\n\nFor options that each need a line of description or a price, use `RadioGroup.Card`. For options best chosen by a picture, use [Choice Cards](/docs/web/components/choice-cards). For more than about seven, use a [Select](/docs/web/components/select). For a choice that applies at once without a form, use [Tabs](/docs/web/components/tabs).",
+  "usage": "<RadioGroup defaultValue=\"standard\" aria-label=\"Delivery\">\n  <Label>\n    <Radio value=\"standard\" />\n    <Label.Text>Standard</Label.Text>\n  </Label>\n  <Label>\n    <Radio value=\"express\" />\n    <Label.Text>Express</Label.Text>\n  </Label>\n</RadioGroup>",
+  "anatomy": "<RadioGroup>\n  <Radio />\n</RadioGroup>\n\n<RadioGroup>\n  <RadioGroup.Card>\n    <RadioGroup.CardBody>\n      <RadioGroup.CardTitle />\n      <RadioGroup.CardDescription />\n    </RadioGroup.CardBody>\n    <RadioGroup.CardAside />\n  </RadioGroup.Card>\n</RadioGroup>",
+  "examples": [
+    {
+      "title": "In a row",
+      "description": "`orientation=\"horizontal\"` sets the radios side by side, and the left and right arrow keys move the choice.",
+      "demo": "horizontal",
+      "height": 120
+    },
+    {
+      "title": "Cards",
+      "description": "`RadioGroup.Card` puts each option in a card with the radio inside it, for options that need a line of description or a price beside the name. The whole card is the target. The default `outline` rings the chosen card.",
+      "demo": "cards",
+      "height": 280
+    },
+    {
+      "title": "Filled cards",
+      "description": "`appearance=\"filled\"` tints the chosen card in its `color`. Cards can sit in a row; a disabled one stays visible so the reader can see it is taken.",
+      "demo": "cards-filled",
+      "height": 200
+    },
+    {
+      "title": "Dither cards",
+      "description": "`appearance=\"dither\"` fills the chosen card from its far edge with an ordered dither in its colour, densest at the edge and thinning before it reaches the text. It sweeps in as the card is chosen and out as it is left.",
+      "demo": "cards-dither",
+      "height": 260
+    },
+    {
+      "title": "Sizes and colours",
+      "description": "`sm`, `md` and `lg`, and a `color` for the chosen radio. Use `destructive` for the option that loses something.",
+      "demo": "colors",
+      "height": 200
+    },
+    {
+      "title": "A disabled option",
+      "description": "`disabled` on one radio leaves the rest usable. Say why with a `Label.Hint`.",
+      "demo": "disabled",
+      "height": 200
+    }
+  ],
+  "notes": "### Keyboard\n\nThe group is one Tab stop. Inside it, the arrow keys move the choice to the next radio, as a native radio group does.\n\n### Motion\n\nThe chosen radio's dot grows in with a small overshoot, and the one it leaves shrinks. With reduced motion turned on, both change at once.\n\n### Exports\n\n`Radio` is also exported as `RadioGroup.Item` and `RadioGroupItem`. The card parts are also exported by name, such as `RadioGroupCard` and `RadioGroupCardTitle`, for a Server Component.\n\n### Reduced motion\n\nThe dither card's sweep and the dot's overshoot are skipped; the chosen card is filled at once."
+}

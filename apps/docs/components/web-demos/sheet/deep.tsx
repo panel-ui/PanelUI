@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Button } from 'panelui-web/button';
+import { Field } from 'panelui-web/field';
+import { Input } from 'panelui-web/input';
 import { Frame } from 'panelui-web/frame';
 import { Sheet } from 'panelui-web/sheet';
 
@@ -60,17 +60,17 @@ export default function SheetDeep() {
               <Sheet.Header title={item.name} description={`${money(item.price)} each`} />
               <Sheet.Body className="flex flex-col gap-4">
                 <Field>
-                  <FieldLabel>Quantity</FieldLabel>
+                  <Field.Label>Quantity</Field.Label>
                   <Input type="number" min={1} defaultValue={item.quantity} />
                 </Field>
                 <Field>
-                  <FieldLabel>Note for the picker</FieldLabel>
+                  <Field.Label>Note for the picker</Field.Label>
                   <Input placeholder="A substitute is fine" />
                 </Field>
               </Sheet.Body>
               <Sheet.Footer>
                 <Sheet.Close render={<Button size="lg" />}>Save</Sheet.Close>
-                <Sheet.Trigger to="remove" payload={item} render={<Button size="lg" variant="destructive-outline" />}>
+                <Sheet.Trigger to="remove" payload={item} render={<Button size="lg" variant="destructive" />}>
                   Remove from order
                 </Sheet.Trigger>
               </Sheet.Footer>

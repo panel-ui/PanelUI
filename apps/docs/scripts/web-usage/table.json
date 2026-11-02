@@ -1,0 +1,31 @@
+{
+  "slug": "table",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 260
+  },
+  "intro": "Use a table for records that share the same columns and are compared down a column: invoices, stock, readings.\n\nFor a list of things with one or two details each, [Frame](/docs/web/components/frame) rows read better on a narrow screen.\n\nA table wider than its container scrolls sideways inside its own box.",
+  "usage": "<Table>\n  <Table.Header>\n    <Table.Row>\n      <Table.Head>Invoice</Table.Head>\n      <Table.Head align=\"end\">Amount</Table.Head>\n    </Table.Row>\n  </Table.Header>\n  <Table.Body>\n    <Table.Row>\n      <Table.Cell>INV-2041</Table.Cell>\n      <Table.Cell align=\"end\">£1,280.00</Table.Cell>\n    </Table.Row>\n  </Table.Body>\n</Table>",
+  "anatomy": "<Table>\n  <Table.Caption />\n  <Table.Header>\n    <Table.Row>\n      <Table.Head />\n    </Table.Row>\n  </Table.Header>\n  <Table.Body>\n    <Table.Row>\n      <Table.Cell />\n    </Table.Row>\n  </Table.Body>\n  <Table.Footer />\n</Table>",
+  "examples": [
+    {
+      "title": "Compact and striped",
+      "description": "`density=\"compact\"` tightens the rows for a dense screen. `striped` shades every other row, which helps keep your place across a wide row.",
+      "demo": "dense",
+      "height": 300
+    },
+    {
+      "title": "Pinned header",
+      "description": "`maxHeight` makes the body scroll, with the header pinned above it. `framed` keeps the first and last columns off the edge of a bordered box.",
+      "demo": "scroll",
+      "height": 360
+    },
+    {
+      "title": "In a Frame",
+      "description": "In a panel with no padding, `framed` lines the columns up with the panel's header.",
+      "demo": "frame",
+      "height": 280
+    }
+  ],
+  "notes": "### Numbers\n\n`align=\"end\"` on a column's head and cells right-aligns it and gives the digits equal widths, so amounts line up on their last digit. Set it on both.\n\n### Accessibility\n\nEvery part is the native table element, and `Table.Head` has `scope=\"col\"`, so a screen reader announces each cell's column. `Table.Caption` names the table."
+}

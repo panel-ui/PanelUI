@@ -2,7 +2,7 @@
 
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Sheet } from 'panelui-web/sheet';
 
 const CODES = ['7KQ2-M9XD', 'HV4T-28PL', 'Q0RS-6WNE', 'ZB3J-T1YC', 'LM8F-UA5K', 'D6GX-4PEQ', 'W2NH-9VRB', 'C5YT-KJ70'];

@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Button } from 'panelui-web/button';
+import { Switch } from 'panelui-web/switch';
 import { Frame } from 'panelui-web/frame';
 
 export default function FrameInset() {

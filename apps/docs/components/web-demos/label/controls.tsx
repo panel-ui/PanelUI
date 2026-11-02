@@ -1,7 +1,7 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
+import { Checkbox } from 'panelui-web/checkbox';
+import { Switch } from 'panelui-web/switch';
 import { Label } from 'panelui-web/label';
 
 export default function LabelControls() {

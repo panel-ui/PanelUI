@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from 'panelui-web/button';
 import { Flow, type FlowNodePosition } from 'panelui-web/flow';
 
 const IDS = ['brief', 'sketch', 'review', 'final'] as const;

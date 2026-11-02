@@ -1,0 +1,31 @@
+{
+  "slug": "checkbox",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use a checkbox for a choice that applies when a form is sent, such as accepting terms, or for picking any number of items from a list.\n\nFor a setting that takes effect the moment it changes, use a [Switch](/docs/web/components/switch). For one choice out of several, use a [Radio Group](/docs/web/components/radio-group).\n\nGive every checkbox a name. Wrap it in a [Label](/docs/web/components/label), or pass `label` when its name is shown elsewhere.",
+  "usage": "<Label>\n  <Checkbox defaultChecked />\n  <Label.Text>Email me a receipt</Label.Text>\n</Label>",
+  "anatomy": "<Checkbox.Group>\n  <Checkbox parent />\n  <Checkbox value=\"…\" />\n</Checkbox.Group>",
+  "examples": [
+    {
+      "title": "Select all",
+      "description": "In a `Checkbox.Group` with `allValues`, a checkbox marked `parent` is checked when every member is, shows a dash when some are, and checks or clears them all when pressed.",
+      "demo": "parent",
+      "height": 240
+    },
+    {
+      "title": "Sizes and colours",
+      "description": "`sm`, `md` and `lg`. `indeterminate` draws a dash. `color` sets the fill: use `destructive` for a box whose meaning is that something will be lost.",
+      "demo": "colors",
+      "height": 220
+    },
+    {
+      "title": "Required",
+      "description": "In a [Field](/docs/web/components/field), a `required` checkbox shows the field's error when the form is sent unticked.",
+      "demo": "form",
+      "height": 200
+    }
+  ],
+  "notes": "### Motion\n\nThe tick is drawn as a line, the way a pen makes it, and is drawn back out when unchecked. With reduced motion turned on, it appears at once.\n\n### In a form\n\nPass `name` and the checkbox submits with the form. `value` sets what it submits, and is what a `Checkbox.Group` holds."
+}

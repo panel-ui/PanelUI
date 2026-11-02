@@ -63,6 +63,7 @@ import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { cn } from '../../utils/cn';
 import { Text, type TextProps } from '../../primitives/text';
+import { webDeps } from '../../primitives/web-deps';
 
 const AnimatedText = Animated.createAnimatedComponent(RNText);
 
@@ -651,7 +652,7 @@ function TextAnimationCounting({
     (current, previous) => {
       if (current !== previous) runOnJS(setShown)(current);
     },
-    [factor]
+    webDeps([factor])
   );
 
   return (

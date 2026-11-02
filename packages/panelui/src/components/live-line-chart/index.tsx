@@ -69,6 +69,7 @@ import {
   View,
   type LayoutChangeEvent,
   type ViewProps,
+  type AppStateStatus,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -457,7 +458,7 @@ const LiveLineChartRoot = forwardRef<LiveLineChartHandle, LiveLineChartProps>(
       now.value = Date.now();
     }, false);
 
-    const running = liveLineClockRuns({ paused, loading, reducedMotion, appState });
+    const running = liveLineClockRuns({ paused, loading, reducedMotion, appState: appState as AppStateStatus });
 
     useEffect(() => {
       frame.setActive(running);

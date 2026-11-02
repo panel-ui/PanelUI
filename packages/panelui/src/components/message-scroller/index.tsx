@@ -49,7 +49,6 @@ import {
   type LayoutChangeEvent,
   type ListRenderItemInfo,
   type ViewProps,
-  type ViewToken,
 } from 'react-native';
 import Animated, {
   runOnJS,
@@ -74,6 +73,7 @@ import {
   messageScrollerIndex,
   MESSAGE_SCROLLER_EDGE_THRESHOLD,
 } from './message-scroller-math';
+import type { ViewTokenOf } from '../../primitives/refs';
 
 /**
  * How much of the previous turn is left showing above an anchored one. Scrolling
@@ -617,9 +617,9 @@ function MessageScrollerList<T extends MessageScrollerListItem>({
   };
 
   const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken<T>[] }) => {
-      const first = viewableItems.reduce(
-        (best, token) => (token.index !== null && token.index < best ? token.index : best),
+    ({ viewableItems }: { viewableItems: ViewTokenOf<T>[] }) => {
+      const first = viewableItems.reduce<number>(
+        (best, token) => (token.index != null && token.index < best ? token.index : best),
         Infinity
       );
       firstVisibleIndex.current = Number.isFinite(first) ? first : null;

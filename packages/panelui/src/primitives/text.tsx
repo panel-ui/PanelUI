@@ -2,6 +2,7 @@ import { Children, forwardRef, type ReactElement, type ReactNode } from 'react';
 import { Text as RNText, type Text as RNTextType, type TextProps as RNTextProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { useDirection } from '../hooks/use-direction';
+import type { TextRef } from './refs';
 
 const textVariants = tv({
   base: 'text-foreground',
@@ -35,7 +36,7 @@ export interface TextProps extends RNTextProps, VariantProps<typeof textVariants
   className?: string;
 }
 
-export const Text = forwardRef<RNTextType, TextProps>(
+export const Text = forwardRef<TextRef, TextProps>(
   ({ className, size, weight, muted, style, ...props }, ref) => {
     /*
      * `direction` is a Yoga *layout* property, and React Native resolves a

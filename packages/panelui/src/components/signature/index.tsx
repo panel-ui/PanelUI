@@ -92,6 +92,7 @@ import {
   signatureAnnouncement,
   type SignatureChangeKind,
 } from './signature-accessibility';
+import type { ViewRef } from '../../primitives/refs';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -333,7 +334,7 @@ function SignatureRoot(
   // The live stroke: a flat buffer so the worklet reads numbers rather than
   // objects, which is what keeps the per-frame cost flat.
   const live = useSharedValue<number[]>([]);
-  const padRef = useRef<View>(null);
+  const padRef = useRef<ViewRef>(null);
 
   const inkToken = useCSSVariable('--color-foreground');
   const ink =

@@ -86,6 +86,7 @@ import { useScrollProgress } from '../../primitives/scroll-progress';
 import { Text, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import { webDeps } from '../../primitives/web-deps';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -383,7 +384,7 @@ function SectionProgressRoot({
       const clamped = next < 0 ? 0 : next > 1 ? 1 : next;
       filled.value = withTiming(clamped, { duration: PROGRESS_EASE });
     },
-    [progress, source]
+    webDeps([progress, source])
   );
 
   const radius = (RING_SIZE - RING_STROKE) / 2;
@@ -413,7 +414,7 @@ function SectionProgressRoot({
     (next, previous) => {
       if (next !== previous) runOnJS(setRevealed)(next);
     },
-    [revealAt, source]
+    webDeps([revealAt, source])
   );
 
   const shown = useSharedValue(revealAt <= 0 ? 1 : 0);

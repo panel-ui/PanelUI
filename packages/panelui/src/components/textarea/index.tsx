@@ -24,7 +24,6 @@ import {
   TextInput,
   View,
   type NativeSyntheticEvent,
-  type TextInputContentSizeChangeEventData,
   type TextInputProps,
 } from 'react-native';
 import Animated, {
@@ -40,7 +39,7 @@ import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
 import { Text } from '../../primitives/text';
 import { Label } from '../label';
 import { textareaIsDisabled } from './textarea-disabled';
-import type { TextInputRef } from '../../primitives/refs';
+import type { ContentSizeChangeEvent, TextInputRef } from '../../primitives/refs';
 
 /** Long enough to read as a transition, short enough not to lag a fast tab. */
 const FOCUS_DURATION = 150;
@@ -284,7 +283,7 @@ export const Textarea = forwardRef<TextInputRef, TextareaProps>(
     );
 
     const handleContentSizeChange = useCallback(
-      (event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
+      (event: ContentSizeChangeEvent) => {
         if (autoGrow) {
           setContentHeight(event.nativeEvent.contentSize.height);
         }

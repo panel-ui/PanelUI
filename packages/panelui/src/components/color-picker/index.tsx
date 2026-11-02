@@ -64,6 +64,8 @@ import {
   useState,
   type ReactElement,
   type ReactNode,
+  type ComponentType as MaskComponentType,
+  type ReactElement as MaskReactElement,
 } from 'react';
 import {
   Pressable,
@@ -72,8 +74,9 @@ import {
   type AccessibilityActionEvent,
   type LayoutChangeEvent,
   type ViewStyle,
+  type ViewProps,
 } from 'react-native';
-import MaskedView from '@react-native-masked-view/masked-view';
+import MaskedViewNative from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -110,6 +113,16 @@ import { selectionTick } from '../../utils/haptics';
 import { Popover, type PopoverContentProps } from '../popover';
 import { enabledColorPickerAction } from './color-picker-accessibility';
 import type { ViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
+
+/*
+ * The masked view's own declarations build its class from a React Native type
+ * that 0.88 removed, so on 0.88 it cannot be used as JSX at all. It is typed
+ * here by its props instead, which is all this file relies on.
+ */
+const MaskedView = MaskedViewNative as unknown as MaskComponentType<
+  ViewProps & { maskElement: MaskReactElement; androidRenderingMode?: 'software' | 'hardware' }
+>;
 
 /** Settles a thumb that was moved by something other than a finger. */
 const TIMING = { duration: 140 } as const;
@@ -679,7 +692,7 @@ interface ChannelTrackProps {
   disabled: boolean;
   accessibilityValue: { min: number; max: number; now: number; text: string };
   onAccessibilityAction: (event: AccessibilityActionEvent) => void;
-  innerRef: React.ForwardedRef<View>;
+  innerRef: React.ForwardedRef<ViewRef>;
 }
 
 function ChannelTrack({
@@ -1049,7 +1062,7 @@ const ColorPickerPreview = forwardRef<ViewRef, ColorPickerPreviewProps>(
       (current, previous) => {
         if (current !== previous) runOnJS(setPrinted)(current);
       },
-      [format]
+      webDeps([format])
     );
 
     const fillStyle = useAnimatedStyle(() => ({
@@ -1274,7 +1287,7 @@ const ColorPickerField = forwardRef<ViewRef, ColorPickerFieldProps>(
       (current, previous) => {
         if (current !== previous) runOnJS(setPrinted)(current);
       },
-      [format]
+      webDeps([format])
     );
 
     const fillStyle = useAnimatedStyle(() => ({
@@ -1384,7 +1397,7 @@ const ColorPickerChannelReadout = forwardRef<ViewRef, ColorPickerChannelProps>(
       (current, previous) => {
         if (current !== previous) runOnJS(setValue)(current);
       },
-      [channel]
+      webDeps([channel])
     );
 
     const text = format

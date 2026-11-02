@@ -67,6 +67,7 @@ import { NativeHost, getSwiftUI } from '../../native';
 import { BottomSheet } from '../bottom-sheet';
 import { Text, type TextProps, textChildren } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+import type { ViewRef } from '../../primitives/refs';
 
 /** Gap between the trigger and the panel. */
 const DEFAULT_OFFSET = 8;
@@ -355,7 +356,7 @@ export interface PopoverTriggerProps {
  */
 function PopoverTrigger({ children }: PopoverTriggerProps) {
   const { open, setOpen, setTrigger, native } = usePopover('Popover.Trigger');
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewRef>(null);
 
   const measureThenToggle = (...args: unknown[]) => {
     if (isValidElement(children)) children.props.onPress?.(...args);

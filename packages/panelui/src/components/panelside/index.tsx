@@ -132,6 +132,7 @@ import { useBackHandler } from '../../hooks/use-back-handler';
 import { useDirectionSign } from '../../hooks/use-direction';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import { webDeps } from '../../primitives/web-deps';
 
 const SPRING = { damping: 24, stiffness: 300, mass: 0.7 } as const;
 
@@ -630,7 +631,7 @@ function PanelsideRoot({
   const extent = Math.max(1, mode === 'push' ? width + GAP : width);
 
   const translation = useSharedValue(open ? extent : 0);
-  const progress = useDerivedValue(() => translation.value / extent, [extent]);
+  const progress = useDerivedValue(() => translation.value / extent, webDeps([extent]));
 
   /*
    * Which end state a spring is already heading for, so the effect below does
@@ -827,7 +828,7 @@ function PanelsidePanel({ className, children, style, ...props }: PanelsidePanel
     const p = docked ? 1 : progress.value;
     const distance = mode === 'overlay' ? width : width * PARALLAX;
     return { transform: [{ translateX: -(1 - p) * distance }] };
-  }, [docked, mode, width]);
+  }, webDeps([docked, mode, width]));
 
   /*
    * Out of the accessibility tree until it is nearly all the way in. A panel
@@ -840,7 +841,7 @@ function PanelsidePanel({ className, children, style, ...props }: PanelsidePanel
     return Platform.OS === 'android'
       ? { importantForAccessibility: hidden ? 'no-hide-descendants' : 'auto' }
       : { accessibilityElementsHidden: hidden };
-  }, [docked]);
+  }, webDeps([docked]));
 
   const surface = useMemo<PanelsideSurfaceValue>(
     () => ({ footerHeight, setFooterHeight }),
@@ -1794,12 +1795,12 @@ function PanelsideScene({
       ],
       borderRadius: p * radius,
     };
-  }, [pushes, radius, scale, sceneWidth, sign, width]);
+  }, webDeps([pushes, radius, scale, sceneWidth, sign, width]));
 
   const scrimStyle = useAnimatedStyle(() => {
     const p = docked ? 0 : progress.value;
     return { opacity: p * dim };
-  }, [dim, docked]);
+  }, webDeps([dim, docked]));
 
   /*
    * The edge is drawn as its own layer rather than as a border on the scene.
@@ -1811,14 +1812,14 @@ function PanelsideScene({
   const ringStyle = useAnimatedStyle(() => {
     const p = docked ? 0 : progress.value;
     return { opacity: p * EDGE_OPACITY, borderRadius: p * radius };
-  }, [docked, radius]);
+  }, webDeps([docked, radius]));
 
   const animatedProps = useAnimatedProps<ViewProps>(() => {
     const hidden = !docked && progress.value > 1 - HIDDEN_EPSILON;
     return Platform.OS === 'android'
       ? { importantForAccessibility: hidden ? 'no-hide-descendants' : 'auto' }
       : { accessibilityElementsHidden: hidden };
-  }, [docked]);
+  }, webDeps([docked]));
 
   return (
     <Animated.View

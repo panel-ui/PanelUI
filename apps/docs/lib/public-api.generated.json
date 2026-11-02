@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1500,
+    "exports": 1501,
     "values": 374,
-    "types": 1126,
+    "types": 1127,
     "modules": 169,
     "components": 141,
     "hooks": 13
@@ -6740,6 +6740,10 @@
           },
           {
             "name": "TextInputRef",
+            "kind": "type"
+          },
+          {
+            "name": "ScrollViewRef",
             "kind": "type"
           }
         ]

@@ -46,7 +46,8 @@ test('the strip is in the right place on the frame it first appears', () => {
   // commit is the one where the strip mounts: the transform evaluated to
   // `-position × 0`, which is the first panel whichever tab is active.
   assert.match(source, /translateX: -position\.value \* width \* sign/);
-  assert.match(source, /\[width, sign\]\s*\);/);
+  // The list is what the web build rebuilds on; native reads `width` through the worklet's closure.
+  assert.match(source, /webDeps\(\[width, sign\]\)\s*\);/);
 });
 
 test('a value that is not among the panels holds its place', () => {

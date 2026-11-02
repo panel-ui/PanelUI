@@ -83,6 +83,7 @@ import { useKeyboard } from '../../hooks/use-keyboard';
 import { cn } from '../../utils/cn';
 import { Chip } from '../chip';
 import { Spinner } from '../spinner';
+import type { TextInputRef, ViewRef } from '../../primitives/refs';
 
 /** Matches Input's focus crossfade, so the two read as the same control. */
 const FOCUS_DURATION = 150;
@@ -465,8 +466,8 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
    * `measureInWindow`. `inline` never reads the anchor, so the list it also
    * wraps cannot skew anything.
    */
-  const fieldRef = useRef<View>(null);
-  const inputRef = useRef<TextInput>(null);
+  const fieldRef = useRef<ViewRef>(null);
+  const inputRef = useRef<TextInputRef>(null);
   const { height: screenHeight } = useWindowDimensions();
   /*
    * The keyboard is up whenever this list is open — the field is a text input

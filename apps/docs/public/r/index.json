@@ -50,6 +50,7 @@
       "icons",
       "keyboard-avoider",
       "native",
+      "refs",
       "soundwave",
       "switch",
       "text",
@@ -153,7 +154,8 @@
     "registryDependencies": [
       "button",
       "cn",
-      "icons"
+      "icons",
+      "refs"
     ],
     "docsPath": "components/avatar-cropper"
   },
@@ -317,6 +319,7 @@
       "date",
       "icons",
       "popover",
+      "refs",
       "text"
     ],
     "docsPath": "components/calendar"
@@ -519,7 +522,8 @@
       "popover",
       "refs",
       "text",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "components/color-picker"
   },
@@ -535,6 +539,7 @@
       "cn",
       "icons",
       "portal",
+      "refs",
       "spinner",
       "text",
       "use-back-handler",
@@ -569,7 +574,8 @@
       "haptics",
       "menu",
       "popover",
-      "portal"
+      "portal",
+      "refs"
     ],
     "docsPath": "components/context-menu"
   },
@@ -722,7 +728,8 @@
       "refs",
       "scrim",
       "text",
-      "use-back-handler"
+      "use-back-handler",
+      "web-deps"
     ],
     "docsPath": "components/fab"
   },
@@ -975,6 +982,7 @@
       "haptics",
       "icons",
       "portal",
+      "refs",
       "scrim",
       "text",
       "use-back-handler",
@@ -1192,7 +1200,8 @@
     "registryDependencies": [
       "cn",
       "text",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "components/marquee"
   },
@@ -1240,6 +1249,7 @@
       "animated-pressable",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/message-scroller"
@@ -1387,7 +1397,8 @@
       "menu",
       "text",
       "use-back-handler",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "ai-components/panelside"
   },
@@ -1482,6 +1493,7 @@
       "cn",
       "native",
       "portal",
+      "refs",
       "scrim",
       "text",
       "use-back-handler"
@@ -1797,7 +1809,8 @@
       "refs",
       "scrim",
       "text",
-      "use-theme"
+      "use-theme",
+      "web-deps"
     ],
     "docsPath": "components/scroll-header"
   },
@@ -1808,7 +1821,9 @@
     "group": "components",
     "stability": "stable",
     "description": "Shares UI-thread scroll offset, viewport, content size and scroller position with descendants.",
-    "registryDependencies": []
+    "registryDependencies": [
+      "refs"
+    ]
   },
   {
     "name": "scroll-text",
@@ -1854,7 +1869,8 @@
       "haptics",
       "scroll-progress",
       "text",
-      "use-back-handler"
+      "use-back-handler",
+      "web-deps"
     ],
     "docsPath": "components/section-progress"
   },
@@ -1887,6 +1903,7 @@
       "input-group",
       "native",
       "portal",
+      "refs",
       "text",
       "use-back-handler"
     ],
@@ -1950,6 +1967,7 @@
       "animated-pressable",
       "cn",
       "icons",
+      "refs",
       "text"
     ],
     "docsPath": "components/signature"
@@ -1978,7 +1996,8 @@
       "bottom-sheet",
       "cn",
       "color-picker",
-      "haptics"
+      "haptics",
+      "refs"
     ],
     "docsPath": "components/sketch"
   },
@@ -1992,6 +2011,7 @@
     "registryDependencies": [
       "haptics",
       "icons",
+      "refs",
       "text",
       "use-direction"
     ],
@@ -2044,7 +2064,8 @@
     "registryDependencies": [
       "cn",
       "haptics",
-      "icons"
+      "icons",
+      "web-deps"
     ],
     "docsPath": "components/sortable"
   },
@@ -2107,7 +2128,8 @@
     "description": "Panes that share a container, with a seam between them you can drag.",
     "registryDependencies": [
       "haptics",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "components/splitter"
   },
@@ -2125,7 +2147,8 @@
       "haptics",
       "icons",
       "refs",
-      "text"
+      "text",
+      "web-deps"
     ],
     "docsPath": "components/stack-card"
   },
@@ -2232,8 +2255,10 @@
     "description": "Segmented navigation with an animated indicator.",
     "registryDependencies": [
       "cn",
+      "refs",
       "text",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "components/tabs"
   },
@@ -2278,6 +2303,7 @@
     "stability": "stable",
     "description": "Themed text with a size, weight and muted scale. Most components build on it.",
     "registryDependencies": [
+      "refs",
       "use-direction"
     ]
   },
@@ -2290,7 +2316,8 @@
     "description": "Five ways a piece of text or a number arrives.",
     "registryDependencies": [
       "cn",
-      "text"
+      "text",
+      "web-deps"
     ],
     "docsPath": "components/text-animation"
   },
@@ -2367,6 +2394,7 @@
       "haptics",
       "icons",
       "popover",
+      "refs",
       "text",
       "time"
     ],
@@ -2430,6 +2458,7 @@
     "registryDependencies": [
       "cn",
       "portal",
+      "refs",
       "text"
     ],
     "docsPath": "components/tooltip"
@@ -2446,6 +2475,7 @@
       "cn",
       "icons",
       "portal",
+      "refs",
       "text",
       "use-back-handler"
     ],
@@ -2462,7 +2492,8 @@
       "icons",
       "refs",
       "text",
-      "use-direction"
+      "use-direction",
+      "web-deps"
     ],
     "docsPath": "components/tree"
   },
@@ -2574,7 +2605,9 @@
     "group": "hooks",
     "stability": "stable",
     "description": "Lift an element just clear of the software keyboard.",
-    "registryDependencies": [],
+    "registryDependencies": [
+      "refs"
+    ],
     "docsPath": "hooks/use-keyboard-avoidance"
   },
   {
@@ -2595,6 +2628,7 @@
     "stability": "stable",
     "description": "Reports how far an element has travelled through its scroll viewport.",
     "registryDependencies": [
+      "refs",
       "scroll-progress"
     ],
     "docsPath": "hooks/use-reveal-progress"
@@ -2606,7 +2640,9 @@
     "group": "hooks",
     "stability": "stable",
     "description": "Tracks the active measured section and scrolls directly to one.",
-    "registryDependencies": [],
+    "registryDependencies": [
+      "refs"
+    ],
     "docsPath": "hooks/use-scroll-sections"
   },
   {
@@ -2667,5 +2703,14 @@
       "use-skeleton-handoff"
     ],
     "docsPath": "charts/waterfall-chart"
+  },
+  {
+    "name": "web-deps",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "Passes a Reanimated dependency list on the web only, where it is used.",
+    "registryDependencies": []
   }
 ]

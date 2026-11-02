@@ -266,7 +266,7 @@ export const OtpInput = forwardRef<TextInputRef, OtpInputProps>(
     const invalid = isInvalid || !!errorMessage;
 
     const [focused, setFocused] = useState(false);
-    const inputRef = useRef<TextInput | null>(null);
+    const inputRef = useRef<TextInputRef | null>(null);
 
     // A one-shot guard so onComplete fires on the transition to full, not on
     // every keystroke that leaves the field full (e.g. a trailing focus event).
@@ -275,7 +275,7 @@ export const OtpInput = forwardRef<TextInputRef, OtpInputProps>(
     const slots = otpVariants({ size, disabled: !!disabled });
 
     const setRef = useCallback(
-      (node: TextInput | null) => {
+      (node: TextInputRef | null) => {
         inputRef.current = node;
         if (typeof ref === 'function') ref(node);
         else if (ref) ref.current = node;

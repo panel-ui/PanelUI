@@ -82,6 +82,7 @@ import { ColorPicker } from '../color-picker';
 import { AnimatedPressable } from '../../primitives/animated-pressable';
 import { cn } from '../../utils/cn';
 import { selectionTick } from '../../utils/haptics';
+import type { ViewRef } from '../../primitives/refs';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -580,7 +581,7 @@ function SketchRoot(
   const [layout, setLayout] = useState({ width: 0, height: 0 });
 
   const ink = color ?? foreground;
-  const canvasRef = useRef<View>(null);
+  const canvasRef = useRef<ViewRef>(null);
 
   // Mirrors of the state the gesture reads, so it is built once and the live
   // stroke is drawn in the tool and width chosen at the moment it started.

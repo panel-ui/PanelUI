@@ -72,6 +72,7 @@ import { cn } from '../../utils/cn';
 import { BottomSheet, bottomSheetDetentHeight } from '../bottom-sheet';
 import { InputGroup } from '../input-group';
 import { nativeSelectSupportsOptions } from './native-select-contract';
+import type { ViewRef } from '../../primitives/refs';
 
 const selectVariants = tv({
   slots: {
@@ -553,7 +554,7 @@ function SelectRoot({
   const [query, setQuery] = useState('');
   const [anchor, setAnchor] = useState<Anchor | null>(null);
   const [listHeight, setListHeight] = useState(0);
-  const triggerRef = useRef<View>(null);
+  const triggerRef = useRef<ViewRef>(null);
   const chevron = useSharedValue(0);
   const { height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();

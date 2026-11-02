@@ -42,6 +42,7 @@ import Animated, {
   type AnimatedScrollViewProps,
   type SharedValue,
 } from 'react-native-reanimated';
+import type { ViewRef } from './refs';
 
 export interface ScrollProgressValue {
   /** Distance scrolled, in pixels. */
@@ -90,7 +91,7 @@ export function ScrollProgress({ className, children, ...props }: ScrollProgress
   const viewport = useSharedValue(0);
   const content = useSharedValue(0);
   const top = useSharedValue(0);
-  const hostRef = useRef<View>(null);
+  const hostRef = useRef<ViewRef>(null);
 
   const child = Children.only(children) as ReactElement<ScrollableProps>;
 

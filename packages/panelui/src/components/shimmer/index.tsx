@@ -13,7 +13,7 @@
  * Set `as="view"` to shimmer arbitrary children (skeleton blocks, cards) — the
  * mask is then the rendered subtree's alpha instead of a line of text.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ComponentType, type ReactElement, type ReactNode } from 'react';
 import {
   StyleSheet,
   View,
@@ -22,7 +22,7 @@ import {
   type TextStyle,
   type ViewProps,
 } from 'react-native';
-import MaskedView from '@react-native-masked-view/masked-view';
+import MaskedViewNative from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   cancelAnimation,
@@ -37,6 +37,15 @@ import { useCSSVariable } from 'uniwind';
 import { useDirectionSign } from '../../hooks/use-direction';
 import { Text } from '../../primitives/text';
 import { cn } from '../../utils/cn';
+
+/*
+ * The masked view's own declarations build its class from a React Native type
+ * that 0.88 removed, so on 0.88 it cannot be used as JSX at all. It is typed
+ * here by its props instead, which is all this file relies on.
+ */
+const MaskedView = MaskedViewNative as unknown as ComponentType<
+  ViewProps & { maskElement: ReactElement; androidRenderingMode?: 'software' | 'hardware' }
+>;
 
 export interface ShimmerProps extends ViewProps {
   className?: string;

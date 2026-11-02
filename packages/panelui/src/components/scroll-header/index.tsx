@@ -137,6 +137,7 @@ import {
   snapTarget,
 } from './scroll-header-math';
 import type { TextRef, ViewRef } from '../../primitives/refs';
+import { webDeps } from '../../primitives/web-deps';
 
 /**
  * Height of the pinned bar, in points, before the device's top inset is added.
@@ -352,7 +353,7 @@ const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
         : withTiming(next, { duration: HANDOVER_DURATION });
       if (externalProgress) externalProgress.value = value;
       return value;
-    }, [threshold, externalProgress]);
+    }, webDeps([threshold, externalProgress]));
 
     // The one thing the transition tells React about. `collapsed` gates the
     // accessibility of the two titles and is what `onCollapsedChange` reports;
@@ -371,7 +372,7 @@ const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
         if (!isCrossing(isCollapsed, was)) return;
         runOnJS(cross)(isCollapsed);
       },
-      [cross]
+      webDeps([cross])
     );
 
     const settle = useCallback(
@@ -461,7 +462,7 @@ const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
           settle(0);
         },
       },
-      [settle, forwards, forwardScroll]
+      webDeps([settle, forwards, forwardScroll])
     );
 
     const onScroll = useComposedEventHandler([
@@ -489,7 +490,7 @@ const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
       () => ({
         height: bandHeight(barBand, largeHeight.value, offset.value, stretch && !reducedMotion),
       }),
-      [barBand, stretch, reducedMotion]
+      webDeps([barBand, stretch, reducedMotion])
     );
 
     const metrics = useMemo<BandMetrics>(

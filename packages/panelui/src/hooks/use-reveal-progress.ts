@@ -36,6 +36,7 @@ import {
   type SharedValue,
 } from 'react-native-reanimated';
 import { useScrollProgress } from '../primitives/scroll-progress';
+import type { ViewRef } from '../primitives/refs';
 
 export interface UseRevealProgressOptions {
   /**
@@ -59,7 +60,7 @@ export interface UseRevealProgressOptions {
 
 export interface UseRevealProgressResult {
   /** Attach to the element whose travel drives the effect. */
-  ref: AnimatedRef<View>;
+  ref: AnimatedRef<ViewRef>;
   /**
    * Attach to the same element. It is what says the element can be measured —
    * without it the effect still works, at the cost of a warning per frame for
@@ -76,7 +77,7 @@ export function useRevealProgress({
   progress: external,
   enabled = true,
 }: UseRevealProgressOptions = {}): UseRevealProgressResult {
-  const ref = useAnimatedRef<View>();
+  const ref = useAnimatedRef<ViewRef>();
   const scroll = useScrollProgress();
   const { height: windowHeight } = useWindowDimensions();
 

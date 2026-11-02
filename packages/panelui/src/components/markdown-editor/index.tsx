@@ -59,7 +59,6 @@ import {
   View,
   type NativeSyntheticEvent,
   type TextInput,
-  type TextInputSelectionChangeEventData,
   type ViewProps,
 } from 'react-native';
 import { tv } from 'tailwind-variants';
@@ -97,7 +96,7 @@ import {
   type EditResult,
   type EditorSelection,
 } from './markdown-transforms';
-import type { TextInputRef, ViewRef } from '../../primitives/refs';
+import type { SelectionChangeEvent, TextInputRef, ViewRef } from '../../primitives/refs';
 
 export type { EditorSelection, EditResult } from './markdown-transforms';
 
@@ -305,7 +304,7 @@ interface MarkdownEditorContextValue {
   clearPending: () => void;
   onChangeText: (next: string) => void;
   /** Registers the field, so the root's ref can focus it. */
-  registerField: (field: TextInput | null) => void;
+  registerField: (field: TextInputRef | null) => void;
   disabled: boolean;
 }
 
@@ -327,7 +326,7 @@ function useMarkdownEditor(part: string): MarkdownEditorContextValue {
  */
 export interface MarkdownEditorHandle {
   /** The container, for measuring and for anything a `View` ref is good for. */
-  readonly view: View | null;
+  readonly view: ViewRef | null;
   /** Runs one of the toolbar's actions against the current selection. */
   apply: (action: MarkdownEditorAction) => void;
   /** Which actions are already in effect where the caret is. */
@@ -408,8 +407,8 @@ const MarkdownEditorRoot = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>
     ref
   ) => {
     const slots = markdownEditorVariants();
-    const viewRef = useRef<View>(null);
-    const fieldRef = useRef<TextInput | null>(null);
+    const viewRef = useRef<ViewRef>(null);
+    const fieldRef = useRef<TextInputRef | null>(null);
 
     const [internalValue, setInternalValue] = useState(defaultValue);
     const value = valueProp ?? internalValue;
@@ -537,7 +536,7 @@ const MarkdownEditorRoot = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>
       [continueLists, commit, readActive]
     );
 
-    const registerField = useCallback((field: TextInput | null) => {
+    const registerField = useCallback((field: TextInputRef | null) => {
       fieldRef.current = field;
     }, []);
 
@@ -803,7 +802,7 @@ const MarkdownEditorInput = forwardRef<TextInputRef, MarkdownEditorInputProps>(
      * forwarded so a caller's ref still works. Both, rather than either.
      */
     const attach = useCallback(
-      (field: TextInput | null) => {
+      (field: TextInputRef | null) => {
         registerField(field);
         if (typeof ref === 'function') ref(field);
         else if (ref) ref.current = field;
@@ -820,7 +819,7 @@ const MarkdownEditorInput = forwardRef<TextInputRef, MarkdownEditorInputProps>(
      * end of the document instead of between the markers just inserted.
      */
     const handleSelectionChange = useCallback(
-      (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
+      (event: SelectionChangeEvent) => {
         const { selection } = event.nativeEvent;
         setSelection(selection);
         if (

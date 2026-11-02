@@ -176,6 +176,33 @@ passing explicitly.
 <Button startContent={<Feather name="send" size={16} color="white" />}>Launch</Button>
 ```
 
+## Adding a glyph to the built-in set
+
+To add one icon that behaves like the built-in ones, build it with `icon()`. It
+is the factory the whole set is made with, so the new glyph follows the same
+colour order (the prop, then `IconColorProvider`, then its default), draws at the
+same weight, and takes `filled` and the right-to-left mirror the same way.
+
+```tsx
+import HgViewOffIcon from '@hugeicons/core-free-icons/ViewOffIcon';
+import { icon } from 'panelui-native/icons';
+
+export const EyeOffIcon = icon(HgViewOffIcon, { size: 16, color: '#737373' });
+```
+
+The second argument is `IconDefaults`, which is exported too:
+
+| Key | What it sets |
+| --- | --- |
+| `size` | The width and height when the caller passes no `size`. |
+| `color` | The colour when neither a prop nor a provider supplies one. |
+| `strokeWidth` | The line weight, if it should differ from the set's `2`. |
+| `flip` | `true` for a glyph whose meaning is a horizontal direction, so it mirrors in right-to-left layouts. |
+| `fillable` | `true` for a toggle glyph that can be drawn solid with `filled`. |
+
+In a project that copied the components in with the CLI, import `icon` from
+`@/components/ui/icons` instead.
+
 ## Next
 
 <Cards>

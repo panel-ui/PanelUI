@@ -25,10 +25,13 @@
  *
  * An action that goes to another page is a link, whatever it looks like, so
  * that it opens in a new tab and reads as a link to a screen reader. Pass the
- * link as `render` and the button's look is put on it:
- * `<Button render={<a href="/" />}>Home</Button>`.
+ * link as `render` and the button's look and behaviour are put on it:
+ * `<Button render={<a href="/" />}>Home</Button>`. The button is the headless
+ * button primitive underneath, so keyboard handling, `disabled` and focus work
+ * the same whatever it is drawn as.
  */
-import { cloneElement, type ComponentProps, type ReactElement } from 'react';
+import { Button as BaseButton } from '@base-ui/react/button';
+import { isValidElement, type ComponentProps, type ReactElement } from 'react';
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const buttonVariants = tv({
@@ -83,10 +86,16 @@ export interface ButtonProps extends ComponentProps<'button'> {
   loading?: boolean;
   /**
    * An element to draw the button as, such as `<a href="/" />` or a router's
-   * link. It takes the button's classes and children; `type`, `disabled` and
-   * `loading` do not apply to it.
+   * link, or a function of the props and state that returns one. It takes the
+   * button's classes, children, ref and event handlers. A link stays a link: it
+   * is not given `type`, and Space does not press it.
    */
-  render?: ReactElement<Record<string, unknown>>;
+  render?: BaseButton.Props['render'];
+  /**
+   * Whether `render` draws a native `<button>`. Set automatically for an
+   * element; pass it when `render` is a function that returns something else.
+   */
+  nativeButton?: boolean;
 }
 
 function Spinner() {
@@ -117,32 +126,28 @@ function ButtonRoot({
   className,
   children,
   render,
+  nativeButton,
   ...props
 }: ButtonProps) {
-  if (render) {
-    const own = render.props as { className?: string };
-    return cloneElement(render, {
-      ...props,
-      'data-slot': 'button',
-      'data-variant': variant ?? 'default',
-      className: buttonVariants({ variant, size, shape, className: [className, own.className] }),
-      children,
-    });
-  }
+  // An element to render tells whether it is a native button; a function cannot, so it says.
+  const native = nativeButton ?? (render === undefined || (isValidElement(render) && render.type === 'button'));
   return (
-    <button
-      type={type}
+    <BaseButton
+      type={native ? type : undefined}
       data-slot="button"
       data-variant={variant ?? 'default'}
       aria-busy={loading || undefined}
       disabled={disabled || loading}
+      focusableWhenDisabled={loading}
+      nativeButton={native}
+      render={render as ReactElement | undefined}
       className={buttonVariants({ variant, size, shape, className })}
-      {...props}
+      {...(props as Omit<BaseButton.Props, 'className'>)}
     >
       {loading ? <Spinner /> : null}
       {/* `contents`, so the label still lays out in the button's own row. */}
       <span className={loading ? 'invisible contents' : 'contents'}>{children}</span>
-    </button>
+    </BaseButton>
   );
 }
 ButtonRoot.displayName = 'Button';

@@ -440,5 +440,14 @@
       "addedIn": "0.11.0",
       "category": "data"
     }
+  ],
+  "toast": [
+    "Toast",
+    "A short message that leaves on its own, with a title that changes through dither.",
+    "react toast notification snackbar dither component",
+    {
+      "addedIn": "0.11.0",
+      "category": "feedback"
+    }
   ]
 }

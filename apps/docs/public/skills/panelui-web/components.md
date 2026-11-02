@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Alert](components/alert.md) — A message set into the page that stays until it is dealt with, as a card in a tray of its tone.
 - [Feedback](components/feedback.md) — A dialog with a well to write in and two actions in the band around it.
 - [Not Found](components/not-found.md) — An error code drawn in pixels that come apart near the pointer, with a title and a way out.
+- [Toast](components/toast.md) — A short message that leaves on its own, with a title that changes through dither.
 
 ## Media and motion
 

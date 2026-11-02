@@ -1,0 +1,565 @@
+---
+title: Toast
+description: A short message that leaves on its own, with a title that changes through dither.
+status: new
+---
+
+<ComponentPreview name="toast/overview" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+function Publish() {
+  const toast = useToast();
+  return (
+    <Button
+      onClick={() =>
+        toast.add({
+          title: 'Recipe published',
+          description: 'Slow-roast tomato soup is live on your page.',
+          type: 'success',
+        })
+      }
+    >
+      Publish recipe
+    </Button>
+  );
+}
+
+export default function ToastOverview() {
+  return (
+    <Toast.Provider>
+      <Publish />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use a toast to confirm something that just happened, or to follow a task that finishes in the background, without interrupting what the reader is doing.
+
+A toast leaves on its own after five seconds, so it cannot hold anything the reader must act on. For a question that needs an answer, use an [Alert Dialog](/docs/web/components/alert-dialog). For a message that should stay on the page, use an [Alert](/docs/web/components/alert).
+
+Toasts are drawn in ordered dither, in one of three versions set by `effect`: the title typed through dither cells (`type`, the default), the card dithered in and then its text (`materialize`), or the title typed with a dithered bar timing it (`timer`).
+
+Put one `Toast.Provider` near the root of the app. `useToast()` raises toasts from anywhere inside it.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/toast.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/toast` instead of `@/components/panelui/toast`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/toast/`, one file for each below:
+
+<RegistrySource name="toast" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Toast } from "@/components/panelui/toast"
+```
+
+```tsx
+<Toast.Provider position="bottom-right" effect="type">
+  <App />
+</Toast.Provider>
+
+const toast = useToast();
+
+toast.add({ title: 'Invoice sent', description: 'Harbour Bakery will get it in a minute.', type: 'success' });
+```
+
+## Composition
+
+```tsx
+<Toast.Provider>
+  {/* the app; useToast() inside it */}
+</Toast.Provider>
+```
+
+## Examples
+
+### Updating a toast
+
+`update(id, …)` changes a toast in place. The old title dissolves into dither cells and the new one resolves through them, so a reader sees one task progressing rather than a pile of toasts. Set `timeout: 0` while it is still working, and a timeout again when it is done.
+
+<ComponentPreview name="toast/morph" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+const STEPS = [
+  { title: 'Building site', type: 'loading' },
+  { title: 'Uploading assets', type: 'loading' },
+  { title: 'Warming the cache', type: 'loading' },
+  { title: 'Live on larkspur.co', type: 'success' },
+] as const;
+
+function Deploy() {
+  const toast = useToast();
+  const run = () => {
+    const id = toast.add({ title: STEPS[0].title, type: STEPS[0].type, timeout: 0 });
+    STEPS.slice(1).forEach((step, index) => {
+      setTimeout(() => {
+        const last = index === STEPS.length - 2;
+        toast.update(id, { title: step.title, type: step.type, timeout: last ? 4000 : 0 });
+      }, (index + 1) * 1600);
+    });
+  };
+  return (
+    <Button variant="outline" onClick={run}>
+      Deploy
+    </Button>
+  );
+}
+
+export default function ToastMorph() {
+  return (
+    <Toast.Provider>
+      <Deploy />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Materialize
+
+`effect="materialize"` builds the toast in two steps: the card arrives through an ordered dither, then its title and description resolve through dither cells inside it. Leaving, the words dissolve first and then the card. The text is held at its full size throughout, so the stack does not jump.
+
+<ComponentPreview name="toast/materialize" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+function Copy() {
+  const toast = useToast();
+  return (
+    <Button
+      variant="outline"
+      onClick={() =>
+        toast.add({ title: 'Link copied', description: 'Anyone with the link can view the board.', type: 'info' })
+      }
+    >
+      Copy share link
+    </Button>
+  );
+}
+
+export default function ToastMaterialize() {
+  return (
+    <Toast.Provider effect="materialize">
+      <Copy />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Materialize, then update
+
+The card dithers in first, then its text resolves inside it. Each `update(id, …)` after that dissolves the title and description into dither cells and resolves the new ones through them, while the card stays put. Use it for a task with several steps: keep `timeout: 0` until the last one.
+
+<ComponentPreview name="toast/materialize-update" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast, type ToastType } from '@/components/panelui/toast';
+
+const STEPS: { title: string; description: string; type: ToastType }[] = [
+  { title: 'Uploading photos', description: '12 images from the shoot', type: 'loading' },
+  { title: 'Building gallery', description: 'Making thumbnails and captions', type: 'loading' },
+  { title: 'Gallery published', description: 'Live at larkspur.co/autumn', type: 'success' },
+];
+
+function Publish() {
+  const toast = useToast();
+  const run = () => {
+    const [first, ...rest] = STEPS;
+    const id = toast.add({ ...first!, timeout: 0 });
+    rest.forEach((step, index) => {
+      const last = index === rest.length - 1;
+      setTimeout(() => toast.update(id, { ...step, timeout: last ? 4000 : 0 }), (index + 1) * 2200);
+    });
+  };
+  return <Button onClick={run}>Publish gallery</Button>;
+}
+
+export default function ToastMaterializeUpdate() {
+  return (
+    <Toast.Provider effect="materialize">
+      <Publish />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Timer
+
+`effect="timer"` runs a dithered bar along the bottom for the toast's time, so a reader can see how long is left. It pauses while the stack is open. A toast with `timeout: 0` sweeps the bar instead.
+
+<ComponentPreview name="toast/timer" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+function Remind() {
+  const toast = useToast();
+  return (
+    <div className="flex gap-2">
+      <Button
+        variant="outline"
+        onClick={() =>
+          toast.add({ title: 'Message scheduled', description: 'Sends tomorrow at 9:00.', type: 'success', timeout: 6000 })
+        }
+      >
+        Schedule message
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => {
+          const id = toast.add({ title: 'Reconnecting', description: 'Trying the server again.', type: 'loading', timeout: 0 });
+          setTimeout(() => toast.update(id, { title: 'Back online', description: undefined, type: 'success', timeout: 3000 }), 3000);
+        }}
+      >
+        Lose connection
+      </Button>
+    </div>
+  );
+}
+
+export default function ToastTimer() {
+  return (
+    <Toast.Provider effect="timer">
+      <Remind />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### One effect per toast
+
+`data: { effect }` on one toast overrides the provider's `effect`, so a quiet confirmation and a long-running task can be drawn differently.
+
+<ComponentPreview name="toast/mixed" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast, type ToastEffect } from '@/components/panelui/toast';
+
+const EFFECTS: { effect: ToastEffect; title: string; type: 'success' | 'info' | 'warning' | 'destructive' }[] = [
+  { effect: 'type', title: 'Typed through dither', type: 'info' },
+  { effect: 'materialize', title: 'Card first, then words', type: 'success' },
+  { effect: 'timer', title: 'Timed by a dither bar', type: 'destructive' },
+];
+
+function Each() {
+  const toast = useToast();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {EFFECTS.map(({ effect, title, type }) => (
+        <Button key={effect} variant="outline" size="sm" onClick={() => toast.add({ title, type, data: { effect } })}>
+          {effect}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export default function ToastMixed() {
+  return (
+    <Toast.Provider>
+      <Each />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Following a promise
+
+`promise(p, { loading, success, error })` shows `loading` until the promise settles, then turns into `success` or `error`. Each can be a title or a whole toast, and `success` and `error` can be functions of the result.
+
+<ComponentPreview name="toast/promise" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+function exportReport(fail: boolean) {
+  return new Promise<number>((resolve, reject) =>
+    setTimeout(() => (fail ? reject(new Error('Timed out')) : resolve(48)), 2200)
+  );
+}
+
+function Export() {
+  const toast = useToast();
+  const run = (fail: boolean) =>
+    toast
+      .promise(exportReport(fail), {
+        loading: 'Exporting October',
+        success: (pages) => ({ title: 'Report exported', description: `${pages} pages, saved to Downloads.` }),
+        error: { title: 'Export failed', description: 'The server took too long. Try again in a minute.' },
+      })
+      .catch(() => {});
+  return (
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={() => run(false)}>
+        Export report
+      </Button>
+      <Button variant="ghost" onClick={() => run(true)}>
+        Export, and fail
+      </Button>
+    </div>
+  );
+}
+
+export default function ToastPromise() {
+  return (
+    <Toast.Provider>
+      <Export />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Types
+
+`type` sets the colour of the mark and of the dither. `loading` cycles the mark while it waits.
+
+<ComponentPreview name="toast/types" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast, type ToastType } from '@/components/panelui/toast';
+
+const KINDS: { type: ToastType; title: string; description: string }[] = [
+  { type: 'default', title: 'Draft saved', description: 'Saved to Recipes, 2 minutes ago.' },
+  { type: 'success', title: 'Payment received', description: '£42.00 from Harbour Bakery.' },
+  { type: 'info', title: 'New version ready', description: 'Reload to get the latest editor.' },
+  { type: 'warning', title: 'Storage nearly full', description: '9.4 of 10 GB used.' },
+  { type: 'destructive', title: 'Card declined', description: 'Your bank refused the charge.' },
+];
+
+function Kinds() {
+  const toast = useToast();
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {KINDS.map((kind) => (
+        <Button key={kind.type} variant="outline" size="sm" onClick={() => toast.add(kind)}>
+          {kind.type}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export default function ToastTypes() {
+  return (
+    <Toast.Provider>
+      <Kinds />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### With an action
+
+`actionProps` adds a button. Use it for one quick reversal such as Undo, and give the toast a longer `timeout` so there is time to press it.
+
+<ComponentPreview name="toast/action" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast } from '@/components/panelui/toast';
+
+function Archive() {
+  const toast = useToast();
+  const [archived, setArchived] = useState(0);
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <Button
+        variant="outline"
+        onClick={() => {
+          setArchived((count) => count + 1);
+          const id = toast.add({
+            title: 'Thread archived',
+            description: 'Kitchen quote from Fen Lane',
+            timeout: 6000,
+            actionProps: {
+              children: 'Undo',
+              onClick: () => {
+                setArchived((count) => count - 1);
+                toast.close(id);
+              },
+            },
+          });
+        }}
+      >
+        Archive thread
+      </Button>
+      <p className="text-sm text-muted-foreground">Archived: {archived}</p>
+    </div>
+  );
+}
+
+export default function ToastAction() {
+  return (
+    <Toast.Provider>
+      <Archive />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Position
+
+`position` on the provider sets the corner or edge the toasts gather at. A toast can be swiped towards the nearest edge to dismiss it.
+
+<ComponentPreview name="toast/positions" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Toast, useToast, type ToastPosition } from '@/components/panelui/toast';
+
+const POSITIONS: ToastPosition[] = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+
+function Corner({ onPick }: { onPick: (position: ToastPosition) => void }) {
+  const toast = useToast();
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {POSITIONS.map((position) => (
+        <Button
+          key={position}
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            onPick(position);
+            toast.add({ title: `Pinned ${position.replace('-', ' ')}`, type: 'info' });
+          }}
+        >
+          {position}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export default function ToastPositions() {
+  const [position, setPosition] = useState<ToastPosition>('bottom-right');
+  return (
+    <Toast.Provider position={position}>
+      <Corner onPick={setPosition} />
+    </Toast.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Toast.Provider
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `position` | `ToastPosition` | `'bottom-right'` | Which corner or edge of the screen the toasts gather at. Default `bottom-right`. |
+| `inline` | `boolean` | `false` | Draws the stack where the provider is, in the flow of the page, instead of pinned to a corner of the screen. For a preview or a thumbnail. |
+| `effect` | `ToastEffect` | `'type'` | How the toasts are dithered. `type` writes the title through dither cells. `materialize` dithers the whole card in, then resolves its title and description through dither inside it, and runs the same backwards when it leaves. `timer` writes the title as `type` does and runs a dithered bar down the toast's time. One toast can choose its own with `data: { effect }`. Default `type`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Motion
+
+With `type`, the title arrives through a row of dither cells with a caret at the arriving edge, changes through the same cells, and dissolves into them before the card fades. With reduced motion turned on, every effect holds still: the title changes in place, the card appears without dithering in and the bar does not run.
+
+### Stacking
+
+Up to `limit` toasts (3 by default) show at once. They stack into one, with the ones behind peeking out. Hovering or focusing the stack spreads it into a list and pauses every timer until the pointer leaves.
+
+### Accessibility
+
+Toasts are announced by a screen reader as they arrive, without moving focus: politely by default, and at once with `priority: 'high'`. F6 moves focus to the stack. The title is announced as text; the dither is hidden from assistive technology.
+
+### Outside React
+
+`createToaster()` returns a manager with the same `add`, `update`, `promise` and `close`. Pass it to `Toast.Provider` as `toastManager` and call it from anywhere, such as a data-fetching layer.

@@ -1,0 +1,67 @@
+{
+  "slug": "toast",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 160
+  },
+  "intro": "Use a toast to confirm something that just happened, or to follow a task that finishes in the background, without interrupting what the reader is doing.\n\nA toast leaves on its own after five seconds, so it cannot hold anything the reader must act on. For a question that needs an answer, use an [Alert Dialog](/docs/web/components/alert-dialog). For a message that should stay on the page, use an [Alert](/docs/web/components/alert).\n\nToasts are drawn in ordered dither, in one of three versions set by `effect`: the title typed through dither cells (`type`, the default), the card dithered in and then its text (`materialize`), or the title typed with a dithered bar timing it (`timer`).\n\nPut one `Toast.Provider` near the root of the app. `useToast()` raises toasts from anywhere inside it.",
+  "usage": "<Toast.Provider position=\"bottom-right\" effect=\"type\">\n  <App />\n</Toast.Provider>\n\nconst toast = useToast();\n\ntoast.add({ title: 'Invoice sent', description: 'Harbour Bakery will get it in a minute.', type: 'success' });",
+  "anatomy": "<Toast.Provider>\n  {/* the app; useToast() inside it */}\n</Toast.Provider>",
+  "examples": [
+    {
+      "title": "Updating a toast",
+      "description": "`update(id, …)` changes a toast in place. The old title dissolves into dither cells and the new one resolves through them, so a reader sees one task progressing rather than a pile of toasts. Set `timeout: 0` while it is still working, and a timeout again when it is done.",
+      "demo": "morph",
+      "height": 160
+    },
+    {
+      "title": "Materialize",
+      "description": "`effect=\"materialize\"` builds the toast in two steps: the card arrives through an ordered dither, then its title and description resolve through dither cells inside it. Leaving, the words dissolve first and then the card. The text is held at its full size throughout, so the stack does not jump.",
+      "demo": "materialize",
+      "height": 160
+    },
+    {
+      "title": "Materialize, then update",
+      "description": "The card dithers in first, then its text resolves inside it. Each `update(id, …)` after that dissolves the title and description into dither cells and resolves the new ones through them, while the card stays put. Use it for a task with several steps: keep `timeout: 0` until the last one.",
+      "demo": "materialize-update",
+      "height": 160
+    },
+    {
+      "title": "Timer",
+      "description": "`effect=\"timer\"` runs a dithered bar along the bottom for the toast's time, so a reader can see how long is left. It pauses while the stack is open. A toast with `timeout: 0` sweeps the bar instead.",
+      "demo": "timer",
+      "height": 160
+    },
+    {
+      "title": "One effect per toast",
+      "description": "`data: { effect }` on one toast overrides the provider's `effect`, so a quiet confirmation and a long-running task can be drawn differently.",
+      "demo": "mixed",
+      "height": 180
+    },
+    {
+      "title": "Following a promise",
+      "description": "`promise(p, { loading, success, error })` shows `loading` until the promise settles, then turns into `success` or `error`. Each can be a title or a whole toast, and `success` and `error` can be functions of the result.",
+      "demo": "promise",
+      "height": 160
+    },
+    {
+      "title": "Types",
+      "description": "`type` sets the colour of the mark and of the dither. `loading` cycles the mark while it waits.",
+      "demo": "types",
+      "height": 160
+    },
+    {
+      "title": "With an action",
+      "description": "`actionProps` adds a button. Use it for one quick reversal such as Undo, and give the toast a longer `timeout` so there is time to press it.",
+      "demo": "action",
+      "height": 180
+    },
+    {
+      "title": "Position",
+      "description": "`position` on the provider sets the corner or edge the toasts gather at. A toast can be swiped towards the nearest edge to dismiss it.",
+      "demo": "positions",
+      "height": 200
+    }
+  ],
+  "notes": "### Motion\n\nWith `type`, the title arrives through a row of dither cells with a caret at the arriving edge, changes through the same cells, and dissolves into them before the card fades. With reduced motion turned on, every effect holds still: the title changes in place, the card appears without dithering in and the bar does not run.\n\n### Stacking\n\nUp to `limit` toasts (3 by default) show at once. They stack into one, with the ones behind peeking out. Hovering or focusing the stack spreads it into a list and pauses every timer until the pointer leaves.\n\n### Accessibility\n\nToasts are announced by a screen reader as they arrive, without moving focus: politely by default, and at once with `priority: 'high'`. F6 moves focus to the stack. The title is announced as text; the dither is hidden from assistive technology.\n\n### Outside React\n\n`createToaster()` returns a manager with the same `add`, `update`, `promise` and `close`. Pass it to `Toast.Provider` as `toastManager` and call it from anywhere, such as a data-fetching layer."
+}

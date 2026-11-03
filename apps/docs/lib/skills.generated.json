@@ -1,5 +1,12 @@
 [
   {
+    "name": "apparatus",
+    "type": "skill-md",
+    "description": "Build an interactive explainer for a React Native or Expo app — a small isometric machine whose working is the idea being explained, drawn with react-native-svg, moved on the UI thread with Reanimated and Gesture Handler, and framed in a PanelUI card with a live readout. Use when someone asks to explain how something works inside an app (a spring animation, rate limiting, a cache, an engine, a cell, an algorithm), wants a how-it-works or onboarding illustration that responds to touch, an interactive diagram or technical drawing on a phone screen, or a \"show me how X works\" figure, even if they never say \"isometric\" or \"machine\". Not for charts of data (use the chart components) or for the web.",
+    "path": "/skills/apparatus/SKILL.md",
+    "digest": "sha256:b2c905fd0746dbda0358680d06211ddb8149cf3e8c00a1ab02d7d4784f96ec08"
+  },
+  {
     "name": "logo-maker",
     "type": "skill-md",
     "description": "Design an original app logo — a compact mascot or symbol that stays readable at 32 × 32 and works as an icon at every size. Use when asked to create, design or generate a logo, app icon, brand mark, mascot or avatar for a product, whether or not an image generator is available. Produces either a vector file the project can keep or a prompt for an image model, from one shared set of design rules.",

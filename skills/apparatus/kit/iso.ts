@@ -581,17 +581,19 @@ export function ring(view: View, frame: Frame3, r: number, segments = 32): strin
 /**
  * The half of a ring that faces the viewer, for a band or a seam round a
  * round part: the other half is behind the part and must not show through it.
- * `frame.w` is the part's axis.
+ * `frame.w` is the part's axis. Pass `side: 'back'` for the far half, which
+ * shows only through something clear — a glass tube's far rim.
  */
-export function ringFront(view: View, frame: Frame3, r: number, segments = 48): string {
+export function ringFront(view: View, frame: Frame3, r: number, segments = 48, side: 'front' | 'back' = 'front'): string {
   const eye = towardViewer(view.cam);
+  const facing = side === 'front' ? 1 : -1;
   const runs: Vec2[][] = [];
   let run: Vec2[] = [];
   for (let i = 0; i <= segments; i += 1) {
     const angle = (i / segments) * Math.PI * 2;
     const radial = add(mul(frame.u, Math.cos(angle)), mul(frame.v, Math.sin(angle)));
     const point = view.point(along(frame, r * Math.cos(angle), r * Math.sin(angle), 0));
-    if (dot(radial, eye) >= 0) run.push(point);
+    if (dot(radial, eye) * facing >= 0) run.push(point);
     else if (run.length) {
       runs.push(run);
       run = [];
@@ -599,7 +601,7 @@ export function ringFront(view: View, frame: Frame3, r: number, segments = 48): 
   }
   if (run.length) runs.push(run);
   // A run that wrapped past the start belongs to the first one.
-  if (runs.length > 1 && dot(add(mul(frame.u, 1), mul(frame.v, 0)), eye) >= 0) {
+  if (runs.length > 1 && dot(frame.u, eye) * facing >= 0) {
     const last = runs.pop()!;
     runs[0] = [...last, ...runs[0]!];
   }
@@ -630,6 +632,32 @@ export function planeMatrix(view: View, origin: Vec3, u: Vec3, v: Vec3): [number
   const [ax, ay] = view.delta(u);
   const [bx, by] = view.delta(v);
   return [ax, ay, bx, by, ox, oy];
+}
+
+/**
+ * The two outside edges of a round part as screen lines, from one end to the
+ * other: the outline of a glass tube, which has no faces to shade.
+ */
+export function silhouette(view: View, spec: { at: Vec3; axis: Axis; r: number; length: number }): string {
+  const frame = axisFrame(spec.axis, spec.at);
+  const axis = view.delta(frame.w);
+  const across: Vec2 = [-axis[1], axis[0]];
+  let best = 0;
+  let bestAngle = 0;
+  for (let i = 0; i < 180; i += 1) {
+    const angle = (i / 180) * Math.PI;
+    const [x, y] = view.delta(add(mul(frame.u, Math.cos(angle)), mul(frame.v, Math.sin(angle))));
+    const reach = Math.abs(x * across[0] + y * across[1]);
+    if (reach > best) {
+      best = reach;
+      bestAngle = angle;
+    }
+  }
+  const radial = add(mul(frame.u, Math.cos(bestAngle) * spec.r), mul(frame.v, Math.sin(bestAngle) * spec.r));
+  const end = mul(frame.w, spec.length);
+  const a = add(spec.at, radial);
+  const b = sub(spec.at, radial);
+  return line(view, a, add(a, end)) + line(view, b, add(b, end));
 }
 
 /** Screen points of world points, for dots: screws, rivets, terminals. */

@@ -2,9 +2,9 @@
  * The card an apparatus figure sits in.
  *
  * The drawing carries no words, so everything a reader needs to read sits in
- * the frame around it: a short title and the figure number in the header, what
- * to do with it at the bottom left, the live number at the bottom right, and a
- * caption under the card saying what the machine stands for. The readout is
+ * the frame around it: a short title and the figure number in the header, the
+ * live number and what to do with the figure in the footer, and a caption under
+ * the card saying what the machine stands for. The readout is
  * set in tabular figures so it does not jitter as it counts.
  *
  * Built from PanelUI's Frame parts, so it takes the theme's radius, border and
@@ -41,12 +41,19 @@ export function ApparatusFrame({ figure, title, hint, readout, caption, children
         </Frame.Header>
         <Frame.Panel>{children}</Frame.Panel>
         <Frame.Footer>
-          <Text size="sm" muted className="flex-1">
-            {hint}
-          </Text>
-          <Text size="sm" weight="medium" style={{ fontVariant: ['tabular-nums'] }}>
-            {readout}
-          </Text>
+          {/*
+           * Two fixed lines, each held to one line. Side by side, a readout that
+           * grows ("2 refused") pushes the hint onto a second line and the whole
+           * card changes height under the reader's finger.
+           */}
+          <View className="flex-1 gap-0.5">
+            <Text size="sm" weight="medium" numberOfLines={1} style={{ fontVariant: ['tabular-nums'] }}>
+              {readout}
+            </Text>
+            <Text size="sm" muted numberOfLines={1}>
+              {hint}
+            </Text>
+          </View>
         </Frame.Footer>
       </Frame>
       {caption ? (

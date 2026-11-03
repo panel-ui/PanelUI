@@ -72,6 +72,11 @@
       "react-native": "./src/primitives/scroll-progress.tsx",
       "default": "./lib/module/primitives/scroll-progress.js"
     },
+    "./primitives/refs": {
+      "types": "./lib/typescript/src/primitives/refs.d.ts",
+      "react-native": "./src/primitives/refs.ts",
+      "default": "./lib/module/primitives/refs.js"
+    },
     "./utils/cn": {
       "types": "./lib/typescript/src/utils/cn.d.ts",
       "react-native": "./src/utils/cn.ts",

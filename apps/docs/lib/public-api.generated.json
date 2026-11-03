@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1501,
+    "exports": 1506,
     "values": 374,
-    "types": 1127,
+    "types": 1132,
     "modules": 169,
     "components": 141,
     "hooks": 13
@@ -6744,6 +6744,26 @@
           },
           {
             "name": "ScrollViewRef",
+            "kind": "type"
+          },
+          {
+            "name": "KeyPressEvent",
+            "kind": "type"
+          },
+          {
+            "name": "SubmitEditingEvent",
+            "kind": "type"
+          },
+          {
+            "name": "SelectionChangeEvent",
+            "kind": "type"
+          },
+          {
+            "name": "ContentSizeChangeEvent",
+            "kind": "type"
+          },
+          {
+            "name": "ViewTokenOf",
             "kind": "type"
           }
         ]

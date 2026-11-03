@@ -54,6 +54,9 @@ const leaves = [
   ['./primitives/portal', 'primitives/portal.tsx'],
   ['./primitives/scrim', 'primitives/scrim.tsx'],
   ['./primitives/scroll-progress', 'primitives/scroll-progress.tsx'],
+  // Types only. A component's ref and its event types are named here, so a
+  // wrapper can type them without importing the root entry.
+  ['./primitives/refs', 'primitives/refs.ts'],
   ['./utils/cn', 'utils/cn.ts'],
   ['./utils/color', 'utils/color.ts'],
   ['./utils/time', 'utils/time.ts'],

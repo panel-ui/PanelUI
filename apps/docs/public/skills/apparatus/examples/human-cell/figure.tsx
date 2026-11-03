@@ -64,22 +64,27 @@ export function HumanCellFigure({ figure = 5, active = true, className }: HumanC
   const feed = () => {
     'worklet';
     idle.value = 0;
-    let started = false;
-    trips.modify((t) => {
-      'worklet';
-      for (let i = 0; i < TRIPS; i += 1) {
-        const o = i * TRIP_FIELDS;
-        if (t[o + T.active]) continue;
-        t[o + T.active] = 1;
-        t[o + T.t] = 0;
-        t[o + T.mito] = next.value;
-        t[o + T.split] = 0;
-        started = true;
+    // Find the free slot first, then write it. A variable set inside the
+    // `modify` updater would not reach this worklet: the updater gets a copy.
+    const current = trips.value;
+    let slot = -1;
+    for (let i = 0; i < TRIPS; i += 1) {
+      if (!current[i * TRIP_FIELDS + T.active]) {
+        slot = i;
         break;
       }
+    }
+    if (slot < 0) return;
+    const mito = next.value;
+    trips.modify((t) => {
+      'worklet';
+      const o = slot * TRIP_FIELDS;
+      t[o + T.active] = 1;
+      t[o + T.t] = 0;
+      t[o + T.mito] = mito;
+      t[o + T.split] = 0;
       return t;
     });
-    if (!started) return;
     next.value = (next.value + 1) % MITOS.length;
     shift.value = 1;
   };

@@ -31,7 +31,10 @@ costs nothing.
 When the reader can start a second one before the first is done — balls,
 requests, molecules — keep a **pool**: a flat array in one shared value, a few
 fields per item (kind, time, position, speed), and one layer per pool slot.
-Find a free slot to start one; return it to free when it is done. Never reuse a
+Find a free slot to start one; return it to free when it is done. Find the
+slot by reading the array *before* calling `modify`, then write it inside: a
+variable assigned in the `modify` updater stays in the updater, which works on
+a copy of what it captured. Never reuse a
 moving item for the next request, and never hide one because another needs its
 place.
 

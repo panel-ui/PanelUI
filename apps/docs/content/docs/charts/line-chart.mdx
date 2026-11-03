@@ -476,9 +476,10 @@ Four series across the chart token ramp. They share one y-domain, so they stay c
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `color` | `string` | — |  |
-| `showLabel` | `boolean` | — | Float a small label at the crosshair showing the x-value and each series' value at that point — the minimal readout a drag wants. On by default. |
+| `showLabel` | `boolean` | `true` | Float a small label at the crosshair showing the x-value and each series' value at that point — the minimal readout a drag wants. On by default. |
 | `formatValue` | `(value: number, key: string) => string` | — | Format one series' value for the label. Defaults to a compact number. |
 | `formatX` | `(datum: LineChartDatum) => string` | — | Format the label's heading from the row. Defaults to the value at xDataKey. |
+| `activateAfterLongPress` | `number` | `180` | How long a press has to be held before the readout takes the touch, in milliseconds. Until then the touch belongs to whatever else wants it: a quick tap still reaches a button floating over the chart, and a swipe still scrolls the screen the chart sits in. Set `0` to read on contact, only for a chart with nothing over it and no scroll view around it. |
 
 ### LineChart.Legend
 

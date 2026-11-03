@@ -134,11 +134,14 @@ try {
       "import { Planner, type PlannerProps } from 'panelui-native/components/planner';",
       "import { PanelUIProvider } from 'panelui-native/provider';",
       "import { Scrim } from 'panelui-native/primitives/scrim';",
+      "import type { TextInputRef, KeyPressEvent } from 'panelui-native/primitives/refs';",
       "import { useTheme, type ThemeName } from 'panelui-native/theme';",
       "const meter: MeterProps = { value: 1 };",
       "const planner: PlannerProps = { entries: [] };",
       "const theme: ThemeName = 'system';",
-      "void [Meter, Planner, PanelUIProvider, Scrim, useTheme, meter, planner, theme];",
+      "const onKey = (event: KeyPressEvent): void => { void event; };",
+      "const inputRef: { current: TextInputRef | null } = { current: null };",
+      "void [Meter, Planner, PanelUIProvider, Scrim, useTheme, meter, planner, theme, onKey, inputRef];",
     ].join("\n"),
   );
   execFileSync(process.execPath, [

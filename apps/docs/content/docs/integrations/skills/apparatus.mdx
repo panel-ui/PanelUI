@@ -1,0 +1,166 @@
+---
+title: Apparatus
+description: An agent skill that explains an idea with a machine the reader can touch — an isometric figure for a React Native screen, moved on the UI thread and framed in a PanelUI card.
+---
+
+Apparatus builds an interactive explainer for a React Native or Expo app. Ask
+for one in your own words — "explain how rate limiting works", "show how a
+spring animation settles" — and the agent designs a small machine whose working
+is the idea, writes it as a component, and checks it running.
+
+<SkillHeader name="apparatus" since="1.1.0" prompt="explain how a spring animation settles, as a machine I can drag." />
+
+<PreviewVideo
+  src="/previews/apparatus-spring-bench.mp4"
+  poster="/previews/apparatus-spring-bench-poster.jpg"
+  alt="The spring bench running in the example app: the carriage is pulled out and let go, it swings back past rest and settles, and the pen draws the curve on the paper."
+  width={720}
+  height={1566}
+/>
+
+## What it makes
+
+One figure, as a component in your project:
+
+- **A machine** drawn in isometric with react-native-svg, from parts that belong
+  to it — rails, knobs, coils, gates, a cut-open casing.
+- **A model** in plain TypeScript. The motion, the readout and the caption all
+  come from it, so the drawing cannot claim something the numbers do not.
+- **Touch** that runs the machine: drag a carriage, flick a wheel, tap a lever.
+  The figure only claims the touches it needs, so the screen still scrolls.
+- **A frame** built from PanelUI's [Frame](/docs/components/frame) parts: title,
+  figure number, a live readout and a one-line hint, with a caption underneath.
+- **Accessibility**: a role, a value read from the model, and actions for
+  everything a finger can do.
+
+Motion runs on the UI thread with Reanimated. Each moving part is its own native
+layer, transformed rather than re-rendered, so React renders the figure once.
+
+## Requirements
+
+The figure needs react-native-svg 15, Reanimated 3 or 4, Gesture Handler and
+PanelUI, either the `panelui-native` package or components copied in with the
+CLI. `expo-haptics` is optional: with it, knobs click through their detents.
+
+The skill copies its drawing kit into your project, about five files, the first
+time it builds a figure. Later figures reuse it.
+
+## Asking for one
+
+Name the idea and, if you like, what the reader should be able to do. The skill
+picks the machine.
+
+- "Explain how a debounced search waits for the user to stop typing."
+- "Show how a list view reuses its rows when it scrolls."
+- "Make an onboarding figure for how end-to-end encryption works."
+- "Explain how a car engine works."
+
+A figure takes most of an hour to build properly. The agent says how large the
+figure will be before starting, and asks first if it is a big one.
+
+## The examples
+
+Five figures built with the skill ship in its `examples/` folder, where the agent
+reads them as references. They are also in the example app's Skills section.
+
+### Spring bench
+
+A carriage on a rail, held by a coil spring and an oil dashpot. Drag it out and
+let go: the spring is stiffness, the dashpot is damping, and a pen on the
+carriage draws the motion onto paper feeding down. Two knobs change the spring
+and the damping.
+
+<PreviewVideo
+  src="/previews/apparatus-spring-bench.mp4"
+  poster="/previews/apparatus-spring-bench-poster.jpg"
+  alt="The spring bench: the carriage is pulled out and released, overshoots rest and settles while the pen traces the curve."
+  width={720}
+  height={1566}
+/>
+
+### Flywheel
+
+Momentum scrolling. Flick the wheel and it keeps your speed, then the brake
+takes the same share of it every millisecond. The strip across the top is the
+list's content. Touch the wheel to stop it; the knob sets the deceleration rate.
+
+<PreviewVideo
+  src="/previews/apparatus-flywheel.mp4"
+  poster="/previews/apparatus-flywheel-poster.jpg"
+  alt="The flywheel is flicked; the strip of rows slides fast, slows, and stops, while the readout counts down the distance left."
+  width={720}
+  height={1566}
+/>
+
+### Token hopper
+
+Rate limiting with a token bucket. Each tap is a request. While there is a ball
+in the magazine, the request goes through: the ball drops through the gate and
+rolls down to the tray. When the magazine is empty the request is refused and a
+flag goes up. The feeder adds one ball every 0.8 s.
+
+<PreviewVideo
+  src="/previews/apparatus-token-hopper.mp4"
+  poster="/previews/apparatus-token-hopper-poster.jpg"
+  alt="A burst of requests: balls roll out of the gate one after another and queue on the tray, the magazine empties, the refusal flag goes up, and the feeder refills it."
+  width={720}
+  height={1566}
+/>
+
+### Four-stroke engine
+
+An inline four cut open down its cylinders. Each piston runs intake,
+compression, power and exhaust over two turns of the crankshaft, and the four
+fire in the order 1, 3, 4, 2. Drag sideways to turn the crank by hand; the knob
+on the throttle sets the speed.
+
+<PreviewVideo
+  src="/previews/apparatus-car-engine.mp4"
+  poster="/previews/apparatus-car-engine-poster.jpg"
+  alt="The engine running: pistons rise and fall in pairs, valves open in turn and each cylinder lights as it fires."
+  width={720}
+  height={1566}
+/>
+
+### Human cell
+
+A cell on a slide, cut in half. Tap to feed it glucose. The molecule comes in
+through a transporter and splits as it crosses the cytoplasm, which nets 2 ATP.
+The halves then go into a mitochondrion, which releases about 28 more.
+
+<PreviewVideo
+  src="/previews/apparatus-human-cell.mp4"
+  poster="/previews/apparatus-human-cell-poster.jpg"
+  alt="Glucose enters the cell through the transporter, splits, and goes into a mitochondrion, which lights up and releases a burst of ATP."
+  width={720}
+  height={1566}
+/>
+
+## What it does
+
+1. **Sizes the figure** — a sketch, a figure or a showpiece — and asks before a
+   large one.
+2. **Writes the model** with the real numbers: rates, ratios, counts.
+3. **Invents the machine** and lists its parts.
+4. **Builds the geometry** once per screen size, and splits the drawing into
+   layers wherever a part moves between two others.
+5. **Makes it live**: one frame loop on the UI thread, gestures, haptics, and a
+   demonstration when nobody is touching it.
+6. **Verifies it running** on a simulator or a device, recording the motion and
+   reading it frame by frame.
+
+## Limits
+
+It is for explaining how something works. For data, use the
+[charts](/docs/charts/bar-chart); for decoration, a still illustration is
+cheaper.
+
+Figures are drawn in four greys from your theme and one accent, your primary
+colour. They follow light and dark mode and every theme, but they are not
+full-colour illustrations.
+
+The skill targets React Native and Expo. It does not build figures for the web.
+
+## SKILL.md
+
+<SkillSource name="apparatus" />

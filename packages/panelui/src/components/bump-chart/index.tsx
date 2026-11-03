@@ -1170,6 +1170,15 @@ function BumpLabel({
 /** Height of one name's hit box. */
 const LABEL_ROW = 20;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface BumpChartTooltipProps {
   color?: string;
   /** Format a rank in the readout. Defaults to `#1`, `#2`… */
@@ -1177,13 +1186,29 @@ export interface BumpChartTooltipProps {
   /** Format the readout's heading from the row. Defaults to the value at xDataKey. */
   formatX?: (datum: BumpChartDatum) => string;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
  * A scrub across the columns, and a readout listing every series in the order
  * it stood at the column under the finger.
  */
-function BumpChartTooltip({ color, formatRank, formatX, className }: BumpChartTooltipProps) {
+function BumpChartTooltip({
+  color,
+  formatRank,
+  formatX,
+  className,
+  activateAfterLongPress = DEFAULT_HOLD,
+}: BumpChartTooltipProps) {
   const {
     data,
     xDataKey,
@@ -1221,7 +1246,8 @@ function BumpChartTooltip({ color, formatRank, formatX, className }: BumpChartTo
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x);
       })
@@ -1231,10 +1257,12 @@ function BumpChartTooltip({ color, formatRank, formatX, className }: BumpChartTo
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, width, activeIndex, setActiveIndexJS]);
+  }, [total, left, width, activeIndex, setActiveIndexJS, activateAfterLongPress]);
 
   const crosshairStyle = useAnimatedStyle(() => {
     const index = activeIndex.value;

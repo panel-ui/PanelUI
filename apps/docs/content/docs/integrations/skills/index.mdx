@@ -1,0 +1,26 @@
+---
+title: Skills
+description: Agent skills that ship in the PanelUI repository — what each one is for and how to install it.
+---
+
+A skill is a folder of instructions a coding agent loads when a request matches
+it. These are the ones in this repository. Install all of them with one command,
+or one at a time with `--skill`.
+
+<SkillDirectory />
+
+The command asks which skills to install and for which agents: Claude Code,
+Codex, Cursor and others that read `SKILL.md`. Each skill activates on its own
+when a request matches its description, so there is no command to remember
+afterwards.
+
+For a single skill:
+
+<InstallTabs kind="dlx" packages="skills add panel-ui/PanelUI --skill apparatus" />
+
+In Claude Code, the plugin installs all of them along with the MCP server:
+
+```
+/plugin marketplace add panel-ui/PanelUI
+/plugin install panelui
+```

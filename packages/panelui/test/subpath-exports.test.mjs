@@ -76,6 +76,7 @@ test('reviewed provider, theme and foundation leaves have exact conditions', () 
     'primitives/portal': 'primitives/portal.tsx',
     'primitives/scrim': 'primitives/scrim.tsx',
     'primitives/scroll-progress': 'primitives/scroll-progress.tsx',
+    'primitives/refs': 'primitives/refs.ts',
   };
   for (const [name, source] of Object.entries(leaves)) {
     const stem = source.replace(/\.tsx?$/, '');

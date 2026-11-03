@@ -1073,12 +1073,31 @@ BarChartYAxis.layer = 'overlay' as Layer;
 // makes what it is drawn over unreadable too.
 BarChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface BarChartTooltipProps {
   /** Format one series' value. Defaults to a compact number. */
   formatValue?: (value: number, key: string) => string;
   /** Format the readout's heading from the row. Defaults to the value at xDataKey. */
   formatX?: (datum: BarChartDatum) => string;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1093,7 +1112,12 @@ export interface BarChartTooltipProps {
  * summon is a readout nobody finds — and the thinner the bars, the truer that
  * gets.
  */
-function BarChartTooltip({ formatValue, formatX, className }: BarChartTooltipProps) {
+function BarChartTooltip({
+  formatValue,
+  formatX,
+  className,
+  activateAfterLongPress = DEFAULT_HOLD,
+}: BarChartTooltipProps) {
   const {
     data,
     xDataKey,
@@ -1142,7 +1166,8 @@ function BarChartTooltip({ formatValue, formatX, className }: BarChartTooltipPro
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x, event.y);
       })
@@ -1152,10 +1177,22 @@ function BarChartTooltip({ formatValue, formatX, className }: BarChartTooltipPro
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, top, width, height, horizontal, activeIndex, setActiveIndexJS]);
+  }, [
+    total,
+    left,
+    top,
+    width,
+    height,
+    horizontal,
+    activeIndex,
+    setActiveIndexJS,
+    activateAfterLongPress,
+  ]);
 
   /*
    * The readout centres over its band and is clamped inside the plot, so it

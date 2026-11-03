@@ -288,6 +288,15 @@ the registry is named in `components.json`. Both are covered at
 **[panelui.dev/docs/web/skills](https://panelui.dev/docs/web/skills)** and
 **[panelui.dev/docs/web/mcp](https://panelui.dev/docs/web/mcp)**.
 
+Two more skills ship beside them. **Apparatus** builds interactive explainers for a React Native
+screen: an isometric machine whose working is the idea, run with a finger and framed in a PanelUI
+card. **Logo Maker** designs an app logo. All four are listed, with what each is for, at
+**[panelui.dev/docs/integrations/skills](https://panelui.dev/docs/integrations/skills)**.
+
+```sh
+npx skills add panel-ui/PanelUI --skill apparatus
+```
+
 ## Example app
 
 An Expo Router showcase with a live demo for every component and a theme picker — used to

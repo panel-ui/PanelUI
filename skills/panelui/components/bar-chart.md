@@ -110,6 +110,7 @@ Extends `ViewProps, ChartAccessibilityProps<BarChartDatum>`.
 | `formatValue` | `(value: number, key: string) => string` | — | Format one series' value. Defaults to a compact number. |
 | `formatX` | `(datum: BarChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |
 | `className` | `string` | — | — |
+| `activateAfterLongPress` | `number` | `180` | How long a press has to be held before the readout takes the touch, in milliseconds. Until then the touch belongs to whatever else wants it: a quick tap still reaches a button floating over the chart, and a swipe still scrolls the screen the chart sits in. Set `0` to read on contact, only for a chart with nothing over it and no scroll view around it. |
 
 #### `BarChartLegendProps`
 
@@ -155,6 +156,12 @@ Declare a `Bar` per series. They stand in one band, sharing the width `barGap` l
 For an animated chart, keep the data at **500 rows or fewer and no more than four `Bar` series**. The regression budget also covers 1,000 rows by five series, but that is a tested ceiling rather than the recommended interactive size; profile on the slowest target device before using it. Downsample or paginate beyond the recommendation.
 
 Every series scans every row twice per animated frame — once for the active band and once for the rest — so frame work grows as `2 × rows × series`. Grouping and stacking have the same frame cost. Stacking additionally prepares each series from the ones below it when data or series change, adding `rows × series × (series - 1) / 2` value visits; wide stacks therefore cost more to update than grouped data even when they animate identically.
+
+### Buttons over the chart
+
+The readout takes the touch only after the press has been held for 180 ms. Until then the touch belongs to whatever else wants it, so a tap on a button floating over the chart reaches the button, and a swipe still scrolls the screen the chart sits in.
+
+To change the wait, pass `activateAfterLongPress` to `BarChart.Tooltip`. Pass `0` to read on contact, for a chart with nothing drawn over it and no scroll view around it. Every chart that reads values under the finger takes the same prop.
 
 ### Why the axis always reaches zero
 

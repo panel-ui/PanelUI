@@ -82,6 +82,12 @@ const config = {
    */
   async redirects() {
     return [
+      // Moved into the Skills section when Apparatus joined it.
+      {
+        source: '/docs/integrations/logo-maker',
+        destination: '/docs/integrations/skills/logo-maker',
+        permanent: true,
+      },
       // Renamed after 0.88.0 shipped it as FeedbackDialog. The old page is
       // live and linked, so it keeps a way through to the new one.
       {

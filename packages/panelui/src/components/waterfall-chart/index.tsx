@@ -1297,12 +1297,31 @@ function WaterfallChartValues({ format, className }: WaterfallChartValuesProps) 
 WaterfallChartValues.displayName = 'WaterfallChart.Values';
 WaterfallChartValues.layer = 'overlay' as Layer;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface WaterfallChartTooltipProps {
   /** Format the step's change. Defaults to a signed compact number. */
   formatValue?: (step: WaterfallStep) => string;
   /** Format the running total line. Return `null` to drop it. */
   formatTotal?: (step: WaterfallStep) => string | null;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1321,6 +1340,7 @@ function WaterfallChartTooltip({
   formatValue,
   formatTotal,
   className,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: WaterfallChartTooltipProps) {
   const {
     steps,
@@ -1367,7 +1387,8 @@ function WaterfallChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x, event.y);
       })
@@ -1377,10 +1398,22 @@ function WaterfallChartTooltip({
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, top, width, height, horizontal, activeIndex, setActiveIndexJS]);
+  }, [
+    total,
+    left,
+    top,
+    width,
+    height,
+    horizontal,
+    activeIndex,
+    setActiveIndexJS,
+    activateAfterLongPress,
+  ]);
 
   // The readout centres over its band and is clamped inside the plot, so it
   // never runs off the edge at the first or last one. Which axis it follows is

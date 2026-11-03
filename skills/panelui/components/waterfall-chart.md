@@ -128,6 +128,7 @@ Extends `ViewProps, ChartAccessibilityProps<WaterfallStep>`.
 | `formatValue` | `(step: WaterfallStep) => string` | — | Format the step's change. Defaults to a signed compact number. |
 | `formatTotal` | `(step: WaterfallStep) => string \| null` | — | Format the running total line. Return `null` to drop it. |
 | `className` | `string` | — | — |
+| `activateAfterLongPress` | `number` | `180` | How long a press has to be held before the readout takes the touch, in milliseconds. Until then the touch belongs to whatever else wants it: a quick tap still reaches a button floating over the chart, and a swipe still scrolls the screen the chart sits in. Set `0` to read on contact, only for a chart with nothing over it and no scroll view around it. |
 
 #### `WaterfallChartLegendProps`
 

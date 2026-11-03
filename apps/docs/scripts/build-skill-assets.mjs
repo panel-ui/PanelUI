@@ -31,8 +31,13 @@ const SOURCE = path.join(ROOT, 'skills');
 const PUBLIC = path.join(DOCS, 'public', 'skills');
 const INDEX = path.join(DOCS, 'lib', 'skills.generated.json');
 
-/** Everything that is part of a skill. Anything else in the folder is not copied. */
-const EXTENSIONS = new Set(['.md', '.json', '.txt']);
+/**
+ * Everything that is part of a skill. Anything else in the folder is not copied.
+ * TypeScript is included because a skill can ship code an agent copies into a
+ * project — the Apparatus kit and its examples — and an agent that found the
+ * skill by URL has no other way to fetch it.
+ */
+const EXTENSIONS = new Set(['.md', '.json', '.txt', '.ts', '.tsx']);
 
 function copyTree(from, to) {
   fs.mkdirSync(to, { recursive: true });

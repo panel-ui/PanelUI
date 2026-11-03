@@ -106,6 +106,7 @@ Extends `ViewProps, ChartAccessibilityProps<ScatterChartDatum>`.
 | `formatY` | `(value: number, key: string) => string` | — | Format the y value for the readout. Defaults to a compact number. |
 | `formatTitle` | `(datum: ScatterChartDatum) => string` | — | A heading for the readout, from the row — a name, a label, a category. |
 | `hitRadius` | `number` | `32` | How far from a point a touch still counts as being on it, in points. |
+| `activateAfterLongPress` | `number` | `180` | How long a press has to be held before the readout takes the touch, in milliseconds. Until then the touch belongs to whatever else wants it: a quick tap still reaches a button floating over the chart, and a swipe still scrolls the screen the chart sits in. Set `0` to read on contact, only for a chart with nothing over it and no scroll view around it. |
 
 #### `ScatterChartLegendProps`
 

@@ -123,6 +123,7 @@ Extends `ViewProps, ChartAccessibilityProps<MirrorAreaChartDatum>`.
 | `formatX` | `(datum: MirrorAreaChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |
 | `formatSummary` | `(datum: MirrorAreaChartDatum) => string` | — | One line to show instead of a row per series — "1,120 jobs · 78% high". Use it when the series only make sense read together. |
 | `className` | `string` | — | — |
+| `activateAfterLongPress` | `number` | `180` | How long a press has to be held before the readout takes the touch, in milliseconds. Until then the touch belongs to whatever else wants it: a quick tap still reaches a button floating over the chart, and a swipe still scrolls the screen the chart sits in. Set `0` to read on contact, only for a chart with nothing over it and no scroll view around it. |
 
 #### `MirrorAreaChartLegendProps`
 

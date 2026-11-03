@@ -13,6 +13,9 @@ import { Preview } from '@/components/preview';
 import { Platform } from '@/components/platform';
 import { PreviewVideo } from '@/components/preview-video';
 import { RegistrySource } from '@/components/registry-source';
+import { SkillDirectory } from '@/components/skills/skill-directory';
+import { SkillHeader } from '@/components/skills/skill-header';
+import { SkillSource } from '@/components/skills/skill-source';
 import type { MDXComponents } from 'mdx/types';
 
 /** Components available to every MDX page without importing them. */
@@ -34,6 +37,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Preview,
     PreviewVideo,
     RegistrySource,
+    SkillDirectory,
+    SkillHeader,
+    SkillSource,
     Platform,
     ...components,
   };

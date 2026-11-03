@@ -9,9 +9,11 @@ survive being shrunk to a tab favicon are not the detailed ones.
 **Logo Maker** is an agent skill that designs one. It ships in this repository
 alongside the PanelUI skill, so the command that installs one installs both.
 
+<SkillHeader name="logo-maker" since="0.76.0" prompt="design a logo for this app." />
+
 ## Install
 
-<InstallTabs kind="dlx" packages="skills add panel-ui/PanelUI" />
+<InstallTabs kind="dlx" packages="skills add panel-ui/PanelUI --skill logo-maker" />
 
 Then ask for a logo in your own words — "design a logo for this app", "I need
 an app icon for a habit tracker". The skill activates on the request; there is
@@ -70,3 +72,7 @@ It draws no text: a mark that needs a word to be understood is a wordmark,
 which is a different job. It produces no grid or contact sheet from a single
 generation — a picture of some logos is not a logo. And it names the rule
 anything failed rather than reporting a pass it did not verify.
+
+## SKILL.md
+
+<SkillSource name="logo-maker" />

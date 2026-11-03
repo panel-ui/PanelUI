@@ -5,6 +5,7 @@ import { HomeCard } from '../src/components/home-card';
 import { ScreenHeader } from '../src/components/screen-header';
 import { BLOCKS } from '../src/data/blocks';
 import { COMPONENT_COUNT } from '../src/data/components.generated';
+import { SKILL_EXAMPLES } from '../src/data/skills';
 
 export default function HomeScreen() {
   return (
@@ -31,6 +32,12 @@ export default function HomeScreen() {
           subtitle="Ready-made page sections"
           count={BLOCKS.length}
           onPress={() => router.push('/blocks')}
+        />
+        <HomeCard
+          title="Skills"
+          subtitle="Figures made with the agent skills"
+          count={SKILL_EXAMPLES.length}
+          onPress={() => router.push('/skills')}
         />
       </ScrollView>
     </View>

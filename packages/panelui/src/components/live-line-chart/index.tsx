@@ -1107,10 +1107,29 @@ LiveLineChartYAxis.displayName = 'LiveLineChart.YAxis';
 LiveLineChartYAxis.layer = 'overlay' as Layer;
 LiveLineChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface LiveLineChartTooltipProps {
   /** Format the value. Defaults to a compact number. */
   formatValue?: (value: number) => string;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1120,7 +1139,11 @@ export interface LiveLineChartTooltipProps {
  * place on screen, so it travels left with the reading it named instead of
  * sitting still while the line slides out from under it.
  */
-function LiveLineChartTooltip({ formatValue, className }: LiveLineChartTooltipProps) {
+function LiveLineChartTooltip({
+  formatValue,
+  className,
+  activateAfterLongPress = DEFAULT_HOLD,
+}: LiveLineChartTooltipProps) {
   const {
     plot,
     times,
@@ -1182,7 +1205,8 @@ function LiveLineChartTooltip({ formatValue, className }: LiveLineChartTooltipPr
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x);
       })
@@ -1192,10 +1216,12 @@ function LiveLineChartTooltip({ formatValue, className }: LiveLineChartTooltipPr
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeTime.value === -1) return;
         activeTime.value = -1;
         runOnJS(report)(-1, 0);
       });
-  }, [times, values, now, windowMs, plot, activeTime, report]);
+  }, [times, values, now, windowMs, plot, activeTime, report, activateAfterLongPress]);
 
   const crosshairStyle = useAnimatedStyle(() => {
     const time = activeTime.value;

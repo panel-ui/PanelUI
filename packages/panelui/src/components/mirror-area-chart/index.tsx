@@ -1002,6 +1002,15 @@ MirrorAreaChartYAxis.layer = 'overlay' as Layer;
 // Read by the root, which leaves room for the labels before laying the plot out.
 MirrorAreaChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface MirrorAreaChartTooltipProps {
   /** Colour of the crosshair and the dot. Defaults to the foreground token. */
   color?: string;
@@ -1015,6 +1024,16 @@ export interface MirrorAreaChartTooltipProps {
    */
   formatSummary?: (datum: MirrorAreaChartDatum) => string;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1027,6 +1046,7 @@ function MirrorAreaChartTooltip({
   formatX,
   formatSummary,
   className,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: MirrorAreaChartTooltipProps) {
   const {
     data,
@@ -1067,7 +1087,8 @@ function MirrorAreaChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x);
       })
@@ -1077,10 +1098,12 @@ function MirrorAreaChartTooltip({
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, width, activeIndex, setActiveIndexJS]);
+  }, [total, left, width, activeIndex, setActiveIndexJS, activateAfterLongPress]);
 
   /*
    * The dot sits on the outermost edge on the top half — the largest value of

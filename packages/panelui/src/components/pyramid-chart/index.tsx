@@ -1060,12 +1060,31 @@ PyramidChartYAxis.layer = 'overlay' as Layer;
 // drawn over unreadable too.
 PyramidChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface PyramidChartTooltipProps {
   /** Format one series' value. Defaults to a compact number. */
   formatValue?: (value: number, key: string) => string;
   /** Format the readout's heading from the row. Defaults to the value at xDataKey. */
   formatX?: (datum: PyramidChartDatum) => string;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1082,6 +1101,7 @@ function PyramidChartTooltip({
   formatValue,
   formatX,
   className,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: PyramidChartTooltipProps) {
   const {
     data,
@@ -1125,7 +1145,8 @@ function PyramidChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.y);
       })
@@ -1135,10 +1156,12 @@ function PyramidChartTooltip({
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, top, height, activeIndex, setActiveIndexJS]);
+  }, [total, top, height, activeIndex, setActiveIndexJS, activateAfterLongPress]);
 
   /*
    * The readout slides down to the row it is describing and sits centred over

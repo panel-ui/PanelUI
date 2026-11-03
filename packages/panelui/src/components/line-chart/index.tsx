@@ -954,6 +954,15 @@ LineChartYAxis.layer = 'overlay' as Layer;
 // plot out.
 LineChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface LineChartTooltipProps {
   color?: string;
   /**
@@ -965,6 +974,16 @@ export interface LineChartTooltipProps {
   formatValue?: (value: number, key: string) => string;
   /** Format the label's heading from the row. Defaults to the value at xDataKey. */
   formatX?: (datum: LineChartDatum) => string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -979,7 +998,13 @@ export interface LineChartTooltipProps {
  * The hit area is the whole plot. A crosshair you have to land on the line to
  * summon is a crosshair nobody finds.
  */
-function LineChartTooltip({ color, showLabel = true, formatValue, formatX }: LineChartTooltipProps) {
+function LineChartTooltip({
+  color,
+  showLabel = true,
+  formatValue,
+  formatX,
+  activateAfterLongPress = DEFAULT_HOLD,
+}: LineChartTooltipProps) {
   const {
     data,
     xDataKey,
@@ -1022,7 +1047,8 @@ function LineChartTooltip({ color, showLabel = true, formatValue, formatX }: Lin
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x);
       })
@@ -1032,10 +1058,12 @@ function LineChartTooltip({ color, showLabel = true, formatValue, formatX }: Lin
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, width, activeIndex, setActiveIndexJS]);
+  }, [total, left, width, activeIndex, setActiveIndexJS, activateAfterLongPress]);
 
   const crosshairStyle = useAnimatedStyle(() => {
     const index = activeIndex.value;

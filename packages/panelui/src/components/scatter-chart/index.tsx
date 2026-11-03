@@ -1028,6 +1028,15 @@ ScatterChartYAxis.layer = 'overlay' as Layer;
 // plot out.
 ScatterChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface ScatterChartTooltipProps {
   /** Float a small readout beside the selected point. On by default. */
   showLabel?: boolean;
@@ -1039,6 +1048,16 @@ export interface ScatterChartTooltipProps {
   formatTitle?: (datum: ScatterChartDatum) => string;
   /** How far from a point a touch still counts as being on it, in points. */
   hitRadius?: number;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1064,6 +1083,7 @@ function ScatterChartTooltip({
   formatY,
   formatTitle,
   hitRadius = HIT_RADIUS,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: ScatterChartTooltipProps) {
   const {
     data,
@@ -1190,7 +1210,8 @@ function ScatterChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x, event.y);
       })
@@ -1202,7 +1223,7 @@ function ScatterChartTooltip({
         'worklet';
         clear();
       });
-  }, [hit, hitRadius, activeId, select]);
+  }, [hit, hitRadius, activeId, select, activateAfterLongPress]);
 
   // The readout sits above the point and is clamped inside the plot, so it
   // never runs off an edge at an extreme value.

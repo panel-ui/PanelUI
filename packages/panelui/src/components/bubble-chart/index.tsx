@@ -1794,6 +1794,15 @@ BubbleChartYAxis.layer = 'overlay' as Layer;
 // plot out.
 BubbleChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface BubbleChartTooltipProps {
   /** Float a small readout beside the selected bubble. On by default. */
   showLabel?: boolean;
@@ -1806,6 +1815,16 @@ export interface BubbleChartTooltipProps {
   /** Floor on the touch target, for a chart whose smallest bubbles are tiny. */
   hitRadius?: number;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1831,6 +1850,7 @@ function BubbleChartTooltip({
   formatSize,
   hitRadius = HIT_RADIUS,
   className,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: BubbleChartTooltipProps) {
   const {
     bubbles,
@@ -1926,7 +1946,8 @@ function BubbleChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x, event.y);
       })
@@ -1938,7 +1959,7 @@ function BubbleChartTooltip({
         'worklet';
         clear();
       });
-  }, [hit, activeIndex, select]);
+  }, [hit, activeIndex, select, activateAfterLongPress]);
 
   /*
    * The readout's own height, measured rather than assumed. It decides whether

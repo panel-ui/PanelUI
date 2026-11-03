@@ -1093,6 +1093,15 @@ CandlestickChartYAxis.layer = 'overlay' as Layer;
 // drawn over unreadable too.
 CandlestickChartYAxis.axis = 'y' as const;
 
+/**
+ * How long the readout waits before claiming the touch, in milliseconds.
+ *
+ * Long enough that a tap reaches a button drawn over the chart and a swipe
+ * scrolls the screen, short enough that a deliberate press does not feel
+ * ignored.
+ */
+const DEFAULT_HOLD = 180;
+
 export interface CandlestickChartTooltipProps {
   /** Format one of the four prices. Defaults to a compact number. */
   formatValue?: (value: number, field: 'open' | 'high' | 'low' | 'close') => string;
@@ -1101,6 +1110,16 @@ export interface CandlestickChartTooltipProps {
   /** Show the period's change from open to close under the four prices. */
   showChange?: boolean;
   className?: string;
+  /**
+   * How long a press has to be held before the readout takes the touch, in
+   * milliseconds.
+   *
+   * Until then the touch belongs to whatever else wants it: a quick tap still
+   * reaches a button floating over the chart, and a swipe still scrolls the
+   * screen the chart sits in. Set `0` to read on contact, only for a chart with
+   * nothing over it and no scroll view around it.
+   */
+  activateAfterLongPress?: number;
 }
 
 /**
@@ -1118,6 +1137,7 @@ function CandlestickChartTooltip({
   formatX,
   showChange = true,
   className,
+  activateAfterLongPress = DEFAULT_HOLD,
 }: CandlestickChartTooltipProps) {
   const {
     data,
@@ -1156,7 +1176,8 @@ function CandlestickChartTooltip({
 
     return Gesture.Pan()
       .minDistance(0)
-      .onBegin((event) => {
+      .activateAfterLongPress(activateAfterLongPress)
+      .onStart((event) => {
         'worklet';
         resolve(event.x);
       })
@@ -1166,10 +1187,12 @@ function CandlestickChartTooltip({
       })
       .onFinalize(() => {
         'worklet';
+        // Fires whether or not the readout ever took the touch.
+        if (activeIndex.value === -1) return;
         activeIndex.value = -1;
         runOnJS(setActiveIndexJS)(-1);
       });
-  }, [total, left, width, activeIndex, setActiveIndexJS]);
+  }, [total, left, width, activeIndex, setActiveIndexJS, activateAfterLongPress]);
 
   // The readout centres over its candle and is clamped inside the plot, so it
   // never runs off the edge at the first or last one.

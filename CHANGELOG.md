@@ -9,6 +9,54 @@ fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [1.1.0] — 2026-11-03
+
+Charts stop taking taps meant for the buttons drawn over them, the ref and event types get a
+subpath of their own, and a new agent skill, Apparatus, builds interactive explainers for a
+React Native screen.
+
+### Added
+
+- **`panelui-native/primitives/refs`.** The ref types every component forwards (`ViewRef`,
+  `TextRef`, `TextInputRef`, `ScrollViewRef`) now have a subpath. A project that forbids
+  importing the root entry, because Metro loads all of it, can type a `useRef` or a
+  `forwardRef` wrapper without it. The TextInput event types (`KeyPressEvent`,
+  `SubmitEditingEvent`, `SelectionChangeEvent`, `ContentSizeChangeEvent`) and `ViewTokenOf` are
+  exported here and from the root; before, they were exported from neither. Reported by
+  @techzealot in [#259](https://github.com/panel-ui/PanelUI/issues/259).
+- **`activateAfterLongPress` on every chart readout.** It sets how long a press has to be held
+  before the readout takes the touch: 180 ms by default. It is on the `Tooltip` of BarChart,
+  LineChart, AreaChart, MirrorAreaChart, LiveLineChart, ScatterChart, CandlestickChart,
+  WaterfallChart, PyramidChart, BumpChart and BubbleChart, and on `Plot.Cursor`. Set `0` to
+  read on contact, for a chart with nothing over it and no scroll view around it.
+- **Apparatus**, an agent skill that explains an idea by building a small isometric machine
+  whose working is the idea: a carriage on a spring for a spring animation, a magazine of balls
+  for a rate limiter. The agent writes it as a component, drawn with react-native-svg, moved on
+  the UI thread and framed in a PanelUI card with a live readout. It ships with a drawing kit
+  and five example figures, which are also in the example app.
+
+  ```sh
+  npx skills add panel-ui/PanelUI --skill apparatus
+  ```
+
+### Changed
+
+- **Chart readouts wait for a held press.** A readout used to take the touch the moment a
+  finger landed, which cancelled every Pressable drawn over the chart and read the chart
+  instead of scrolling the screen. It now waits 180 ms, as HeatmapChart already did, so a tap
+  reaches a floating button and a swipe scrolls. Reported by @arnabJ in
+  [#260](https://github.com/panel-ui/PanelUI/issues/260).
+- **`react-native-gesture-handler` 2.5.0 or later is required.** Holding before activating is a
+  gesture-handler 2.5.0 feature, and HeatmapChart and Sortable already relied on it. The peer
+  range said 2.0.0.
+
+### Docs
+
+- **Skills**, under Integrations, lists every agent skill in the repository with its install
+  command. Apparatus has a page with a recording of each example. Logo Maker moved into the
+  section; its old address redirects.
+- The BarChart page explains how the readout shares the touch with buttons drawn over it.
+
 ## [1.0.0] — 2026-11-02
 
 The first stable release, after two months of beta. Nothing is removed and no existing API

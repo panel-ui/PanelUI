@@ -23,7 +23,7 @@
     {
       "addedIn": "0.25.0",
       "group": "charts",
-      "updatedIn": "0.63.0",
+      "updatedIn": "1.1.0",
       "visualization": true,
       "accessibilityMode": "shared-data"
     }
@@ -81,7 +81,7 @@
     {
       "addedIn": "0.25.0",
       "group": "charts",
-      "updatedIn": "0.63.0",
+      "updatedIn": "1.1.0",
       "visualization": true,
       "accessibilityMode": "shared-data"
     }
@@ -93,7 +93,7 @@
     {
       "addedIn": "0.53.0",
       "group": "charts",
-      "updatedIn": "0.63.0",
+      "updatedIn": "1.1.0",
       "visualization": true,
       "accessibilityMode": "shared-data"
     }
@@ -399,7 +399,8 @@
       "addedIn": "0.100.0",
       "group": "charts",
       "visualization": true,
-      "accessibilityMode": "shared-data"
+      "accessibilityMode": "shared-data",
+      "updatedIn": "1.1.0"
     }
   ],
   "number-input": [
@@ -471,7 +472,7 @@
     "Animated time series, drawn on the UI thread.",
     "react native line chart",
     {
-      "updatedIn": "0.63.0",
+      "updatedIn": "1.1.0",
       "group": "charts",
       "visualization": true,
       "accessibilityMode": "shared-data"
@@ -672,7 +673,7 @@
       "group": "charts",
       "visualization": true,
       "accessibilityMode": "shared-data",
-      "updatedIn": "0.78.0"
+      "updatedIn": "1.1.0"
     }
   ],
   "scroll-canvas": [
@@ -1241,7 +1242,7 @@
     {
       "addedIn": "0.62.0",
       "group": "charts",
-      "updatedIn": "0.71.0",
+      "updatedIn": "1.1.0",
       "visualization": true,
       "accessibilityMode": "summary"
     }
@@ -1254,7 +1255,7 @@
       "group": "charts",
       "addedIn": "0.63.0",
       "alpha": true,
-      "updatedIn": "0.76.0",
+      "updatedIn": "1.1.0",
       "visualization": true,
       "accessibilityMode": "shared-data"
     }
@@ -1264,7 +1265,7 @@
     "How a run of changes carried one total to another.",
     "react native waterfall chart bridge",
     {
-      "updatedIn": "0.76.0",
+      "updatedIn": "1.1.0",
       "addedIn": "0.64.0",
       "group": "charts",
       "visualization": true,
@@ -1280,7 +1281,7 @@
       "group": "charts",
       "visualization": true,
       "accessibilityMode": "shared-data",
-      "updatedIn": "0.88.0"
+      "updatedIn": "1.1.0"
     }
   ],
   "bump-chart": [
@@ -1291,7 +1292,8 @@
       "addedIn": "0.100.0",
       "group": "charts",
       "visualization": true,
-      "accessibilityMode": "shared-data"
+      "accessibilityMode": "shared-data",
+      "updatedIn": "1.1.0"
     }
   ],
   "pyramid-chart": [
@@ -1302,7 +1304,8 @@
       "addedIn": "0.87.0",
       "group": "charts",
       "visualization": true,
-      "accessibilityMode": "shared-data"
+      "accessibilityMode": "shared-data",
+      "updatedIn": "1.1.0"
     }
   ],
   "sankey-chart": [

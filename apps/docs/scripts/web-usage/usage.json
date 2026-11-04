@@ -1,0 +1,70 @@
+{
+  "slug": "usage",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 240
+  },
+  "intro": "Use it to show how much of a model's context window is used, or how much of a plan or a budget is left. The indicator is small enough for a composer's footer or a chat header. Pressing it opens a popover with the figures behind it.\n\nThe colour comes from the share used. Below 70% it is the info colour, from 70% the warning colour, and from 90% the destructive one; `warning` and `critical` move those points. `state=\"idle\"` greys it out for a conversation that has not started, and `state=\"done\"` turns it to the success colour, with the ring closing into its dot.\n\nPass `segments` to say what the space is taken up by, oldest first. The ring and the bars draw them in that order with a gap between each: the earlier ones in neutral greys and the last one in the state's colour, because the last is usually the part still growing. Without segments, pass the amount as `value`.\n\nFor one number with its change over time, use a [KPI](/docs/web/components/kpi). For a limit somebody sets by dragging, use a [Range Meter](/docs/web/components/range-meter).",
+  "usage": "const context = [\n  { label: 'System prompt', value: 9_400 },\n  { label: 'Files', value: 41_800 },\n  { label: 'Messages', value: 56_600 },\n]\n\n<Usage limit={200_000} segments={context}>\n  <Usage.Trigger />\n  <Usage.Content>\n    <Usage.Summary label=\"Context window\" unit=\"tokens\" />\n    <Usage.Breakdown />\n  </Usage.Content>\n</Usage>",
+  "anatomy": "<Usage>\n  <Usage.Trigger />\n  <Usage.Content>\n    <Usage.Summary />\n    <Usage.Breakdown />\n    <Usage.Section>\n      <Usage.Meter />\n    </Usage.Section>\n    <Usage.Footer />\n  </Usage.Content>\n</Usage>",
+  "parts": {
+    "Trigger": "The indicator, and the button that opens the popover. `variant` picks the look: `ring`, `dots`, `gauge`, `bar`, `cells` or `pill`. Its accessible name says the share used, such as \"Context: 62% used\".",
+    "Content": "The popover, opened above the trigger by default since the trigger usually sits low on the page. `side` and `align` place it.",
+    "Summary": "The amount used, written large with the limit and the share, and the segments as one bar under it. The figure rolls to its new value. `unit` goes after the limit.",
+    "Breakdown": "One row per segment, with a swatch in the colour the indicator draws it in, its amount and its share, and a last row for what is left. `freeLabel` renames that row, and `null` removes it.",
+    "Section": "A block of figures under a rule, with a `title` and an `aside` at the far end of the heading.",
+    "Meter": "One limit with its own `value` and `limit`, drawn as a row of ticks in the colour of its own share. `note` adds a line under it, such as when it resets, and `display` replaces the figure beside the label.",
+    "Footer": "A band at the foot of the popover, for a note and an action."
+  },
+  "examples": [
+    {
+      "title": "Ring",
+      "description": "The default: a dot in the state's colour inside a ring of arcs, one per segment, and a faint track for what is free. The popover here has every part: the summary, the breakdown and a footer with an action.",
+      "demo": "ring",
+      "height": 360
+    },
+    {
+      "title": "Dots",
+      "description": "The same reading as twelve dots round the dot, lighting up a twelfth at a time. It is coarser than the ring, which suits a reader who needs to know roughly how full, not by how much.",
+      "demo": "dots",
+      "height": 360
+    },
+    {
+      "title": "Gauge",
+      "description": "An open arc with the percentage written in it. Here it shows one limit of a plan, and the popover lists the plan's limits as meters, each coloured by its own share.",
+      "demo": "gauge",
+      "height": 380
+    },
+    {
+      "title": "Bar",
+      "description": "A short segmented bar with the percentage beside it, for a line of text or a footer. `format` writes the amounts in any `Intl.NumberFormat` style, here as dollars.",
+      "demo": "bar",
+      "height": 380
+    },
+    {
+      "title": "Cells",
+      "description": "A small grid that fills a twentieth at a time, with the amount beside it. Meters in the popover can go past their limit: the figure says so, and the ticks stay full.",
+      "demo": "cells",
+      "height": 380
+    },
+    {
+      "title": "Pill",
+      "description": "A chip with a small ring and the count written out, for a header where there is room for words.",
+      "demo": "pill",
+      "height": 360
+    },
+    {
+      "title": "States",
+      "description": "Every look following one conversation as it fills, finishes and starts over. The arcs and bars grow to each new amount, the dot breathes while `state` is `active`, and `done` closes the ring into its dot.",
+      "demo": "states",
+      "height": 200
+    },
+    {
+      "title": "In a prompt",
+      "description": "The ring beside the send button of a [Prompt](/docs/web/components/prompt), where it shows how much room the next message has. The popover opens above it and lines up with its end.",
+      "demo": "prompt",
+      "height": 440
+    }
+  ],
+  "notes": "### Accessibility\n\nThe trigger's accessible name is the root's `label` and the share used, such as \"Context: 62% used\", or \"not started\" while idle. The drawing inside it is hidden from screen readers. Each `Usage.Meter` is a `role=\"meter\"` with its value and limit.\n\n### Reduced motion\n\nWith reduced motion turned on, the indicator jumps to each new reading instead of growing to it, the dot stops breathing, and the popover appears without growing.\n\n### Amounts\n\nAmounts are written compactly by default, so 124000 is `124K`. Pass `format` to the root for another style, such as `{ style: 'currency', currency: 'USD' }`, and `locales` for another locale."
+}

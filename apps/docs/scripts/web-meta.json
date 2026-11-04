@@ -470,5 +470,14 @@
       "addedIn": "0.12.0",
       "category": "overlays"
     }
+  ],
+  "usage": [
+    "Usage",
+    "How full a model's context or a plan is, as a small indicator that opens into the figures.",
+    "react ai context window usage indicator token meter component",
+    {
+      "addedIn": "0.12.0",
+      "category": "ai"
+    }
   ]
 }

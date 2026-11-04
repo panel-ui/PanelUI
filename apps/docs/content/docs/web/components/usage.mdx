@@ -1,0 +1,575 @@
+---
+title: Usage
+description: How full a model's context or a plan is, as a small indicator that opens into the figures.
+status: new
+---
+
+<ComponentPreview name="usage/overview" height={240}>
+
+```tsx lineNumbers
+'use client';
+
+import { Usage, type UsageState } from '@/components/panelui/usage';
+
+/** One conversation at five points: not started, under way, getting full, nearly full, finished. */
+const MOMENTS: { label: string; state: UsageState; segments: { label: string; value: number }[] }[] = [
+  { label: 'New chat', state: 'idle', segments: [] },
+  {
+    label: 'Refactor auth',
+    state: 'active',
+    segments: [
+      { label: 'System prompt', value: 9_400 },
+      { label: 'Tools', value: 16_200 },
+      { label: 'Messages', value: 58_000 },
+    ],
+  },
+  {
+    label: 'Migrate billing',
+    state: 'active',
+    segments: [
+      { label: 'System prompt', value: 9_400 },
+      { label: 'Files', value: 61_000 },
+      { label: 'Messages', value: 84_000 },
+    ],
+  },
+  {
+    label: 'Audit logs',
+    state: 'active',
+    segments: [
+      { label: 'System prompt', value: 9_400 },
+      { label: 'Files', value: 92_000 },
+      { label: 'Messages', value: 88_500 },
+    ],
+  },
+  {
+    label: 'Fix flaky test',
+    state: 'done',
+    segments: [
+      { label: 'System prompt', value: 9_400 },
+      { label: 'Messages', value: 31_000 },
+    ],
+  },
+];
+
+export default function UsageOverview() {
+  return (
+    <div className="flex items-center gap-3">
+      {MOMENTS.map((moment) => (
+        <Usage key={moment.label} limit={200_000} segments={moment.segments} state={moment.state}>
+          <Usage.Trigger />
+          <Usage.Content side="bottom" align="center">
+            <Usage.Summary label={moment.label} unit="tokens" />
+            <Usage.Breakdown />
+          </Usage.Content>
+        </Usage>
+      ))}
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show how much of a model's context window is used, or how much of a plan or a budget is left. The indicator is small enough for a composer's footer or a chat header. Pressing it opens a popover with the figures behind it.
+
+The colour comes from the share used. Below 70% it is the info colour, from 70% the warning colour, and from 90% the destructive one; `warning` and `critical` move those points. `state="idle"` greys it out for a conversation that has not started, and `state="done"` turns it to the success colour, with the ring closing into its dot.
+
+Pass `segments` to say what the space is taken up by, oldest first. The ring and the bars draw them in that order with a gap between each: the earlier ones in neutral greys and the last one in the state's colour, because the last is usually the part still growing. Without segments, pass the amount as `value`.
+
+For one number with its change over time, use a [KPI](/docs/web/components/kpi). For a limit somebody sets by dragging, use a [Range Meter](/docs/web/components/range-meter).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/usage.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/usage` instead of `@/components/panelui/usage`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Add the component it is built on: [Rolling Number](/docs/web/components/rolling-number).
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/usage.tsx`:
+
+<RegistrySource name="usage" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Usage } from "@/components/panelui/usage"
+```
+
+```tsx
+const context = [
+  { label: 'System prompt', value: 9_400 },
+  { label: 'Files', value: 41_800 },
+  { label: 'Messages', value: 56_600 },
+]
+
+<Usage limit={200_000} segments={context}>
+  <Usage.Trigger />
+  <Usage.Content>
+    <Usage.Summary label="Context window" unit="tokens" />
+    <Usage.Breakdown />
+  </Usage.Content>
+</Usage>
+```
+
+## Composition
+
+```tsx
+<Usage>
+  <Usage.Trigger />
+  <Usage.Content>
+    <Usage.Summary />
+    <Usage.Breakdown />
+    <Usage.Section>
+      <Usage.Meter />
+    </Usage.Section>
+    <Usage.Footer />
+  </Usage.Content>
+</Usage>
+```
+
+- **`Usage.Trigger`** — The indicator, and the button that opens the popover. `variant` picks the look: `ring`, `dots`, `gauge`, `bar`, `cells` or `pill`. Its accessible name says the share used, such as "Context: 62% used".
+- **`Usage.Content`** — The popover, opened above the trigger by default since the trigger usually sits low on the page. `side` and `align` place it.
+- **`Usage.Summary`** — The amount used, written large with the limit and the share, and the segments as one bar under it. The figure rolls to its new value. `unit` goes after the limit.
+- **`Usage.Breakdown`** — One row per segment, with a swatch in the colour the indicator draws it in, its amount and its share, and a last row for what is left. `freeLabel` renames that row, and `null` removes it.
+- **`Usage.Section`** — A block of figures under a rule, with a `title` and an `aside` at the far end of the heading.
+- **`Usage.Meter`** — One limit with its own `value` and `limit`, drawn as a row of ticks in the colour of its own share. `note` adds a line under it, such as when it resets, and `display` replaces the figure beside the label.
+- **`Usage.Footer`** — A band at the foot of the popover, for a note and an action.
+
+## Examples
+
+### Ring
+
+The default: a dot in the state's colour inside a ring of arcs, one per segment, and a faint track for what is free. The popover here has every part: the summary, the breakdown and a footer with an action.
+
+<ComponentPreview name="usage/ring" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Usage } from '@/components/panelui/usage';
+
+const CONTEXT = [
+  { label: 'System prompt', value: 9_400 },
+  { label: 'Tools', value: 16_200 },
+  { label: 'Files', value: 41_800 },
+  { label: 'Messages', value: 56_600 },
+];
+
+export default function UsageRing() {
+  return (
+    <Usage limit={200_000} segments={CONTEXT}>
+      <Usage.Trigger />
+      <Usage.Content side="right" align="center">
+        <Usage.Summary label="Context window" unit="tokens" />
+        <Usage.Breakdown />
+        <Usage.Footer>
+          Older messages are summarised at 90%.
+          <Button size="sm" variant="outline">
+            Compact now
+          </Button>
+        </Usage.Footer>
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Dots
+
+The same reading as twelve dots round the dot, lighting up a twelfth at a time. It is coarser than the ring, which suits a reader who needs to know roughly how full, not by how much.
+
+<ComponentPreview name="usage/dots" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { Usage } from '@/components/panelui/usage';
+
+const CONTEXT = [
+  { label: 'Instructions', value: 6_100 },
+  { label: 'Attached PDF', value: 52_300 },
+  { label: 'Conversation', value: 39_900 },
+];
+
+export default function UsageDots() {
+  return (
+    <Usage limit={128_000} segments={CONTEXT}>
+      <Usage.Trigger variant="dots" />
+      <Usage.Content side="bottom" align="center">
+        <Usage.Summary label="Reading “Lease agreement.pdf”" unit="tokens" />
+        <Usage.Breakdown />
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Gauge
+
+An open arc with the percentage written in it. Here it shows one limit of a plan, and the popover lists the plan's limits as meters, each coloured by its own share.
+
+<ComponentPreview name="usage/gauge" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { Usage } from '@/components/panelui/usage';
+
+export default function UsageGauge() {
+  return (
+    <Usage limit={100} value={64} label="Session">
+      <Usage.Trigger variant="gauge" />
+      <Usage.Content side="bottom" align="center">
+        <Usage.Section title="Plan" aside="Team" className="border-t-0">
+          <Usage.Meter label="This session" value={64} note="Resets in 2 h 14 min" />
+          <Usage.Meter label="This week" value={38} note="Resets on Monday at 09:00" />
+          <Usage.Meter label="Deep research" value={9} limit={10} display="9 of 10 runs" note="One run left this week" />
+        </Usage.Section>
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Bar
+
+A short segmented bar with the percentage beside it, for a line of text or a footer. `format` writes the amounts in any `Intl.NumberFormat` style, here as dollars.
+
+<ComponentPreview name="usage/bar" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Usage } from '@/components/panelui/usage';
+
+const SPEND = [
+  { label: 'Chat', value: 11.2 },
+  { label: 'Image generation', value: 8.65 },
+  { label: 'Batch jobs', value: 17.55 },
+];
+
+const DOLLARS: Intl.NumberFormatOptions = { style: 'currency', currency: 'USD', maximumFractionDigits: 2 };
+
+export default function UsageBar() {
+  return (
+    <Usage limit={50} segments={SPEND} label="Credit" format={DOLLARS}>
+      <Usage.Trigger variant="bar" />
+      <Usage.Content side="bottom" align="center">
+        <Usage.Summary label="Credit used in November" />
+        <Usage.Breakdown freeLabel="Left" />
+        <Usage.Footer>
+          Renews on 1 December.
+          <Button size="sm">Add credit</Button>
+        </Usage.Footer>
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Cells
+
+A small grid that fills a twentieth at a time, with the amount beside it. Meters in the popover can go past their limit: the figure says so, and the ticks stay full.
+
+<ComponentPreview name="usage/cells" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { Usage } from '@/components/panelui/usage';
+
+const WHOLE: Intl.NumberFormatOptions = { maximumFractionDigits: 0 };
+
+export default function UsageCells() {
+  return (
+    <Usage limit={200} value={183} label="Requests today" format={WHOLE}>
+      <Usage.Trigger variant="cells" />
+      <Usage.Content side="bottom" align="center">
+        <Usage.Summary unit="requests" />
+        <Usage.Section title="By key">
+          <Usage.Meter label="Production" value={141} limit={160} />
+          <Usage.Meter label="Staging" value={42} limit={40} display="42 / 40, over" note="Staging is rate-limited until midnight UTC" />
+        </Usage.Section>
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Pill
+
+A chip with a small ring and the count written out, for a header where there is room for words.
+
+<ComponentPreview name="usage/pill" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { Usage } from '@/components/panelui/usage';
+
+const CONTEXT = [
+  { label: 'System prompt', value: 4_800 },
+  { label: 'Repository map', value: 22_000 },
+  { label: 'Open files', value: 37_500 },
+  { label: 'Messages', value: 29_200 },
+];
+
+export default function UsagePill() {
+  return (
+    <Usage limit={128_000} segments={CONTEXT}>
+      <Usage.Trigger variant="pill" />
+      <Usage.Content side="bottom" align="center">
+        <Usage.Summary label="Context" unit="tokens" />
+        <Usage.Breakdown />
+      </Usage.Content>
+    </Usage>
+  );
+}
+```
+
+</ComponentPreview>
+
+### States
+
+Every look following one conversation as it fills, finishes and starts over. The arcs and bars grow to each new amount, the dot breathes while `state` is `active`, and `done` closes the ring into its dot.
+
+<ComponentPreview name="usage/states" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Usage, type UsageVariant } from '@/components/panelui/usage';
+
+const LIMIT = 200_000;
+const LOOKS: UsageVariant[] = ['ring', 'dots', 'gauge', 'bar', 'cells', 'pill'];
+
+/** A conversation filling up in steps, finishing, and starting over. */
+const STEPS = [0, 22_000, 64_000, 108_000, 146_000, 171_000, 188_000, -1];
+
+export default function UsageStates() {
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const timer = setInterval(() => setStep((current) => (current + 1) % STEPS.length), 1400);
+    return () => clearInterval(timer);
+  }, []);
+
+  const done = STEPS[step] === -1;
+  const messages = done ? 188_000 : STEPS[step]!;
+  const segments = messages > 0 ? [{ label: 'System prompt', value: 9_400 }, { label: 'Messages', value: messages - 9_400 }] : [];
+  const state = step === 0 ? 'idle' : done ? 'done' : 'active';
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      {LOOKS.map((look) => (
+        <Usage key={look} limit={LIMIT} segments={segments} state={state}>
+          <Usage.Trigger variant={look} />
+          <Usage.Content side="bottom" align="center">
+            <Usage.Summary unit="tokens" />
+          </Usage.Content>
+        </Usage>
+      ))}
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### In a prompt
+
+The ring beside the send button of a [Prompt](/docs/web/components/prompt), where it shows how much room the next message has. The popover opens above it and lines up with its end.
+
+<ComponentPreview name="usage/prompt" height={440}>
+
+```tsx lineNumbers
+'use client';
+
+import { BrainIcon, SparklesIcon, ZapIcon } from 'lucide-react';
+import { Prompt, type PromptModelItem } from '@/components/panelui/prompt';
+import { Usage } from '@/components/panelui/usage';
+
+const MODELS: PromptModelItem[] = [
+  { value: 'lumen', label: 'Lumen 4', icon: <SparklesIcon />, description: 'Balanced, for most questions' },
+  { value: 'lumen-mini', label: 'Lumen 4 Mini', icon: <ZapIcon />, description: 'Quick answers to small asks' },
+  { value: 'lumen-deep', label: 'Lumen 4 Deep', icon: <BrainIcon />, description: 'Slower, for hard problems' },
+];
+
+const CONTEXT = [
+  { label: 'System prompt', value: 9_400 },
+  { label: 'Tools', value: 16_200 },
+  { label: 'Files', value: 74_000 },
+  { label: 'Messages', value: 52_300 },
+];
+
+export default function UsagePrompt() {
+  return (
+    <div className="w-full max-w-xl">
+      <Prompt>
+        <Prompt.Field>
+          <Prompt.Textarea placeholder="Ask about the codebase" minRows={2} />
+          <Prompt.Footer>
+            <Prompt.Tools>
+              <Prompt.Menu />
+              <Prompt.Model items={MODELS} defaultValue="lumen" variant="ghost" />
+            </Prompt.Tools>
+            <div className="flex items-center gap-1">
+              <Usage limit={200_000} segments={CONTEXT}>
+                <Usage.Trigger />
+                <Usage.Content align="end">
+                  <Usage.Summary label="Context window" unit="tokens" />
+                  <Usage.Breakdown />
+                </Usage.Content>
+              </Usage>
+              <Prompt.Submit />
+            </div>
+          </Prompt.Footer>
+        </Prompt.Field>
+      </Prompt>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Usage
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | — | How much there is in all, in the unit of the values: tokens, requests, dollars. |
+| `segments` | `readonly UsageSegment[]` | — | What the used space is taken up by, oldest first. Their sum is the amount used. |
+| `value` | `number` | — | The amount used, when there are no `segments` to add up. |
+| `state` | `UsageState` | `'active'` | `idle` greys it out, `active` breathes, `done` turns it to the success colour. Default `active`. |
+| `warning` | `number` | `0.7` | The share, from 0 to 1, at which it turns to the warning colour. Default `0.7`. |
+| `critical` | `number` | `0.9` | The share, from 0 to 1, at which it turns to the destructive colour. Default `0.9`. |
+| `label` | `string` | `'Context'` | What is being measured, as the trigger's accessible name begins. Default `Context`. |
+| `format` | `Intl.NumberFormatOptions` | `{ notation: 'compact', maximumFractionDigits: 1 }` | How amounts are written. Default compact, so 124000 is `124K`. |
+| `locales` | `Intl.LocalesArgument` | — | The locale the amounts are written in. Default the browser's. |
+
+### Usage.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `UsageVariant` | `ring` | The indicator: `ring`, `dots`, `gauge`, `bar`, `cells` or `pill`. Default `ring`. |
+| `className` | `string` | — |  |
+
+### Usage.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `side` | `Popover.Positioner.Props['side']` | — | Which side of the trigger it opens on. Default `top`, since the trigger usually sits low in a composer. |
+| `align` | `Popover.Positioner.Props['align']` | — | How it lines up with the trigger along that side. Default `start`. |
+| `sideOffset` | `number` | — | The gap between the trigger and the popover, in pixels. Default `8`. |
+| `container` | `Popover.Portal.Props['container']` | — | Where in the document it is put. Default `document.body`. |
+| `className` | `string` | — |  |
+
+### Usage.Summary
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | `'Context'` | What is being measured, over the figure. Default the root's `label`. |
+| `unit` | `ReactNode` | — | The unit after the limit: `tokens`. |
+
+### Usage.Breakdown
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `freeLabel` | `ReactNode` | — | What the unused space is called in the last row. Pass `null` for no such row. Default `Free`. |
+
+### Usage.Section
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | The section's heading: `Plan`, `This month`. |
+| `aside` | `ReactNode` | — | Something at the far end of the heading, such as the plan's name. |
+
+### Usage.Meter
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | `'Context'` | What it measures: `Session`, `This week`. |
+| `value` | `number` | — | How much is used. |
+| `limit` | `number` | — | How much there is. Default `100`, for a value that is already a percentage. |
+| `note` | `ReactNode` | — | A line under the bar: when it resets, what happens at the limit. |
+| `display` | `ReactNode` | — | How the value is written beside the label. Default `value / limit` in the root's format, or a percentage when `limit` is 100. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Accessibility
+
+The trigger's accessible name is the root's `label` and the share used, such as "Context: 62% used", or "not started" while idle. The drawing inside it is hidden from screen readers. Each `Usage.Meter` is a `role="meter"` with its value and limit.
+
+### Reduced motion
+
+With reduced motion turned on, the indicator jumps to each new reading instead of growing to it, the dot stops breathing, and the popover appears without growing.
+
+### Amounts
+
+Amounts are written compactly by default, so 124000 is `124K`. Pass `format` to the root for another style, such as `{ style: 'currency', currency: 'USD' }`, and `locales` for another locale.
+
+### Server Components
+
+`Usage` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Usage.Trigger` off the import, so each part is also exported by name: `UsageTrigger` is `Usage.Trigger`, and so on for the others.
+
+```tsx
+import { Usage, UsageTrigger, UsageContent, UsageSummary, UsageBreakdown, UsageSection, UsageMeter, UsageFooter } from "@/components/panelui/usage"
+```

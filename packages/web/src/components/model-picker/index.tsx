@@ -185,7 +185,7 @@ const pickerVariants = tv({
     meterCell: 'h-2.5 flex-1 rounded-[2px] bg-muted-foreground/20 data-on:bg-foreground/80',
     price: 'w-16 shrink-0 font-medium tracking-wider',
     priceCell: 'hidden @[30rem]:block',
-    pane: 'hidden w-64 shrink-0 flex-col gap-4 border-s bg-muted/30 p-4 @[34rem]:flex',
+    pane: 'hidden w-64 shrink-0 flex-col gap-4 overflow-y-auto border-s bg-muted/30 p-4 [scrollbar-width:thin] @[34rem]:flex',
     paneIcon: 'flex size-10 items-center justify-center rounded-xl border bg-background [&_svg]:size-5',
     paneTitle: 'text-base font-semibold text-foreground',
     paneText: 'text-[0.8125rem] leading-5 text-muted-foreground',
@@ -206,7 +206,10 @@ const pickerVariants = tv({
         itemNameText: 'overflow-visible whitespace-normal',
       },
       compare: { popup: 'w-[33rem]', item: 'h-11' },
-      detail: { popup: 'min-h-[22rem] w-[38rem]', item: 'h-9' },
+      // A fixed height: the pane's text changes with the highlight, and a popup
+      // that grew with it moved the rows under the pointer, which moved the
+      // highlight again.
+      detail: { popup: 'h-[24rem] w-[38rem]', item: 'h-9' },
     },
     appearance: {
       ghost: { trigger: 'text-muted-foreground hover:bg-accent hover:text-foreground data-popup-open:text-foreground' },
@@ -773,7 +776,7 @@ function Tags({ tags }: { tags: readonly string[] }) {
 function Pane({ item }: { item: ModelPickerItem }) {
   const { picker, slots } = useRow();
   return (
-    <aside aria-live="polite" className={slots.pane()}>
+    <aside className={slots.pane()}>
       <span aria-hidden="true" className={slots.paneIcon()}>
         {iconOf(picker, item)}
       </span>
@@ -845,7 +848,7 @@ function ModelPickerContent({
 }: ModelPickerContentProps) {
   const picker = usePicker('ModelPicker.Content');
   const { variant } = picker;
-  const slots = pickerVariants({ variant });
+  const slots = useMemo(() => pickerVariants({ variant }), [variant]);
   const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const firstFilter = (): Filter =>
@@ -887,7 +890,7 @@ function ModelPickerContent({
   }, [variant, visible, query, picker.providerList]);
 
   // The order the rows are shown in, which ⌘1 to ⌘9 count along.
-  const ordered = variant === 'list' ? groups.flatMap((group) => group.items) : visible;
+  const ordered = useMemo(() => (variant === 'list' ? groups.flatMap((group) => group.items) : visible), [variant, groups, visible]);
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const digit = /^Digit([1-9])$/.exec(event.code);
@@ -933,6 +936,8 @@ function ModelPickerContent({
     );
 
   const source = (variant === 'list' ? groups : visible) as unknown as ModelPickerItem[];
+  // Held steady across highlight changes, so moving the pointer re-renders the pane and not every row.
+  const rowContext = useMemo(() => ({ picker, slots, ordered }), [picker, slots, ordered]);
   const shown = highlighted ?? picker.items.find((item) => item.value === picker.value);
 
   return (
@@ -965,7 +970,7 @@ function ModelPickerContent({
             autoHighlight="always"
             keepHighlight
           >
-            <RowContext.Provider value={{ picker, slots, ordered }}>
+            <RowContext.Provider value={rowContext}>
             {variant === 'rail' ? (
               <div role="toolbar" aria-orientation="vertical" aria-label="Filter by provider" className={slots.rail()}>
                 <Tooltip.Provider>

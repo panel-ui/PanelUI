@@ -52,6 +52,10 @@ const checkboxVariants = tv({
       // Checked or mixed: the box fills with the colour, and the border goes with it.
       'data-checked:border-(--checkbox-color) data-checked:bg-(--checkbox-color)',
       'data-indeterminate:border-(--checkbox-color) data-indeterminate:bg-(--checkbox-color)',
+      // Said again for dark mode: `dark:bg-input/30` above outranks a plain
+      // `data-checked:` fill there, which left a checked box empty and its tick
+      // drawn in the dark mark colour on nothing.
+      'dark:data-checked:bg-(--checkbox-color) dark:data-indeterminate:bg-(--checkbox-color)',
       'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
       'data-disabled:cursor-not-allowed data-disabled:opacity-50',
       // A wider target than the box, so it is not a fiddle to hit on a phone.

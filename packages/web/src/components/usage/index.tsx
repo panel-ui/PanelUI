@@ -241,7 +241,10 @@ export interface UsageProps extends Omit<Popover.Root.Props, 'children'> {
   label?: string;
   /** How amounts are written. Default compact, so 124000 is `124K`. */
   format?: Intl.NumberFormatOptions;
-  /** The locale the amounts are written in. Default the browser's. */
+  /**
+   * The locale the amounts are written in. Default `en-US`, so `124K` reads the same on every device;
+   * pass the reader's locale to write them in their language.
+   */
   locales?: Intl.LocalesArgument;
   children?: ReactNode;
 }
@@ -258,7 +261,7 @@ function UsageRoot({
   critical = 0.9,
   label = 'Context',
   format = COMPACT,
-  locales,
+  locales = 'en-US',
   children,
   ...props
 }: UsageProps) {

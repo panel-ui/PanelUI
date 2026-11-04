@@ -76,7 +76,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `critical` | `number` | `0.9` | The share, from 0 to 1, at which it turns to the destructive colour. Default `0.9`. |
 | `label` | `string` | `'Context'` | What is being measured, as the trigger's accessible name begins. Default `Context`. |
 | `format` | `Intl.NumberFormatOptions` | `{ notation: 'compact', maximumFractionDigits: 1 }` | How amounts are written. Default compact, so 124000 is `124K`. |
-| `locales` | `Intl.LocalesArgument` | — | The locale the amounts are written in. Default the browser's. |
+| `locales` | `Intl.LocalesArgument` | `'en-US'` | The locale the amounts are written in. Default `en-US`, so `124K` reads the same on every device; pass the reader's locale to write them in their language. |
 
 #### `UsageTriggerProps`
 
@@ -141,7 +141,7 @@ With reduced motion turned on, the indicator jumps to each new reading instead o
 
 #### Amounts
 
-Amounts are written compactly by default, so 124000 is `124K`. Pass `format` to the root for another style, such as `{ style: 'currency', currency: 'USD' }`, and `locales` for another locale.
+Amounts are written compactly and in English by default, so 124000 is `124K` whatever language the device is set to. Pass `format` to the root for another style, such as `{ style: 'currency', currency: 'USD' }`, and `locales` to write them in the reader's language, such as `locales="ar"`.
 
 ## Example
 

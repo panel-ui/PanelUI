@@ -304,6 +304,26 @@
       ]
     },
     {
+      "name": "command",
+      "type": "registry:component",
+      "title": "Command",
+      "description": "A launcher: type to find a page, an app or an action, and run it with Enter.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/spinner.json"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/command.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/command.tsx"
+        }
+      ]
+    },
+    {
       "name": "command-dock",
       "type": "registry:component",
       "title": "Command Dock",

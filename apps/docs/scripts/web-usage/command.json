@@ -1,0 +1,70 @@
+{
+  "slug": "command",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 600
+  },
+  "intro": "Use it for a launcher that is opened from a hotkey: search the pages of an app, its settings and its actions in one place, and run one with Enter. For a field that answers a question in rows under it, use [Command Dock](/docs/web/components/command-dock). For actions on one thing, opened from a button beside it, use a [Menu](/docs/web/components/menu).\n\nItems are written as children. Each hides itself when it does not match what is typed: every word has to appear in its title, its `subtitle`, its `kind` or its `keywords`, in any order. A group with nothing left in it hides too, and `Command.Empty` shows when nothing is left at all. The first match is highlighted, so a few letters and Enter run it.\n\nPut it in a `Command.Dialog` to open it over the page with ⌘K, or Ctrl+K, or leave it in the page. Opened from its hotkey it appears at once, with no animation, because a launcher is opened many times a day.",
+  "usage": "<Command.Dialog hotkey=\"mod+k\">\n  <Command>\n    <Command.Input placeholder=\"Search for pages and actions…\" />\n    <Command.List>\n      <Command.Group heading=\"Pages\">\n        <Command.Item icon={<BookIcon />} kind=\"Guide\" onSelect={() => go('/docs')}>\n          Documentation\n        </Command.Item>\n      </Command.Group>\n      <Command.Empty />\n    </Command.List>\n    <Command.Footer>\n      <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>\n    </Command.Footer>\n  </Command>\n</Command.Dialog>",
+  "anatomy": "<Command.Dialog>\n  <Command>\n    <Command.Input>\n      <Command.InputAction />\n    </Command.Input>\n    <Command.List>\n      <Command.Group>\n        <Command.Item />\n      </Command.Group>\n      <Command.Separator />\n      <Command.Loading />\n      <Command.Empty />\n    </Command.List>\n    <Command.Footer>\n      <Command.FooterAction />\n      <Command.FooterDivider />\n    </Command.Footer>\n  </Command>\n</Command.Dialog>",
+  "parts": {
+    "Dialog": "Opens the launcher in a panel over the page, from its `hotkey` (`mod+k` by default, `null` for none) or from a `trigger`. Choosing an item closes it, unless the item has `closeOnSelect={false}`. Escape closes it too.",
+    "Input": "The field. It has focus while the launcher is open, and the arrow keys and Enter work from it. `icon` replaces the magnifying glass and `prefix` puts a chip before the text, such as the page a nested list is on. Its children go at its end.",
+    "InputAction": "A button at the end of the field, with its `keys` after its label, such as switching the field to asking an assistant.",
+    "List": "The results, scrolling inside the launcher. In the `split` layout the preview of the highlighted item sits beside it.",
+    "Group": "Items under a `heading`. It hides when none of its items match.",
+    "Item": "One result: `icon`, the title as its children, a quieter `subtitle`, and at its end a `badge`, its `kind` and its `shortcut`. `onSelect` runs when it is pressed or Enter is pressed on it. `keywords` are more words to find it by, and `forceMount` keeps it whatever is typed.",
+    "Empty": "Shown when no item is left.",
+    "Loading": "A spinner and a line, for results still on their way.",
+    "Separator": "A rule between groups.",
+    "Footer": "The bar at the foot, with `lead` at its start and its actions at its end.",
+    "FooterAction": "An action in the footer, with its `keys` after its label. The first is usually what Enter does.",
+    "FooterDivider": "A thin rule between two footer actions.",
+    "Keys": "Keys drawn as key caps, for anywhere else in the launcher."
+  },
+  "examples": [
+    {
+      "title": "In a dialog",
+      "description": "`Command.Dialog` with a `trigger` for a pointer and `hotkey` for the keyboard. Choosing an item runs its `onSelect` and closes the dialog. Opened from the keyboard it appears at once; opened with the button it fades in. This page's own search already has ⌘K, so the demo uses ⌥K.",
+      "demo": "dialog",
+      "height": 200
+    },
+    {
+      "title": "Compact",
+      "description": "`variant=\"compact\"`: a dense palette for an editor, with smaller rows and each item's `shortcut` at its end.",
+      "demo": "compact",
+      "height": 420
+    },
+    {
+      "title": "Grid",
+      "description": "`variant=\"grid\"` lays the items out as tiles, `columns` to a row, and the arrow keys move across and down. The rows are cut from the items that match, so a filtered grid closes up rather than leaving gaps.",
+      "demo": "grid",
+      "height": 480
+    },
+    {
+      "title": "Split",
+      "description": "`variant=\"split\"` shows the highlighted item's `preview` beside the list, and moving with the arrow keys changes it. On a narrow screen the preview is left out.",
+      "demo": "split",
+      "height": 460
+    },
+    {
+      "title": "Inline",
+      "description": "`variant=\"inline\"` sits in the page as a card, for a search page rather than a launcher. Anything can go between the field and the list; here a [Chip](/docs/web/components/chip) group narrows the results by section.",
+      "demo": "inline",
+      "height": 520
+    },
+    {
+      "title": "Results from a server",
+      "description": "`filter={false}` stops the items hiding themselves, for results already filtered elsewhere. Hold the text with `search` and `onSearchChange`, and show `Command.Loading` while the request is out.",
+      "demo": "async",
+      "height": 400
+    },
+    {
+      "title": "Nested pages",
+      "description": "An item with `closeOnSelect={false}` can open a page of its own: swap the groups, show where you are with the field's `prefix`, and go back when Backspace is pressed in the empty field.",
+      "demo": "pages",
+      "height": 420
+    }
+  ],
+  "notes": "### Keyboard\n\nThe arrow keys move the highlight, Enter runs the highlighted item, and Escape closes a dialog. In the `grid` layout Left and Right move across a row. The hotkey opens and closes the dialog from anywhere on the page.\n\n### Choosing a hotkey\n\nA page never receives the keys a browser keeps for itself, such as ⌘T, ⌘W or ⌘1 to ⌘9. ⌘K and Ctrl+K are free to use and are what most launchers use. With more than one `Command.Dialog` on a page, or a search of your own already on ⌘K, give only one of them the hotkey and pass `hotkey={null}` to the rest.\n\n### Accessibility\n\nThe field is a combobox and the results are a listbox, so a screen reader announces the highlighted item as the arrow keys move. The dialog is named by its `label`, `Command menu` by default. Shortcuts drawn by `shortcut` and `Command.Keys` are only shown; handle the keys where the action lives."
+}

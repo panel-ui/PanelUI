@@ -1,0 +1,805 @@
+---
+title: Command
+description: "A launcher: type to find a page, an app or an action, and run it with Enter."
+status: new
+---
+
+<ComponentPreview name="command/overview" height={600}>
+
+```tsx lineNumbers
+'use client';
+
+import {
+  BookOpenIcon,
+  BoxIcon,
+  ClipboardListIcon,
+  MoonStarIcon,
+  PackagePlusIcon,
+  PaletteIcon,
+  RocketIcon,
+  SparklesIcon,
+  TerminalIcon,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Command } from '@/components/panelui/command';
+
+/** An app's picture: an icon on a tile in one of the theme's colours. */
+function Tile({ tone, children }: { tone: string; children: ReactNode }) {
+  return <span className={`flex size-full items-center justify-center ${tone === 'bg-foreground' ? 'text-background' : 'text-white'} [&_svg]:size-3.5 ${tone}`}>{children}</span>;
+}
+
+export default function CommandOverview() {
+  return (
+    <Command className="max-w-2xl">
+      <Command.Input placeholder="Search for components, pages and actions…">
+        <Command.InputAction keys={['Tab']}>Ask AI</Command.InputAction>
+      </Command.Input>
+      <Command.List>
+        <Command.Group>
+          <Command.Item icon={<Tile tone="bg-destructive"><SparklesIcon /></Tile>} subtitle="v0.12.0" kind="Changelog">
+            See what’s new
+          </Command.Item>
+        </Command.Group>
+        <Command.Group heading="Suggestions">
+          <Command.Item icon={<Tile tone="bg-info"><BoxIcon /></Tile>} subtitle="Components" kind="Page">
+            Model Picker
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-warning"><ClipboardListIcon /></Tile>} subtitle="Components" kind="Page">
+            Usage
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-success"><PaletteIcon /></Tile>} subtitle="Theming" kind="Guide" keywords={['colours', 'tokens']}>
+            Choose a theme
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-foreground"><TerminalIcon /></Tile>} subtitle="Installation" kind="Guide">
+            Add with the CLI
+          </Command.Item>
+        </Command.Group>
+        <Command.Group heading="Actions">
+          <Command.Item icon={<Tile tone="bg-info"><PackagePlusIcon /></Tile>} subtitle="npm" kind="Command" shortcut={['⌘', 'I']}>
+            Install panelui-web
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-foreground"><MoonStarIcon /></Tile>} kind="Command" keywords={['dark', 'light', 'appearance']}>
+            Switch theme
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-success"><RocketIcon /></Tile>} subtitle="Templates" badge="New" kind="Command">
+            Start a new app
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-warning"><BookOpenIcon /></Tile>} subtitle="Reference" kind="Page">
+            Read the API reference
+          </Command.Item>
+        </Command.Group>
+        <Command.Empty>No components or pages match</Command.Empty>
+      </Command.List>
+      <Command.Footer>
+        <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>
+        <Command.FooterDivider />
+        <Command.FooterAction keys={['⌘', 'K']}>Actions</Command.FooterAction>
+      </Command.Footer>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a launcher that is opened from a hotkey: search the pages of an app, its settings and its actions in one place, and run one with Enter. For a field that answers a question in rows under it, use [Command Dock](/docs/web/components/command-dock). For actions on one thing, opened from a button beside it, use a [Menu](/docs/web/components/menu).
+
+Items are written as children. Each hides itself when it does not match what is typed: every word has to appear in its title, its `subtitle`, its `kind` or its `keywords`, in any order. A group with nothing left in it hides too, and `Command.Empty` shows when nothing is left at all. The first match is highlighted, so a few letters and Enter run it.
+
+Put it in a `Command.Dialog` to open it over the page with ⌘K, or Ctrl+K, or leave it in the page. Opened from its hotkey it appears at once, with no animation, because a launcher is opened many times a day.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/command.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/command` instead of `@/components/panelui/command`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Add the component it is built on: [Spinner](/docs/web/components/spinner).
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/command.tsx`:
+
+<RegistrySource name="command" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Command } from "@/components/panelui/command"
+```
+
+```tsx
+<Command.Dialog hotkey="mod+k">
+  <Command>
+    <Command.Input placeholder="Search for pages and actions…" />
+    <Command.List>
+      <Command.Group heading="Pages">
+        <Command.Item icon={<BookIcon />} kind="Guide" onSelect={() => go('/docs')}>
+          Documentation
+        </Command.Item>
+      </Command.Group>
+      <Command.Empty />
+    </Command.List>
+    <Command.Footer>
+      <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>
+    </Command.Footer>
+  </Command>
+</Command.Dialog>
+```
+
+## Composition
+
+```tsx
+<Command.Dialog>
+  <Command>
+    <Command.Input>
+      <Command.InputAction />
+    </Command.Input>
+    <Command.List>
+      <Command.Group>
+        <Command.Item />
+      </Command.Group>
+      <Command.Separator />
+      <Command.Loading />
+      <Command.Empty />
+    </Command.List>
+    <Command.Footer>
+      <Command.FooterAction />
+      <Command.FooterDivider />
+    </Command.Footer>
+  </Command>
+</Command.Dialog>
+```
+
+- **`Command.Dialog`** — Opens the launcher in a panel over the page, from its `hotkey` (`mod+k` by default, `null` for none) or from a `trigger`. Choosing an item closes it, unless the item has `closeOnSelect={false}`. Escape closes it too.
+- **`Command.Input`** — The field. It has focus while the launcher is open, and the arrow keys and Enter work from it. `icon` replaces the magnifying glass and `prefix` puts a chip before the text, such as the page a nested list is on. Its children go at its end.
+- **`Command.InputAction`** — A button at the end of the field, with its `keys` after its label, such as switching the field to asking an assistant.
+- **`Command.List`** — The results, scrolling inside the launcher. In the `split` layout the preview of the highlighted item sits beside it.
+- **`Command.Group`** — Items under a `heading`. It hides when none of its items match.
+- **`Command.Item`** — One result: `icon`, the title as its children, a quieter `subtitle`, and at its end a `badge`, its `kind` and its `shortcut`. `onSelect` runs when it is pressed or Enter is pressed on it. `keywords` are more words to find it by, and `forceMount` keeps it whatever is typed.
+- **`Command.Empty`** — Shown when no item is left.
+- **`Command.Loading`** — A spinner and a line, for results still on their way.
+- **`Command.Separator`** — A rule between groups.
+- **`Command.Footer`** — The bar at the foot, with `lead` at its start and its actions at its end.
+- **`Command.FooterAction`** — An action in the footer, with its `keys` after its label. The first is usually what Enter does.
+- **`Command.FooterDivider`** — A thin rule between two footer actions.
+- **`Command.Keys`** — Keys drawn as key caps, for anywhere else in the launcher.
+
+## Examples
+
+### In a dialog
+
+`Command.Dialog` with a `trigger` for a pointer and `hotkey` for the keyboard. Choosing an item runs its `onSelect` and closes the dialog. Opened from the keyboard it appears at once; opened with the button it fades in. This page's own search already has ⌘K, so the demo uses ⌥K.
+
+<ComponentPreview name="command/dialog" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { BookOpenIcon, BoxIcon, PaletteIcon, SearchIcon, SunMoonIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Command } from '@/components/panelui/command';
+
+export default function CommandDialogDemo() {
+  const [last, setLast] = useState<string | null>(null);
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <Command.Dialog
+        // ⌘K is the docs site's own search, so this page uses ⌥K.
+        hotkey="alt+k"
+        trigger={
+          <Button variant="outline" className="w-64 justify-start text-muted-foreground">
+            <SearchIcon />
+            Search the docs…
+            <span className="ms-auto text-xs">⌥K</span>
+          </Button>
+        }
+      >
+        <Command>
+          <Command.Input placeholder="Search the docs…" />
+          <Command.List>
+            <Command.Group heading="Pages">
+              <Command.Item icon={<BookOpenIcon />} kind="Guide" onSelect={() => setLast('Installation')}>
+                Installation
+              </Command.Item>
+              <Command.Item icon={<PaletteIcon />} kind="Guide" onSelect={() => setLast('Theming')}>
+                Theming
+              </Command.Item>
+              <Command.Item icon={<BoxIcon />} kind="Component" onSelect={() => setLast('Command')}>
+                Command
+              </Command.Item>
+            </Command.Group>
+            <Command.Group heading="Actions">
+              <Command.Item icon={<SunMoonIcon />} kind="Command" onSelect={() => setLast('Switch theme')}>
+                Switch theme
+              </Command.Item>
+            </Command.Group>
+            <Command.Empty />
+          </Command.List>
+        </Command>
+      </Command.Dialog>
+      <p className="text-sm text-muted-foreground">{last ? `Opened “${last}”.` : 'Press ⌥K, or Alt+K, anywhere on the page.'}</p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Compact
+
+`variant="compact"`: a dense palette for an editor, with smaller rows and each item's `shortcut` at its end.
+
+<ComponentPreview name="command/compact" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import {
+  AlignLeftIcon,
+  CopyIcon,
+  FileCode2Icon,
+  FolderOpenIcon,
+  GitBranchIcon,
+  ReplaceIcon,
+  SplitSquareHorizontalIcon,
+  TerminalSquareIcon,
+} from 'lucide-react';
+import { Command } from '@/components/panelui/command';
+
+export default function CommandCompact() {
+  return (
+    <Command variant="compact" className="max-w-lg">
+      <Command.Input placeholder="Run a command…" />
+      <Command.List className="max-h-72">
+        <Command.Group heading="Editor">
+          <Command.Item icon={<AlignLeftIcon />} shortcut={['⇧', '⌥', 'F']}>
+            Format document
+          </Command.Item>
+          <Command.Item icon={<ReplaceIcon />} shortcut={['⌘', 'H']}>
+            Find and replace
+          </Command.Item>
+          <Command.Item icon={<SplitSquareHorizontalIcon />} shortcut={['⌘', '\\']}>
+            Split editor right
+          </Command.Item>
+          <Command.Item icon={<CopyIcon />} subtitle="src/components/usage" shortcut={['⌥', '⇧', 'C']}>
+            Copy relative path
+          </Command.Item>
+        </Command.Group>
+        <Command.Group heading="Workspace">
+          <Command.Item icon={<FolderOpenIcon />} shortcut={['⌘', 'O']}>
+            Open folder
+          </Command.Item>
+          <Command.Item icon={<FileCode2Icon />} shortcut={['⌘', 'P']}>
+            Go to file
+          </Command.Item>
+          <Command.Item icon={<GitBranchIcon />} subtitle="main">
+            Switch branch
+          </Command.Item>
+          <Command.Item icon={<TerminalSquareIcon />} shortcut={['⌃', '`']}>
+            Toggle terminal
+          </Command.Item>
+        </Command.Group>
+        <Command.Empty />
+      </Command.List>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Grid
+
+`variant="grid"` lays the items out as tiles, `columns` to a row, and the arrow keys move across and down. The rows are cut from the items that match, so a filtered grid closes up rather than leaving gaps.
+
+<ComponentPreview name="command/grid" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import {
+  BellIcon,
+  CalendarIcon,
+  ChartPieIcon,
+  CloudSunIcon,
+  ContactRoundIcon,
+  FileTextIcon,
+  ImageIcon,
+  KanbanIcon,
+  MapIcon,
+  MessageCircleIcon,
+  MusicIcon,
+  WalletIcon,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Command } from '@/components/panelui/command';
+
+function Tile({ tone, children }: { tone: string; children: ReactNode }) {
+  return <span className={`flex size-full items-center justify-center ${tone === 'bg-foreground' ? 'text-background' : 'text-white'} [&_svg]:size-[18px] ${tone}`}>{children}</span>;
+}
+
+const APPS = [
+  { name: 'Calendar', icon: <CalendarIcon />, tone: 'bg-destructive' },
+  { name: 'Messages', icon: <MessageCircleIcon />, tone: 'bg-success' },
+  { name: 'Photos', icon: <ImageIcon />, tone: 'bg-warning' },
+  { name: 'Maps', icon: <MapIcon />, tone: 'bg-info' },
+  { name: 'Music', icon: <MusicIcon />, tone: 'bg-destructive' },
+  { name: 'Weather', icon: <CloudSunIcon />, tone: 'bg-info' },
+  { name: 'Notes', icon: <FileTextIcon />, tone: 'bg-warning' },
+  { name: 'Contacts', icon: <ContactRoundIcon />, tone: 'bg-foreground' },
+  { name: 'Wallet', icon: <WalletIcon />, tone: 'bg-foreground' },
+  { name: 'Reminders', icon: <BellIcon />, tone: 'bg-success' },
+];
+
+const WIDGETS = [
+  { name: 'Budget', icon: <ChartPieIcon />, tone: 'bg-success' },
+  { name: 'Sprint board', icon: <KanbanIcon />, tone: 'bg-info' },
+  { name: 'Forecast', icon: <CloudSunIcon />, tone: 'bg-warning' },
+];
+
+export default function CommandGrid() {
+  return (
+    <Command variant="grid" columns={5} className="max-w-xl">
+      <Command.Input placeholder="Open an app or a widget…" />
+      <Command.List className="max-h-80">
+        <Command.Group heading="Apps">
+          {APPS.map((app) => (
+            <Command.Item key={app.name} icon={<Tile tone={app.tone}>{app.icon}</Tile>}>
+              {app.name}
+            </Command.Item>
+          ))}
+        </Command.Group>
+        <Command.Group heading="Widgets">
+          {WIDGETS.map((widget) => (
+            <Command.Item key={widget.name} icon={<Tile tone={widget.tone}>{widget.icon}</Tile>}>
+              {widget.name}
+            </Command.Item>
+          ))}
+        </Command.Group>
+        <Command.Empty />
+      </Command.List>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Split
+
+`variant="split"` shows the highlighted item's `preview` beside the list, and moving with the arrow keys changes it. On a narrow screen the preview is left out.
+
+<ComponentPreview name="command/split" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { Badge } from '@/components/panelui/badge';
+import { Command } from '@/components/panelui/command';
+
+/** Palettes for a slide deck's cover, each as the four colours its swatch draws. */
+const PALETTES = [
+  { name: 'Dusk', note: 'Slate and lilac, for a talk that starts after dark.', swatch: ['#1e1b2e', '#5b5280', '#d9d3f0', '#a78bfa'], tag: 'Recent' },
+  { name: 'Paper', note: 'Warm off-white surfaces and ink-black text, for reading.', swatch: ['#1c1917', '#a8a29e', '#f5f0e6', '#b45309'] },
+  { name: 'Harbour', note: 'Deep navy and sea glass, calm in a dark room.', swatch: ['#0b1726', '#36597a', '#9fc2d6', '#2dd4bf'] },
+  { name: 'Orchard', note: 'Leaf greens on cream, with a ripe red for danger.', swatch: ['#14290f', '#4d7c0f', '#ecf3d9', '#dc2626'], tag: 'New' },
+  { name: 'Ember', note: 'Charcoal with a warm orange that glows on hover.', swatch: ['#18120e', '#57412f', '#f2d8c2', '#f97316'] },
+];
+
+function Preview({ palette }: { palette: (typeof PALETTES)[number] }) {
+  return (
+    <div className="flex flex-col gap-4 p-5">
+      <div className="grid h-24 grid-cols-4 overflow-hidden rounded-xl border">
+        {palette.swatch.map((colour) => (
+          <span key={colour} style={{ background: colour }} />
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-base font-semibold text-foreground">{palette.name}</span>
+        {palette.tag ? <Badge variant={palette.tag === 'New' ? 'info' : 'outline'}>{palette.tag}</Badge> : null}
+      </div>
+      <p className="text-sm leading-6 text-muted-foreground">{palette.note}</p>
+    </div>
+  );
+}
+
+export default function CommandSplit() {
+  return (
+    <Command variant="split" className="max-w-3xl">
+      <Command.Input placeholder="Preview a palette…" />
+      <Command.List className="h-72">
+        <Command.Group heading="Palettes">
+          {PALETTES.map((palette) => (
+            <Command.Item
+              key={palette.name}
+              icon={
+                <span className="grid size-full grid-cols-2 overflow-hidden rounded-md border">
+                  {palette.swatch.map((colour) => (
+                    <span key={colour} style={{ background: colour }} />
+                  ))}
+                </span>
+              }
+              kind={palette.tag}
+              preview={<Preview palette={palette} />}
+            >
+              {palette.name}
+            </Command.Item>
+          ))}
+        </Command.Group>
+        <Command.Empty />
+      </Command.List>
+      <Command.Footer lead="5 palettes">
+        <Command.FooterAction keys={['↵']}>Apply</Command.FooterAction>
+      </Command.Footer>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Inline
+
+`variant="inline"` sits in the page as a card, for a search page rather than a launcher. Anything can go between the field and the list; here a [Chip](/docs/web/components/chip) group narrows the results by section.
+
+<ComponentPreview name="command/inline" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { BookOpenIcon, BoxIcon, CodeXmlIcon, FileTextIcon, HashIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Chip } from '@/components/panelui/chip';
+import { Command } from '@/components/panelui/command';
+
+const RESULTS = [
+  { title: 'Command', section: 'components', where: 'Components · Overlays', icon: <BoxIcon /> },
+  { title: 'Model Picker', section: 'components', where: 'Components · AI', icon: <BoxIcon /> },
+  { title: 'Spinner', section: 'components', where: 'Components · Feedback', icon: <BoxIcon /> },
+  { title: 'Theming', section: 'guides', where: 'Guides', icon: <BookOpenIcon /> },
+  { title: 'Composition', section: 'guides', where: 'Guides', icon: <BookOpenIcon /> },
+  { title: 'useMicrophone', section: 'api', where: 'API · Soundwave', icon: <CodeXmlIcon /> },
+  { title: '--usage-tone', section: 'api', where: 'API · Usage', icon: <HashIcon /> },
+  { title: 'Upgrading', section: 'guides', where: 'Guides', icon: <FileTextIcon /> },
+];
+
+export default function CommandInline() {
+  const [sections, setSections] = useState<string[]>(['components', 'guides', 'api']);
+
+  return (
+    <Command variant="inline" className="max-w-xl" label="Search the docs">
+      <Command.Input placeholder="Search the docs" />
+      <div className="flex gap-1.5 border-b px-3 py-2">
+        <Chip.Group value={sections} onValueChange={setSections} aria-label="Sections">
+          <Chip value="components" size="sm">Components</Chip>
+          <Chip value="guides" size="sm">Guides</Chip>
+          <Chip value="api" size="sm">API</Chip>
+        </Chip.Group>
+      </div>
+      <Command.List>
+        {RESULTS.filter((result) => sections.includes(result.section)).map((result) => (
+          <Command.Item key={result.title} icon={result.icon} subtitle={result.where}>
+            {result.title}
+          </Command.Item>
+        ))}
+        <Command.Empty>Nothing in the sections chosen</Command.Empty>
+      </Command.List>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Results from a server
+
+`filter={false}` stops the items hiding themselves, for results already filtered elsewhere. Hold the text with `search` and `onSearchChange`, and show `Command.Loading` while the request is out.
+
+<ComponentPreview name="command/async" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { PackageIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Command } from '@/components/panelui/command';
+
+const PACKAGES = [
+  { name: 'panelui-web', about: 'Animated React components on shadcn tokens', downloads: '18k' },
+  { name: 'panelui-native', about: 'React Native components for Expo', downloads: '41k' },
+  { name: 'panelui-cli', about: 'Copies components into a project', downloads: '9k' },
+  { name: 'create-panelui-app', about: 'Starts an Expo app with PanelUI set up', downloads: '6k' },
+  { name: 'tailwind-variants', about: 'Variant APIs for Tailwind classes', downloads: '2.1M' },
+  { name: '@base-ui/react', about: 'Unstyled, accessible React primitives', downloads: '1.4M' },
+];
+
+/** Stands in for a search request that takes a moment. */
+function useSearch(query: string) {
+  const [state, setState] = useState({ loading: false, results: PACKAGES });
+  useEffect(() => {
+    setState((current) => ({ ...current, loading: true }));
+    const timer = setTimeout(() => {
+      const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+      setState({ loading: false, results: PACKAGES.filter((pkg) => words.every((word) => `${pkg.name} ${pkg.about}`.includes(word))) });
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [query]);
+  return state;
+}
+
+export default function CommandAsync() {
+  const [query, setQuery] = useState('');
+  const { loading, results } = useSearch(query);
+
+  return (
+    <Command variant="compact" filter={false} search={query} onSearchChange={setQuery} className="max-w-lg">
+      <Command.Input placeholder="Search the registry…" />
+      <Command.List className="h-64">
+        {loading ? (
+          <Command.Loading>Searching the registry…</Command.Loading>
+        ) : (
+          <>
+            {results.map((pkg) => (
+              <Command.Item key={pkg.name} icon={<PackageIcon />} subtitle={pkg.about} kind={`${pkg.downloads}/wk`}>
+                {pkg.name}
+              </Command.Item>
+            ))}
+            <Command.Empty>No packages match “{query}”</Command.Empty>
+          </>
+        )}
+      </Command.List>
+    </Command>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Nested pages
+
+An item with `closeOnSelect={false}` can open a page of its own: swap the groups, show where you are with the field's `prefix`, and go back when Backspace is pressed in the empty field.
+
+<ComponentPreview name="command/pages" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { ChevronRightIcon, MoonIcon, PaletteIcon, SunIcon, SunMoonIcon, TypeIcon } from 'lucide-react';
+import { useState, type KeyboardEvent } from 'react';
+import { Command } from '@/components/panelui/command';
+
+const THEMES = ['Panel', 'Moon', 'Grass'];
+
+export default function CommandPages() {
+  const [page, setPage] = useState<'root' | 'theme' | 'appearance'>('root');
+  const [search, setSearch] = useState('');
+  const [chosen, setChosen] = useState('Panel · System');
+
+  function open(next: typeof page) {
+    setPage(next);
+    setSearch('');
+  }
+
+  // Backspace in an empty field goes back a page.
+  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace' && search === '' && page !== 'root') {
+      event.preventDefault();
+      open('root');
+    }
+  }
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-center gap-3">
+      <Command variant="compact" search={search} onSearchChange={setSearch} className="w-full">
+        <Command.Input
+          placeholder={page === 'root' ? 'Search settings…' : 'Filter…'}
+          prefix={page === 'theme' ? 'Theme' : page === 'appearance' ? 'Appearance' : undefined}
+          onKeyDown={onKeyDown}
+        />
+        <Command.List className="h-52">
+          {page === 'root' ? (
+            <Command.Group heading="Settings">
+              <Command.Item icon={<PaletteIcon />} closeOnSelect={false} kind={<ChevronRightIcon />} onSelect={() => open('theme')}>
+                Change theme…
+              </Command.Item>
+              <Command.Item icon={<SunMoonIcon />} closeOnSelect={false} kind={<ChevronRightIcon />} onSelect={() => open('appearance')}>
+                Change appearance…
+              </Command.Item>
+              <Command.Item icon={<TypeIcon />} subtitle="16px">
+                Text size
+              </Command.Item>
+            </Command.Group>
+          ) : null}
+          {page === 'theme' ? (
+            <Command.Group heading="Themes">
+              {THEMES.map((theme) => (
+                <Command.Item
+                  key={theme}
+                  icon={<PaletteIcon />}
+                  onSelect={() => {
+                    setChosen((current) => `${theme} · ${current.split(' · ')[1]}`);
+                    open('root');
+                  }}
+                >
+                  {theme}
+                </Command.Item>
+              ))}
+            </Command.Group>
+          ) : null}
+          {page === 'appearance' ? (
+            <Command.Group heading="Appearance">
+              {[
+                { name: 'Light', icon: <SunIcon /> },
+                { name: 'Dark', icon: <MoonIcon /> },
+                { name: 'System', icon: <SunMoonIcon /> },
+              ].map((option) => (
+                <Command.Item
+                  key={option.name}
+                  icon={option.icon}
+                  onSelect={() => {
+                    setChosen((current) => `${current.split(' · ')[0]} · ${option.name}`);
+                    open('root');
+                  }}
+                >
+                  {option.name}
+                </Command.Item>
+              ))}
+            </Command.Group>
+          ) : null}
+          <Command.Empty />
+        </Command.List>
+        <Command.Footer lead={page === 'root' ? 'Settings' : 'Backspace to go back'} />
+      </Command>
+      <p className="text-sm text-muted-foreground">Now: {chosen}</p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Command
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `CommandVariant` | `'spotlight'` | The layout: `spotlight`, `compact`, `grid`, `split` or `inline`. Default `spotlight`. |
+| `search` | `string` | — | What is typed in the field, when the caller holds it. |
+| `onSearchChange` | `(search: string) => void` | — | Called with the text in the field as it changes. |
+| `filter` | `boolean` | `true` | Whether items hide when they do not match. Turn it off for results already filtered elsewhere, such as by a server. Default `true`. |
+| `columns` | `number` | `5` | Tiles to a row, for the `grid` layout. Default `5`. |
+| `label` | `string` | `'Commands'` | What a screen reader calls the list. Default `Commands`. |
+
+### Command.Input
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | — | What sits before the field. Default a magnifying glass; pass `null` for none. |
+| `prefix` | `ReactNode` | — | A chip before the text, such as the page a nested list is on. |
+| `className` | `string` | — |  |
+
+### Command.Keys
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keys` | `readonly string[]` | — | The keys, each drawn as a key cap: `['⌘', 'K']`. |
+
+### Command.InputAction
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keys` | `readonly string[]` | — | The keys that do the same, drawn after the label. |
+
+### Command.Group
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `heading` | `ReactNode` | — | The group's heading. |
+
+### Command.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | What identifies it. Default its text. Two items must not share one. |
+| `textValue` | `string` | — | The text it is matched against, when its children are not plain text. |
+| `keywords` | `readonly string[]` | — | More words it should be found by: `['settings', 'preferences']`. |
+| `icon` | `ReactNode` | — | An icon or an app's picture before the title. |
+| `subtitle` | `ReactNode` | — | Quieter words after the title: the app it belongs to, a handle. |
+| `kind` | `ReactNode` | — | What kind of thing it is, at the end of the row: `Command`, `Application`. |
+| `badge` | `ReactNode` | — | A short flag before the kind, such as `Pro`. |
+| `shortcut` | `readonly string[]` | — | Keys that run it, drawn at the end of the row. |
+| `preview` | `ReactNode` | — | What the `split` layout shows beside the list while it is highlighted. |
+| `onSelect` | `() => void` | — | Called when it is pressed, or Enter is pressed while it is highlighted. |
+| `closeOnSelect` | `boolean` | `true` | Whether choosing it closes the dialog it is in. Default `true`. |
+| `forceMount` | `boolean` | `false` | Whether it shows whatever is typed. Use it for an item such as "Search the web for …". |
+| `disabled` | `boolean` | — | Whether it can be chosen. |
+
+### Command.Footer
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `lead` | `ReactNode` | — | What sits at the start of the bar: where the launcher is, or a hint. |
+
+### Command.FooterAction
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keys` | `readonly string[]` | — | The keys that do the same, drawn after the label. |
+
+### Command.Dialog
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Whether it is open, when the caller holds it. |
+| `defaultOpen` | `boolean` | `false` | Whether it is open to begin with. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
+| `hotkey` | `string \| null` | `'mod+k'` | Keys that open and close it from anywhere on the page. `mod` is ⌘ on a Mac and Ctrl elsewhere. Default `mod+k`; `null` for none. |
+| `trigger` | `ReactElement` | — | A button that opens it, such as a search field in a header. |
+| `label` | `string` | `'Command menu'` | What a screen reader calls the dialog. Default `Command menu`. |
+| `className` | `string` | — | Classes for the panel. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Keyboard
+
+The arrow keys move the highlight, Enter runs the highlighted item, and Escape closes a dialog. In the `grid` layout Left and Right move across a row. The hotkey opens and closes the dialog from anywhere on the page.
+
+### Choosing a hotkey
+
+A page never receives the keys a browser keeps for itself, such as ⌘T, ⌘W or ⌘1 to ⌘9. ⌘K and Ctrl+K are free to use and are what most launchers use. With more than one `Command.Dialog` on a page, or a search of your own already on ⌘K, give only one of them the hotkey and pass `hotkey={null}` to the rest.
+
+### Accessibility
+
+The field is a combobox and the results are a listbox, so a screen reader announces the highlighted item as the arrow keys move. The dialog is named by its `label`, `Command menu` by default. Shortcuts drawn by `shortcut` and `Command.Keys` are only shown; handle the keys where the action lives.
+
+### Server Components
+
+`Command` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Command.Dialog` off the import, so each part is also exported by name: `CommandDialog` is `Command.Dialog`, and so on for the others.
+
+```tsx
+import { Command, CommandDialog, CommandInput, CommandInputAction, CommandList, CommandGroup, CommandItem, CommandEmpty, CommandLoading, CommandSeparator, CommandFooter, CommandFooterAction, CommandFooterDivider, CommandKeys } from "@/components/panelui/command"
+```

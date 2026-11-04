@@ -26,6 +26,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Overlays
 
 - [Alert Dialog](components/alert-dialog.md) — A question that must be answered before the page can be used again, with the answers side by side under it.
+- [Command](components/command.md) — A launcher: type to find a page, an app or an action, and run it with Enter.
 - [Command Dock](components/command-dock.md) — A small button that opens into a field, with the answer arriving under it a row at a time.
 - [Dialog](components/dialog.md) — A task done in a panel over the page, with its buttons in the band beneath it.
 - [Menu](components/menu.md) — A list of actions that opens from a button, with shortcuts, checks and submenus.

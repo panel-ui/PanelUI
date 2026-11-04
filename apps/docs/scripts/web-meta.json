@@ -489,5 +489,14 @@
       "category": "ai",
       "title": "Model Picker"
     }
+  ],
+  "command": [
+    "Command",
+    "A launcher: type to find a page, an app or an action, and run it with Enter.",
+    "react command palette launcher cmdk search menu component",
+    {
+      "addedIn": "0.12.0",
+      "category": "overlays"
+    }
   ]
 }

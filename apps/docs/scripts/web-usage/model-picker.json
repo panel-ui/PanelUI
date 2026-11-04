@@ -1,0 +1,59 @@
+{
+  "slug": "model-picker",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use it to choose the model a message goes to, in a composer's footer or a chat's header, when there are more models than a plain select can show well. For three or four models with no need to search, [Prompt](/docs/web/components/prompt)'s own `Prompt.Model` is enough.\n\nIt opens with the search field focused. Typing searches every model by its name, its provider, its description and its tags, whatever filter is on. The arrow keys move through the list, Enter chooses, and ⌥1 to ⌥9 choose the numbered rows. `hotkey` opens it from anywhere on the page; opened that way it appears at once instead of growing.\n\nStarred models come first: they are the rail's first filter, and the first group of the `list` layout. Star a model with the star on its row, or with ⌥S on the highlighted one.\n\nThe component draws no logos. Give each provider an `icon`, and each model shows its provider's unless it has its own. The marks on this page are the providers' own, and an app needs the right to show them.",
+  "usage": "const providers = [\n  { value: 'anthropic', label: 'Anthropic', icon: <ClaudeMark /> },\n  { value: 'openai', label: 'OpenAI', icon: <OpenAIMark /> },\n]\n\nconst models = [\n  { value: 'claude-sonnet-5.5', label: 'Claude Sonnet 5.5', provider: 'anthropic' },\n  { value: 'gpt-5.5', label: 'GPT-5.5', provider: 'openai' },\n]\n\n<ModelPicker items={models} providers={providers} defaultValue=\"claude-sonnet-5.5\" hotkey=\"alt+m\">\n  <ModelPicker.Trigger />\n  <ModelPicker.Content />\n</ModelPicker>",
+  "anatomy": "<ModelPicker>\n  <ModelPicker.Trigger />\n  <ModelPicker.Content />\n</ModelPicker>",
+  "parts": {
+    "Trigger": "The button that opens the list, showing the chosen model's icon and name. `appearance` is `ghost`, with no box until hovered, for a composer, or `outline`, for a toolbar. With a `hotkey` on the root, its tooltip shows the keys.",
+    "Content": "The list, laid out as the root's `variant` says. `side` and `align` place it against the trigger, and `placeholder` and `emptyText` change what the search field and an empty list say."
+  },
+  "examples": [
+    {
+      "title": "Rail",
+      "description": "The default layout: the providers in a column of icons beside the list, starred models first. A provider's `status` marks its icon: `new` with a dot, `limited` with a clock. A model with `disabled` stays in the list, greyed out, with its `note` saying why.",
+      "demo": "rail",
+      "height": 200
+    },
+    {
+      "title": "List",
+      "description": "One list under provider headings, with starred models in a group of their own at the top and each model's `contextWindow` at the end of its row.",
+      "demo": "list",
+      "height": 200
+    },
+    {
+      "title": "Cards",
+      "description": "Each model as a card with its `description` and `tags`, under a row of provider filters. The arrow keys move across the grid as well as down it.",
+      "demo": "cards",
+      "height": 200
+    },
+    {
+      "title": "Compare",
+      "description": "Speed, intelligence and price side by side, from each model's `speed`, `intelligence` (1 to 5) and `price` (1 to 4). Use it where the choice is a trade-off the reader should see.",
+      "demo": "compare",
+      "height": 200
+    },
+    {
+      "title": "Detail",
+      "description": "A pane beside the list describing the highlighted model: its description, context window, meters and tags. Moving through the list with the arrow keys updates it. On a narrow screen the pane is left out.",
+      "demo": "detail",
+      "height": 200
+    },
+    {
+      "title": "Controlled",
+      "description": "`value` with `onValueChange`, and `favorites` with `onFavoritesChange`, hold the choice and the stars outside the picker, to keep them in a user's settings.",
+      "demo": "controlled",
+      "height": 220
+    },
+    {
+      "title": "In a prompt",
+      "description": "The `ghost` trigger in a [Prompt](/docs/web/components/prompt)'s footer, opening upwards with `side=\"top\"` since the prompt sits at the bottom of the page.",
+      "demo": "prompt",
+      "height": 260
+    }
+  ],
+  "notes": "### Keyboard\n\nWith the list open, the search field has focus. The arrow keys move the highlight, Enter chooses the highlighted model, and Escape closes the list. ⌥1 to ⌥9, or Alt+1 to Alt+9 on Windows and Linux, choose the row with that number, and ⌥S, or Alt+S, stars or unstars the highlighted model. Tab and Shift+Tab move between the search field and the provider filters.\n\n### Accessibility\n\nThe trigger's accessible name is the root's `label` and the chosen model, such as \"Model: Claude Sonnet 5.5\". The list is a listbox named by the search field. The meters in `compare` and `detail` are read as \"Speed 4 of 5\".\n\n### Searching\n\nThe search matches every word typed against a model's name, its provider's name, its description and its tags, in any order, so \"fast google\" finds a Gemini model tagged `Fast`.\n\n### Choosing a hotkey\n\nA page never receives the keys a browser keeps for itself: ⌘1 to ⌘9 and Ctrl+1 to Ctrl+9 switch tabs, and in Chrome on a Mac ⌘⇧M opens the profile menu. That is why the row numbers are on ⌥. Pick a `hotkey` the browser leaves alone, such as `alt+m`."
+}

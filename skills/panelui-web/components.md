@@ -75,6 +75,7 @@ Generated from the collection's source. Read a component's own file before using
 ## AI components
 
 - [Message](components/message.md) — One turn of a conversation with an assistant: a person's bubble, or an answer set as prose with actions under it.
+- [Model Picker](components/model-picker.md) — A select for the model a message goes to, searched by name, filtered by provider and starred.
 - [Prompt](components/prompt.md) — A field for writing to an assistant, with its files, model and tools in one card.
 - [Soundwave](components/soundwave.md) — A voice drawn while an app listens: capsules, bars, a line, a field of dots, spokes round a person, or rings of dots.
 - [Usage](components/usage.md) — How full a model's context or a plan is, as a small indicator that opens into the figures.

@@ -479,5 +479,15 @@
       "addedIn": "0.12.0",
       "category": "ai"
     }
+  ],
+  "model-picker": [
+    "ModelPicker",
+    "A select for the model a message goes to, searched by name, filtered by provider and starred.",
+    "react model picker ai model selector llm dropdown component",
+    {
+      "addedIn": "0.12.0",
+      "category": "ai",
+      "title": "Model Picker"
+    }
   ]
 }

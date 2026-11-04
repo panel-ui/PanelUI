@@ -619,6 +619,26 @@
       ]
     },
     {
+      "name": "model-picker",
+      "type": "registry:component",
+      "title": "Model Picker",
+      "description": "A select for the model a message goes to, searched by name, filtered by provider and starred.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/model-picker.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/model-picker.tsx"
+        }
+      ]
+    },
+    {
       "name": "not-found",
       "type": "registry:component",
       "title": "Not Found",

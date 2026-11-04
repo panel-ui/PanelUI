@@ -825,3 +825,14 @@ export {
   type UsageLevel,
   type UsageVariant,
 } from './components/usage';
+export {
+  ModelPicker,
+  ModelPickerTrigger,
+  ModelPickerContent,
+  type ModelPickerProps,
+  type ModelPickerTriggerProps,
+  type ModelPickerContentProps,
+  type ModelPickerItem,
+  type ModelPickerProvider,
+  type ModelPickerVariant,
+} from './components/model-picker';

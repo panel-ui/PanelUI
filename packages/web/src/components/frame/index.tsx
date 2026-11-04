@@ -290,6 +290,15 @@ function FrameRow({
       {chevron ? <Chevron className={slots.chevron()} /> : null}
     </>
   );
+  // Called before any branch, so a prop that changes later cannot change the hook count.
+  const rendered = useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'frame-row', className: slots.row({ className }), children: <>{inside}</> },
+      props
+    ),
+  });
   if (href !== undefined) {
     return (
       <a
@@ -317,14 +326,7 @@ function FrameRow({
       </button>
     );
   }
-  return useRender({
-    defaultTagName: 'div',
-    render,
-    props: mergeProps(
-      { 'data-slot': 'frame-row', className: slots.row({ className }), children: <>{inside}</> },
-      props
-    ),
-  });
+  return rendered;
 }
 FrameRow.displayName = 'Frame.Row';
 

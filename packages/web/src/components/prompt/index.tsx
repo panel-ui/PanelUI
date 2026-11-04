@@ -693,6 +693,15 @@ function PromptContextItem({
   ...props
 }: PromptContextItemProps & RenderProp<'span'>) {
   const slots = promptVariants();
+  // Called before any branch, so a prop that changes later cannot change the hook count.
+  const rendered = useRender({
+    defaultTagName: 'span',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'prompt-context-item', className: slots.contextItem({ className }), children: <>{children}</> },
+      props
+    ),
+  });
   if (onSelect) {
     return (
       <button
@@ -705,14 +714,7 @@ function PromptContextItem({
       </button>
     );
   }
-  return useRender({
-    defaultTagName: 'span',
-    render,
-    props: mergeProps(
-      { 'data-slot': 'prompt-context-item', className: slots.contextItem({ className }), children: <>{children}</> },
-      props
-    ),
-  });
+  return rendered;
 }
 PromptContextItem.displayName = 'Prompt.ContextItem';
 
@@ -881,8 +883,9 @@ function PromptAttachments({
 }: PromptAttachmentsProps & RenderProp<'ul'>) {
   const prompt = usePrompt('Prompt.Attachments');
   const slots = promptVariants();
-  if (prompt.attachments.length === 0) return null;
-  return useRender({
+  // The hook runs even with nothing attached, so the first file does not
+  // change the hook count.
+  const element = useRender({
     defaultTagName: 'ul',
     render,
     props: mergeProps(
@@ -936,6 +939,7 @@ function PromptAttachments({
       props
     ),
   });
+  return prompt.attachments.length === 0 ? null : element;
 }
 PromptAttachments.displayName = 'Prompt.Attachments';
 

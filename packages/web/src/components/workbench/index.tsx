@@ -395,19 +395,8 @@ function WorkbenchInspector({
   const workbench = useWorkbenchContext('Workbench.Inspector');
   usePresence(workbench.hasInspector);
   const slots = workbenchVariants();
-  if (workbench.compact) {
-    return (
-      <Sheet side="right" open={workbench.inspectorOpen} onOpenChange={workbench.setInspectorOpen}>
-        <Sheet.Content size="full">
-          <Sheet.Header title={title} />
-          <div data-slot="workbench-inspector" className={slots.sheetBody()}>
-            {children}
-          </div>
-        </Sheet.Content>
-      </Sheet>
-    );
-  }
-  return useRender({
+  // Called on both sizes, so crossing the breakpoint keeps the hook count.
+  const panel = useRender({
     defaultTagName: 'div',
     render,
     props: mergeProps(
@@ -420,6 +409,17 @@ function WorkbenchInspector({
       props
     ),
   });
+  if (!workbench.compact) return panel;
+  return (
+    <Sheet side="right" open={workbench.inspectorOpen} onOpenChange={workbench.setInspectorOpen}>
+      <Sheet.Content size="full">
+        <Sheet.Header title={title} />
+        <div data-slot="workbench-inspector" className={slots.sheetBody()}>
+          {children}
+        </div>
+      </Sheet.Content>
+    </Sheet>
+  );
 }
 WorkbenchInspector.displayName = 'Workbench.Inspector';
 
@@ -439,8 +439,10 @@ function WorkbenchInspectorTrigger({
 }: WorkbenchInspectorTriggerProps & RenderProp<'button'>) {
   const workbench = useWorkbenchContext('Workbench.InspectorTrigger');
   const slots = workbenchVariants();
-  if (!workbench.compact) return null;
-  return useRender({
+  // The hook runs on every render, and the result is dropped on a wide
+  // screen: returning before it would change the hook count whenever the
+  // window crosses the breakpoint, which React treats as a crash.
+  const element = useRender({
     defaultTagName: 'button',
     render,
     props: mergeProps(
@@ -478,6 +480,7 @@ function WorkbenchInspectorTrigger({
       props
     ),
   });
+  return workbench.compact ? element : null;
 }
 WorkbenchInspectorTrigger.displayName = 'Workbench.InspectorTrigger';
 

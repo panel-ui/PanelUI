@@ -532,14 +532,8 @@ function MessageAttachment({
   ...props
 }: MessageAttachmentProps & RenderProp<'div'>) {
   const slots = messageVariants();
-  if (src) {
-    return (
-      <div data-slot="message-attachment" className={slots.attachment({ className })} {...props}>
-        <img src={src} alt={name} className={slots.attachmentImage()} />
-      </div>
-    );
-  }
-  return useRender({
+  // Called before any branch, so a prop that changes later cannot change the hook count.
+  const rendered = useRender({
     defaultTagName: 'div',
     render,
     props: mergeProps(
@@ -559,6 +553,14 @@ function MessageAttachment({
       props
     ),
   });
+  if (src) {
+    return (
+      <div data-slot="message-attachment" className={slots.attachment({ className })} {...props}>
+        <img src={src} alt={name} className={slots.attachmentImage()} />
+      </div>
+    );
+  }
+  return rendered;
 }
 MessageAttachment.displayName = 'Message.Attachment';
 

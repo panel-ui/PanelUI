@@ -280,6 +280,81 @@ function DayGridRoot({
     );
   })();
 
+
+  // One Tab stop for the grid: the selected day, or the first.
+  const focusable = value !== null && value >= 0 && value < cells.length ? value : 0;
+
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+    const moves: Record<string, number> = {
+      // One day along a row, or one whole column when the days run downwards.
+      ArrowLeft: (rtl ? 1 : -1) * (byColumn ? rows : 1),
+      ArrowRight: (rtl ? -1 : 1) * (byColumn ? rows : 1),
+      ArrowUp: byColumn ? -1 : -across,
+      ArrowDown: byColumn ? 1 : across,
+    };
+    let next: number | undefined;
+    if (event.key in moves) next = index + (moves[event.key] ?? 0);
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = cells.length - 1;
+    if (next === undefined || next < 0 || next >= cells.length) return;
+    event.preventDefault();
+    nodes.current[next]?.focus();
+    onValueChange?.(next);
+  };
+
+  // Called before the branch below, so a prop that changes later cannot change the hook count.
+  const rendered = useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        ref: root,
+        role: 'group',
+        'aria-label': summary,
+        className: slots.root({ className }),
+        style: layout,
+        onPointerMove: moveLens,
+        onPointerLeave: leave,
+        children: (
+          <>
+            {cells.map((cell, index) => {
+              const part = dayGridVariants({
+                level: cell.level,
+                interactive: true,
+                selected: value === index,
+              });
+              return (
+                <button
+                  key={index}
+                  ref={(node) => {
+                    nodes.current[index] = node;
+                  }}
+                  type="button"
+                  aria-label={cell.label ?? `Day ${index + 1}, level ${cell.level} of 4`}
+                  aria-pressed={value === index}
+                  tabIndex={index === focusable ? 0 : -1}
+                  onClick={() => onValueChange?.(index)}
+                  onKeyDown={(event) => onKeyDown(event, index)}
+                  onFocus={(event) => {
+                    // Only for focus that came from the keyboard: a click focuses
+                    // too, and the pointer is already showing that day's tag.
+                    if (event.currentTarget.matches(':focus-visible')) setPointed(index);
+                  }}
+                  onBlur={() => setPointed((current) => (current === index ? null : current))}
+                  className={part.cell()}
+                >
+                  <span className={part.dot()} style={dotStyle(index)} />
+                </button>
+              );
+            })}
+            {tag}
+          </>
+        ),
+      },
+      props
+    ),
+  });
   if (!interactive) {
     return (
       <div
@@ -310,80 +385,7 @@ function DayGridRoot({
       </div>
     );
   }
-
-  // One Tab stop for the grid: the selected day, or the first.
-  const focusable = value !== null && value >= 0 && value < cells.length ? value : 0;
-
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
-    const moves: Record<string, number> = {
-      // One day along a row, or one whole column when the days run downwards.
-      ArrowLeft: (rtl ? 1 : -1) * (byColumn ? rows : 1),
-      ArrowRight: (rtl ? -1 : 1) * (byColumn ? rows : 1),
-      ArrowUp: byColumn ? -1 : -across,
-      ArrowDown: byColumn ? 1 : across,
-    };
-    let next: number | undefined;
-    if (event.key in moves) next = index + (moves[event.key] ?? 0);
-    else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = cells.length - 1;
-    if (next === undefined || next < 0 || next >= cells.length) return;
-    event.preventDefault();
-    nodes.current[next]?.focus();
-    onValueChange(next);
-  };
-
-  return useRender({
-    defaultTagName: 'div',
-    render,
-    props: mergeProps(
-      {
-        ref: root,
-        role: 'group',
-        'aria-label': summary,
-        className: slots.root({ className }),
-        style: layout,
-        onPointerMove: moveLens,
-        onPointerLeave: leave,
-        children: (
-          <>
-            {cells.map((cell, index) => {
-              const part = dayGridVariants({
-                level: cell.level,
-                interactive: true,
-                selected: value === index,
-              });
-              return (
-                <button
-                  key={index}
-                  ref={(node) => {
-                    nodes.current[index] = node;
-                  }}
-                  type="button"
-                  aria-label={cell.label ?? `Day ${index + 1}, level ${cell.level} of 4`}
-                  aria-pressed={value === index}
-                  tabIndex={index === focusable ? 0 : -1}
-                  onClick={() => onValueChange(index)}
-                  onKeyDown={(event) => onKeyDown(event, index)}
-                  onFocus={(event) => {
-                    // Only for focus that came from the keyboard: a click focuses
-                    // too, and the pointer is already showing that day's tag.
-                    if (event.currentTarget.matches(':focus-visible')) setPointed(index);
-                  }}
-                  onBlur={() => setPointed((current) => (current === index ? null : current))}
-                  className={part.cell()}
-                >
-                  <span className={part.dot()} style={dotStyle(index)} />
-                </button>
-              );
-            })}
-            {tag}
-          </>
-        ),
-      },
-      props
-    ),
-  });
+  return rendered;
 }
 DayGridRoot.displayName = 'DayGrid';
 

@@ -1165,34 +1165,14 @@ function SheetSlide({
   });
   const frameStyle = aspect ? { ...style, aspectRatio: aspect } : style;
 
-  // In a deck the slide is the frame, so the observer that finds the current
-  // one has a box to watch.
-  if (slides.snap) {
-    return (
-      <div
-        data-slot="sheet-slide"
-        data-slide-frame=""
-        data-index={at}
-        data-current={selected ? '' : undefined}
-        role="group"
-        aria-roledescription="slide"
-        aria-label={name}
-        className={frameClass}
-        style={frameStyle}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
-
   const frame = (
     <div data-slide-frame="" data-current={selected ? '' : undefined} className={frameClass} style={frameStyle}>
       {children}
     </div>
   );
 
-  return useRender({
+  // Called before the branch below, so a prop that changes later cannot change the hook count.
+  const rendered = useRender({
     defaultTagName: 'div',
     render,
     props: mergeProps(
@@ -1230,6 +1210,27 @@ function SheetSlide({
       props
     ),
   });
+  // In a deck the slide is the frame, so the observer that finds the current
+  // one has a box to watch.
+  if (slides.snap) {
+    return (
+      <div
+        data-slot="sheet-slide"
+        data-slide-frame=""
+        data-index={at}
+        data-current={selected ? '' : undefined}
+        role="group"
+        aria-roledescription="slide"
+        aria-label={name}
+        className={frameClass}
+        style={frameStyle}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+  return rendered;
 }
 SheetSlide.displayName = 'Sheet.Slide';
 

@@ -1,0 +1,54 @@
+{
+  "slug": "spinner",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use it where something is working and the wait is short or unknown: a button that is saving, a search that is running, a row that is syncing. When the share done is known, a progress bar says more. When the wait is for an assistant writing, the shimmering status line of [Message](/docs/web/components/message) reads better than a spinner beside the words.\n\nIt draws in the colour of the text around it, so a spinner in a muted line is muted and one in a button takes the button's text colour. `size` gives 14, 16 and 24 pixels; a `size-*` class sets any other.\n\nThe motion is quick, because a faster spinner makes the same wait feel shorter. With reduced motion asked for it runs at a third of its speed rather than stopping, since a spinner that stands still looks frozen.",
+  "usage": "<Spinner />\n<Spinner variant=\"dots\" size=\"lg\" label=\"Writing a reply\" />\n\n<Button disabled>\n  <Spinner size=\"sm\" label=\"Exporting\" />\n  Exporting\n</Button>",
+  "examples": [
+    {
+      "title": "Ring",
+      "description": "The default: an arc running round a faint track. It suits most waits, from a 14-pixel spinner in a button to a large one in an empty panel.",
+      "demo": "ring",
+      "height": 220
+    },
+    {
+      "title": "Spokes",
+      "description": "Twelve spokes stepping round, for a background job reported in a line of text.",
+      "demo": "spokes",
+      "height": 160
+    },
+    {
+      "title": "Dots",
+      "description": "Three dots rising in turn. They sit on a line of text the way a word does, so they fit where somebody, or something, is writing.",
+      "demo": "dots",
+      "height": 220
+    },
+    {
+      "title": "Orbit",
+      "description": "Two dots on one circle that bunch up and pull apart. It is small enough for the end of a field, here a search running as it is typed.",
+      "demo": "orbit",
+      "height": 160
+    },
+    {
+      "title": "Pulse",
+      "description": "A ring breathing out of a dot. Use it for waiting on a person rather than a computer: an invite not yet accepted, a call not yet answered.",
+      "demo": "pulse",
+      "height": 160
+    },
+    {
+      "title": "Dither",
+      "description": "A three-by-three cell filling and emptying in ordered-dither order, the pattern the rest of the collection draws with. It fits a badge for a build or a queue.",
+      "demo": "dither",
+      "height": 160
+    },
+    {
+      "title": "Colours",
+      "description": "Give it a text colour to change it. The theme's status colours mark what kind of work is running.",
+      "demo": "colours",
+      "height": 160
+    }
+  ],
+  "notes": "### Accessibility\n\nIt has `role=\"status\"` and announces `label`, which is `Loading` unless you pass another. Name what is happening, such as `Saving` or `Searching`, so a screen reader says more than that something is busy. Where a visible line of text already says it, as in a button, the two can match.\n\n### Inside a button\n\n[Button](/docs/web/components/button) has its own `loading` prop, which puts a spinner over the label and keeps the button's width. Put a `Spinner` in a button yourself when the label should change while it works, as in \"Exporting 3 of 12\"."
+}

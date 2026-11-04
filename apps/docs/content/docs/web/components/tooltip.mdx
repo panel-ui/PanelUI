@@ -1,0 +1,508 @@
+---
+title: Tooltip
+description: "A short hint about a control while it is hovered or focused: a pill, a card, its keys or a status."
+status: new
+---
+
+<ComponentPreview name="tooltip/overview" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { BellIcon, InboxIcon, SettingsIcon, UserRoundIcon } from 'lucide-react';
+
+const ACTIONS = [
+  { label: 'Inbox', icon: <InboxIcon /> },
+  { label: 'Notifications', icon: <BellIcon /> },
+  { label: 'Profile', icon: <UserRoundIcon /> },
+  { label: 'Settings', icon: <SettingsIcon /> },
+];
+
+export default function TooltipOverview() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex items-center gap-1">
+        {ACTIONS.map((action, index) => (
+          <Tooltip key={action.label} defaultOpen={index === 1}>
+            <Tooltip.Trigger render={<Button variant="ghost" size="icon" aria-label={action.label} />}>
+              {action.icon}
+            </Tooltip.Trigger>
+            <Tooltip.Content>{action.label}</Tooltip.Content>
+          </Tooltip>
+        ))}
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to name an icon button, to show the keys for an action, or to add a line about a control that its label has no room for.
+
+A tooltip only appears to a pointer or to keyboard focus. It cannot be opened on a touch screen, so put nothing in it that somebody needs in order to use the page, and nothing that can be pressed. For content with links or buttons, use a popover; for a message that must be read, an [Alert](/docs/web/components/alert).
+
+Put one `Tooltip.Provider` round a group of tooltips, or round the whole app. The first tooltip waits half a second, so passing over a toolbar does not flash one at every button. Once one is open, the next opens at once and without animating, so reading along a row of icons is quick.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/tooltip.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/tooltip` instead of `@/components/panelui/tooltip`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/tooltip.tsx`:
+
+<RegistrySource name="tooltip" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Tooltip } from "@/components/panelui/tooltip"
+```
+
+```tsx
+<Tooltip.Provider>
+  <Tooltip>
+    <Tooltip.Trigger render={<Button variant="ghost" size="icon" aria-label="Settings" />}>
+      <SettingsIcon />
+    </Tooltip.Trigger>
+    <Tooltip.Content>Settings</Tooltip.Content>
+  </Tooltip>
+</Tooltip.Provider>
+```
+
+## Composition
+
+```tsx
+<Tooltip.Provider>
+  <Tooltip>
+    <Tooltip.Trigger />
+    <Tooltip.Content>
+      <Tooltip.Title />
+      <Tooltip.Description />
+      <Tooltip.Shortcut />
+    </Tooltip.Content>
+  </Tooltip>
+</Tooltip.Provider>
+```
+
+- **`Tooltip.Provider`** — Shares the timing between the tooltips inside it: `delay` before the first opens, 500ms by default, and none for the next while one is showing.
+- **`Tooltip.Trigger`** — What the tooltip is about. It is a button unless `render` draws it as something else, such as a `Button`.
+- **`Tooltip.Content`** — The hint, in a layer over the page. `variant` picks the look and `side` the side of the trigger it opens on; it moves to the other side where there is no room. `arrow={false}` takes the arrow off.
+- **`Tooltip.Title`** — A heavier first line, for the `rich` look.
+- **`Tooltip.Description`** — Quieter words under the title.
+- **`Tooltip.Shortcut`** — The keys for the action, as key caps at the end of the line. It only shows them; handle the keys where the action lives.
+
+## Examples
+
+### Solid
+
+The default: a small pill in the inverse of the page. Use it to name the buttons in a row of icons. Move along the row and each one opens at once.
+
+<ComponentPreview name="tooltip/solid" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { BoldIcon, CodeIcon, ItalicIcon, LinkIcon, StrikethroughIcon } from 'lucide-react';
+
+const FORMATS = [
+  { label: 'Bold', icon: <BoldIcon /> },
+  { label: 'Italic', icon: <ItalicIcon /> },
+  { label: 'Strikethrough', icon: <StrikethroughIcon /> },
+  { label: 'Inline code', icon: <CodeIcon /> },
+  { label: 'Link', icon: <LinkIcon /> },
+];
+
+export default function TooltipSolid() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex items-center gap-0.5">
+        {FORMATS.map((format) => (
+          <Tooltip key={format.label}>
+            <Tooltip.Trigger render={<Button variant="ghost" size="icon-sm" aria-label={format.label} />}>
+              {format.icon}
+            </Tooltip.Trigger>
+            <Tooltip.Content>{format.label}</Tooltip.Content>
+          </Tooltip>
+        ))}
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Outline
+
+The popover surface with a hairline edge. It sits more quietly beside a form than a dark pill, which suits a line of help next to a label.
+
+<ComponentPreview name="tooltip/outline" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { Input } from '@/components/panelui/input';
+import { Label } from '@/components/panelui/label';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { InfoIcon } from 'lucide-react';
+
+export default function TooltipOutline() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex w-72 flex-col gap-2">
+        <Label htmlFor="billing-email">
+          <Label.Text>Billing email</Label.Text>
+          <Label.Hint>
+            <Tooltip>
+              <Tooltip.Trigger
+                aria-label="Receipts and failed payments go here"
+                className="flex text-muted-foreground transition-colors hover:text-foreground [&_svg]:size-3.5"
+              >
+                <InfoIcon />
+              </Tooltip.Trigger>
+              <Tooltip.Content variant="outline">Receipts and failed payments go here.</Tooltip.Content>
+            </Tooltip>
+          </Label.Hint>
+        </Label>
+        <Input id="billing-email" type="email" defaultValue="accounts@northwind.studio" />
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Shortcut
+
+The name and its keys side by side on a frosted chip, for the tools of an editor. It has no arrow, so a row of them opened one after another reads as one strip.
+
+<ComponentPreview name="tooltip/shortcut" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { MousePointer2Icon, PenLineIcon, SquareIcon, TypeIcon, Undo2Icon } from 'lucide-react';
+
+const TOOLS = [
+  { label: 'Select', keys: ['V'], icon: <MousePointer2Icon /> },
+  { label: 'Frame', keys: ['F'], icon: <SquareIcon /> },
+  { label: 'Pen', keys: ['P'], icon: <PenLineIcon /> },
+  { label: 'Text', keys: ['T'], icon: <TypeIcon /> },
+  { label: 'Undo', keys: ['⌘', 'Z'], icon: <Undo2Icon /> },
+];
+
+export default function TooltipShortcut() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex items-center gap-1">
+        {TOOLS.map((tool) => (
+          <Tooltip key={tool.label}>
+            <Tooltip.Trigger render={<Button variant="outline" size="icon" aria-label={tool.label} />}>
+              {tool.icon}
+            </Tooltip.Trigger>
+            <Tooltip.Content variant="shortcut" side="bottom">
+              {tool.label}
+              <Tooltip.Shortcut keys={tool.keys} />
+            </Tooltip.Content>
+          </Tooltip>
+        ))}
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Rich
+
+A small card with a `Tooltip.Title` and a `Tooltip.Description`, for saying what a control will do before it is pressed. Keep it to two or three lines.
+
+<ComponentPreview name="tooltip/rich" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { ArchiveIcon, WandSparklesIcon } from 'lucide-react';
+
+export default function TooltipRich() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <Tooltip.Trigger render={<Button variant="outline" />}>
+            <WandSparklesIcon />
+            Tidy up
+          </Tooltip.Trigger>
+          <Tooltip.Content variant="rich">
+            <Tooltip.Title>Tidy up the board</Tooltip.Title>
+            <Tooltip.Description>
+              Cards with no activity for 30 days move to Archive. Nothing is deleted, and you can move them back.
+            </Tooltip.Description>
+          </Tooltip.Content>
+        </Tooltip>
+        <Tooltip>
+          <Tooltip.Trigger render={<Button variant="ghost" size="icon" aria-label="Archive" />}>
+            <ArchiveIcon />
+          </Tooltip.Trigger>
+          <Tooltip.Content variant="rich" side="bottom">
+            <Tooltip.Title>Archive · 42 cards</Tooltip.Title>
+            <Tooltip.Description>Last tidied on Monday by Lina.</Tooltip.Description>
+          </Tooltip.Content>
+        </Tooltip>
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Tone
+
+`variant="tone"` tints it in a status colour with a dot. `tone` is `info`, `success`, `warning` or `destructive`. Use it for a hint that warns or confirms, such as what a delete will remove.
+
+<ComponentPreview name="tooltip/tone" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { CloudCheckIcon, RocketIcon, Trash2Icon } from 'lucide-react';
+
+export default function TooltipTone() {
+  return (
+    <Tooltip.Provider>
+      <div className="flex items-center gap-2">
+        <Tooltip>
+          <Tooltip.Trigger render={<Button variant="ghost" size="icon" aria-label="Backed up" />}>
+            <CloudCheckIcon />
+          </Tooltip.Trigger>
+          <Tooltip.Content variant="tone" tone="success">
+            Backed up 2 minutes ago
+          </Tooltip.Content>
+        </Tooltip>
+        <Tooltip>
+          <Tooltip.Trigger render={<Button variant="outline" />}>
+            <RocketIcon />
+            Deploy
+          </Tooltip.Trigger>
+          <Tooltip.Content variant="tone" tone="warning">
+            2 checks are still running
+          </Tooltip.Content>
+        </Tooltip>
+        <Tooltip>
+          <Tooltip.Trigger render={<Button variant="ghost" size="icon" aria-label="Delete folder" />}>
+            <Trash2Icon />
+          </Tooltip.Trigger>
+          <Tooltip.Content variant="tone" tone="destructive">
+            Deletes 14 files for everyone
+          </Tooltip.Content>
+        </Tooltip>
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sides
+
+`side` picks the side of the trigger it opens on: `top`, `right`, `bottom` or `left`. Where there is no room on that side, it opens on the opposite one. `align` lines it up along the side, at its `start`, `center` or `end`.
+
+<ComponentPreview name="tooltip/sides" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { Button } from '@/components/panelui/button';
+import { Tooltip } from '@/components/panelui/tooltip';
+import { ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon } from 'lucide-react';
+
+/** Each button points the way its tooltip opens, placed on that side of the cross. */
+const SIDES = [
+  { side: 'top', icon: <ArrowUpIcon />, cell: 'col-start-2 row-start-1' },
+  { side: 'left', icon: <ArrowLeftIcon />, cell: 'col-start-1 row-start-2' },
+  { side: 'right', icon: <ArrowRightIcon />, cell: 'col-start-3 row-start-2' },
+  { side: 'bottom', icon: <ArrowDownIcon />, cell: 'col-start-2 row-start-3' },
+] as const;
+
+export default function TooltipSides() {
+  return (
+    <Tooltip.Provider>
+      <div className="grid grid-cols-3 grid-rows-3 gap-1.5">
+        {SIDES.map(({ side, icon, cell }) => (
+          // Held open, so all four placements can be compared at once.
+          <Tooltip key={side} open>
+            <Tooltip.Trigger
+              render={<Button variant="outline" size="icon" aria-label={`Opens on the ${side}`} className={cell} />}
+            >
+              {icon}
+            </Tooltip.Trigger>
+            <Tooltip.Content variant="outline" side={side} className="capitalize">
+              {side}
+            </Tooltip.Content>
+          </Tooltip>
+        ))}
+      </div>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Following the pointer
+
+`trackCursorAxis="x"` on the root keeps the tooltip over the pointer as it moves along the trigger, for reading values off a chart. The trigger here is the whole chart, and the content changes with the bar under the pointer.
+
+<ComponentPreview name="tooltip/follow" height={260}>
+
+```tsx lineNumbers
+'use client';
+
+import { Tooltip } from '@/components/panelui/tooltip';
+import { useState, type PointerEvent } from 'react';
+
+/** Visits to a shop's site in each hour of one day. */
+const VISITS = [4, 3, 2, 2, 3, 6, 14, 28, 41, 46, 52, 58, 61, 57, 49, 44, 47, 55, 63, 59, 42, 27, 15, 8];
+const PEAK = Math.max(...VISITS);
+
+export default function TooltipFollow() {
+  const [hour, setHour] = useState(12);
+
+  function track(event: PointerEvent<HTMLElement>) {
+    const box = event.currentTarget.getBoundingClientRect();
+    const at = Math.floor(((event.clientX - box.left) / box.width) * VISITS.length);
+    setHour(Math.min(VISITS.length - 1, Math.max(0, at)));
+  }
+
+  return (
+    <Tooltip.Provider delay={0}>
+      <Tooltip trackCursorAxis="x">
+        <Tooltip.Trigger
+          render={<div />}
+          onPointerMove={track}
+          aria-label="Visits by hour"
+          className="flex h-32 w-full max-w-md items-end gap-1 px-2"
+        >
+          {VISITS.map((count, index) => (
+            <span
+              key={index}
+              className={
+                'flex-1 rounded-t-sm transition-colors duration-100 ' +
+                (index === hour ? 'bg-chart-2' : 'bg-chart-2/30')
+              }
+              style={{ height: `${Math.max(4, (count / PEAK) * 100)}%` }}
+            />
+          ))}
+        </Tooltip.Trigger>
+        <Tooltip.Content variant="outline" arrow={false} className="tabular-nums">
+          <Tooltip.Title>{String(hour).padStart(2, '0')}:00</Tooltip.Title>
+          <Tooltip.Description>{VISITS[hour]} visits</Tooltip.Description>
+        </Tooltip.Content>
+      </Tooltip>
+    </Tooltip.Provider>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Tooltip.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### Tooltip.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `TooltipVariant` | `'solid'` | Its look: `solid`, `outline`, `shortcut`, `rich` or `tone`. Default `solid`. |
+| `tone` | `TooltipTone` | `info` | The status colour of a `tone` tooltip. Default `info`. |
+| `side` | `BaseTooltip.Positioner.Props['side']` | `'top'` | Which side of the trigger it opens on. It moves to the other side where there is no room. Default `top`. |
+| `align` | `BaseTooltip.Positioner.Props['align']` | `'center'` | How it lines up with the trigger along that side. Default `center`. |
+| `sideOffset` | `number` | — | The gap between the trigger and the tooltip, in pixels. Default `8`, or `6` without an arrow. |
+| `arrow` | `boolean` | `true` | Whether a small arrow points at the trigger. The `shortcut` look never has one. Default `true`. |
+| `container` | `BaseTooltip.Portal.Props['container']` | — | Where in the document it is put. Default `document.body`. |
+| `className` | `string` | — |  |
+
+### Tooltip.Shortcut
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keys` | `readonly string[]` | — | The keys, each drawn as a key cap: `['⌘', 'K']`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Accessibility
+
+A tooltip is for people who can see it. A screen reader does not read it, so the trigger must carry the same words in its own name: give an icon button an `aria-label` that matches its tooltip, as every example here does.
+
+The tooltip opens when the trigger is focused from the keyboard and closes on Escape.
+
+### Reduced motion
+
+With reduced motion turned on, it appears and goes without growing or fading.
+
+### Server Components
+
+`Tooltip` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Tooltip.Provider` off the import, so each part is also exported by name: `TooltipProvider` is `Tooltip.Provider`, and so on for the others.
+
+```tsx
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent, TooltipTitle, TooltipDescription, TooltipShortcut } from "@/components/panelui/tooltip"
+```

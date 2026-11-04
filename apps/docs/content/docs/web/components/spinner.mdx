@@ -1,0 +1,309 @@
+---
+title: Spinner
+description: "Something working that has not finished: an arc, spokes, dots, an orbit, a pulse or a dither cell."
+status: new
+---
+
+<ComponentPreview name="spinner/overview" height={200}>
+
+```tsx lineNumbers
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerOverview() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-10 text-foreground">
+      <Spinner variant="ring" size="lg" />
+      <Spinner variant="spokes" size="lg" />
+      <Spinner variant="dots" size="lg" />
+      <Spinner variant="orbit" size="lg" />
+      <Spinner variant="pulse" size="lg" />
+      <Spinner variant="dither" size="lg" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it where something is working and the wait is short or unknown: a button that is saving, a search that is running, a row that is syncing. When the share done is known, a progress bar says more. When the wait is for an assistant writing, the shimmering status line of [Message](/docs/web/components/message) reads better than a spinner beside the words.
+
+It draws in the colour of the text around it, so a spinner in a muted line is muted and one in a button takes the button's text colour. `size` gives 14, 16 and 24 pixels; a `size-*` class sets any other.
+
+The motion is quick, because a faster spinner makes the same wait feel shorter. With reduced motion asked for it runs at a third of its speed rather than stopping, since a spinner that stands still looks frozen.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/spinner.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/spinner` instead of `@/components/panelui/spinner`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/spinner.tsx`:
+
+<RegistrySource name="spinner" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Spinner } from "@/components/panelui/spinner"
+```
+
+```tsx
+<Spinner />
+<Spinner variant="dots" size="lg" label="Writing a reply" />
+
+<Button disabled>
+  <Spinner size="sm" label="Exporting" />
+  Exporting
+</Button>
+```
+
+## Examples
+
+### Ring
+
+The default: an arc running round a faint track. It suits most waits, from a 14-pixel spinner in a button to a large one in an empty panel.
+
+<ComponentPreview name="spinner/ring" height={220}>
+
+```tsx lineNumbers
+import { Button } from '@/components/panelui/button';
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerRing() {
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex items-end gap-6 text-foreground">
+        <Spinner size="sm" />
+        <Spinner size="md" />
+        <Spinner size="lg" />
+        <Spinner className="size-9" />
+      </div>
+      <Button variant="outline" disabled>
+        <Spinner size="sm" label="Exporting" />
+        Exporting 3 of 12
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Spokes
+
+Twelve spokes stepping round, for a background job reported in a line of text.
+
+<ComponentPreview name="spinner/spokes" height={160}>
+
+```tsx lineNumbers
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerSpokes() {
+  return (
+    <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
+      <Spinner variant="spokes" label="Syncing" />
+      Syncing library, <span className="tabular-nums">214 of 380</span> photos
+    </p>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Dots
+
+Three dots rising in turn. They sit on a line of text the way a word does, so they fit where somebody, or something, is writing.
+
+<ComponentPreview name="spinner/dots" height={220}>
+
+```tsx lineNumbers
+import { Message } from '@/components/panelui/message';
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerDots() {
+  return (
+    <div className="flex w-full max-w-sm flex-col gap-3">
+      <Message from="user">
+        <Message.Content>
+          <Message.Bubble>
+            <Message.BubbleContent>Can you move standup to 10:30?</Message.BubbleContent>
+          </Message.Bubble>
+        </Message.Content>
+      </Message>
+      <Spinner variant="dots" size="lg" className="text-muted-foreground" label="Writing a reply" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Orbit
+
+Two dots on one circle that bunch up and pull apart. It is small enough for the end of a field, here a search running as it is typed.
+
+<ComponentPreview name="spinner/orbit" height={160}>
+
+```tsx lineNumbers
+import { Input } from '@/components/panelui/input';
+import { Spinner } from '@/components/panelui/spinner';
+import { SearchIcon } from 'lucide-react';
+
+export default function SpinnerOrbit() {
+  return (
+    <div className="w-72">
+      <Input.Group>
+        <Input.Addon>
+          <SearchIcon />
+        </Input.Addon>
+        <Input defaultValue="invoice march" aria-label="Search" />
+        <Input.Addon align="end">
+          <Spinner variant="orbit" className="text-info" label="Searching" />
+        </Input.Addon>
+      </Input.Group>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Pulse
+
+A ring breathing out of a dot. Use it for waiting on a person rather than a computer: an invite not yet accepted, a call not yet answered.
+
+<ComponentPreview name="spinner/pulse" height={160}>
+
+```tsx lineNumbers
+import { Avatar } from '@/components/panelui/avatar';
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerPulse() {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      <Avatar name="Rami Haddad" />
+      <div className="flex flex-col">
+        <span className="font-medium text-foreground">Rami Haddad</span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <Spinner variant="pulse" size="sm" className="text-warning" label="Waiting for Rami" />
+          Waiting for them to join
+        </span>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Dither
+
+A three-by-three cell filling and emptying in ordered-dither order, the pattern the rest of the collection draws with. It fits a badge for a build or a queue.
+
+<ComponentPreview name="spinner/dither" height={160}>
+
+```tsx lineNumbers
+import { Badge } from '@/components/panelui/badge';
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerDither() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <Badge variant="info">
+        <Spinner variant="dither" size="sm" label="Building" />
+        Building
+      </Badge>
+      <Badge variant="outline">
+        <Spinner variant="dither" size="sm" label="Queued" />
+        Queued · 2 ahead
+      </Badge>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Colours
+
+Give it a text colour to change it. The theme's status colours mark what kind of work is running.
+
+<ComponentPreview name="spinner/colours" height={160}>
+
+```tsx lineNumbers
+import { Spinner } from '@/components/panelui/spinner';
+
+export default function SpinnerColours() {
+  return (
+    <div className="flex items-center gap-8">
+      <Spinner size="lg" className="text-foreground" />
+      <Spinner size="lg" className="text-muted-foreground" />
+      <Spinner size="lg" className="text-info" />
+      <Spinner size="lg" className="text-success" />
+      <Spinner size="lg" className="text-warning" />
+      <Spinner size="lg" className="text-destructive" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Spinner
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `SpinnerVariant` | — | Its look: `ring`, `spokes`, `dots`, `orbit`, `pulse` or `dither`. Default `ring`. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `md` | `sm` is 14px, `md` 16px and `lg` 24px. A `size-*` class sets any other. Default `md`. |
+| `label` | `string` | — | What a screen reader announces. Default `Loading`. |
+| `className` | `string` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Accessibility
+
+It has `role="status"` and announces `label`, which is `Loading` unless you pass another. Name what is happening, such as `Saving` or `Searching`, so a screen reader says more than that something is busy. Where a visible line of text already says it, as in a button, the two can match.
+
+### Inside a button
+
+[Button](/docs/web/components/button) has its own `loading` prop, which puts a spinner over the label and keeps the button's width. Put a `Spinner` in a button yourself when the label should change while it works, as in "Exporting 3 of 12".

@@ -784,3 +784,22 @@ export {
   type ToastEffect,
   type ToastData,
 } from './components/toast';
+export { Spinner, type SpinnerProps, type SpinnerVariant } from './components/spinner';
+export {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipTitle,
+  TooltipDescription,
+  TooltipShortcut,
+  type TooltipProps,
+  type TooltipProviderProps,
+  type TooltipTriggerProps,
+  type TooltipContentProps,
+  type TooltipTitleProps,
+  type TooltipDescriptionProps,
+  type TooltipShortcutProps,
+  type TooltipVariant,
+  type TooltipTone,
+} from './components/tooltip';

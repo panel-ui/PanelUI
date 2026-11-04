@@ -1,0 +1,63 @@
+{
+  "slug": "tooltip",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 200
+  },
+  "intro": "Use it to name an icon button, to show the keys for an action, or to add a line about a control that its label has no room for.\n\nA tooltip only appears to a pointer or to keyboard focus. It cannot be opened on a touch screen, so put nothing in it that somebody needs in order to use the page, and nothing that can be pressed. For content with links or buttons, use a popover; for a message that must be read, an [Alert](/docs/web/components/alert).\n\nPut one `Tooltip.Provider` round a group of tooltips, or round the whole app. The first tooltip waits half a second, so passing over a toolbar does not flash one at every button. Once one is open, the next opens at once and without animating, so reading along a row of icons is quick.",
+  "usage": "<Tooltip.Provider>\n  <Tooltip>\n    <Tooltip.Trigger render={<Button variant=\"ghost\" size=\"icon\" aria-label=\"Settings\" />}>\n      <SettingsIcon />\n    </Tooltip.Trigger>\n    <Tooltip.Content>Settings</Tooltip.Content>\n  </Tooltip>\n</Tooltip.Provider>",
+  "anatomy": "<Tooltip.Provider>\n  <Tooltip>\n    <Tooltip.Trigger />\n    <Tooltip.Content>\n      <Tooltip.Title />\n      <Tooltip.Description />\n      <Tooltip.Shortcut />\n    </Tooltip.Content>\n  </Tooltip>\n</Tooltip.Provider>",
+  "parts": {
+    "Provider": "Shares the timing between the tooltips inside it: `delay` before the first opens, 500ms by default, and none for the next while one is showing.",
+    "Trigger": "What the tooltip is about. It is a button unless `render` draws it as something else, such as a `Button`.",
+    "Content": "The hint, in a layer over the page. `variant` picks the look and `side` the side of the trigger it opens on; it moves to the other side where there is no room. `arrow={false}` takes the arrow off.",
+    "Title": "A heavier first line, for the `rich` look.",
+    "Description": "Quieter words under the title.",
+    "Shortcut": "The keys for the action, as key caps at the end of the line. It only shows them; handle the keys where the action lives."
+  },
+  "examples": [
+    {
+      "title": "Solid",
+      "description": "The default: a small pill in the inverse of the page. Use it to name the buttons in a row of icons. Move along the row and each one opens at once.",
+      "demo": "solid",
+      "height": 180
+    },
+    {
+      "title": "Outline",
+      "description": "The popover surface with a hairline edge. It sits more quietly beside a form than a dark pill, which suits a line of help next to a label.",
+      "demo": "outline",
+      "height": 200
+    },
+    {
+      "title": "Shortcut",
+      "description": "The name and its keys side by side on a frosted chip, for the tools of an editor. It has no arrow, so a row of them opened one after another reads as one strip.",
+      "demo": "shortcut",
+      "height": 180
+    },
+    {
+      "title": "Rich",
+      "description": "A small card with a `Tooltip.Title` and a `Tooltip.Description`, for saying what a control will do before it is pressed. Keep it to two or three lines.",
+      "demo": "rich",
+      "height": 300
+    },
+    {
+      "title": "Tone",
+      "description": "`variant=\"tone\"` tints it in a status colour with a dot. `tone` is `info`, `success`, `warning` or `destructive`. Use it for a hint that warns or confirms, such as what a delete will remove.",
+      "demo": "tone",
+      "height": 180
+    },
+    {
+      "title": "Sides",
+      "description": "`side` picks the side of the trigger it opens on: `top`, `right`, `bottom` or `left`. Where there is no room on that side, it opens on the opposite one. `align` lines it up along the side, at its `start`, `center` or `end`.",
+      "demo": "sides",
+      "height": 300
+    },
+    {
+      "title": "Following the pointer",
+      "description": "`trackCursorAxis=\"x\"` on the root keeps the tooltip over the pointer as it moves along the trigger, for reading values off a chart. The trigger here is the whole chart, and the content changes with the bar under the pointer.",
+      "demo": "follow",
+      "height": 260
+    }
+  ],
+  "notes": "### Accessibility\n\nA tooltip is for people who can see it. A screen reader does not read it, so the trigger must carry the same words in its own name: give an icon button an `aria-label` that matches its tooltip, as every example here does.\n\nThe tooltip opens when the trigger is focused from the keyboard and closes on Escape.\n\n### Reduced motion\n\nWith reduced motion turned on, it appears and goes without growing or fading."
+}

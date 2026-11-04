@@ -38,6 +38,7 @@
     "sheet",
     "slider",
     "soundwave",
+    "spinner",
     "stat",
     "switch",
     "table",
@@ -47,6 +48,7 @@
     "timeline",
     "toast",
     "toolbar",
+    "tooltip",
     "workbench",
     "xy-pad"
   ]

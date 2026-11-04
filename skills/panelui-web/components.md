@@ -30,6 +30,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Dialog](components/dialog.md) — A task done in a panel over the page, with its buttons in the band beneath it.
 - [Menu](components/menu.md) — A list of actions that opens from a button, with shortcuts, checks and submenus.
 - [Sheet](components/sheet.md) — A panel that rises from an edge of the screen, floating clear of it, and leaves with a swipe.
+- [Tooltip](components/tooltip.md) — A short hint about a control while it is hovered or focused: a pill, a card, its keys or a status.
 
 ## Navigation
 
@@ -64,6 +65,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Alert](components/alert.md) — A message set into the page that stays until it is dealt with, as a card in a tray of its tone.
 - [Feedback](components/feedback.md) — A dialog with a well to write in and two actions in the band around it.
 - [Not Found](components/not-found.md) — An error code drawn in pixels that come apart near the pointer, with a title and a way out.
+- [Spinner](components/spinner.md) — Something working that has not finished: an arc, spokes, dots, an orbit, a pulse or a dither cell.
 - [Toast](components/toast.md) — A short message that leaves on its own, with a title that changes through dither.
 
 ## Media and motion

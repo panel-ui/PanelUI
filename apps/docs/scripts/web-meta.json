@@ -452,5 +452,23 @@
       "addedIn": "0.11.0",
       "category": "feedback"
     }
+  ],
+  "spinner": [
+    "Spinner",
+    "Something working that has not finished: an arc, spokes, dots, an orbit, a pulse or a dither cell.",
+    "react spinner loading indicator loader component",
+    {
+      "addedIn": "0.12.0",
+      "category": "feedback"
+    }
+  ],
+  "tooltip": [
+    "Tooltip",
+    "A short hint about a control while it is hovered or focused: a pill, a card, its keys or a status.",
+    "react tooltip hint popover shortcut component",
+    {
+      "addedIn": "0.12.0",
+      "category": "overlays"
+    }
   ]
 }

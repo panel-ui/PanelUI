@@ -849,6 +849,7 @@ export {
   CommandSeparator,
   CommandFooter,
   CommandFooterAction,
+  CommandFooterButton,
   CommandFooterDivider,
   CommandKeys,
   type CommandProps,
@@ -863,6 +864,7 @@ export {
   type CommandSeparatorProps,
   type CommandFooterProps,
   type CommandFooterActionProps,
+  type CommandFooterButtonProps,
   type CommandKeysProps,
   type CommandVariant,
 } from './components/command';

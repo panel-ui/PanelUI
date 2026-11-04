@@ -2,6 +2,10 @@
 
 import {
   BookOpenIcon,
+  BugIcon,
+  StarIcon,
+  KeyboardIcon,
+  EqualIcon,
   BoxIcon,
   ClipboardListIcon,
   MoonStarIcon,
@@ -22,10 +26,18 @@ function Tile({ tone, children }: { tone: string; children: ReactNode }) {
 export default function CommandOverview() {
   return (
     <Command className="max-w-2xl">
-      <Command.Input placeholder="Search for components, pages and actions…">
-        <Command.InputAction keys={['Tab']}>Ask AI</Command.InputAction>
+      <Command.Input
+        placeholder="Search components and actions…"
+        icon={
+          <>
+            <img src="/logo-light.png" alt="" className="dark:hidden" />
+            <img src="/logo-dark.png" alt="" className="hidden dark:block" />
+          </>
+        }
+      >
+        <Command.InputAction keys={['⇥']}>Ask AI</Command.InputAction>
       </Command.Input>
-      <Command.List>
+      <Command.List className="max-h-[27rem]">
         <Command.Group>
           <Command.Item icon={<Tile tone="bg-destructive"><SparklesIcon /></Tile>} subtitle="v0.12.0" kind="Changelog">
             See what’s new
@@ -58,11 +70,26 @@ export default function CommandOverview() {
           <Command.Item icon={<Tile tone="bg-warning"><BookOpenIcon /></Tile>} subtitle="Reference" kind="Page">
             Read the API reference
           </Command.Item>
+          <Command.Item icon={<Tile tone="bg-destructive"><BugIcon /></Tile>} subtitle="GitHub" kind="Link">
+            Report a bug
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-warning"><StarIcon /></Tile>} subtitle="panel-ui/PanelUI" kind="Link">
+            Star the repository
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-info"><KeyboardIcon /></Tile>} kind="Command" shortcut={['⌘', '/']}>
+            Keyboard shortcuts
+          </Command.Item>
         </Command.Group>
         <Command.Empty>No components or pages match</Command.Empty>
       </Command.List>
-      <Command.Footer>
-        <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>
+      <Command.Footer
+        lead={
+          <Command.FooterButton aria-label="Settings">
+            <EqualIcon />
+          </Command.FooterButton>
+        }
+      >
+        <Command.FooterAction keys={['↵']}>Open Page</Command.FooterAction>
         <Command.FooterDivider />
         <Command.FooterAction keys={['⌘', 'K']}>Actions</Command.FooterAction>
       </Command.Footer>

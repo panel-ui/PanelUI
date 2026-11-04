@@ -68,7 +68,7 @@ export type CommandVariant = 'spotlight' | 'compact' | 'grid' | 'split' | 'inlin
 const commandVariants = tv({
   slots: {
     // A size container, so the split layout can leave its preview out when narrow.
-    root: 'group/command @container flex min-h-0 w-full flex-col overflow-hidden text-popover-foreground',
+    root: 'group/command @container relative flex min-h-0 w-full flex-col overflow-hidden text-popover-foreground',
     inputRow: 'flex shrink-0 items-center gap-3 border-b',
     inputIcon: 'flex shrink-0 items-center justify-center text-muted-foreground [&_svg]:size-full',
     input: 'h-full min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/75',
@@ -107,6 +107,13 @@ const commandVariants = tv({
     separator: 'mx-3 my-1.5 h-px shrink-0 bg-border',
     footer: 'flex shrink-0 items-center gap-1 border-t',
     footerLead: 'me-auto flex min-w-0 items-center gap-2 text-[0.8125rem] text-muted-foreground [&_svg]:size-4',
+    // Where the actions sit: inline in most layouts, a floating pill in `spotlight`.
+    footerBar: 'flex items-center gap-1',
+    footerButton: [
+      'inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground outline-none',
+      'transition-[background-color,color,scale] duration-150 hover:bg-accent hover:text-foreground active:scale-[0.96]',
+      'focus-visible:ring-[3px] focus-visible:ring-ring/30 data-popup-open:bg-accent [&_svg]:size-4',
+    ],
     footerAction: [
       'inline-flex h-7 shrink-0 cursor-pointer items-center gap-2 rounded-lg ps-2.5 pe-1 text-[0.8125rem] font-medium text-foreground outline-none',
       'transition-[background-color,scale] duration-150 hover:bg-accent active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/30',
@@ -123,6 +130,7 @@ const commandVariants = tv({
     viewport: 'fixed inset-0 z-50 flex items-start justify-center px-3 pt-[12vh]',
     popup: [
       '@container flex max-h-[min(34rem,78vh)] w-full flex-col overflow-hidden rounded-2xl border bg-popover shadow-2xl shadow-black/25 outline-none',
+      'data-[variant=spotlight]:rounded-[1.375rem]',
       'transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]',
       'data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0',
       // Opened from the keyboard: no animation at all.
@@ -132,17 +140,32 @@ const commandVariants = tv({
   variants: {
     variant: {
       spotlight: {
-        inputRow: 'h-16 px-5',
-        inputIcon: 'size-5',
-        input: 'text-lg',
-        list: 'scroll-py-2 p-2',
-        group: 'not-first:mt-2',
-        groupLabel: 'px-3 pb-1.5 pt-2',
-        item: 'h-11 gap-3 rounded-xl px-3 text-[0.9375rem]',
-        itemIcon: 'size-6 [&>*]:rounded-md',
-        itemSubtitle: 'text-[0.875rem]',
-        itemEnd: 'text-[0.875rem]',
-        footer: 'h-12 bg-muted/30 px-3',
+        root: 'rounded-[1.375rem]',
+        // One sheet: no rule between the field and the list.
+        inputRow: 'h-[4.25rem] border-b-0 px-6',
+        inputIcon: 'size-6',
+        input: 'text-xl placeholder:text-muted-foreground/60',
+        list: [
+          'scroll-py-2 px-2 pb-2',
+          // With a footer, the last rows run on under its floating pill and fade out.
+          'group-has-[[data-slot=command-footer]]/command:pb-20',
+          'group-has-[[data-slot=command-footer]]/command:[mask-image:linear-gradient(to_bottom,black_calc(100%-6rem),transparent_calc(100%-1.5rem))]',
+        ],
+        group: 'not-first:mt-1',
+        groupLabel: 'px-3 pb-1 pt-2 text-[0.8125rem]',
+        item: 'h-[2.375rem] gap-3 rounded-[0.625rem] px-3 text-[0.9375rem]',
+        itemIcon: 'size-[1.375rem] [&>*]:rounded-[0.4rem]',
+        itemSubtitle: 'text-[0.9375rem]',
+        itemEnd: 'text-[0.9375rem] @max-[30rem]:[&>[data-slot=command-keys]]:hidden',
+        key: 'h-6 min-w-6 rounded-[0.4rem] border-foreground/15 bg-transparent text-[0.75rem] text-foreground/75',
+        inputAction: 'h-9 gap-2.5 ps-3 pe-1.5 text-[0.9375rem] hover:bg-accent/70',
+        footer: 'pointer-events-none absolute inset-x-3 bottom-3 border-t-0',
+        footerLead: 'pointer-events-auto',
+        footerBar: 'pointer-events-auto h-11 gap-0.5 rounded-full border bg-popover px-1.5 shadow-lg shadow-black/20',
+        // On a narrow launcher the pill keeps the labels and drops the key caps, so it fits.
+        footerAction: 'h-8 rounded-full ps-3.5 pe-1.5 text-[0.9375rem] @max-[30rem]:px-3 @max-[30rem]:[&>[data-slot=command-keys]]:hidden',
+        footerButton: 'pointer-events-auto size-11 rounded-full border bg-popover shadow-lg shadow-black/20 [&_svg]:size-[1.125rem]',
+        footerDivider: 'mx-1.5 h-5',
       },
       compact: {
         inputRow: 'h-11 px-3.5',
@@ -204,7 +227,7 @@ const commandVariants = tv({
 });
 
 const DIALOG_WIDTH: Record<CommandVariant, string> = {
-  spotlight: 'max-w-[44rem]',
+  spotlight: 'max-w-[47rem]',
   compact: 'max-w-[34rem]',
   grid: 'max-w-[40rem]',
   split: 'max-w-[50rem]',
@@ -360,7 +383,11 @@ function CommandRoot({
           aria-label={label}
           className={slots.root({
             // Outside a dialog it draws the panel itself, so it can sit in the page.
-            className: [!dialog && variant !== 'inline' ? 'rounded-2xl border bg-popover shadow-xl shadow-black/10' : '', className],
+            className: [
+              !dialog && variant !== 'inline' ? 'border bg-popover shadow-xl shadow-black/10' : '',
+              !dialog && variant !== 'inline' && variant !== 'spotlight' ? 'rounded-2xl' : '',
+              className,
+            ],
           })}
           {...props}
         >
@@ -699,7 +726,7 @@ function CommandFooter({ lead, className, children, ...props }: CommandFooterPro
   return (
     <div data-slot="command-footer" className={slots.footer({ className })} {...props}>
       <span className={slots.footerLead()}>{lead}</span>
-      {children}
+      {children ? <span className={slots.footerBar()}>{children}</span> : null}
     </div>
   );
 }
@@ -721,6 +748,18 @@ function CommandFooterAction({ keys, className, children, type = 'button', ...pr
   );
 }
 CommandFooterAction.displayName = 'Command.FooterAction';
+
+export interface CommandFooterButtonProps extends ComponentProps<'button'> {
+  /** What a screen reader calls it, since it shows only an icon. */
+  'aria-label': string;
+}
+
+/** An icon button for the footer's start, such as one that opens a menu of settings. Round and floating in `spotlight`. */
+function CommandFooterButton({ className, type = 'button', ...props }: CommandFooterButtonProps) {
+  const { slots } = useCommand('Command.FooterButton');
+  return <button type={type} data-slot="command-footer-button" className={slots.footerButton({ className })} {...props} />;
+}
+CommandFooterButton.displayName = 'Command.FooterButton';
 
 /** A thin rule between two footer actions. */
 function CommandFooterDivider() {
@@ -823,6 +862,7 @@ function CommandDialog({
               <Dialog.Popup
                 aria-label={label}
                 data-slot="command-dialog"
+                data-variant={variant ?? 'spotlight'}
                 data-instant={instant ? '' : undefined}
                 className={slots.popup({ className: [DIALOG_WIDTH[variant ?? 'spotlight'], className] })}
               >
@@ -868,6 +908,7 @@ export const Command = Object.assign(CommandWithPreviews, {
   Separator: CommandSeparator,
   Footer: CommandFooter,
   FooterAction: CommandFooterAction,
+  FooterButton: CommandFooterButton,
   FooterDivider: CommandFooterDivider,
   Keys: CommandKeys,
 });
@@ -884,6 +925,7 @@ export {
   CommandSeparator,
   CommandFooter,
   CommandFooterAction,
+  CommandFooterButton,
   CommandFooterDivider,
   CommandKeys,
 };

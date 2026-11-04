@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpenIcon, BoxIcon, PaletteIcon, SearchIcon, SunMoonIcon } from 'lucide-react';
+import { BookOpenIcon, BoxIcon, EqualIcon, PaletteIcon, SearchIcon, SunMoonIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from 'panelui-web/button';
 import { Command } from 'panelui-web/command';
@@ -42,6 +42,15 @@ export default function CommandDialogDemo() {
             </Command.Group>
             <Command.Empty />
           </Command.List>
+          <Command.Footer
+            lead={
+              <Command.FooterButton aria-label="Settings">
+                <EqualIcon />
+              </Command.FooterButton>
+            }
+          >
+            <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>
+          </Command.Footer>
         </Command>
       </Command.Dialog>
       <p className="text-sm text-muted-foreground">{last ? `Opened “${last}”.` : 'Press ⌥K, or Alt+K, anywhere on the page.'}</p>

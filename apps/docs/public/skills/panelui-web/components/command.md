@@ -14,6 +14,8 @@ Use it for a launcher that is opened from a hotkey: search the pages of an app, 
 
 Items are written as children. Each hides itself when it does not match what is typed: every word has to appear in its title, its `subtitle`, its `kind` or its `keywords`, in any order. A group with nothing left in it hides too, and `Command.Empty` shows when nothing is left at all. The first match is highlighted, so a few letters and Enter run it.
 
+The default layout, `spotlight`, is the large launcher: a tall field with a mark at its start, slim rows with the kind of each at their end, and a floating footer the last rows fade out under.
+
 Put it in a `Command.Dialog` to open it over the page with ⌘K, or Ctrl+K, or leave it in the page. Opened from its hotkey it appears at once, with no animation, because a launcher is opened many times a day.
 
 ## Usage
@@ -54,6 +56,7 @@ Put it in a `Command.Dialog` to open it over the page with ⌘K, or Ctrl+K, or l
       <Command.Empty />
     </Command.List>
     <Command.Footer>
+      <Command.FooterButton />
       <Command.FooterAction />
       <Command.FooterDivider />
     </Command.Footer>
@@ -70,8 +73,9 @@ Put it in a `Command.Dialog` to open it over the page with ⌘K, or Ctrl+K, or l
 - `Command.Empty` — Shown when no item is left.
 - `Command.Loading` — A spinner and a line, for results still on their way.
 - `Command.Separator` — A rule between groups.
-- `Command.Footer` — The bar at the foot, with `lead` at its start and its actions at its end.
+- `Command.Footer` — The foot of the launcher: `lead` at its start, such as a `Command.FooterButton`, and its actions at its end. In `spotlight` it floats over the list as a round button and a pill of actions, and the last rows fade out under it; in the other layouts it is a bar.
 - `Command.FooterAction` — An action in the footer, with its `keys` after its label. The first is usually what Enter does.
+- `Command.FooterButton` — An icon button for the footer's start, such as one that opens a menu of settings. It needs an `aria-label`. Round in `spotlight`.
 - `Command.FooterDivider` — A thin rule between two footer actions.
 - `Command.Keys` — Keys drawn as key caps, for anywhere else in the launcher.
 
@@ -160,7 +164,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 ## In a Server Component
 
-`Command` is a client component. A Server Component cannot read `Command.Dialog` off the import, so import each part by name: `CommandDialog`, `CommandInput`, `CommandInputAction`, `CommandList`, `CommandGroup`, `CommandItem`, `CommandEmpty`, `CommandLoading`, `CommandSeparator`, `CommandFooter`, `CommandFooterAction`, `CommandFooterDivider`, `CommandKeys`.
+`Command` is a client component. A Server Component cannot read `Command.Dialog` off the import, so import each part by name: `CommandDialog`, `CommandInput`, `CommandInputAction`, `CommandList`, `CommandGroup`, `CommandItem`, `CommandEmpty`, `CommandLoading`, `CommandSeparator`, `CommandFooter`, `CommandFooterAction`, `CommandFooterButton`, `CommandFooterDivider`, `CommandKeys`.
 
 ## Notes
 
@@ -183,6 +187,10 @@ The field is a combobox and the results are a listbox, so a screen reader announ
 
 import {
   BookOpenIcon,
+  BugIcon,
+  StarIcon,
+  KeyboardIcon,
+  EqualIcon,
   BoxIcon,
   ClipboardListIcon,
   MoonStarIcon,
@@ -203,10 +211,18 @@ function Tile({ tone, children }: { tone: string; children: ReactNode }) {
 export default function CommandOverview() {
   return (
     <Command className="max-w-2xl">
-      <Command.Input placeholder="Search for components, pages and actions…">
-        <Command.InputAction keys={['Tab']}>Ask AI</Command.InputAction>
+      <Command.Input
+        placeholder="Search components and actions…"
+        icon={
+          <>
+            <img src="/logo-light.png" alt="" className="dark:hidden" />
+            <img src="/logo-dark.png" alt="" className="hidden dark:block" />
+          </>
+        }
+      >
+        <Command.InputAction keys={['⇥']}>Ask AI</Command.InputAction>
       </Command.Input>
-      <Command.List>
+      <Command.List className="max-h-[27rem]">
         <Command.Group>
           <Command.Item icon={<Tile tone="bg-destructive"><SparklesIcon /></Tile>} subtitle="v0.12.0" kind="Changelog">
             See what’s new
@@ -239,11 +255,26 @@ export default function CommandOverview() {
           <Command.Item icon={<Tile tone="bg-warning"><BookOpenIcon /></Tile>} subtitle="Reference" kind="Page">
             Read the API reference
           </Command.Item>
+          <Command.Item icon={<Tile tone="bg-destructive"><BugIcon /></Tile>} subtitle="GitHub" kind="Link">
+            Report a bug
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-warning"><StarIcon /></Tile>} subtitle="panel-ui/PanelUI" kind="Link">
+            Star the repository
+          </Command.Item>
+          <Command.Item icon={<Tile tone="bg-info"><KeyboardIcon /></Tile>} kind="Command" shortcut={['⌘', '/']}>
+            Keyboard shortcuts
+          </Command.Item>
         </Command.Group>
         <Command.Empty>No components or pages match</Command.Empty>
       </Command.List>
-      <Command.Footer>
-        <Command.FooterAction keys={['↵']}>Open</Command.FooterAction>
+      <Command.Footer
+        lead={
+          <Command.FooterButton aria-label="Settings">
+            <EqualIcon />
+          </Command.FooterButton>
+        }
+      >
+        <Command.FooterAction keys={['↵']}>Open Page</Command.FooterAction>
         <Command.FooterDivider />
         <Command.FooterAction keys={['⌘', 'K']}>Actions</Command.FooterAction>
       </Command.Footer>

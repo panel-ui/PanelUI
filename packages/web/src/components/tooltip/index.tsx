@@ -207,6 +207,7 @@ function TooltipContent({
         side={side}
         align={align}
         sideOffset={sideOffset ?? (pointed ? 8 : 6)}
+        collisionPadding={8}
         className={slots.positioner()}
       >
         <BaseTooltip.Popup

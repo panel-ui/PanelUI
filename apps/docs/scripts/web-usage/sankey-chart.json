@@ -1,0 +1,64 @@
+{
+  "slug": "sankey-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 600
+  },
+  "intro": "Use it for a routing question: which campaigns produced which signups, which budget lines paid for which departments. The answer has to need a source and a target, because a ribbon has two ends and its thickness is the amount that travelled.\n\nRibbons are grey at rest and the bars carry the colour. Hovering, tapping or walking to a stage with the arrow keys colours its whole route, every stage before and after it, and a click pins the reading.\n\nThe rows under the diagram are optional: `SankeyChart.Breakdown` and `SankeyChart.Legend` are parts, so a chart has them only if you write them.\n\nFor a total cut into parts with no routing between them, or what survived each step of one process, a bar chart is easier to read.",
+  "usage": "<SankeyChart nodes={stages} links={flows} height={300}>\n  <SankeyChart.Links />\n  <SankeyChart.Nodes />\n  <SankeyChart.Labels />\n</SankeyChart>",
+  "extraImports": [
+    "type SankeyNode",
+    "type SankeyLink"
+  ],
+  "anatomy": "<SankeyChart nodes={…} links={…}>\n  <SankeyChart.Header />\n  <SankeyChart.Skeleton />\n  <SankeyChart.Links />\n  <SankeyChart.Nodes />\n  <SankeyChart.Labels />\n  <SankeyChart.Tooltip />\n  <SankeyChart.Breakdown />\n  <SankeyChart.Legend />\n</SankeyChart>",
+  "parts": {
+    "Header": "The strip above the diagram: `title`, `value` and `caption`, with your own control on the trailing side. The value is not derived, because 128400 can be a count, a currency or a rate.",
+    "Skeleton": "Plain equal bars and ribbons, drawn only while `status` is `loading`. Equal, because varied thicknesses would look like real routing.",
+    "Links": "The ribbons, grey at rest and in their source's colour on the route being read.",
+    "Nodes": "The bars the ribbons run between. A bar's height is what passes through it.",
+    "Labels": "The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.",
+    "Tooltip": "The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.",
+    "Breakdown": "Optional. What is being read, written out under the diagram: where each stream came from and where it went, with its share of the stage. A row selects the node at its other end. It holds its height, so reading a stage does not move the page.",
+    "Legend": "Optional. Every stage named under the diagram with its share of the widest stage. Use it when some bars are too small to carry a name: pressing an entry selects that node."
+  },
+  "examples": [
+    {
+      "title": "The diagram alone",
+      "description": "Leave out `Breakdown` and `Legend` for just the flow. Reading a stage still colours its route. Add `Tooltip` if the figures are needed.",
+      "demo": "plain",
+      "height": 360
+    },
+    {
+      "title": "Which column a node goes in",
+      "description": "`align` settles what the flow leaves open. `justify`, the default, pushes every node that feeds nothing into the last column. Use `left` when the columns are steps of a process and a node that stops early did stop early.",
+      "demo": "align",
+      "height": 360
+    },
+    {
+      "title": "Running the flow downwards",
+      "description": "`orientation=\"vertical\"` runs the stages down the page, which suits a narrow column. Left unset, `height` is worked out from how many stages the flow needs.",
+      "demo": "vertical",
+      "height": 560
+    },
+    {
+      "title": "Too many small streams",
+      "description": "A ribbon carries its value in its thickness, so a column of thirty is thirty hairlines. `collapse` folds each column's smallest nodes into one bucket. `maxPerColumn` caps how many a column keeps, and `minShare` folds anything under that fraction of its column.",
+      "demo": "collapse",
+      "height": 420
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `SankeyChart.Skeleton` and drive `status`. The flow draws in column by column when it turns `ready`, and a `ref` on the chart has `replay()`, which draws it in again.",
+      "demo": "loading",
+      "height": 420
+    },
+    {
+      "title": "Rows that cannot be drawn",
+      "description": "A row naming a missing node, carrying nothing or closing a loop is dropped rather than thrown. `onDropLinks` reports how many, so a screen can say so.",
+      "demo": "dropped",
+      "height": 400
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `height`, because nothing in a flow says how deep it should be. Raising it thickens every ribbon together, which is how to make small streams legible. The plot draws in the browser after it has been measured, and the space is reserved until then.\n\n### What a bar is worth\n\nA node is worth the larger of what arrives and what leaves. Give it a `value` to pin it, for a stage that loses some of what it received to somewhere the links do not describe.\n\n### Keyboard\n\nThe arrow keys walk the bars, column by column. Escape clears the reading. A screen reader gets every ribbon as a list, named by `labelForLink`.",
+  "propsNote": "`SankeyChart`, `SankeyChart.Header`, `SankeyChart.Breakdown` and `SankeyChart.Legend` also take the props of the element they render, and a `className`. `SankeyChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed."
+}

@@ -190,7 +190,7 @@ export default function BarChartGrouped() {
 
 ### Stacked
 
-`stacked` shows the same series as a total. `stackGap` leaves a hairline between the segments, which keeps similar colours apart. The first `Bar` is the lowest segment.
+`stacked` adds the series into a total, so give it series that add up, such as costs and profit. `stackGap` leaves a hairline between the segments, which keeps similar colours apart. The first `Bar` is the lowest segment.
 
 <ComponentPreview name="bar-chart/stacked" height={360}>
 
@@ -200,12 +200,12 @@ export default function BarChartGrouped() {
 import { BarChart } from '@/components/panelui/bar-chart';
 
 const REVENUE = [
-  { month: 'Mar', revenue: 19_800, costs: 12_100 },
-  { month: 'Apr', revenue: 24_600, costs: 13_400 },
-  { month: 'May', revenue: 27_100, costs: 14_900 },
-  { month: 'Jun', revenue: 25_300, costs: 15_200 },
-  { month: 'Jul', revenue: 29_900, costs: 16_800 },
-  { month: 'Aug', revenue: 32_400, costs: 17_300 },
+  { month: 'Mar', costs: 12_100, profit: 7_700 },
+  { month: 'Apr', costs: 13_400, profit: 11_200 },
+  { month: 'May', costs: 14_900, profit: 12_200 },
+  { month: 'Jun', costs: 15_200, profit: 10_100 },
+  { month: 'Jul', costs: 16_800, profit: 13_100 },
+  { month: 'Aug', costs: 17_300, profit: 15_100 },
 ];
 
 export default function BarChartStacked() {
@@ -213,9 +213,9 @@ export default function BarChartStacked() {
     <BarChart data={REVENUE} xDataKey="month" stacked stackGap={2} className="max-w-lg">
       <BarChart.Grid />
       <BarChart.Bar dataKey="costs" color="chart-3" />
-      <BarChart.Bar dataKey="revenue" />
+      <BarChart.Bar dataKey="profit" />
       <BarChart.XAxis />
-      <BarChart.Tooltip labels={{ revenue: 'Revenue', costs: 'Costs' }} />
+      <BarChart.Tooltip labels={{ costs: 'Costs', profit: 'Profit' }} />
     </BarChart>
   );
 }
@@ -470,7 +470,7 @@ export default function BarChartChangingData() {
 | `labels` | `Record<string, string>` | — | Prettier names for the series keys, as the legend takes. |
 | `legend` | `boolean` | `false` | Draw a swatch and a name per series along the trailing edge. Prefer this to `BarChart.Legend` on a chart that has a header: the legend sits over the plot, in the corner the bars also want. |
 
-Every part also takes the props of the element it renders, and a `className`.
+`BarChart`, `BarChart.Header` and `BarChart.Legend` also take the props of the element they render, and a `className`. `BarChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
 
 ## Notes
 

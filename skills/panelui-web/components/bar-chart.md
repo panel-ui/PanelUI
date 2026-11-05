@@ -53,7 +53,7 @@ The value axis always includes zero, because a bar cropped at the bottom misstat
 
 ## Props
 
-Every part also takes the props of the element it renders, and a `className`.
+`BarChart`, `BarChart.Header` and `BarChart.Legend` also take the props of the element they render, and a `className`. `BarChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
 
 #### `BarChartProps`
 

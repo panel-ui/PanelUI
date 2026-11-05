@@ -3,12 +3,12 @@
 import { BarChart } from 'panelui-web/bar-chart';
 
 const REVENUE = [
-  { month: 'Mar', revenue: 19_800, costs: 12_100 },
-  { month: 'Apr', revenue: 24_600, costs: 13_400 },
-  { month: 'May', revenue: 27_100, costs: 14_900 },
-  { month: 'Jun', revenue: 25_300, costs: 15_200 },
-  { month: 'Jul', revenue: 29_900, costs: 16_800 },
-  { month: 'Aug', revenue: 32_400, costs: 17_300 },
+  { month: 'Mar', costs: 12_100, profit: 7_700 },
+  { month: 'Apr', costs: 13_400, profit: 11_200 },
+  { month: 'May', costs: 14_900, profit: 12_200 },
+  { month: 'Jun', costs: 15_200, profit: 10_100 },
+  { month: 'Jul', costs: 16_800, profit: 13_100 },
+  { month: 'Aug', costs: 17_300, profit: 15_100 },
 ];
 
 export default function BarChartStacked() {
@@ -16,9 +16,9 @@ export default function BarChartStacked() {
     <BarChart data={REVENUE} xDataKey="month" stacked stackGap={2} className="max-w-lg">
       <BarChart.Grid />
       <BarChart.Bar dataKey="costs" color="chart-3" />
-      <BarChart.Bar dataKey="revenue" />
+      <BarChart.Bar dataKey="profit" />
       <BarChart.XAxis />
-      <BarChart.Tooltip labels={{ revenue: 'Revenue', costs: 'Costs' }} />
+      <BarChart.Tooltip labels={{ costs: 'Costs', profit: 'Profit' }} />
     </BarChart>
   );
 }

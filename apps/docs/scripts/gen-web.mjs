@@ -231,7 +231,7 @@ for (const slug of slugs) {
       return `### ${heading.replace(/\.$/, '')}\n\n${table}`;
     });
     sections.push(
-      `## API Reference\n\n${reference.join('\n\n')}\n\nEvery part also takes the props of the element it renders, and a \`className\`.`
+      `## API Reference\n\n${reference.join('\n\n')}\n\n${u.propsNote ?? 'Every part also takes the props of the element it renders, and a `className`.'}`
     );
   }
 

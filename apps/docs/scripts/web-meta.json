@@ -498,5 +498,15 @@
       "addedIn": "0.12.0",
       "category": "overlays"
     }
+  ],
+  "bar-chart": [
+    "BarChart",
+    "Categories compared by length, grouped or stacked.",
+    "react bar chart component grouped stacked",
+    {
+      "addedIn": "0.13.0",
+      "category": "data",
+      "title": "Bar Chart"
+    }
   ]
 }

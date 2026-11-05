@@ -1,0 +1,513 @@
+---
+title: Bar Chart
+description: Categories compared by length, grouped or stacked.
+status: new
+---
+
+<ComponentPreview name="bar-chart/overview" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BarChart, type BarChartDatum } from '@/components/panelui/bar-chart';
+import { Frame } from '@/components/panelui/frame';
+
+const REVENUE = [
+  { month: 'Jan', revenue: 18_400 },
+  { month: 'Feb', revenue: 21_200 },
+  { month: 'Mar', revenue: 19_800 },
+  { month: 'Apr', revenue: 24_600 },
+  { month: 'May', revenue: 27_100 },
+  { month: 'Jun', revenue: 25_300 },
+  { month: 'Jul', revenue: 29_900 },
+  { month: 'Aug', revenue: 32_400 },
+];
+
+const total = REVENUE.reduce((sum, row) => sum + row.revenue, 0);
+const dollars = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+export default function BarChartOverview() {
+  const [active, setActive] = useState<BarChartDatum | null>(null);
+
+  return (
+    <Frame variant="band" className="w-full max-w-lg">
+      <Frame.Header>
+        <Frame.Title>Revenue</Frame.Title>
+        <Frame.Action>2026</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <BarChart data={REVENUE} xDataKey="month" onActiveIndexChange={(_index, datum) => setActive(datum)}>
+          <BarChart.Header
+            title={active ? String(active.month) : 'January to August'}
+            value={dollars(active ? Number(active.revenue) : total)}
+          />
+          <BarChart.Grid />
+          <BarChart.Bar dataKey="revenue" />
+          <BarChart.YAxis />
+          <BarChart.XAxis />
+          <BarChart.Tooltip labels={{ revenue: 'Revenue' }} formatValue={dollars} />
+        </BarChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to compare categories by length: revenue per month, messages per channel. Each row of `data` is a band, and each `BarChart.Bar` is a series drawn from one of its keys.
+
+The grid, the axes, the legend and the readout are separate parts, so a chart has only the ones you write.
+
+The value axis always includes zero, because a bar cropped at the bottom misstates its value. For a series where the change matters more than the size, use a line chart instead.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/bar-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/bar-chart` instead of `@/components/panelui/bar-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/bar-chart.tsx`:
+
+<RegistrySource name="bar-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { BarChart } from "@/components/panelui/bar-chart"
+```
+
+```tsx
+<BarChart data={revenue} xDataKey="month">
+  <BarChart.Grid />
+  <BarChart.Bar dataKey="revenue" />
+  <BarChart.XAxis />
+  <BarChart.Tooltip />
+</BarChart>
+```
+
+## Composition
+
+```tsx
+<BarChart data={…}>
+  <BarChart.Header />
+  <BarChart.Grid />
+  <BarChart.Bar dataKey="…" />
+  <BarChart.Skeleton />
+  <BarChart.XAxis />
+  <BarChart.YAxis />
+  <BarChart.Legend />
+  <BarChart.Tooltip />
+</BarChart>
+```
+
+- **`BarChart.Header`** — The strip above the plot: `title`, `value` and `caption`, with the series key or your own control on the trailing side.
+- **`BarChart.Grid`** — Lines across the value axis, in the theme's border colour. `rows` is roughly how many: the axis picks round numbers near it.
+- **`BarChart.Bar`** — One series. Declare one per key. Their order is the order they stand in a band, and from the baseline up in a stack.
+- **`BarChart.Skeleton`** — A row of short, equal stubs on the baseline with a highlight moving across them, drawn only while `status` is `loading`.
+- **`BarChart.XAxis`** — Category labels under the bands. Labels are dropped when the bands are too narrow to fit them. Draws nothing on a horizontal chart.
+- **`BarChart.YAxis`** — Value labels on the grid lines, in round numbers, with room made for them. On a horizontal chart it draws the category names instead.
+- **`BarChart.Legend`** — A swatch and a name per series, over the top corner of the plot. On a chart with a header, use the header's `legend` prop instead.
+- **`BarChart.Tooltip`** — The readout, and what drives it. It covers the plot, so the pointer does not have to land on a bar. `labels` names the series in it.
+
+## Examples
+
+### Two series side by side
+
+Declare a `Bar` per series. They share the width `barGap` leaves in each band. `color` names one of the theme's roles.
+
+<ComponentPreview name="bar-chart/grouped" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { BarChart } from '@/components/panelui/bar-chart';
+
+const REVENUE = [
+  { month: 'Mar', revenue: 19_800, costs: 12_100 },
+  { month: 'Apr', revenue: 24_600, costs: 13_400 },
+  { month: 'May', revenue: 27_100, costs: 14_900 },
+  { month: 'Jun', revenue: 25_300, costs: 15_200 },
+  { month: 'Jul', revenue: 29_900, costs: 16_800 },
+  { month: 'Aug', revenue: 32_400, costs: 17_300 },
+];
+
+export default function BarChartGrouped() {
+  return (
+    <BarChart data={REVENUE} xDataKey="month" className="max-w-lg">
+      <BarChart.Grid />
+      <BarChart.Bar dataKey="revenue" />
+      <BarChart.Bar dataKey="costs" color="chart-3" />
+      <BarChart.XAxis />
+      <BarChart.Legend labels={{ revenue: 'Revenue', costs: 'Costs' }} />
+      <BarChart.Tooltip
+        labels={{ revenue: 'Revenue', costs: 'Costs' }}
+        formatValue={(value) => `$${value.toLocaleString('en-US')}`}
+      />
+    </BarChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Stacked
+
+`stacked` shows the same series as a total. `stackGap` leaves a hairline between the segments, which keeps similar colours apart. The first `Bar` is the lowest segment.
+
+<ComponentPreview name="bar-chart/stacked" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { BarChart } from '@/components/panelui/bar-chart';
+
+const REVENUE = [
+  { month: 'Mar', revenue: 19_800, costs: 12_100 },
+  { month: 'Apr', revenue: 24_600, costs: 13_400 },
+  { month: 'May', revenue: 27_100, costs: 14_900 },
+  { month: 'Jun', revenue: 25_300, costs: 15_200 },
+  { month: 'Jul', revenue: 29_900, costs: 16_800 },
+  { month: 'Aug', revenue: 32_400, costs: 17_300 },
+];
+
+export default function BarChartStacked() {
+  return (
+    <BarChart data={REVENUE} xDataKey="month" stacked stackGap={2} className="max-w-lg">
+      <BarChart.Grid />
+      <BarChart.Bar dataKey="costs" color="chart-3" />
+      <BarChart.Bar dataKey="revenue" />
+      <BarChart.XAxis />
+      <BarChart.Tooltip labels={{ revenue: 'Revenue', costs: 'Costs' }} />
+    </BarChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sideways
+
+Use `orientation="horizontal"` when the category names are longer than a band is wide. `YAxis` draws the names down the side.
+
+<ComponentPreview name="bar-chart/sideways" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { BarChart } from '@/components/panelui/bar-chart';
+
+const CHANNELS = [
+  { name: 'Newsletter', sent: 4_200 },
+  { name: 'Push', sent: 3_100 },
+  { name: 'Product', sent: 2_400 },
+  { name: 'Referrals', sent: 1_800 },
+  { name: 'Search', sent: 900 },
+];
+
+export default function BarChartSideways() {
+  return (
+    <BarChart data={CHANNELS} orientation="horizontal" barGap={0.35} className="max-w-lg">
+      <BarChart.Grid />
+      <BarChart.Bar dataKey="sent" color="chart-2" />
+      <BarChart.YAxis />
+      <BarChart.Tooltip labels={{ sent: 'Sent' }} />
+    </BarChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Values too small to see
+
+`minBarLength` draws any non-zero bar at a visible length. Thursday's zero still draws nothing.
+
+<ComponentPreview name="bar-chart/small-values" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { BarChart } from '@/components/panelui/bar-chart';
+
+const ERRORS = [
+  { day: 'Mon', count: 1 },
+  { day: 'Tue', count: 212 },
+  { day: 'Wed', count: 4 },
+  { day: 'Thu', count: 0 },
+  { day: 'Fri', count: 96 },
+  { day: 'Sat', count: 2 },
+  { day: 'Sun', count: 1 },
+];
+
+export default function BarChartSmallValues() {
+  return (
+    <BarChart data={ERRORS} xDataKey="day" minBarLength={3} className="max-w-lg">
+      <BarChart.Bar dataKey="count" color="destructive" />
+      <BarChart.XAxis />
+      <BarChart.Tooltip labels={{ count: 'Errors' }} />
+    </BarChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `BarChart.Skeleton` and drive `status`. The bars grow out of the baseline when it turns `ready`. It draws one stub per row, or seven with no rows yet; `bars` sets another count.
+
+<ComponentPreview name="bar-chart/loading" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BarChart, type BarChartStatus } from '@/components/panelui/bar-chart';
+import { Button } from '@/components/panelui/button';
+
+const REVENUE = [
+  { month: 'Mar', revenue: 19_800 },
+  { month: 'Apr', revenue: 24_600 },
+  { month: 'May', revenue: 27_100 },
+  { month: 'Jun', revenue: 25_300 },
+  { month: 'Jul', revenue: 29_900 },
+  { month: 'Aug', revenue: 32_400 },
+];
+
+export default function BarChartLoading() {
+  const [status, setStatus] = useState<BarChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <BarChart data={REVENUE} status={status} xDataKey="month">
+        <BarChart.Grid />
+        <BarChart.Skeleton />
+        <BarChart.Bar dataKey="revenue" />
+        <BarChart.XAxis />
+      </BarChart>
+      <Button variant="outline" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+When `data` changes, the bars and the axis move to their new values over `domainDuration`, and a bar under the same band and series keeps its identity. A `ref` on the chart has `replay()`, which grows the bars in again.
+
+<ComponentPreview name="bar-chart/changing-data" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { BarChart, type BarChartHandle } from '@/components/panelui/bar-chart';
+import { Button } from '@/components/panelui/button';
+
+const MONTHS = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+const PERIODS = {
+  'This year': [19_800, 24_600, 27_100, 25_300, 29_900, 32_400],
+  'Last year': [9_200, 11_500, 10_400, 13_800, 12_900, 15_100],
+};
+type Period = keyof typeof PERIODS;
+
+export default function BarChartChangingData() {
+  const chart = useRef<BarChartHandle>(null);
+  const [period, setPeriod] = useState<Period>('This year');
+  const rows = MONTHS.map((month, index) => ({ month, revenue: PERIODS[period][index] }));
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <BarChart ref={chart} data={rows} xDataKey="month">
+        <BarChart.Grid />
+        <BarChart.Bar dataKey="revenue" />
+        <BarChart.YAxis />
+        <BarChart.XAxis />
+        <BarChart.Tooltip labels={{ revenue: period }} />
+      </BarChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setPeriod(period === 'This year' ? 'Last year' : 'This year')}>
+          Show {period === 'This year' ? 'last year' : 'this year'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### BarChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly BarChartDatum[]` | — | The rows. Each one is a band along the category axis. |
+| `xDataKey` | `string` | `'name'` | Key holding the category label. Used by the axis and the readout. |
+| `status` | `BarChartStatus` | `'ready'` | `loading` holds the bars back and grows them in when it turns `ready`. Add a `BarChart.Skeleton` for something to stand in the plot meanwhile. |
+| `aspectRatio` | `number` | `2` | The plot's width ÷ height. `2` is the wide card shape. |
+| `animationDuration` | `number` | `700` | Milliseconds for the bars to grow in. |
+| `domainDuration` | `number` | `500` | Milliseconds for the bars and the axis to settle after the data changes. |
+| `yDomain` | `[number, number]` | — | Fix the value axis instead of deriving it. The derived domain always includes zero, and bar lengths cannot be compared on a domain that does not. |
+| `orientation` | `BarChartOrientation` | `'vertical'` | `vertical` grows the bars upward; `horizontal` grows them rightward. |
+| `stacked` | `boolean` | `false` | Stack the series on each other instead of standing them side by side. |
+| `barGap` | `number` | `0.2` | Fraction of each band left empty, `0` to `1`. |
+| `barWidth` | `number` | — | Largest bar thickness in pixels. Derived from the band when omitted. |
+| `stackGap` | `number` | `0` | Pixels between the segments of a stack. |
+| `cornerRadius` | `number` | `4` | Corner radius on the growing end of a bar. |
+| `minBarLength` | `number` | `0` | Smallest length a non-zero bar is drawn at, in pixels. |
+| `fadedOpacity` | `number` | `0.3` | Opacity of the bars that are not being read. |
+| `onActiveIndexChange` | `(index: number, datum: BarChartDatum \| null) => void` | — | The band being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
+| `compact` | `boolean` | `false` | Drop the axis padding, for a bar sparkline with no axis or readout. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForDatum` | `(datum: BarChartDatum, index: number) => string` | — | What a screen reader says for one row. Defaults to its keys and values. |
+
+### BarChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | — | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `opacity` | `number` | — | Opacity of the lines. |
+
+### BarChart.Bar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — | Column in the data holding this series' values. |
+| `color` | `BarChartColor` | — | Which of the theme's roles the series is drawn in. |
+| `cornerRadius` | `number` | `4` | Corner radius, overriding the chart's. |
+
+### BarChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `bars` | `number` | — | How many placeholder bars to draw. Defaults to one per row, and to seven when the data has not arrived. |
+| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
+
+### BarChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | — | How many labels to show. Every category by default, thinned only when the bands get too narrow to read. Pass a number to force it lower. |
+| `format` | `(datum: BarChartDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
+
+### BarChart.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | — | Roughly how many labels to show along the value axis. |
+| `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
+
+### BarChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, key: string) => string` | — | Format one series' value. Defaults to a compact number. |
+| `formatX` | `(datum: BarChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys, as the legend takes. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### BarChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys. |
+
+### BarChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the chart is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a total. |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys, as the legend takes. |
+| `legend` | `boolean` | `false` | Draw a swatch and a name per series along the trailing edge. Prefer this to `BarChart.Legend` on a chart that has a header: the legend sits over the plot, in the corner the bars also want. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Sizing
+
+The chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.
+
+### Bundle size
+
+The chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.
+
+### Colour
+
+`color` on `BarChart.Bar` names a role in the theme. Every series defaults to `chart-1`, so give the others their own.
+
+### Reading a band
+
+With a `Tooltip`, hovering a band reads it. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the bands it crosses, and a vertical drag scrolls the page.
+
+`onActiveIndexChange` fires when the band changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useBarChart` gives the same band.
+
+### Keyboard
+
+With a `Tooltip`, the plot takes focus. The arrow keys move between bands, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it.
+
+### Screen readers
+
+Each row is given as text beside the drawing. `label` names the chart and `labelForDatum` writes a row, for values with a unit. Without them a row is read as its keys and values.
+
+### Reduced motion
+
+With reduced motion set, the bars and the axis appear at their final values, and the skeleton's highlight is not drawn.
+
+### Server Components
+
+`BarChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `BarChart.Header` off the import, so each part is also exported by name: `BarChartHeader` is `BarChart.Header`, and so on for the others.
+
+```tsx
+import { BarChart, BarChartHeader, BarChartGrid, BarChartBar, BarChartSkeleton, BarChartXAxis, BarChartYAxis, BarChartTooltip, BarChartLegend } from "@/components/panelui/bar-chart"
+```

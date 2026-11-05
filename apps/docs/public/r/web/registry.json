@@ -114,6 +114,37 @@
       ]
     },
     {
+      "name": "bar-chart",
+      "type": "registry:component",
+      "title": "Bar Chart",
+      "description": "Categories compared by length, grouped or stacked.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/bar-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/bar-chart.tsx"
+        }
+      ]
+    },
+    {
       "name": "bar-picker",
       "type": "registry:component",
       "title": "Bar Picker",

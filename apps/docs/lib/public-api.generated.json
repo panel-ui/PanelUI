@@ -1,9 +1,9 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1506,
+    "exports": 1507,
     "values": 374,
-    "types": 1132,
+    "types": 1133,
     "modules": 169,
     "components": 141,
     "hooks": 13
@@ -455,6 +455,10 @@
           },
           {
             "name": "BottomSheetContentProps",
+            "kind": "type"
+          },
+          {
+            "name": "BottomSheetSize",
             "kind": "type"
           },
           {

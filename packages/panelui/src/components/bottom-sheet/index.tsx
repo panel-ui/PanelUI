@@ -429,14 +429,18 @@ export interface BottomSheetContentProps extends ViewProps {
    *
    * `auto` sizes to the content, which is right for a sheet that is a handful
    * of rows. It stops short of the status bar, and a `Body` inside it scrolls
-   * once the content is taller than that. `half` and `full` fix the height instead, for content that has to
-   * be given the room rather than allowed to ask for it — a list, a form, a
-   * document. Either way the sheet is clamped to leave the status bar clear,
-   * so `full` is as tall as the screen allows rather than as tall as the screen.
+   * once the content is taller than that. `half` and `full` fix the height
+   * instead, for content that has to be given the room rather than allowed to
+   * ask for it — a list, a form, a document. For any other height, pass a
+   * number of points (`320`) or a percentage of the screen (`'30%'`). Every
+   * fixed height is clamped to leave the status bar clear, so `full` is as tall
+   * as the screen allows rather than as tall as the screen.
    *
-   * On the native sheet this maps onto the platform's detents.
+   * On the native sheet this maps onto the platform's detents: a number becomes
+   * `{ height }` and a percentage `{ fraction }`, which Android snaps to the
+   * nearer of `half` and `full`.
    */
-  size?: 'auto' | 'half' | 'full';
+  size?: 'auto' | 'half' | 'full' | number | `${number}%`;
   children?: ReactNode;
 }
 
@@ -446,6 +450,34 @@ export interface BottomSheetContentProps extends ViewProps {
  * and the gap is what says the app is still there underneath.
  */
 const SIZE_FRACTION = { half: 0.5, full: 0.94 } as const;
+
+/** How tall `BottomSheet.Content` opens: a keyword, points, or a percentage of the screen. */
+export type BottomSheetSize = NonNullable<BottomSheetContentProps['size']>;
+
+/** A percentage string as a fraction of the screen, or `undefined` if it is not one. */
+function percentFraction(size: BottomSheetSize): number | undefined {
+  if (typeof size !== 'string' || !size.endsWith('%')) return undefined;
+  const value = Number(size.slice(0, -1));
+  return Number.isFinite(value) && value > 0 ? value / 100 : undefined;
+}
+
+/** The height a sized sheet aims for before it is clamped, or `undefined` for `auto`. */
+function sizeTarget(size: BottomSheetSize, screenHeight: number): number | undefined {
+  if (size === 'half' || size === 'full') return screenHeight * SIZE_FRACTION[size];
+  if (typeof size === 'number') return Number.isFinite(size) && size > 0 ? size : undefined;
+  const fraction = percentFraction(size);
+  return fraction === undefined ? undefined : screenHeight * fraction;
+}
+
+/** The native sheet's detents for a `size`, or `undefined` to size to the content. */
+function sizeSnapPoints(size: BottomSheetSize): BottomSheetProps['snapPoints'] {
+  if (size === 'half' || size === 'full') return [size];
+  if (typeof size === 'number') {
+    return Number.isFinite(size) && size > 0 ? [{ height: size }] : undefined;
+  }
+  const fraction = percentFraction(size);
+  return fraction === undefined ? undefined : [{ fraction: Math.min(fraction, 1) }];
+}
 
 function BottomSheetContent({
   className,
@@ -814,10 +846,8 @@ function BottomSheetContent({
    * those is unreadable at exactly the moment the sheet is at its tallest.
    */
   const sheetCap = screenHeight - insets.top - (detached ? detachedGap : 8);
-  const sizedHeight =
-    size === 'auto'
-      ? undefined
-      : Math.min(screenHeight * SIZE_FRACTION[size], sheetCap);
+  const target = sizeTarget(size, screenHeight);
+  const sizedHeight = target === undefined ? undefined : Math.min(target, sheetCap);
 
   const surface = useMemo(
     () => ({ scrollGesture, scrollOffset, hasScrollable, scrollHold }),
@@ -832,7 +862,7 @@ function BottomSheetContent({
      * height, so a native sheet keeps the system's snapping.
      */
     const snapPoints =
-      nativeSheet.snapPoints ?? (size === 'auto' ? undefined : [size]);
+      nativeSheet.snapPoints ?? sizeSnapPoints(size);
     /*
      * `true` means the theme's surface, and a string means itself. A token
      * that did not resolve is dropped rather than passed on — an unresolved

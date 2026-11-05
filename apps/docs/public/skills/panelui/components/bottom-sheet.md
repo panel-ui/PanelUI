@@ -59,7 +59,7 @@ Extends `ViewProps`.
 | `showGrabber` | `boolean` | `true` | Show the drag handle at the top of the sheet. On by default, because a sheet that can be dragged should say so. Turn it off when the sheet draws its own — a component wrapping this one to give the surface a material of its own has to put the handle on that material, and a handle floating above it belongs to nothing. On the native sheet it hides the platform's grabber on iOS. |
 | `detached` | `boolean` | `false` | Float the sheet clear of the screen edges instead of docking it to the bottom, so it reads as a card laid over the app rather than a drawer pulled out of it. All four corners round and the bottom border comes back, since a floating sheet has four real edges where a docked one has three. On Android it floats above the navigation bar, so the system buttons stay uncovered. Ignored by the native sheet, which the platform positions itself. |
 | `blur` | `boolean` | `false` | Frost the screen behind the sheet instead of dimming it, so what is behind stays legible as shape and colour while losing its detail. Needs the optional `expo-blur`; without it this dims, rather than failing. Someone who has Reduce Transparency switched on gets an opaque backdrop instead, which is the whole point of the setting. |
-| `size` | `'auto' \| 'half' \| 'full'` | `auto` | How tall the sheet opens. `auto` sizes to the content, which is right for a sheet that is a handful of rows. It stops short of the status bar, and a `Body` inside it scrolls once the content is taller than that. `half` and `full` fix the height instead, for content that has to be given the room rather than allowed to ask for it — a list, a form, a document. Either way the sheet is clamped to leave the status bar clear, so `full` is as tall as the screen allows rather than as tall as the screen. On the native sheet this maps onto the platform's detents. |
+| `size` | `'auto' \| 'half' \| 'full' \| number \| `${number}%`` | `auto` | How tall the sheet opens. `auto` sizes to the content, which is right for a sheet that is a handful of rows. It stops short of the status bar, and a `Body` inside it scrolls once the content is taller than that. `half` and `full` fix the height instead, for content that has to be given the room rather than allowed to ask for it — a list, a form, a document. For any other height, pass a number of points (`320`) or a percentage of the screen (`'30%'`). Every fixed height is clamped to leave the status bar clear, so `full` is as tall as the screen allows rather than as tall as the screen. On the native sheet this maps onto the platform's detents: a number becomes `{ height }` and a percentage `{ fraction }`, which Android snaps to the nearer of `half` and `full`. |
 | `children` | `ReactNode` | — | — |
 
 #### `BottomSheetHeaderProps`
@@ -121,9 +121,11 @@ A docked sheet is continuous with the bottom of the screen — three real edges,
 
 `size` decides. `auto`, the default, sizes to the content, which is right for a sheet of a handful of rows. `half` and `full` fix the height instead, for content that has to be given the room rather than allowed to ask for it — a list, a form, a document.
 
+For any other height, pass a number of points (`size={320}`) or a percentage of the screen (`size="30%"`).
+
 Either way the sheet is clamped to leave the status bar and the notch clear, so `full` is as tall as the screen allows rather than as tall as the screen. It is not the whole screen by design: a sheet reaching the top has nothing behind it to read as laid *over*, and the gap is what says the app is still there underneath.
 
-On the native sheet `size` maps onto the platform’s own detents, so it keeps the system’s snapping. An explicit `snapPoints` on the root is the finer control and wins.
+On the native sheet `size` maps onto the platform’s own detents, so it keeps the system’s snapping. A number becomes a `{ height }` detent and a percentage a `{ fraction }` detent; both are iOS-only, and Android snaps them to the nearer of `half` and `full`. An explicit `snapPoints` on the root is the finer control and wins.
 
 ### Scrolling inside a sheet
 

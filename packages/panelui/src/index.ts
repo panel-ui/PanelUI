@@ -206,6 +206,7 @@ export {
   BottomSheet,
   type BottomSheetProps,
   type BottomSheetContentProps,
+  type BottomSheetSize,
   type BottomSheetHeaderProps,
   type BottomSheetBodyProps,
   type BottomSheetFooterProps,

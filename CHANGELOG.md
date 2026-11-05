@@ -9,6 +9,21 @@ fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [1.2.0] — 2026-11-06
+
+BottomSheet can open at any height, not only `half` and `full`.
+
+### Added
+
+- **A custom height for `BottomSheet.Content`'s `size`.** It now takes a number of points
+  (`size={320}`) or a percentage of the screen (`size="30%"`) as well as `auto`, `half` and
+  `full`. Before, the default sheet had no way to open at any other height, because the root's
+  `snapPoints` only reach the native sheet. A custom height is kept below the status bar like
+  the others. On the native sheet a number becomes a `{ height }` detent and a percentage a
+  `{ fraction }` detent; both are iOS-only, and Android snaps them to the nearer of `half` and
+  `full`. The new `BottomSheetSize` type names the accepted values. Requested by @yashDahiwale
+  in [#263](https://github.com/panel-ui/PanelUI/issues/263).
+
 ## [1.1.0] — 2026-11-03
 
 Charts stop taking taps meant for the buttons drawn over them, the ref and event types get a

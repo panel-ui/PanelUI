@@ -86,7 +86,7 @@ function page(slug) {
   const tables = entry.interfaces.map((iface) => propsTable(entry, iface)).filter(Boolean);
   if (tables.length > 0) {
     out.push(
-      `## Props\n\nEvery part also takes the props of the element it renders, and a \`className\`.\n\n${tables.join('\n\n')}`
+      `## Props\n\n${use.propsNote ?? 'Every part also takes the props of the element it renders, and a `className`.'}\n\n${tables.join('\n\n')}`
     );
   }
 

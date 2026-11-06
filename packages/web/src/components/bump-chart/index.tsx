@@ -186,7 +186,7 @@ const STYLES = `@keyframes panelui-bump-sweep{from{transform:translateX(-100%)}t
 @keyframes panelui-bump-reveal{from{clip-path:inset(0 100% 0 0) view-box}to{clip-path:inset(0 0 0 0) view-box}}
 @media (prefers-reduced-motion:no-preference){[data-slot=bump-chart-plot][data-revealing] .ts-chart__line{animation:panelui-bump-reveal var(--bump-reveal) ease-out both}}`;
 
-const defaultRank = (rank: number) => `#${rank}`;
+const defaultRank = (rank: number) => '#' + rank;
 
 /** Horizontal tangents at both ends of a segment, which is what makes the S between two ranks. */
 const BUMP_CURVE: ChartCurve = {
@@ -1033,7 +1033,7 @@ function BumpChartStandings({
   render,
   ...props
 }: BumpChartStandingsProps & RenderProp<'div'>) {
-  const { data, series, ranks, status, morphDuration, highlight, setHighlight, activeIndex, setSlot } =
+  const { data, xDataKey, series, ranks, status, morphDuration, highlight, setHighlight, activeIndex, setSlot } =
     useChart('BumpChart.Standings');
   const slots = bumpChartVariants();
 
@@ -1058,7 +1058,7 @@ function BumpChartStandings({
       {
         'data-slot': 'bump-chart-standings',
         role: 'group',
-        'aria-label': data[column] === undefined ? 'Standings' : `Standings, column ${column + 1}`,
+        'aria-label': data[column] === undefined ? 'Standings' : `Standings, ${String(data[column][xDataKey] ?? `column ${column + 1}`)}`,
         className: slots.standings({ className }),
         style: { height: standing.length * STANDINGS_ROW },
         children: standing.length

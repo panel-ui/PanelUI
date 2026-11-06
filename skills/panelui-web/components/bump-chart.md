@@ -131,7 +131,7 @@ More than three or four lines in their own colours are hard to follow through th
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `formatRank` | `(rank: number) => string` | `(rank: number) => `#${rank}`` | Format a rank. Defaults to `#1`, `#2`… |
+| `formatRank` | `(rank: number) => string` | `(rank: number) => '#' + rank` | Format a rank. Defaults to `#1`, `#2`… |
 | `movement` | `boolean` | `true` | Show the places gained or lost since the column before. |
 | `pressable` | `boolean` | `true` | Let pressing a row pick that line out, and pressing it again clear it. |
 
@@ -139,7 +139,7 @@ More than three or four lines in their own colours are hard to follow through th
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `formatRank` | `(rank: number) => string` | `(rank: number) => `#${rank}`` | Format a rank in the readout. Defaults to `#1`, `#2`… |
+| `formatRank` | `(rank: number) => string` | `(rank: number) => '#' + rank` | Format a rank in the readout. Defaults to `#1`, `#2`… |
 | `formatX` | `(datum: BumpChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |
 | `className` | `string` | — | Added to the readout's surface. |
 
@@ -174,7 +174,7 @@ The chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page 
 
 #### Colour
 
-`color` on `BumpChart.Line` names a role in the theme. Every series defaults to `chart-5`, so give the others their own, or pick one out with `highlight` and leave the rest.
+`color` on `BumpChart.Line` names a role in the theme. Every series defaults to `chart-1`, so give the others their own, or pick one out with `highlight` and leave the rest.
 
 #### Reading a column
 

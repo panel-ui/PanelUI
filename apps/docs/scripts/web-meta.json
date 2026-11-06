@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "live-line-chart": [
+    "LiveLineChart",
+    "A reading that keeps arriving, against a window that keeps moving.",
+    "react live streaming realtime line chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Live Line Chart"
+    }
   ]
 }

@@ -382,7 +382,7 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
   const boxRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef<HTMLDivElement>(null);
   const interactionRef = useRef<ChartInteractionController<MarkRow, number, number> | null>(null);
-  const dragging = useRef(false);
+  const releaseDrag = useRef<(() => void) | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [marks, setMarks] = useState<readonly RegisteredMark[]>([]);
   const [extraSeries, setExtraSeries] = useState<readonly [string, string][]>([]);
@@ -696,6 +696,9 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
     if (!interactive) reportActive(-1);
   }, [interactive]);
 
+  // A held reading ends with the next press, or when the plot goes away.
+  useEffect(() => () => releaseDrag.current?.(), []);
+
   /*
    * The chart follows a mouse on its own but not a finger, which it treats as a
    * tap. A sideways drag reads the rows it crosses, and the last one stays until the
@@ -708,16 +711,16 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
     const target = interaction?.resolvePointer(event.clientX, event.clientY);
     if (!interaction || !target) return;
     interaction.setControlledFocus(target);
-    if (dragging.current) return;
-    dragging.current = true;
-    document.addEventListener(
-      'pointerdown',
-      () => {
-        dragging.current = false;
-        interactionRef.current?.setControlledFocus(null);
-      },
-      { capture: true, once: true }
-    );
+    if (releaseDrag.current) return;
+    const onPress = () => {
+      releaseDrag.current?.();
+      interactionRef.current?.setControlledFocus(null);
+    };
+    document.addEventListener('pointerdown', onPress, { capture: true });
+    releaseDrag.current = () => {
+      document.removeEventListener('pointerdown', onPress, { capture: true });
+      releaseDrag.current = null;
+    };
   };
 
   const renderReadout = (index: number) => {

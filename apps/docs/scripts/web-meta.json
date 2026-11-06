@@ -569,5 +569,15 @@
       "category": "charts",
       "title": "Waterfall Chart"
     }
+  ],
+  "treemap-chart": [
+    "TreemapChart",
+    "A total, cut into the parts it is made of, sized by area.",
+    "react treemap chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Treemap Chart"
+    }
   ]
 }

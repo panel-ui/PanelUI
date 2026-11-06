@@ -7,6 +7,7 @@
     "line-chart",
     "plot",
     "sankey-chart",
+    "treemap-chart",
     "waterfall-chart"
   ]
 }

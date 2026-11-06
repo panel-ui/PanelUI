@@ -739,7 +739,15 @@ const WaterfallChartRoot = forwardRef<WaterfallChartHandle, WaterfallChartProps 
    * the next press, the same as a tap's. A vertical drag never gets here: `pan-y`
    * gives it to the page, and the browser cancels the pointer.
    */
-  useEffect(() => () => dragRelease.current?.abort(), []);
+  // Cleared as well as aborted: a controller left in the ref after the chart is
+  // hidden mid-drag (by Activity, say) would stop any later drag from releasing.
+  useEffect(
+    () => () => {
+      dragRelease.current?.abort();
+      dragRelease.current = null;
+    },
+    []
+  );
   const readDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'touch' || !readable || loading) return;
     const interaction = interactionRef.current;

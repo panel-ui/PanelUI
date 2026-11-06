@@ -53,6 +53,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Badge](components/badge.md) — A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
 - [Bar Picker](components/bar-picker.md) — A short run of values as columns of lights, one column picked.
+- [Bump Chart](components/bump-chart.md) — How a set of things ranked against each other over time.
 - [Day Grid](components/day-grid.md) — A run of days as a field of dots, each sized by how much happened on it.
 - [Flow](components/flow.md) — A canvas of nodes joined by edges, that you pan, zoom and rearrange.
 - [KPI](components/kpi.md) — One number and what it is doing: its change, its shape over time, its progress to a target.

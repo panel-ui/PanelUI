@@ -508,5 +508,15 @@
       "category": "data",
       "title": "Bar Chart"
     }
+  ],
+  "bump-chart": [
+    "BumpChart",
+    "How a set of things ranked against each other over time.",
+    "react bump chart component ranking leaderboard",
+    {
+      "addedIn": "0.14.0",
+      "category": "data",
+      "title": "Bump Chart"
+    }
   ]
 }

@@ -320,7 +320,8 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
     const began = performance.now();
     let frame = 0;
     const step = (now: number) => {
-      const elapsed = Math.min(1, (now - began) / animationDuration);
+      // A frame's timestamp can be earlier than the clock read that started the tween.
+      const elapsed = Math.max(0, Math.min(1, (now - began) / animationDuration));
       show(elapsed < 1 ? polarRadiiBetween(from, target, 1 - (1 - elapsed) ** 3) : target);
       if (elapsed < 1) frame = requestAnimationFrame(step);
     };
@@ -498,6 +499,8 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
               onBlur={() => read(-1)}
               // Walked from the reading, and kept from the chart, which would walk from its own focus.
               onKeyDownCapture={(event) => {
+                // The browser's own shortcuts, such as going back.
+                if (event.altKey || event.ctrlKey || event.metaKey) return;
                 const next = polarKeyWalk(activeIndex, data.length, event.key);
                 if (next === undefined) return;
                 event.preventDefault();
@@ -830,7 +833,7 @@ function PolarAreaChartHeader({
           <>
             <div className={slots.headerText()}>
               {title ? <div className={slots.headerMuted()}>{title}</div> : null}
-              {value ? <div className={slots.headerValue()}>{value}</div> : null}
+              {value || value === 0 ? <div className={slots.headerValue()}>{value}</div> : null}
               {caption ? <div className={slots.headerMuted()}>{caption}</div> : null}
             </div>
             {trailing ? <div className={slots.headerTrailing()}>{trailing}</div> : null}

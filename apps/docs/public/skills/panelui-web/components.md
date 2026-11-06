@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Pie Chart](components/pie-chart.md) — One total, divided between its parts.
 
 ## Feedback and status
 

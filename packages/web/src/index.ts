@@ -894,3 +894,22 @@ export {
   type BarChartTooltipProps,
   type BarChartLegendProps,
 } from './components/bar-chart';
+export {
+  PieChart,
+  PieChartHeader,
+  PieChartSlices,
+  PieChartCenter,
+  PieChartLegend,
+  PieChartSkeleton,
+  usePieChart,
+  type PieChartProps,
+  type PieChartHandle,
+  type PieChartStatus,
+  type PieChartColor,
+  type PieDatum,
+  type PieChartHeaderProps,
+  type PieChartSlicesProps,
+  type PieChartCenterProps,
+  type PieChartLegendProps,
+  type PieChartSkeletonProps,
+} from './components/pie-chart';

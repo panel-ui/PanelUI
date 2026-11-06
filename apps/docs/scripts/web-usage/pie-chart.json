@@ -1,0 +1,69 @@
+{
+  "slug": "pie-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 520
+  },
+  "intro": "Use it for a handful of parts of one obvious total: a budget, a disk, a split of traffic. Every slice is a share of the sum of `data`, so there is no maximum to set.\n\nAngles are hard to compare, and a pie stops working at around six or seven slices. Sort the parts, keep the top few and put the rest in an \"everything else\" slice.\n\nFor parts that need precise comparison, or that do not belong to one whole, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<PieChart data={spend} size={208} innerRadius={0.62}>\n  <PieChart.Header title=\"August\" />\n  <PieChart.Slices />\n  <PieChart.Center />\n  <PieChart.Legend />\n</PieChart>",
+  "anatomy": "<PieChart data={…}>\n  <PieChart.Header />\n  <PieChart.Skeleton />\n  <PieChart.Slices />\n  <PieChart.Center />\n  <PieChart.Legend />\n</PieChart>",
+  "parts": {
+    "Header": "The strip above the dial: `title`, `value` and `caption`, with a colour key or your own control on the trailing side.",
+    "Slices": "Every slice, in data order. The chart draws nothing without this part. Its props set the rounding, the lift and the dimming.",
+    "Center": "The readout in the hole: the total, then the value and share of the slice being read. It draws nothing when `innerRadius` is `0`.",
+    "Legend": "A swatch, a name and a share per slice, under the dial. Each entry is a button that reads its slice.",
+    "Skeleton": "The dial as one plain band while `status` is `loading`. It fades out as the slices unroll over it."
+  },
+  "examples": [
+    {
+      "title": "Pie or donut",
+      "description": "`innerRadius` is a share of the radius, and `0` is a pie. A donut has room for `PieChart.Center`, which shows the total, the one figure a pie can be read for exactly.",
+      "demo": "pie",
+      "height": 340
+    },
+    {
+      "title": "Reading from outside",
+      "description": "Pass `activeIndex` and `onActiveIndexChange` when something else on the page has to stay in step. The callback fires for hovering as well as pressing, and with `-1` when the reading ends.",
+      "demo": "selecting",
+      "height": 400
+    },
+    {
+      "title": "A short key",
+      "description": "`legend` on the header puts the key in its trailing corner. Use it for two or three short names, and `PieChart.Legend` for anything longer.",
+      "demo": "key",
+      "height": 300
+    },
+    {
+      "title": "Gaps, rounding and a floor",
+      "description": "`padAngle` leaves a gap between slices and `cornerRadius` rounds them. `minAngle` keeps a very small slice visible: Email is a third of a percent here. The angle it gains comes off the other slices, so its size no longer matches its share exactly.",
+      "demo": "segments",
+      "height": 340
+    },
+    {
+      "title": "Opening the dial",
+      "description": "`startAngle` and `endAngle` are degrees clockwise from twelve o'clock. Less than a full turn leaves a gap, and the slices share what remains.",
+      "demo": "dial",
+      "height": 340
+    },
+    {
+      "title": "Drawing the middle yourself",
+      "description": "`PieChart.Center` takes a function, given the slice being read or `null`. Its width is limited to the square that fits inside the hole.",
+      "demo": "center",
+      "height": 300
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `PieChart.Skeleton` and drive `status`. The pie unrolls clockwise when it turns `ready`.",
+      "demo": "loading",
+      "height": 340
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, the slices move to their new angles. A `ref` on the chart has `replay()`, which unrolls the pie again.",
+      "demo": "changing-data",
+      "height": 400
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart takes `size` as its diameter, or fills its container's width as a square without it. The plot draws in the browser after it has been measured, so it is not in server-rendered HTML.\n\n### Colour\n\n`color` on a datum names a role in the theme. Without it, slices take the five chart colours in order, and a sixth slice repeats the first.\n\n### Reading a slice\n\nHovering a slice reads it. A click or a tap holds the reading until you press that slice again, press outside the slices, or press Escape. On a touch screen a drag scrolls the page and does not read slices.\n\nInside the chart, `usePieChart` gives the slice being read and its share.\n\n### Keyboard\n\nThe plot takes focus. The arrow keys move between slices, Enter or Space holds the reading, and Escape clears it. The legend's entries are buttons, reached with Tab.\n\n### Screen readers\n\nEach slice is given as text beside the drawing, as its name and share. `label` names the chart and `labelForDatum` writes a slice, for values with a unit.\n\n### Reduced motion\n\nWith reduced motion set, the pie appears without unrolling and the data change does not animate. The lift on a slice being read stays, because it is the response to the pointer or a press.\n\n### Zero and negative values\n\nA negative value counts as zero, and a slice worth zero is not drawn, whatever `minAngle` says. It keeps its legend entry.",
+  "propsNote": "`PieChart`, `PieChart.Header`, `PieChart.Legend` and `PieChart.Skeleton` also take the props of the element they render, and a `className`. `PieChart.Center` takes a `className` for its readout. `PieChart.Slices` draws nothing itself and takes only the props listed."
+}

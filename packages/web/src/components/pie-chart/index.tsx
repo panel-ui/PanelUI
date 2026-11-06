@@ -405,7 +405,7 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
 
   // A remounted chart says nothing about the focus it lost.
   useEffect(() => {
-    if (pinned.current < 0) report(-1);
+    if (revision > 0 && pinned.current < 0) report(-1);
   }, [revision, report]);
 
   // The drawing only reads the slices and the geometry. The reading stays out of

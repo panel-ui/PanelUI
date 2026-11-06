@@ -45,11 +45,11 @@ For a total cut into parts with no routing between them, or what survived each s
 
 - `SankeyChart.Header` — The strip above the diagram: `title`, `value` and `caption`, with your own control on the trailing side. The value is not derived, because 128400 can be a count, a currency or a rate.
 - `SankeyChart.Skeleton` — Plain equal bars and ribbons, drawn only while `status` is `loading`. Equal, because varied thicknesses would look like real routing.
-- `SankeyChart.Links` — The ribbons, grey at rest and in their source's colour on the route being read.
+- `SankeyChart.Links` — The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others.
 - `SankeyChart.Nodes` — The bars the ribbons run between. A bar's height is what passes through it.
 - `SankeyChart.Labels` — The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.
 - `SankeyChart.Tooltip` — The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.
-- `SankeyChart.Breakdown` — Optional. What is being read, written out under the diagram: where each stream came from and where it went, with its share of the stage. A row selects the node at its other end. It holds its height, so reading a stage does not move the page.
+- `SankeyChart.Breakdown` — Optional. The figures, written out under the diagram. At rest it lists where the flow starts and ends. Reading a stage swaps in where each of its streams came from and went, with its share of the stage. A row selects the node it names. It holds its height, so reading a stage does not move the page.
 - `SankeyChart.Legend` — Optional. Every stage named under the diagram with its share of the widest stage. Use it when some bars are too small to carry a name: pressing an entry selects that node.
 
 ## Props
@@ -83,8 +83,9 @@ For a total cut into parts with no routing between them, or what survived each s
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `opacity` | `number` | — | A ribbon's opacity at rest. |
-| `activeOpacity` | `number` | — | A ribbon's opacity on the route being read, in its own colour. |
+| `gradient` | `boolean` | — | Blend each ribbon from its source's colour to its target's, at rest as well as on a route. |
+| `opacity` | `number` | — | A ribbon's opacity at rest. Defaults to `0.09`, or `0.45` with `gradient`. |
+| `activeOpacity` | `number` | — | A ribbon's opacity on the route being read. Defaults to `0.42`, or `0.8` with `gradient`. |
 
 #### `SankeyChartNodesProps`
 
@@ -116,9 +117,10 @@ For a total cut into parts with no routing between them, or what survived each s
 | `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
 | `maxRows` | `number` | — | How many rows each side shows before stopping. |
 | `onSelectNode` | `(id: string) => void` | — | Fires with the node at the other end of a row, as the chart follows it there. |
-| `placeholder` | `ReactNode` | `'Select a stage to see where it came from and went.'` | Shown in place of the rows when nothing is being read. |
-| `sourcesTitle` | `ReactNode` | `'From'` | The heading over what arrives. |
-| `targetsTitle` | `ReactNode` | `'To'` | The heading over what leaves. |
+| `startsTitle` | `ReactNode` | `'Sources'` | The heading over the stages nothing arrives at, while nothing is being read. |
+| `endsTitle` | `ReactNode` | `'Outcomes'` | The heading over the stages nothing leaves, while nothing is being read. |
+| `sourcesTitle` | `ReactNode` | `'From'` | The heading over what arrives at the stage being read. |
+| `targetsTitle` | `ReactNode` | `'To'` | The heading over what leaves the stage being read. |
 
 #### `SankeyChartLegendProps`
 

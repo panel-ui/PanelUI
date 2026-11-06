@@ -150,7 +150,7 @@ const THEME = {
 const sankeyChartVariants = tv({
   slots: {
     root: 'relative grid w-full grid-cols-1 text-foreground',
-    plot: 'relative col-start-1 row-start-2 w-full',
+    plot: "relative col-start-1 row-start-2 w-full [&_[data-ts-key^='sankey-links:']]:transition-opacity data-dimmed:[&_[data-ts-key^='sankey-links:']]:opacity-25",
     chart:
       'absolute! inset-0 rounded-lg text-xs [--ts-chart-tooltip-background:var(--popover)] [--ts-chart-tooltip-border-radius:var(--radius-xl)] [--ts-chart-tooltip-border:1px_solid_var(--border)] [--ts-chart-tooltip-color:var(--popover-foreground)] [--ts-chart-tooltip-shadow:var(--shadow-lg)] [&_svg]:rounded-lg [&_svg]:outline-none [&_svg:focus-visible]:ring-2 [&_svg:focus-visible]:ring-ring',
     header: 'col-start-1 row-start-1 flex items-start justify-between gap-3 pb-3',
@@ -205,6 +205,8 @@ const SKELETON_COLUMNS = 3;
 
 const NODES_MARK = 'sankey-nodes';
 const LINKS_MARK = 'sankey-links';
+const STRAIGHT_NUDGE = 0.1;
+const gradientId = (row: LinkRow) => row.key.replace(':', '-');
 
 const COMPACT = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 const compactNumber = (value: number) => COMPACT.format(value);
@@ -235,6 +237,8 @@ interface LinkRow {
   layer: number;
   width: number;
   color: string;
+  /** Where the ribbon's gradient ends: the target's colour, or its own when it was given one. */
+  endColor: string;
   x1: number;
   y1: number;
   x2: number;
@@ -455,7 +459,7 @@ function pointsOf(nodes: readonly SceneNode[], found: RowPoint[] = []): RowPoint
 
 /** What the parts have asked for. Formatters are read through `latest`, so a new one costs nothing. */
 interface Slots {
-  links?: { opacity: number; activeOpacity: number };
+  links?: { gradient: boolean; opacity: number; activeOpacity: number };
   nodes?: { radius: number; dimOpacity: number; interactive: boolean };
   labels?: { showValue: boolean; minHeight: number; latest: { current: Pick<SankeyChartLabelsProps, 'formatValue'> } };
   tooltip?: { className: string | undefined; latest: { current: Pick<SankeyChartTooltipProps, 'formatValue'> } };
@@ -501,6 +505,10 @@ export function useSankeyChart() {
     const placed = reading?.kind === 'node' ? nodeById.get(reading.id) : undefined;
     const ribbon = reading?.kind === 'link' ? rows.links.find(({ key }) => key === reading.key) : undefined;
     const largestFirst = (a: SankeyChartFlow, b: SankeyChartFlow) => b.value - a.value;
+    const outer = (stages: readonly NodeRow[]) => {
+      const total = stages.reduce((sum, { value }) => sum + value, 0);
+      return stages.map(({ id, value }) => flow(id, value, total)).sort(largestFirst);
+    };
 
     return {
       /** The node being read, or `null` while nothing is, or a ribbon is. */
@@ -525,6 +533,10 @@ export function useSankeyChart() {
       targets: placed
         ? rows.links.filter(({ source }) => source === placed.id).map((row) => flow(row.target, row.value, placed.value)).sort(largestFirst)
         : ([] as SankeyChartFlow[]),
+      /** The stages nothing arrives at, largest first, each as a share of them all. */
+      starts: outer(rows.nodes.filter(({ id }) => !rows.links.some(({ target }) => target === id))),
+      /** The stages nothing leaves, largest first, each as a share of them all. */
+      ends: outer(rows.nodes.filter(({ id }) => !rows.links.some(({ source }) => source === id))),
     };
   }, [rows, reading]);
 }
@@ -697,6 +709,10 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       if (!source || !target) return [];
       const input = links[link.input];
       const [fromX, toX] = mirror ? [source.x0, target.x1] : [source.x1, target.x0];
+      const color = input?.color ? COLOR_VAR[input.color] : source.color;
+      // A gradient is sized to the path's box, and a straight path has no box to
+      // size it to, so it would not paint at all. Rounding can leave a sliver too.
+      const unbent = Math.abs(link.y1 - link.y0) < STRAIGHT_NUDGE ? link.y0 + STRAIGHT_NUDGE : link.y1;
       return [
         {
           kind: 'link',
@@ -707,10 +723,11 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
           value: link.value,
           layer: source.layer,
           width: link.width,
-          color: input?.color ? COLOR_VAR[input.color] : source.color,
+          color,
+          endColor: input?.color ? color : target.color,
           ...(vertical
-            ? { x1: link.y0, y1: source.y1, x2: link.y1, y2: target.y0 }
-            : { x1: fromX, y1: link.y0, x2: toX, y2: link.y1 }),
+            ? { x1: link.y0, y1: source.y1, x2: unbent, y2: target.y0 }
+            : { x1: fromX, y1: link.y0, x2: toX, y2: unbent }),
         },
       ];
     });
@@ -744,14 +761,14 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
                 linkMark(rows.links, {
                   ...position,
                   id: LINKS_MARK,
-                  stroke: 'var(--foreground)',
+                  stroke: linksSlot.gradient ? (row: LinkRow) => `url(#${gradientId(row)})` : 'var(--foreground)',
                   strokeOpacity: linksSlot.opacity,
                 }),
                 whenFocused(
                   linkMark(rows.links, {
                     ...position,
                     id: `${LINKS_MARK}-route`,
-                    stroke: (row: LinkRow) => row.color,
+                    stroke: linksSlot.gradient ? (row: LinkRow) => `url(#${gradientId(row)})` : (row: LinkRow) => row.color,
                     strokeOpacity: linksSlot.activeOpacity,
                   }),
                   { match: 'group' }
@@ -842,6 +859,21 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     return defineChart({
       theme: THEME,
       marks,
+      gradients: linksSlot?.gradient
+        ? rows.links.map((row) => ({
+            id: gradientId(row),
+            // From where the flow starts, which is the right-hand edge in a right-to-left page.
+            ...(vertical
+              ? { x1: 0, y1: 0, x2: 0, y2: 1 }
+              : row.x1 > row.x2
+                ? { x1: 1, y1: 0, x2: 0, y2: 0 }
+                : { x1: 0, y1: 0, x2: 1, y2: 0 }),
+            stops: [
+              { offset: 0, color: row.color },
+              { offset: 1, color: row.endColor },
+            ],
+          }))
+        : [],
       // The layout has already worked in pixels, so both scales hand them straight through.
       scales: {
         x: { scale: scaleLinear([0, width], [0, 1]), nice: false, axis: false as const, grid: false as const },
@@ -963,6 +995,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
             <div
               ref={plotRef}
               data-slot="sankey-chart-plot"
+              data-dimmed={linksSlot?.gradient && reading ? '' : undefined}
               className={slotClasses.plot()}
               style={{ height }}
               onClick={(event) => {
@@ -1016,7 +1049,7 @@ function skeletonMarks(width: number, height: number, vertical: boolean, bar: nu
   const cross = vertical ? width : height;
   const step = (along - bar) / Math.max(SKELETON_COLUMNS - 1, 1);
   const flip = <T,>(a: T, b: T): [T, T] => (vertical ? [b, a] : [a, b]);
-  const blank = { value: 0, layer: 0, color: 'var(--muted)' };
+  const blank = { value: 0, layer: 0, color: 'var(--muted)', endColor: 'var(--muted)' };
   const bars = Array.from({ length: SKELETON_COLUMNS }, (_unused, column): NodeRow => {
     const [x0, y0] = flip(column * step, cross / 6);
     const [x1, y1] = flip(column * step + bar, (cross * 5) / 6);
@@ -1067,19 +1100,24 @@ function useLatest<T>(value: T) {
 }
 
 export interface SankeyChartLinksProps {
-  /** A ribbon's opacity at rest. */
+  /** Blend each ribbon from its source's colour to its target's, at rest as well as on a route. */
+  gradient?: boolean;
+  /** A ribbon's opacity at rest. Defaults to `0.09`, or `0.45` with `gradient`. */
   opacity?: number;
-  /** A ribbon's opacity on the route being read, in its own colour. */
+  /** A ribbon's opacity on the route being read. Defaults to `0.42`, or `0.8` with `gradient`. */
   activeOpacity?: number;
 }
 
-/** The ribbons. Grey at rest, and in their source's colour on the route being read. */
-function SankeyChartLinks({ opacity = 0.09, activeOpacity = 0.42 }: SankeyChartLinksProps) {
+/**
+ * The ribbons. Grey at rest, and in their source's colour on the route being
+ * read. With `gradient` they keep their colours at rest, and a reading dims the rest.
+ */
+function SankeyChartLinks({ gradient = false, opacity = gradient ? 0.45 : 0.09, activeOpacity = gradient ? 0.8 : 0.42 }: SankeyChartLinksProps) {
   const { setSlot } = useChart('SankeyChart.Links');
   useEffect(() => {
-    setSlot('links', { opacity, activeOpacity });
+    setSlot('links', { gradient, opacity, activeOpacity });
     return () => setSlot('links', undefined);
-  }, [opacity, activeOpacity, setSlot]);
+  }, [gradient, opacity, activeOpacity, setSlot]);
   return null;
 }
 SankeyChartLinks.displayName = 'SankeyChart.Links';
@@ -1166,24 +1204,28 @@ export interface SankeyChartBreakdownProps extends ComponentProps<'div'> {
   maxRows?: number;
   /** Fires with the node at the other end of a row, as the chart follows it there. */
   onSelectNode?: (id: string) => void;
-  /** Shown in place of the rows when nothing is being read. */
-  placeholder?: ReactNode;
-  /** The heading over what arrives. */
+  /** The heading over the stages nothing arrives at, while nothing is being read. */
+  startsTitle?: ReactNode;
+  /** The heading over the stages nothing leaves, while nothing is being read. */
+  endsTitle?: ReactNode;
+  /** The heading over what arrives at the stage being read. */
   sourcesTitle?: ReactNode;
-  /** The heading over what leaves. */
+  /** The heading over what leaves the stage being read. */
   targetsTitle?: ReactNode;
 }
 
 /**
  * Optional: leave it out for the diagram alone. What is being read, written out
- * under the diagram: where each stream came from and where it went. A row
- * selects the node at its other end, so a flow can be walked one stage at a time.
+ * under the diagram: where each stream came from and where it went, or where the
+ * whole flow starts and ends while nothing is. A row selects the node it names,
+ * so a flow can be walked one stage at a time.
  */
 function SankeyChartBreakdown({
   formatValue,
   maxRows,
   onSelectNode,
-  placeholder = 'Select a stage to see where it came from and went.',
+  startsTitle = 'Sources',
+  endsTitle = 'Outcomes',
   sourcesTitle = 'From',
   targetsTitle = 'To',
   className,
@@ -1192,7 +1234,7 @@ function SankeyChartBreakdown({
   ...props
 }: SankeyChartBreakdownProps & RenderProp<'div'>) {
   const { rows, status, select } = useChart('SankeyChart.Breakdown');
-  const { activeId, activeLink, sources, targets } = useSankeyChart();
+  const { activeId, activeLink, sources, targets, starts, ends } = useSankeyChart();
   const slots = sankeyChartVariants();
   const format = formatValue ?? compactNumber;
   const limit = maxRows && maxRows > 0 ? Math.floor(maxRows) : undefined;
@@ -1207,8 +1249,9 @@ function SankeyChartBreakdown({
         rows.links.filter(({ target }) => target === node.id).length
       );
     }
+    most = Math.max(most, starts.length, ends.length);
     return Math.min(most, limit ?? most);
-  }, [rows, limit]);
+  }, [rows, starts, ends, limit]);
 
   const flowRow = (flow: SankeyChartFlow, showShare: boolean) => (
     <button
@@ -1266,14 +1309,17 @@ function SankeyChartBreakdown({
             {side(targetsTitle, targets)}
           </div>
         ) : (
-          <div className={slots.breakdownPlaceholder()}>{placeholder}</div>
+          <div className={slots.breakdownSides()}>
+            {side(startsTitle, starts)}
+            {side(endsTitle, ends)}
+          </div>
         ),
       },
       props
     ),
   });
 
-  return status === 'loading' ? null : element;
+  return status === 'loading' || !rows.nodes.length ? null : element;
 }
 SankeyChartBreakdown.displayName = 'SankeyChart.Breakdown';
 

@@ -227,6 +227,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'sankey-chart/align': dynamic(() => import('./sankey-chart/align')),
   'sankey-chart/collapse': dynamic(() => import('./sankey-chart/collapse')),
   'sankey-chart/dropped': dynamic(() => import('./sankey-chart/dropped')),
+  'sankey-chart/gradient': dynamic(() => import('./sankey-chart/gradient')),
   'sankey-chart/loading': dynamic(() => import('./sankey-chart/loading')),
   'sankey-chart/overview': dynamic(() => import('./sankey-chart/overview')),
   'sankey-chart/plain': dynamic(() => import('./sankey-chart/plain')),

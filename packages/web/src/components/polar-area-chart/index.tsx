@@ -471,6 +471,9 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
                 ))}
               </ul>
             )}
+            <div aria-live="polite" className="sr-only">
+              {activeIndex >= 0 && data[activeIndex] ? spoken(data[activeIndex], activeIndex) : ''}
+            </div>
             <div
               ref={plotRef}
               data-slot="polar-area-chart-plot"

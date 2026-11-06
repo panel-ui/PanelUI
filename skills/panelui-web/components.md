@@ -66,6 +66,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Area Chart](components/area-chart.md) — Filled bands over time, stacked or overlaid.
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
 - [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
+- [Bump Chart](components/bump-chart.md) — How a set of things ranked against each other over time.
 - [Candlestick Chart](components/candlestick-chart.md) — Open, high, low and close for a period, drawn as one mark.
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.

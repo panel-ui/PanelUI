@@ -518,5 +518,16 @@
       "category": "charts",
       "title": "Sankey Chart"
     }
+  ],
+  "plot": [
+    "Plot",
+    "A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.",
+    "react composable chart component bars line area",
+    {
+      "addedIn": "0.14.0",
+      "alpha": true,
+      "category": "charts",
+      "title": "Plot"
+    }
   ]
 }

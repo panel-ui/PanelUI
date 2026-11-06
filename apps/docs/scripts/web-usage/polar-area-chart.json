@@ -1,0 +1,59 @@
+{
+  "slug": "polar-area-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 500
+  },
+  "intro": "Use it for a handful of readings on one scale when the overall shape matters: which direction the weight sits in, or whether one reading runs away from the rest. Every wedge takes the same angle and the radius carries the value, so the values do not have to add up to anything.\n\nA wedge worth twice another covers four times the area under the default scale, and area is what the eye adds up first. Set `scale=\"area\"` to make the ink proportional to the value, at the cost of unevenly spaced rings.\n\nTo rank the readings, use a [Bar Chart](/docs/web/charts/bar-chart). For parts of one total, use a [Pie Chart](/docs/web/charts/pie-chart).",
+  "usage": "<PolarAreaChart data={scores} size={240}>\n  <PolarAreaChart.Grid />\n  <PolarAreaChart.Wedges />\n  <PolarAreaChart.Labels />\n  <PolarAreaChart.Tooltip />\n  <PolarAreaChart.Legend />\n</PolarAreaChart>",
+  "anatomy": "<PolarAreaChart data={…}>\n  <PolarAreaChart.Header />\n  <PolarAreaChart.Skeleton />\n  <PolarAreaChart.Grid />\n  <PolarAreaChart.Wedges />\n  <PolarAreaChart.Labels />\n  <PolarAreaChart.Tooltip />\n  <PolarAreaChart.Legend />\n</PolarAreaChart>",
+  "parts": {
+    "Header": "The strip above the dial: `title`, `value` and `caption`, with a colour key or your own control on the trailing side.",
+    "Grid": "The rings, each at the value it stands for, with optional spokes along the wedge edges.",
+    "Wedges": "Every wedge, in data order. The chart draws nothing without this part. Its props set the rounding and the dimming.",
+    "Labels": "The value on each wedge that reaches at least `minRadius`, in black or white to suit the wedge's colour.",
+    "Tooltip": "The name and value of the wedge being read, over the dial. This is how the short, unlabelled wedges are named.",
+    "Legend": "A swatch, a name and a value per wedge, under the dial. Each entry is a button that reads its wedge.",
+    "Skeleton": "One plain disc while `status` is `loading`."
+  },
+  "examples": [
+    {
+      "title": "Scale",
+      "description": "`scale=\"radius\"` lets a reading be counted off the rings. `scale=\"area\"` makes the ink proportional to the value, so the rings bunch towards the edge.",
+      "demo": "scale",
+      "height": 340
+    },
+    {
+      "title": "Reading from outside",
+      "description": "Pass `activeIndex` and `onActiveIndexChange` when something else on the page has to stay in step. The callback fires for hovering as well as pressing, and with `-1` when the reading ends.",
+      "demo": "selecting",
+      "height": 440
+    },
+    {
+      "title": "Gaps and spokes",
+      "description": "`padAngle` and `cornerRadius` separate the wedges, and `spokes` on the grid draws a line along each edge. `startAngle` turns the dial.",
+      "demo": "spokes",
+      "height": 340
+    },
+    {
+      "title": "A fixed maximum",
+      "description": "Set `maxValue` when charts have to be compared, because the default rounds up from each chart's own largest value.",
+      "demo": "maximum",
+      "height": 340
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `PolarAreaChart.Skeleton` and drive `status`. The wedges grow out of the centre when it turns `ready`.",
+      "demo": "loading",
+      "height": 340
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, each wedge moves to its new reach. A `ref` on the chart has `replay()`, which grows the wedges again from the centre.",
+      "demo": "changing-data",
+      "height": 420
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart takes `size` as its diameter, or fills its container's width as a square without it. The plot draws in the browser after it has been measured, so it is not in server-rendered HTML.\n\n### Colour\n\n`color` on a datum names a role in the theme. Without it, wedges take the five chart colours in order, and a sixth wedge repeats the first.\n\n### Reading a wedge\n\nHovering a wedge reads it. A click or a tap holds the reading until you press that wedge again or press outside the wedges. A touch drag does not read wedges, so the page can still scroll.\n\n`usePolarAreaChart` gives the wedge being read to anything rendered inside the chart.\n\n### Keyboard\n\nThe plot takes focus. The arrow keys move between wedges, Enter or Space holds the reading, and Escape clears it. Moving to another wedge lets go of a held reading. The legend's entries are buttons, reached with Tab.\n\n### Screen readers\n\nEach wedge is given as text beside the drawing, as its name and value. `label` names the chart and `labelForDatum` writes a wedge, for values with a unit.\n\n### Reduced motion\n\nWith reduced motion set, the wedges appear at their full reach, and a data change lands in one step.\n\n### Zero and negative values\n\nA negative value counts as zero. A wedge at zero draws nothing, though the arrow keys and the legend still reach it.",
+  "propsNote": "`PolarAreaChart`, `PolarAreaChart.Header`, `PolarAreaChart.Legend` and `PolarAreaChart.Skeleton` also take the props of the element they render, and a `className`. `PolarAreaChart.Labels` and `PolarAreaChart.Tooltip` take a `className` for each label and for the readout. `PolarAreaChart.Grid` and `PolarAreaChart.Wedges` take only the props listed."
+}

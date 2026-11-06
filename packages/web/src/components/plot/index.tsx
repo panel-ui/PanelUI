@@ -699,6 +699,11 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
   // A held reading ends with the next press, or when the plot goes away.
   useEffect(() => () => releaseDrag.current?.(), []);
 
+  const clearReading = () => {
+    releaseDrag.current?.();
+    interactionRef.current?.setControlledFocus(null);
+  };
+
   /*
    * The chart follows a mouse on its own but not a finger, which it treats as a
    * tap. A sideways drag reads the rows it crosses, and the last one stays until the
@@ -712,13 +717,9 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
     if (!interaction || !target) return;
     interaction.setControlledFocus(target);
     if (releaseDrag.current) return;
-    const onPress = () => {
-      releaseDrag.current?.();
-      interactionRef.current?.setControlledFocus(null);
-    };
-    document.addEventListener('pointerdown', onPress, { capture: true });
+    document.addEventListener('pointerdown', clearReading, { capture: true });
     releaseDrag.current = () => {
-      document.removeEventListener('pointerdown', onPress, { capture: true });
+      document.removeEventListener('pointerdown', clearReading, { capture: true });
       releaseDrag.current = null;
     };
   };
@@ -829,10 +830,10 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
               className={slotClasses.box()}
               style={{ aspectRatio }}
               onKeyDown={(event) => {
-                if (event.key === 'Escape') interactionRef.current?.setControlledFocus(null);
+                if (event.key === 'Escape') clearReading();
               }}
               onPointerMove={readDrag}
-              onPointerCancel={() => interactionRef.current?.setControlledFocus(null)}
+              onPointerCancel={clearReading}
             >
               <svg ref={setGridHost} aria-hidden className={slotClasses.layer()} />
               <div ref={revealRef} data-slot="plot-reveal" className={slotClasses.reveal()}>

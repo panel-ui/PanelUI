@@ -30,6 +30,13 @@ test('a pinned end stays where it was pinned, and the other is derived', () => {
   assert.deepEqual(plotExtent(rows, ['a'], { yDomain: [5, 50] }), [5, 50]);
 });
 
+test('a pin past all the data does not flip the axis', () => {
+  const below = [{ a: -20 }, { a: -10 }];
+  assert.deepEqual(plotExtent(below, ['a'], { yDomain: [0, 'auto'] }), [0, 10]);
+  assert.deepEqual(plotExtent(below, ['a'], { yDomain: [0, 'auto'], nice: true }), [0, 10]);
+  assert.deepEqual(plotExtent(below, ['a'], { yDomain: ['auto', -30] }), [-40, -30]);
+});
+
 test('a non-finite pin is auto, and non-finite values are not measured', () => {
   assert.deepEqual(plotExtent(rows, ['a'], { yDomain: [Number.NaN, 'auto'] }), [9, 21]);
   assert.deepEqual(plotExtent([{ a: 10 }, { a: Infinity }, { a: 20 }], ['a']), [9, 21]);

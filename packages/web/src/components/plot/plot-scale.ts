@@ -164,10 +164,12 @@ export function plotExtent(
 
   const headroom = (max - min) * 0.1;
   const [niceLow, niceHigh] = nice ? niceDomain(min, max) : [min, max];
-  return [
-    lowPin ?? (nice ? niceLow : min - headroom * lowRoom),
-    highPin ?? (nice ? niceHigh : max + headroom * highRoom),
-  ];
+  const low = lowPin ?? (nice ? niceLow : min - headroom * lowRoom);
+  const high = highPin ?? (nice ? niceHigh : max + headroom * highRoom);
+  if (low < high) return [low, high];
+  // A pin past all the data would flip the axis, so the derived end keeps to its side.
+  const span = max - min;
+  return lowPin !== undefined ? [low, low + span] : [high - span, high];
 }
 
 /**

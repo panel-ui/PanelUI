@@ -79,6 +79,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Polar Area Chart](components/polar-area-chart.md) — Several readings compared on one measure, as a dial.
 - [Pyramid Chart](components/pyramid-chart.md) — Two series mirrored about a centre line, one row per category, on one shared scale.
 - [Radar Chart](components/radar-chart.md) — Several measures of one thing, drawn as one shape.
+- [Ring Chart](components/ring-chart.md) — Progress towards several targets, as concentric arcs.
 - [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 - [Scatter Chart](components/scatter-chart.md) — Two measured quantities against each other, to show how they relate.
 - [Treemap Chart](components/treemap-chart.md) — A total, cut into the parts it is made of, sized by area.

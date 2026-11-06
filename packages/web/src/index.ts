@@ -1434,3 +1434,19 @@ export {
   type HexChartLegendProps,
   type HexChartSkeletonProps,
 } from './components/hex-chart';
+export {
+  RingChart,
+  RingChartHeader,
+  RingChartRing,
+  RingChartCenter,
+  RingChartLegend,
+  useRingChart,
+  type RingChartProps,
+  type RingChartHandle,
+  type RingChartColor,
+  type RingDatum,
+  type RingChartHeaderProps,
+  type RingChartRingProps,
+  type RingChartCenterProps,
+  type RingChartLegendProps,
+} from './components/ring-chart';

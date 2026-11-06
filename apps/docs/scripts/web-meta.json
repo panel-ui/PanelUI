@@ -699,5 +699,15 @@
       "category": "charts",
       "title": "Hex Chart"
     }
+  ],
+  "ring-chart": [
+    "RingChart",
+    "Progress towards several targets, as concentric arcs.",
+    "react ring chart progress rings gauge component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Ring Chart"
+    }
   ]
 }

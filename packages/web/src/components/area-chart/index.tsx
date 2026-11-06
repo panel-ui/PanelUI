@@ -425,6 +425,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
   const [outline, setOutline] = useState('');
   const interactionRef = useRef<ChartInteractionController<BandRow, number, number> | null>(null);
   const dragging = useRef(false);
+  const dragRelease = useRef<AbortController | null>(null);
+  useEffect(() => () => dragRelease.current?.abort(), []);
 
   /*
    * The chart mounts once its width is known. Mounted at a guess, the first
@@ -835,13 +837,14 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     interaction.setControlledFocus(target);
     if (dragging.current) return;
     dragging.current = true;
+    dragRelease.current = new AbortController();
     document.addEventListener(
       'pointerdown',
       () => {
         dragging.current = false;
         interactionRef.current?.setControlledFocus(null);
       },
-      { capture: true, once: true }
+      { capture: true, once: true, signal: dragRelease.current.signal }
     );
   };
 
@@ -951,7 +954,11 @@ export interface AreaChartGridProps {
 }
 
 /** Lines across the value axis, so a band can be read against a number. */
-function AreaChartGrid({ rows = 4, dashArray = '4 6', opacity = 1 }: AreaChartGridProps) {
+function AreaChartGrid({
+  rows = 4,
+  dashArray = '4 6',
+  opacity = 1,
+}: AreaChartGridProps) {
   const { setSlot } = useChart('AreaChart.Grid');
   useEffect(() => {
     setSlot('grid', { rows, dashArray, opacity });
@@ -1024,7 +1031,13 @@ export interface AreaChartLineProps {
  * stack, so it can show a total the stack is measured against. It counts toward
  * the value axis and has its own row in the readout.
  */
-function AreaChartLine({ dataKey, color = 'foreground', curve, dashArray, strokeWidth = 2 }: AreaChartLineProps) {
+function AreaChartLine({
+  dataKey,
+  color = 'foreground',
+  curve,
+  dashArray,
+  strokeWidth = 2,
+}: AreaChartLineProps) {
   const { setLine, removeLine } = useChart('AreaChart.Line');
   const stroke = COLOR_VAR[color];
   useEffect(() => {
@@ -1058,7 +1071,12 @@ export interface AreaChartReferenceLineProps {
 }
 
 /** A rule across the plot at a fixed value: a budget, a limit, a target. */
-function AreaChartReferenceLine({ y, color = 'foreground', dashArray = '3 4', label }: AreaChartReferenceLineProps) {
+function AreaChartReferenceLine({
+  y,
+  color = 'foreground',
+  dashArray = '3 4',
+  label,
+}: AreaChartReferenceLineProps) {
   useAnnotation('AreaChart.ReferenceLine', { axis: 'y', at: y, stroke: COLOR_VAR[color], dashArray, label });
   return null;
 }
@@ -1076,7 +1094,12 @@ export interface AreaChartMarkerProps {
 }
 
 /** A rule down the plot at one row: a release, a date something ran out. */
-function AreaChartMarker({ index, color = 'muted-foreground', dashArray = '2 3', label }: AreaChartMarkerProps) {
+function AreaChartMarker({
+  index,
+  color = 'muted-foreground',
+  dashArray = '2 3',
+  label,
+}: AreaChartMarkerProps) {
   useAnnotation('AreaChart.Marker', { axis: 'x', at: index, stroke: COLOR_VAR[color], dashArray, label });
   return null;
 }
@@ -1187,7 +1210,9 @@ export interface AreaChartSkeletonProps {
  * The highlight is a child translated inside a clip of the band's outline, so
  * the loop runs on the compositor and repaints nothing.
  */
-function AreaChartSkeleton({ duration = 1400 }: AreaChartSkeletonProps) {
+function AreaChartSkeleton({
+  duration = 1400,
+}: AreaChartSkeletonProps) {
   const { setSlot } = useChart('AreaChart.Skeleton');
   useEffect(() => {
     setSlot('skeleton', { duration });
@@ -1208,7 +1233,10 @@ export interface AreaChartXAxisProps {
 }
 
 /** The x labels, each placed on its own point. */
-function AreaChartXAxis({ ticks, format }: AreaChartXAxisProps) {
+function AreaChartXAxis({
+  ticks,
+  format,
+}: AreaChartXAxisProps) {
   const { setSlot } = useChart('AreaChart.XAxis');
   useEffect(() => {
     setSlot('xAxis', { ticks, format });
@@ -1226,7 +1254,10 @@ export interface AreaChartYAxisProps {
 }
 
 /** Value labels down the side, with room made for them. */
-function AreaChartYAxis({ ticks = 4, format }: AreaChartYAxisProps) {
+function AreaChartYAxis({
+  ticks = 4,
+  format,
+}: AreaChartYAxisProps) {
   const { setSlot } = useChart('AreaChart.YAxis');
   useEffect(() => {
     setSlot('yAxis', { ticks, format });
@@ -1359,7 +1390,7 @@ function AreaChartHeader({
           <>
             <div className={slots.headerText()}>
               {title ? <div className={slots.headerMuted()}>{title}</div> : null}
-              {value ? <div className={slots.headerValue()}>{value}</div> : null}
+              {value === 0 || value ? <div className={slots.headerValue()}>{value}</div> : null}
               {caption ? <div className={slots.headerMuted()}>{caption}</div> : null}
             </div>
             {trailing ? <div className={slots.headerTrailing()}>{trailing}</div> : null}

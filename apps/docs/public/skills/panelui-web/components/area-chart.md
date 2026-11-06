@@ -88,8 +88,8 @@ For one series where the shape matters more than what it is made of, use a line 
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `rows` | `number` | — | Roughly how many lines to draw across the value axis. |
-| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. |
 | `opacity` | `number` | `1` | Opacity of the lines. |
 
 #### `AreaChartAreaProps`
@@ -109,8 +109,8 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this line's values. |
-| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the line is drawn in. |
-| `curve` | `AreaChartCurve` | `'monotone'` | Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. |
+| `color` | `AreaChartColor` | `'foreground'` | Which of the theme's roles the line is drawn in. |
+| `curve` | `AreaChartCurve` | — | Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. |
 | `dashArray` | `string` | — | The stroke's dash pattern. |
 | `strokeWidth` | `number` | `2` | Thickness of the line. |
 
@@ -119,8 +119,8 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `y` | `number` | **required** | The value to draw the rule at. It counts toward the value axis. |
-| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the rule and its label are drawn in. |
-| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `color` | `AreaChartColor` | `'foreground'` | Which of the theme's roles the rule and its label are drawn in. |
+| `dashArray` | `string` | `'3 4'` | The stroke's dash pattern. |
 | `label` | `string` | — | Text above the rule's left end. |
 
 #### `AreaChartMarkerProps`
@@ -128,8 +128,8 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `index` | `number` | **required** | The row to draw the rule at, counted from `0`. |
-| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the rule and its label are drawn in. |
-| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `color` | `AreaChartColor` | `'muted-foreground'` | Which of the theme's roles the rule and its label are drawn in. |
+| `dashArray` | `string` | `'2 3'` | The stroke's dash pattern. |
 | `label` | `string` | — | Text beside the rule's top. It moves to the left of a rule near the right edge. |
 
 #### `AreaChartLabelsProps`
@@ -145,7 +145,7 @@ For one series where the shape matters more than what it is made of, use a line 
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
 
 #### `AreaChartXAxisProps`
 
@@ -158,7 +158,7 @@ For one series where the shape matters more than what it is made of, use a line 
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | Roughly how many labels to show along the value axis. |
+| `ticks` | `number` | `4` | Roughly how many labels to show along the value axis. |
 | `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
 
 #### `AreaChartTooltipProps`

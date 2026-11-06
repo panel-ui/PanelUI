@@ -639,5 +639,15 @@
       "category": "charts",
       "title": "Heatmap Chart"
     }
+  ],
+  "pie-chart": [
+    "PieChart",
+    "One total, divided between its parts.",
+    "react pie chart donut chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Pie Chart"
+    }
   ]
 }

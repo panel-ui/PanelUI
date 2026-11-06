@@ -9,6 +9,7 @@
     "heatmap-chart",
     "line-chart",
     "live-line-chart",
+    "pie-chart",
     "plot",
     "pyramid-chart",
     "sankey-chart",

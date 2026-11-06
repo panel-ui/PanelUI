@@ -363,7 +363,7 @@ const rowKey = (row: Row) => (isNode(row) || isLink(row) ? row.key : `node:${row
  * point would be a ribbon's midpoint, which a pointer on the same ribbon's end
  * is further from than it is from the bar next door.
  */
-function routeFocus(links: readonly LinkRow[], vertical: boolean, reach: number): ChartFocusStrategy<Row, number, number> {
+function routeFocus(links: readonly LinkRow[], vertical: boolean, reach: number, barsReadable: boolean): ChartFocusStrategy<Row, number, number> {
   let cachedFor = '';
   let cached = new Set<string>();
   const routeFor = (row: Row) => {
@@ -383,7 +383,7 @@ function routeFocus(links: readonly LinkRow[], vertical: boolean, reach: number)
 
   return {
     resolve(points, { x, y }) {
-      const bar = points.find(({ datum }) => isNode(datum) && x >= datum.x0 - 3 && x <= datum.x1 + 3 && y >= datum.y0 - 3 && y <= datum.y1 + 3);
+      const bar = !barsReadable ? undefined : points.find(({ datum }) => isNode(datum) && x >= datum.x0 - 3 && x <= datum.x1 + 3 && y >= datum.y0 - 3 && y <= datum.y1 + 3);
       if (bar) return group(points, bar);
       let nearest: RowPoint | undefined;
       let nearestGap = Infinity;
@@ -400,6 +400,7 @@ function routeFocus(links: readonly LinkRow[], vertical: boolean, reach: number)
     group: (points, { point }) => group(points, point),
     // The bars are enough to walk: from each one the breakdown names its ribbons.
     navigation: (points) => {
+      if (!barsReadable) return points.filter(({ datum }) => isLink(datum));
       const bars = points.filter(({ datum }) => isNode(datum));
       return bars.sort((a, b) => {
         const [left, right] = [a.datum as NodeRow, b.datum as NodeRow];
@@ -900,7 +901,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       },
       keyboard: interactive,
       pointer: interactive,
-      focus: interactive ? routeFocus(rows.links, vertical, curve) : false,
+      focus: interactive ? routeFocus(rows.links, vertical, curve, nodesSlot?.interactive ?? true) : false,
       maxFocusDistance: Number.POSITIVE_INFINITY,
       ...(interactive && readout ? { tooltip: readout } : {}),
     });
@@ -910,6 +911,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
 
   const reportedId = useRef<string | null>(null);
+  const latestActiveId = useLatest(activeId);
+  const [askedParent, setAskedParent] = useState(0);
 
   /*
    * The chart only pins a reading for a tooltip, and the rows of a breakdown have
@@ -930,7 +933,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     const id = next?.kind === 'node' ? next.id : null;
     if (reportedId.current !== id) {
       reportedId.current = id;
-      onActiveIdChange?.(id);
+      if (id !== latestActiveId.current) onActiveIdChange?.(id);
+      if (latestActiveId.current !== undefined) setAskedParent((count) => count + 1);
     }
   };
 
@@ -966,10 +970,17 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     request(activeId);
   }, [activeId, request]);
 
+  // A parent that kept its `activeId` has turned the change down, so the chart goes back to it.
+  useEffect(() => {
+    const id = latestActiveId.current;
+    if (id !== undefined && id !== (reading?.kind === 'node' ? reading.id : null)) request(id);
+    // Only once a change has been offered: `reading` moving by itself is that change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [askedParent]);
+
   const chartKey = `${revision}:${status}`;
   const drawnKey = useRef<string | null>(null);
   const resetKey = useRef<string | null>(null);
-  const latestActiveId = useLatest(activeId);
 
   // A remounted chart says nothing about the focus it lost.
   useEffect(() => {

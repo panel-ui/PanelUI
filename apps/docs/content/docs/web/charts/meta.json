@@ -1,7 +1,22 @@
 {
   "title": "Charts",
   "pages": [
+    "area-chart",
     "bar-chart",
-    "mirror-area-chart"
+    "bubble-chart",
+    "bump-chart",
+    "candlestick-chart",
+    "funnel-chart",
+    "heatmap-chart",
+    "line-chart",
+    "live-line-chart",
+    "mirror-area-chart",
+    "pie-chart",
+    "plot",
+    "pyramid-chart",
+    "sankey-chart",
+    "scatter-chart",
+    "treemap-chart",
+    "waterfall-chart"
   ]
 }

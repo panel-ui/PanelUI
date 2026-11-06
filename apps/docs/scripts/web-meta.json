@@ -679,5 +679,15 @@
       "category": "charts",
       "title": "Polar Area Chart"
     }
+  ],
+  "radar-chart": [
+    "RadarChart",
+    "Several measures of one thing, drawn as one shape.",
+    "react radar chart spider web chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Radar Chart"
+    }
   ]
 }

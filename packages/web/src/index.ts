@@ -1396,3 +1396,23 @@ export {
   type PolarAreaChartLegendProps,
   type PolarAreaChartSkeletonProps,
 } from './components/polar-area-chart';
+export {
+  RadarChart,
+  RadarChartHeader,
+  RadarChartGrid,
+  RadarChartAxis,
+  RadarChartSeries,
+  RadarChartTooltip,
+  RadarChartLegend,
+  type RadarChartProps,
+  type RadarChartHandle,
+  type RadarChartStatus,
+  type RadarChartColor,
+  type RadarChartDatum,
+  type RadarChartHeaderProps,
+  type RadarChartGridProps,
+  type RadarChartAxisProps,
+  type RadarChartSeriesProps,
+  type RadarChartTooltipProps,
+  type RadarChartLegendProps,
+} from './components/radar-chart';

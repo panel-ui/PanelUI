@@ -326,7 +326,10 @@ export interface TreemapChartProps extends Omit<ComponentProps<'div'>, 'ref' | '
    * shapes suffer without it. Turn it off where the given order is the message.
    */
   sort?: boolean;
-  /** Keep the largest `maxTiles` and gather the rest into one tile. */
+  /**
+   * The most tiles to draw, counting the gathered one. Past it, the first tiles
+   * are kept, which are the largest unless `sort` is off, and the rest are gathered into one.
+   */
   maxTiles?: number;
   /** What the gathered tile is called. */
   otherLabel?: string;
@@ -414,7 +417,7 @@ const TreemapChartRoot = forwardRef<TreemapChartHandle, TreemapChartProps & Rend
     const cleaned = data.map((datum, index) => ({
       id: datum.id ?? String(index),
       label: datum.label,
-      value: Math.max(0, datum.value) || 0,
+      value: Number.isFinite(datum.value) ? Math.max(0, datum.value) : 0,
       color: datum.color,
       sourceIndex: index,
     }));

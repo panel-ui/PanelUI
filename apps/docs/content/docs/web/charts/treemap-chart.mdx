@@ -430,7 +430,7 @@ export default function TreemapChartChangingData() {
 | `cornerRadius` | `number` | `6` | Corner radius of a tile, in pixels. |
 | `tileAspect` | `number` | `1` | How much wider than square-ish to lay the tiles out. `1` keeps the shapes closest to square, which are the easiest to compare. Raise it on a short chart, where a tile needs width for a name across it. |
 | `sort` | `boolean` | `true` | Sort the tiles largest first. The layout assumes a descending run, so the shapes suffer without it. Turn it off where the given order is the message. |
-| `maxTiles` | `number` | — | Keep the largest `maxTiles` and gather the rest into one tile. |
+| `maxTiles` | `number` | — | The most tiles to draw, counting the gathered one. Past it, the first tiles are kept, which are the largest unless `sort` is off, and the rest are gathered into one. |
 | `otherLabel` | `string` | `'Other'` | What the gathered tile is called. |
 | `color` | `TreemapChartColor` | `'chart-1'` | The ramp's hue: a theme role or any CSS colour. |
 | `animationDuration` | `number` | `520` | Milliseconds for one tile to arrive. |
@@ -523,7 +523,7 @@ Each tile is given as text beside the drawing. `label` names the chart and `labe
 
 ### Negative values
 
-Negative values are treated as zero, because an area cannot be less than none.
+Negative and non-finite values are treated as zero, because an area cannot be less than none.
 
 ### Reduced motion
 

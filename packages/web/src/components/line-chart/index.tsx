@@ -35,8 +35,13 @@
  * that a change of data moves the points and the axis to their new values, and
  * the reveal does not play again: repeating it would turn a refresh into an
  * animation.
+ *
+ * ## Web additions
+ *
+ * `ReferenceLine`, `Marker` and the `step` curve are not in the app library. They
+ * are for reading a value against a plan without hovering.
  */
-import { areaY, d3Curve, defineChart, dot, lineY, type ChartInteractionController, type ChartMotionContext, type ChartPoint } from '@tanstack/charts';
+import { areaY, d3Curve, defineChart, dot, lineY, ruleX, ruleY, text, type ChartInteractionController, type ChartMotionContext, type ChartPoint } from '@tanstack/charts';
 import { crosshair } from '@tanstack/charts/crosshair';
 import { whenFocused } from '@tanstack/charts/focus/mark';
 import { decorative } from '@tanstack/charts/mark/decorative';
@@ -44,7 +49,7 @@ import { motion } from '@tanstack/charts/motion';
 import { Chart } from '@tanstack/charts/react/core';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
 import { tooltip as chartTooltip } from '@tanstack/charts/tooltip';
-import { curveLinear, curveMonotoneX } from 'd3-shape';
+import { curveLinear, curveMonotoneX, curveStepAfter } from 'd3-shape';
 import {
   createContext,
   forwardRef,
@@ -70,11 +75,11 @@ import { lineDomain, readValue, tickIndexes } from './line-scale';
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type LineChartStatus = 'loading' | 'ready';
-export type LineChartCurve = 'monotone' | 'linear';
+export type LineChartCurve = 'monotone' | 'linear' | 'step';
 export type LineChartDatum = Record<string, string | number | null | undefined>;
 
-/** Which of the theme's roles a series is drawn in. */
-export type LineChartColor =
+/** The theme's colour roles. */
+type LineChartRole =
   | 'primary'
   | 'info'
   | 'success'
@@ -88,7 +93,10 @@ export type LineChartColor =
   | 'foreground'
   | 'muted-foreground';
 
-const COLOR_VAR: Record<LineChartColor, string> = {
+/** A role in the theme, or any CSS colour. */
+export type LineChartColor = LineChartRole | (string & {});
+
+const COLOR_VAR: Record<LineChartRole, string> = {
   primary: 'var(--primary)',
   info: 'var(--info)',
   success: 'var(--success)',
@@ -103,6 +111,8 @@ const COLOR_VAR: Record<LineChartColor, string> = {
   'muted-foreground': 'var(--muted-foreground)',
 };
 
+const paintOf = (color: LineChartColor) => COLOR_VAR[color as LineChartRole] ?? color;
+
 const THEME = {
   foreground: 'var(--foreground)',
   muted: 'var(--muted-foreground)',
@@ -111,7 +121,10 @@ const THEME = {
   palette: ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'],
 };
 
-const CURVES = { monotone: d3Curve(curveMonotoneX), linear: d3Curve(curveLinear) };
+const CURVES = { monotone: d3Curve(curveMonotoneX), linear: d3Curve(curveLinear), step: d3Curve(curveStepAfter) };
+
+/** The size of a reference line's or a marker's label. */
+const ANNOTATION_FONT_SIZE = 11;
 
 const lineChartVariants = tv({
   slots: {
@@ -171,12 +184,23 @@ interface LineEntry {
   strokeWidth: number;
   dashArray: string | undefined;
   showMarkers: boolean;
+  curve: LineChartCurve | undefined;
 }
 
 interface AreaEntry {
   key: string;
   fill: string;
   opacity: number;
+}
+
+/** A rule from `ReferenceLine` (across, at a value) or `Marker` (down, at a row). */
+interface Annotation {
+  id: string;
+  axis: 'x' | 'y';
+  at: number;
+  stroke: string;
+  dashArray: string;
+  label: string | undefined;
 }
 
 /** Where the drawing put the plot, in pixels inside the chart's box. */
@@ -212,6 +236,8 @@ interface LineChartContextValue {
   removeLine: (key: string) => void;
   setArea: (entry: AreaEntry) => void;
   removeArea: (key: string) => void;
+  setAnnotation: (entry: Annotation) => void;
+  removeAnnotation: (id: string) => void;
   setSlot: <K extends keyof Slots>(slot: K, value: Slots[K]) => void;
   activeIndex: number;
 }
@@ -264,7 +290,7 @@ export interface LineChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   domainDuration?: number;
   /** Fix the value axis instead of deriving it from the data. */
   yDomain?: [number, number];
-  /** `monotone` never overshoots between points; `linear` joins them straight. */
+  /** `monotone` never overshoots between points; `linear` joins them straight; `step` holds each value until the next, for a balance that moves on the day money does. */
   curve?: LineChartCurve;
   /**
    * The point being read, and `-1`/`null` when there is none. Fires when the
@@ -310,6 +336,7 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
   const [width, setWidth] = useState(0);
   const [lines, setLines] = useState<readonly LineEntry[]>([]);
   const [areas, setAreas] = useState<readonly AreaEntry[]>([]);
+  const [annotations, setAnnotations] = useState<readonly Annotation[]>([]);
   const [slots, setSlots] = useState<Slots>({});
   const [activeIndex, setActiveIndex] = useState(-1);
   const [revision, setRevision] = useState(0);
@@ -344,6 +371,19 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
     (key: string) => setAreas((current) => current.filter((entry) => entry.key !== key)),
     []
   );
+  const setAnnotation = useCallback(
+    (entry: Annotation) =>
+      setAnnotations((current) =>
+        current.some(({ id }) => id === entry.id)
+          ? current.map((existing) => (existing.id === entry.id ? entry : existing))
+          : [...current, entry]
+      ),
+    []
+  );
+  const removeAnnotation = useCallback(
+    (id: string) => setAnnotations((current) => current.filter((entry) => entry.id !== id)),
+    []
+  );
   const setSlot = useCallback<LineChartContextValue['setSlot']>(
     (slot, value) => setSlots((current) => ({ ...current, [slot]: value })),
     []
@@ -360,7 +400,6 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
   const { grid, xAxis, yAxis, tooltip, skeleton } = slots;
 
   const definition = useMemo(() => {
-    const curveFactory = CURVES[curve];
     const span = Math.max(1, data.length - 1);
     const rowsOf = (key: string): LineRow[] =>
       data.map((datum, index) => ({ index, series: key, value: readValue(datum[key]) }));
@@ -371,7 +410,8 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
       lineDomain(
         data,
         [...lines, ...areas].map(({ key }) => key),
-        valueTicks
+        valueTicks,
+        annotations.filter(({ axis }) => axis === 'y').map(({ at }) => at)
       );
 
     const gradientId = (key: string) => `${gradientPrefix}-${areas.findIndex((entry) => entry.key === key)}`;
@@ -386,12 +426,13 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
           key: 'index',
           fill: `url(#${gradientId(key)})`,
           fillOpacity: 1,
-          curve: curveFactory,
+          // Follows its line, so a stepped balance is not filled under a smooth edge.
+          curve: CURVES[lines.find((line) => line.key === key)?.curve ?? curve],
         })
       )
     );
     // One mark per series, because a mark has one stroke width and one dash.
-    const lineMarks = lines.map(({ key, stroke, strokeWidth, dashArray, showMarkers }) =>
+    const lineMarks = lines.map(({ key, stroke, strokeWidth, dashArray, showMarkers, curve: own }) =>
       lineY(rowsOf(key), {
         id: `line-chart-line-${key}`,
         x: 'index',
@@ -403,9 +444,36 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
         points: showMarkers,
         lineCap: 'round',
         lineJoin: 'round',
-        curve: curveFactory,
+        curve: CURVES[own ?? curve],
       })
     );
+    const annotationMarks = annotations.flatMap(({ id, axis, at, stroke, dashArray, label: name }) => {
+      const nearEnd = axis === 'x' && at > span * 0.75;
+      return [
+        decorative(
+          axis === 'y'
+            ? ruleY([at], { id: `line-chart-rule-${id}`, stroke, strokeDasharray: dashArray, strokeWidth: 1 })
+            : ruleX([at], { id: `line-chart-rule-${id}`, stroke, strokeDasharray: dashArray, strokeWidth: 1 })
+        ),
+        ...(name
+          ? [
+              decorative(
+                text([name], {
+                  id: `line-chart-rule-label-${id}`,
+                  x: () => (axis === 'y' ? 0 : at),
+                  y: () => (axis === 'y' ? at : domain[1]),
+                  text: () => name,
+                  fill: stroke,
+                  fontSize: ANNOTATION_FONT_SIZE,
+                  anchor: nearEnd ? 'end' : 'start',
+                  dx: nearEnd ? -6 : axis === 'y' ? 8 : 6,
+                  dy: axis === 'y' ? -8 : 8,
+                })
+              ),
+            ]
+          : []),
+      ];
+    });
     // A dot riding each series at the point being read.
     const dots = lines.map(({ key, stroke }) =>
       whenFocused(
@@ -504,6 +572,7 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
         : [
             ...areaMarks,
             ...lineMarks,
+            ...annotationMarks,
             ...(interactive
               ? [crosshair<number, number>({ y: false, stroke: tooltip.stroke, strokeOpacity: 0.45, strokeWidth: 1 }), ...dots]
               : []),
@@ -543,6 +612,7 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
     xDataKey,
     lines,
     areas,
+    annotations,
     loading,
     curve,
     yDomain?.[0],
@@ -563,8 +633,8 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
   const summary = label ?? `Line chart, ${data.length} ${data.length === 1 ? 'row' : 'rows'}`;
 
   const context = useMemo<LineChartContextValue>(
-    () => ({ data, xDataKey, lines, setLine, removeLine, setArea, removeArea, setSlot, activeIndex }),
-    [data, xDataKey, lines, setLine, removeLine, setArea, removeArea, setSlot, activeIndex]
+    () => ({ data, xDataKey, lines, setLine, removeLine, setArea, removeArea, setAnnotation, removeAnnotation, setSlot, activeIndex }),
+    [data, xDataKey, lines, setLine, removeLine, setArea, removeArea, setAnnotation, removeAnnotation, setSlot, activeIndex]
   );
 
   const spokenRow = (datum: LineChartDatum, index: number) =>
@@ -719,7 +789,7 @@ export interface LineChartGridProps {
   dashArray?: string;
   /** Opacity of the lines. */
   opacity?: number;
-  /** Which of the theme's roles the lines are drawn in. Defaults to the border colour. */
+  /** A role in the theme, or any CSS colour, for the lines. Defaults to the border colour. */
   color?: LineChartColor;
 }
 
@@ -731,7 +801,7 @@ function LineChartGrid({
   color,
 }: LineChartGridProps) {
   const { setSlot } = useChart('LineChart.Grid');
-  const stroke = color ? COLOR_VAR[color] : 'var(--border)';
+  const stroke = color ? paintOf(color) : 'var(--border)';
   useEffect(() => {
     setSlot('grid', { rows, dashArray, opacity, stroke });
     return () => setSlot('grid', undefined);
@@ -743,7 +813,7 @@ LineChartGrid.displayName = 'LineChart.Grid';
 export interface LineChartLineProps {
   /** Column in the data holding this series' values. A missing value leaves a gap. */
   dataKey: string;
-  /** Which of the theme's roles the series is drawn in. */
+  /** A role in the theme, or any CSS colour, for the series. */
   color?: LineChartColor;
   /** The stroke's width. */
   strokeWidth?: number;
@@ -751,6 +821,8 @@ export interface LineChartLineProps {
   dashArray?: string;
   /** A dot at every point. Best kept for short series. */
   showMarkers?: boolean;
+  /** Defaults to the chart's `curve`. `step` beside a smooth series draws a balance against its plan. */
+  curve?: LineChartCurve;
 }
 
 /** One series. */
@@ -760,12 +832,13 @@ function LineChartLine({
   strokeWidth = 2.5,
   dashArray,
   showMarkers = false,
+  curve,
 }: LineChartLineProps) {
   const { setLine, removeLine } = useChart('LineChart.Line');
-  const stroke = COLOR_VAR[color];
+  const stroke = paintOf(color);
   useEffect(() => {
-    setLine({ key: dataKey, stroke, strokeWidth, dashArray, showMarkers });
-  }, [dataKey, stroke, strokeWidth, dashArray, showMarkers, setLine]);
+    setLine({ key: dataKey, stroke, strokeWidth, dashArray, showMarkers, curve });
+  }, [dataKey, stroke, strokeWidth, dashArray, showMarkers, curve, setLine]);
   // Apart from the update above, so a new colour keeps the series' place in the order.
   useEffect(() => () => removeLine(dataKey), [dataKey, removeLine]);
   return null;
@@ -775,7 +848,7 @@ LineChartLine.displayName = 'LineChart.Line';
 export interface LineChartAreaProps {
   /** Column in the data holding this series' values. */
   dataKey: string;
-  /** Which of the theme's roles the fill is drawn in. */
+  /** A role in the theme, or any CSS colour, for the fill. */
   color?: LineChartColor;
   /** Opacity at the line. It fades to nothing at the bottom of the plot. */
   opacity?: number;
@@ -792,7 +865,7 @@ function LineChartArea({
   opacity = 0.18,
 }: LineChartAreaProps) {
   const { setArea, removeArea } = useChart('LineChart.Area');
-  const fill = COLOR_VAR[color];
+  const fill = paintOf(color);
   useEffect(() => {
     setArea({ key: dataKey, fill, opacity });
   }, [dataKey, fill, opacity, setArea]);
@@ -801,10 +874,67 @@ function LineChartArea({
 }
 LineChartArea.displayName = 'LineChart.Area';
 
+/** Registers one rule with the root, keeping its place in the order when its props change. */
+function useAnnotation(component: string, entry: Omit<Annotation, 'id'>) {
+  const { setAnnotation, removeAnnotation } = useChart(component);
+  const id = useId();
+  const { axis, at, stroke, dashArray, label } = entry;
+  useEffect(() => {
+    setAnnotation({ id, axis, at, stroke, dashArray, label });
+  }, [id, axis, at, stroke, dashArray, label, setAnnotation]);
+  useEffect(() => () => removeAnnotation(id), [id, removeAnnotation]);
+}
+
+export interface LineChartReferenceLineProps {
+  /** The value to draw the rule at. It counts toward the value axis. */
+  y: number;
+  /** A role in the theme, or any CSS colour, for the rule and its label. */
+  color?: LineChartColor;
+  /** The stroke's dash pattern. */
+  dashArray?: string;
+  /** Text above the rule's left end. */
+  label?: string;
+}
+
+/** A rule across the plot at a fixed value: a budget, an average, a target. */
+function LineChartReferenceLine({
+  y,
+  color = 'foreground',
+  dashArray = '3 4',
+  label,
+}: LineChartReferenceLineProps) {
+  useAnnotation('LineChart.ReferenceLine', { axis: 'y', at: y, stroke: paintOf(color), dashArray, label });
+  return null;
+}
+LineChartReferenceLine.displayName = 'LineChart.ReferenceLine';
+
+export interface LineChartMarkerProps {
+  /** The row to draw the rule at, counted from `0`. */
+  index: number;
+  /** A role in the theme, or any CSS colour, for the rule and its label. */
+  color?: LineChartColor;
+  /** The stroke's dash pattern. */
+  dashArray?: string;
+  /** Text beside the rule's top. It moves to the left of a rule near the right edge. */
+  label?: string;
+}
+
+/** A rule down the plot at one row: a release, the day something ran out. */
+function LineChartMarker({
+  index,
+  color = 'muted-foreground',
+  dashArray = '2 3',
+  label,
+}: LineChartMarkerProps) {
+  useAnnotation('LineChart.Marker', { axis: 'x', at: index, stroke: paintOf(color), dashArray, label });
+  return null;
+}
+LineChartMarker.displayName = 'LineChart.Marker';
+
 export interface LineChartSkeletonProps {
   /** Milliseconds for one pass of the sweep. */
   duration?: number;
-  /** Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. */
+  /** A role in the theme, or any CSS colour, for the rule under the highlight. Defaults to the muted colour. */
   color?: LineChartColor;
 }
 
@@ -818,7 +948,7 @@ function LineChartSkeleton({
   color,
 }: LineChartSkeletonProps) {
   const { setSlot } = useChart('LineChart.Skeleton');
-  const base = color && COLOR_VAR[color];
+  const base = color && paintOf(color);
   useEffect(() => {
     setSlot('skeleton', { duration, base });
     return () => setSlot('skeleton', undefined);
@@ -901,7 +1031,7 @@ function LineChartTooltip({
 }: LineChartTooltipProps) {
   const { setSlot } = useChart('LineChart.Tooltip');
   const latest = useLatest({ formatValue, formatX, labels });
-  const stroke = COLOR_VAR[color];
+  const stroke = paintOf(color);
   useEffect(() => {
     setSlot('tooltip', { stroke, showLabel, className, latest });
     return () => setSlot('tooltip', undefined);
@@ -1022,6 +1152,8 @@ export const LineChart = Object.assign(LineChartRoot, {
   Grid: LineChartGrid,
   Area: LineChartArea,
   Line: LineChartLine,
+  ReferenceLine: LineChartReferenceLine,
+  Marker: LineChartMarker,
   Skeleton: LineChartSkeleton,
   XAxis: LineChartXAxis,
   YAxis: LineChartYAxis,
@@ -1036,6 +1168,8 @@ export {
   LineChartGrid,
   LineChartArea,
   LineChartLine,
+  LineChartReferenceLine,
+  LineChartMarker,
   LineChartSkeleton,
   LineChartXAxis,
   LineChartYAxis,

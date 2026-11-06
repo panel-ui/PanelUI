@@ -6,12 +6,14 @@
   },
   "intro": "Use it to show how a value moved over time: visits per week, response time per hour. Each row of `data` is a point, and each `LineChart.Line` is a series drawn from one of its keys.\n\nThe grid, the fill, the axes, the legend and the readout are separate parts, so a chart has only the ones you write.\n\nThe value axis fits the data and does not have to reach zero, so a small change stays visible. To compare sizes, use a [bar chart](/docs/web/charts/bar-chart).",
   "usage": "<LineChart data={visits} xDataKey=\"date\">\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"visits\" />\n  <LineChart.Line dataKey=\"visits\" />\n  <LineChart.XAxis />\n  <LineChart.Tooltip />\n</LineChart>",
-  "anatomy": "<LineChart data={…}>\n  <LineChart.Header />\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"…\" />\n  <LineChart.Line dataKey=\"…\" />\n  <LineChart.Skeleton />\n  <LineChart.XAxis />\n  <LineChart.YAxis />\n  <LineChart.Legend />\n  <LineChart.Tooltip />\n</LineChart>",
+  "anatomy": "<LineChart data={…}>\n  <LineChart.Header />\n  <LineChart.Grid />\n  <LineChart.Area dataKey=\"…\" />\n  <LineChart.Line dataKey=\"…\" />\n  <LineChart.ReferenceLine y={…} />\n  <LineChart.Marker index={…} />\n  <LineChart.Skeleton />\n  <LineChart.XAxis />\n  <LineChart.YAxis />\n  <LineChart.Legend />\n  <LineChart.Tooltip />\n</LineChart>",
   "parts": {
     "Header": "The strip above the plot: `title`, `value` and `caption`, with the series key or your own control on the trailing side.",
     "Grid": "Lines across the value axis, in the theme's border colour. `rows` is roughly how many: the axis picks round numbers near it.",
     "Area": "The fill under a series, fading to nothing at the bottom of the plot. It always draws under the lines.",
     "Line": "One series. Declare one per key. A later `Line` draws over an earlier one.",
+    "ReferenceLine": "A rule across the plot at the value `y`: a budget, an average, a target. It counts toward the value axis, and `label` writes text above its left end.",
+    "Marker": "A rule down the plot at the row `index`: a release, the day something ran out. `label` writes text beside its top.",
     "Skeleton": "A flat rule where the series will be, with a highlight moving along it, drawn only while `status` is `loading`.",
     "XAxis": "The x labels, each on its own point. `ticks` is how many, evenly spaced with both ends kept.",
     "YAxis": "Value labels on the grid lines, in round numbers, with room made for them.",
@@ -30,6 +32,24 @@
       "description": "`dashArray` draws a projection, and `showMarkers` puts a dot on every point of a short series. Repeat the last actual value in the forecast's column so the two lines meet. `curve=\"linear\"` joins the points straight.",
       "demo": "projection",
       "height": 340
+    },
+    {
+      "title": "Steps against a plan",
+      "description": "`curve=\"step\"` on one `Line` holds each value until the next, for a balance that moves on the day money does. The other line keeps the chart's curve, so a smooth plan can sit beside it.",
+      "demo": "steps",
+      "height": 380
+    },
+    {
+      "title": "Marking a value and a row",
+      "description": "`ReferenceLine` marks a value, such as an average, and `Marker` marks a row. The axis grows to include a reference line above or below the data.",
+      "demo": "annotated",
+      "height": 360
+    },
+    {
+      "title": "Any colour",
+      "description": "`color` takes a theme role or any CSS colour, for a chart whose colour comes from elsewhere in your app. A row can carry extra fields, and `XAxis.format` and `Tooltip.formatX` get the whole row, so here an estimated value says so.",
+      "demo": "any-colour",
+      "height": 380
     },
     {
       "title": "Missing values",
@@ -56,6 +76,6 @@
       "height": 420
     }
   ],
-  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n### The value axis\n\nThe derived axis spans every `Line` and `Area`, with some headroom, rounded to numbers worth labelling. `yDomain` fixes it, which is the way to hold it steady across charts or to bring zero in.\n\n### Bundle size\n\nThe chart adds about 65 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.\n\n### Colour\n\n`color` on `LineChart.Line` and `LineChart.Area` names a role in the theme. Every series defaults to `chart-1`, so give the others their own.\n\n### Reading a point\n\nWith a `Tooltip`, hovering the plot reads the nearest point. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the points it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the point changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useLineChart` gives the same point.\n\n### Keyboard\n\nWith a `Tooltip`, the plot takes focus. The arrow keys move between points, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it.\n\n### Screen readers\n\nEach row is given as text beside the drawing. `label` names the chart and `labelForDatum` writes a row, for values with a unit. Without them a row is read as its keys and values.\n\n### Reduced motion\n\nWith reduced motion set, the series and the axis appear at their final values, and the skeleton's highlight is not drawn.",
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n### The value axis\n\nThe derived axis spans every `Line` and `Area`, with some headroom, rounded to numbers worth labelling. `yDomain` fixes it, which is the way to hold it steady across charts or to bring zero in.\n\n### Bundle size\n\nThe chart adds about 65 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.\n\n### Colour\n\n`color` on any part takes a role in the theme or any CSS colour. A role follows light and dark on its own, and a CSS colour stays as you give it. Every series defaults to `chart-1`, so give the others their own.\n\n### Reading a point\n\nWith a `Tooltip`, hovering the plot reads the nearest point. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the points it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the point changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useLineChart` gives the same point.\n\n### Keyboard\n\nWith a `Tooltip`, the plot takes focus. The arrow keys move between points, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it.\n\n### Screen readers\n\nEach row is given as text beside the drawing. `label` names the chart and `labelForDatum` writes a row, for values with a unit. Without them a row is read as its keys and values.\n\n### Reduced motion\n\nWith reduced motion set, the series and the axis appear at their final values, and the skeleton's highlight is not drawn.",
   "propsNote": "`LineChart`, `LineChart.Header` and `LineChart.Legend` also take the props of the element they render, and a `className`. `LineChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed."
 }

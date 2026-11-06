@@ -36,6 +36,8 @@ The value axis fits the data and does not have to reach zero, so a small change 
   <LineChart.Grid />
   <LineChart.Area dataKey="…" />
   <LineChart.Line dataKey="…" />
+  <LineChart.ReferenceLine y={…} />
+  <LineChart.Marker index={…} />
   <LineChart.Skeleton />
   <LineChart.XAxis />
   <LineChart.YAxis />
@@ -48,6 +50,8 @@ The value axis fits the data and does not have to reach zero, so a small change 
 - `LineChart.Grid` — Lines across the value axis, in the theme's border colour. `rows` is roughly how many: the axis picks round numbers near it.
 - `LineChart.Area` — The fill under a series, fading to nothing at the bottom of the plot. It always draws under the lines.
 - `LineChart.Line` — One series. Declare one per key. A later `Line` draws over an earlier one.
+- `LineChart.ReferenceLine` — A rule across the plot at the value `y`: a budget, an average, a target. It counts toward the value axis, and `label` writes text above its left end.
+- `LineChart.Marker` — A rule down the plot at the row `index`: a release, the day something ran out. `label` writes text beside its top.
 - `LineChart.Skeleton` — A flat rule where the series will be, with a highlight moving along it, drawn only while `status` is `loading`.
 - `LineChart.XAxis` — The x labels, each on its own point. `ticks` is how many, evenly spaced with both ends kept.
 - `LineChart.YAxis` — Value labels on the grid lines, in round numbers, with room made for them.
@@ -69,7 +73,7 @@ The value axis fits the data and does not have to reach zero, so a small change 
 | `animationDuration` | `number` | `700` | Milliseconds for the reveal. |
 | `domainDuration` | `number` | `500` | Milliseconds for the points and the axis to settle after the data changes. |
 | `yDomain` | `[number, number]` | — | Fix the value axis instead of deriving it from the data. |
-| `curve` | `LineChartCurve` | `'monotone'` | `monotone` never overshoots between points; `linear` joins them straight. |
+| `curve` | `LineChartCurve` | `'monotone'` | `monotone` never overshoots between points; `linear` joins them straight; `step` holds each value until the next, for a balance that moves on the day money does. |
 | `onActiveIndexChange` | `(index: number, datum: LineChartDatum \| null) => void` | — | The point being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
 | `compact` | `boolean` | `false` | Drop the axis padding so the line reaches the edges, for a sparkline. |
 | `label` | `string` | — | What a screen reader calls the chart. |
@@ -82,32 +86,51 @@ The value axis fits the data and does not have to reach zero, so a small change 
 | `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
 | `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. Omit for the default dash, `"none"` for a solid rule. |
 | `opacity` | `number` | `1` | Opacity of the lines. |
-| `color` | `LineChartColor` | — | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
+| `color` | `LineChartColor` | — | A role in the theme, or any CSS colour, for the lines. Defaults to the border colour. |
 
 #### `LineChartLineProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. A missing value leaves a gap. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the series is drawn in. |
+| `color` | `LineChartColor` | `'chart-1'` | A role in the theme, or any CSS colour, for the series. |
 | `strokeWidth` | `number` | `2.5` | The stroke's width. |
 | `dashArray` | `string` | — | The stroke's dash pattern, such as `"6 4"`, for a projection or a secondary series. |
 | `showMarkers` | `boolean` | `false` | A dot at every point. Best kept for short series. |
+| `curve` | `LineChartCurve` | — | Defaults to the chart's `curve`. `step` beside a smooth series draws a balance against its plan. |
 
 #### `LineChartAreaProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the fill is drawn in. |
+| `color` | `LineChartColor` | `'chart-1'` | A role in the theme, or any CSS colour, for the fill. |
 | `opacity` | `number` | `0.18` | Opacity at the line. It fades to nothing at the bottom of the plot. |
+
+#### `LineChartReferenceLineProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `y` | `number` | **required** | The value to draw the rule at. It counts toward the value axis. |
+| `color` | `LineChartColor` | `'foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
+| `dashArray` | `string` | `'3 4'` | The stroke's dash pattern. |
+| `label` | `string` | — | Text above the rule's left end. |
+
+#### `LineChartMarkerProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `index` | `number` | **required** | The row to draw the rule at, counted from `0`. |
+| `color` | `LineChartColor` | `'muted-foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
+| `dashArray` | `string` | `'2 3'` | The stroke's dash pattern. |
+| `label` | `string` | — | Text beside the rule's top. It moves to the left of a rule near the right edge. |
 
 #### `LineChartSkeletonProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
-| `color` | `LineChartColor` | — | Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. |
+| `color` | `LineChartColor` | — | A role in the theme, or any CSS colour, for the rule under the highlight. Defaults to the muted colour. |
 
 #### `LineChartXAxisProps`
 
@@ -152,7 +175,7 @@ The value axis fits the data and does not have to reach zero, so a small change 
 
 ## In a Server Component
 
-`LineChart` is a client component. A Server Component cannot read `LineChart.Header` off the import, so import each part by name: `LineChartHeader`, `LineChartGrid`, `LineChartArea`, `LineChartLine`, `LineChartSkeleton`, `LineChartXAxis`, `LineChartYAxis`, `LineChartTooltip`, `LineChartLegend`.
+`LineChart` is a client component. A Server Component cannot read `LineChart.Header` off the import, so import each part by name: `LineChartHeader`, `LineChartGrid`, `LineChartArea`, `LineChartLine`, `LineChartReferenceLine`, `LineChartMarker`, `LineChartSkeleton`, `LineChartXAxis`, `LineChartYAxis`, `LineChartTooltip`, `LineChartLegend`.
 
 ## Notes
 
@@ -170,7 +193,7 @@ The chart adds about 65 KB of gzipped JavaScript to a page that uses it. A page 
 
 #### Colour
 
-`color` on `LineChart.Line` and `LineChart.Area` names a role in the theme. Every series defaults to `chart-1`, so give the others their own.
+`color` on any part takes a role in the theme or any CSS colour. A role follows light and dark on its own, and a CSS colour stays as you give it. Every series defaults to `chart-1`, so give the others their own.
 
 #### Reading a point
 

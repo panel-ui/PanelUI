@@ -46,3 +46,9 @@ test('a flat series keeps its value on the axis at any size', () => {
     assert.ok(high - low <= Math.max(Math.abs(value), 1));
   }
 });
+
+test('the axis reaches a reference line outside the data', () => {
+  const [low, high] = lineDomain([{ a: 10 }, { a: 20 }], ['a'], 4, [50, -5]);
+  assert.ok(high >= 50);
+  assert.ok(low <= -5);
+});

@@ -437,7 +437,15 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
   // The arrow keys walk rows, not series, so Enter on the plot has no series to mean.
   const pressedByKey = useRef(false);
   const dragRelease = useRef<AbortController | null>(null);
-  useEffect(() => () => dragRelease.current?.abort(), []);
+  // A cleanup that only aborted the listener would leave `dragging` set if the
+  // chart is hidden mid-drag (by Activity, say), and no later drag could release.
+  useEffect(
+    () => () => {
+      dragRelease.current?.abort();
+      dragging.current = false;
+    },
+    []
+  );
 
   /*
    * The chart mounts once its width is known. Mounted at a guess, the first

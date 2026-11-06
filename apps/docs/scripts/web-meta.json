@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "pyramid-chart": [
+    "PyramidChart",
+    "Two series mirrored about a centre line, one row per category, on one shared scale.",
+    "pyramid",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Pyramid Chart"
+    }
   ]
 }

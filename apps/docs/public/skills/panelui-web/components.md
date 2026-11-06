@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Pyramid Chart](components/pyramid-chart.md) — Two series mirrored about a centre line, one row per category, on one shared scale.
 
 ## Feedback and status
 

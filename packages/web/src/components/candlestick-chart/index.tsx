@@ -589,6 +589,11 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
     // A held reading ends with the next press, or with the chart it was read from.
     useEffect(() => () => releaseDrag.current?.(), [revision, status]);
 
+    const clearReading = () => {
+      releaseDrag.current?.();
+      interactionRef.current?.setControlledFocus(null);
+    };
+
     /*
      * The chart follows a mouse on its own but not a finger, which it treats as a
      * tap. A sideways drag reads the periods it crosses, and the last one stays
@@ -602,13 +607,9 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
       if (!interaction || !target) return;
       interaction.setControlledFocus(target);
       if (releaseDrag.current) return;
-      const onPress = () => {
-        releaseDrag.current?.();
-        interactionRef.current?.setControlledFocus(null);
-      };
-      document.addEventListener('pointerdown', onPress, { capture: true });
+      document.addEventListener('pointerdown', clearReading, { capture: true });
       releaseDrag.current = () => {
-        document.removeEventListener('pointerdown', onPress, { capture: true });
+        document.removeEventListener('pointerdown', clearReading, { capture: true });
         releaseDrag.current = null;
       };
     };
@@ -670,10 +671,10 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
                 className={slotClasses.plot()}
                 style={{ aspectRatio }}
                 onKeyDown={(event) => {
-                  if (event.key === 'Escape') interactionRef.current?.setControlledFocus(null);
+                  if (event.key === 'Escape') clearReading();
                 }}
                 onPointerMove={readDrag}
-                onPointerCancel={() => interactionRef.current?.setControlledFocus(null)}
+                onPointerCancel={clearReading}
               >
                 {width > 0 ? (
                   <RendererChart

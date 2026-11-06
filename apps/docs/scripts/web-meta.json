@@ -509,6 +509,127 @@
       "title": "Bar Chart"
     }
   ],
+  "sankey-chart": [
+    "SankeyChart",
+    "Where a quantity came from and where it ended up, as ribbons between stages.",
+    "react sankey chart component flow diagram",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Sankey Chart"
+    }
+  ],
+  "plot": [
+    "Plot",
+    "A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.",
+    "react composable chart component bars line area",
+    {
+      "addedIn": "0.14.0",
+      "alpha": true,
+      "category": "charts",
+      "title": "Plot"
+    }
+  ],
+  "bubble-chart": [
+    "BubbleChart",
+    "One labelled circle per row, on two measured axes, with a third quantity on each circle's area.",
+    "react bubble chart component area",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Bubble Chart"
+    }
+  ],
+  "area-chart": [
+    "AreaChart",
+    "Filled bands over time, stacked or overlaid.",
+    "react area chart component stacked gradient",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Area Chart"
+    }
+  ],
+  "line-chart": [
+    "LineChart",
+    "A series over time, drawn in from the left.",
+    "react line chart component time series sparkline",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Line Chart"
+    }
+  ],
+  "waterfall-chart": [
+    "WaterfallChart",
+    "How a run of changes carried one total to another, with each step floating on the running balance.",
+    "bridge",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Waterfall Chart"
+    }
+  ],
+  "treemap-chart": [
+    "TreemapChart",
+    "A total, cut into the parts it is made of, sized by area.",
+    "react treemap chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Treemap Chart"
+    }
+  ],
+  "scatter-chart": [
+    "ScatterChart",
+    "Two measured quantities against each other, to show how they relate.",
+    "react scatter plot chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Scatter Chart"
+    }
+  ],
+  "live-line-chart": [
+    "LiveLineChart",
+    "A reading that keeps arriving, against a window that keeps moving.",
+    "react live streaming realtime line chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Live Line Chart"
+    }
+  ],
+  "candlestick-chart": [
+    "CandlestickChart",
+    "Open, high, low and close for a period, drawn as one mark.",
+    "react candlestick chart ohlc financial",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Candlestick Chart"
+    }
+  ],
+  "bump-chart": [
+    "BumpChart",
+    "How a set of things ranked against each other over time.",
+    "react bump chart component ranking leaderboard",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Bump Chart"
+    }
+  ],
+  "pyramid-chart": [
+    "PyramidChart",
+    "Two series mirrored about a centre line, one row per category, on one shared scale.",
+    "pyramid",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Pyramid Chart"
+    }
+  ],
   "heatmap-chart": [
     "HeatmapChart",
     "A calendar of bins, shaded by how much happened in each.",

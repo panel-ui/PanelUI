@@ -1,0 +1,50 @@
+{
+  "slug": "bump-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 500
+  },
+  "intro": "Each series is drawn at its rank in every column, with an S-curve wherever it changes places. Use it for league tables, leaderboards, search positions or any ranking tracked over time.\n\nThe rows are evenly spaced whatever the gap between the scores behind them, so the chart shows order and not distance. When how far apart the series are matters, use a line chart of the scores instead.\n\nMore than three or four lines in their own colours are hard to follow through the crossings. Pick one out with `highlight`: it is drawn in its colour and on top, and the rest are drawn in a muted grey.",
+  "usage": "<BumpChart data={league} xDataKey=\"week\" defaultHighlight=\"harbour\">\n  <BumpChart.Grid />\n  <BumpChart.Line dataKey=\"harbour\" label=\"Harbour\" color=\"chart-2\" />\n  <BumpChart.Line dataKey=\"northside\" label=\"Northside\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Tooltip />\n</BumpChart>",
+  "anatomy": "<BumpChart data={…}>\n  <BumpChart.Header />\n  <BumpChart.Grid />\n  <BumpChart.Skeleton />\n  <BumpChart.Line dataKey=\"…\" />\n  <BumpChart.YAxis />\n  <BumpChart.XAxis />\n  <BumpChart.Labels />\n  <BumpChart.Standings />\n  <BumpChart.Tooltip />\n  <BumpChart.Legend />\n</BumpChart>",
+  "parts": {
+    "Header": "The strip above the plot: `title`, `value` and `caption`, with the series key or your own control on the trailing side. Pass the value yourself, from `onHighlightChange` or `onActiveIndexChange` if it should follow the chart.",
+    "Grid": "Dashed guides down every column, and across every rank with `horizontal`.",
+    "Skeleton": "A thin bar on every rank row with a highlight moving across them, drawn only while `status` is `loading`.",
+    "Line": "One series. Declare one per key. With `values=\"score\"`, their order breaks ties.",
+    "YAxis": "The ranks down the side, one on every row, with room made for them. `format` changes `#1` to anything else.",
+    "XAxis": "Column labels along the bottom. `ticks` sets how many are shown, spread across the run.",
+    "Labels": "Each series' name level with its last point, in a column kept on the right. The names move with their lines when the data changes. Pressing one picks that line out, and pressing it again clears it. `pressable={false}` turns that off.",
+    "Standings": "A table of the column being read, or of the last column when none is, with the places gained or lost since the column before. Reading the chart reorders it. It sits beside the plot from 448 pixels wide and under it below that.",
+    "Tooltip": "The readout, and what drives it. It lists every series in the order it stood at that column, and it covers the plot, so the pointer does not have to land on a line.",
+    "Legend": "A swatch and a name per series, over the top corner of the plot. On a chart with a header, use the header's `legend` prop instead."
+  },
+  "examples": [
+    {
+      "title": "A live table",
+      "description": "Add `Standings` for a table that follows the column being read. It drives the reading on its own, so a chart can use it in place of `Tooltip`, whose readout covers part of the lines. It takes the same room as `Labels`, so a chart usually has one or the other.",
+      "demo": "standings",
+      "height": 400
+    },
+    {
+      "title": "Ranking from scores",
+      "description": "Pass the scores themselves with `values=\"score\"` and the chart ranks every column, highest first. Two equal scores keep the order the lines are declared in. `bumpRanks(data, keys, { values: 'score' })` runs the same ranking outside the chart, for a header or a table that has to agree with it.",
+      "demo": "scores",
+      "height": 400
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `BumpChart.Skeleton` and drive `status`. The lines are drawn in from the left when it turns `ready`. It draws a bar per rank, and at least four; `rows` sets another count.",
+      "demo": "loading",
+      "height": 400
+    },
+    {
+      "title": "Changing data",
+      "description": "New data moves every line to its new places over `morphDuration`, and the names move with them. A `ref` on the chart has `replay()`, which draws the lines in again.",
+      "demo": "changing-data",
+      "height": 400
+    }
+  ],
+  "notes": "### The data\n\nOne row per column. Each series is a key holding its rank in that column, with `1` at the top. A missing or non-numeric value leaves a gap in that line, and a line that stops before the last column has its name beside the point where it stopped. The number of rows is the lowest rank any series holds, so a table of five with one series missing keeps five rows.\n\n### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n`YAxis` and `Labels` each keep room beside the plot. `Labels` takes 84 pixels by default; set its `width` for longer or shorter names. A name that does not fit is cut short.\n\n### Bundle size\n\nThe chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root. The drawing library is shared with the other web charts, so a second chart costs far less.\n\n### Colour\n\n`color` on `BumpChart.Line` names a role in the theme. Every series defaults to `chart-1`, so give the others their own, or pick one out with `highlight` and leave the rest.\n\n### Reading a column\n\nWith a `Tooltip` or `Standings`, hovering a column reads it. On a touch screen a sideways drag reads the columns it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the column changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useBumpChart` gives the same column and the picked line.\n\n### Keyboard\n\nWith a `Tooltip` or `Standings`, the plot takes focus. The arrow keys move between columns, Home and End go to the first and last, and Escape clears the reading. The names and the rows of the table are buttons.\n\n### Screen readers\n\nEach column is given as text beside the drawing, listing every series' rank. `label` names the chart and `labelForDatum` writes a column. The names and the rows of the table say whether they are pressed.\n\n### Reduced motion\n\nWith reduced motion set, the lines appear without drawing in, and the skeleton's highlight is not drawn.",
+  "propsNote": "`BumpChart`, `BumpChart.Header`, `BumpChart.Labels`, `BumpChart.Standings` and `BumpChart.Legend` also take the props of the element they render, and a `className`. `BumpChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed."
+}

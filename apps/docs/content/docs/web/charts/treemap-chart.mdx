@@ -1,0 +1,538 @@
+---
+title: Treemap Chart
+description: A total, cut into the parts it is made of, sized by area.
+status: new
+---
+
+<ComponentPreview name="treemap-chart/overview" height={560}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Frame } from '@/components/panelui/frame';
+import { TreemapChart, type TreemapTile } from '@/components/panelui/treemap-chart';
+
+const SPEND = [
+  { label: 'Compute', value: 18_300 },
+  { label: 'Storage', value: 8_200 },
+  { label: 'Network', value: 6_100 },
+  { label: 'Database', value: 5_400 },
+  { label: 'Logs', value: 3_700 },
+  { label: 'CDN', value: 2_900 },
+  { label: 'Backups', value: 2_100 },
+  { label: 'Email', value: 1_500 },
+];
+
+const dollars = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+const total = SPEND.reduce((sum, part) => sum + part.value, 0);
+
+export default function TreemapChartOverview() {
+  const [active, setActive] = useState<TreemapTile | null>(null);
+
+  return (
+    <Frame variant="band" className="w-full max-w-lg">
+      <Frame.Header>
+        <Frame.Title>Infrastructure</Frame.Title>
+        <Frame.Action>November</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <TreemapChart data={SPEND} color="primary" onActiveIndexChange={(_index, tile) => setActive(tile)}>
+          <TreemapChart.Header
+            title={active ? active.label : 'Spend this month'}
+            value={dollars(active ? active.value : total)}
+            caption={active ? `${Math.round(active.share * 100)}% of spend` : 'Compute is 38% of it'}
+          />
+          <TreemapChart.Tiles />
+          <TreemapChart.Labels formatValue={dollars} />
+          <TreemapChart.Tooltip formatValue={dollars} />
+        </TreemapChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show what a total is made of when there are too many parts for a pie chart. Each tile is one part, and its area is its share of the whole.
+
+People compare areas badly, so a treemap is for ranking and grouping at a glance. Exact values belong in the labels, the readout or a `Breakdown` table.
+
+The tiles are sorted largest first and share one colour that fades with rank, because the area already says which is bigger.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/treemap-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/treemap-chart` instead of `@/components/panelui/treemap-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/treemap-chart/`, one file for each below:
+
+<RegistrySource name="treemap-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { TreemapChart } from "@/components/panelui/treemap-chart"
+```
+
+```tsx
+<TreemapChart data={spend}>
+  <TreemapChart.Header title="Spend" value="$48,200" />
+  <TreemapChart.Tiles />
+  <TreemapChart.Labels />
+  <TreemapChart.Tooltip />
+</TreemapChart>
+```
+
+## Composition
+
+```tsx
+<TreemapChart data={…}>
+  <TreemapChart.Header />
+  <TreemapChart.Tiles />
+  <TreemapChart.Skeleton />
+  <TreemapChart.Labels />
+  <TreemapChart.Tooltip />
+  <TreemapChart.Legend />
+  <TreemapChart.Breakdown />
+</TreemapChart>
+```
+
+- **`TreemapChart.Header`** — The strip above the box: `title`, `value` and `caption`, with your own control on the trailing side. Pass the value yourself, from `onActiveIndexChange` if it should follow the chart.
+- **`TreemapChart.Tiles`** — The rectangles. One part rather than one per datum, because a tile's box depends on every tile before it in its row.
+- **`TreemapChart.Skeleton`** — The box undivided, with a highlight moving across it, drawn only while `status` is `loading`.
+- **`TreemapChart.Labels`** — Names and values on the tiles. A tile shows both on two lines, both on one line, its name alone, or nothing, depending on its room.
+- **`TreemapChart.Tooltip`** — The readout for the tile being read. This is how the tiles too small to label are read.
+- **`TreemapChart.Legend`** — A swatch and a name per tile, under the box. Pointing at one reads its tile, and pressing it pins the reading.
+- **`TreemapChart.Breakdown`** — A table of every tile with its exact value and share. Reading a row lights its tile. It sits beside the box from 448 pixels wide and under it below that.
+
+## Examples
+
+### A table beside the tiles
+
+Add `Breakdown` to name every tile, including the ones too small to label. A chart can use it in place of `Tooltip`, whose readout covers part of the tiles.
+
+<ComponentPreview name="treemap-chart/breakdown" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Frame } from '@/components/panelui/frame';
+import { TreemapChart, type TreemapTile } from '@/components/panelui/treemap-chart';
+
+const SPEND = [
+  { label: 'Compute', value: 18_300 },
+  { label: 'Storage', value: 8_200 },
+  { label: 'Network', value: 6_100 },
+  { label: 'Database', value: 5_400 },
+  { label: 'Logs', value: 3_700 },
+  { label: 'CDN', value: 2_900 },
+  { label: 'Backups', value: 2_100 },
+  { label: 'Email', value: 1_500 },
+];
+
+const dollars = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+const total = SPEND.reduce((sum, part) => sum + part.value, 0);
+
+export default function TreemapChartBreakdownDemo() {
+  const [active, setActive] = useState<TreemapTile | null>(null);
+
+  return (
+    <Frame variant="band" className="w-full max-w-xl">
+      <Frame.Header>
+        <Frame.Title>Infrastructure</Frame.Title>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <TreemapChart data={SPEND} color="info" onActiveIndexChange={(_index, tile) => setActive(tile)}>
+          <TreemapChart.Header title={active ? active.label : 'Spend this month'} value={dollars(active ? active.value : total)} />
+          <TreemapChart.Tiles />
+          <TreemapChart.Labels formatValue={dollars} />
+          <TreemapChart.Breakdown formatValue={dollars} />
+        </TreemapChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A long tail
+
+`maxTiles` keeps the largest few and gathers the rest into one tile. Dropping the tail would rescale what is left, so every tile would claim a larger share than it has. `otherLabel` names the gathered tile.
+
+<ComponentPreview name="treemap-chart/long-tail" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { TreemapChart } from '@/components/panelui/treemap-chart';
+
+const SESSIONS = [
+  ['United States', 64_200],
+  ['Germany', 28_400],
+  ['United Kingdom', 22_100],
+  ['France', 16_300],
+  ['Canada', 13_900],
+  ['Japan', 11_200],
+  ['Brazil', 8_400],
+  ['India', 7_900],
+  ['Spain', 5_200],
+  ['Italy', 4_700],
+  ['Mexico', 3_900],
+  ['Poland', 3_100],
+  ['Sweden', 2_500],
+  ['Norway', 1_800],
+  ['Portugal', 1_400],
+  ['Ireland', 1_200],
+].map(([label, value]) => ({ label: String(label), value: Number(value) }));
+
+export default function TreemapChartLongTail() {
+  return (
+    <TreemapChart data={SESSIONS} maxTiles={8} otherLabel="Rest of world" className="max-w-lg">
+      <TreemapChart.Tiles />
+      <TreemapChart.Labels showShare />
+      <TreemapChart.Tooltip />
+      <TreemapChart.Legend limit={6} />
+    </TreemapChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Picking one out
+
+A tile with its own `color` is drawn at full strength while the rest keep the ramp. `activeIndex` drives the reading from outside. It counts tiles as laid out, largest first.
+
+<ComponentPreview name="treemap-chart/picked" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { TreemapChart } from '@/components/panelui/treemap-chart';
+
+const BUDGET = [
+  { label: 'Salaries', value: 42_000 },
+  { label: 'Contractors', value: 18_500, color: 'destructive' },
+  { label: 'Licences', value: 9_400 },
+  { label: 'Travel', value: 6_100 },
+  { label: 'Equipment', value: 4_800 },
+  { label: 'Training', value: 2_600 },
+];
+
+export default function TreemapChartPicked() {
+  const [selected, setSelected] = useState(-1);
+
+  return (
+    <div className="flex w-full max-w-lg flex-col gap-3">
+      <TreemapChart data={BUDGET} color="primary" activeIndex={selected} onActiveIndexChange={setSelected}>
+        <TreemapChart.Tiles dimOpacity={0.2} />
+        <TreemapChart.Labels />
+        <TreemapChart.Legend showShare={false} />
+      </TreemapChart>
+      <Button variant="outline" className="self-start" onClick={() => setSelected(1)}>
+        Show what is over budget
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Wide tiles that lead somewhere
+
+`tileAspect` lays the tiles out wider, which leaves room for a name across a short chart. `color` also takes any CSS colour, such as one a user picked for a category. `onSelect` fires on a click, a tap or Enter, and not on hover.
+
+<ComponentPreview name="treemap-chart/wide-tiles" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { TreemapChart } from '@/components/panelui/treemap-chart';
+
+const CATEGORIES = [
+  { id: 'rent', label: 'Rent', value: 1_450, color: '#6366f1' },
+  { id: 'groceries', label: 'Groceries', value: 620, color: '#10b981' },
+  { id: 'transport', label: 'Transport', value: 310, color: '#f59e0b' },
+  { id: 'dining', label: 'Dining out', value: 280, color: '#ef4444' },
+  { id: 'subscriptions', label: 'Subscriptions', value: 96, color: '#8b5cf6' },
+  { id: 'utilities', label: 'Utilities', value: 84, color: '#06b6d4' },
+];
+
+const dollars = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+export default function TreemapChartWideTiles() {
+  const [opened, setOpened] = useState('Nothing yet');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col gap-3">
+      <TreemapChart data={CATEGORIES} aspectRatio={2.6} tileAspect={2.6} onSelect={(tile) => setOpened(tile.label)}>
+        <TreemapChart.Tiles />
+        <TreemapChart.Labels formatValue={dollars} />
+        <TreemapChart.Tooltip formatValue={dollars} />
+      </TreemapChart>
+      <p className="text-xs text-muted-foreground">Opened: {opened}</p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `TreemapChart.Skeleton` and drive `status`. The box is one plain rectangle until the data arrives, because placeholder tiles would look like a real split.
+
+<ComponentPreview name="treemap-chart/loading" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { TreemapChart, type TreemapChartStatus } from '@/components/panelui/treemap-chart';
+
+const SPEND = [
+  { label: 'Compute', value: 18_300 },
+  { label: 'Storage', value: 8_200 },
+  { label: 'Network', value: 6_100 },
+  { label: 'Database', value: 5_400 },
+  { label: 'Logs', value: 3_700 },
+  { label: 'CDN', value: 2_900 },
+  { label: 'Backups', value: 2_100 },
+  { label: 'Email', value: 1_500 },
+];
+
+const dollars = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+export default function TreemapChartLoading() {
+  const [status, setStatus] = useState<TreemapChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col gap-3">
+      <TreemapChart data={status === 'loading' ? [] : SPEND} status={status} color="primary">
+        <TreemapChart.Skeleton />
+        <TreemapChart.Tiles />
+        <TreemapChart.Labels formatValue={dollars} />
+      </TreemapChart>
+      <Button variant="outline" className="self-start" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+Give each datum an `id` and its tile moves to its new box when `data` changes. Without one, a tile is identified by its row. A `ref` on the chart has `replay()`, which plays the entrance again.
+
+<ComponentPreview name="treemap-chart/changing-data" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { TreemapChart, type TreemapChartHandle } from '@/components/panelui/treemap-chart';
+
+const MONTHS = {
+  October: { Compute: 15_100, Storage: 9_800, Network: 7_300, Database: 3_200, Logs: 2_400 },
+  November: { Compute: 18_300, Storage: 8_200, Network: 6_100, Database: 5_400, Logs: 3_700 },
+};
+
+type Month = keyof typeof MONTHS;
+
+export default function TreemapChartChangingData() {
+  const chart = useRef<TreemapChartHandle>(null);
+  const [month, setMonth] = useState<Month>('November');
+  const data = Object.entries(MONTHS[month]).map(([label, value]) => ({ id: label, label, value }));
+
+  return (
+    <div className="flex w-full max-w-lg flex-col gap-3">
+      <TreemapChart ref={chart} data={data} aspectRatio={2} color="primary">
+        <TreemapChart.Tiles />
+        <TreemapChart.Labels />
+        <TreemapChart.Tooltip />
+      </TreemapChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setMonth(month === 'November' ? 'October' : 'November')}>
+          Show {month === 'November' ? 'October' : 'November'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### TreemapChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly TreemapDatum[]` | — | The parts of the total, in any order. Sorted by the chart unless told not to. |
+| `aspectRatio` | `number` | `1.4` | Width ÷ height of the box the tiles fill. |
+| `gap` | `number` | `3` | Pixels between one tile and the next. |
+| `cornerRadius` | `number` | `6` | Corner radius of a tile, in pixels. |
+| `tileAspect` | `number` | `1` | How much wider than square-ish to lay the tiles out. `1` keeps the shapes closest to square, which are the easiest to compare. Raise it on a short chart, where a tile needs width for a name across it. |
+| `sort` | `boolean` | `true` | Sort the tiles largest first. The layout assumes a descending run, so the shapes suffer without it. Turn it off where the given order is the message. |
+| `maxTiles` | `number` | — | The most tiles to draw, counting the gathered one. Past it, the first tiles are kept, which are the largest unless `sort` is off, and the rest are gathered into one. |
+| `otherLabel` | `string` | `'Other'` | What the gathered tile is called. |
+| `color` | `TreemapChartColor` | `'chart-1'` | The ramp's hue: a theme role or any CSS colour. |
+| `animationDuration` | `number` | `520` | Milliseconds for one tile to arrive. |
+| `staggerDelay` | `number` | `26` | Milliseconds between one tile starting and the next. `0` for all at once. |
+| `status` | `TreemapChartStatus` | `'ready'` | `loading` holds the tiles back. Add a `TreemapChart.Skeleton` to stand in the box meanwhile. |
+| `activeIndex` | `number` | — | The tile being read, indexed as laid out. Leave unset to let the chart track it. |
+| `onActiveIndexChange` | `(index: number, tile: TreemapTile \| null) => void` | — | Fires with the tile being read, and `-1`/`null` when there is none. Fires on hover as well as on a press. |
+| `onSelect` | `(tile: TreemapTile) => void` | — | Fires when a tile is clicked or tapped, or Enter is pressed on it. For a tile that leads somewhere. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForTile` | `(tile: TreemapTile) => string` | — | What a screen reader says for one tile. Defaults to its name, value and share. |
+
+### TreemapChart.Tiles
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dimOpacity` | `number` | `0.35` | Opacity of the tiles that are not being read, once one is. |
+
+### TreemapChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
+
+### TreemapChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `showValue` | `boolean` | `true` | Show each tile's value under its name. |
+| `showShare` | `boolean` | `false` | Show each tile's share of the total beside its value. |
+| `formatValue` | `(value: number, tile: TreemapTile) => string` | — | Format the value. Defaults to a compact number. |
+| `className` | `string` | — |  |
+
+### TreemapChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, tile: TreemapTile) => string` | — | Format the value. Defaults to a compact number. |
+| `className` | `string` | — |  |
+
+### TreemapChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | — | How many tiles to name before stopping. |
+| `showShare` | `boolean` | `true` | Show each tile's share beside its name. |
+
+### TreemapChart.Breakdown
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | — | How many tiles to list before stopping. |
+| `showShare` | `boolean` | `true` | Show each tile's share beside its value. |
+| `formatValue` | `(value: number, tile: TreemapTile) => string` | — | Format the value. Defaults to the full number. |
+
+### TreemapChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the total is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a caveat. |
+
+`TreemapChart`, `TreemapChart.Header`, `TreemapChart.Legend` and `TreemapChart.Breakdown` also take the props of the element they render, and a `className`. `TreemapChart.Labels` puts its `className` on the layer of labels, and `TreemapChart.Tooltip` puts its own on the readout. The other parts take only the props listed.
+
+## Notes
+
+### Sizing
+
+The chart fills its container's width and takes its height from `aspectRatio`, which applies to the box alone, so a header does not shrink it. The tiles draw in the browser after the box has been measured, and the space is reserved until then, so they are not in server-rendered HTML.
+
+### Bundle size
+
+The chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.
+
+### Colour
+
+`color` names a role in the theme or takes any CSS colour, on the chart for the ramp and on a datum for one tile. Labels are white or near-black depending on the tile under them, so they stay readable on any colour in both themes.
+
+### Reading a tile
+
+Hovering a tile reads it and dims the others. A click or a tap pins the reading, a second one on the same tile lets go of it, and Escape clears it. `onActiveIndexChange` fires when the tile changes, so it can drive a readout outside the chart, as the first example does. For a tile that opens something, use `onSelect`, which does not fire on hover.
+
+### Keyboard
+
+The box takes focus. The arrow keys move between tiles, Enter or Space pins the reading and fires `onSelect`, and Escape clears it. The rows of `Legend` and `Breakdown` are buttons.
+
+### Screen readers
+
+Each tile is given as text beside the drawing. `label` names the chart and `labelForTile` writes a tile, for values with a unit.
+
+### Negative values
+
+Negative and non-finite values are treated as zero, because an area cannot be less than none.
+
+### Reduced motion
+
+With reduced motion set, the tiles and labels appear in place, and the skeleton's highlight is not drawn.
+
+### Server Components
+
+`TreemapChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `TreemapChart.Header` off the import, so each part is also exported by name: `TreemapChartHeader` is `TreemapChart.Header`, and so on for the others.
+
+```tsx
+import { TreemapChart, TreemapChartHeader, TreemapChartTiles, TreemapChartSkeleton, TreemapChartLabels, TreemapChartTooltip, TreemapChartLegend, TreemapChartBreakdown } from "@/components/panelui/treemap-chart"
+```

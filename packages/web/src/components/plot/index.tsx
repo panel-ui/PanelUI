@@ -19,7 +19,7 @@
  *
  * The parts and their props are the app library's Plot, so a chart written for one
  * reads the same in the other. What differs is what the web changes: a colour is
- * named by the theme's role, a row is read by hovering, tapping or dragging, a
+ * a theme role or any CSS colour, a row is read by hovering, tapping or dragging, a
  * click pins the reading, and the arrow keys walk the rows.
  *
  * ## One scale, however many marks
@@ -78,6 +78,7 @@ import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
 import {
   bandOf,
+  barEnd,
   columnValues,
   compactNumber,
   domainBetween,
@@ -119,7 +120,7 @@ export type PlotDatum = Record<string, string | number | null | undefined>;
  */
 export type PlotScale = 'point' | 'band';
 
-/** Which of the theme's roles a mark is drawn in. */
+/** A theme role by name, or any CSS colour: a hex value, `var(--brand)`, `color-mix(…)`. */
 export type PlotColor =
   | 'primary'
   | 'info'
@@ -130,9 +131,10 @@ export type PlotColor =
   | 'chart-2'
   | 'chart-3'
   | 'chart-4'
-  | 'chart-5';
+  | 'chart-5'
+  | (string & {});
 
-const COLOR_VAR: Record<PlotColor, string> = {
+const COLOR_VAR: Record<string, string> = {
   primary: 'var(--primary)',
   info: 'var(--info)',
   success: 'var(--success)',
@@ -144,6 +146,11 @@ const COLOR_VAR: Record<PlotColor, string> = {
   'chart-4': 'var(--chart-4)',
   'chart-5': 'var(--chart-5)',
 };
+
+const colorOf = (color: PlotColor) => COLOR_VAR[color] ?? color;
+
+const fadedColor = (color: string, opacity: number) =>
+  `color-mix(in srgb, ${color} ${Math.min(Math.max(opacity, 0), 1) * 100}%, transparent)`;
 
 const PALETTE = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'].map((role) => `var(--${role})`);
 
@@ -219,7 +226,17 @@ interface MarkRow {
 type MarkSpec =
   | { kind: 'line'; dataKey: string; color: string; strokeWidth: number; curve?: PlotCurve; dashArray?: string }
   | { kind: 'area'; dataKey: string; color: string; opacity: number; curve?: PlotCurve }
-  | { kind: 'bars'; dataKey: string; color: string; gap: number; radius: number; opacity: number; baseline: number }
+  | {
+      kind: 'bars';
+      dataKey: string;
+      color: string;
+      gap: number;
+      radius: number;
+      /** One number for the column, or one per row. */
+      opacity: number | readonly number[];
+      baseline: number;
+      minHeight: number;
+    }
   | { kind: 'dots'; dataKey: string; color: string; size: number; ringWidth: number };
 
 type RegisteredMark = MarkSpec & { id: string; order: number };
@@ -479,13 +496,14 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
       setDomain(next);
     };
     // Nothing drawn yet means nothing to move from, so the first real domain lands at once.
-    if (marks.length === 0 || loading || prefersReducedMotion()) {
+    if (marks.length === 0 || loading || domainDuration <= 0 || prefersReducedMotion()) {
       land([lowEnd, highEnd]);
       return;
     }
     const start = performance.now();
     let frame = requestAnimationFrame(function step(now) {
-      const progress = Math.min(1, (now - start) / Math.max(1, domainDuration));
+      // A frame's timestamp can be earlier than `start`, and a negative progress overshoots.
+      const progress = Math.min(1, Math.max(0, (now - start) / domainDuration));
       land(domainBetween(from, [lowEnd, highEnd], easeOut(progress)));
       if (progress < 1) frame = requestAnimationFrame(step);
     });
@@ -510,7 +528,7 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
 
   const definition = useMemo(() => {
     const indexes = Array.from({ length: data.length }, (_unused, index) => index);
-    const curves = { monotone: plotCurve('monotone'), linear: plotCurve('linear') };
+    const curves = { monotone: plotCurve('monotone'), linear: plotCurve('linear'), step: plotCurve('step') };
 
     const drawn = ordered.map((mark) => {
       const rows: MarkRow[] = columnValues(data, mark.dataKey).map((value, index) => ({ index, value }));
@@ -538,14 +556,17 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
           });
         case 'bars': {
           const base = Math.min(Math.max(mark.baseline, lowEnd), highEnd);
+          const { opacity } = mark;
           return barY(present, {
             id: mark.id,
             x: 'index' as const,
             key,
             y1: base,
-            y2: 'value' as const,
-            fill: mark.color,
-            fillOpacity: mark.opacity,
+            y2: (row: MarkRow) => barEnd(row.value ?? base, base, mark.minHeight, plot.height, [lowEnd, highEnd]),
+            // The mark's own opacity is one number, so a per-row one goes into the fill.
+            ...(typeof opacity === 'number'
+              ? { fill: mark.color, fillOpacity: opacity }
+              : { fill: ({ index }: MarkRow) => fadedColor(mark.color, opacity[index] ?? 1) }),
             radius: { end: mark.radius },
             maxThickness: Math.max(1, sliceWidth * (1 - Math.min(Math.max(mark.gap, 0), 0.95))),
           });
@@ -566,7 +587,7 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
       cursor?.showLine && interactive
         ? [
             crosshair<number, number>({
-              x: { stroke: cursor.color ? COLOR_VAR[cursor.color] : 'var(--foreground)', strokeOpacity: 0.45 },
+              x: { stroke: cursor.color ? colorOf(cursor.color) : 'var(--foreground)', strokeOpacity: 0.45 },
               y: false,
               // It follows the pointer, so it does not take the time a change of data does.
               motion: false,
@@ -640,6 +661,7 @@ const PlotRoot = forwardRef<PlotHandle, PlotProps & RenderProp<'div'>>(function 
     pad.right,
     pad.bottom,
     sliceWidth,
+    plot.height,
     loading,
     interactive,
     cursor,
@@ -905,14 +927,17 @@ function useMark(spec: MarkSpec) {
 export interface PlotSeriesProps {
   /** Column of `data` this mark draws. */
   dataKey: string;
-  /** Which of the theme's roles the mark is drawn in. */
+  /** A theme role by name, or any CSS colour. */
   color?: PlotColor;
 }
 
 export interface PlotLineProps extends PlotSeriesProps {
   /** Thickness of the stroke, in pixels. */
   strokeWidth?: number;
-  /** `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. */
+  /**
+   * `monotone` never overshoots between points, `linear` joins them straight, and
+   * `step` holds each value until the next point. The root's by default.
+   */
   curve?: PlotCurve;
   /** Dash pattern, such as `"6 4"`, for a forecast or a series that is not real yet. */
   dashArray?: string;
@@ -920,7 +945,7 @@ export interface PlotLineProps extends PlotSeriesProps {
 
 /** A series as a stroked line. A gap in the column breaks the line. */
 function PlotLine({ dataKey, color = 'chart-1', strokeWidth = 2.5, curve, dashArray }: PlotLineProps) {
-  useMark({ kind: 'line', dataKey, color: COLOR_VAR[color], strokeWidth, curve, dashArray });
+  useMark({ kind: 'line', dataKey, color: colorOf(color), strokeWidth, curve, dashArray });
   return null;
 }
 PlotLine.displayName = 'Plot.Line';
@@ -928,13 +953,16 @@ PlotLine.displayName = 'Plot.Line';
 export interface PlotAreaProps extends PlotSeriesProps {
   /** Opacity of the fill. */
   opacity?: number;
-  /** `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. */
+  /**
+   * `monotone` never overshoots between points, `linear` joins them straight, and
+   * `step` holds each value until the next point. The root's by default.
+   */
   curve?: PlotCurve;
 }
 
 /** A series as a fill down to the bottom of the plot. Write it before the line it belongs under. */
 function PlotArea({ dataKey, color = 'chart-1', opacity = 0.18, curve }: PlotAreaProps) {
-  useMark({ kind: 'area', dataKey, color: COLOR_VAR[color], opacity, curve });
+  useMark({ kind: 'area', dataKey, color: colorOf(color), opacity, curve });
   return null;
 }
 PlotArea.displayName = 'Plot.Area';
@@ -944,8 +972,16 @@ export interface PlotBarsProps extends PlotSeriesProps {
   gap?: number;
   /** Rounds the end the bar grows towards, in pixels. */
   radius?: number;
-  /** Opacity of the fill. */
-  opacity?: number;
+  /**
+   * Opacity of the fill. Pass a function to set it per row, to fade rows that have
+   * not happened yet or dim the ones not being read.
+   */
+  opacity?: number | ((datum: PlotDatum, index: number) => number);
+  /**
+   * The shortest a bar may be drawn, in pixels, so a small value beside a large one
+   * still shows. A value on the baseline draws no bar. The reading keeps the real value.
+   */
+  minHeight?: number;
   /**
    * The value the columns grow from, for a chart of movement against a reference.
    * It is clamped into the axis, so a baseline the domain does not cover falls back
@@ -955,8 +991,19 @@ export interface PlotBarsProps extends PlotSeriesProps {
 }
 
 /** A series as columns. Its presence puts the whole plot on a band scale. */
-function PlotBars({ dataKey, color = 'chart-1', gap = 0.35, radius = 4, opacity = 1, baseline = 0 }: PlotBarsProps) {
-  useMark({ kind: 'bars', dataKey, color: COLOR_VAR[color], gap, radius, opacity, baseline });
+function PlotBars({
+  dataKey,
+  color = 'chart-1',
+  gap = 0.35,
+  radius = 4,
+  opacity = 1,
+  minHeight = 0,
+  baseline = 0,
+}: PlotBarsProps) {
+  const { data } = useChart('Plot.Bars');
+  // Resolved here, so an inline function re-registers the mark only when a row's opacity moves.
+  const resolved = typeof opacity === 'number' ? opacity : data.map(opacity);
+  useMark({ kind: 'bars', dataKey, color: colorOf(color), gap, radius, opacity: resolved, baseline, minHeight });
   return null;
 }
 PlotBars.displayName = 'Plot.Bars';
@@ -970,7 +1017,7 @@ export interface PlotDotsProps extends PlotSeriesProps {
 
 /** A dot per row, for a series short enough that its points are worth marking. */
 function PlotDots({ dataKey, color = 'chart-1', size = 3.5, ringWidth = 2 }: PlotDotsProps) {
-  useMark({ kind: 'dots', dataKey, color: COLOR_VAR[color], size, ringWidth });
+  useMark({ kind: 'dots', dataKey, color: colorOf(color), size, ringWidth });
   return null;
 }
 PlotDots.displayName = 'Plot.Dots';
@@ -982,7 +1029,7 @@ PlotDots.displayName = 'Plot.Dots';
 export interface PlotGridProps {
   /** Horizontal rules across the plot. Yields `rows + 1` lines. */
   rows?: number;
-  /** The theme role of the lines. The border colour by default. */
+  /** A theme role by name, or any CSS colour. The border colour by default. */
   color?: PlotColor;
   /** Dash pattern, such as `"4 6"`. An empty string draws a solid rule. */
   dashArray?: string;
@@ -999,7 +1046,7 @@ function PlotGrid({ rows = 4, color, dashArray = '4 6', opacity = 1 }: PlotGridP
     <g
       data-slot="plot-grid"
       opacity={opacity}
-      stroke={color ? COLOR_VAR[color] : 'var(--border)'}
+      stroke={color ? colorOf(color) : 'var(--border)'}
       strokeDasharray={dashArray || undefined}
     >
       {Array.from({ length: intervals + 1 }, (_unused, index) => {
@@ -1054,7 +1101,7 @@ export interface PlotRuleProps {
   x?: number;
   /** A name for what the line means. */
   label?: string;
-  /** The theme role of the line and its caption. The foreground colour by default. */
+  /** A theme role by name, or any CSS colour, for the line and its caption. The foreground colour by default. */
   color?: PlotColor;
   /** Thickness in pixels. */
   strokeWidth?: number;
@@ -1090,7 +1137,7 @@ function PlotRule({
   const { plot, domainMin, domainMax, status, data, xScale, hosts } = useChart('Plot.Rule');
   if (status === 'loading' || !hosts.overlay || plot.width <= 0) return null;
 
-  const stroke = color ? COLOR_VAR[color] : 'var(--foreground)';
+  const stroke = color ? colorOf(color) : 'var(--foreground)';
   const slots = plotVariants();
   const border = `${strokeWidth}px ${dashed ? 'dashed' : 'solid'} ${stroke}`;
 
@@ -1231,7 +1278,7 @@ function PlotYAxis({ ticks = 4, format, className }: PlotYAxisProps) {
 PlotYAxis.displayName = 'Plot.YAxis';
 
 export interface PlotCursorProps {
-  /** The theme role of the line. The foreground colour by default. */
+  /** A theme role by name, or any CSS colour. The foreground colour by default. */
   color?: PlotColor;
   /** Hide the vertical line and keep only the reading. */
   showLine?: boolean;

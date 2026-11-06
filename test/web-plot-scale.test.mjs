@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import {
   areaPath,
   bandOf,
+  barEnd,
   domainBetween,
   labelledRows,
   linePath,
@@ -88,6 +89,23 @@ test('a monotone curve does not overshoot its points', () => {
 test('an area closes back along its floor, right to left', () => {
   const path = plotCurve('linear').area([[0, 10], [10, 20]], [[0, 50], [10, 50]]);
   assert.equal(path, 'M0,10 L10,20 L10,50 L0,50 Z');
+});
+
+test('a step holds each value until the next point, then moves straight to it', () => {
+  assert.equal(plotCurve('step').line([[0, 10], [10, 20], [20, 5]]), 'M0,10 L10,10 L10,20 L20,20 L20,5');
+  assert.equal(linePath([1, null, 3], box, 0, 4, 'step').match(/M/g)?.length, 2);
+});
+
+test('a bar is at least its minimum height, on the side its value is on', () => {
+  const domain = [0, 1000];
+  assert.equal(barEnd(1, 0, 4, 100, domain), 40);
+  assert.equal(barEnd(-1, 0, 4, 100, domain), -40);
+  assert.equal(barEnd(500, 0, 4, 100, domain), 500);
+});
+
+test('a value on the baseline draws no bar, whatever the minimum', () => {
+  assert.equal(barEnd(0, 0, 4, 100, [0, 1000]), 0);
+  assert.equal(barEnd(5, 5, 4, 100, [0, 1000]), 5);
 });
 
 test('x labels land on whole rows, first and last included', () => {

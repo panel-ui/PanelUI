@@ -53,8 +53,8 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 - `Plot.Legend` — A swatch and a name for every mark. `labels` maps a `dataKey` to a name. Without it the key itself is shown.
 - `Plot.Grid` — Horizontal rules across the plot. They are outside the reveal, so the frame is there when the marks are uncovered.
 - `Plot.Area` — A series as a fill down to the bottom of the plot. Write it before the line that belongs over it.
-- `Plot.Bars` — A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis.
-- `Plot.Line` — A series as a stroked path. `curve="monotone"` never overshoots between points, and `linear` joins them straight. A gap in the column breaks the line.
+- `Plot.Bars` — A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis. `opacity` takes a function to set it per row, and `minHeight` keeps a small value visible.
+- `Plot.Line` — A series as a stroked path. `curve="monotone"` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. A gap in the column breaks the line.
 - `Plot.Dots` — A dot per row, ringed in the page colour so it reads on top of the line.
 - `Plot.Rule` — A reference line at a value, or down the plot at a row when you pass `x`, with a caption. It hides itself when the value falls outside the axis.
 - `Plot.Layer` — Marks of your own, in SVG, in the plot's pixels. They reach the geometry through `usePlot()`.
@@ -92,14 +92,14 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column of `data` this mark draws. |
-| `color` | `PlotColor` | — | Which of the theme's roles the mark is drawn in. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. |
 
 #### `PlotLineProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `strokeWidth` | `number` | `1` | Thickness of the stroke, in pixels. |
-| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. |
+| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 | `dashArray` | `string` | — | Dash pattern, such as `"6 4"`, for a forecast or a series that is not real yet. |
 
 #### `PlotAreaProps`
@@ -107,16 +107,17 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `opacity` | `number` | `1` | Opacity of the fill. |
-| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. |
+| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 
 #### `PlotBarsProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `gap` | `number` | — | Fraction of each slice left empty, `0` to `1`. |
-| `radius` | `number` | — | Rounds the end the bar grows towards, in pixels. |
-| `opacity` | `number` | `1` | Opacity of the fill. |
-| `baseline` | `number` | — | The value the columns grow from, for a chart of movement against a reference. It is clamped into the axis, so a baseline the domain does not cover falls back to the nearer edge. |
+| `gap` | `number` | `0.35` | Fraction of each slice left empty, `0` to `1`. |
+| `radius` | `number` | `4` | Rounds the end the bar grows towards, in pixels. |
+| `opacity` | `number \| ((datum: PlotDatum, index: number) => number)` | `1` | Opacity of the fill. Pass a function to set it per row, to fade rows that have not happened yet or dim the ones not being read. |
+| `minHeight` | `number` | `0` | The shortest a bar may be drawn, in pixels, so a small value beside a large one still shows. A value on the baseline draws no bar. The reading keeps the real value. |
+| `baseline` | `number` | `0` | The value the columns grow from, for a chart of movement against a reference. It is clamped into the axis, so a baseline the domain does not cover falls back to the nearer edge. |
 
 #### `PlotDotsProps`
 
@@ -130,7 +131,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `rows` | `number` | — | Horizontal rules across the plot. Yields `rows + 1` lines. |
-| `color` | `PlotColor` | — | The theme role of the lines. The border colour by default. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The border colour by default. |
 | `dashArray` | `string` | — | Dash pattern, such as `"4 6"`. An empty string draws a solid rule. |
 | `opacity` | `number` | `1` | Opacity of the lines. |
 
@@ -148,7 +149,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 | `y` | `number` | — | Where to draw it, in the data's own units. Wins if `x` is given too. |
 | `x` | `number` | — | A row to draw a vertical rule at, by index: the day a change landed, the release being read against. |
 | `label` | `string` | — | A name for what the line means. |
-| `color` | `PlotColor` | — | The theme role of the line and its caption. The foreground colour by default. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour, for the line and its caption. The foreground colour by default. |
 | `strokeWidth` | `number` | `1` | Thickness in pixels. |
 | `dashed` | `boolean` | `false` | Break the line into dashes, so it reads as an annotation rather than a series. |
 | `opacity` | `number` | `1` | Fades the line and its caption together. |
@@ -176,7 +177,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `color` | `PlotColor` | — | The theme role of the line. The foreground colour by default. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The foreground colour by default. |
 | `showLine` | `boolean` | — | Hide the vertical line and keep only the reading. |
 
 #### `PlotTooltipProps`

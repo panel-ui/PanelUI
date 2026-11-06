@@ -17,8 +17,11 @@ export interface PlotPoint {
   y: number;
 }
 
-/** How a series is joined between its points. */
-export type PlotCurve = 'monotone' | 'linear';
+/**
+ * How a series is joined between its points. `step` holds each value until the next
+ * point and then moves straight to it, for a balance that only changes on the day it does.
+ */
+export type PlotCurve = 'monotone' | 'linear' | 'step';
 
 /** One end of the y-domain: a number to pin it at, or `auto` to derive it. */
 export type PlotBound = number | 'auto';
@@ -237,6 +240,11 @@ function tangents(xs: readonly number[], ys: readonly number[]): number[] {
 /** One unbroken run of points as a path, curved or straight. */
 export function segment(points: readonly PlotPoint[], curve: PlotCurve): string {
   if (!points.length) return '';
+  if (curve === 'step') {
+    return points
+      .map(({ x, y }, index) => (index === 0 ? `M${x},${y}` : `L${x},${points[index - 1]!.y} L${x},${y}`))
+      .join(' ');
+  }
   if (points.length < 3 || curve === 'linear') {
     return points.map(({ x, y }, index) => `${index === 0 ? 'M' : 'L'}${x},${y}`).join(' ');
   }
@@ -322,6 +330,22 @@ export function barPath(
   return towards === 'up'
     ? `M${x},${bottom}L${x},${y + r}Q${x},${y} ${x + r},${y}L${right - r},${y}Q${right},${y} ${right},${y + r}L${right},${bottom}Z`
     : `M${x},${y}L${x},${bottom - r}Q${x},${bottom} ${x + r},${bottom}L${right - r},${bottom}Q${right},${bottom} ${right},${bottom - r}L${right},${y}Z`;
+}
+
+/**
+ * Where a bar ends once it is at least `minHeight` pixels long. A value on the
+ * baseline stays there, because no bar is the honest drawing of nothing.
+ */
+export function barEnd(
+  value: number,
+  baseline: number,
+  minHeight: number,
+  plotHeight: number,
+  [min, max]: readonly [number, number]
+): number {
+  if (value === baseline || plotHeight <= 0) return value;
+  const least = (minHeight / plotHeight) * (max - min);
+  return Math.abs(value - baseline) >= least ? value : baseline + Math.sign(value - baseline) * least;
 }
 
 /** Which rows get an x label: `ticks` of them, as evenly spread as whole rows allow. */

@@ -12,8 +12,8 @@
     "Legend": "A swatch and a name for every mark. `labels` maps a `dataKey` to a name. Without it the key itself is shown.",
     "Grid": "Horizontal rules across the plot. They are outside the reveal, so the frame is there when the marks are uncovered.",
     "Area": "A series as a fill down to the bottom of the plot. Write it before the line that belongs over it.",
-    "Bars": "A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis.",
-    "Line": "A series as a stroked path. `curve=\"monotone\"` never overshoots between points, and `linear` joins them straight. A gap in the column breaks the line.",
+    "Bars": "A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis. `opacity` takes a function to set it per row, and `minHeight` keeps a small value visible.",
+    "Line": "A series as a stroked path. `curve=\"monotone\"` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. A gap in the column breaks the line.",
     "Dots": "A dot per row, ringed in the page colour so it reads on top of the line.",
     "Rule": "A reference line at a value, or down the plot at a row when you pass `x`, with a caption. It hides itself when the value falls outside the axis.",
     "Layer": "Marks of your own, in SVG, in the plot's pixels. They reach the geometry through `usePlot()`.",
@@ -53,6 +53,18 @@
       "description": "`x` draws a rule down the plot at a row, here the month a change shipped. `baseline` sets where the columns grow from, for a chart of movement against a reference.",
       "demo": "marking",
       "height": 480
+    },
+    {
+      "title": "Selecting a bar, with the future faded",
+      "description": "`opacity` takes a function, so a row can be dimmed while another is read and a row that has not happened yet can stay faded. `minHeight` keeps a small month visible next to a large one, and the reading still gives its real value. A dashed `Plot.Rule` marks the average.\n\nThe cursor still stops on a future row, so this demo ignores those rows in `onActiveIndexChange`.",
+      "demo": "selected-bars",
+      "height": 480
+    },
+    {
+      "title": "A budget burndown",
+      "description": "This one is composed from existing parts. `curve=\"step\"` draws the balance, because money leaves on a day and not between days. The ideal and the projection are dashed lines from their own columns, and a column with a value on one row puts a dot on the last point.\n\nThe fills around zero and the hatch over the deficit are SVG in `Plot.Layer`, drawn with `linePath`, `xOf` and `yOf`. The same path in `var(--destructive)`, clipped below zero, turns the balance red once it is overdrawn.",
+      "demo": "budget-burndown",
+      "height": 520
     },
     {
       "title": "Loading and changing data",

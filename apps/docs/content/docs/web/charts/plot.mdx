@@ -137,8 +137,8 @@ import { Plot } from "@/components/panelui/plot"
 - **`Plot.Legend`** — A swatch and a name for every mark. `labels` maps a `dataKey` to a name. Without it the key itself is shown.
 - **`Plot.Grid`** — Horizontal rules across the plot. They are outside the reveal, so the frame is there when the marks are uncovered.
 - **`Plot.Area`** — A series as a fill down to the bottom of the plot. Write it before the line that belongs over it.
-- **`Plot.Bars`** — A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis.
-- **`Plot.Line`** — A series as a stroked path. `curve="monotone"` never overshoots between points, and `linear` joins them straight. A gap in the column breaks the line.
+- **`Plot.Bars`** — A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis. `opacity` takes a function to set it per row, and `minHeight` keeps a small value visible.
+- **`Plot.Line`** — A series as a stroked path. `curve="monotone"` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. A gap in the column breaks the line.
 - **`Plot.Dots`** — A dot per row, ringed in the page colour so it reads on top of the line.
 - **`Plot.Rule`** — A reference line at a value, or down the plot at a row when you pass `x`, with a caption. It hides itself when the value falls outside the axis.
 - **`Plot.Layer`** — Marks of your own, in SVG, in the plot's pixels. They reach the geometry through `usePlot()`.
@@ -380,6 +380,191 @@ export default function PlotMarking() {
 
 </ComponentPreview>
 
+### Selecting a bar, with the future faded
+
+`opacity` takes a function, so a row can be dimmed while another is read and a row that has not happened yet can stay faded. `minHeight` keeps a small month visible next to a large one, and the reading still gives its real value. A dashed `Plot.Rule` marks the average.
+
+The cursor still stops on a future row, so this demo ignores those rows in `onActiveIndexChange`.
+
+<ComponentPreview name="plot/selected-bars" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Plot } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', spent: 2140 },
+  { month: 'Feb', spent: 1880 },
+  { month: 'Mar', spent: 12 },
+  { month: 'Apr', spent: 2430 },
+  { month: 'May', spent: 1960 },
+  { month: 'Jun', spent: 2710 },
+  { month: 'Jul', spent: 2250 },
+  { month: 'Aug', spent: 1500 },
+  { month: 'Sep', spent: 1500 },
+  { month: 'Oct', spent: 1500 },
+];
+
+const LAST_LIVE = 7;
+const LIVE = MONTHS.slice(0, LAST_LIVE + 1);
+const AVERAGE = LIVE.reduce((sum, { spent }) => sum + spent, 0) / LIVE.length;
+
+const money = (value: number) => `$${Math.round(value).toLocaleString('en-US')}`;
+
+export default function PlotSelectedBars() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const shown = selected === null ? null : MONTHS[selected];
+
+  return (
+    <Plot
+      data={MONTHS}
+      xDataKey="month"
+      aspectRatio={1.7}
+      className="max-w-lg"
+      nice
+      onActiveIndexChange={(index) => setSelected(index < 0 || index > LAST_LIVE ? null : index)}
+    >
+      <Plot.Header title={shown ? shown.month : 'Average'} value={money(shown ? shown.spent : AVERAGE)} />
+      <Plot.Grid rows={3} />
+      <Plot.Bars
+        dataKey="spent"
+        color="var(--foreground)"
+        minHeight={4}
+        opacity={(_row, index) => (index > LAST_LIVE ? 0.3 : selected !== null && selected !== index ? 0.4 : 1)}
+      />
+      <Plot.Rule y={AVERAGE} color="var(--muted-foreground)" dashed />
+      <Plot.YAxis ticks={3} format={(value) => `$${value / 1000}k`} />
+      <Plot.XAxis ticks={5} />
+      <Plot.Cursor showLine={false} />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A budget burndown
+
+This one is composed from existing parts. `curve="step"` draws the balance, because money leaves on a day and not between days. The ideal and the projection are dashed lines from their own columns, and a column with a value on one row puts a dot on the last point.
+
+The fills around zero and the hatch over the deficit are SVG in `Plot.Layer`, drawn with `linePath`, `xOf` and `yOf`. The same path in `var(--destructive)`, clipped below zero, turns the balance red once it is overdrawn.
+
+<ComponentPreview name="plot/budget-burndown" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useId, useState } from 'react';
+import { linePath, Plot, usePlot, xOf, yOf } from '@/components/panelui/plot';
+
+const LIMIT = 900;
+const TOTAL_DAYS = 30;
+const SPENT = [
+  0, 40, 40, 115, 160, 160, 245, 300, 300, 380, 455, 500, 590, 590, 690, 770, 860, 945, 945, 1040,
+];
+
+const TODAY = SPENT.length - 1;
+const balanceOn = (day: number) => LIMIT - (SPENT[day] ?? 0);
+const PROJECTED = LIMIT - ((SPENT[TODAY] ?? 0) / (TODAY + 1)) * TOTAL_DAYS;
+/** The first day the balance is below zero. */
+const OVERDRAWN = SPENT.findIndex((spent) => spent > LIMIT);
+
+const DAYS = Array.from({ length: TOTAL_DAYS }, (_unused, day) => ({
+  day: `Day ${day + 1}`,
+  balance: day <= TODAY ? balanceOn(day) : null,
+  ideal: LIMIT - (LIMIT * day) / (TOTAL_DAYS - 1),
+  projection:
+    day < TODAY ? null : balanceOn(TODAY) + ((PROJECTED - balanceOn(TODAY)) * (day - TODAY)) / (TOTAL_DAYS - 1 - TODAY),
+  today: day === TODAY ? balanceOn(TODAY) : null,
+}));
+
+const BALANCES = DAYS.map(({ balance }) => balance);
+const money = (value: number) => `${value < 0 ? '-' : ''}$${Math.abs(Math.round(value))}`;
+
+/** The fill from the balance to zero, and the hatch over what is overdrawn. Under the marks. */
+function ZeroFills() {
+  const { plot, domainMin, domainMax } = usePlot();
+  const hatch = useId();
+  const x = (day: number) => xOf(day, TOTAL_DAYS, plot);
+  const y = (value: number) => yOf(value, plot, domainMin, domainMax);
+  const stepped = linePath(BALANCES, plot, domainMin, domainMax, 'step');
+  return (
+    <>
+      <defs>
+        <pattern id={hatch} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line y2={6} stroke="var(--destructive)" strokeOpacity={0.55} strokeWidth={1.6} />
+        </pattern>
+      </defs>
+      <path d={`${stepped} L${x(TODAY)},${y(0)} L${x(0)},${y(0)} Z`} fill="var(--foreground)" fillOpacity={0.07} />
+      <path
+        d={`M${x(OVERDRAWN)},${y(0)} L${x(OVERDRAWN)},${y(balanceOn(TODAY))} L${x(TODAY)},${y(balanceOn(TODAY))} L${x(TOTAL_DAYS - 1)},${y(PROJECTED)} L${x(TOTAL_DAYS - 1)},${y(0)} Z`}
+        fill={`url(#${hatch})`}
+      />
+    </>
+  );
+}
+
+/** The balance again in red, clipped to below zero. Over the marks. */
+function BelowZero() {
+  const { plot, domainMin, domainMax } = usePlot();
+  const clip = useId();
+  const zero = yOf(0, plot, domainMin, domainMax);
+  return (
+    <>
+      <clipPath id={clip}>
+        <rect x={plot.left} y={zero} width={plot.width} height={plot.top + plot.height - zero} />
+      </clipPath>
+      <path
+        d={linePath(BALANCES, plot, domainMin, domainMax, 'step')}
+        clipPath={`url(#${clip})`}
+        fill="none"
+        stroke="var(--destructive)"
+        strokeWidth={2.2}
+      />
+    </>
+  );
+}
+
+export default function PlotBudgetBurndown() {
+  const [read, setRead] = useState<number | null>(null);
+  // The days to come have no balance to report, so the reading stays on today.
+  const day = read === null || read > TODAY ? TODAY : read;
+
+  return (
+    <Plot
+      data={DAYS}
+      xDataKey="day"
+      aspectRatio={1.7}
+      className="max-w-lg"
+      yDomain={[-1000, 1000]}
+      label="Budget burndown"
+      onActiveIndexChange={(index) => setRead(index < 0 ? null : index)}
+    >
+      <Plot.Header title={`Day ${day + 1} of ${TOTAL_DAYS}`} value={money(balanceOn(day))} caption={`Limit ${money(LIMIT)}`} />
+      <Plot.Grid rows={2} />
+      <Plot.Layer>
+        <ZeroFills />
+      </Plot.Layer>
+      <Plot.Line dataKey="ideal" color="var(--muted-foreground)" strokeWidth={1} curve="linear" dashArray="3 4" />
+      <Plot.Line dataKey="balance" color="var(--foreground)" strokeWidth={2.2} curve="step" />
+      <Plot.Line dataKey="projection" color="destructive" strokeWidth={1.6} curve="linear" dashArray="6 4" />
+      <Plot.Dots dataKey="today" color="destructive" />
+      <Plot.Layer>
+        <BelowZero />
+      </Plot.Layer>
+      <Plot.Rule y={0} color="var(--foreground)" />
+      <Plot.YAxis ticks={2} format={(value) => `${value < 0 ? '-' : ''}$${Math.abs(value) / 1000}k`} />
+      <Plot.XAxis format={(_row, index) => String(index + 1)} ticks={5} />
+      <Plot.Cursor />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
 ### Loading and changing data
 
 With `status="loading"` the grid stays and nothing else is drawn. Turning `ready` uncovers the marks from the left, and going back to `loading` arms that again.
@@ -471,14 +656,14 @@ export default function PlotChangingData() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | — | Column of `data` this mark draws. |
-| `color` | `PlotColor` | — | Which of the theme's roles the mark is drawn in. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. |
 
 ### Plot.Line
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `strokeWidth` | `number` | `1` | Thickness of the stroke, in pixels. |
-| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. |
+| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 | `dashArray` | `string` | — | Dash pattern, such as `"6 4"`, for a forecast or a series that is not real yet. |
 
 ### Plot.Area
@@ -486,16 +671,17 @@ export default function PlotChangingData() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `opacity` | `number` | `1` | Opacity of the fill. |
-| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, and `linear` joins them straight. The root's by default. |
+| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 
 ### Plot.Bars
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `gap` | `number` | — | Fraction of each slice left empty, `0` to `1`. |
-| `radius` | `number` | — | Rounds the end the bar grows towards, in pixels. |
-| `opacity` | `number` | `1` | Opacity of the fill. |
-| `baseline` | `number` | — | The value the columns grow from, for a chart of movement against a reference. It is clamped into the axis, so a baseline the domain does not cover falls back to the nearer edge. |
+| `gap` | `number` | `0.35` | Fraction of each slice left empty, `0` to `1`. |
+| `radius` | `number` | `4` | Rounds the end the bar grows towards, in pixels. |
+| `opacity` | `number \| ((datum: PlotDatum, index: number) => number)` | `1` | Opacity of the fill. Pass a function to set it per row, to fade rows that have not happened yet or dim the ones not being read. |
+| `minHeight` | `number` | `0` | The shortest a bar may be drawn, in pixels, so a small value beside a large one still shows. A value on the baseline draws no bar. The reading keeps the real value. |
+| `baseline` | `number` | `0` | The value the columns grow from, for a chart of movement against a reference. It is clamped into the axis, so a baseline the domain does not cover falls back to the nearer edge. |
 
 ### Plot.Dots
 
@@ -509,7 +695,7 @@ export default function PlotChangingData() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `rows` | `number` | — | Horizontal rules across the plot. Yields `rows + 1` lines. |
-| `color` | `PlotColor` | — | The theme role of the lines. The border colour by default. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The border colour by default. |
 | `dashArray` | `string` | — | Dash pattern, such as `"4 6"`. An empty string draws a solid rule. |
 | `opacity` | `number` | `1` | Opacity of the lines. |
 
@@ -527,7 +713,7 @@ export default function PlotChangingData() {
 | `y` | `number` | — | Where to draw it, in the data's own units. Wins if `x` is given too. |
 | `x` | `number` | — | A row to draw a vertical rule at, by index: the day a change landed, the release being read against. |
 | `label` | `string` | — | A name for what the line means. |
-| `color` | `PlotColor` | — | The theme role of the line and its caption. The foreground colour by default. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour, for the line and its caption. The foreground colour by default. |
 | `strokeWidth` | `number` | `1` | Thickness in pixels. |
 | `dashed` | `boolean` | `false` | Break the line into dashes, so it reads as an annotation rather than a series. |
 | `opacity` | `number` | `1` | Fades the line and its caption together. |
@@ -555,7 +741,7 @@ export default function PlotChangingData() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `color` | `PlotColor` | — | The theme role of the line. The foreground colour by default. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The foreground colour by default. |
 | `showLine` | `boolean` | — | Hide the vertical line and keep only the reading. |
 
 ### Plot.Tooltip

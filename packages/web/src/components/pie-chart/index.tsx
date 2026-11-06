@@ -63,18 +63,22 @@ type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentP
 
 export type PieChartStatus = 'loading' | 'ready';
 
+/** Written out in full, because the registry finds the tokens a component needs by reading its source. */
+const COLORS = {
+  primary: 'var(--primary)',
+  info: 'var(--info)',
+  success: 'var(--success)',
+  warning: 'var(--warning)',
+  destructive: 'var(--destructive)',
+  'chart-1': 'var(--chart-1)',
+  'chart-2': 'var(--chart-2)',
+  'chart-3': 'var(--chart-3)',
+  'chart-4': 'var(--chart-4)',
+  'chart-5': 'var(--chart-5)',
+};
+
 /** Which of the theme's roles a slice is drawn in. */
-export type PieChartColor =
-  | 'primary'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'destructive'
-  | 'chart-1'
-  | 'chart-2'
-  | 'chart-3'
-  | 'chart-4'
-  | 'chart-5';
+export type PieChartColor = keyof typeof COLORS;
 
 /** One slice. Its share is worked out from the others, so there is no maximum. */
 export interface PieDatum {
@@ -338,11 +342,13 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
   }, [slices]);
 
   const colors = useMemo(
-    () => data.map((datum, index) => (datum.color ? `var(--${datum.color})` : PALETTE[index % PALETTE.length]!)),
+    () => data.map((datum, index) => (datum.color ? COLORS[datum.color] : PALETTE[index % PALETTE.length]!)),
     [data]
   );
 
-  const activeIndex = activeIndexProp ?? internalActive;
+  const wanted = activeIndexProp ?? internalActive;
+  // An index the data no longer has reads nothing.
+  const activeIndex = wanted < data.length ? wanted : -1;
 
   // A reading is reported when it changes, not per pointer event.
   const reported = useRef(-1);
@@ -383,6 +389,10 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
     pinned.current = -1;
     report(-1);
   }, [report]);
+  // A held slice that was removed would otherwise block every other reading.
+  useEffect(() => {
+    if (pinned.current >= data.length || reported.current >= data.length) release();
+  }, [data.length, release]);
 
   useImperativeHandle(
     ref,
@@ -633,7 +643,7 @@ function PieChartSkeleton({ color, className, style, render, ...props }: PieChar
           height: radius * 2,
           marginTop: LIFT,
           opacity: loading ? 1 : 0,
-          ...(color ? { background: `var(--${color})` } : {}),
+          ...(color ? { background: COLORS[color] } : {}),
           borderRadius: '50%',
           maskImage: `${band},${dial}`,
           maskComposite: 'intersect',

@@ -529,5 +529,15 @@
       "category": "charts",
       "title": "Plot"
     }
+  ],
+  "bubble-chart": [
+    "BubbleChart",
+    "One labelled circle per row, on two measured axes, with a third quantity on each circle's area.",
+    "react bubble chart component area",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Bubble Chart"
+    }
   ]
 }

@@ -2,6 +2,7 @@
   "title": "Charts",
   "pages": [
     "bar-chart",
+    "bubble-chart",
     "plot",
     "sankey-chart"
   ]

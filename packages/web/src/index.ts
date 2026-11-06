@@ -1416,3 +1416,21 @@ export {
   type RadarChartTooltipProps,
   type RadarChartLegendProps,
 } from './components/radar-chart';
+export {
+  HexChart,
+  HexChartHeader,
+  HexChartCells,
+  HexChartTooltip,
+  HexChartLegend,
+  HexChartSkeleton,
+  type HexChartProps,
+  type HexChartHandle,
+  type HexChartStatus,
+  type HexDatum,
+  type HexShape,
+  type HexChartHeaderProps,
+  type HexChartCellsProps,
+  type HexChartTooltipProps,
+  type HexChartLegendProps,
+  type HexChartSkeletonProps,
+} from './components/hex-chart';

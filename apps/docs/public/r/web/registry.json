@@ -698,6 +698,30 @@
       ]
     },
     {
+      "name": "hex-chart",
+      "type": "registry:component",
+      "title": "Hex Chart",
+      "description": "A whole broken into parts, counted out in hexagonal cells.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/hex-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/hex-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/hex-chart/hex-layout.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/hex-chart/hex-layout.ts"
+        }
+      ]
+    },
+    {
       "name": "input",
       "type": "registry:component",
       "title": "Input",

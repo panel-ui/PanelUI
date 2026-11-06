@@ -689,5 +689,15 @@
       "category": "charts",
       "title": "Radar Chart"
     }
+  ],
+  "hex-chart": [
+    "HexChart",
+    "A whole broken into parts, counted out in hexagonal cells.",
+    "react hex chart honeycomb part to whole component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Hex Chart"
+    }
   ]
 }

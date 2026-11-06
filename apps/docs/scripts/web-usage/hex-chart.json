@@ -1,0 +1,51 @@
+{
+  "slug": "hex-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 560
+  },
+  "intro": "Use it to show how one total divides, in a form a reader can count: revenue by channel, seats by team. Each item in `data` has a `label` and a `value`, and takes a share of the cells in proportion.\n\nEvery cell is a whole unit, so a series worth less than a cell can disappear. It suits shares of a few percent and up. For a long tail, use a Bar Chart.",
+  "usage": "<HexChart data={attribution}>\n  <HexChart.Cells />\n  <HexChart.Tooltip />\n  <HexChart.Legend />\n</HexChart>",
+  "anatomy": "<HexChart data={…}>\n  <HexChart.Header />\n  <HexChart.Cells />\n  <HexChart.Skeleton />\n  <HexChart.Tooltip />\n  <HexChart.Legend />\n</HexChart>",
+  "parts": {
+    "Header": "The strip above the field: `title`, `value` and `caption`, with a key or your own control on the trailing side.",
+    "Cells": "The honeycomb: the unfilled field and the series over it. Without this part nothing is drawn.",
+    "Skeleton": "The field with nothing divided up, tinted, while `status` is `loading`.",
+    "Tooltip": "Makes the field readable by pointer and keyboard, and hangs a label above the series being read.",
+    "Legend": "A swatch, a name and a share per series, under the field. Each is a button that selects its series."
+  },
+  "examples": [
+    {
+      "title": "Counting off a grid",
+      "description": "`shape=\"grid\"` fills the whole field in reading order and in data order, so a reader can count cells along a row. `showCells` on the tooltip adds the count to the label.",
+      "demo": "grid",
+      "height": 440
+    },
+    {
+      "title": "Field size and density",
+      "description": "`columns` sets how many cells run across, which also sets the size of one. `density` is how much of the field a blob fills. Fewer, larger cells suit a small split. More cells show small shares.",
+      "demo": "density",
+      "height": 480
+    },
+    {
+      "title": "Selecting from outside",
+      "description": "Pass `activeIndex` and `onActiveIndexChange` to keep the selection yourself, for a control elsewhere on the page. The value is -1 when nothing is selected.",
+      "demo": "controlled",
+      "height": 520
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `HexChart.Skeleton` and drive `status`. The field shows undivided, because placeholder shares would be a made-up split. The series fill in from the middle when it turns `ready`.",
+      "demo": "loading",
+      "height": 460
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, each cell takes its new series. A `ref` on the chart has `replay()`, which fills the series in again.",
+      "demo": "changing-data",
+      "height": 480
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the field alone, so a header and a legend do not shrink it. Rows follow from the width, the height and `columns`.\n\n### Reading\n\nA mouse reads the series under it. A tap or a click pins the reading, and pressing the same series again or an unfilled cell clears it. Once the field has focus, the arrow keys walk the series and Escape clears the reading. All of this comes from `HexChart.Tooltip`. Without it, only the legend selects.\n\n### Accessibility\n\nThe chart renders a list of its series for screen readers, and announces the series being read. `label` and `labelForDatum` set what it says. With reduced motion set, the series appear at once without the fill. `animationDuration={0}` draws them at once for everybody.",
+  "propsNote": "`HexChart`, `HexChart.Header` and `HexChart.Legend` also take the props of the element they render, and a `className`. `HexChart.Tooltip` puts its `className` on the label. The other parts draw nothing themselves and take only the props listed."
+}

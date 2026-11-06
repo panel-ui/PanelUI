@@ -8,6 +8,7 @@
     "candlestick-chart",
     "funnel-chart",
     "heatmap-chart",
+    "hex-chart",
     "line-chart",
     "live-line-chart",
     "mirror-area-chart",

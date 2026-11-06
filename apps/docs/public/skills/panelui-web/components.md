@@ -70,6 +70,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Candlestick Chart](components/candlestick-chart.md) — Open, high, low and close for a period, drawn as one mark.
 - [Funnel Chart](components/funnel-chart.md) — Where a population drained away, one step at a time.
 - [Heatmap Chart](components/heatmap-chart.md) — A calendar of bins, shaded by how much happened in each.
+- [Hex Chart](components/hex-chart.md) — A whole broken into parts, counted out in hexagonal cells.
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.
 - [Mirror Area Chart](components/mirror-area-chart.md) — Two readings of one timeline, one above a baseline and one below it.

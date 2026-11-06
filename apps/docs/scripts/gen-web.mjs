@@ -111,7 +111,7 @@ function propsTable(iface, c) {
 
 function installation(slug, item) {
   const address = `https://panelui.dev/r/web/${slug}.json`;
-  const npm = item.dependencies.join(' ');
+  const npm = [...item.dependencies, ...(item.devDependencies ?? [])].join(' ');
   const builtOn = item.registryDependencies
     .filter((dependency) => dependency.startsWith('https://panelui.dev/r/web/'))
     .map((dependency) => dependency.replace(/^.*\/([a-z0-9-]+)\.json$/, '$1'));

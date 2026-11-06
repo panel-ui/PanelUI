@@ -53,18 +53,22 @@ import { ringAfterKey, ringFraction, ringPercent, ringRadius, ringSpan, ringStag
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
+/** Written out in full, because the registry finds the tokens a component needs by reading its source. */
+const COLORS = {
+  primary: 'var(--primary)',
+  info: 'var(--info)',
+  success: 'var(--success)',
+  warning: 'var(--warning)',
+  destructive: 'var(--destructive)',
+  'chart-1': 'var(--chart-1)',
+  'chart-2': 'var(--chart-2)',
+  'chart-3': 'var(--chart-3)',
+  'chart-4': 'var(--chart-4)',
+  'chart-5': 'var(--chart-5)',
+};
+
 /** Which of the theme's roles a ring is drawn in. */
-export type RingChartColor =
-  | 'primary'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'destructive'
-  | 'chart-1'
-  | 'chart-2'
-  | 'chart-3'
-  | 'chart-4'
-  | 'chart-5';
+export type RingChartColor = keyof typeof COLORS;
 
 /** One ring per datum. Nothing is shared between rings, so nothing has to add up. */
 export interface RingDatum {
@@ -84,7 +88,7 @@ const ringChartVariants = tv({
   slots: {
     root: 'relative grid w-full grid-cols-1 text-foreground',
     plot: 'relative col-start-1 row-start-2 w-full justify-self-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    svg: 'absolute inset-0 block',
+    svg: 'absolute inset-0 block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring',
     ring: 'transition-opacity duration-150 motion-reduce:transition-none',
     sweep:
       'ease-out transition-[stroke-dasharray] duration-(--ring-duration) delay-(--ring-delay) motion-reduce:transition-none',
@@ -112,6 +116,7 @@ const ringChartVariants = tv({
 });
 
 const DIM = 0.35;
+const NAVIGATION_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']);
 const LEGEND_DIM = 0.4;
 /** Below this width the hole fits the number alone. */
 const FULL_CENTER_ROOM = 90;
@@ -228,7 +233,7 @@ const RingChartRoot = forwardRef<RingChartHandle, RingChartProps & RenderProp<'d
   const box = size ?? measured;
   const span = ringSpan(startAngle, endAngle);
   const colors = useMemo(
-    () => data.map((ring, index) => (ring.color ? `var(--${ring.color})` : PALETTE[index % PALETTE.length]!)),
+    () => data.map((ring, index) => (ring.color ? COLORS[ring.color] : PALETTE[index % PALETTE.length]!)),
     [data]
   );
 
@@ -253,7 +258,9 @@ const RingChartRoot = forwardRef<RingChartHandle, RingChartProps & RenderProp<'d
     []
   );
 
-  const activeIndex = activeIndexProp ?? internalActive;
+  const wanted = activeIndexProp ?? internalActive;
+  // An index the data no longer has reads nothing.
+  const activeIndex = wanted < data.length ? wanted : -1;
 
   // A reading is reported when it changes, not per pointer event.
   const reported = useRef(-1);
@@ -294,6 +301,10 @@ const RingChartRoot = forwardRef<RingChartHandle, RingChartProps & RenderProp<'d
     pinned.current = -1;
     report(-1);
   }, [report]);
+  // A held ring that was removed would otherwise block every other reading.
+  useEffect(() => {
+    if (pinned.current >= data.length || reported.current >= data.length) release();
+  }, [data.length, release]);
 
   const context = useMemo<RingChartContextValue>(
     () => ({
@@ -360,12 +371,10 @@ const RingChartRoot = forwardRef<RingChartHandle, RingChartProps & RenderProp<'d
                   togglePin(activeIndex);
                   return;
                 }
-                const next = ringAfterKey(event.key, activeIndex, data.length);
-                if (next !== activeIndex || (next >= 0 && next === pinned.current)) {
-                  event.preventDefault();
-                  pinned.current = -1;
-                  report(next);
-                }
+                if (!NAVIGATION_KEYS.has(event.key)) return;
+                event.preventDefault();
+                pinned.current = -1;
+                report(ringAfterKey(event.key, activeIndex, data.length));
               }}
               onBlur={() => read(-1)}
             >
@@ -410,7 +419,7 @@ function RingChartRing({ index, color, lineCap, trackOpacity = 0.15, segments, s
   if (!datum || !svg || box <= 0) return null;
 
   const slots = ringChartVariants();
-  const stroke = color ? `var(--${color})` : colors[index];
+  const stroke = color ? COLORS[color] : colors[index];
   const radius = ringRadius(box, strokeWidth, ringGap, index);
   const circumference = 2 * Math.PI * radius;
   const arcLength = circumference * span;

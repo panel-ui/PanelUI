@@ -1,7 +1,11 @@
 {
   "title": "Charts",
   "pages": [
+    "area-chart",
     "bar-chart",
-    "line-chart"
+    "bubble-chart",
+    "line-chart",
+    "plot",
+    "sankey-chart"
   ]
 }

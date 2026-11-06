@@ -131,7 +131,7 @@ The plot takes focus. The arrow keys move between slices, Enter or Space holds t
 
 #### Screen readers
 
-Each slice is given as text beside the drawing, as its name and share. `label` names the chart and `labelForDatum` writes a slice, for values with a unit.
+Each slice is given as text beside the drawing, as its name and share, and the reading is announced as it changes. `label` names the chart and `labelForDatum` writes a slice, for values with a unit.
 
 #### Reduced motion
 

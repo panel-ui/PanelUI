@@ -33,7 +33,7 @@
  * a fade. It is a conic mask over the finished drawing, with one registered
  * angle animated, and it comes off when the sweep ends. Nothing repaints at rest.
  */
-import { defineChart, type ChartInteractionController, type ChartPoint } from '@tanstack/charts';
+import { defineChart, type ChartInteractionController } from '@tanstack/charts';
 import { motion } from '@tanstack/charts/motion';
 import { polar, radialArc } from '@tanstack/charts/polar';
 import { Chart } from '@tanstack/charts/react/core';
@@ -56,7 +56,7 @@ import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
-import { pieSliceAt, pieSlices, pieSlicesBetween, pieTotal, type PieSliceAngles } from './pie-layout';
+import { pieKeyWalk, pieSliceAt, pieSlices, pieSlicesBetween, pieTotal, type PieSliceAngles } from './pie-layout';
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
@@ -132,7 +132,6 @@ const pieChartVariants = tv({
 /** Room kept outside the pie so a selected slice has somewhere to lift into. */
 const LIFT = 8;
 const MORPH_DURATION = 420;
-const NAVIGATION_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']);
 
 /** Milliseconds for a slice to lift out and settle back. */
 const SELECT_DURATION = 180;
@@ -463,7 +462,7 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
           return points.filter((point) => point.datum.index === hit);
         },
         group: (_points, { point }) => [point],
-        navigation: (points) => [...points].sort((a, b) => a.datum.index - b.datum.index),
+        navigation: (points) => points,
       },
       motion: false,
     });
@@ -471,7 +470,6 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
 
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
 
-  const onFocusChange = (point: ChartPoint<SliceRow, number, number> | null) => read(point ? point.datum.index : -1);
 
   const summary = label ?? `Pie chart, ${data.length} ${data.length === 1 ? 'slice' : 'slices'}`;
   const spoken = (datum: PieDatum, index: number) =>
@@ -532,6 +530,9 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
                 ))}
               </ul>
             )}
+            <div aria-live="polite" className="sr-only">
+              {activeIndex >= 0 && data[activeIndex] ? spoken(data[activeIndex], activeIndex) : ''}
+            </div>
             <div
               ref={plotRef}
               data-slot="pie-chart-plot"
@@ -545,8 +546,25 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
                 else if (pinned.current >= 0) release();
               }}
               // Before the chart moves its focus, so the move is read rather than ignored.
+              // From the pointer rather than the chart's focus: a finger reads by pressing, its drags are the page
+              // scrolling, and the chart stays silent about a slice it still counts as focused after the keys moved on.
+              onPointerMove={(event) => {
+                if (event.pointerType === 'touch') return;
+                const point = interactionRef.current?.resolvePointer(event.clientX, event.clientY)?.point;
+                read(point ? point.datum.index : -1);
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType !== 'touch') read(-1);
+              }}
+              onBlur={() => read(-1)}
+              // Walked from the reading, and kept from the chart, which would walk from its own focus.
               onKeyDownCapture={(event) => {
-                if (NAVIGATION_KEYS.has(event.key)) pinned.current = -1;
+                const next = pieKeyWalk(activeIndex, data.length, event.key);
+                if (next === undefined) return;
+                event.preventDefault();
+                event.stopPropagation();
+                pinned.current = -1;
+                report(next);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {
@@ -575,7 +593,6 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
                     aspectRatio={1}
                     initialWidth={box}
                     className={slotClasses.chart()}
-                    onFocusChange={onFocusChange}
                     onRender={({ interaction }) => {
                       interactionRef.current = interaction;
                     }}

@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pieSliceAt, pieSlices, pieSlicesBetween, pieTotal } from '../packages/web/src/components/pie-chart/pie-layout.ts';
+import { pieKeyWalk, pieSliceAt, pieSlices, pieSlicesBetween, pieTotal } from '../packages/web/src/components/pie-chart/pie-layout.ts';
 
 const CLOSED = { startAngle: 0, endAngle: 360, padAngle: 0, minAngle: 0 };
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} is not ${expected}`);
@@ -103,4 +103,14 @@ test('a slice new to the data grows from its own start, and a removed one is dro
   const start = pieSlicesBetween(before, after, 0);
   assert.equal(start[1].to, start[1].from);
   assert.equal(pieSlicesBetween(after, before, 0.5).length, 1);
+});
+
+test('the keys walk from the reading and stop at the ends', () => {
+  assert.equal(pieKeyWalk(-1, 3, 'ArrowRight'), 0);
+  assert.equal(pieKeyWalk(2, 3, 'ArrowRight'), 2);
+  assert.equal(pieKeyWalk(0, 3, 'ArrowLeft'), 0);
+  assert.equal(pieKeyWalk(0, 3, 'End'), 2);
+  assert.equal(pieKeyWalk(2, 3, 'Home'), 0);
+  assert.equal(pieKeyWalk(0, 3, 'a'), undefined);
+  assert.equal(pieKeyWalk(-1, 0, 'ArrowRight'), undefined);
 });

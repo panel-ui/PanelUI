@@ -95,3 +95,23 @@ export function pieSlicesBetween(
     return { ...angles, mid: (angles.from + angles.to) / 2, fraction: mix(start.fraction, slice.fraction) };
   });
 }
+
+/** The slice a navigation key moves the reading to, or undefined for any other key. Stops at the ends. */
+export function pieKeyWalk(current: number, count: number, key: string): number | undefined {
+  const last = count - 1;
+  if (last < 0) return undefined;
+  switch (key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      return Math.min(current + 1, last);
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      return Math.max(current - 1, 0);
+    case 'Home':
+      return 0;
+    case 'End':
+      return last;
+    default:
+      return undefined;
+  }
+}

@@ -92,3 +92,23 @@ export function polarPoint(center: number, radius: number, turn: number): { x: n
 export function polarBoxInside(point: number, boxSize: number, plot: number): number {
   return Math.max(0, Math.min(plot - boxSize, point - boxSize / 2));
 }
+
+/** The wedge a navigation key moves the reading to, or undefined for any other key. Stops at the ends. */
+export function polarKeyWalk(current: number, count: number, key: string): number | undefined {
+  const last = count - 1;
+  if (last < 0) return undefined;
+  switch (key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      return Math.min(current + 1, last);
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      return Math.max(current - 1, 0);
+    case 'Home':
+      return 0;
+    case 'End':
+      return last;
+    default:
+      return undefined;
+  }
+}

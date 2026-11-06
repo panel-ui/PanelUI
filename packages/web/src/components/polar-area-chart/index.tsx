@@ -55,6 +55,7 @@ import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
 import {
   polarBoxInside,
+  polarKeyWalk,
   polarNiceMax,
   polarPoint,
   polarRadiiBetween,
@@ -140,7 +141,6 @@ const polarAreaChartVariants = tv({
   },
 });
 
-const NAVIGATION_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']);
 const WEDGE_MARK = 'polar-wedge-';
 const SELECT_DURATION = 180;
 const LEGEND_DIM = 0.4;
@@ -199,7 +199,8 @@ export function usePolarAreaChart() {
   const { data, wedges, activeIndex } = useChart('usePolarAreaChart');
   return {
     activeIndex,
-    activeDatum: activeIndex >= 0 ? (data[activeIndex] ?? null) : null,
+    activeWedge: activeIndex >= 0 ? (data[activeIndex] ?? null) : null,
+    /** The wedge's value against the maximum, 0 to 1. */
     activeFraction: activeIndex >= 0 ? (wedges[activeIndex]?.fraction ?? 0) : 0,
   };
 }
@@ -421,14 +422,16 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
       focusRing: false,
       keyboard: true,
       pointer: true,
-      // By the wedge under the pointer, and round the dial in data order for the arrow keys.
+      // By the wedge under the pointer. The arrow keys are walked in `onKeyDownCapture`.
       focus: {
         resolve: (points, { x, y }) => {
-          const hit = polarWedgeAt(wedges, x - box / 2, y - box / 2);
+          // Against what is drawn, so a wedge still growing is not hit where it has yet to reach.
+          const shown = wedges.map((wedge, index) => ({ ...wedge, radius: drawn[index] ?? 0 }));
+          const hit = polarWedgeAt(shown, x - box / 2, y - box / 2);
           return points.filter((point) => point.datum.index === hit);
         },
         group: (_points, { point }) => [point],
-        navigation: (points) => [...points].sort((a, b) => a.datum.index - b.datum.index),
+        navigation: (points) => points,
       },
       motion: false,
     });
@@ -436,7 +439,11 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
 
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
 
-  const onFocusChange = (point: ChartPoint<WedgeRow, number, number> | null) => read(point ? point.datum.index : -1);
+  // A finger reads by pressing. The chart also reports its drags, which are the page being scrolled.
+  const touching = useRef(false);
+  const onFocusChange = (point: ChartPoint<WedgeRow, number, number> | null) => {
+    if (!touching.current) read(point ? point.datum.index : -1);
+  };
 
   const summary = label ?? `Polar area chart, ${data.length} ${data.length === 1 ? 'wedge' : 'wedges'}`;
   const spoken = (datum: PolarAreaDatum, index: number) => labelForDatum?.(datum, index) ?? `${datum.label}, ${compactNumber(datum.value)}`;
@@ -481,9 +488,20 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
                 if (point) togglePin(point.datum.index);
                 else if (pinned.current >= 0) release();
               }}
-              // Before the chart moves its focus, so the move is read rather than ignored.
+              onPointerDownCapture={(event) => {
+                touching.current = event.pointerType === 'touch';
+              }}
+              onPointerMoveCapture={(event) => {
+                touching.current = event.pointerType === 'touch';
+              }}
+              // Walked from the reading, and kept from the chart, whose own focus stays on the last wedge hovered.
               onKeyDownCapture={(event) => {
-                if (NAVIGATION_KEYS.has(event.key)) pinned.current = -1;
+                const next = polarKeyWalk(activeIndex, data.length, event.key);
+                if (next === undefined) return;
+                event.preventDefault();
+                event.stopPropagation();
+                pinned.current = -1;
+                report(next);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {

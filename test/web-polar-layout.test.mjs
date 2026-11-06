@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   polarBoxInside,
+  polarKeyWalk,
   polarNiceMax,
   polarPoint,
   polarRadiiBetween,
@@ -69,4 +70,15 @@ test('points go clockwise from twelve, and a readout stays inside the plot', () 
   assert.equal(polarBoxInside(10, 60, 200), 0);
   assert.equal(polarBoxInside(190, 60, 200), 140);
   assert.equal(polarBoxInside(100, 60, 200), 70);
+});
+
+test('the keys walk from the reading and stop at the ends', () => {
+  assert.equal(polarKeyWalk(-1, 3, 'ArrowRight'), 0);
+  assert.equal(polarKeyWalk(0, 3, 'ArrowDown'), 1);
+  assert.equal(polarKeyWalk(2, 3, 'ArrowRight'), 2);
+  assert.equal(polarKeyWalk(-1, 3, 'ArrowLeft'), 0);
+  assert.equal(polarKeyWalk(0, 3, 'End'), 2);
+  assert.equal(polarKeyWalk(2, 3, 'Home'), 0);
+  assert.equal(polarKeyWalk(0, 3, 'a'), undefined);
+  assert.equal(polarKeyWalk(-1, 0, 'ArrowRight'), undefined);
 });

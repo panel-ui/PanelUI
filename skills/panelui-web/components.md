@@ -75,6 +75,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Mirror Area Chart](components/mirror-area-chart.md) — Two readings of one timeline, one above a baseline and one below it.
 - [Pie Chart](components/pie-chart.md) — One total, divided between its parts.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
+- [Polar Area Chart](components/polar-area-chart.md) — Several readings compared on one measure, as a dial.
 - [Pyramid Chart](components/pyramid-chart.md) — Two series mirrored about a centre line, one row per category, on one shared scale.
 - [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 - [Scatter Chart](components/scatter-chart.md) — Two measured quantities against each other, to show how they relate.

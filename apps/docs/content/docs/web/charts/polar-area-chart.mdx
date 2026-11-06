@@ -1,0 +1,494 @@
+---
+title: Polar Area Chart
+description: Several readings compared on one measure, as a dial.
+status: new
+---
+
+<ComponentPreview name="polar-area-chart/overview" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { PolarAreaChart } from '@/components/panelui/polar-area-chart';
+import { Frame } from '@/components/panelui/frame';
+
+const SCORES = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+  { label: 'Care', value: 64 },
+];
+
+export default function PolarAreaChartOverview() {
+  return (
+    <Frame variant="band" className="w-full max-w-sm">
+      <Frame.Header>
+        <Frame.Title>Team scores</Frame.Title>
+        <Frame.Action>Q3</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <PolarAreaChart data={SCORES} size={240}>
+          <PolarAreaChart.Grid />
+          <PolarAreaChart.Wedges />
+          <PolarAreaChart.Labels />
+          <PolarAreaChart.Tooltip />
+          <PolarAreaChart.Legend />
+        </PolarAreaChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a handful of readings on one scale when the overall shape matters: which direction the weight sits in, or whether one reading runs away from the rest. Every wedge takes the same angle and the radius carries the value, so the values do not have to add up to anything.
+
+A wedge worth twice another covers four times the area under the default scale, and area is what the eye adds up first. Set `scale="area"` to make the ink proportional to the value, at the cost of unevenly spaced rings.
+
+To rank the readings, use a [Bar Chart](/docs/web/charts/bar-chart). For parts of one total, use a [Pie Chart](/docs/web/charts/pie-chart).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/polar-area-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/polar-area-chart` instead of `@/components/panelui/polar-area-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/polar-area-chart/`, one file for each below:
+
+<RegistrySource name="polar-area-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { PolarAreaChart } from "@/components/panelui/polar-area-chart"
+```
+
+```tsx
+<PolarAreaChart data={scores} size={240}>
+  <PolarAreaChart.Grid />
+  <PolarAreaChart.Wedges />
+  <PolarAreaChart.Labels />
+  <PolarAreaChart.Tooltip />
+  <PolarAreaChart.Legend />
+</PolarAreaChart>
+```
+
+## Composition
+
+```tsx
+<PolarAreaChart data={…}>
+  <PolarAreaChart.Header />
+  <PolarAreaChart.Skeleton />
+  <PolarAreaChart.Grid />
+  <PolarAreaChart.Wedges />
+  <PolarAreaChart.Labels />
+  <PolarAreaChart.Tooltip />
+  <PolarAreaChart.Legend />
+</PolarAreaChart>
+```
+
+- **`PolarAreaChart.Header`** — The strip above the dial: `title`, `value` and `caption`, with a colour key or your own control on the trailing side.
+- **`PolarAreaChart.Grid`** — The rings, each at the value it stands for, with optional spokes along the wedge edges.
+- **`PolarAreaChart.Wedges`** — Every wedge, in data order. The chart draws nothing without this part. Its props set the rounding and the dimming.
+- **`PolarAreaChart.Labels`** — The value on each wedge that reaches at least `minRadius`, in black or white to suit the wedge's colour.
+- **`PolarAreaChart.Tooltip`** — The name and value of the wedge being read, over the dial. This is how the short, unlabelled wedges are named.
+- **`PolarAreaChart.Legend`** — A swatch, a name and a value per wedge, under the dial. Each entry is a button that reads its wedge.
+- **`PolarAreaChart.Skeleton`** — One plain disc while `status` is `loading`.
+
+## Examples
+
+### Scale
+
+`scale="radius"` lets a reading be counted off the rings. `scale="area"` makes the ink proportional to the value, so the rings bunch towards the edge.
+
+<ComponentPreview name="polar-area-chart/scale" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { PolarAreaChart } from '@/components/panelui/polar-area-chart';
+
+const SCORES = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+  { label: 'Care', value: 64 },
+];
+
+export default function PolarAreaChartScale() {
+  return (
+    <div className="grid w-full max-w-lg grid-cols-2 gap-4">
+      <PolarAreaChart data={SCORES} scale="radius">
+        <PolarAreaChart.Header title="radius" />
+        <PolarAreaChart.Grid />
+        <PolarAreaChart.Wedges />
+      </PolarAreaChart>
+      <PolarAreaChart data={SCORES} scale="area">
+        <PolarAreaChart.Header title="area" />
+        <PolarAreaChart.Grid />
+        <PolarAreaChart.Wedges />
+      </PolarAreaChart>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Reading from outside
+
+Pass `activeIndex` and `onActiveIndexChange` when something else on the page has to stay in step. The callback fires for hovering as well as pressing, and with `-1` when the reading ends.
+
+<ComponentPreview name="polar-area-chart/selecting" height={440}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { PolarAreaChart } from '@/components/panelui/polar-area-chart';
+import { Button } from '@/components/panelui/button';
+
+const SCORES = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+  { label: 'Care', value: 64 },
+];
+
+export default function PolarAreaChartSelecting() {
+  const [active, setActive] = useState(-1);
+
+  return (
+    <div className="flex w-full max-w-sm flex-col items-start gap-4">
+      <PolarAreaChart data={SCORES} size={220} activeIndex={active} onActiveIndexChange={setActive}>
+        <PolarAreaChart.Grid />
+        <PolarAreaChart.Wedges />
+        <PolarAreaChart.Tooltip />
+        <PolarAreaChart.Legend />
+      </PolarAreaChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setActive(3)}>
+          Show cost
+        </Button>
+        <Button variant="ghost" onClick={() => setActive(-1)}>
+          Clear
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Gaps and spokes
+
+`padAngle` and `cornerRadius` separate the wedges, and `spokes` on the grid draws a line along each edge. `startAngle` turns the dial.
+
+<ComponentPreview name="polar-area-chart/spokes" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { PolarAreaChart } from '@/components/panelui/polar-area-chart';
+
+const SCORES = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+  { label: 'Care', value: 64 },
+];
+
+export default function PolarAreaChartSpokes() {
+  return (
+    <PolarAreaChart data={SCORES} size={240} padAngle={4} startAngle={-30} className="max-w-sm">
+      <PolarAreaChart.Grid spokes />
+      <PolarAreaChart.Wedges cornerRadius={4} />
+      <PolarAreaChart.Labels />
+    </PolarAreaChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A fixed maximum
+
+Set `maxValue` when charts have to be compared, because the default rounds up from each chart's own largest value.
+
+<ComponentPreview name="polar-area-chart/maximum" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { PolarAreaChart } from '@/components/panelui/polar-area-chart';
+
+const LOW = [
+  { label: 'North', value: 12 },
+  { label: 'East', value: 30 },
+  { label: 'South', value: 22 },
+  { label: 'West', value: 8 },
+];
+
+export default function PolarAreaChartMaximum() {
+  return (
+    <PolarAreaChart data={LOW} size={240} maxValue={100} className="max-w-sm">
+      <PolarAreaChart.Header title="Out of 100" />
+      <PolarAreaChart.Grid />
+      <PolarAreaChart.Wedges />
+      <PolarAreaChart.Tooltip />
+    </PolarAreaChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `PolarAreaChart.Skeleton` and drive `status`. The wedges grow out of the centre when it turns `ready`.
+
+<ComponentPreview name="polar-area-chart/loading" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { PolarAreaChart, type PolarAreaChartStatus } from '@/components/panelui/polar-area-chart';
+import { Button } from '@/components/panelui/button';
+
+const SCORES = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+  { label: 'Care', value: 64 },
+];
+
+export default function PolarAreaChartLoading() {
+  const [status, setStatus] = useState<PolarAreaChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-sm flex-col items-start gap-4">
+      <PolarAreaChart data={SCORES} size={220} status={status}>
+        <PolarAreaChart.Skeleton />
+        <PolarAreaChart.Grid />
+        <PolarAreaChart.Wedges />
+      </PolarAreaChart>
+      <Button variant="outline" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+When `data` changes, each wedge moves to its new reach. A `ref` on the chart has `replay()`, which grows the wedges again from the centre.
+
+<ComponentPreview name="polar-area-chart/changing-data" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { PolarAreaChart, type PolarAreaChartHandle } from '@/components/panelui/polar-area-chart';
+import { Button } from '@/components/panelui/button';
+
+const Q3 = [
+  { label: 'Speed', value: 82 },
+  { label: 'Reach', value: 54 },
+  { label: 'Depth', value: 71 },
+  { label: 'Cost', value: 28 },
+];
+const Q4 = [
+  { label: 'Speed', value: 46 },
+  { label: 'Reach', value: 88 },
+  { label: 'Depth', value: 60 },
+  { label: 'Cost', value: 74 },
+];
+
+export default function PolarAreaChartChangingData() {
+  const chart = useRef<PolarAreaChartHandle>(null);
+  const [later, setLater] = useState(false);
+
+  return (
+    <div className="flex w-full max-w-sm flex-col items-start gap-4">
+      <PolarAreaChart ref={chart} data={later ? Q4 : Q3} size={220} maxValue={100}>
+        <PolarAreaChart.Grid />
+        <PolarAreaChart.Wedges />
+        <PolarAreaChart.Labels />
+        <PolarAreaChart.Legend />
+      </PolarAreaChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setLater((current) => !current)}>
+          {later ? 'Show Q3' : 'Show Q4'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### PolarAreaChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly PolarAreaDatum[]` | — | One entry per wedge, drawn clockwise in the order they are listed. |
+| `size` | `number` | — | Diameter in pixels. Without it the chart fills its container's width as a square. |
+| `maxValue` | `number` | — | The value the outermost ring stands for. Defaults to a round number above the largest value. |
+| `scale` | `PolarAreaScale` | `'radius'` | `radius` puts the value on the radius, `area` on the ink. |
+| `startAngle` | `number` | `0` | Where the first wedge begins, in degrees clockwise from twelve o'clock. |
+| `padAngle` | `number` | `0` | Gap between one wedge and the next, in degrees. |
+| `status` | `PolarAreaChartStatus` | `'ready'` | `loading` shows `PolarAreaChart.Skeleton`, then the wedges grow when it turns `ready`. |
+| `animationDuration` | `number` | `620` | Milliseconds for the wedges to grow, and to move when `data` changes. |
+| `activeIndex` | `number` | — | The wedge being read. Leave unset to let the chart track it. |
+| `onActiveIndexChange` | `(index: number) => void` | — | Fires when the reading changes, from a hover, a key or a press, with `-1` when it ends. |
+| `label` | `string` | — | Names the chart for screen readers. |
+| `labelForDatum` | `(datum: PolarAreaDatum, index: number) => string` | — | Writes one wedge for screen readers, for a value with a unit. |
+
+### PolarAreaChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rings` | `number` | — | How many rings, including the outermost. |
+| `color` | `PolarAreaChartColor` | — | Which of the theme's roles to draw it in. Defaults to the border colour. |
+| `spokes` | `boolean` | — | Draw a line from the centre out along each wedge's edge. |
+
+### PolarAreaChart.Wedges
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cornerRadius` | `number` | — | Rounds the turns of each wedge, in pixels. |
+| `dimOpacity` | `number` | — | Opacity of the other wedges while one is read. |
+
+### PolarAreaChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, datum: PolarAreaDatum) => string` | — | Format the value. Defaults to a compact number. |
+| `minRadius` | `number` | — | Wedges reaching less far than this, in pixels, are left unlabelled. |
+| `className` | `string` | — | Added to each label. |
+
+### PolarAreaChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, datum: PolarAreaDatum) => string` | — | Format the value. Defaults to a compact number. |
+| `className` | `string` | — | Added to the readout. |
+
+### PolarAreaChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `PolarAreaChartColor` | — | Which of the theme's roles to draw the disc in. Defaults to the muted surface. |
+
+### PolarAreaChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `showValue` | `boolean` | — | Show each wedge's reading beside its name. |
+| `formatValue` | `(value: number, datum: PolarAreaDatum) => string` | — | Format the value. Defaults to a compact number. |
+
+### PolarAreaChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the chart is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a caveat. |
+| `labels` | `Record<string, string>` | — | Prettier names for the wedges, keyed by their `label`. |
+| `legend` | `boolean` | `false` | Draw a swatch and a name per wedge along the trailing edge, for two or three short names. |
+
+`PolarAreaChart`, `PolarAreaChart.Header`, `PolarAreaChart.Legend` and `PolarAreaChart.Skeleton` also take the props of the element they render, and a `className`. `PolarAreaChart.Labels` and `PolarAreaChart.Tooltip` take a `className` for each label and for the readout. `PolarAreaChart.Grid` and `PolarAreaChart.Wedges` take only the props listed.
+
+## Notes
+
+### Sizing
+
+The chart takes `size` as its diameter, or fills its container's width as a square without it. The plot draws in the browser after it has been measured, so it is not in server-rendered HTML.
+
+### Colour
+
+`color` on a datum names a role in the theme. Without it, wedges take the five chart colours in order, and a sixth wedge repeats the first.
+
+### Reading a wedge
+
+Hovering a wedge reads it. A click or a tap holds the reading until you press that wedge again or press outside the wedges. A touch drag does not read wedges, so the page can still scroll.
+
+`usePolarAreaChart` gives the wedge being read to anything rendered inside the chart.
+
+### Keyboard
+
+The plot takes focus. The arrow keys move between wedges, Enter or Space holds the reading, and Escape clears it. Moving to another wedge lets go of a held reading. The legend's entries are buttons, reached with Tab.
+
+### Screen readers
+
+Each wedge is given as text beside the drawing, as its name and value, and the reading is announced as it changes. `label` names the chart and `labelForDatum` writes a wedge, for values with a unit.
+
+### Reduced motion
+
+With reduced motion set, the wedges appear at their full reach, and a data change lands in one step.
+
+### Zero and negative values
+
+A negative value counts as zero. A wedge at zero draws nothing, though the arrow keys and the legend still reach it.
+
+### Server Components
+
+`PolarAreaChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `PolarAreaChart.Header` off the import, so each part is also exported by name: `PolarAreaChartHeader` is `PolarAreaChart.Header`, and so on for the others.
+
+```tsx
+import { PolarAreaChart, PolarAreaChartHeader, PolarAreaChartGrid, PolarAreaChartWedges, PolarAreaChartLabels, PolarAreaChartTooltip, PolarAreaChartLegend, PolarAreaChartSkeleton } from "@/components/panelui/polar-area-chart"
+```

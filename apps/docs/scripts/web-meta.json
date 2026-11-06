@@ -669,5 +669,15 @@
       "category": "charts",
       "title": "Mirror Area Chart"
     }
+  ],
+  "polar-area-chart": [
+    "PolarAreaChart",
+    "Several readings compared on one measure, as a dial.",
+    "react polar area chart coxcomb rose chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Polar Area Chart"
+    }
   ]
 }

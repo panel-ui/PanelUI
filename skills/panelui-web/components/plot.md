@@ -98,7 +98,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `strokeWidth` | `number` | `1` | Thickness of the stroke, in pixels. |
+| `strokeWidth` | `number` | `2.5` | Thickness of the stroke, in pixels. |
 | `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 | `dashArray` | `string` | — | Dash pattern, such as `"6 4"`, for a forecast or a series that is not real yet. |
 
@@ -106,8 +106,8 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `opacity` | `number` | `1` | Opacity of the fill. |
-| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
+| `opacity` | `number` | `0.18` | Opacity of the fill. |
+| `curve` | `PlotCurve` | — | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
 
 #### `PlotBarsProps`
 
@@ -123,16 +123,16 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `size` | `number` | — | Radius, in pixels. |
-| `ringWidth` | `number` | — | Ring around each dot in the page colour, so it reads on top of the line. |
+| `size` | `number` | `3.5` | Radius, in pixels. |
+| `ringWidth` | `number` | `2` | Ring around each dot in the page colour, so it reads on top of the line. |
 
 #### `PlotGridProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `rows` | `number` | — | Horizontal rules across the plot. Yields `rows + 1` lines. |
-| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The border colour by default. |
-| `dashArray` | `string` | — | Dash pattern, such as `"4 6"`. An empty string draws a solid rule. |
+| `rows` | `number` | `4` | Horizontal rules across the plot. Yields `rows + 1` lines. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour. The border colour by default. |
+| `dashArray` | `string` | `'4 6'` | Dash pattern, such as `"4 6"`. An empty string draws a solid rule. |
 | `opacity` | `number` | `1` | Opacity of the lines. |
 
 #### `PlotOverlayProps`
@@ -161,7 +161,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many labels to show. The rest are dropped, evenly. |
+| `ticks` | `number` | `4` | How many labels to show. The rest are dropped, evenly. |
 | `format` | `(datum: PlotDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
 | `className` | `string` | — | Added to each label. |
 
@@ -169,7 +169,7 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many intervals to divide the axis into. Yields `ticks + 1` labels. Give it the same count as the grid. |
+| `ticks` | `number` | `4` | How many intervals to divide the axis into. Yields `ticks + 1` labels. Give it the same count as the grid. |
 | `format` | `(value: number) => string` | — | Turn a value into its label. Defaults to a compact number. |
 | `className` | `string` | — | Added to each label. |
 
@@ -177,8 +177,8 @@ It is marked alpha. The parts are settled, and the fields `usePlot` hands out ar
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. The foreground colour by default. |
-| `showLine` | `boolean` | — | Hide the vertical line and keep only the reading. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour. The foreground colour by default. |
+| `showLine` | `boolean` | `true` | Hide the vertical line and keep only the reading. |
 
 #### `PlotTooltipProps`
 

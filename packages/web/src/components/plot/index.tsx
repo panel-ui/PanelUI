@@ -944,7 +944,13 @@ export interface PlotLineProps extends PlotSeriesProps {
 }
 
 /** A series as a stroked line. A gap in the column breaks the line. */
-function PlotLine({ dataKey, color = 'chart-1', strokeWidth = 2.5, curve, dashArray }: PlotLineProps) {
+function PlotLine({
+  dataKey,
+  color = 'chart-1',
+  strokeWidth = 2.5,
+  curve,
+  dashArray,
+}: PlotLineProps) {
   useMark({ kind: 'line', dataKey, color: colorOf(color), strokeWidth, curve, dashArray });
   return null;
 }
@@ -961,7 +967,12 @@ export interface PlotAreaProps extends PlotSeriesProps {
 }
 
 /** A series as a fill down to the bottom of the plot. Write it before the line it belongs under. */
-function PlotArea({ dataKey, color = 'chart-1', opacity = 0.18, curve }: PlotAreaProps) {
+function PlotArea({
+  dataKey,
+  color = 'chart-1',
+  opacity = 0.18,
+  curve,
+}: PlotAreaProps) {
   useMark({ kind: 'area', dataKey, color: colorOf(color), opacity, curve });
   return null;
 }
@@ -1016,7 +1027,12 @@ export interface PlotDotsProps extends PlotSeriesProps {
 }
 
 /** A dot per row, for a series short enough that its points are worth marking. */
-function PlotDots({ dataKey, color = 'chart-1', size = 3.5, ringWidth = 2 }: PlotDotsProps) {
+function PlotDots({
+  dataKey,
+  color = 'chart-1',
+  size = 3.5,
+  ringWidth = 2,
+}: PlotDotsProps) {
   useMark({ kind: 'dots', dataKey, color: colorOf(color), size, ringWidth });
   return null;
 }
@@ -1038,7 +1054,12 @@ export interface PlotGridProps {
 }
 
 /** Horizontal rules, outside the reveal because they are the frame the marks arrive into. */
-function PlotGrid({ rows = 4, color, dashArray = '4 6', opacity = 1 }: PlotGridProps) {
+function PlotGrid({
+  rows = 4,
+  color,
+  dashArray = '4 6',
+  opacity = 1,
+}: PlotGridProps) {
   const { plot, hosts } = useChart('Plot.Grid');
   if (!hosts.grid || plot.width <= 0) return null;
   const intervals = Math.max(1, Math.round(rows));
@@ -1196,7 +1217,11 @@ export interface PlotXAxisProps {
 }
 
 /** Labels along the bottom, each centred on the row it names and held inside the frame. */
-function PlotXAxis({ ticks = 4, format, className }: PlotXAxisProps) {
+function PlotXAxis({
+  ticks = 4,
+  format,
+  className,
+}: PlotXAxisProps) {
   const { data, xDataKey, plot, xScale, hosts } = useChart('Plot.XAxis');
   if (!hosts.overlay || plot.width <= 0) return null;
   const slots = plotVariants();
@@ -1240,7 +1265,11 @@ export interface PlotYAxisProps {
  * Value labels down the side, one per grid line, with room made for them. They name
  * the domain being settled on, so they hold still while the marks move.
  */
-function PlotYAxis({ ticks = 4, format, className }: PlotYAxisProps) {
+function PlotYAxis({
+  ticks = 4,
+  format,
+  className,
+}: PlotYAxisProps) {
   const { plot, extent, status, hosts, setSlot } = useChart('Plot.YAxis');
   useEffect(() => {
     setSlot('yAxis', true);
@@ -1289,7 +1318,10 @@ export interface PlotCursorProps {
  * across them, or the arrow keys. A click or a tap pins the reading until the next
  * press elsewhere or Escape. The hit area is the whole plot.
  */
-function PlotCursor({ color, showLine = true }: PlotCursorProps) {
+function PlotCursor({
+  color,
+  showLine = true,
+}: PlotCursorProps) {
   const { setSlot } = useChart('Plot.Cursor');
   useEffect(() => {
     setSlot('cursor', { color, showLine });

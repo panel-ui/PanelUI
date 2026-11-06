@@ -38,6 +38,7 @@ const SECTIONS = {
   navigation: 'Navigation',
   layout: 'Layout and structure',
   data: 'Data',
+  charts: 'Charts',
   feedback: 'Feedback and status',
   media: 'Media and motion',
   ai: 'AI components',

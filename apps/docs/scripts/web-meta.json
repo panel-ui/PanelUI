@@ -505,7 +505,7 @@
     "react bar chart component grouped stacked",
     {
       "addedIn": "0.13.0",
-      "category": "data",
+      "category": "charts",
       "title": "Bar Chart"
     }
   ]

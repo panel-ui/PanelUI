@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Treemap Chart](components/treemap-chart.md) — A total, cut into the parts it is made of, sized by area.
 
 ## Feedback and status
 

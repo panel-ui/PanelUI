@@ -894,3 +894,23 @@ export {
   type BarChartTooltipProps,
   type BarChartLegendProps,
 } from './components/bar-chart';
+export {
+  RadarChart,
+  RadarChartHeader,
+  RadarChartGrid,
+  RadarChartAxis,
+  RadarChartSeries,
+  RadarChartTooltip,
+  RadarChartLegend,
+  type RadarChartProps,
+  type RadarChartHandle,
+  type RadarChartStatus,
+  type RadarChartColor,
+  type RadarChartDatum,
+  type RadarChartHeaderProps,
+  type RadarChartGridProps,
+  type RadarChartAxisProps,
+  type RadarChartSeriesProps,
+  type RadarChartTooltipProps,
+  type RadarChartLegendProps,
+} from './components/radar-chart';

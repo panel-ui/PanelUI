@@ -103,14 +103,14 @@ export function pieSlicesBetween(
 export function pieKeyWalk(current: number, drawn: readonly number[], key: string): number | undefined {
   const last = drawn.length - 1;
   if (last < 0) return undefined;
-  const at = drawn.indexOf(current);
   switch (key) {
+    // By position rather than by lookup, because a slice with no share can be read from the legend.
     case 'ArrowRight':
     case 'ArrowDown':
-      return drawn[Math.min(at + 1, last)];
+      return drawn.find((index) => index > current) ?? drawn[last];
     case 'ArrowLeft':
     case 'ArrowUp':
-      return drawn[Math.max(at - 1, 0)];
+      return [...drawn].reverse().find((index) => index < current) ?? drawn[0];
     case 'Home':
       return drawn[0];
     case 'End':

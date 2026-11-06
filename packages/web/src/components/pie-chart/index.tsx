@@ -559,7 +559,7 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
               onBlur={() => read(-1)}
               // Walked from the reading, and kept from the chart, which would walk from its own focus.
               onKeyDownCapture={(event) => {
-                const shown = slices.flatMap((slice, index) => (slice.to > slice.from ? [index] : []));
+                const shown = drawn.flatMap((slice, index) => (slice.to > slice.from ? [index] : []));
                 const next = pieKeyWalk(activeIndex, shown, event.key);
                 if (next === undefined) return;
                 event.preventDefault();

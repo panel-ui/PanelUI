@@ -112,6 +112,9 @@ test('the keys walk the drawn slices from the reading and stop at the ends', () 
   assert.equal(pieKeyWalk(3, drawn, 'ArrowRight'), 3);
   assert.equal(pieKeyWalk(2, drawn, 'ArrowLeft'), 0);
   assert.equal(pieKeyWalk(0, drawn, 'ArrowUp'), 0);
+  assert.equal(pieKeyWalk(1, drawn, 'ArrowRight'), 2);
+  assert.equal(pieKeyWalk(1, drawn, 'ArrowLeft'), 0);
+  assert.equal(pieKeyWalk(-1, drawn, 'ArrowLeft'), 0);
   assert.equal(pieKeyWalk(0, drawn, 'End'), 3);
   assert.equal(pieKeyWalk(3, drawn, 'Home'), 0);
   assert.equal(pieKeyWalk(0, drawn, 'a'), undefined);

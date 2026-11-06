@@ -896,6 +896,37 @@ export {
 } from './components/bar-chart';
 
 export {
+  SankeyChart,
+  SankeyChartHeader,
+  SankeyChartLinks,
+  SankeyChartNodes,
+  SankeyChartLabels,
+  SankeyChartTooltip,
+  SankeyChartBreakdown,
+  SankeyChartLegend,
+  SankeyChartSkeleton,
+  useSankeyChart,
+  type SankeyChartProps,
+  type SankeyChartHandle,
+  type SankeyNode,
+  type SankeyLink,
+  type SankeyAlign,
+  type SankeyCollapse,
+  type SankeyOrientation,
+  type SankeyChartStatus,
+  type SankeyChartColor,
+  type SankeyChartFlow,
+  type SankeyChartActiveLink,
+  type SankeyChartHeaderProps,
+  type SankeyChartLinksProps,
+  type SankeyChartNodesProps,
+  type SankeyChartLabelsProps,
+  type SankeyChartTooltipProps,
+  type SankeyChartBreakdownProps,
+  type SankeyChartLegendProps,
+} from './components/sankey-chart';
+
+export {
   Plot,
   PlotHeader,
   PlotLegend,

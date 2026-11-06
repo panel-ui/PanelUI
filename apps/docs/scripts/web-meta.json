@@ -559,5 +559,15 @@
       "category": "charts",
       "title": "Line Chart"
     }
+  ],
+  "waterfall-chart": [
+    "WaterfallChart",
+    "How a run of changes carried one total to another, with each step floating on the running balance.",
+    "bridge",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Waterfall Chart"
+    }
   ]
 }

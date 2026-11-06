@@ -69,6 +69,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
 - [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
+- [Waterfall Chart](components/waterfall-chart.md) — How a run of changes carried one total to another, with each step floating on the running balance.
 
 ## Feedback and status
 

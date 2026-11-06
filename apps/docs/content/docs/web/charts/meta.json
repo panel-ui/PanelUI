@@ -6,6 +6,7 @@
     "bubble-chart",
     "line-chart",
     "plot",
-    "sankey-chart"
+    "sankey-chart",
+    "waterfall-chart"
   ]
 }

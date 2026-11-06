@@ -1443,6 +1443,42 @@
       ]
     },
     {
+      "name": "waterfall-chart",
+      "type": "registry:component",
+      "title": "Waterfall Chart",
+      "description": "How a run of changes carried one total to another, with each step floating on the running balance.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/waterfall-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/waterfall-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/waterfall-chart/waterfall-steps.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/waterfall-chart/waterfall-steps.ts"
+        }
+      ]
+    },
+    {
       "name": "workbench",
       "type": "registry:component",
       "title": "Workbench",

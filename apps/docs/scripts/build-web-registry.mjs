@@ -124,6 +124,7 @@ export function buildItem(slug) {
     title: meta[slug][3]?.title ?? name,
     description: summary,
     dependencies: [...dependencies].sort(),
+    ...(dependencies.has('d3-shape') ? { devDependencies: ['@types/d3-shape'] } : {}),
     registryDependencies: [...registryDependencies].sort(),
     ...(Object.keys(tokens).length > 0 ? { cssVars: { light: tokens, dark: tokens } } : {}),
     files,

@@ -1,0 +1,706 @@
+---
+title: Sankey Chart
+description: Where a quantity came from and where it ended up, as ribbons between stages.
+status: new
+---
+
+<ComponentPreview name="sankey-chart/overview" height={600}>
+
+```tsx lineNumbers
+'use client';
+
+import { Frame } from '@/components/panelui/frame';
+import { SankeyChart, useSankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'search', target: 'docs', value: 26_000 },
+  { source: 'search', target: 'pricing', value: 16_000 },
+  { source: 'social', target: 'docs', value: 9_000 },
+  { source: 'social', target: 'pricing', value: 22_000 },
+  { source: 'direct', target: 'docs', value: 12_000 },
+  { source: 'direct', target: 'pricing', value: 13_000 },
+  { source: 'docs', target: 'signup', value: 14_000 },
+  { source: 'docs', target: 'left', value: 33_000 },
+  { source: 'pricing', target: 'signup', value: 21_000 },
+  { source: 'pricing', target: 'left', value: 30_000 },
+];
+
+const TOTAL = 98_000;
+
+function Reading() {
+  const { activeLabel, activeValue, activeLink } = useSankeyChart();
+  if (activeLink) {
+    return (
+      <SankeyChart.Header
+        title={`${activeLink.source.label} to ${activeLink.target.label}`}
+        value={activeLink.value.toLocaleString('en-US')}
+      />
+    );
+  }
+  return (
+    <SankeyChart.Header
+      title={activeLabel ? `${activeLabel}, ${Math.round((activeValue / TOTAL) * 100)}% of sessions` : 'Sessions'}
+      value={(activeLabel ? activeValue : TOTAL).toLocaleString('en-US')}
+    />
+  );
+}
+
+export default function SankeyChartOverview() {
+  return (
+    <Frame variant="band" className="w-full max-w-2xl">
+      <Frame.Header>
+        <Frame.Title>Traffic</Frame.Title>
+        <Frame.Action>November</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <SankeyChart nodes={STAGES} links={FLOWS} height={300} label="Sessions from source to outcome">
+          <Reading />
+          <SankeyChart.Links />
+          <SankeyChart.Nodes />
+          <SankeyChart.Labels showValue />
+          <SankeyChart.Breakdown formatValue={(value) => value.toLocaleString('en-US')} />
+        </SankeyChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a routing question: which campaigns produced which signups, which budget lines paid for which departments. The answer has to need a source and a target, because a ribbon has two ends and its thickness is the amount that travelled.
+
+Ribbons are grey at rest and the bars carry the colour. Hovering, tapping or walking to a stage with the arrow keys colours its whole route, every stage before and after it, and a click pins the reading.
+
+The rows under the diagram are optional: `SankeyChart.Breakdown` and `SankeyChart.Legend` are parts, so a chart has them only if you write them.
+
+For a total cut into parts with no routing between them, or what survived each step of one process, a bar chart is easier to read.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/sankey-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/sankey-chart` instead of `@/components/panelui/sankey-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/sankey-chart/`, one file for each below:
+
+<RegistrySource name="sankey-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { SankeyChart, type SankeyNode, type SankeyLink } from "@/components/panelui/sankey-chart"
+```
+
+```tsx
+<SankeyChart nodes={stages} links={flows} height={300}>
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+</SankeyChart>
+```
+
+## Composition
+
+```tsx
+<SankeyChart nodes={…} links={…}>
+  <SankeyChart.Header />
+  <SankeyChart.Skeleton />
+  <SankeyChart.Links />
+  <SankeyChart.Nodes />
+  <SankeyChart.Labels />
+  <SankeyChart.Tooltip />
+  <SankeyChart.Breakdown />
+  <SankeyChart.Legend />
+</SankeyChart>
+```
+
+- **`SankeyChart.Header`** — The strip above the diagram: `title`, `value` and `caption`, with your own control on the trailing side. The value is not derived, because 128400 can be a count, a currency or a rate.
+- **`SankeyChart.Skeleton`** — Plain equal bars and ribbons, drawn only while `status` is `loading`. Equal, because varied thicknesses would look like real routing.
+- **`SankeyChart.Links`** — The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others. A ribbon's `opacity` on the data fades it within that gradient.
+- **`SankeyChart.Nodes`** — The bars the ribbons run between. A bar's height is what passes through it. A node with `bar: false` draws none and can still be read.
+- **`SankeyChart.Labels`** — The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.
+- **`SankeyChart.Tooltip`** — The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.
+- **`SankeyChart.Breakdown`** — Optional. The figures, written out under the diagram. At rest it lists where the flow starts and ends. Reading a stage swaps in where each of its streams came from and went, with its share of the stage. A row selects the node it names. It holds its height, so reading a stage does not move the page.
+- **`SankeyChart.Legend`** — Optional. Every stage named under the diagram with its share of the largest column's total. Use it when some bars are too small to carry a name: pressing an entry selects that node.
+
+## Examples
+
+### The diagram alone
+
+Leave out `Breakdown` and `Legend` for just the flow. Reading a stage still colours its route. Add `Tooltip` if the figures are needed.
+
+<ComponentPreview name="sankey-chart/plain" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'search', target: 'docs', value: 26_000 },
+  { source: 'search', target: 'pricing', value: 16_000 },
+  { source: 'social', target: 'docs', value: 9_000 },
+  { source: 'social', target: 'pricing', value: 22_000 },
+  { source: 'direct', target: 'docs', value: 12_000 },
+  { source: 'direct', target: 'pricing', value: 13_000 },
+  { source: 'docs', target: 'signup', value: 14_000 },
+  { source: 'docs', target: 'left', value: 33_000 },
+  { source: 'pricing', target: 'signup', value: 21_000 },
+  { source: 'pricing', target: 'left', value: 30_000 },
+];
+
+export default function SankeyChartPlain() {
+  return (
+    <SankeyChart nodes={STAGES} links={FLOWS} height={300} className="max-w-2xl">
+      <SankeyChart.Links />
+      <SankeyChart.Nodes />
+      <SankeyChart.Labels />
+    </SankeyChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Ribbons in colour
+
+Pass `gradient` to `SankeyChart.Links` to blend each ribbon from its source's colour to its target's. A ribbon with its own `color` stays that colour. The colours compete with the labels, so use it when the stages are few enough to tell apart.
+
+<ComponentPreview name="sankey-chart/gradient" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'search', target: 'docs', value: 26_000 },
+  { source: 'search', target: 'pricing', value: 16_000 },
+  { source: 'social', target: 'docs', value: 9_000 },
+  { source: 'social', target: 'pricing', value: 22_000 },
+  { source: 'direct', target: 'docs', value: 12_000 },
+  { source: 'direct', target: 'pricing', value: 13_000 },
+  { source: 'docs', target: 'signup', value: 14_000 },
+  { source: 'docs', target: 'left', value: 33_000 },
+  { source: 'pricing', target: 'signup', value: 21_000 },
+  { source: 'pricing', target: 'left', value: 30_000 },
+];
+
+export default function SankeyChartGradient() {
+  return (
+    <SankeyChart nodes={STAGES} links={FLOWS} height={300} className="max-w-2xl">
+      <SankeyChart.Links gradient />
+      <SankeyChart.Nodes />
+      <SankeyChart.Labels showValue />
+      <SankeyChart.Breakdown />
+    </SankeyChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Ribbons into a table
+
+`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. A row whose text wraps grows past it and moves every row below off its ribbon, so keep the cells to one line with `whitespace-nowrap`. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.
+
+<ComponentPreview name="sankey-chart/rows" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+import { Table } from '@/components/panelui/table';
+
+const HEAD = 32;
+const ROW = 38;
+
+const CATEGORIES = [
+  { id: 'rent', label: 'Rent', color: '#6366f1', amount: 1_650 },
+  { id: 'groceries', label: 'Groceries', color: '#10b981', amount: 620 },
+  { id: 'dining', label: 'Dining', color: '#f59e0b', amount: 380 },
+  { id: 'transport', label: 'Transport', color: '#ec4899', amount: 240 },
+  { id: 'kept', label: 'Kept', color: '#94a3b8', amount: 1_810 },
+];
+
+const NODES: SankeyNode[] = [
+  { id: 'salary', label: 'Salary', bar: false, color: '#38bdf8' },
+  { id: 'freelance', label: 'Freelance', bar: false, color: '#a78bfa' },
+  { id: 'income', label: 'Income', color: 'var(--foreground)' },
+  ...CATEGORIES.map(({ id, label, color }) => ({ id, label, color })),
+];
+
+const LINKS: SankeyLink[] = [
+  { source: 'salary', target: 'income', value: 3_900, color: '#38bdf8', opacity: [0.75, 0.3] },
+  { source: 'freelance', target: 'income', value: 800, color: '#a78bfa', opacity: [0.75, 0.3] },
+  ...CATEGORIES.map(({ id, color, amount }) => ({
+    source: 'income',
+    target: id,
+    value: amount,
+    color,
+    opacity: [0.3, 1] as const,
+  })),
+];
+
+const money = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+export default function SankeyChartRows() {
+  const [active, setActive] = useState<string | null>(null);
+
+  return (
+    <div className="grid w-full max-w-3xl grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-x-3">
+      <SankeyChart
+        nodes={NODES}
+        links={LINKS}
+        height={HEAD + CATEGORIES.length * ROW}
+        nodeWidth={3}
+        targetRows={{ top: HEAD, height: ROW, taper: 0.3 }}
+        activeId={active}
+        onActiveIdChange={setActive}
+      >
+        <SankeyChart.Links gradient />
+        <SankeyChart.Nodes />
+        <SankeyChart.Labels />
+      </SankeyChart>
+      <Table density="compact">
+        <Table.Header>
+          <Table.Row>
+            <Table.Head>Category</Table.Head>
+            <Table.Head align="end">Spent</Table.Head>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {CATEGORIES.map(({ id, label, color, amount }) => (
+            <Table.Row
+              key={id}
+              className="h-[38px]"
+              data-state={active === id ? 'selected' : undefined}
+              onMouseEnter={() => setActive(id)}
+              onMouseLeave={() => setActive(null)}
+            >
+              <Table.Cell className="whitespace-nowrap">
+                <span className="flex items-center gap-2">
+                  <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                  {label}
+                </span>
+              </Table.Cell>
+              <Table.Cell align="end">{money(amount)}</Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Which column a node goes in
+
+`align` settles what the flow leaves open. `justify`, the default, pushes every node that feeds nothing into the last column. Use `left` when the columns are steps of a process and a node that stops early did stop early.
+
+<ComponentPreview name="sankey-chart/align" height={360}>
+
+```tsx lineNumbers
+'use client';
+
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'visit', label: 'Visited' },
+  { id: 'bounce', label: 'Bounced' },
+  { id: 'trial', label: 'Started a trial' },
+  { id: 'paid', label: 'Paid' },
+  { id: 'lapsed', label: 'Lapsed' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'visit', target: 'bounce', value: 62_000 },
+  { source: 'visit', target: 'trial', value: 38_000 },
+  { source: 'trial', target: 'paid', value: 11_000 },
+  { source: 'trial', target: 'lapsed', value: 27_000 },
+];
+
+export default function SankeyChartAlign() {
+  return (
+    <SankeyChart nodes={STAGES} links={FLOWS} height={300} align="left" className="max-w-2xl">
+      <SankeyChart.Links />
+      <SankeyChart.Nodes />
+      <SankeyChart.Labels showValue />
+    </SankeyChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Running the flow downwards
+
+`orientation="vertical"` runs the stages down the page, which suits a narrow column. Left unset, `height` is worked out from how many stages the flow needs.
+
+<ComponentPreview name="sankey-chart/vertical" height={560}>
+
+```tsx lineNumbers
+'use client';
+
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'search', target: 'docs', value: 26_000 },
+  { source: 'search', target: 'pricing', value: 16_000 },
+  { source: 'social', target: 'docs', value: 9_000 },
+  { source: 'social', target: 'pricing', value: 22_000 },
+  { source: 'direct', target: 'docs', value: 12_000 },
+  { source: 'direct', target: 'pricing', value: 13_000 },
+  { source: 'docs', target: 'signup', value: 14_000 },
+  { source: 'docs', target: 'left', value: 33_000 },
+  { source: 'pricing', target: 'signup', value: 21_000 },
+  { source: 'pricing', target: 'left', value: 30_000 },
+];
+
+export default function SankeyChartVertical() {
+  return (
+    <SankeyChart nodes={STAGES} links={FLOWS} orientation="vertical" className="max-w-sm">
+      <SankeyChart.Links />
+      <SankeyChart.Nodes />
+      <SankeyChart.Labels />
+      <SankeyChart.Tooltip />
+    </SankeyChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Too many small streams
+
+A ribbon carries its value in its thickness, so a column of thirty is thirty hairlines. `collapse` folds each column's smallest nodes into one bucket. `maxPerColumn` caps how many a column keeps, and `minShare` folds anything under that fraction of its column.
+
+<ComponentPreview name="sankey-chart/collapse" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const COUNTRIES = ['USA', 'Germany', 'Brazil', 'Japan', 'India', 'France', 'Spain', 'Mexico', 'Canada', 'Italy', 'Norway', 'Chile'];
+
+const STAGES: SankeyNode[] = [
+  ...COUNTRIES.map((id) => ({ id })),
+  { id: 'free', label: 'Free' },
+  { id: 'pro', label: 'Pro' },
+];
+
+const FLOWS: SankeyLink[] = COUNTRIES.flatMap((source, index) => [
+  { source, target: 'free', value: 900 - index * 70 },
+  { source, target: 'pro', value: 420 - index * 30 },
+]);
+
+export default function SankeyChartCollapse() {
+  return (
+    <SankeyChart nodes={STAGES} links={FLOWS} height={320} collapse={{ maxPerColumn: 6 }} className="max-w-2xl">
+      <SankeyChart.Links />
+      <SankeyChart.Nodes />
+      <SankeyChart.Labels />
+      <SankeyChart.Legend />
+    </SankeyChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `SankeyChart.Skeleton` and drive `status`. The flow draws in column by column when it turns `ready`, and a `ref` on the chart has `replay()`, which draws it in again.
+
+<ComponentPreview name="sankey-chart/loading" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { SankeyChart, type SankeyChartStatus, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'search', label: 'Search' },
+  { id: 'social', label: 'Social' },
+  { id: 'direct', label: 'Direct' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'signup', label: 'Signed up' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'search', target: 'docs', value: 26_000 },
+  { source: 'search', target: 'pricing', value: 16_000 },
+  { source: 'social', target: 'docs', value: 9_000 },
+  { source: 'social', target: 'pricing', value: 22_000 },
+  { source: 'direct', target: 'docs', value: 12_000 },
+  { source: 'direct', target: 'pricing', value: 13_000 },
+  { source: 'docs', target: 'signup', value: 14_000 },
+  { source: 'docs', target: 'left', value: 33_000 },
+  { source: 'pricing', target: 'signup', value: 21_000 },
+  { source: 'pricing', target: 'left', value: 30_000 },
+];
+
+export default function SankeyChartLoading() {
+  const [status, setStatus] = useState<SankeyChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-2xl flex-col items-start gap-4">
+      <SankeyChart nodes={STAGES} links={FLOWS} height={300} status={status}>
+        <SankeyChart.Skeleton />
+        <SankeyChart.Links />
+        <SankeyChart.Nodes />
+        <SankeyChart.Labels />
+      </SankeyChart>
+      <Button variant="outline" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Rows that cannot be drawn
+
+A row naming a missing node, carrying nothing or closing a loop is dropped rather than thrown. `onDropLinks` reports how many, so a screen can say so.
+
+<ComponentPreview name="sankey-chart/dropped" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Alert } from '@/components/panelui/alert';
+import { SankeyChart, type SankeyLink, type SankeyNode } from '@/components/panelui/sankey-chart';
+
+const STAGES: SankeyNode[] = [
+  { id: 'ads', label: 'Ads' },
+  { id: 'store', label: 'Store' },
+  { id: 'bought', label: 'Bought' },
+  { id: 'left', label: 'Left' },
+];
+
+const FLOWS: SankeyLink[] = [
+  { source: 'ads', target: 'store', value: 800 },
+  { source: 'store', target: 'bought', value: 240 },
+  { source: 'store', target: 'left', value: 560 },
+  { source: 'store', target: 'wishlist', value: 90 },
+  { source: 'bought', target: 'ads', value: 40 },
+];
+
+export default function SankeyChartDropped() {
+  const [dropped, setDropped] = useState(0);
+
+  return (
+    <div className="flex w-full max-w-2xl flex-col gap-3">
+      {dropped > 0 ? (
+        <Alert tone="warning">
+          <Alert.Title>{dropped} rows could not be drawn</Alert.Title>
+        </Alert>
+      ) : null}
+      <SankeyChart nodes={STAGES} links={FLOWS} height={240} onDropLinks={setDropped}>
+        <SankeyChart.Links />
+        <SankeyChart.Nodes />
+        <SankeyChart.Labels />
+      </SankeyChart>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### SankeyChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nodes` | `readonly SankeyNode[]` | — | The stages. Order does not decide position; the links do. |
+| `links` | `readonly SankeyLink[]` | — | What travels between them. |
+| `height` | `number` | — | How tall the diagram is drawn, in pixels. Under `orientation="vertical"` it is the length of the flow, and left unset it is worked out from how many stages the flow needs. |
+| `nodeWidth` | `number` | `10` | How thick a node's bar is, in pixels. |
+| `nodePadding` | `number` | `14` | The most space between two nodes in a column, in pixels. A crowded column gives it up first. |
+| `orientation` | `SankeyOrientation` | `'horizontal'` | `horizontal` runs the flow across, `vertical` from the top down, which suits a narrow screen. |
+| `collapse` | `SankeyCollapse` | — | Folds each column's smallest nodes into one bucket. `maxPerColumn` caps how many a column keeps, the bucket included; `minShare` folds anything under that fraction of its column; `label` names the bucket, `Other` by default. |
+| `align` | `SankeyAlign` | `'justify'` | Which column a node goes in where the flow leaves a choice. |
+| `iterations` | `number` | `6` | Relaxation rounds spent untangling the ribbons. |
+| `curve` | `number` | `0.5` | How far a ribbon bends, `0` for a straight diagonal and `0.5` for an S. |
+| `animationDuration` | `number` | `620` | Milliseconds for one column to draw itself. |
+| `staggerDelay` | `number` | `110` | Milliseconds between one column starting and the next. |
+| `status` | `SankeyChartStatus` | `'ready'` | `loading` holds the data back. Add `SankeyChart.Skeleton` for a shape to stand in meanwhile. |
+| `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
+| `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the id of the node being read, and `null` when none is. |
+| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows, and keep each row to one line, because a taller row moves those below it off their ribbons. A horizontal flow only. |
+| `onLayout` | `(targets: readonly SankeyTargetLayout[]) => void` | — | Fires with where the last column landed, and again when that moves. |
+| `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn: ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForLink` | `(link: SankeyLink, index: number) => string` | — | What a screen reader says for one ribbon. Defaults to "source to target, value". |
+
+### SankeyChart.Links
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `gradient` | `boolean` | — | Blend each ribbon from its source's colour to its target's, at rest as well as on a route. |
+| `opacity` | `number` | — | A ribbon's opacity at rest. Defaults to `0.09`, or `0.45` with `gradient`. |
+| `activeOpacity` | `number` | — | A ribbon's opacity on the route being read. Defaults to `0.42`, or `0.8` with `gradient`. |
+
+### SankeyChart.Nodes
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `radius` | `number` | — | Corner radius on a node's bar, in pixels. |
+| `dimOpacity` | `number` | — | A bar's opacity when it is off the route being read. |
+| `interactive` | `boolean` | — | Whether hovering or pressing a bar reads its node. |
+
+### SankeyChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, id: string) => string` | — | Format the figure under a name. Defaults to a compact number. |
+| `showValue` | `boolean` | — | Show the figure under the name. |
+| `minHeight` | `number` | — | Hide the name on a bar shorter than this, in pixels. |
+
+### SankeyChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### SankeyChart.Breakdown
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number) => string` | — | Format the figures. Defaults to a compact number. |
+| `maxRows` | `number` | — | How many rows each side shows before stopping. |
+| `onSelectNode` | `(id: string) => void` | — | Fires with the node at the other end of a row, as the chart follows it there. |
+| `startsTitle` | `ReactNode` | `'Sources'` | The heading over the stages nothing arrives at, while nothing is being read. |
+| `endsTitle` | `ReactNode` | `'Outcomes'` | The heading over the stages nothing leaves, while nothing is being read. |
+| `sourcesTitle` | `ReactNode` | `'From'` | The heading over what arrives at the stage being read. |
+| `targetsTitle` | `ReactNode` | `'To'` | The heading over what leaves the stage being read. |
+
+### SankeyChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | — | How many names to show before stopping. |
+| `showShare` | `boolean` | — | Show each node's share of the largest column's total beside its name. |
+
+### SankeyChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the flow is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a caveat. |
+
+`SankeyChart`, `SankeyChart.Header`, `SankeyChart.Breakdown` and `SankeyChart.Legend` also take the props of the element they render, and a `className`. `SankeyChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
+
+## Notes
+
+### Sizing
+
+The chart fills its container's width and takes its height from `height`, because nothing in a flow says how deep it should be. Raising it thickens every ribbon together, which is how to make small streams legible. The plot draws in the browser after it has been measured, and the space is reserved until then.
+
+### What a bar is worth
+
+A node is worth the larger of what arrives and what leaves. Give it a `value` to pin it, for a stage that loses some of what it received to somewhere the links do not describe.
+
+### Keyboard
+
+The arrow keys walk the bars, column by column. Escape clears the reading. A screen reader gets every ribbon as a list, named by `labelForLink`.
+
+### Server Components
+
+`SankeyChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `SankeyChart.Header` off the import, so each part is also exported by name: `SankeyChartHeader` is `SankeyChart.Header`, and so on for the others.
+
+```tsx
+import { SankeyChart, SankeyChartHeader, SankeyChartLinks, SankeyChartNodes, SankeyChartLabels, SankeyChartTooltip, SankeyChartBreakdown, SankeyChartLegend, SankeyChartSkeleton } from "@/components/panelui/sankey-chart"
+```

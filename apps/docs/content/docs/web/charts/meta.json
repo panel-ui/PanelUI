@@ -1,7 +1,13 @@
 {
   "title": "Charts",
   "pages": [
+    "area-chart",
     "bar-chart",
-    "treemap-chart"
+    "bubble-chart",
+    "line-chart",
+    "plot",
+    "sankey-chart",
+    "treemap-chart",
+    "waterfall-chart"
   ]
 }

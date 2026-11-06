@@ -1,7 +1,16 @@
 {
   "title": "Charts",
   "pages": [
+    "area-chart",
     "bar-chart",
-    "candlestick-chart"
+    "bubble-chart",
+    "candlestick-chart",
+    "line-chart",
+    "live-line-chart",
+    "plot",
+    "sankey-chart",
+    "scatter-chart",
+    "treemap-chart",
+    "waterfall-chart"
   ]
 }

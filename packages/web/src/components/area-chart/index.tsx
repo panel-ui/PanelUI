@@ -84,8 +84,7 @@ export type AreaChartStatus = 'loading' | 'ready';
 export type AreaChartCurve = 'monotone' | 'linear' | 'step';
 export type AreaChartDatum = Record<string, string | number | null | undefined>;
 
-/** Which of the theme's roles a series is drawn in. */
-export type AreaChartColor =
+type AreaChartRole =
   | 'primary'
   | 'info'
   | 'success'
@@ -99,7 +98,10 @@ export type AreaChartColor =
   | 'foreground'
   | 'muted-foreground';
 
-const COLOR_VAR: Record<AreaChartColor, string> = {
+/** A role in the theme, or any CSS colour for one the theme has no role for. */
+export type AreaChartColor = AreaChartRole | (string & {});
+
+const COLOR_VAR: Record<AreaChartRole, string> = {
   primary: 'var(--primary)',
   info: 'var(--info)',
   success: 'var(--success)',
@@ -113,6 +115,8 @@ const COLOR_VAR: Record<AreaChartColor, string> = {
   foreground: 'var(--foreground)',
   'muted-foreground': 'var(--muted-foreground)',
 };
+
+const paintOf = (color: AreaChartColor) => COLOR_VAR[color as AreaChartRole] ?? color;
 
 const THEME = {
   foreground: 'var(--foreground)',
@@ -143,6 +147,7 @@ const areaChartVariants = tv({
       'col-start-1 row-start-3 m-0 mt-2 flex list-none flex-wrap gap-x-3 gap-y-1 p-0 text-xs @lg:relative @lg:col-start-2 @lg:row-start-2 @lg:mt-0 @lg:block @lg:w-44',
     labelsItem:
       'flex items-center gap-1.5 whitespace-nowrap @lg:absolute @lg:inset-x-0 @lg:-translate-y-1/2 @lg:pl-3',
+    labelsAction: 'flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 text-left',
     labelsName: 'min-w-0 flex-1 truncate font-medium',
     labelsValue: 'text-muted-foreground tabular-nums',
     header: 'col-span-full row-start-1 flex items-start justify-between gap-3 pb-3',
@@ -248,6 +253,7 @@ interface AreaChartContextValue {
   loading: boolean;
   setSlot: <K extends keyof Slots>(slot: K, value: Slots[K]) => void;
   activeIndex: number;
+  onSelect: ((key: string) => void) | undefined;
 }
 
 const AreaChartContext = createContext<AreaChartContextValue | null>(null);
@@ -346,7 +352,7 @@ function skeletonOutline(nodes: readonly SceneNode[], x = 0, y = 0, inside = fal
     .join('');
 }
 
-export interface AreaChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
+export interface AreaChartProps extends Omit<ComponentProps<'div'>, 'ref' | 'onSelect'> {
   /** The rows. Each one is a point along the x-axis. */
   data: readonly AreaChartDatum[];
   /** Key holding the x label. Used by the axis and the readout. */
@@ -377,6 +383,8 @@ export interface AreaChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
    * index changes, not per frame.
    */
   onActiveIndexChange?: (index: number, datum: AreaChartDatum | null) => void;
+  /** An `Area` was chosen, by pressing it on the plot or its entry in `Labels`. Gets its `dataKey`. */
+  onSelect?: (key: string) => void;
   /** Drop the axis padding so the bands reach the edges, for a sparkline. */
   compact?: boolean;
   /** What a screen reader calls the chart. */
@@ -390,7 +398,7 @@ export interface AreaChartHandle {
   replay: () => void;
 }
 
-const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'div'>>(function AreaChartRoot(
+const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderProp<'div'>, 'onSelect'>>(function AreaChartRoot(
   {
     data,
     xDataKey = 'date',
@@ -402,6 +410,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     stacked = false,
     curve = 'monotone',
     onActiveIndexChange,
+    onSelect,
     compact = false,
     label,
     labelForDatum,
@@ -425,6 +434,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
   const [outline, setOutline] = useState('');
   const interactionRef = useRef<ChartInteractionController<BandRow, number, number> | null>(null);
   const dragging = useRef(false);
+  // The arrow keys walk rows, not series, so Enter on the plot has no series to mean.
+  const pressedByKey = useRef(false);
   const dragRelease = useRef<AbortController | null>(null);
   useEffect(() => () => dragRelease.current?.abort(), []);
 
@@ -781,8 +792,10 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
       loading,
       setSlot,
       activeIndex,
+      onSelect,
     }),
     [
+      onSelect,
       data,
       xDataKey,
       stacked,
@@ -869,6 +882,12 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
               data-slot="area-chart-plot"
               className={slotClasses.plot()}
               style={{ aspectRatio }}
+              onPointerDownCapture={() => {
+                pressedByKey.current = false;
+              }}
+              onKeyDownCapture={() => {
+                pressedByKey.current = true;
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') interactionRef.current?.setControlledFocus(null);
               }}
@@ -887,6 +906,14 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
                   initialWidth={width}
                   className={slotClasses.chart()}
                   onFocusChange={onFocusChange}
+                  onSelect={
+                    onSelect
+                      ? (point) => {
+                          const key = point?.datum.series;
+                          if (key && !pressedByKey.current && series.some((entry) => entry.key === key)) onSelect(key);
+                        }
+                      : undefined
+                  }
                   onRender={({ scene, interaction }) => {
                     interactionRef.current = interaction;
                     setOutline(skeletonOutline(scene.nodes));
@@ -971,7 +998,7 @@ AreaChartGrid.displayName = 'AreaChart.Grid';
 export interface AreaChartAreaProps {
   /** Column in the data holding this series' values. */
   dataKey: string;
-  /** Which of the theme's roles the series is drawn in. */
+  /** A role in the theme, or any CSS colour. */
   color?: AreaChartColor;
   /**
    * Opacity of the fill at the top of the band. Defaults to `0.6` stacked and
@@ -1003,7 +1030,7 @@ function AreaChartArea({
   strokeWidth = 2,
 }: AreaChartAreaProps) {
   const { setSeries, removeSeries } = useChart('AreaChart.Area');
-  const stroke = COLOR_VAR[color];
+  const stroke = paintOf(color);
   useEffect(() => {
     setSeries({ key: dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth });
   }, [dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth, setSeries]);
@@ -1016,7 +1043,7 @@ AreaChartArea.displayName = 'AreaChart.Area';
 export interface AreaChartLineProps {
   /** Column in the data holding this line's values. */
   dataKey: string;
-  /** Which of the theme's roles the line is drawn in. */
+  /** A role in the theme, or any CSS colour. */
   color?: AreaChartColor;
   /** Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. */
   curve?: AreaChartCurve;
@@ -1039,7 +1066,7 @@ function AreaChartLine({
   strokeWidth = 2,
 }: AreaChartLineProps) {
   const { setLine, removeLine } = useChart('AreaChart.Line');
-  const stroke = COLOR_VAR[color];
+  const stroke = paintOf(color);
   useEffect(() => {
     setLine({ key: dataKey, stroke, curve, dashArray, strokeWidth });
   }, [dataKey, stroke, curve, dashArray, strokeWidth, setLine]);
@@ -1062,7 +1089,7 @@ function useAnnotation(component: string, entry: Omit<Annotation, 'id'>) {
 export interface AreaChartReferenceLineProps {
   /** The value to draw the rule at. It counts toward the value axis. */
   y: number;
-  /** Which of the theme's roles the rule and its label are drawn in. */
+  /** A role in the theme, or any CSS colour, for the rule and its label. */
   color?: AreaChartColor;
   /** The stroke's dash pattern. */
   dashArray?: string;
@@ -1077,7 +1104,7 @@ function AreaChartReferenceLine({
   dashArray = '3 4',
   label,
 }: AreaChartReferenceLineProps) {
-  useAnnotation('AreaChart.ReferenceLine', { axis: 'y', at: y, stroke: COLOR_VAR[color], dashArray, label });
+  useAnnotation('AreaChart.ReferenceLine', { axis: 'y', at: y, stroke: paintOf(color), dashArray, label });
   return null;
 }
 AreaChartReferenceLine.displayName = 'AreaChart.ReferenceLine';
@@ -1085,7 +1112,7 @@ AreaChartReferenceLine.displayName = 'AreaChart.ReferenceLine';
 export interface AreaChartMarkerProps {
   /** The row to draw the rule at, counted from `0`. */
   index: number;
-  /** Which of the theme's roles the rule and its label are drawn in. */
+  /** A role in the theme, or any CSS colour, for the rule and its label. */
   color?: AreaChartColor;
   /** The stroke's dash pattern. */
   dashArray?: string;
@@ -1100,7 +1127,7 @@ function AreaChartMarker({
   dashArray = '2 3',
   label,
 }: AreaChartMarkerProps) {
-  useAnnotation('AreaChart.Marker', { axis: 'x', at: index, stroke: COLOR_VAR[color], dashArray, label });
+  useAnnotation('AreaChart.Marker', { axis: 'x', at: index, stroke: paintOf(color), dashArray, label });
   return null;
 }
 AreaChartMarker.displayName = 'AreaChart.Marker';
@@ -1143,7 +1170,7 @@ function AreaChartLabels({
   render,
   ...props
 }: AreaChartLabelsProps & RenderProp<'ol'>) {
-  const { data, series, lines, stacked, valueAxis, loading } = useChart('AreaChart.Labels');
+  const { data, series, lines, stacked, valueAxis, loading, onSelect } = useChart('AreaChart.Labels');
   const slots = areaChartVariants();
   const last = data.slice(-1);
   const opacities = new Map(series.map(({ key, opacity }) => [key, opacity]));
@@ -1173,12 +1200,8 @@ function AreaChartLabels({
         className: slots.labels({ className }),
         children: placed.map(({ key, value, y }) => {
           const swatch = swatchOf.get(key);
-          return (
-            <li
-              key={key}
-              className={slots.labelsItem()}
-              style={{ top: y, opacity: (opacities.get(key) ?? 1) < 1 ? DIMMED_LABEL_OPACITY : undefined }}
-            >
+          const content = (
+            <>
               <span
                 aria-hidden
                 className={swatch?.rule ? slots.legendRule() : slots.legendSwatch()}
@@ -1188,6 +1211,21 @@ function AreaChartLabels({
               <span className={slots.labelsValue()}>
                 {formatValue ? formatValue(value ?? 0, key) : compactNumber(value ?? 0)}
               </span>
+            </>
+          );
+          return (
+            <li
+              key={key}
+              className={slots.labelsItem()}
+              style={{ top: y, opacity: (opacities.get(key) ?? 1) < 1 ? DIMMED_LABEL_OPACITY : undefined }}
+            >
+              {onSelect && opacities.has(key) ? (
+                <button type="button" className={slots.labelsAction()} onClick={() => onSelect(key)}>
+                  {content}
+                </button>
+              ) : (
+                content
+              )}
             </li>
           );
         }),

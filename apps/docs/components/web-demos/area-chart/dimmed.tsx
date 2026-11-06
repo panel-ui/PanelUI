@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { AreaChart } from 'panelui-web/area-chart';
 
 const SPEND = [
@@ -10,12 +12,19 @@ const SPEND = [
   { week: 'W5', rent: 300, food: 150, travel: 130 },
 ];
 
+const CATEGORIES = [
+  { key: 'rent', color: '#0ea5e9' },
+  { key: 'food', color: '#f97316' },
+  { key: 'travel', color: '#a855f7' },
+];
+
 const LABELS = { rent: 'Rent', food: 'Food', travel: 'Travel' };
 
 /** How far the series that are not picked fade. */
 const DIMMED = 0.25;
 
 export default function AreaChartDimmed() {
+  const [picked, setPicked] = useState('food');
   return (
     <AreaChart
       data={SPEND}
@@ -23,12 +32,13 @@ export default function AreaChartDimmed() {
       stacked
       className="max-w-2xl"
       aspectRatio={2.4}
-      label="Spending per week, with food picked out"
+      label="Spending per week by category. Choose a category to pick it out."
+      onSelect={setPicked}
     >
       <AreaChart.Grid />
-      <AreaChart.Area dataKey="rent" color="success" opacity={DIMMED} />
-      <AreaChart.Area dataKey="food" color="info" />
-      <AreaChart.Area dataKey="travel" color="warning" opacity={DIMMED} />
+      {CATEGORIES.map(({ key, color }) => (
+        <AreaChart.Area key={key} dataKey={key} color={color} opacity={key === picked ? 1 : DIMMED} />
+      ))}
       <AreaChart.YAxis />
       <AreaChart.XAxis />
       <AreaChart.Labels labels={LABELS} />

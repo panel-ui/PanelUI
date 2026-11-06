@@ -80,6 +80,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | `stacked` | `boolean` | `false` | Sit each band on the running total of the ones below it, so the top edge is the whole and each thickness is a share. The first `Area` is the bottom of the stack. Without it the bands overlay and their fills are translucent. |
 | `curve` | `AreaChartCurve` | `'monotone'` | `monotone` never overshoots between points. `linear` joins them straight. `step` holds each value until the next. |
 | `onActiveIndexChange` | `(index: number, datum: AreaChartDatum \| null) => void` | — | The point being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
+| `onSelect` | `(key: string) => void` | — | An `Area` was chosen, by pressing it on the plot or its entry in `Labels`. Gets its `dataKey`. |
 | `compact` | `boolean` | `false` | Drop the axis padding so the bands reach the edges, for a sparkline. |
 | `label` | `string` | — | What a screen reader calls the chart. |
 | `labelForDatum` | `(datum: AreaChartDatum, index: number) => string` | — | What a screen reader says for one row. Defaults to its keys and values. |
@@ -97,7 +98,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. |
-| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the series is drawn in. |
+| `color` | `AreaChartColor` | `'chart-1'` | A role in the theme, or any CSS colour. |
 | `fillOpacity` | `number` | — | Opacity of the fill at the top of the band. Defaults to `0.6` stacked and `0.35` overlaid, so overlaid bands show each other through. |
 | `gradientToOpacity` | `number` | `0` | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
 | `opacity` | `number` | `1` | Opacity of the whole series, fill and edge, for picking one out from the others. |
@@ -109,7 +110,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this line's values. |
-| `color` | `AreaChartColor` | `'foreground'` | Which of the theme's roles the line is drawn in. |
+| `color` | `AreaChartColor` | `'foreground'` | A role in the theme, or any CSS colour. |
 | `curve` | `AreaChartCurve` | — | Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. |
 | `dashArray` | `string` | — | The stroke's dash pattern. |
 | `strokeWidth` | `number` | `2` | Thickness of the line. |
@@ -119,7 +120,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `y` | `number` | **required** | The value to draw the rule at. It counts toward the value axis. |
-| `color` | `AreaChartColor` | `'foreground'` | Which of the theme's roles the rule and its label are drawn in. |
+| `color` | `AreaChartColor` | `'foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
 | `dashArray` | `string` | `'3 4'` | The stroke's dash pattern. |
 | `label` | `string` | — | Text above the rule's left end. |
 
@@ -128,7 +129,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `index` | `number` | **required** | The row to draw the rule at, counted from `0`. |
-| `color` | `AreaChartColor` | `'muted-foreground'` | Which of the theme's roles the rule and its label are drawn in. |
+| `color` | `AreaChartColor` | `'muted-foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
 | `dashArray` | `string` | `'2 3'` | The stroke's dash pattern. |
 | `label` | `string` | — | Text beside the rule's top. It moves to the left of a rule near the right edge. |
 
@@ -216,7 +217,7 @@ The chart adds about 67 KB of gzipped JavaScript to a page that uses it. A page 
 
 #### Colour
 
-`color` names a role in the theme. Every `Area` defaults to `chart-1`, so give the others their own. `Line` and `ReferenceLine` default to `foreground`, and `Marker` to `muted-foreground`.
+`color` names a role in the theme. Every `Area` defaults to `chart-1`, so give the others their own. `Line` and `ReferenceLine` default to `foreground`, and `Marker` to `muted-foreground`. `color` also takes any CSS colour, for a colour that comes from your data. Unlike a role, it does not change with the theme.
 
 #### Reading a point
 
@@ -227,6 +228,8 @@ With a `Tooltip`, hovering the plot reads the nearest point. A click or a tap pi
 #### Keyboard
 
 With a `Tooltip`, the plot takes focus. The arrow keys move between points, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it.
+
+The arrow keys move between rows, not series, so Enter on the plot does not call `onSelect`. Add `AreaChart.Labels` so a keyboard can reach it: each `Area`'s entry becomes a button.
 
 #### Screen readers
 

@@ -1,0 +1,66 @@
+{
+  "slug": "plot",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 520
+  },
+  "intro": "Use `Plot` when you need a combination of marks that no named chart draws: columns with a line over them, a series against a shaded band, or a mark you wrote yourself. It measures a box and resolves one y-axis, and every part you put inside it draws on them, in the order they are written.\n\nReach for a named chart first. [Bar Chart](/docs/web/charts/bar-chart) and the others already decide where the baseline belongs and how loading reads, and a chart assembled here has to make those decisions itself.\n\nIt is marked alpha. The parts are settled, and the fields `usePlot` hands out are the part most likely to change.",
+  "usage": "<Plot data={months} xDataKey=\"month\">\n  <Plot.Grid />\n  <Plot.Bars dataKey=\"revenue\" color=\"info\" />\n  <Plot.Line dataKey=\"costs\" color=\"primary\" />\n  <Plot.YAxis />\n  <Plot.XAxis />\n</Plot>",
+  "anatomy": "<Plot data={…}>\n  <Plot.Header />    {/* the row above the drawing */}\n  <Plot.Legend />    {/* a swatch and a name per mark */}\n  <Plot.Grid />      {/* the rules the marks arrive into */}\n  <Plot.Area />      {/* a series as a fill */}\n  <Plot.Bars />      {/* a series as columns */}\n  <Plot.Line />      {/* a series as a stroke */}\n  <Plot.Dots />      {/* a dot per row */}\n  <Plot.Layer />     {/* marks of your own, in SVG */}\n  <Plot.Rule />      {/* a reference line, with a caption */}\n  <Plot.YAxis />     {/* value labels down the side */}\n  <Plot.XAxis />     {/* labels along the bottom */}\n  <Plot.Cursor />    {/* reading the rows, and the line that follows */}\n  <Plot.Tooltip />   {/* the readout that rides the cursor */}\n  <Plot.Overlay />   {/* anything of yours that is text or takes a pointer */}\n</Plot>",
+  "parts": {
+    "Header": "The row above the drawing: what the plot is of, and the one number worth reading. Pass `children` to replace it and keep only its place.",
+    "Legend": "A swatch and a name for every mark. `labels` maps a `dataKey` to a name. Without it the key itself is shown.",
+    "Grid": "Horizontal rules across the plot. They are outside the reveal, so the frame is there when the marks are uncovered.",
+    "Area": "A series as a fill down to the bottom of the plot. Write it before the line that belongs over it.",
+    "Bars": "A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis.",
+    "Line": "A series as a stroked path. `curve=\"monotone\"` never overshoots between points, and `linear` joins them straight. A gap in the column breaks the line.",
+    "Dots": "A dot per row, ringed in the page colour so it reads on top of the line.",
+    "Rule": "A reference line at a value, or down the plot at a row when you pass `x`, with a caption. It hides itself when the value falls outside the axis.",
+    "Layer": "Marks of your own, in SVG, in the plot's pixels. They reach the geometry through `usePlot()`.",
+    "Overlay": "Anything of yours that is text or takes a pointer, laid over the drawing.",
+    "XAxis": "Labels along the bottom, each centred on the row it names and held inside the frame.",
+    "YAxis": "Value labels down the side, with room made for them. Give it the same `ticks` as the grid's `rows`, so every label has a line.",
+    "Cursor": "Reading the rows: hover, press or drag across them, or focus the chart and use the arrow keys. A click or tap pins the reading until the next press elsewhere or Escape. It draws the line that follows, which `showLine={false}` hides.",
+    "Tooltip": "The readout that rides the cursor. It needs a `Plot.Cursor` beside it. Pass a function as `children` to draw it yourself."
+  },
+  "examples": [
+    {
+      "title": "Pinning one end of the axis",
+      "description": "Either end of `yDomain` takes a number to hold it there, or `auto` to derive it from the data. `[0, 'auto']` keeps the baseline at zero while the top follows the data. `nice` rounds the derived end out to a whole number.\n\nA plot with `Plot.Bars` already has zero on its axis, because a bar's length is measured from zero. Pin it when you want to hold the top as well.",
+      "demo": "pinned",
+      "height": 480
+    },
+    {
+      "title": "A mark of your own",
+      "description": "`Plot.Layer` holds SVG, and `usePlot()` gives it the plot box and the moving domain. `yOf`, `xOf`, `bandOf`, `linePath`, `areaPath` and `barPath` are exported from the same module, so a mark you write sits on the same geometry and is uncovered with the rest.\n\nA layer written before the first mark draws under all the marks, and one written after it draws over them. It cannot sit between two marks, because the marks are drawn as one chart.",
+      "demo": "custom-mark",
+      "height": 480
+    },
+    {
+      "title": "Reading the cursor",
+      "description": "`Plot.Cursor` resolves the row being read. Without a `Plot.Tooltip` nothing rides it, which suits a plot that shows the value in its own header.\n\nOutside the plot, take the row from `onActiveIndexChange`. Inside it, use `usePlotCursor()`.",
+      "demo": "reading",
+      "height": 480
+    },
+    {
+      "title": "Which scale the x-axis is on",
+      "description": "`point` puts the first and last rows on the plot's edges, which suits a series that should reach the frame. `band` gives every row an equal slice and centres it, which anything with width needs.\n\nA plot with `Plot.Bars` is always banded. Anything else is on points unless `xScale` says otherwise.",
+      "demo": "scales",
+      "height": 460
+    },
+    {
+      "title": "Marking a row, and moving the baseline",
+      "description": "`x` draws a rule down the plot at a row, here the month a change shipped. `baseline` sets where the columns grow from, for a chart of movement against a reference.",
+      "demo": "marking",
+      "height": 480
+    },
+    {
+      "title": "Loading and changing data",
+      "description": "With `status=\"loading\"` the grid stays and nothing else is drawn. Turning `ready` uncovers the marks from the left, and going back to `loading` arms that again.\n\nWhen the data changes, the marks and rules move to their new values over `domainDuration`. A `ref` on the chart has `replay()`, which uncovers it again.",
+      "demo": "changing-data",
+      "height": 520
+    }
+  ],
+  "notes": "Non-finite values are ignored when the domain and the marks are derived, and a non-finite `yDomain` end is treated as `auto`.\n\nEvery mark, including your layers, is uncovered by one clip, so they arrive as one drawing. With reduced motion the clip does not run and data changes land at once.\n\nFor a screen reader the rows are listed as text, using `label` and `labelForDatum`. Keep `format` and the other callbacks free to change between renders: they do not redraw the chart.",
+  "propsNote": "`Plot`, `Plot.Header`, `Plot.Legend` and `Plot.Overlay` also take the props of the element they render, and a `className`. `Plot.Tooltip` puts its `className` on the readout. The marks, `Plot.Grid`, `Plot.Layer` and `Plot.Cursor` take only the props listed."
+}

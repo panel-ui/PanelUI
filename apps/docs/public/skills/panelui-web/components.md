@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Candlestick Chart](components/candlestick-chart.md) — Open, high, low and close for a period, drawn as one mark.
 
 ## Feedback and status
 

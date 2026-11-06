@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "candlestick-chart": [
+    "CandlestickChart",
+    "Open, high, low and close for a period, drawn as one mark.",
+    "react candlestick chart ohlc financial",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Candlestick Chart"
+    }
   ]
 }

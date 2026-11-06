@@ -16,7 +16,7 @@ The window follows the clock and not the data, so the line drifts left whether o
 
 The clock costs one frame callback while the chart can be seen. `paused`, `status="loading"`, a hidden page and scrolling off screen stop it. Under reduced motion it does not run, and the window advances as each reading arrives.
 
-For a fixed series that is not going to grow, such as a week of visits, use a [line chart](/docs/web/charts/line-chart).
+For a fixed series that is not going to grow, such as a week of visits, use a line chart.
 
 ## Usage
 
@@ -76,7 +76,7 @@ For a fixed series that is not going to grow, such as a week of visits, use a [l
 | `aspectRatio` | `number` | `2` | The plot's width ÷ height. |
 | `status` | `LiveLineChartStatus` | `'ready'` | `loading` holds the clock and draws `Skeleton` in place of the line. |
 | `momentumColors` | `LiveLineMomentumColors` | — | Which role to draw in per direction. Left out, the chart keeps to one colour. |
-| `color` | `LiveLineChartColor` | `'chart-1'` | Which of the theme's roles the chart is drawn in. Ignored when `momentumColors` is set. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles the chart is drawn in, `chart-1` by default. Ignored when `momentumColors` is set. |
 | `onActivePointChange` | `(point: LiveLinePoint \| null) => void` | — | The reading under the crosshair as it moves, and `null` when it is let go. |
 | `label` | `string` | — | Names the chart for a screen reader. Falls back to the Header's title, then to "Live line chart". |
 | `hint` | `string` | — | Further guidance after the snapshot a screen reader gets. |
@@ -85,30 +85,30 @@ For a fixed series that is not going to grow, such as a week of visits, use a [l
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `rows` | `number` | — | How many bands the plot is divided into. Give it the same number as `YAxis`'s `ticks`. |
-| `dashArray` | `string` | — | The stroke's dash pattern. `"none"` for a solid rule. |
-| `color` | `LiveLineChartColor` | `'chart-1'` | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
+| `rows` | `number` | `4` | How many bands the plot is divided into. Give it the same number as `YAxis`'s `ticks`. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. `"none"` for a solid rule. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
 
 #### `LiveLineChartLineProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `strokeWidth` | `number` | — | The stroke's width. |
-| `color` | `LiveLineChartColor` | `'chart-1'` | Which of the theme's roles to draw in. Overrides the chart's colour, momentum included. |
+| `strokeWidth` | `number` | `2` | The stroke's width. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles to draw in. Overrides the chart's colour, momentum included. |
 
 #### `LiveLineChartAreaProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `opacity` | `number` | — | Opacity at the top of the fill, fading to nothing at the bottom of the plot. |
-| `color` | `LiveLineChartColor` | `'chart-1'` | Which of the theme's roles to draw in. Overrides the chart's colour, momentum included. |
+| `opacity` | `number` | `0.22` | Opacity at the top of the fill, fading to nothing at the bottom of the plot. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles to draw in. Overrides the chart's colour, momentum included. |
 
 #### `LiveLineChartTipProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `badge` | `boolean` | — | Write the current reading in a badge beside the dot. Off by default, because a floating card nobody opened reads as a tooltip. Turn it on where the chart has no header to put the reading in. |
-| `pulse` | `boolean` | — | Ring the dot with a repeating pulse. Held while paused and under reduced motion. |
+| `badge` | `boolean` | `false` | Write the current reading in a badge beside the dot. Off by default, because a floating card nobody opened reads as a tooltip. Turn it on where the chart has no header to put the reading in. |
+| `pulse` | `boolean` | `true` | Ring the dot with a repeating pulse. Held while paused and under reduced motion. |
 | `formatValue` | `(value: number) => string` | — | Format the badge. Defaults to a compact number. |
 | `className` | `string` | — | Added to the badge's surface. |
 
@@ -116,14 +116,14 @@ For a fixed series that is not going to grow, such as a week of visits, use a [l
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many steps along the bottom. There is a label at each end of each one. |
+| `ticks` | `number` | `4` | How many steps along the bottom. There is a label at each end of each one. |
 | `formatTick` | `(secondsAgo: number) => string` | — | Rewrites a label. Given how many seconds back the tick is. |
 
 #### `LiveLineChartYAxisProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many steps up the side. There is a label at each end of each one. |
+| `ticks` | `number` | `4` | How many steps up the side. There is a label at each end of each one. |
 | `formatValue` | `(value: number) => string` | — | Format a value. Defaults to a compact number. |
 
 #### `LiveLineChartTooltipProps`
@@ -137,7 +137,7 @@ For a fixed series that is not going to grow, such as a week of visits, use a [l
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `color` | `LiveLineChartColor` | `'chart-1'` | Which of the theme's roles the line is drawn in. Defaults to the muted colour. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles the line is drawn in. Defaults to the muted colour. |
 
 #### `LiveLineChartHeaderProps`
 

@@ -286,7 +286,7 @@ export interface LiveLineChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   status?: LiveLineChartStatus;
   /** Which role to draw in per direction. Left out, the chart keeps to one colour. */
   momentumColors?: LiveLineMomentumColors;
-  /** Which of the theme's roles the chart is drawn in. Ignored when `momentumColors` is set. */
+  /** Which of the theme's roles the chart is drawn in, `chart-1` by default. Ignored when `momentumColors` is set. */
   color?: LiveLineChartColor;
   /** The reading under the crosshair as it moves, and `null` when it is let go. */
   onActivePointChange?: (point: LiveLinePoint | null) => void;
@@ -313,7 +313,7 @@ const LiveLineChartRoot = forwardRef<LiveLineChartHandle, LiveLineChartProps & R
     aspectRatio = 2,
     status = 'ready',
     momentumColors,
-    color = 'chart-1',
+    color,
     onActivePointChange,
     label,
     hint,
@@ -401,8 +401,8 @@ const LiveLineChartRoot = forwardRef<LiveLineChartHandle, LiveLineChartProps & R
         ? (momentumColors.up ?? 'success')
         : momentum === 'down'
           ? (momentumColors.down ?? 'destructive')
-          : (momentumColors.flat ?? color)
-      : color
+          : (momentumColors.flat ?? color ?? 'chart-1')
+      : (color ?? 'chart-1')
   ];
 
   const reported = useRef<LiveLinePoint | null>(null);
@@ -592,7 +592,7 @@ const LiveLineChartRoot = forwardRef<LiveLineChartHandle, LiveLineChartProps & R
                     format: (value: number) => {
                       const secondsAgo = Math.abs(value);
                       const format = xAxis.format.current;
-                      return format ? format(secondsAgo) : secondsAgo === 0 ? 'now' : `-${Math.round(secondsAgo)}s`;
+                      return format ? format(secondsAgo) : secondsAgo === 0 ? 'now' : `-${Number(secondsAgo.toFixed(1))}s`;
                     },
                   },
                 }
@@ -636,6 +636,9 @@ const LiveLineChartRoot = forwardRef<LiveLineChartHandle, LiveLineChartProps & R
   });
 
   const canRead = tooltip !== undefined && !loading;
+  useEffect(() => {
+    if (!canRead) setActivePoint(null);
+  }, [canRead, setActivePoint]);
 
   const readAt = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!canRead || !box) return;
@@ -822,7 +825,11 @@ export interface LiveLineChartGridProps {
 }
 
 /** The horizontal rules the readings are judged against. */
-function LiveLineChartGrid({ rows = 4, dashArray = '4 6', color }: LiveLineChartGridProps) {
+function LiveLineChartGrid({
+  rows = 4,
+  dashArray = '4 6',
+  color,
+}: LiveLineChartGridProps) {
   const { setSlot } = useChart('LiveLineChart.Grid');
   const stroke = color ? COLOR_VAR[color] : 'var(--border)';
   useEffect(() => {
@@ -841,7 +848,10 @@ export interface LiveLineChartLineProps {
 }
 
 /** The line. */
-function LiveLineChartLine({ strokeWidth = 2, color }: LiveLineChartLineProps) {
+function LiveLineChartLine({
+  strokeWidth = 2,
+  color,
+}: LiveLineChartLineProps) {
   const { setSlot } = useChart('LiveLineChart.Line');
   const stroke = color ? COLOR_VAR[color] : undefined;
   useEffect(() => {
@@ -860,7 +870,10 @@ export interface LiveLineChartAreaProps {
 }
 
 /** The fill under the line, so a chart that wants only the shape simply does not have one. */
-function LiveLineChartArea({ opacity = 0.22, color }: LiveLineChartAreaProps) {
+function LiveLineChartArea({
+  opacity = 0.22,
+  color,
+}: LiveLineChartAreaProps) {
   const { setSlot } = useChart('LiveLineChart.Area');
   const fill = color ? COLOR_VAR[color] : undefined;
   useEffect(() => {
@@ -890,7 +903,12 @@ export interface LiveLineChartTipProps {
  * The dot at the leading end. It rides the newest reading and not the right-hand
  * edge, so a feed that stops is a dot drifting left with the rest of the line.
  */
-function LiveLineChartTip({ badge = false, pulse = true, formatValue, className }: LiveLineChartTipProps) {
+function LiveLineChartTip({
+  badge = false,
+  pulse = true,
+  formatValue,
+  className,
+}: LiveLineChartTipProps) {
   const { setSlot } = useChart('LiveLineChart.Tip');
   const format = useLatest(formatValue);
   useEffect(() => {
@@ -913,7 +931,10 @@ export interface LiveLineChartXAxisProps {
  * a moving window labelled with clock times would rewrite every one of them on
  * every frame.
  */
-function LiveLineChartXAxis({ ticks = 4, formatTick }: LiveLineChartXAxisProps) {
+function LiveLineChartXAxis({
+  ticks = 4,
+  formatTick,
+}: LiveLineChartXAxisProps) {
   const { setSlot } = useChart('LiveLineChart.XAxis');
   const format = useLatest(formatTick);
   useEffect(() => {
@@ -932,7 +953,10 @@ export interface LiveLineChartYAxisProps {
 }
 
 /** The scale up the left-hand side, with room made for it. */
-function LiveLineChartYAxis({ ticks = 4, formatValue }: LiveLineChartYAxisProps) {
+function LiveLineChartYAxis({
+  ticks = 4,
+  formatValue,
+}: LiveLineChartYAxisProps) {
   const { setSlot } = useChart('LiveLineChart.YAxis');
   const format = useLatest(formatValue);
   useEffect(() => {
@@ -955,7 +979,10 @@ export interface LiveLineChartTooltipProps {
  * The crosshair is pinned to the moment and not the place on screen, so it travels
  * left with the reading it named. Escape or moving away lets it go.
  */
-function LiveLineChartTooltip({ formatValue, className }: LiveLineChartTooltipProps) {
+function LiveLineChartTooltip({
+  formatValue,
+  className,
+}: LiveLineChartTooltipProps) {
   const { setSlot } = useChart('LiveLineChart.Tooltip');
   const format = useLatest(formatValue);
   useEffect(() => {
@@ -972,7 +999,9 @@ export interface LiveLineChartSkeletonProps {
 }
 
 /** The waiting state: a flat line down the middle of the plot, shown while `status="loading"`. */
-function LiveLineChartSkeleton({ color }: LiveLineChartSkeletonProps) {
+function LiveLineChartSkeleton({
+  color,
+}: LiveLineChartSkeletonProps) {
   const { setSlot } = useChart('LiveLineChart.Skeleton');
   const base = color && COLOR_VAR[color];
   useEffect(() => {

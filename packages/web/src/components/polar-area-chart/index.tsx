@@ -31,7 +31,7 @@
  * a morph between two drawn arcs interpolates the large-arc flag into an invalid path,
  * and a chart of one or two wedges spans half a turn.
  */
-import { defineChart, type ChartInteractionController, type ChartPoint } from '@tanstack/charts';
+import { defineChart, type ChartInteractionController } from '@tanstack/charts';
 import { motion } from '@tanstack/charts/motion';
 import { polar, radialArc } from '@tanstack/charts/polar';
 import { Chart } from '@tanstack/charts/react/core';
@@ -439,12 +439,6 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
 
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
 
-  // A finger reads by pressing. The chart also reports its drags, which are the page being scrolled.
-  const touching = useRef(false);
-  const onFocusChange = (point: ChartPoint<WedgeRow, number, number> | null) => {
-    if (!touching.current) read(point ? point.datum.index : -1);
-  };
-
   const summary = label ?? `Polar area chart, ${data.length} ${data.length === 1 ? 'wedge' : 'wedges'}`;
   const spoken = (datum: PolarAreaDatum, index: number) => labelForDatum?.(datum, index) ?? `${datum.label}, ${compactNumber(datum.value)}`;
   const dimOpacity = wedgesConfig?.dimOpacity ?? 0.35;
@@ -488,13 +482,18 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
                 if (point) togglePin(point.datum.index);
                 else if (pinned.current >= 0) release();
               }}
-              onPointerDownCapture={(event) => {
-                touching.current = event.pointerType === 'touch';
+              // From the pointer rather than the chart's focus: a finger reads by pressing, its drags are the page
+              // scrolling, and the chart stays silent about a wedge it still counts as focused after the keys moved on.
+              onPointerMove={(event) => {
+                if (event.pointerType === 'touch') return;
+                const point = interactionRef.current?.resolvePointer(event.clientX, event.clientY)?.point;
+                read(point ? point.datum.index : -1);
               }}
-              onPointerMoveCapture={(event) => {
-                touching.current = event.pointerType === 'touch';
+              onPointerLeave={(event) => {
+                if (event.pointerType !== 'touch') read(-1);
               }}
-              // Walked from the reading, and kept from the chart, whose own focus stays on the last wedge hovered.
+              onBlur={() => read(-1)}
+              // Walked from the reading, and kept from the chart, which would walk from its own focus.
               onKeyDownCapture={(event) => {
                 const next = polarKeyWalk(activeIndex, data.length, event.key);
                 if (next === undefined) return;
@@ -523,7 +522,6 @@ const PolarAreaChartRoot = forwardRef<PolarAreaChartHandle, PolarAreaChartProps 
                   aspectRatio={1}
                   initialWidth={box}
                   className={slots.chart()}
-                  onFocusChange={onFocusChange}
                   onRender={({ interaction }) => {
                     interactionRef.current = interaction;
                   }}

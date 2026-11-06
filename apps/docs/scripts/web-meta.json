@@ -549,5 +549,15 @@
       "category": "charts",
       "title": "Area Chart"
     }
+  ],
+  "line-chart": [
+    "LineChart",
+    "A series over time, drawn in from the left.",
+    "react line chart component time series sparkline",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Line Chart"
+    }
   ]
 }

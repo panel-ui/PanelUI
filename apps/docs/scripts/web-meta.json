@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "funnel-chart": [
+    "FunnelChart",
+    "Where a population drained away, one step at a time.",
+    "react funnel chart component conversion",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Funnel Chart"
+    }
   ]
 }

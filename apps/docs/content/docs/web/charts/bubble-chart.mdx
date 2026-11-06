@@ -1,0 +1,638 @@
+---
+title: Bubble Chart
+description: One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
+status: new
+---
+
+<ComponentPreview name="bubble-chart/overview" height={600}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BubbleChart, type BubbleChartPoint } from '@/components/panelui/bubble-chart';
+import { Frame } from '@/components/panelui/frame';
+
+const PRODUCTS = [
+  { name: 'Atlas', code: 'AT', growth: 42, margin: 31, revenue: 840 },
+  { name: 'Beacon', code: 'BE', growth: 18, margin: 44, revenue: 1_260 },
+  { name: 'Cinder', code: 'CI', growth: 7, margin: 12, revenue: 310 },
+  { name: 'Drift', code: 'DR', growth: 33, margin: 22, revenue: 520 },
+  { name: 'Ember', code: 'EM', growth: 12, margin: 28, revenue: 690 },
+  { name: 'Fathom', code: 'FA', growth: 54, margin: 38, revenue: 980 },
+  { name: 'Gale', code: 'GA', growth: 25, margin: 16, revenue: 180 },
+  { name: 'Harbor', code: 'HA', growth: 38, margin: 47, revenue: 1_480 },
+  { name: 'Isle', code: 'IS', growth: 4, margin: 35, revenue: 430 },
+  { name: 'Juno', code: 'JU', growth: 47, margin: 18, revenue: 260 },
+];
+
+const percent = (value: number) => `${value}%`;
+const thousands = (value: number) => `$${value.toLocaleString('en-US')}k`;
+
+const total = PRODUCTS.reduce((sum, { revenue }) => sum + revenue, 0);
+
+export default function BubbleChartOverview() {
+  const [active, setActive] = useState<BubbleChartPoint | null>(null);
+  return (
+    <Frame className="w-full max-w-lg" variant="band">
+      <Frame.Header>
+        <Frame.Title>Product portfolio</Frame.Title>
+        <Frame.Action>{PRODUCTS.length} products</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <BubbleChart
+          data={PRODUCTS}
+          xDataKey="growth"
+          yDataKey="margin"
+          sizeKey="revenue"
+          labelKey="code"
+          aspectRatio={1.2}
+          label="Products by growth, margin and revenue"
+          labelForDatum={(datum) => `${datum.name}: ${datum.growth}% growth, ${datum.margin}% margin, ${thousands(Number(datum.revenue))} revenue`}
+          onActivePointChange={setActive}
+        >
+          <BubbleChart.Header
+            title={active ? String(active.datum.name) : 'Revenue'}
+            value={thousands(active?.size ?? total)}
+            caption={active ? `${active.x}% growth, ${active.y}% margin` : 'Area shows revenue'}
+          />
+          <BubbleChart.Grid />
+          <BubbleChart.Bubbles />
+          <BubbleChart.Labels />
+          <BubbleChart.XAxis format={percent} />
+          <BubbleChart.YAxis format={percent} />
+          <BubbleChart.Tooltip
+            formatX={percent}
+            formatY={percent}
+            formatSize={thousands}
+            labels={{ growth: 'Growth', margin: 'Margin', revenue: 'Revenue' }}
+          />
+        </BubbleChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to compare named things on three measures at once: growth, margin and revenue for a set of products. Each row of `data` is one circle. `xDataKey` and `yDataKey` place it, `sizeKey` sets its area and `labelKey` names it. Colour cycles by row, or comes from `colorKey`.
+
+Area is hard to judge exactly, and overlapping circles hide each other, so it suits a dozen or two named rows. For many unnamed rows, use a [Scatter Chart](/docs/web/charts/scatter-chart).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/bubble-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/bubble-chart` instead of `@/components/panelui/bubble-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/bubble-chart/`, one file for each below:
+
+<RegistrySource name="bubble-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { BubbleChart } from "@/components/panelui/bubble-chart"
+```
+
+```tsx
+<BubbleChart data={products} xDataKey="growth" yDataKey="margin" sizeKey="revenue" labelKey="code">
+  <BubbleChart.Grid />
+  <BubbleChart.Bubbles />
+  <BubbleChart.Labels />
+  <BubbleChart.XAxis />
+  <BubbleChart.YAxis />
+  <BubbleChart.Tooltip />
+</BubbleChart>
+```
+
+## Composition
+
+```tsx
+<BubbleChart data={…}>
+  <BubbleChart.Header />
+  <BubbleChart.Grid />
+  <BubbleChart.Quadrants />
+  <BubbleChart.Trend />
+  <BubbleChart.Bubbles />
+  <BubbleChart.Labels />
+  <BubbleChart.SizeKey />
+  <BubbleChart.Skeleton />
+  <BubbleChart.XAxis />
+  <BubbleChart.YAxis />
+  <BubbleChart.Tooltip />
+  <BubbleChart.Legend />
+</BubbleChart>
+```
+
+- **`BubbleChart.Header`** — The strip above the plot: `title`, `value` and `caption`, with your own control on the trailing side.
+- **`BubbleChart.Grid`** — Lines both ways, in the theme's border colour. `rows` and `columns` are roughly how many: the axes pick round numbers near them.
+- **`BubbleChart.Quadrants`** — A crosshair splitting the plot into four, with an optional word for each corner. It stands at the mean of each axis unless `x` and `y` pin it.
+- **`BubbleChart.Trend`** — The straight line that fits the cloud best, dashed and under the circles. `onFit` gives you the slope, the intercept and how tight the fit is.
+- **`BubbleChart.Bubbles`** — The circles. Without this part nothing is drawn or readable.
+- **`BubbleChart.Labels`** — The names, inside the circles. A bubble under `minRadius` goes without, and a name longer than its circle is cut.
+- **`BubbleChart.SizeKey`** — Three nested circles saying what an area is worth, over a corner of the plot. It needs `sizeKey` on the chart.
+- **`BubbleChart.Skeleton`** — A still field of muted circles, drawn only while `status` is `loading`.
+- **`BubbleChart.XAxis`** — Value labels under the plot, in round numbers. `label` names the axis.
+- **`BubbleChart.YAxis`** — Value labels down the side, in round numbers. `label` names the axis.
+- **`BubbleChart.Tooltip`** — Makes the field readable by pointer and keyboard, and floats a readout beside what is being read. `showLabel={false}` keeps the reading without the readout. `labels` names the keys in it.
+- **`BubbleChart.Legend`** — A swatch and a name per row, under the plot, up to `limit`.
+
+## Examples
+
+### Quadrants
+
+`BubbleChart.Quadrants` splits the plot at the mean of each axis and names the corners. Pass `x` and `y` to split at a target instead. Set `tint={false}` when all four corners matter equally.
+
+<ComponentPreview name="bubble-chart/quadrants" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { BubbleChart } from '@/components/panelui/bubble-chart';
+
+const PRODUCTS = [
+  { name: 'Atlas', code: 'AT', growth: 42, margin: 31, revenue: 840 },
+  { name: 'Beacon', code: 'BE', growth: 18, margin: 44, revenue: 1_260 },
+  { name: 'Cinder', code: 'CI', growth: 7, margin: 12, revenue: 310 },
+  { name: 'Drift', code: 'DR', growth: 33, margin: 22, revenue: 520 },
+  { name: 'Ember', code: 'EM', growth: 12, margin: 28, revenue: 690 },
+  { name: 'Fathom', code: 'FA', growth: 54, margin: 38, revenue: 980 },
+  { name: 'Gale', code: 'GA', growth: 25, margin: 16, revenue: 180 },
+  { name: 'Harbor', code: 'HA', growth: 38, margin: 47, revenue: 1_480 },
+  { name: 'Isle', code: 'IS', growth: 4, margin: 35, revenue: 430 },
+  { name: 'Juno', code: 'JU', growth: 47, margin: 18, revenue: 260 },
+];
+
+const percent = (value: number) => `${value}%`;
+const thousands = (value: number) => `$${value.toLocaleString('en-US')}k`;
+
+export default function BubbleChartQuadrantsDemo() {
+  return (
+    <BubbleChart data={PRODUCTS} xDataKey="growth" yDataKey="margin" sizeKey="revenue" labelKey="code" aspectRatio={1.2} className="w-full max-w-lg">
+      <BubbleChart.Grid />
+      <BubbleChart.Quadrants
+        labels={{ topLeft: 'Cash cows', topRight: 'Stars', bottomLeft: 'Question marks', bottomRight: 'Bets' }}
+      />
+      <BubbleChart.Bubbles color="chart-1" />
+      <BubbleChart.Labels />
+      <BubbleChart.XAxis format={percent} label="Growth" />
+      <BubbleChart.YAxis format={percent} label="Margin" />
+      <BubbleChart.Tooltip formatX={percent} formatY={percent} formatSize={thousands} />
+    </BubbleChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Trend
+
+`BubbleChart.Trend` fits a straight line through the circles. `onFit` reports how tight the fit is, and fires only when the numbers change, so it can go straight into state.
+
+<ComponentPreview name="bubble-chart/trend" height={560}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BubbleChart } from '@/components/panelui/bubble-chart';
+
+const SPEND = [
+  { team: 'Ads', spend: 12, signups: 310, cost: 40 },
+  { team: 'Search', spend: 24, signups: 480, cost: 70 },
+  { team: 'Video', spend: 31, signups: 520, cost: 110 },
+  { team: 'Events', spend: 44, signups: 590, cost: 180 },
+  { team: 'Radio', spend: 52, signups: 760, cost: 90 },
+  { team: 'Print', spend: 63, signups: 820, cost: 60 },
+  { team: 'Partners', spend: 71, signups: 1_010, cost: 150 },
+  { team: 'Social', spend: 84, signups: 1_120, cost: 130 },
+];
+
+export default function BubbleChartTrendDemo() {
+  const [tightness, setTightness] = useState(0);
+  return (
+    <BubbleChart data={SPEND} xDataKey="spend" yDataKey="signups" sizeKey="cost" labelKey="team" aspectRatio={1.2} className="w-full max-w-lg">
+      <BubbleChart.Header title="Signups against spend" value={`r = ${tightness.toFixed(2)}`} caption="How tightly the teams sit on the line" />
+      <BubbleChart.Grid />
+      <BubbleChart.Trend onFit={({ r }) => setTightness(r)} />
+      <BubbleChart.Bubbles color="chart-2" />
+      <BubbleChart.XAxis />
+      <BubbleChart.YAxis />
+      <BubbleChart.Tooltip />
+    </BubbleChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Size key
+
+Area has no axis to read it off, so `BubbleChart.SizeKey` shows what the smallest, middle and largest areas are worth. Place it in the corner the circles leave empty.
+
+<ComponentPreview name="bubble-chart/size-key" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { BubbleChart } from '@/components/panelui/bubble-chart';
+
+const PRODUCTS = [
+  { name: 'Atlas', code: 'AT', growth: 42, margin: 31, revenue: 840 },
+  { name: 'Beacon', code: 'BE', growth: 18, margin: 44, revenue: 1_260 },
+  { name: 'Cinder', code: 'CI', growth: 7, margin: 12, revenue: 310 },
+  { name: 'Drift', code: 'DR', growth: 33, margin: 22, revenue: 520 },
+  { name: 'Ember', code: 'EM', growth: 12, margin: 28, revenue: 690 },
+  { name: 'Fathom', code: 'FA', growth: 54, margin: 38, revenue: 980 },
+  { name: 'Gale', code: 'GA', growth: 25, margin: 16, revenue: 180 },
+  { name: 'Harbor', code: 'HA', growth: 38, margin: 47, revenue: 1_480 },
+  { name: 'Isle', code: 'IS', growth: 4, margin: 35, revenue: 430 },
+  { name: 'Juno', code: 'JU', growth: 47, margin: 18, revenue: 260 },
+];
+
+const percent = (value: number) => `${value}%`;
+const thousands = (value: number) => `$${value.toLocaleString('en-US')}k`;
+
+export default function BubbleChartSizeKeyDemo() {
+  return (
+    <BubbleChart data={PRODUCTS} xDataKey="growth" yDataKey="margin" sizeKey="revenue" labelKey="code" aspectRatio={1.2} yDomain={[0, 70]} className="w-full max-w-lg">
+      <BubbleChart.Grid />
+      <BubbleChart.Bubbles />
+      <BubbleChart.Labels />
+      <BubbleChart.SizeKey placement="top-left" label="Revenue" format={thousands} />
+      <BubbleChart.XAxis format={percent} />
+      <BubbleChart.YAxis format={percent} />
+      <BubbleChart.Tooltip formatX={percent} formatY={percent} formatSize={thousands} />
+    </BubbleChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Colours and a legend
+
+`colorKey` reads a colour from each row: a theme role, any CSS colour, or a number from 1 to 5 naming a chart colour. `BubbleChart.Legend` lists the rows under the plot.
+
+<ComponentPreview name="bubble-chart/colors" height={540}>
+
+```tsx lineNumbers
+'use client';
+
+import { BubbleChart } from '@/components/panelui/bubble-chart';
+
+const REGIONS = [
+  { name: 'North', x: 12, y: 40, people: 80, tone: 'success' },
+  { name: 'South', x: 28, y: 22, people: 140, tone: 'warning' },
+  { name: 'East', x: 41, y: 51, people: 60, tone: 'info' },
+  { name: 'West', x: 55, y: 30, people: 110, tone: 3 },
+  { name: 'Centre', x: 33, y: 36, people: 170, tone: 'oklch(0.65 0.2 320)' },
+];
+
+export default function BubbleChartColors() {
+  return (
+    <BubbleChart data={REGIONS} sizeKey="people" labelKey="name" colorKey="tone" sizeRange={[16, 36]} aspectRatio={1.2} className="w-full max-w-lg">
+      <BubbleChart.Grid />
+      <BubbleChart.Bubbles />
+      <BubbleChart.Labels />
+      <BubbleChart.XAxis />
+      <BubbleChart.YAxis />
+      <BubbleChart.Tooltip />
+      <BubbleChart.Legend />
+    </BubbleChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `BubbleChart.Skeleton` and drive `status`. The placeholder circles stay still, because a shimmer would read as them moving. The real bubbles grow in where they belong when it turns `ready`.
+
+<ComponentPreview name="bubble-chart/loading" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BubbleChart } from '@/components/panelui/bubble-chart';
+import { Button } from '@/components/panelui/button';
+
+const PRODUCTS = [
+  { name: 'Atlas', code: 'AT', growth: 42, margin: 31, revenue: 840 },
+  { name: 'Beacon', code: 'BE', growth: 18, margin: 44, revenue: 1_260 },
+  { name: 'Cinder', code: 'CI', growth: 7, margin: 12, revenue: 310 },
+  { name: 'Drift', code: 'DR', growth: 33, margin: 22, revenue: 520 },
+  { name: 'Ember', code: 'EM', growth: 12, margin: 28, revenue: 690 },
+  { name: 'Fathom', code: 'FA', growth: 54, margin: 38, revenue: 980 },
+  { name: 'Gale', code: 'GA', growth: 25, margin: 16, revenue: 180 },
+  { name: 'Harbor', code: 'HA', growth: 38, margin: 47, revenue: 1_480 },
+  { name: 'Isle', code: 'IS', growth: 4, margin: 35, revenue: 430 },
+  { name: 'Juno', code: 'JU', growth: 47, margin: 18, revenue: 260 },
+];
+
+const percent = (value: number) => `${value}%`;
+const thousands = (value: number) => `$${value.toLocaleString('en-US')}k`;
+
+export default function BubbleChartLoading() {
+  const [ready, setReady] = useState(false);
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <BubbleChart
+        data={ready ? PRODUCTS : []}
+        status={ready ? 'ready' : 'loading'}
+        xDataKey="growth"
+        yDataKey="margin"
+        sizeKey="revenue"
+        labelKey="code"
+        aspectRatio={1.2}
+        className="w-full"
+      >
+        <BubbleChart.Grid />
+        <BubbleChart.Skeleton />
+        <BubbleChart.Bubbles />
+        <BubbleChart.Labels />
+        <BubbleChart.XAxis format={percent} />
+        <BubbleChart.YAxis format={percent} />
+        <BubbleChart.Tooltip formatX={percent} formatY={percent} formatSize={thousands} />
+      </BubbleChart>
+      <Button variant="outline" onClick={() => setReady((current) => !current)}>
+        {ready ? 'Load again' : 'Finish loading'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+When `data` changes, the circles, names, rules and axes move to their new values over `domainDuration`, and a bubble keeps its identity through its row. A `ref` on the chart has `replay()`, which grows the bubbles in again.
+
+<ComponentPreview name="bubble-chart/changing-data" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { BubbleChart, type BubbleChartHandle } from '@/components/panelui/bubble-chart';
+import { Button } from '@/components/panelui/button';
+
+const PRODUCTS = [
+  { name: 'Atlas', code: 'AT', growth: 42, margin: 31, revenue: 840 },
+  { name: 'Beacon', code: 'BE', growth: 18, margin: 44, revenue: 1_260 },
+  { name: 'Cinder', code: 'CI', growth: 7, margin: 12, revenue: 310 },
+  { name: 'Drift', code: 'DR', growth: 33, margin: 22, revenue: 520 },
+  { name: 'Ember', code: 'EM', growth: 12, margin: 28, revenue: 690 },
+  { name: 'Fathom', code: 'FA', growth: 54, margin: 38, revenue: 980 },
+  { name: 'Gale', code: 'GA', growth: 25, margin: 16, revenue: 180 },
+  { name: 'Harbor', code: 'HA', growth: 38, margin: 47, revenue: 1_480 },
+  { name: 'Isle', code: 'IS', growth: 4, margin: 35, revenue: 430 },
+  { name: 'Juno', code: 'JU', growth: 47, margin: 18, revenue: 260 },
+];
+
+const percent = (value: number) => `${value}%`;
+const thousands = (value: number) => `$${value.toLocaleString('en-US')}k`;
+
+const NEXT = PRODUCTS.map((product, index) => ({
+  ...product,
+  growth: product.growth + (index % 2 ? 14 : -3),
+  margin: product.margin + (index % 3 ? 6 : -5),
+  revenue: Math.round(product.revenue * (index % 2 ? 1.5 : 0.7)),
+}));
+
+export default function BubbleChartChangingData() {
+  const chart = useRef<BubbleChartHandle>(null);
+  const [later, setLater] = useState(false);
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <BubbleChart
+        ref={chart}
+        data={later ? NEXT : PRODUCTS}
+        xDataKey="growth"
+        yDataKey="margin"
+        sizeKey="revenue"
+        labelKey="code"
+        aspectRatio={1.2}
+        className="w-full"
+      >
+        <BubbleChart.Grid />
+        <BubbleChart.Quadrants />
+        <BubbleChart.Bubbles />
+        <BubbleChart.Labels />
+        <BubbleChart.XAxis format={percent} />
+        <BubbleChart.YAxis format={percent} />
+        <BubbleChart.Tooltip formatX={percent} formatY={percent} formatSize={thousands} />
+      </BubbleChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setLater((current) => !current)}>
+          {later ? 'Back to this year' : 'Next year'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### BubbleChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly BubbleChartDatum[]` | — | The rows. One bubble each. |
+| `xDataKey` | `string` | `'x'` | Key holding the horizontal value. |
+| `yDataKey` | `string` | `'y'` | Key holding the vertical value. |
+| `sizeKey` | `string` | — | Key holding the third quantity, spaced by each bubble's area. The lowest value takes the smallest radius in `sizeRange` and the highest the largest, so sizes compare rows without giving their exact ratio. Without it every bubble is drawn at the middle of `sizeRange`. |
+| `labelKey` | `string` | — | Key holding the name written inside the circle. |
+| `colorKey` | `string` | — | Key holding a colour for the row: a theme role, a CSS colour, or a number from 1 to 5 naming a chart colour. Without it the ramp cycles by row. |
+| `sizeRange` | `[number, number]` | `[10, 28]` | Smallest and largest radius `sizeKey` maps onto, in pixels. The largest is also what the plot holds back at every edge, so raising it costs room. |
+| `status` | `BubbleChartStatus` | `'ready'` | `loading` holds the bubbles back and grows them in when it turns `ready`. Add a `BubbleChart.Skeleton` for something to stand in the plot meanwhile. |
+| `aspectRatio` | `number` | `1` | The plot's width ÷ height. `1` is the square shape a bubble field reads best in. |
+| `animationDuration` | `number` | `800` | Milliseconds for the bubbles to grow in. `0` draws them at once. |
+| `domainDuration` | `number` | `500` | Milliseconds for the bubbles and the axes to settle after the data changes. |
+| `xDomain` | `[number, number]` | — | Fix the horizontal axis instead of deriving it. |
+| `yDomain` | `[number, number]` | — | Fix the vertical axis instead of deriving it. |
+| `onActivePointChange` | `(point: BubbleChartPoint \| null) => void` | — | The bubble being read, and `null` when there is none. Fires when it changes, not per frame. Reading needs `BubbleChart.Tooltip`; `showLabel={false}` keeps it without the label. |
+| `compact` | `boolean` | `false` | Drop the axis padding so the field reaches the edges, for a thumbnail. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForDatum` | `(datum: BubbleChartDatum, index: number) => string` | — | What a screen reader says for one row. Defaults to its name and values. |
+
+### BubbleChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | `8` | Roughly how many lines to draw across the plot. With a y-axis, the lines follow its `ticks` instead. |
+| `columns` | `number` | `8` | Roughly how many lines to draw up it. With an x-axis, the lines follow its `ticks` instead. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+
+### BubbleChart.Trend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `onFit` | `(fit: BubbleFit) => void` | — | The line's slope and intercept, and how tightly the cloud sits on it. `r` runs 0 to 1: 1 is every bubble on the line, 0 is a cloud with no direction. Fires when the numbers change, so putting the fit straight into state is safe. It does not fire when fewer than two bubbles with different x values remain, so clear a stored fit with the data. |
+| `color` | `string` | — | A theme role or any CSS colour. Defaults to the muted foreground. |
+| `strokeWidth` | `number` | `1.5` | Thickness of the line, in pixels. |
+| `dashArray` | `string` | `'6 5'` | Dash pattern. Dashed by default: the line is a reading, not a measurement. |
+| `opacity` | `number` | `0.7` | Opacity of the line. |
+
+### BubbleChart.Bubbles
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `opacity` | `number` | `0.9` | Fill opacity. Below 1 by default, so overlapping bubbles read as denser. |
+| `color` | `string` | — | One colour for every bubble, a theme role or any CSS colour, over the per-row ramp. |
+
+### BubbleChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `count` | `number` | `7` | How many placeholder circles to scatter. |
+| `color` | `string` | — | A theme role or any CSS colour. Defaults to the muted surface. |
+
+### BubbleChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `minRadius` | `number` | `10` | Smallest radius a bubble may have and still be given its name. |
+| `format` | `(point: BubbleChartPoint) => string` | — | Turn a bubble into its name. Defaults to the value at `labelKey`. |
+
+### BubbleChart.Quadrants
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `number` | — | Where the vertical rule stands. Defaults to the mean of the x values. |
+| `y` | `number` | — | Where the horizontal rule lies. Defaults to the mean of the y values. |
+| `labels` | `{ topLeft?: string; topRight?: string; bottomLeft?: string; bottomRight?: string }` | — | A word for each corner, written in the corner it belongs to. |
+| `tint` | `boolean` | `true` | Tint the high-high and low-low corners. |
+| `color` | `string` | — | Colour of the rules, a theme role or any CSS colour. Defaults to the muted foreground. |
+
+### BubbleChart.SizeKey
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placement` | `'top-left' \| 'top-right' \| 'bottom-left' \| 'bottom-right'` | `'bottom-right'` | Which corner of the plot it sits in. |
+| `format` | `(value: number) => string` | — | Turn a value into its label. Defaults to a compact number. |
+| `label` | `string` | — | A word for what the area means: "people", "revenue". |
+
+### BubbleChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | Roughly how many labels to show. |
+| `format` | `(value: number) => string` | — | Turn a value into its label. Defaults to a compact number. |
+| `label` | `string` | — | The axis's own name: what is being measured. |
+
+### BubbleChart.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | Roughly how many labels to show. |
+| `format` | `(value: number) => string` | — | Turn a value into its label. Defaults to a compact number. |
+| `label` | `string` | — | The axis's own name: what is being measured. |
+
+### BubbleChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `showLabel` | `boolean` | `true` | Float a small readout beside the bubble. Without it the bubble still swells and reports. |
+| `formatX` | `(value: number) => string` | — | Format the x value for the readout. Defaults to a compact number. |
+| `formatY` | `(value: number) => string` | — | Format the y value for the readout. Defaults to a compact number. |
+| `formatSize` | `(value: number) => string` | — | Format the size value for the readout. Defaults to a compact number. |
+| `labels` | `Record<string, string>` | — | Prettier names for the x, y and size keys. |
+| `hitRadius` | `number` | `22` | How far from a bubble's centre the pointer still reads it, at the least, in pixels. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### BubbleChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `limit` | `number` | `8` | How many rows to list before stopping. |
+
+### BubbleChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the chart is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: what the area means, usually. |
+
+`BubbleChart`, `BubbleChart.Header`, `BubbleChart.SizeKey` and `BubbleChart.Legend` also take the props of the element they render, and a `className`. `BubbleChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
+
+## Notes
+
+### Rows
+
+A row with no finite number at `xDataKey` or `yDataKey` draws no bubble, and a numeric string does not count as a number. Convert strings before passing the data.
+
+### Sizing
+
+The chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The default of `1` suits a bubble field.
+
+Every edge of the plot holds back the largest radius in `sizeRange`, so raising it costs room. On a narrow screen, lower `sizeRange` before lowering anything else.
+
+### Domains
+
+Each axis is the data's extent widened to round numbers, and neither is floored at zero. `xDomain` and `yDomain` fix one instead, which also keeps the frame still when the data changes.
+
+### Reading
+
+A mouse reads the nearest bubble as it moves. A tap reads one, and a sideways drag reads the bubbles it passes. A click or a tap pins the reading until the next press elsewhere or Escape. The arrow keys walk the bubbles once the chart has focus. `onActivePointChange` gives you the bubble being read, for a readout outside the chart.
+
+### Accessibility
+
+The chart renders a list of its rows for screen readers, and `label` and `labelForDatum` set what it says. With reduced motion set, the bubbles appear at their final size without the entrance, and data changes jump to their new places. `animationDuration={0}` draws the bubbles at once for everybody.
+
+### Server Components
+
+`BubbleChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `BubbleChart.Header` off the import, so each part is also exported by name: `BubbleChartHeader` is `BubbleChart.Header`, and so on for the others.
+
+```tsx
+import { BubbleChart, BubbleChartHeader, BubbleChartGrid, BubbleChartQuadrants, BubbleChartTrend, BubbleChartBubbles, BubbleChartLabels, BubbleChartSizeKey, BubbleChartSkeleton, BubbleChartXAxis, BubbleChartYAxis, BubbleChartTooltip, BubbleChartLegend } from "@/components/panelui/bubble-chart"
+```

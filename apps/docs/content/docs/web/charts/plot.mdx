@@ -1,0 +1,785 @@
+---
+title: Plot
+description: A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
+status: alpha
+---
+
+<ComponentPreview name="plot/overview" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { Plot } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+const money = (value: number) => `$${(value / 1000).toFixed(1)}k`;
+
+export default function PlotOverview() {
+  return (
+    <Plot data={MONTHS} xDataKey="month" aspectRatio={1.7} className="max-w-lg">
+      <Plot.Header title="Revenue" value="$198.1k" />
+      <Plot.Legend labels={{ costs: 'Costs', revenue: 'Revenue' }} />
+      <Plot.Grid />
+      <Plot.Bars dataKey="costs" color="info" />
+      <Plot.Line dataKey="revenue" color="primary" />
+      <Plot.Dots dataKey="revenue" color="primary" />
+      <Plot.YAxis format={(value) => `$${Math.round(value / 1000)}k`} />
+      <Plot.XAxis />
+      <Plot.Cursor />
+      <Plot.Tooltip formatValue={money} />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use `Plot` when you need a combination of marks that no named chart draws: columns with a line over them, a series against a shaded band, or a mark you wrote yourself. It measures a box and resolves one y-axis, and every part you put inside it draws on them, in the order they are written.
+
+Reach for a named chart first. [Bar Chart](/docs/web/charts/bar-chart) and the others already decide where the baseline belongs and how loading reads, and a chart assembled here has to make those decisions itself.
+
+It is marked alpha. The parts are settled, and the fields `usePlot` hands out are the part most likely to change.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/plot.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/plot` instead of `@/components/panelui/plot`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/plot/`, one file for each below:
+
+<RegistrySource name="plot" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Plot } from "@/components/panelui/plot"
+```
+
+```tsx
+<Plot data={months} xDataKey="month">
+  <Plot.Grid />
+  <Plot.Bars dataKey="revenue" color="info" />
+  <Plot.Line dataKey="costs" color="primary" />
+  <Plot.YAxis />
+  <Plot.XAxis />
+</Plot>
+```
+
+## Composition
+
+```tsx
+<Plot data={…}>
+  <Plot.Header />    {/* the row above the drawing */}
+  <Plot.Legend />    {/* a swatch and a name per mark */}
+  <Plot.Grid />      {/* the rules the marks arrive into */}
+  <Plot.Area />      {/* a series as a fill */}
+  <Plot.Bars />      {/* a series as columns */}
+  <Plot.Line />      {/* a series as a stroke */}
+  <Plot.Dots />      {/* a dot per row */}
+  <Plot.Layer />     {/* marks of your own, in SVG */}
+  <Plot.Rule />      {/* a reference line, with a caption */}
+  <Plot.YAxis />     {/* value labels down the side */}
+  <Plot.XAxis />     {/* labels along the bottom */}
+  <Plot.Cursor />    {/* reading the rows, and the line that follows */}
+  <Plot.Tooltip />   {/* the readout that rides the cursor */}
+  <Plot.Overlay />   {/* anything of yours that is text or takes a pointer */}
+</Plot>
+```
+
+- **`Plot.Header`** — The row above the drawing: what the plot is of, and the one number worth reading. Pass `children` to replace it and keep only its place.
+- **`Plot.Legend`** — A swatch and a name for every mark. `labels` maps a `dataKey` to a name. Without it the key itself is shown.
+- **`Plot.Grid`** — Horizontal rules across the plot. They are outside the reveal, so the frame is there when the marks are uncovered.
+- **`Plot.Area`** — A series as a fill down to the bottom of the plot. Write it before the line that belongs over it.
+- **`Plot.Bars`** — A series as columns. Its presence puts the whole plot on a band scale, and zero on the axis. `opacity` takes a function to set it per row, and `minHeight` keeps a small value visible.
+- **`Plot.Line`** — A series as a stroked path. `curve="monotone"` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. A gap in the column breaks the line.
+- **`Plot.Dots`** — A dot per row, ringed in the page colour so it reads on top of the line.
+- **`Plot.Rule`** — A reference line at a value, or down the plot at a row when you pass `x`, with a caption. It hides itself when the value falls outside the axis.
+- **`Plot.Layer`** — Marks of your own, in SVG, in the plot's pixels. They reach the geometry through `usePlot()`.
+- **`Plot.Overlay`** — Anything of yours that is text or takes a pointer, laid over the drawing.
+- **`Plot.XAxis`** — Labels along the bottom, each centred on the row it names and held inside the frame.
+- **`Plot.YAxis`** — Value labels down the side, with room made for them. Give it the same `ticks` as the grid's `rows`, so every label has a line.
+- **`Plot.Cursor`** — Reading the rows: hover, press or drag across them, or focus the chart and use the arrow keys. A click or tap pins the reading until the next press elsewhere or Escape. It draws the line that follows, which `showLine={false}` hides.
+- **`Plot.Tooltip`** — The readout that rides the cursor. It needs a `Plot.Cursor` beside it. Pass a function as `children` to draw it yourself.
+
+## Examples
+
+### Pinning one end of the axis
+
+Either end of `yDomain` takes a number to hold it there, or `auto` to derive it from the data. `[0, 'auto']` keeps the baseline at zero while the top follows the data. `nice` rounds the derived end out to a whole number.
+
+A plot with `Plot.Bars` already has zero on its axis, because a bar's length is measured from zero. Pin it when you want to hold the top as well.
+
+<ComponentPreview name="plot/pinned" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { Plot } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+export default function PlotPinned() {
+  return (
+    <Plot data={MONTHS} xDataKey="month" yDomain={[0, 'auto']} nice aspectRatio={1.7} className="max-w-lg">
+      <Plot.Header title="Revenue by month" />
+      <Plot.Grid />
+      <Plot.Bars dataKey="revenue" color="info" />
+      <Plot.Rule y={28000} label="Target" dashed labelPlacement="start" />
+      <Plot.YAxis format={(value) => `$${Math.round(value / 1000)}k`} />
+      <Plot.XAxis />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A mark of your own
+
+`Plot.Layer` holds SVG, and `usePlot()` gives it the plot box and the moving domain. `yOf`, `xOf`, `bandOf`, `linePath`, `areaPath` and `barPath` are exported from the same module, so a mark you write sits on the same geometry and is uncovered with the rest.
+
+A layer written before the first mark draws under all the marks, and one written after it draws over them. It cannot sit between two marks, because the marks are drawn as one chart.
+
+<ComponentPreview name="plot/custom-mark" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { Plot, usePlot, yOf } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+/** A shaded band between two values, on the chart's own geometry. */
+function BandBetween({ low, high }: { low: number; high: number }) {
+  const { plot, domainMin, domainMax } = usePlot();
+  const top = yOf(high, plot, domainMin, domainMax);
+  const bottom = yOf(low, plot, domainMin, domainMax);
+  return <rect x={plot.left} y={top} width={plot.width} height={bottom - top} fill="var(--success)" fillOpacity={0.14} />;
+}
+
+export default function PlotCustomMark() {
+  return (
+    <Plot data={MONTHS} xDataKey="month" aspectRatio={1.7} className="max-w-lg">
+      <Plot.Header title="Revenue" caption="Shaded where the month was within the plan" />
+      <Plot.Grid />
+      <Plot.Layer>
+        <BandBetween low={20000} high={28000} />
+      </Plot.Layer>
+      <Plot.Area dataKey="revenue" color="primary" />
+      <Plot.Line dataKey="revenue" color="primary" />
+      <Plot.YAxis format={(value) => `$${Math.round(value / 1000)}k`} />
+      <Plot.XAxis />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Reading the cursor
+
+`Plot.Cursor` resolves the row being read. Without a `Plot.Tooltip` nothing rides it, which suits a plot that shows the value in its own header.
+
+Outside the plot, take the row from `onActiveIndexChange`. Inside it, use `usePlotCursor()`.
+
+<ComponentPreview name="plot/reading" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Plot, type PlotDatum } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+const money = (value: number) => `$${(value / 1000).toFixed(1)}k`;
+
+export default function PlotReading() {
+  const [row, setRow] = useState<PlotDatum | null>(null);
+
+  return (
+    <Plot
+      data={MONTHS}
+      xDataKey="month"
+      aspectRatio={1.7}
+      className="max-w-lg"
+      onActiveIndexChange={(_index, datum) => setRow(datum)}
+    >
+      <Plot.Header
+        title={row ? String(row.month) : 'Latest month'}
+        value={money(Number(row ? row.revenue : MONTHS[MONTHS.length - 1].revenue))}
+      />
+      <Plot.Grid />
+      <Plot.Area dataKey="revenue" color="primary" />
+      <Plot.Line dataKey="revenue" color="primary" />
+      <Plot.YAxis format={(value) => `$${Math.round(value / 1000)}k`} />
+      <Plot.XAxis />
+      <Plot.Cursor />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Which scale the x-axis is on
+
+`point` puts the first and last rows on the plot's edges, which suits a series that should reach the frame. `band` gives every row an equal slice and centres it, which anything with width needs.
+
+A plot with `Plot.Bars` is always banded. Anything else is on points unless `xScale` says otherwise.
+
+<ComponentPreview name="plot/scales" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { Plot } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+export default function PlotScales() {
+  return (
+    <div className="grid w-full max-w-lg gap-6">
+      <Plot data={MONTHS} xDataKey="month" aspectRatio={3}>
+        <Plot.Header title="Points: the line reaches the frame" />
+        <Plot.Grid rows={2} />
+        <Plot.Line dataKey="revenue" color="primary" />
+        <Plot.XAxis />
+      </Plot>
+      <Plot data={MONTHS} xDataKey="month" xScale="band" aspectRatio={3}>
+        <Plot.Header title="Bands: each point is in the middle of its slice" />
+        <Plot.Grid rows={2} />
+        <Plot.Line dataKey="revenue" color="primary" />
+        <Plot.XAxis />
+      </Plot>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Marking a row, and moving the baseline
+
+`x` draws a rule down the plot at a row, here the month a change shipped. `baseline` sets where the columns grow from, for a chart of movement against a reference.
+
+<ComponentPreview name="plot/marking" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { Plot } from '@/components/panelui/plot';
+
+const DELTAS = [
+  { month: 'Jan', delta: -1800 },
+  { month: 'Feb', delta: -900 },
+  { month: 'Mar', delta: -2400 },
+  { month: 'Apr', delta: 300 },
+  { month: 'May', delta: 1900 },
+  { month: 'Jun', delta: 1200 },
+  { month: 'Jul', delta: 2800 },
+  { month: 'Aug', delta: 3400 },
+];
+
+export default function PlotMarking() {
+  return (
+    <Plot data={DELTAS} xDataKey="month" nice aspectRatio={1.7} className="max-w-lg">
+      <Plot.Header title="Change against plan" />
+      <Plot.Grid />
+      <Plot.Bars dataKey="delta" baseline={0} color="info" />
+      <Plot.Rule x={3} label="Shipped" dashed labelPlacement="start" />
+      <Plot.YAxis />
+      <Plot.XAxis />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Selecting a bar, with the future faded
+
+`opacity` takes a function, so a row can be dimmed while another is read and a row that has not happened yet can stay faded. `minHeight` keeps a small month visible next to a large one, and the reading still gives its real value. A dashed `Plot.Rule` marks the average.
+
+The cursor still stops on a future row, so this demo ignores those rows in `onActiveIndexChange`.
+
+<ComponentPreview name="plot/selected-bars" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Plot } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', spent: 2140 },
+  { month: 'Feb', spent: 1880 },
+  { month: 'Mar', spent: 12 },
+  { month: 'Apr', spent: 2430 },
+  { month: 'May', spent: 1960 },
+  { month: 'Jun', spent: 2710 },
+  { month: 'Jul', spent: 2250 },
+  { month: 'Aug', spent: 1500 },
+  { month: 'Sep', spent: 1500 },
+  { month: 'Oct', spent: 1500 },
+];
+
+const LAST_LIVE = 7;
+const LIVE = MONTHS.slice(0, LAST_LIVE + 1);
+const AVERAGE = LIVE.reduce((sum, { spent }) => sum + spent, 0) / LIVE.length;
+
+const money = (value: number) => `$${Math.round(value).toLocaleString('en-US')}`;
+
+export default function PlotSelectedBars() {
+  const [selected, setSelected] = useState<number | null>(null);
+  const shown = selected === null ? null : MONTHS[selected];
+
+  return (
+    <Plot
+      data={MONTHS}
+      xDataKey="month"
+      aspectRatio={1.7}
+      className="max-w-lg"
+      nice
+      onActiveIndexChange={(index) => setSelected(index < 0 || index > LAST_LIVE ? null : index)}
+    >
+      <Plot.Header title={shown ? shown.month : 'Average'} value={money(shown ? shown.spent : AVERAGE)} />
+      <Plot.Grid rows={3} />
+      <Plot.Bars
+        dataKey="spent"
+        color="var(--foreground)"
+        minHeight={4}
+        opacity={(_row, index) => (index > LAST_LIVE ? 0.3 : selected !== null && selected !== index ? 0.4 : 1)}
+      />
+      <Plot.Rule y={AVERAGE} color="var(--muted-foreground)" dashed />
+      <Plot.YAxis ticks={3} format={(value) => `$${value / 1000}k`} />
+      <Plot.XAxis ticks={5} />
+      <Plot.Cursor showLine={false} />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A budget burndown
+
+This one is composed from existing parts. `curve="step"` draws the balance, because money leaves on a day and not between days. The ideal and the projection are dashed lines from their own columns, and a column with a value on one row puts a dot on the last point.
+
+The fills around zero and the hatch over the deficit are SVG in `Plot.Layer`, drawn with `linePath`, `xOf` and `yOf`. The same path in `var(--destructive)`, clipped below zero, turns the balance red once it is overdrawn.
+
+<ComponentPreview name="plot/budget-burndown" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useId, useState } from 'react';
+import { linePath, Plot, usePlot, xOf, yOf } from '@/components/panelui/plot';
+
+const LIMIT = 900;
+const TOTAL_DAYS = 30;
+const SPENT = [
+  0, 40, 40, 115, 160, 160, 245, 300, 300, 380, 455, 500, 590, 590, 690, 770, 860, 945, 945, 1040,
+];
+
+const TODAY = SPENT.length - 1;
+const balanceOn = (day: number) => LIMIT - (SPENT[day] ?? 0);
+const PROJECTED = LIMIT - ((SPENT[TODAY] ?? 0) / (TODAY + 1)) * TOTAL_DAYS;
+/** The first day the balance is below zero. */
+const OVERDRAWN = SPENT.findIndex((spent) => spent > LIMIT);
+
+const DAYS = Array.from({ length: TOTAL_DAYS }, (_unused, day) => ({
+  day: `Day ${day + 1}`,
+  balance: day <= TODAY ? balanceOn(day) : null,
+  ideal: LIMIT - (LIMIT * day) / (TOTAL_DAYS - 1),
+  projection:
+    day < TODAY ? null : balanceOn(TODAY) + ((PROJECTED - balanceOn(TODAY)) * (day - TODAY)) / (TOTAL_DAYS - 1 - TODAY),
+  today: day === TODAY ? balanceOn(TODAY) : null,
+}));
+
+const BALANCES = DAYS.map(({ balance }) => balance);
+const money = (value: number) => `${value < 0 ? '-' : ''}$${Math.abs(Math.round(value))}`;
+
+/** The fill from the balance to zero, and the hatch over what is overdrawn. Under the marks. */
+function ZeroFills() {
+  const { plot, domainMin, domainMax } = usePlot();
+  const hatch = useId();
+  const x = (day: number) => xOf(day, TOTAL_DAYS, plot);
+  const y = (value: number) => yOf(value, plot, domainMin, domainMax);
+  const stepped = linePath(BALANCES, plot, domainMin, domainMax, 'step');
+  return (
+    <>
+      <defs>
+        <pattern id={hatch} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line y2={6} stroke="var(--destructive)" strokeOpacity={0.55} strokeWidth={1.6} />
+        </pattern>
+      </defs>
+      <path d={`${stepped} L${x(TODAY)},${y(0)} L${x(0)},${y(0)} Z`} fill="var(--foreground)" fillOpacity={0.07} />
+      <path
+        d={`M${x(OVERDRAWN)},${y(0)} L${x(OVERDRAWN)},${y(balanceOn(TODAY))} L${x(TODAY)},${y(balanceOn(TODAY))} L${x(TOTAL_DAYS - 1)},${y(PROJECTED)} L${x(TOTAL_DAYS - 1)},${y(0)} Z`}
+        fill={`url(#${hatch})`}
+      />
+    </>
+  );
+}
+
+/** The balance again in red, clipped to below zero. Over the marks. */
+function BelowZero() {
+  const { plot, domainMin, domainMax } = usePlot();
+  const clip = useId();
+  const zero = yOf(0, plot, domainMin, domainMax);
+  return (
+    <>
+      <clipPath id={clip}>
+        <rect x={plot.left} y={zero} width={plot.width} height={plot.top + plot.height - zero} />
+      </clipPath>
+      <path
+        d={linePath(BALANCES, plot, domainMin, domainMax, 'step')}
+        clipPath={`url(#${clip})`}
+        fill="none"
+        stroke="var(--destructive)"
+        strokeWidth={2.2}
+      />
+    </>
+  );
+}
+
+export default function PlotBudgetBurndown() {
+  const [read, setRead] = useState<number | null>(null);
+  // The days to come have no balance to report, so the reading stays on today.
+  const day = read === null || read > TODAY ? TODAY : read;
+
+  return (
+    <Plot
+      data={DAYS}
+      xDataKey="day"
+      aspectRatio={1.7}
+      className="max-w-lg"
+      yDomain={[-1000, 1000]}
+      label="Budget burndown"
+      onActiveIndexChange={(index) => setRead(index < 0 ? null : index)}
+    >
+      <Plot.Header title={`Day ${day + 1} of ${TOTAL_DAYS}`} value={money(balanceOn(day))} caption={`Limit ${money(LIMIT)}`} />
+      <Plot.Grid rows={2} />
+      <Plot.Layer>
+        <ZeroFills />
+      </Plot.Layer>
+      <Plot.Line dataKey="ideal" color="var(--muted-foreground)" strokeWidth={1} curve="linear" dashArray="3 4" />
+      <Plot.Line dataKey="balance" color="var(--foreground)" strokeWidth={2.2} curve="step" />
+      <Plot.Line dataKey="projection" color="destructive" strokeWidth={1.6} curve="linear" dashArray="6 4" />
+      <Plot.Dots dataKey="today" color="destructive" />
+      <Plot.Layer>
+        <BelowZero />
+      </Plot.Layer>
+      <Plot.Rule y={0} color="var(--foreground)" />
+      <Plot.YAxis ticks={2} format={(value) => `${value < 0 ? '-' : ''}$${Math.abs(value) / 1000}k`} />
+      <Plot.XAxis format={(_row, index) => String(index + 1)} ticks={5} />
+      <Plot.Cursor />
+    </Plot>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading and changing data
+
+With `status="loading"` the grid stays and nothing else is drawn. Turning `ready` uncovers the marks from the left, and going back to `loading` arms that again.
+
+When the data changes, the marks and rules move to their new values over `domainDuration`. A `ref` on the chart has `replay()`, which uncovers it again.
+
+<ComponentPreview name="plot/changing-data" height={520}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { Plot, type PlotHandle, type PlotStatus } from '@/components/panelui/plot';
+
+const MONTHS = [
+  { month: 'Jan', revenue: 18400, costs: 12100 },
+  { month: 'Feb', revenue: 21200, costs: 13300 },
+  { month: 'Mar', revenue: 19800, costs: 14200 },
+  { month: 'Apr', revenue: 24600, costs: 14800 },
+  { month: 'May', revenue: 27100, costs: 16200 },
+  { month: 'Jun', revenue: 25300, costs: 17100 },
+  { month: 'Jul', revenue: 29800, costs: 17600 },
+  { month: 'Aug', revenue: 31500, costs: 18900 },
+];
+
+const SMALLER = MONTHS.map((row) => ({ ...row, revenue: row.revenue / 3, costs: row.costs / 4 }));
+
+const money = (value: number) => `$${(value / 1000).toFixed(1)}k`;
+
+export default function PlotChangingData() {
+  const plot = useRef<PlotHandle>(null);
+  const [status, setStatus] = useState<PlotStatus>('loading');
+  const [smaller, setSmaller] = useState(false);
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <Plot ref={plot} data={smaller ? SMALLER : MONTHS} xDataKey="month" status={status} aspectRatio={1.9}>
+        <Plot.Grid />
+        <Plot.Bars dataKey="costs" color="info" />
+        <Plot.Line dataKey="revenue" color="primary" />
+        <Plot.Rule y={8000} dashed />
+        <Plot.YAxis format={(value) => `$${Math.round(value / 1000)}k`} />
+        <Plot.XAxis />
+        <Plot.Cursor />
+        <Plot.Tooltip formatValue={money} />
+      </Plot>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setStatus(status === 'ready' ? 'loading' : 'ready')}>
+          {status === 'ready' ? 'Load again' : 'Finish loading'}
+        </Button>
+        <Button variant="outline" onClick={() => setSmaller(!smaller)}>
+          {smaller ? 'Show larger' : 'Show smaller'}
+        </Button>
+        <Button variant="ghost" onClick={() => plot.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Plot
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly PlotDatum[]` | — | The rows. Each one is a position along the x-axis. |
+| `xDataKey` | `string` | `'label'` | Key holding the x label. Used by the axis and the readout. |
+| `status` | `PlotStatus` | `'ready'` | `loading` draws the frame and nothing in it, and reveals the marks when it turns `ready`. |
+| `aspectRatio` | `number` | `2` | The plot's width ÷ height. `2` is the wide card shape, and `1.6` suits a narrow column. |
+| `animationDuration` | `number` | `700` | Milliseconds for the plot to be uncovered. |
+| `domainDuration` | `number` | `500` | Milliseconds for the marks and the y-axis to settle after the data changes. |
+| `yDomain` | `[PlotBound, PlotBound]` | — | The y-domain, as `[low, high]`. Either end may be a number to pin it there or `auto` to take it from the data. `[0, 'auto']` keeps the baseline at zero while the top follows whatever arrives. |
+| `nice` | `boolean` | `false` | Round the derived ends of the y-domain out to a step of 1, 2 or 5 times a power of ten, so the axis labels are values a reader can measure against. It only ever widens the axis, and a pinned end is left alone. |
+| `xScale` | `PlotScale` | — | How an index becomes an x. Derived from the marks when left out: a plot with bars in it is banded, and anything else is on points. `Plot.Bars` always needs slices, so it keeps the plot banded even when this says `point`. |
+| `curve` | `PlotCurve` | `'monotone'` | How series are joined between points, unless a mark overrides it. |
+| `onActiveIndexChange` | `(index: number, datum: PlotDatum \| null) => void` | — | The row being read, and `-1`/`null` when there is none. This is how a readout outside the plot gets its value. Fires when the row changes, not per frame. |
+| `compact` | `boolean` | `false` | Drop the padding so the marks reach the edges, for a plot with no axis, grid or cursor. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForDatum` | `(datum: PlotDatum, index: number) => string` | — | What a screen reader says for one row. Defaults to its keys and values. |
+
+### Plot.Series
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — | Column of `data` this mark draws. |
+| `color` | `PlotColor` | `'chart-1'` | A theme role by name, or any CSS colour. |
+
+### Plot.Line
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strokeWidth` | `number` | `2.5` | Thickness of the stroke, in pixels. |
+| `curve` | `PlotCurve` | `'monotone'` | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
+| `dashArray` | `string` | — | Dash pattern, such as `"6 4"`, for a forecast or a series that is not real yet. |
+
+### Plot.Area
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `opacity` | `number` | `0.18` | Opacity of the fill. |
+| `curve` | `PlotCurve` | — | `monotone` never overshoots between points, `linear` joins them straight, and `step` holds each value until the next point. The root's by default. |
+
+### Plot.Bars
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `gap` | `number` | `0.35` | Fraction of each slice left empty, `0` to `1`. |
+| `radius` | `number` | `4` | Rounds the end the bar grows towards, in pixels. |
+| `opacity` | `number \| ((datum: PlotDatum, index: number) => number)` | `1` | Opacity of the fill. Pass a function to set it per row, to fade rows that have not happened yet or dim the ones not being read. |
+| `minHeight` | `number` | `0` | The shortest a bar may be drawn, in pixels, so a small value beside a large one still shows. A value on the baseline draws no bar. The reading keeps the real value. |
+| `baseline` | `number` | `0` | The value the columns grow from, for a chart of movement against a reference. It is clamped into the axis, so a baseline the domain does not cover falls back to the nearer edge. |
+
+### Plot.Dots
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `number` | `3.5` | Radius, in pixels. |
+| `ringWidth` | `number` | `2` | Ring around each dot in the page colour, so it reads on top of the line. |
+
+### Plot.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | `4` | Horizontal rules across the plot. Yields `rows + 1` lines. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour. The border colour by default. |
+| `dashArray` | `string` | `'4 6'` | Dash pattern, such as `"4 6"`. An empty string draws a solid rule. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+
+### Plot.Overlay
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `defaultTagName` | `'div',` | — |  |
+| `props` | `mergeProps(` | — |  |
+
+### Plot.Rule
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `y` | `number` | — | Where to draw it, in the data's own units. Wins if `x` is given too. |
+| `x` | `number` | — | A row to draw a vertical rule at, by index: the day a change landed, the release being read against. |
+| `label` | `string` | — | A name for what the line means. |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour, for the line and its caption. The foreground colour by default. |
+| `strokeWidth` | `number` | `1` | Thickness in pixels. |
+| `dashed` | `boolean` | `false` | Break the line into dashes, so it reads as an annotation rather than a series. |
+| `opacity` | `number` | `1` | Fades the line and its caption together. |
+| `labelPlacement` | `'start' \| 'end'` | `'end'` | Which end of the rule the caption sits at. |
+| `labelClassName` | `string` | — | Added to the caption. |
+| `className` | `string` | — | Added to the rule. |
+
+### Plot.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | How many labels to show. The rest are dropped, evenly. |
+| `format` | `(datum: PlotDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
+| `className` | `string` | — | Added to each label. |
+
+### Plot.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | How many intervals to divide the axis into. Yields `ticks + 1` labels. Give it the same count as the grid. |
+| `format` | `(value: number) => string` | — | Turn a value into its label. Defaults to a compact number. |
+| `className` | `string` | — | Added to each label. |
+
+### Plot.Cursor
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `PlotColor` | — | A theme role by name, or any CSS colour. The foreground colour by default. |
+| `showLine` | `boolean` | `true` | Hide the vertical line and keep only the reading. |
+
+### Plot.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, key: string) => string` | — | Format one series' value. Defaults to a compact number. |
+| `formatX` | `(datum: PlotDatum) => string` | — | Format the heading from the row. Defaults to the value at `xDataKey`. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### Plot.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | A word for what the plot is of. |
+| `value` | `ReactNode` | — | The figure, large. Usually the total, or the row being read. |
+| `caption` | `ReactNode` | — | A line under the value. |
+
+### Plot.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `labels` | `Record<string, string>` | — | Names for the columns, keyed by `dataKey`. Falls back to the key itself. |
+
+`Plot`, `Plot.Header`, `Plot.Legend` and `Plot.Overlay` also take the props of the element they render, and a `className`. `Plot.Tooltip` puts its `className` on the readout. The marks, `Plot.Grid`, `Plot.Layer` and `Plot.Cursor` take only the props listed.
+
+## Notes
+
+Non-finite values are ignored when the domain and the marks are derived, and a non-finite `yDomain` end is treated as `auto`.
+
+Every mark, including your layers, is uncovered by one clip, so they arrive as one drawing. With reduced motion the clip does not run and data changes land at once.
+
+For a screen reader the rows are listed as text, using `label` and `labelForDatum`. Keep `format` and the other callbacks free to change between renders: they do not redraw the chart.
+
+### Server Components
+
+`Plot` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Plot.Header` off the import, so each part is also exported by name: `PlotHeader` is `Plot.Header`, and so on for the others.
+
+```tsx
+import { Plot, PlotHeader, PlotLegend, PlotGrid, PlotArea, PlotBars, PlotLine, PlotDots, PlotRule, PlotLayer, PlotOverlay, PlotXAxis, PlotYAxis, PlotCursor, PlotTooltip } from "@/components/panelui/plot"
+```

@@ -17,12 +17,22 @@ const read = (file) => fs.readFileSync(path.join(docs, file), 'utf8');
 const meta = JSON.parse(read('scripts/web-meta.json'));
 const slugs = Object.keys(meta).sort();
 const item = (slug) => JSON.parse(read(`public/r/web/${slug}.json`));
+const pageOf = (slug) =>
+  `content/docs/web/${meta[slug][3]?.category === 'charts' ? 'charts' : 'components'}/${slug}.mdx`;
 
 test('every component has an item, a page and a usage module', () => {
   for (const slug of slugs) {
     assert.ok(fs.existsSync(path.join(docs, `public/r/web/${slug}.json`)), `${slug}: registry item`);
-    assert.ok(fs.existsSync(path.join(docs, `content/docs/web/components/${slug}.mdx`)), `${slug}: page`);
+    assert.ok(fs.existsSync(path.join(docs, pageOf(slug))), `${slug}: page`);
     assert.ok(fs.existsSync(path.join(docs, `scripts/web-usage/${slug}.json`)), `${slug}: usage`);
+  }
+});
+
+test('a chart in the app is a chart on the web', () => {
+  const app = JSON.parse(read('scripts/meta.json'));
+  for (const slug of slugs) {
+    if (app[slug]?.[3]?.group !== 'charts') continue;
+    assert.equal(meta[slug][3]?.category, 'charts', `${slug}: web-meta.json category`);
   }
 });
 
@@ -66,7 +76,7 @@ test('demos import the package, and pages show the path a project has', () => {
       assert.match(source, /export default function /, `${slug}/${demo} needs a default export`);
       assert.match(source, /from 'panelui-web\/[a-z0-9-]+'/, `${slug}/${demo} must import the package`);
     }
-    const page = read(`content/docs/web/components/${slug}.mdx`);
+    const page = read(pageOf(slug));
     assert.doesNotMatch(page, /from ['"]panelui-web\//, `${slug}: page shows a package import in code`);
     assert.match(page, /@\/components\/panelui\//, `${slug}: page does not show the copied path`);
   }
@@ -94,7 +104,7 @@ test('demos are built from panelui-web, never from the docs site\'s own ui folde
 test('every demo a page names is in the generated map', () => {
   const map = read('components/web-demos/index.generated.tsx');
   for (const slug of slugs) {
-    const page = read(`content/docs/web/components/${slug}.mdx`);
+    const page = read(pageOf(slug));
     for (const [, name] of page.matchAll(/<ComponentPreview name="([^"]+)"/g)) {
       assert.ok(map.includes(`'${name}': dynamic(`), `${name} is shown but not in the map`);
     }

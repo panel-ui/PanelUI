@@ -66,6 +66,41 @@
       ]
     },
     {
+      "name": "area-chart",
+      "type": "registry:component",
+      "title": "Area Chart",
+      "description": "Filled bands over time, stacked or overlaid.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "d3-shape",
+        "tailwind-variants"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/area-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/area-chart.tsx"
+        }
+      ]
+    },
+    {
       "name": "avatar",
       "type": "registry:component",
       "title": "Avatar",
@@ -171,6 +206,30 @@
           "path": "components/panelui/bar-picker.tsx",
           "type": "registry:component",
           "target": "@components/panelui/bar-picker.tsx"
+        }
+      ]
+    },
+    {
+      "name": "bubble-chart",
+      "type": "registry:component",
+      "title": "Bubble Chart",
+      "description": "One labelled circle per row, on two measured axes, with a third quantity on each circle's area.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/bubble-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/bubble-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/bubble-chart/bubble-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/bubble-chart/bubble-scale.ts"
         }
       ]
     },
@@ -626,6 +685,46 @@
       ]
     },
     {
+      "name": "line-chart",
+      "type": "registry:component",
+      "title": "Line Chart",
+      "description": "A series over time, drawn in from the left.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "d3-shape",
+        "tailwind-variants"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/line-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/line-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/line-chart/line-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/line-chart/line-scale.ts"
+        }
+      ]
+    },
+    {
       "name": "live-line-chart",
       "type": "registry:component",
       "title": "Live Line Chart",
@@ -805,6 +904,42 @@
       ]
     },
     {
+      "name": "plot",
+      "type": "registry:component",
+      "title": "Plot",
+      "description": "A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/plot/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/plot/index.tsx"
+        },
+        {
+          "path": "components/panelui/plot/plot-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/plot/plot-scale.ts"
+        }
+      ]
+    },
+    {
       "name": "prompt",
       "type": "registry:component",
       "title": "Prompt",
@@ -910,6 +1045,78 @@
           "path": "components/panelui/rolling-number.tsx",
           "type": "registry:component",
           "target": "@components/panelui/rolling-number.tsx"
+        }
+      ]
+    },
+    {
+      "name": "sankey-chart",
+      "type": "registry:component",
+      "title": "Sankey Chart",
+      "description": "Where a quantity came from and where it ended up, as ribbons between stages.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/sankey-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/sankey-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/sankey-chart/sankey-layout.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/sankey-chart/sankey-layout.ts"
+        }
+      ]
+    },
+    {
+      "name": "scatter-chart",
+      "type": "registry:component",
+      "title": "Scatter Chart",
+      "description": "Two measured quantities against each other, to show how they relate.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/scatter-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/scatter-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/scatter-chart/scatter-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/scatter-chart/scatter-scale.ts"
         }
       ]
     },
@@ -1285,6 +1492,30 @@
       ]
     },
     {
+      "name": "treemap-chart",
+      "type": "registry:component",
+      "title": "Treemap Chart",
+      "description": "A total, cut into the parts it is made of, sized by area.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/treemap-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/treemap-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/treemap-chart/squarify.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/treemap-chart/squarify.ts"
+        }
+      ]
+    },
+    {
       "name": "usage",
       "type": "registry:component",
       "title": "Usage",
@@ -1313,6 +1544,42 @@
           "path": "components/panelui/usage.tsx",
           "type": "registry:component",
           "target": "@components/panelui/usage.tsx"
+        }
+      ]
+    },
+    {
+      "name": "waterfall-chart",
+      "type": "registry:component",
+      "title": "Waterfall Chart",
+      "description": "How a run of changes carried one total to another, with each step floating on the running balance.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/waterfall-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/waterfall-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/waterfall-chart/waterfall-steps.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/waterfall-chart/waterfall-steps.ts"
         }
       ]
     },

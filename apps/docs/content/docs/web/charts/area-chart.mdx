@@ -1,0 +1,641 @@
+---
+title: Area Chart
+description: Filled bands over time, stacked or overlaid.
+status: new
+---
+
+<ComponentPreview name="area-chart/overview" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { AreaChart, type AreaChartDatum } from '@/components/panelui/area-chart';
+import { Frame } from '@/components/panelui/frame';
+
+const SESSIONS = [
+  { hour: '00:00', direct: 120, search: 60, social: 30 },
+  { hour: '02:00', direct: 100, search: 45, social: 25 },
+  { hour: '04:00', direct: 95, search: 40, social: 20 },
+  { hour: '06:00', direct: 140, search: 90, social: 50 },
+  { hour: '08:00', direct: 210, search: 220, social: 100 },
+  { hour: '10:00', direct: 290, search: 400, social: 150 },
+  { hour: '12:00', direct: 340, search: 520, social: 190 },
+  { hour: '14:00', direct: 360, search: 560, social: 210 },
+  { hour: '16:00', direct: 320, search: 480, social: 180 },
+  { hour: '18:00', direct: 250, search: 330, social: 120 },
+  { hour: '20:00', direct: 180, search: 160, social: 70 },
+  { hour: '22:00', direct: 140, search: 90, social: 40 },
+];
+
+const LABELS = { direct: 'Direct', search: 'Search', social: 'Social' };
+const rowTotal = (row: AreaChartDatum) => Number(row.direct) + Number(row.search) + Number(row.social);
+const dayTotal = SESSIONS.reduce((sum, row) => sum + rowTotal(row), 0);
+
+export default function AreaChartOverview() {
+  const [active, setActive] = useState<AreaChartDatum | null>(null);
+
+  return (
+    <Frame variant="band" className="w-full max-w-lg">
+      <Frame.Header>
+        <Frame.Title>Sessions by channel</Frame.Title>
+        <Frame.Action>Today</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <AreaChart
+          data={SESSIONS}
+          xDataKey="hour"
+          stacked
+          label="Sessions by channel, by hour"
+          onActiveIndexChange={(_index, datum) => setActive(datum)}
+        >
+          <AreaChart.Header
+            value={(active ? rowTotal(active) : dayTotal).toLocaleString('en-US')}
+            caption={active ? String(active.hour) : 'All day'}
+            labels={LABELS}
+            legend
+          />
+          <AreaChart.Grid />
+          <AreaChart.Area dataKey="direct" color="primary" />
+          <AreaChart.Area dataKey="search" color="info" />
+          <AreaChart.Area dataKey="social" color="success" />
+          <AreaChart.YAxis />
+          <AreaChart.XAxis />
+          <AreaChart.Tooltip labels={LABELS} formatValue={(value) => value.toLocaleString('en-US')} />
+        </AreaChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show what a total over time is made of: sessions by channel, revenue by plan. Each row of `data` is a point, and each `AreaChart.Area` is a band drawn from one of its keys.
+
+With `stacked`, each band sits on the ones below it, so the top edge is the total and each thickness is a share. Without it the bands overlay, for series that are alternatives rather than parts.
+
+The grid, the axes, the legend and the readout are separate parts, so a chart has only the ones you write.
+
+For one series where the shape matters more than what it is made of, use a line chart instead.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/area-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/area-chart` instead of `@/components/panelui/area-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts d3-shape tailwind-variants @types/d3-shape" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/area-chart.tsx`:
+
+<RegistrySource name="area-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { AreaChart } from "@/components/panelui/area-chart"
+```
+
+```tsx
+<AreaChart data={traffic} xDataKey="hour" stacked>
+  <AreaChart.Grid />
+  <AreaChart.Area dataKey="direct" />
+  <AreaChart.Area dataKey="search" color="chart-2" />
+  <AreaChart.XAxis />
+  <AreaChart.Tooltip />
+</AreaChart>
+```
+
+## Composition
+
+```tsx
+<AreaChart data={…}>
+  <AreaChart.Header />
+  <AreaChart.Grid />
+  <AreaChart.Area dataKey="…" />
+  <AreaChart.Line dataKey="…" />
+  <AreaChart.ReferenceLine y={…} />
+  <AreaChart.Marker index={…} />
+  <AreaChart.Skeleton />
+  <AreaChart.XAxis />
+  <AreaChart.YAxis />
+  <AreaChart.Legend />
+  <AreaChart.Labels />
+  <AreaChart.Tooltip />
+</AreaChart>
+```
+
+- **`AreaChart.Header`** — The strip above the plot: `title`, `value` and `caption`, with the series key or your own control on the trailing side.
+- **`AreaChart.Grid`** — Lines across the value axis, in the theme's border colour. `rows` is roughly how many: the axis picks round numbers near it.
+- **`AreaChart.Area`** — One filled band with a line along its top edge. Declare one per key. In a stack, the first is the bottom.
+- **`AreaChart.Line`** — A series drawn as a line with no fill, over the bands. It is never part of a stack, counts toward the value axis and has a row in the readout. `curve="step"` holds each value until the next.
+- **`AreaChart.ReferenceLine`** — A rule across the plot at the value `y`: a budget, a limit, a target. `label` writes text above its left end.
+- **`AreaChart.Marker`** — A rule down the plot at the row `index`: a release, the day something ran out. `label` writes text beside its top.
+- **`AreaChart.Skeleton`** — A low band on the baseline with a highlight moving across it, drawn only while `status` is `loading`.
+- **`AreaChart.XAxis`** — The x labels, each on its own point. Labels are dropped when they get too close. `ticks` asks for fewer, evenly spaced with both ends kept.
+- **`AreaChart.YAxis`** — Value labels on the grid lines, in round numbers, with room made for them.
+- **`AreaChart.Legend`** — A swatch and a name per series, over the top corner of the plot, reversed for a stack so it reads in the order the bands appear. On a chart with a header, use the header's `legend` prop instead.
+- **`AreaChart.Labels`** — The value at the end of each series, beside where that series ends. Below 32rem of width they wrap under the plot. `extra` adds a figure that belongs to no one series.
+- **`AreaChart.Tooltip`** — The readout, and what drives it. It adds the crosshair and a dot on every band's top edge, and it covers the plot, so the pointer can be anywhere. `labels` names the series in it.
+
+## Examples
+
+### Overlaid
+
+Leave out `stacked` when the series are alternatives, such as two plans compared. The fills go translucent so each band shows through the other, and a later `Area` draws over an earlier one.
+
+<ComponentPreview name="area-chart/overlaid" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { AreaChart } from '@/components/panelui/area-chart';
+
+const SIGNUPS = [
+  { week: 'W1', free: 420, team: 180 },
+  { week: 'W2', free: 480, team: 240 },
+  { week: 'W3', free: 450, team: 310 },
+  { week: 'W4', free: 530, team: 290 },
+  { week: 'W5', free: 610, team: 370 },
+  { week: 'W6', free: 580, team: 460 },
+  { week: 'W7', free: 640, team: 520 },
+];
+
+const LABELS = { free: 'Free', team: 'Team' };
+
+export default function AreaChartOverlaid() {
+  return (
+    <AreaChart data={SIGNUPS} xDataKey="week" className="max-w-lg" label="Signups per week, by plan">
+      <AreaChart.Header title="Signups per week" labels={LABELS} legend />
+      <AreaChart.Grid />
+      <AreaChart.Area dataKey="free" color="primary" />
+      <AreaChart.Area dataKey="team" color="info" />
+      <AreaChart.YAxis />
+      <AreaChart.XAxis />
+      <AreaChart.Tooltip labels={LABELS} />
+    </AreaChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Reading it without hovering
+
+`Line` draws a series outside the stack, such as income above what was spent. `Labels` writes each series' last value beside it. `ReferenceLine` marks a value and `Marker` marks a row.
+
+<ComponentPreview name="area-chart/annotated" height={350}>
+
+```tsx lineNumbers
+'use client';
+
+import { AreaChart } from '@/components/panelui/area-chart';
+
+/** Running totals through a month, so the income line steps up on payday. */
+const MONTH = [
+  { day: '1', rent: 1200, food: 40, travel: 0, income: 2600 },
+  { day: '5', rent: 1200, food: 190, travel: 60, income: 2600 },
+  { day: '10', rent: 1200, food: 340, travel: 60, income: 2600 },
+  { day: '15', rent: 1200, food: 470, travel: 310, income: 5200 },
+  { day: '20', rent: 1200, food: 620, travel: 380, income: 5200 },
+  { day: '25', rent: 1200, food: 760, travel: 690, income: 5200 },
+  { day: '30', rent: 1200, food: 910, travel: 720, income: 5200 },
+];
+
+const LABELS = { rent: 'Rent', food: 'Food', travel: 'Travel', income: 'Income' };
+
+const money = (value: number) => `$${value.toLocaleString('en-US')}`;
+
+export default function AreaChartAnnotated() {
+  return (
+    <AreaChart data={MONTH} xDataKey="day" stacked className="max-w-2xl" label="Spending against income, by day">
+      <AreaChart.Grid />
+      <AreaChart.Area dataKey="rent" color="info" />
+      <AreaChart.Area dataKey="food" color="success" />
+      <AreaChart.Area dataKey="travel" color="warning" />
+      <AreaChart.Line dataKey="income" curve="step" />
+      <AreaChart.ReferenceLine y={2000} label="Budget $2,000" />
+      <AreaChart.Marker index={4} label="Over budget" />
+      <AreaChart.YAxis />
+      <AreaChart.XAxis />
+      <AreaChart.Labels
+        labels={LABELS}
+        formatValue={money}
+        extra={[{ id: 'kept', label: 'Kept', value: 2370, at: 4015 }]}
+      />
+      <AreaChart.Tooltip labels={LABELS} formatValue={money} />
+    </AreaChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Tuning the fill
+
+`fillOpacity` is the weight at the top of a band and `gradientToOpacity` the weight at the bottom. Matching them gives a flat fill. `showLine={false}` drops the edge.
+
+<ComponentPreview name="area-chart/fill" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { AreaChart } from '@/components/panelui/area-chart';
+
+const VISITS = [
+  { day: 'Mon', visits: 310 },
+  { day: 'Tue', visits: 440 },
+  { day: 'Wed', visits: 380 },
+  { day: 'Thu', visits: 570 },
+  { day: 'Fri', visits: 490 },
+  { day: 'Sat', visits: 620 },
+  { day: 'Sun', visits: 540 },
+];
+
+export default function AreaChartFill() {
+  return (
+    <div className="grid w-full max-w-2xl gap-6 sm:grid-cols-3">
+      <AreaChart data={VISITS} xDataKey="day" label="Visits, fading fill">
+        <AreaChart.Header title="Fades out" />
+        <AreaChart.Area dataKey="visits" color="info" fillOpacity={0.5} gradientToOpacity={0.05} />
+      </AreaChart>
+      <AreaChart data={VISITS} xDataKey="day" label="Visits, flat fill">
+        <AreaChart.Header title="Flat" />
+        <AreaChart.Area dataKey="visits" color="info" fillOpacity={0.4} gradientToOpacity={0.4} />
+      </AreaChart>
+      <AreaChart data={VISITS} xDataKey="day" label="Visits, fill only">
+        <AreaChart.Header title="No line" />
+        <AreaChart.Area dataKey="visits" color="info" showLine={false} />
+      </AreaChart>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Picking out a series
+
+`opacity` fades a whole series, fill and edge, and its entry in `Labels` fades with it. `onSelect` reports the `Area` chosen on the plot or in `Labels`, so state can drive it. Here each series also has a colour of its own.
+
+<ComponentPreview name="area-chart/dimmed" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+
+import { AreaChart } from '@/components/panelui/area-chart';
+
+const SPEND = [
+  { week: 'W1', rent: 300, food: 120, travel: 60 },
+  { week: 'W2', rent: 300, food: 160, travel: 40 },
+  { week: 'W3', rent: 300, food: 140, travel: 180 },
+  { week: 'W4', rent: 300, food: 190, travel: 90 },
+  { week: 'W5', rent: 300, food: 150, travel: 130 },
+];
+
+const CATEGORIES = [
+  { key: 'rent', color: '#0ea5e9' },
+  { key: 'food', color: '#f97316' },
+  { key: 'travel', color: '#a855f7' },
+];
+
+const LABELS = { rent: 'Rent', food: 'Food', travel: 'Travel' };
+
+/** How far the series that are not picked fade. */
+const DIMMED = 0.25;
+
+export default function AreaChartDimmed() {
+  const [picked, setPicked] = useState('food');
+  return (
+    <AreaChart
+      data={SPEND}
+      xDataKey="week"
+      stacked
+      className="max-w-2xl"
+      aspectRatio={2.4}
+      label="Spending per week by category. Choose a category to pick it out."
+      onSelect={setPicked}
+    >
+      <AreaChart.Grid />
+      {CATEGORIES.map(({ key, color }) => (
+        <AreaChart.Area key={key} dataKey={key} color={color} opacity={key === picked ? 1 : DIMMED} />
+      ))}
+      <AreaChart.YAxis />
+      <AreaChart.XAxis />
+      <AreaChart.Labels labels={LABELS} />
+      <AreaChart.Tooltip labels={LABELS} />
+    </AreaChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading, then data
+
+Add `AreaChart.Skeleton` and drive `status`. The bands grow out of the baseline when it turns `ready`. Without the skeleton the plot is empty while loading.
+
+<ComponentPreview name="area-chart/loading" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { AreaChart, type AreaChartStatus } from '@/components/panelui/area-chart';
+import { Button } from '@/components/panelui/button';
+
+const SESSIONS = [
+  { hour: '08:00', direct: 210, search: 220 },
+  { hour: '10:00', direct: 290, search: 400 },
+  { hour: '12:00', direct: 340, search: 520 },
+  { hour: '14:00', direct: 360, search: 560 },
+  { hour: '16:00', direct: 320, search: 480 },
+  { hour: '18:00', direct: 250, search: 330 },
+];
+
+export default function AreaChartLoading() {
+  const [status, setStatus] = useState<AreaChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <AreaChart data={SESSIONS} status={status} xDataKey="hour" stacked>
+        <AreaChart.Grid />
+        <AreaChart.Skeleton />
+        <AreaChart.Area dataKey="direct" color="primary" />
+        <AreaChart.Area dataKey="search" color="info" />
+        <AreaChart.XAxis />
+      </AreaChart>
+      <Button variant="outline" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+When `data` changes, the bands and the axis move to their new values over `domainDuration`. A `ref` on the chart has `replay()`, which grows the bands in again.
+
+<ComponentPreview name="area-chart/changing-data" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { AreaChart, type AreaChartHandle } from '@/components/panelui/area-chart';
+import { Button } from '@/components/panelui/button';
+
+const THIS_WEEK = [310, 440, 380, 570, 490, 620, 540];
+const LAST_WEEK = [260, 300, 420, 390, 510, 430, 470];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const rows = (values: number[]) => values.map((visits, index) => ({ day: DAYS[index], visits }));
+
+export default function AreaChartChangingData() {
+  const chart = useRef<AreaChartHandle>(null);
+  const [thisWeek, setThisWeek] = useState(true);
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <AreaChart ref={chart} data={rows(thisWeek ? THIS_WEEK : LAST_WEEK)} xDataKey="day">
+        <AreaChart.Grid />
+        <AreaChart.Area dataKey="visits" color="info" />
+        <AreaChart.YAxis />
+        <AreaChart.XAxis />
+        <AreaChart.Tooltip labels={{ visits: 'Visits' }} />
+      </AreaChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setThisWeek(!thisWeek)}>
+          {thisWeek ? 'Show last week' : 'Show this week'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### AreaChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly AreaChartDatum[]` | — | The rows. Each one is a point along the x-axis. |
+| `xDataKey` | `string` | `'date'` | Key holding the x label. Used by the axis and the readout. |
+| `status` | `AreaChartStatus` | `'ready'` | `loading` holds the bands back and grows them in when it turns `ready`. Add an `AreaChart.Skeleton` for something to stand in the plot meanwhile. |
+| `aspectRatio` | `number` | `2` | The plot's width ÷ height. `2` is the wide card shape. |
+| `animationDuration` | `number` | `700` | Milliseconds for the bands to grow in. |
+| `domainDuration` | `number` | `500` | Milliseconds for the bands and the axis to settle after the data changes. |
+| `yDomain` | `[number, number]` | — | Fix the value axis instead of deriving it from the data. |
+| `stacked` | `boolean` | `false` | Sit each band on the running total of the ones below it, so the top edge is the whole and each thickness is a share. The first `Area` is the bottom of the stack. Without it the bands overlay and their fills are translucent. |
+| `curve` | `AreaChartCurve` | `'monotone'` | `monotone` never overshoots between points. `linear` joins them straight. `step` holds each value until the next. |
+| `onActiveIndexChange` | `(index: number, datum: AreaChartDatum \| null) => void` | — | The point being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
+| `onSelect` | `(key: string) => void` | — | An `Area` was chosen, by pressing it on the plot or its entry in `Labels`. Gets its `dataKey`. |
+| `compact` | `boolean` | `false` | Drop the axis padding so the bands reach the edges, for a sparkline. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForDatum` | `(datum: AreaChartDatum, index: number) => string` | — | What a screen reader says for one row. Defaults to its keys and values. |
+
+### AreaChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+
+### AreaChart.Area
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — | Column in the data holding this series' values. |
+| `color` | `AreaChartColor` | `'chart-1'` | A role in the theme, or any CSS colour. |
+| `fillOpacity` | `number` | — | Opacity of the fill at the top of the band. Defaults to `0.6` stacked and `0.35` overlaid, so overlaid bands show each other through. |
+| `gradientToOpacity` | `number` | `0` | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
+| `opacity` | `number` | `1` | Opacity of the whole series, fill and edge, for picking one out from the others. |
+| `showLine` | `boolean` | `true` | Draw the line along the top edge of the band. |
+| `strokeWidth` | `number` | `2` | Thickness of that line. |
+
+### AreaChart.Line
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | — | Column in the data holding this line's values. |
+| `color` | `AreaChartColor` | `'foreground'` | A role in the theme, or any CSS colour. |
+| `curve` | `AreaChartCurve` | — | Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. |
+| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `strokeWidth` | `number` | `2` | Thickness of the line. |
+
+### AreaChart.ReferenceLine
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `y` | `number` | — | The value to draw the rule at. It counts toward the value axis. |
+| `color` | `AreaChartColor` | `'foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
+| `dashArray` | `string` | `'3 4'` | The stroke's dash pattern. |
+| `label` | `string` | — | Text above the rule's left end. |
+
+### AreaChart.Marker
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `number` | — | The row to draw the rule at, counted from `0`. |
+| `color` | `AreaChartColor` | `'muted-foreground'` | A role in the theme, or any CSS colour, for the rule and its label. |
+| `dashArray` | `string` | `'2 3'` | The stroke's dash pattern. |
+| `label` | `string` | — | Text beside the rule's top. It moves to the left of a rule near the right edge. |
+
+### AreaChart.Labels
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys. |
+| `formatValue` | `(value: number, key: string) => string` | — | Format a value for its label. Defaults to a compact number. |
+| `extra` | `readonly AreaChartExtraLabel[]` | — | Labels of your own, for a figure that belongs to no one series. |
+| `minGap` | `number` | `16` | The least distance between two labels, in pixels. |
+
+### AreaChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
+
+### AreaChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | — | How many labels to show, evenly spaced with both ends kept. Every row by default, thinned only when they get too close to read. |
+| `format` | `(datum: AreaChartDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
+
+### AreaChart.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | Roughly how many labels to show along the value axis. |
+| `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
+
+### AreaChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(value: number, key: string) => string` | — | Format one series' value. Defaults to a compact number. |
+| `formatX` | `(datum: AreaChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys, as the legend takes. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### AreaChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys. |
+
+### AreaChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the chart is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a total. |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys, as the legend takes. |
+| `legend` | `boolean` | `false` | Draw a swatch and a name per series along the trailing edge. Prefer this to `AreaChart.Legend` on a chart that has a header: the legend sits over the plot, in the corner the bands also want. |
+
+`AreaChart`, `AreaChart.Header`, `AreaChart.Legend` and `AreaChart.Labels` also take the props of the element they render, and a `className`. `AreaChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
+
+## Notes
+
+### Stacked or overlaid
+
+Stack when the series are parts of one thing and the total means something: channels making up your traffic, plans making up your revenue. Overlay when a total would mean nothing: two plans compared.
+
+The chart does not add up a stack's total for you. The first example works it out from the row that `onActiveIndexChange` passes.
+
+### The baseline
+
+The derived value axis always includes zero, because an area floating above the bottom of the plot reads as a shape rather than a quantity. `yDomain` fixes the axis to other values.
+
+### Gaps
+
+A missing value leaves a gap in its own band. In a stack it counts as zero for the bands above it.
+
+### Sizing
+
+The chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.
+
+### Bundle size
+
+The chart adds about 67 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.
+
+### Colour
+
+`color` names a role in the theme. Every `Area` defaults to `chart-1`, so give the others their own. `Line` and `ReferenceLine` default to `foreground`, and `Marker` to `muted-foreground`. `color` also takes any CSS colour, for a colour that comes from your data. Unlike a role, it does not change with the theme.
+
+### Reading a point
+
+With a `Tooltip`, hovering the plot reads the nearest point. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the points it crosses, and a vertical drag scrolls the page.
+
+`onActiveIndexChange` fires when the point changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useAreaChart` gives the same point.
+
+### Keyboard
+
+With a `Tooltip`, the plot takes focus. The arrow keys move between points, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it.
+
+The arrow keys move between rows, not series, so Enter on the plot does not call `onSelect`. Add `AreaChart.Labels` so a keyboard can reach it: each `Area`'s entry becomes a button.
+
+### Screen readers
+
+Each row is given as text beside the drawing. `label` names the chart and `labelForDatum` writes a row, for values with a unit. Without them a row is read as its keys and values.
+
+### Reduced motion
+
+With reduced motion set, the bands and the axis appear at their final values, and the skeleton's highlight is not drawn.
+
+### Server Components
+
+`AreaChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `AreaChart.Header` off the import, so each part is also exported by name: `AreaChartHeader` is `AreaChart.Header`, and so on for the others.
+
+```tsx
+import { AreaChart, AreaChartHeader, AreaChartGrid, AreaChartArea, AreaChartLine, AreaChartReferenceLine, AreaChartMarker, AreaChartLabels, AreaChartSkeleton, AreaChartXAxis, AreaChartYAxis, AreaChartTooltip, AreaChartLegend } from "@/components/panelui/area-chart"
+```

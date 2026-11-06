@@ -1,0 +1,49 @@
+{
+  "slug": "live-line-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 460
+  },
+  "intro": "Use it for a number that keeps arriving: a metric off a socket, a sensor, a queue depth. Each reading is placed at the time it carries, against a window running from `window` seconds ago to now, so the gaps between readings are part of what is drawn.\n\nThe window follows the clock and not the data, so the line drifts left whether or not anything is arriving. A feed that stalls shows as the line pulling away from the right edge.\n\nThe clock costs one frame callback while the chart can be seen. `paused`, `status=\"loading\"`, a hidden page and scrolling off screen stop it. Under reduced motion it does not run, and the window advances as each reading arrives.\n\nFor a fixed series that is not going to grow, such as a week of visits, use a line chart.",
+  "usage": "<LiveLineChart data={points} window={30}>\n  <LiveLineChart.Header title=\"Requests / sec\" />\n  <LiveLineChart.Grid />\n  <LiveLineChart.Area />\n  <LiveLineChart.Line />\n  <LiveLineChart.Tip />\n  <LiveLineChart.XAxis />\n  <LiveLineChart.Tooltip />\n</LiveLineChart>",
+  "anatomy": "<LiveLineChart data={…}>\n  <LiveLineChart.Header />\n  <LiveLineChart.Grid />\n  <LiveLineChart.Area />\n  <LiveLineChart.Line />\n  <LiveLineChart.Skeleton />\n  <LiveLineChart.Tip />\n  <LiveLineChart.XAxis />\n  <LiveLineChart.YAxis />\n  <LiveLineChart.Tooltip />\n</LiveLineChart>",
+  "parts": {
+    "Header": "The strip above the plot. Its value falls back to the reading under the crosshair, then to the latest one, so reading back through the window shows here with nothing to wire up. `children` is a trailing slot for a pause control or a badge.",
+    "Grid": "The rules the readings are judged against. They divide the plot evenly and stay put when the scale changes.",
+    "Area": "The gradient fill under the line.",
+    "Line": "The line.",
+    "Tip": "The dot at the leading end. It rides the newest reading and not the right-hand edge, so it drifts left when the feed stops. `badge` writes the reading beside it, for a chart with no header.",
+    "XAxis": "How far back the plot reaches, as offsets from now: `-30s`, `-15s`, `now`. They do not change while the window moves.",
+    "YAxis": "The value scale, with room made for it on the left.",
+    "Tooltip": "Reads a reading that has gone past, by hovering, dragging or the arrow keys. The crosshair stays on the moment it named and travels left with it. Moving away or Escape lets it go.",
+    "Skeleton": "A flat line down the middle of the plot, shown while `status=\"loading\"`."
+  },
+  "examples": [
+    {
+      "title": "Colour from the direction",
+      "description": "`momentumColors` colours the line, the fill and the dot by where the last six readings have been going: rising, falling or flat. Each direction names a theme role, and `up` and `down` default to `success` and `destructive`.\n\nThis chart has no header, so `Tip`'s `badge` writes the reading.",
+      "demo": "momentum",
+      "height": 320
+    },
+    {
+      "title": "Pausing",
+      "description": "`paused` holds the window, the axis, the dot and the colour. Readings keep arriving behind the right-hand edge and appear when it is released. A `ref` on the chart has `sync()`, which lands the window on the present without releasing the pause.",
+      "demo": "pause",
+      "height": 400
+    },
+    {
+      "title": "A feed that stalls",
+      "description": "Nothing has to be done for this. When readings stop, the line and its dot drift left, and once the last reading has left the window the plot is empty.",
+      "demo": "stalled",
+      "height": 400
+    },
+    {
+      "title": "Loading, then data",
+      "description": "`status=\"loading\"` holds the clock and draws `Skeleton`. The axes wait for the data, and the room for `YAxis` is kept so the plot does not move when it arrives.",
+      "demo": "loading",
+      "height": 400
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone. The plot draws in the browser after it has been measured, and the space is reserved until then.\n\n### The value axis\n\nThe derived axis spans the readings inside the window, with 12% of headroom, and settles over `domainDuration` when that range changes. A spike stops holding the axis open once it has scrolled off. `yDomain` fixes it.\n\n### Long-running feeds\n\nThe chart keeps the newest `maxPoints` readings and drops the rest, so a feed can keep appending to `data`. Readings with a non-finite time or value are dropped, and for two readings with the same time the later one wins.\n\n### Accessibility\n\nThe plot is one image whose name a screen reader reads as a snapshot: the name, then the current value and direction, or the selected value and its age, then the window and whether it is paused. It changes with the data and is not announced on its own, because a live region on a stream would never stop talking. `label` names it, falling back to the Header's title.\n\nWith a `Tooltip` the plot takes focus. The left and right arrow keys walk the readings in the window and Escape lets go.",
+  "propsNote": "`LiveLineChart` and `LiveLineChart.Header` also take the props of the element they render, and a `className`. `LiveLineChart.Tip` and `LiveLineChart.Tooltip` put their `className` on the badge and the readout. The other parts draw nothing themselves and take only the props listed."
+}

@@ -1,0 +1,57 @@
+{
+  "slug": "funnel-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 440
+  },
+  "intro": "Use it to show how many were left at each step of a process, such as a checkout or a signup. Each stage is drawn as a band of one ribbon, as tall as its value where it starts and as tall as the next stage's where it ends.\n\nEvery stage has to be a subset of the one above it, in the order the steps happen. The chart never sorts them.\n\nFor categories that do not nest, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<FunnelChart data={checkout}>\n  <FunnelChart.Header title=\"Viewed\" value=\"41,800\" />\n  <FunnelChart.Stages />\n  <FunnelChart.Labels />\n</FunnelChart>",
+  "anatomy": "<FunnelChart data={…}>\n  <FunnelChart.Header />\n  <FunnelChart.Skeleton />\n  <FunnelChart.Stages />\n  <FunnelChart.Labels />\n  <FunnelChart.Legend />\n</FunnelChart>",
+  "parts": {
+    "Header": "The strip above the run: `title`, `value` and `caption`, with your own control on the trailing side. The value is a string you pass, so it can follow `onActiveIndexChange`.",
+    "Skeleton": "One plain ribbon over the whole run, drawn only while `status` is `loading`. It has no divisions, because placeholder stages would read as a real drop-off.",
+    "Stages": "The ribbon. It is one part rather than one per stage, because a stage's near edge is the previous stage's far edge.",
+    "Labels": "The readings around the ribbon: the count above each band, the name under it, and the conversion in a pill on it. `share` picks which conversion.",
+    "Legend": "A swatch, a name and a reading per stage, under the run. Use it in place of `Labels` on a compact chart. `layout` is `list` or `inline`."
+  },
+  "examples": [
+    {
+      "title": "Which conversion the pill reports",
+      "description": "`share=\"top\"` is the share of the first stage, which every stage has. `share=\"previous\"` is the share of the stage above, so the first stage has no pill. `share=\"none\"` leaves the pill out.",
+      "demo": "conversion",
+      "height": 560
+    },
+    {
+      "title": "Straight sides, one layer",
+      "description": "`edges=\"straight\"` draws the sides as diagonals, and `layers={1}` draws each band once with a flat fill. `color` names the hue as one of the theme's roles.",
+      "demo": "straight",
+      "height": 300
+    },
+    {
+      "title": "One stage in its own colour",
+      "description": "`color` on a stage draws it at full strength instead of the fading hue. More `layers` give a deeper halo.",
+      "demo": "glow",
+      "height": 360
+    },
+    {
+      "title": "Compact, with a key",
+      "description": "Without `Labels` the run is a shape, so the numbers go in `FunnelChart.Legend`. Its rows read and pin a stage the same way the plot does.",
+      "demo": "compact",
+      "height": 520
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `FunnelChart.Skeleton` and drive `status`. The stages grow in one after another when it turns `ready`.",
+      "demo": "loading",
+      "height": 380
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, the ribbon moves to its new heights. A `ref` on the chart has `replay()`, which runs the entrance again.",
+      "demo": "changing-data",
+      "height": 380
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes its height from `height`, which applies to the run alone, so a header or a legend does not shrink it. The stages divide the width between them unless `stageSize` is set. Keep the stage names short: five stages at phone width leave each name about 70 pixels.\n\nThe plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n### Bundle size\n\nThe chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.\n\n### Data\n\nHeights are measured against the largest value, so a stage larger than the one above it is drawn as given, wider than its parent. Check the data if you see one.\n\nA non-zero stage is never drawn shorter than `minWidth`, a share of the tallest, so a very small stage stays visible. A stage of zero draws nothing. A negative value counts as zero.\n\n### Colour\n\n`color` on the chart names a role in the theme, and the stages fade along the run in that one hue. `color` on a stage draws that stage at full strength.\n\n### Reading a stage\n\nHovering a column reads its stage, and the whole column is the target, so a thin stage is as easy to reach as a wide one. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the stages it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the stage changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useFunnelChart` gives the same stage with its shares. `activeIndex` makes the stage controlled.\n\n### Keyboard\n\nThe plot takes focus. The arrow keys move between stages, Home and End go to the first and last, Enter or Space pins the reading, and Escape clears it. `FunnelChart.Legend` rows are buttons in the tab order as well.\n\n### Screen readers\n\nEach stage is given as text beside the drawing, and the stage being read is announced as it changes. `label` names the chart and `labelForDatum` writes a stage, for values with a unit. Without it a stage is read as its name, count and share of the first stage.\n\n### Reduced motion\n\nWith reduced motion set, the stages appear at their final heights.",
+  "propsNote": "`FunnelChart`, `FunnelChart.Header` and `FunnelChart.Legend` also take the props of the element they render, and a `className`. `FunnelChart.Labels` puts its `className` on each stage's column. `FunnelChart.Stages` and `FunnelChart.Skeleton` draw nothing themselves and take only the props listed."
+}

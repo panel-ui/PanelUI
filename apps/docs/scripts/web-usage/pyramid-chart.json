@@ -1,0 +1,53 @@
+{
+  "slug": "pyramid-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 520
+  },
+  "intro": "Use it to compare two series row by row, such as men and women by age band. Each row has a bar going left and a bar going right from a centre line.\n\nBoth sides use the same scale, taken from the larger of the two series, so a bar twice as long as the one facing it means twice as much.\n\nFor two series side by side rather than back to back, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<PyramidChart data={penguins} xDataKey=\"species\">\n  <PyramidChart.Grid />\n  <PyramidChart.Bar dataKey=\"male\" side=\"start\" />\n  <PyramidChart.Bar dataKey=\"female\" side=\"end\" />\n  <PyramidChart.XAxis />\n  <PyramidChart.YAxis />\n  <PyramidChart.Tooltip />\n</PyramidChart>",
+  "anatomy": "<PyramidChart data={…}>\n  <PyramidChart.Header />\n  <PyramidChart.Grid />\n  <PyramidChart.Skeleton />\n  <PyramidChart.Bar side=\"start\" />\n  <PyramidChart.Bar side=\"end\" />\n  <PyramidChart.XAxis />\n  <PyramidChart.YAxis />\n  <PyramidChart.Tooltip />\n  <PyramidChart.Legend />\n</PyramidChart>",
+  "parts": {
+    "Header": "The strip above the plot: `title`, `value` and `caption`, with the legend or your own control on the trailing side. The value is a string you pass, so it can follow `onActiveIndexChange`.",
+    "Grid": "Dashed lines at each step on both wings, and a solid line down the middle. `columns` is how many lines per wing.",
+    "Skeleton": "Equal stubs either side of the centre, with a highlight moving across them, drawn only while `status` is `loading`.",
+    "Bar": "One wing. `side` decides which, and the default colour differs per side, so two bars with only a key and a side are already told apart.",
+    "XAxis": "The value labels along the bottom: the same values twice, either side of a zero in the middle. `ticks` is how many per wing.",
+    "YAxis": "The category names, one per row. `labelPlacement` on the chart decides where they sit.",
+    "Tooltip": "The readout, and the reading of a row by hover, press, drag or arrow keys. The other rows fade while one is read.",
+    "Legend": "A swatch and a name per series, over the plot's top corner. On a chart with a header, use the header's `legend` instead."
+  },
+  "examples": [
+    {
+      "title": "Where the names go",
+      "description": "`labelPlacement` moves the category names. The default, `above`, gives each row a line over its bars. `center` puts them in a gutter between the wings, which comes off the bars rather than the edges, so both wings stay equal. It also leaves out the centre line, which would run through the names.",
+      "demo": "between",
+      "height": 520
+    },
+    {
+      "title": "Names down the left",
+      "description": "`labelPlacement=\"start\"` puts the names in a column on the left. Use it when the names are too long to fit a 72 pixel gutter, such as paths.",
+      "demo": "start",
+      "height": 440
+    },
+    {
+      "title": "Small and negative values",
+      "description": "`minBarLength` is the shortest a positive bar is drawn, in pixels, so East is still visible beside North. A negative value is drawn as nothing and still appears in the readout, so hover South to see the bad row. `maxValue` fixes the far end of the scale, for several charts that have to be compared.",
+      "demo": "small-values",
+      "height": 460
+    },
+    {
+      "title": "Loading",
+      "description": "`status=\"loading\"` holds the bars back, and `PyramidChart.Skeleton` shows equal stubs meanwhile. The bars grow out of the centre when it turns `ready`.",
+      "demo": "loading",
+      "height": 460
+    },
+    {
+      "title": "Changing data",
+      "description": "New data moves the bars from where they are, and the shared scale moves with them. `replay()` on the ref runs the entrance again.",
+      "demo": "changing-data",
+      "height": 500
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes the plot's height from `aspectRatio`, so a header does not shrink it. Height has nothing to do with how many rows there are: to shorten a tall chart raise `aspectRatio`, because removing rows only makes the bars thicker.\n\nThe plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n### Bundle size\n\nThe chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.\n\n### Data\n\nThe far end of the scale is the largest value in either series, rounded up to a step that halves cleanly. The near end is zero and cannot be moved, because a bar cropped at its base misreports its value.\n\nWhich side a series is on comes from `side`, not from the sign of its numbers. A negative value is drawn as nothing and still appears in the readout, so a data error shows as a gap.\n\n### Colour\n\n`color` on a bar names a role in the theme. Without it, the start wing is `chart-2` and the end wing is `chart-1`.\n\n### Reading a row\n\nHovering anywhere in a row reads it, and the other rows fade. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the rows it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the row changes, not on every frame, so it can drive a readout outside the chart, as the first example does. Inside the chart, `usePyramidChart` gives the same row.\n\n### Keyboard\n\nThe chart takes focus. The arrow keys walk the rows, Home and End go to the first and last, and Escape clears the reading.\n\n### Screen readers\n\nEach row is given as text beside the drawing. `label` names the chart and `labelForDatum` writes a row, for values with a unit. Without it a row is read as its keys and values.\n\n### Reduced motion\n\nWith reduced motion set, the bars appear at their final lengths and the skeleton's highlight stays still."
+}

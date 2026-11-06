@@ -371,7 +371,8 @@ const RingChartRoot = forwardRef<RingChartHandle, RingChartProps & RenderProp<'d
                   togglePin(activeIndex);
                   return;
                 }
-                if (!NAVIGATION_KEYS.has(event.key)) return;
+                // The browser's own shortcuts, such as going back.
+                if (!NAVIGATION_KEYS.has(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
                 event.preventDefault();
                 pinned.current = -1;
                 report(ringAfterKey(event.key, activeIndex, data.length));
@@ -673,7 +674,7 @@ function RingChartHeader({
           <>
             <div className={slots.headerText()}>
               {title ? <div className={slots.headerMuted()}>{title}</div> : null}
-              {value ? <div className={slots.headerValue()}>{value}</div> : null}
+              {value || value === 0 ? <div className={slots.headerValue()}>{value}</div> : null}
               {caption ? <div className={slots.headerMuted()}>{caption}</div> : null}
             </div>
             {trailing ? <div className={slots.headerTrailing()}>{trailing}</div> : null}

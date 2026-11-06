@@ -175,6 +175,30 @@
       ]
     },
     {
+      "name": "bubble-chart",
+      "type": "registry:component",
+      "title": "Bubble Chart",
+      "description": "One labelled circle per row, on two measured axes, with a third quantity on each circle's area.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/bubble-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/bubble-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/bubble-chart/bubble-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/bubble-chart/bubble-scale.ts"
+        }
+      ]
+    },
+    {
       "name": "button",
       "type": "registry:component",
       "title": "Button",

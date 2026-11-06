@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
 
 ## Feedback and status
 

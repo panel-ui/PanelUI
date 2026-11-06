@@ -79,10 +79,10 @@ The value axis fits the data and does not have to reach zero, so a small change 
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `rows` | `number` | — | Roughly how many lines to draw across the value axis. |
-| `dashArray` | `string` | — | The stroke's dash pattern. Omit for the default dash, `"none"` for a solid rule. |
-| `opacity` | `number` | — | Opacity of the lines. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
+| `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. Omit for the default dash, `"none"` for a solid rule. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+| `color` | `LineChartColor` | — | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
 
 #### `LineChartLineProps`
 
@@ -100,27 +100,27 @@ The value axis fits the data and does not have to reach zero, so a small change 
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. |
 | `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the fill is drawn in. |
-| `opacity` | `number` | — | Opacity at the line. It fades to nothing at the bottom of the plot. |
+| `opacity` | `number` | `0.18` | Opacity at the line. It fades to nothing at the bottom of the plot. |
 
 #### `LineChartSkeletonProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
+| `color` | `LineChartColor` | — | Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. |
 
 #### `LineChartXAxisProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many labels to show, evenly spaced with both ends kept. |
+| `ticks` | `number` | `4` | How many labels to show, evenly spaced with both ends kept. |
 | `format` | `(datum: LineChartDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
 
 #### `LineChartYAxisProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | Roughly how many labels to show. Give it the same number as `Grid`'s `rows`. |
+| `ticks` | `number` | `4` | Roughly how many labels to show. Give it the same number as `Grid`'s `rows`. |
 | `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
 
 #### `LineChartTooltipProps`

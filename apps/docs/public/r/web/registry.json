@@ -636,6 +636,9 @@
         "d3-shape",
         "tailwind-variants"
       ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
       "registryDependencies": [],
       "cssVars": {
         "light": {

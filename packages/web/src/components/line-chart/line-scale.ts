@@ -33,7 +33,7 @@ export function lineDomain(
     }
   }
   if (min === Infinity) return [0, 1];
-  const pad = min === max ? 1 : (max - min) * 0.1;
+  const pad = (min === max ? Math.abs(min) || 1 : max - min) * 0.1;
   const [low, high] = scaleLinear([min - pad, max + pad], [0, 1]).nice(ticks).domain();
   return [low, high];
 }

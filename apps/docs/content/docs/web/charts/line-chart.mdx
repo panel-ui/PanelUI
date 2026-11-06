@@ -92,7 +92,7 @@ Import from `panelui-web/line-chart` instead of `@/components/panelui/line-chart
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts d3-shape tailwind-variants" />
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts d3-shape tailwind-variants @types/d3-shape" />
 
 </Step>
 
@@ -418,10 +418,10 @@ export default function LineChartChangingData() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `rows` | `number` | — | Roughly how many lines to draw across the value axis. |
-| `dashArray` | `string` | — | The stroke's dash pattern. Omit for the default dash, `"none"` for a solid rule. |
-| `opacity` | `number` | — | Opacity of the lines. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
+| `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. Omit for the default dash, `"none"` for a solid rule. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+| `color` | `LineChartColor` | — | Which of the theme's roles the lines are drawn in. Defaults to the border colour. |
 
 ### LineChart.Line
 
@@ -439,27 +439,27 @@ export default function LineChartChangingData() {
 | --- | --- | --- | --- |
 | `dataKey` | `string` | — | Column in the data holding this series' values. |
 | `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the fill is drawn in. |
-| `opacity` | `number` | — | Opacity at the line. It fades to nothing at the bottom of the plot. |
+| `opacity` | `number` | `0.18` | Opacity at the line. It fades to nothing at the bottom of the plot. |
 
 ### LineChart.Skeleton
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
-| `color` | `LineChartColor` | `'chart-1'` | Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
+| `color` | `LineChartColor` | — | Which of the theme's roles the rule is drawn in, under the highlight. Defaults to the muted colour. |
 
 ### LineChart.XAxis
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | How many labels to show, evenly spaced with both ends kept. |
+| `ticks` | `number` | `4` | How many labels to show, evenly spaced with both ends kept. |
 | `format` | `(datum: LineChartDatum, index: number) => string` | — | Turn a row into its label. Defaults to the value at `xDataKey`. |
 
 ### LineChart.YAxis
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `ticks` | `number` | — | Roughly how many labels to show. Give it the same number as `Grid`'s `rows`. |
+| `ticks` | `number` | `4` | Roughly how many labels to show. Give it the same number as `Grid`'s `rows`. |
 | `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
 
 ### LineChart.Tooltip

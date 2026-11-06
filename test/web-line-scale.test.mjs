@@ -38,3 +38,11 @@ test('x labels keep both ends and never outnumber the rows', () => {
   assert.deepEqual(tickIndexes(10, 1), [0]);
   assert.deepEqual(tickIndexes(0, 4), []);
 });
+
+test('a flat series keeps its value on the axis at any size', () => {
+  for (const value of [5_000_000, 0.001, 0]) {
+    const [low, high] = lineDomain([{ a: value }], ['a'], 4);
+    assert.ok(low < value && value < high);
+    assert.ok(high - low <= Math.max(Math.abs(value), 1));
+  }
+});

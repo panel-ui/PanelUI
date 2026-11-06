@@ -153,7 +153,7 @@ const STYLES = `@keyframes panelui-line-sweep{from{transform:translateX(-100%)}t
 @media (prefers-reduced-motion:no-preference){[data-slot=line-chart-plot][data-revealing] :is(.ts-chart__line,.ts-chart__area){animation:panelui-line-reveal var(--line-reveal) cubic-bezier(.33,1,.68,1) both}}`;
 
 const COMPACT = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
-const COMPACT_SMALL = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 });
+const COMPACT_SMALL = new Intl.NumberFormat('en', { notation: 'compact', maximumSignificantDigits: 2 });
 
 /** Below one, a single decimal would round most values down to nothing. */
 const compactNumber = (value: number) => (Math.abs(value) < 1 ? COMPACT_SMALL : COMPACT).format(value);
@@ -353,6 +353,10 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
 
   const loading = status === 'loading';
   const chartKey = `${revision}:${status}`;
+  // A finished reveal counts for this load only, so the next one plays again.
+  useEffect(() => {
+    if (loading) setRevealedKey('');
+  }, [loading]);
   const { grid, xAxis, yAxis, tooltip, skeleton } = slots;
 
   const definition = useMemo(() => {
@@ -720,7 +724,12 @@ export interface LineChartGridProps {
 }
 
 /** Lines across the value axis, so a point can be read against a number. */
-function LineChartGrid({ rows = 4, dashArray = '4 6', opacity = 1, color }: LineChartGridProps) {
+function LineChartGrid({
+  rows = 4,
+  dashArray = '4 6',
+  opacity = 1,
+  color,
+}: LineChartGridProps) {
   const { setSlot } = useChart('LineChart.Grid');
   const stroke = color ? COLOR_VAR[color] : 'var(--border)';
   useEffect(() => {
@@ -777,7 +786,11 @@ export interface LineChartAreaProps {
  * because a chart with two series usually wants it on only one of them: two
  * translucent fills over each other make a third colour that means nothing.
  */
-function LineChartArea({ dataKey, color = 'chart-1', opacity = 0.18 }: LineChartAreaProps) {
+function LineChartArea({
+  dataKey,
+  color = 'chart-1',
+  opacity = 0.18,
+}: LineChartAreaProps) {
   const { setArea, removeArea } = useChart('LineChart.Area');
   const fill = COLOR_VAR[color];
   useEffect(() => {
@@ -800,7 +813,10 @@ export interface LineChartSkeletonProps {
  * travelling along it. The highlight is a translated child inside the rule's
  * clip, so the loop runs on the compositor and repaints nothing.
  */
-function LineChartSkeleton({ duration = 1400, color }: LineChartSkeletonProps) {
+function LineChartSkeleton({
+  duration = 1400,
+  color,
+}: LineChartSkeletonProps) {
   const { setSlot } = useChart('LineChart.Skeleton');
   const base = color && COLOR_VAR[color];
   useEffect(() => {
@@ -819,7 +835,10 @@ export interface LineChartXAxisProps {
 }
 
 /** The x labels, each on its own point. */
-function LineChartXAxis({ ticks = 4, format }: LineChartXAxisProps) {
+function LineChartXAxis({
+  ticks = 4,
+  format,
+}: LineChartXAxisProps) {
   const { setSlot } = useChart('LineChart.XAxis');
   useEffect(() => {
     setSlot('xAxis', { ticks, format });
@@ -837,7 +856,10 @@ export interface LineChartYAxisProps {
 }
 
 /** Value labels down the side, with room made for them. */
-function LineChartYAxis({ ticks = 4, format }: LineChartYAxisProps) {
+function LineChartYAxis({
+  ticks = 4,
+  format,
+}: LineChartYAxisProps) {
   const { setSlot } = useChart('LineChart.YAxis');
   useEffect(() => {
     setSlot('yAxis', { ticks, format });
@@ -904,7 +926,12 @@ export interface LineChartLegendProps extends ComponentProps<'div'> {
 }
 
 /** The series key, over the top corner of the plot. On a chart with a header, use its `legend` prop. */
-function LineChartLegend({ labels, className, render, ...props }: LineChartLegendProps & RenderProp<'div'>) {
+function LineChartLegend({
+  labels,
+  className,
+  render,
+  ...props
+}: LineChartLegendProps & RenderProp<'div'>) {
   const { lines } = useChart('LineChart.Legend');
   const slots = lineChartVariants();
 

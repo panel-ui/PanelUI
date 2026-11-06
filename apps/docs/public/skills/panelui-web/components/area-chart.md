@@ -37,10 +37,14 @@ For one series where the shape matters more than what it is made of, use a line 
   <AreaChart.Header />
   <AreaChart.Grid />
   <AreaChart.Area dataKey="…" />
+  <AreaChart.Line dataKey="…" />
+  <AreaChart.ReferenceLine y={…} />
+  <AreaChart.Marker index={…} />
   <AreaChart.Skeleton />
   <AreaChart.XAxis />
   <AreaChart.YAxis />
   <AreaChart.Legend />
+  <AreaChart.Labels />
   <AreaChart.Tooltip />
 </AreaChart>
 ```
@@ -48,15 +52,19 @@ For one series where the shape matters more than what it is made of, use a line 
 - `AreaChart.Header` — The strip above the plot: `title`, `value` and `caption`, with the series key or your own control on the trailing side.
 - `AreaChart.Grid` — Lines across the value axis, in the theme's border colour. `rows` is roughly how many: the axis picks round numbers near it.
 - `AreaChart.Area` — One filled band with a line along its top edge. Declare one per key. In a stack, the first is the bottom.
+- `AreaChart.Line` — A series drawn as a line with no fill, over the bands. It is never part of a stack, counts toward the value axis and has a row in the readout. `curve="step"` holds each value until the next.
+- `AreaChart.ReferenceLine` — A rule across the plot at the value `y`: a budget, a limit, a target. `label` writes text above its left end.
+- `AreaChart.Marker` — A rule down the plot at the row `index`: a release, the day something ran out. `label` writes text beside its top.
 - `AreaChart.Skeleton` — A low band on the baseline with a highlight moving across it, drawn only while `status` is `loading`.
 - `AreaChart.XAxis` — The x labels, each on its own point. Labels are dropped when they get too close. `ticks` asks for fewer, evenly spaced with both ends kept.
 - `AreaChart.YAxis` — Value labels on the grid lines, in round numbers, with room made for them.
 - `AreaChart.Legend` — A swatch and a name per series, over the top corner of the plot, reversed for a stack so it reads in the order the bands appear. On a chart with a header, use the header's `legend` prop instead.
+- `AreaChart.Labels` — The value at the end of each series, beside where that series ends. Below 32rem of width they wrap under the plot. `extra` adds a figure that belongs to no one series.
 - `AreaChart.Tooltip` — The readout, and what drives it. It adds the crosshair and a dot on every band's top edge, and it covers the plot, so the pointer can be anywhere. `labels` names the series in it.
 
 ## Props
 
-`AreaChart`, `AreaChart.Header` and `AreaChart.Legend` also take the props of the element they render, and a `className`. `AreaChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
+`AreaChart`, `AreaChart.Header`, `AreaChart.Legend` and `AreaChart.Labels` also take the props of the element they render, and a `className`. `AreaChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
 
 #### `AreaChartProps`
 
@@ -70,7 +78,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | `domainDuration` | `number` | `500` | Milliseconds for the bands and the axis to settle after the data changes. |
 | `yDomain` | `[number, number]` | — | Fix the value axis instead of deriving it from the data. |
 | `stacked` | `boolean` | `false` | Sit each band on the running total of the ones below it, so the top edge is the whole and each thickness is a share. The first `Area` is the bottom of the stack. Without it the bands overlay and their fills are translucent. |
-| `curve` | `AreaChartCurve` | `'monotone'` | `monotone` never overshoots between points. `linear` joins them straight. |
+| `curve` | `AreaChartCurve` | `'monotone'` | `monotone` never overshoots between points. `linear` joins them straight. `step` holds each value until the next. |
 | `onActiveIndexChange` | `(index: number, datum: AreaChartDatum \| null) => void` | — | The point being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
 | `compact` | `boolean` | `false` | Drop the axis padding so the bands reach the edges, for a sparkline. |
 | `label` | `string` | — | What a screen reader calls the chart. |
@@ -82,7 +90,7 @@ For one series where the shape matters more than what it is made of, use a line 
 | --- | --- | --- | --- |
 | `rows` | `number` | — | Roughly how many lines to draw across the value axis. |
 | `dashArray` | `string` | — | The stroke's dash pattern. |
-| `opacity` | `number` | — | Opacity of the lines. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
 
 #### `AreaChartAreaProps`
 
@@ -92,8 +100,46 @@ For one series where the shape matters more than what it is made of, use a line 
 | `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the series is drawn in. |
 | `fillOpacity` | `number` | — | Opacity of the fill at the top of the band. Defaults to `0.6` stacked and `0.35` overlaid, so overlaid bands show each other through. |
 | `gradientToOpacity` | `number` | `0` | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
+| `opacity` | `number` | `1` | Opacity of the whole series, fill and edge, for picking one out from the others. |
 | `showLine` | `boolean` | `true` | Draw the line along the top edge of the band. |
 | `strokeWidth` | `number` | `2` | Thickness of that line. |
+
+#### `AreaChartLineProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `dataKey` | `string` | **required** | Column in the data holding this line's values. |
+| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the line is drawn in. |
+| `curve` | `AreaChartCurve` | `'monotone'` | Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. |
+| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `strokeWidth` | `number` | `2` | Thickness of the line. |
+
+#### `AreaChartReferenceLineProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `y` | `number` | **required** | The value to draw the rule at. It counts toward the value axis. |
+| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the rule and its label are drawn in. |
+| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `label` | `string` | — | Text above the rule's left end. |
+
+#### `AreaChartMarkerProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `index` | `number` | **required** | The row to draw the rule at, counted from `0`. |
+| `color` | `AreaChartColor` | `'chart-1'` | Which of the theme's roles the rule and its label are drawn in. |
+| `dashArray` | `string` | — | The stroke's dash pattern. |
+| `label` | `string` | — | Text beside the rule's top. It moves to the left of a rule near the right edge. |
+
+#### `AreaChartLabelsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `labels` | `Record<string, string>` | — | Prettier names for the series keys. |
+| `formatValue` | `(value: number, key: string) => string` | — | Format a value for its label. Defaults to a compact number. |
+| `extra` | `readonly AreaChartExtraLabel[]` | — | Labels of your own, for a figure that belongs to no one series. |
+| `minGap` | `number` | `16` | The least distance between two labels, in pixels. |
 
 #### `AreaChartSkeletonProps`
 
@@ -142,7 +188,7 @@ For one series where the shape matters more than what it is made of, use a line 
 
 ## In a Server Component
 
-`AreaChart` is a client component. A Server Component cannot read `AreaChart.Header` off the import, so import each part by name: `AreaChartHeader`, `AreaChartGrid`, `AreaChartArea`, `AreaChartSkeleton`, `AreaChartXAxis`, `AreaChartYAxis`, `AreaChartTooltip`, `AreaChartLegend`.
+`AreaChart` is a client component. A Server Component cannot read `AreaChart.Header` off the import, so import each part by name: `AreaChartHeader`, `AreaChartGrid`, `AreaChartArea`, `AreaChartLine`, `AreaChartReferenceLine`, `AreaChartMarker`, `AreaChartLabels`, `AreaChartSkeleton`, `AreaChartXAxis`, `AreaChartYAxis`, `AreaChartTooltip`, `AreaChartLegend`.
 
 ## Notes
 
@@ -170,7 +216,7 @@ The chart adds about 65 KB of gzipped JavaScript to a page that uses it. A page 
 
 #### Colour
 
-`color` on `AreaChart.Area` names a role in the theme. Every series defaults to `chart-1`, so give the others their own.
+`color` names a role in the theme. Every `Area` defaults to `chart-1`, so give the others their own. `Line` and `ReferenceLine` default to `foreground`, and `Marker` to `muted-foreground`.
 
 #### Reading a point
 

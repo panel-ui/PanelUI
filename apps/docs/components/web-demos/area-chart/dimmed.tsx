@@ -1,0 +1,38 @@
+'use client';
+
+import { AreaChart } from 'panelui-web/area-chart';
+
+const SPEND = [
+  { week: 'W1', rent: 300, food: 120, travel: 60 },
+  { week: 'W2', rent: 300, food: 160, travel: 40 },
+  { week: 'W3', rent: 300, food: 140, travel: 180 },
+  { week: 'W4', rent: 300, food: 190, travel: 90 },
+  { week: 'W5', rent: 300, food: 150, travel: 130 },
+];
+
+const LABELS = { rent: 'Rent', food: 'Food', travel: 'Travel' };
+
+/** How far the series that are not picked fade. */
+const DIMMED = 0.25;
+
+export default function AreaChartDimmed() {
+  return (
+    <AreaChart
+      data={SPEND}
+      xDataKey="week"
+      stacked
+      className="max-w-2xl"
+      aspectRatio={2.4}
+      label="Spending per week, with food picked out"
+    >
+      <AreaChart.Grid />
+      <AreaChart.Area dataKey="rent" color="success" opacity={DIMMED} />
+      <AreaChart.Area dataKey="food" color="info" />
+      <AreaChart.Area dataKey="travel" color="warning" opacity={DIMMED} />
+      <AreaChart.YAxis />
+      <AreaChart.XAxis />
+      <AreaChart.Labels labels={LABELS} />
+      <AreaChart.Tooltip labels={LABELS} />
+    </AreaChart>
+  );
+}

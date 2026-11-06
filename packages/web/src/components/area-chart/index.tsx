@@ -20,6 +20,10 @@
  * colour is named by the theme's role, a point is read by hovering, tapping or
  * dragging, a click pins the reading, and the arrow keys walk the points.
  *
+ * `Line`, `Labels`, `ReferenceLine` and `Marker` are web additions. They are for
+ * reading a chart without touching it: a total against a limit, or the values at
+ * the end of each series, on a page that shows many charts at once.
+ *
  * ## The parts describe, the root draws
  *
  * `Grid`, `Area`, the axes and `Tooltip` draw nothing themselves. Each one tells
@@ -27,6 +31,11 @@
  * They are found by context and not by inspecting children, so a part can be
  * wrapped in a component of your own. It also means the chart draws in the
  * browser, in a box its `aspectRatio` has reserved.
+ *
+ * `Labels` is the exception, because it is text in the page and not part of the
+ * drawing. It is in the DOM from the first commit, so the first measurement of
+ * the plot already leaves room for it. Reserving that room later would be a
+ * resize, and a resize ends the entrance.
  *
  * ## The stack is worked out here
  *
@@ -39,7 +48,7 @@
  * A gap in one series leaves a gap in its own band and counts as zero for the
  * bands above it.
  */
-import { areaY, d3Curve, defineChart, dot, lineY, type ChartInteractionController, type ChartMotionContext, type ChartPoint, type SceneNode } from '@tanstack/charts';
+import { areaY, d3Curve, defineChart, dot, lineY, ruleX, ruleY, text, type ChartInteractionController, type ChartMotionContext, type ChartPoint, type SceneNode } from '@tanstack/charts';
 import { crosshair } from '@tanstack/charts/crosshair';
 import { whenFocused } from '@tanstack/charts/focus/mark';
 import { decorative } from '@tanstack/charts/mark/decorative';
@@ -47,13 +56,14 @@ import { motion } from '@tanstack/charts/motion';
 import { Chart } from '@tanstack/charts/react/core';
 import { scaleLinear } from '@tanstack/charts/scales/linear';
 import { tooltip as chartTooltip } from '@tanstack/charts/tooltip';
-import { curveLinear, curveMonotoneX } from 'd3-shape';
+import { curveLinear, curveMonotoneX, curveStepAfter } from 'd3-shape';
 import {
   createContext,
   forwardRef,
   useCallback,
   useContext,
   useEffect,
+  useId,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -71,7 +81,7 @@ import type { ElementType as RenderElementType } from 'react';
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
 
 export type AreaChartStatus = 'loading' | 'ready';
-export type AreaChartCurve = 'monotone' | 'linear';
+export type AreaChartCurve = 'monotone' | 'linear' | 'step';
 export type AreaChartDatum = Record<string, string | number | null | undefined>;
 
 /** Which of the theme's roles a series is drawn in. */
@@ -85,7 +95,9 @@ export type AreaChartColor =
   | 'chart-2'
   | 'chart-3'
   | 'chart-4'
-  | 'chart-5';
+  | 'chart-5'
+  | 'foreground'
+  | 'muted-foreground';
 
 const COLOR_VAR: Record<AreaChartColor, string> = {
   primary: 'var(--primary)',
@@ -98,6 +110,8 @@ const COLOR_VAR: Record<AreaChartColor, string> = {
   'chart-3': 'var(--chart-3)',
   'chart-4': 'var(--chart-4)',
   'chart-5': 'var(--chart-5)',
+  foreground: 'var(--foreground)',
+  'muted-foreground': 'var(--muted-foreground)',
 };
 
 const THEME = {
@@ -108,11 +122,11 @@ const THEME = {
   palette: ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'],
 };
 
-const CURVES = { monotone: d3Curve(curveMonotoneX), linear: d3Curve(curveLinear) };
+const CURVES = { monotone: d3Curve(curveMonotoneX), linear: d3Curve(curveLinear), step: d3Curve(curveStepAfter) };
 
 const areaChartVariants = tv({
   slots: {
-    root: 'relative grid w-full grid-cols-1 text-foreground',
+    root: '@container relative grid w-full grid-cols-[minmax(0,1fr)_auto] text-foreground',
     plot: 'relative col-start-1 row-start-2 w-full',
     // `pan-y` hands a vertical drag to the page and a sideways one to the chart.
     chart:
@@ -124,7 +138,14 @@ const areaChartVariants = tv({
       'pointer-events-none absolute right-2 top-1 col-start-1 row-start-2 flex gap-3 text-xs text-muted-foreground',
     legendItem: 'flex items-center gap-1.5',
     legendSwatch: 'size-2 shrink-0 rounded-full',
-    header: 'col-start-1 row-start-1 flex items-start justify-between gap-3 pb-3',
+    legendRule: 'h-0.5 w-2 shrink-0 rounded-full',
+    labels:
+      'col-start-1 row-start-3 m-0 mt-2 flex list-none flex-wrap gap-x-3 gap-y-1 p-0 text-xs @lg:relative @lg:col-start-2 @lg:row-start-2 @lg:mt-0 @lg:block @lg:w-44',
+    labelsItem:
+      'flex items-center gap-1.5 whitespace-nowrap @lg:absolute @lg:inset-x-0 @lg:-translate-y-1/2 @lg:pl-3',
+    labelsName: 'min-w-0 flex-1 truncate font-medium',
+    labelsValue: 'text-muted-foreground tabular-nums',
+    header: 'col-span-full row-start-1 flex items-start justify-between gap-3 pb-3',
     headerText: 'flex min-w-0 flex-1 flex-col gap-0.5',
     headerMuted: 'text-xs text-muted-foreground',
     headerValue: 'text-xl font-bold tabular-nums tracking-tight',
@@ -141,6 +162,12 @@ const SKELETON_BAND = 0.18;
 const SKELETON_MARK = 'area-chart-skeleton';
 
 const KEYFRAMES = '@keyframes panelui-area-sweep{from{transform:translateX(-100%)}to{transform:translateX(250%)}}';
+
+/** Text size of a rule's label, matching the axes. */
+const ANNOTATION_FONT_SIZE = 11;
+
+/** How far a dimmed series' label fades, so it stays legible at any band opacity. */
+const DIMMED_LABEL_OPACITY = 0.45;
 
 const COMPACT = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 const COMPACT_SMALL = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 });
@@ -162,8 +189,35 @@ interface SeriesEntry {
   stroke: string;
   fillOpacity: number | undefined;
   gradientToOpacity: number;
+  opacity: number;
   showLine: boolean;
   strokeWidth: number;
+}
+
+interface LineEntry {
+  key: string;
+  stroke: string;
+  curve: AreaChartCurve | undefined;
+  dashArray: string | undefined;
+  strokeWidth: number;
+}
+
+/** A rule across the plot: at a value on the `y` axis, or at a row on the `x` axis. */
+interface Annotation {
+  id: string;
+  axis: 'x' | 'y';
+  at: number;
+  stroke: string;
+  dashArray: string;
+  label: string | undefined;
+}
+
+/** Where the drawing put the value axis, in pixels from the top of the plot's box. */
+interface ValueAxisPixels {
+  zero: number;
+  unit: number;
+  top: number;
+  bottom: number;
 }
 
 /**
@@ -185,6 +239,13 @@ interface AreaChartContextValue {
   series: readonly SeriesEntry[];
   setSeries: (entry: SeriesEntry) => void;
   removeSeries: (key: string) => void;
+  lines: readonly LineEntry[];
+  setLine: (entry: LineEntry) => void;
+  removeLine: (key: string) => void;
+  setAnnotation: (entry: Annotation) => void;
+  removeAnnotation: (id: string) => void;
+  valueAxis: ValueAxisPixels | null;
+  loading: boolean;
   setSlot: <K extends keyof Slots>(slot: K, value: Slots[K]) => void;
   activeIndex: number;
 }
@@ -212,21 +273,63 @@ export function useAreaChart() {
   };
 }
 
+/** A cell's value, or null for anything that cannot be drawn. */
+function readValue(cell: AreaChartDatum[string]): number | null {
+  return typeof cell === 'number' && !Number.isNaN(cell) ? cell : null;
+}
+
 /** Sits each band on the running total of the ones declared before it, or on zero when overlaid. */
 function bandRows(data: readonly AreaChartDatum[], series: readonly SeriesEntry[], stacked: boolean): BandRow[] {
   return series.flatMap(({ key }, seriesIndex) =>
     data.map((datum, index) => {
-      const read = datum[key];
-      const value = typeof read === 'number' && !Number.isNaN(read) ? read : null;
+      const value = readValue(datum[key]);
       const bottom = stacked
-        ? series.slice(0, seriesIndex).reduce((sum, below) => {
-            const under = datum[below.key];
-            return typeof under === 'number' && !Number.isNaN(under) ? sum + under : sum;
-          }, 0)
+        ? series.slice(0, seriesIndex).reduce((sum, below) => sum + (readValue(datum[below.key]) ?? 0), 0)
         : 0;
       return { index, series: key, value, bottom, top: value === null ? null : bottom + value };
     })
   );
+}
+
+/** A line's points, in the bands' shape so the readout can treat them alike. Lines are never stacked. */
+function lineRows(data: readonly AreaChartDatum[], lines: readonly LineEntry[]): BandRow[] {
+  return lines.flatMap(({ key }) =>
+    data.map((datum, index) => {
+      const value = readValue(datum[key]);
+      return { index, series: key, value, bottom: 0, top: value };
+    })
+  );
+}
+
+/** The series in reading order: a stack from its top down with the lines above it. */
+function keyEntries(series: readonly SeriesEntry[], lines: readonly LineEntry[], stacked: boolean) {
+  const bands = series.map(({ key, stroke }) => ({ key, stroke, rule: false }));
+  const rules = lines.map(({ key, stroke }) => ({ key, stroke, rule: true }));
+  return stacked ? [...rules, ...bands.reverse()] : [...bands, ...rules];
+}
+
+/**
+ * Spreads labels apart by at least `gap`: down the column to clear each other, then back
+ * up from the bottom if that pushed any past it. A label stays where it is if it has room.
+ */
+function spreadLabels<Label extends { y: number }>(
+  labels: readonly Label[],
+  gap: number,
+  min: number,
+  max: number
+): Label[] {
+  const placed = [...labels].sort((a, b) => a.y - b.y).map((label) => ({ ...label }));
+  let floor = min;
+  for (const label of placed) {
+    label.y = Math.max(label.y, floor);
+    floor = label.y + gap;
+  }
+  let ceiling = max;
+  for (const label of [...placed].reverse()) {
+    label.y = Math.min(label.y, ceiling);
+    ceiling = label.y - gap;
+  }
+  return placed;
 }
 
 /** The placeholder band's outline from the drawn scene, for the sweep to be clipped to. */
@@ -267,7 +370,7 @@ export interface AreaChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
    * the stack. Without it the bands overlay and their fills are translucent.
    */
   stacked?: boolean;
-  /** `monotone` never overshoots between points. `linear` joins them straight. */
+  /** `monotone` never overshoots between points. `linear` joins them straight. `step` holds each value until the next. */
   curve?: AreaChartCurve;
   /**
    * The point being read, and `-1`/`null` when there is none. Fires when the
@@ -313,6 +416,9 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
   const plotRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [series, setSeriesState] = useState<readonly SeriesEntry[]>([]);
+  const [lines, setLinesState] = useState<readonly LineEntry[]>([]);
+  const [annotations, setAnnotations] = useState<readonly Annotation[]>([]);
+  const [valueAxis, setValueAxis] = useState<ValueAxisPixels | null>(null);
   const [slots, setSlots] = useState<Slots>({});
   const [activeIndex, setActiveIndex] = useState(-1);
   const [revision, setRevision] = useState(0);
@@ -347,6 +453,32 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     (key: string) => setSeriesState((current) => current.filter((entry) => entry.key !== key)),
     []
   );
+  const setLine = useCallback(
+    (entry: LineEntry) =>
+      setLinesState((current) =>
+        current.some(({ key }) => key === entry.key)
+          ? current.map((existing) => (existing.key === entry.key ? entry : existing))
+          : [...current, entry]
+      ),
+    []
+  );
+  const removeLine = useCallback(
+    (key: string) => setLinesState((current) => current.filter((entry) => entry.key !== key)),
+    []
+  );
+  const setAnnotation = useCallback(
+    (entry: Annotation) =>
+      setAnnotations((current) =>
+        current.some(({ id }) => id === entry.id)
+          ? current.map((existing) => (existing.id === entry.id ? entry : existing))
+          : [...current, entry]
+      ),
+    []
+  );
+  const removeAnnotation = useCallback(
+    (id: string) => setAnnotations((current) => current.filter((entry) => entry.id !== id)),
+    []
+  );
   const setSlot = useCallback<AreaChartContextValue['setSlot']>(
     (slot, value) => setSlots((current) => ({ ...current, [slot]: value })),
     []
@@ -359,7 +491,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
 
   const definition = useMemo(() => {
     const rows = bandRows(data, series, stacked);
-    const bySeries = new Map(series.map((entry) => [entry.key, entry]));
+    const ruleRows = lineRows(data, lines);
+    const strokes = new Map([...series, ...lines].map(({ key, stroke }) => [key, stroke]));
     const gradientId = (key: string) => `panelui-area-${series.findIndex((entry) => entry.key === key)}`;
     const curveFactory = CURVES[curve];
     const span = Math.max(1, data.length - 1);
@@ -378,7 +511,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     // One mark per series, because a mark has one stroke width.
     const edges = series
       .filter(({ showLine }) => showLine)
-      .map(({ key, stroke, strokeWidth }) =>
+      .map(({ key, stroke, opacity, strokeWidth }) =>
         decorative(
           lineY(
             rows.filter((row) => row.series === key),
@@ -388,6 +521,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
               y: 'top',
               key: 'index',
               stroke,
+              strokeOpacity: opacity,
               strokeWidth,
               lineCap: 'round',
               lineJoin: 'round',
@@ -396,11 +530,63 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
           )
         )
       );
-    // A dot on every band's top edge, for the point being read.
-    const dots = series.map(({ key, stroke }) =>
+    // Not decorative, unlike the edges, so its value is in the readout. One mark per
+    // line, because each has its own curve and dash.
+    const lineMarks = lines.map(({ key, stroke, curve: lineCurve, dashArray, strokeWidth }) =>
+      lineY(
+        ruleRows.filter((row) => row.series === key),
+        {
+          id: `area-chart-line-${key}`,
+          x: 'index',
+          y: 'top',
+          key: 'index',
+          stroke,
+          strokeWidth,
+          strokeDasharray: dashArray,
+          lineCap: 'butt',
+          lineJoin: 'round',
+          curve: lineCurve ? CURVES[lineCurve] : curveFactory,
+        }
+      )
+    );
+    // The top of what is drawn, for a marker's label. The derived axis rounds up from
+    // here, so the label is inside the plot without having to know the rounded number.
+    const peak = Math.max(
+      ...[...rows, ...ruleRows].map(({ top }) => top ?? 0),
+      ...annotations.filter(({ axis }) => axis === 'y').map(({ at }) => at)
+    );
+    const annotationMarks = annotations.flatMap(({ id, axis, at, stroke, dashArray, label: name }) => {
+      const nearEnd = axis === 'x' && at > span * 0.75;
+      return [
+        decorative(
+          axis === 'y'
+            ? ruleY([at], { id: `area-chart-rule-${id}`, stroke, strokeDasharray: dashArray, strokeWidth: 1 })
+            : ruleX([at], { id: `area-chart-rule-${id}`, stroke, strokeDasharray: dashArray, strokeWidth: 1 })
+        ),
+        ...(name
+          ? [
+              decorative(
+                text([name], {
+                  id: `area-chart-rule-label-${id}`,
+                  x: () => (axis === 'y' ? 0 : at),
+                  y: () => (axis === 'y' ? at : yDomain?.[1] ?? peak),
+                  text: () => name,
+                  fill: stroke,
+                  fontSize: ANNOTATION_FONT_SIZE,
+                  anchor: nearEnd ? 'end' : 'start',
+                  dx: nearEnd ? -6 : axis === 'y' ? 8 : 6,
+                  dy: axis === 'y' ? -8 : 8,
+                })
+              ),
+            ]
+          : []),
+      ];
+    });
+    // A dot on every band's top edge and every line, for the point being read.
+    const dots = [...series, ...lines].map(({ key, stroke }) =>
       whenFocused(
         dot(
-          rows.filter((row) => row.series === key && row.top !== null),
+          [...rows, ...ruleRows].filter((row) => row.series === key && row.top !== null),
           {
             id: `area-chart-dot-${key}`,
             x: 'index',
@@ -479,7 +665,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
         : (false as const),
     };
 
-    const drawn = rows.some(({ value }) => value !== null);
+    const drawn = [...rows, ...ruleRows].some(({ value }) => value !== null);
     const interactive = tooltip !== undefined && !loading && drawn;
     const readout = tooltip
       ? {
@@ -493,17 +679,16 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
             const { formatValue, formatX, labels } = tooltip.latest.current;
             const first = points[0]?.datum;
             const datum = first ? data[first.index] : undefined;
-            const order = series.map(({ key }) => key);
+            const order = keyEntries(series, lines, stacked).map(({ key }) => key);
             const listed = [...points].sort(
               (a, b) => order.indexOf(a.datum.series) - order.indexOf(b.datum.series)
             );
-            if (stacked) listed.reverse();
             return {
               title: datum ? (formatX ? formatX(datum) : labelOf(first!.index)) : '',
               rows: listed.map(({ datum: row }) => ({
                 label: labels?.[row.series] ?? row.series,
                 value: formatValue ? formatValue(row.value ?? 0, row.series) : compactNumber(row.value ?? 0),
-                color: bySeries.get(row.series)?.stroke,
+                color: strokes.get(row.series),
               })),
             };
           },
@@ -513,7 +698,9 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     return defineChart({
       theme: THEME,
       // Bottom of the stack first, and a later band over an earlier one.
-      marks: loading ? [placeholder] : [area, ...edges, ...(interactive ? [guide, ...dots] : [])],
+      marks: loading
+        ? [placeholder]
+        : [area, ...edges, ...lineMarks, ...annotationMarks, ...(interactive ? [guide, ...dots] : [])],
       scales: { x: xOptions, y: yOptions },
       gradients: series.map((entry) => ({
         id: gradientId(entry.key),
@@ -523,8 +710,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
         y2: 1,
         stops: [
           // Stacked bands touch and carry more weight. Overlaid ones have to show each other through.
-          { offset: 0, color: entry.stroke, opacity: entry.fillOpacity ?? (stacked ? 0.6 : 0.35) },
-          { offset: 1, color: entry.stroke, opacity: entry.gradientToOpacity },
+          { offset: 0, color: entry.stroke, opacity: (entry.fillOpacity ?? (stacked ? 0.6 : 0.35)) * entry.opacity },
+          { offset: 1, color: entry.stroke, opacity: entry.gradientToOpacity * entry.opacity },
         ],
       })),
       ...(compact ? { guides: false as const, margin: 0 } : {}),
@@ -552,6 +739,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
     data,
     xDataKey,
     series,
+    lines,
+    annotations,
     loading,
     stacked,
     curve,
@@ -574,13 +763,45 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
   const summary = label ?? `Area chart, ${data.length} ${data.length === 1 ? 'row' : 'rows'}`;
 
   const context = useMemo<AreaChartContextValue>(
-    () => ({ data, xDataKey, stacked, series, setSeries, removeSeries, setSlot, activeIndex }),
-    [data, xDataKey, stacked, series, setSeries, removeSeries, setSlot, activeIndex]
+    () => ({
+      data,
+      xDataKey,
+      stacked,
+      series,
+      setSeries,
+      removeSeries,
+      lines,
+      setLine,
+      removeLine,
+      setAnnotation,
+      removeAnnotation,
+      valueAxis,
+      loading,
+      setSlot,
+      activeIndex,
+    }),
+    [
+      data,
+      xDataKey,
+      stacked,
+      series,
+      setSeries,
+      removeSeries,
+      lines,
+      setLine,
+      removeLine,
+      setAnnotation,
+      removeAnnotation,
+      valueAxis,
+      loading,
+      setSlot,
+      activeIndex,
+    ]
   );
 
   const spokenRow = (datum: AreaChartDatum, index: number) =>
     labelForDatum?.(datum, index) ??
-    [xDataKey, ...series.map(({ key }) => key)]
+    [xDataKey, ...series.map(({ key }) => key), ...lines.map(({ key }) => key)]
       .filter((key) => datum[key] !== null && datum[key] !== undefined)
       .map((key) => `${key}, ${datum[key]}`)
       .join('. ');
@@ -666,6 +887,21 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & RenderProp<'d
                   onRender={({ scene, interaction }) => {
                     interactionRef.current = interaction;
                     setOutline(skeletonOutline(scene.nodes));
+                    const scale = scene.scales.y;
+                    if (!scale) return;
+                    const zero = scale.map(0);
+                    const unit = scale.map(1) - zero;
+                    const top = scene.chart.y;
+                    const bottom = top + scene.chart.height;
+                    setValueAxis((current) =>
+                      current &&
+                      current.zero === zero &&
+                      current.unit === unit &&
+                      current.top === top &&
+                      current.bottom === bottom
+                        ? current
+                        : { zero, unit, top, bottom }
+                    );
                   }}
                 />
               ) : null}
@@ -737,6 +973,8 @@ export interface AreaChartAreaProps {
   fillOpacity?: number;
   /** Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. */
   gradientToOpacity?: number;
+  /** Opacity of the whole series, fill and edge, for picking one out from the others. */
+  opacity?: number;
   /** Draw the line along the top edge of the band. */
   showLine?: boolean;
   /** Thickness of that line. */
@@ -753,19 +991,189 @@ function AreaChartArea({
   color = 'chart-1',
   fillOpacity,
   gradientToOpacity = 0,
+  opacity = 1,
   showLine = true,
   strokeWidth = 2,
 }: AreaChartAreaProps) {
   const { setSeries, removeSeries } = useChart('AreaChart.Area');
   const stroke = COLOR_VAR[color];
   useEffect(() => {
-    setSeries({ key: dataKey, stroke, fillOpacity, gradientToOpacity, showLine, strokeWidth });
-  }, [dataKey, stroke, fillOpacity, gradientToOpacity, showLine, strokeWidth, setSeries]);
+    setSeries({ key: dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth });
+  }, [dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth, setSeries]);
   // Apart from the update above, so a new colour keeps the series' place in the order.
   useEffect(() => () => removeSeries(dataKey), [dataKey, removeSeries]);
   return null;
 }
 AreaChartArea.displayName = 'AreaChart.Area';
+
+export interface AreaChartLineProps {
+  /** Column in the data holding this line's values. */
+  dataKey: string;
+  /** Which of the theme's roles the line is drawn in. */
+  color?: AreaChartColor;
+  /** Defaults to the chart's `curve`. `step` suits a value that changes on set dates, such as income. */
+  curve?: AreaChartCurve;
+  /** The stroke's dash pattern. */
+  dashArray?: string;
+  /** Thickness of the line. */
+  strokeWidth?: number;
+}
+
+/**
+ * A series drawn as a line with no fill, over the bands. It is never part of a
+ * stack, so it can show a total the stack is measured against. It counts toward
+ * the value axis and has its own row in the readout.
+ */
+function AreaChartLine({ dataKey, color = 'foreground', curve, dashArray, strokeWidth = 2 }: AreaChartLineProps) {
+  const { setLine, removeLine } = useChart('AreaChart.Line');
+  const stroke = COLOR_VAR[color];
+  useEffect(() => {
+    setLine({ key: dataKey, stroke, curve, dashArray, strokeWidth });
+  }, [dataKey, stroke, curve, dashArray, strokeWidth, setLine]);
+  useEffect(() => () => removeLine(dataKey), [dataKey, removeLine]);
+  return null;
+}
+AreaChartLine.displayName = 'AreaChart.Line';
+
+/** Registers one rule with the root, keeping its place in the order when its props change. */
+function useAnnotation(component: string, entry: Omit<Annotation, 'id'>) {
+  const { setAnnotation, removeAnnotation } = useChart(component);
+  const id = useId();
+  const { axis, at, stroke, dashArray, label } = entry;
+  useEffect(() => {
+    setAnnotation({ id, axis, at, stroke, dashArray, label });
+  }, [id, axis, at, stroke, dashArray, label, setAnnotation]);
+  useEffect(() => () => removeAnnotation(id), [id, removeAnnotation]);
+}
+
+export interface AreaChartReferenceLineProps {
+  /** The value to draw the rule at. It counts toward the value axis. */
+  y: number;
+  /** Which of the theme's roles the rule and its label are drawn in. */
+  color?: AreaChartColor;
+  /** The stroke's dash pattern. */
+  dashArray?: string;
+  /** Text above the rule's left end. */
+  label?: string;
+}
+
+/** A rule across the plot at a fixed value: a budget, a limit, a target. */
+function AreaChartReferenceLine({ y, color = 'foreground', dashArray = '3 4', label }: AreaChartReferenceLineProps) {
+  useAnnotation('AreaChart.ReferenceLine', { axis: 'y', at: y, stroke: COLOR_VAR[color], dashArray, label });
+  return null;
+}
+AreaChartReferenceLine.displayName = 'AreaChart.ReferenceLine';
+
+export interface AreaChartMarkerProps {
+  /** The row to draw the rule at, counted from `0`. */
+  index: number;
+  /** Which of the theme's roles the rule and its label are drawn in. */
+  color?: AreaChartColor;
+  /** The stroke's dash pattern. */
+  dashArray?: string;
+  /** Text beside the rule's top. It moves to the left of a rule near the right edge. */
+  label?: string;
+}
+
+/** A rule down the plot at one row: a release, a date something ran out. */
+function AreaChartMarker({ index, color = 'muted-foreground', dashArray = '2 3', label }: AreaChartMarkerProps) {
+  useAnnotation('AreaChart.Marker', { axis: 'x', at: index, stroke: COLOR_VAR[color], dashArray, label });
+  return null;
+}
+AreaChartMarker.displayName = 'AreaChart.Marker';
+
+/** A label of your own in the `Labels` column, with no swatch. */
+export interface AreaChartExtraLabel {
+  /** Identifies the label among the others. */
+  id: string;
+  /** The label's name. */
+  label: string;
+  /** The value it shows. */
+  value: number;
+  /** The place on the value axis to sit beside, which can differ from `value`. */
+  at: number;
+}
+
+export interface AreaChartLabelsProps extends ComponentProps<'ol'> {
+  /** Prettier names for the series keys. */
+  labels?: Record<string, string>;
+  /** Format a value for its label. Defaults to a compact number. */
+  formatValue?: (value: number, key: string) => string;
+  /** Labels of your own, for a figure that belongs to no one series. */
+  extra?: readonly AreaChartExtraLabel[];
+  /** The least distance between two labels, in pixels. */
+  minGap?: number;
+}
+
+/**
+ * The value at the end of each series, beside where that series ends, so a chart
+ * can be read without hovering it. Labels that would touch are spread apart. Below
+ * 32rem of width the column would take too much of the plot, so they wrap under it
+ * instead.
+ */
+function AreaChartLabels({
+  labels,
+  formatValue,
+  extra,
+  minGap = 16,
+  className,
+  render,
+  ...props
+}: AreaChartLabelsProps & RenderProp<'ol'>) {
+  const { data, series, lines, stacked, valueAxis, loading } = useChart('AreaChart.Labels');
+  const slots = areaChartVariants();
+  const last = data.slice(-1);
+  const opacities = new Map(series.map(({ key, opacity }) => [key, opacity]));
+  const swatchOf = new Map(keyEntries(series, lines, stacked).map((entry) => [entry.key, entry]));
+
+  const pixel = (value: number) => (valueAxis ? valueAxis.zero + value * valueAxis.unit : 0);
+  const entries = [
+    ...lineRows(last, lines).map(({ series: key, value, top }) => ({ key, value, y: pixel(top ?? 0) })),
+    // Beside the middle of a band, which is where its colour is.
+    ...bandRows(last, series, stacked).map(({ series: key, value, bottom, top }) => ({
+      key,
+      value,
+      y: pixel((bottom + (top ?? bottom)) / 2),
+    })),
+    ...(extra ?? []).map(({ id, value, at }) => ({ key: id, value, y: pixel(at) })),
+  ].filter(({ value }) => value !== null);
+  const placed =
+    valueAxis && !loading ? spreadLabels(entries, minGap, valueAxis.top, valueAxis.bottom) : [];
+  const names = new Map((extra ?? []).map(({ id, label }) => [id, label]));
+
+  return useRender({
+    defaultTagName: 'ol',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'area-chart-labels',
+        className: slots.labels({ className }),
+        children: placed.map(({ key, value, y }) => {
+          const swatch = swatchOf.get(key);
+          return (
+            <li
+              key={key}
+              className={slots.labelsItem()}
+              style={{ top: y, opacity: (opacities.get(key) ?? 1) < 1 ? DIMMED_LABEL_OPACITY : undefined }}
+            >
+              <span
+                aria-hidden
+                className={swatch?.rule ? slots.legendRule() : slots.legendSwatch()}
+                style={{ background: swatch?.stroke ?? 'transparent' }}
+              />
+              <span className={slots.labelsName()}>{names.get(key) ?? labels?.[key] ?? key}</span>
+              <span className={slots.labelsValue()}>
+                {formatValue ? formatValue(value ?? 0, key) : compactNumber(value ?? 0)}
+              </span>
+            </li>
+          );
+        }),
+      },
+      props
+    ),
+  });
+}
+AreaChartLabels.displayName = 'AreaChart.Labels';
 
 export interface AreaChartSkeletonProps {
   /** Milliseconds for one pass of the sweep. */
@@ -861,10 +1269,10 @@ export interface AreaChartLegendProps extends ComponentProps<'div'> {
   labels?: Record<string, string>;
 }
 
-/** A swatch and a name per series. Reversed for a stack, so it reads in the order the bands appear. */
+/** A swatch and a name per series. A stack reads from its top down, the order the bands appear, with lines first. */
 function AreaChartLegend({ labels, className, render, ...props }: AreaChartLegendProps & RenderProp<'div'>) {
-  const { series, stacked } = useChart('AreaChart.Legend');
-  const listed = stacked ? [...series].reverse() : series;
+  const { series, lines, stacked } = useChart('AreaChart.Legend');
+  const listed = keyEntries(series, lines, stacked);
   const slots = areaChartVariants();
 
   const element = useRender({
@@ -875,9 +1283,9 @@ function AreaChartLegend({ labels, className, render, ...props }: AreaChartLegen
         'data-slot': 'area-chart-legend',
         'aria-hidden': true,
         className: slots.legend({ className }),
-        children: listed.map(({ key, stroke }) => (
+        children: listed.map(({ key, stroke, rule }) => (
           <span key={key} className={slots.legendItem()}>
-            <span className={slots.legendSwatch()} style={{ background: stroke }} />
+            <span className={rule ? slots.legendRule() : slots.legendSwatch()} style={{ background: stroke }} />
             {labels?.[key] ?? key}
           </span>
         )),
@@ -886,7 +1294,7 @@ function AreaChartLegend({ labels, className, render, ...props }: AreaChartLegen
     ),
   });
 
-  return series.length ? element : null;
+  return listed.length ? element : null;
 }
 AreaChartLegend.displayName = 'AreaChart.Legend';
 
@@ -926,15 +1334,15 @@ function AreaChartHeader({
   render,
   ...props
 }: AreaChartHeaderProps & RenderProp<'div'>) {
-  const { series, stacked } = useChart('AreaChart.Header');
-  const listed = stacked ? [...series].reverse() : series;
+  const { series, lines, stacked } = useChart('AreaChart.Header');
+  const listed = keyEntries(series, lines, stacked);
   const slots = areaChartVariants();
   const trailing =
     children ??
-    (legend && series.length
-      ? listed.map(({ key, stroke }) => (
+    (legend && listed.length
+      ? listed.map(({ key, stroke, rule }) => (
           <span key={key} className={slots.legendItem()}>
-            <span className={slots.legendSwatch()} style={{ background: stroke }} />
+            <span className={rule ? slots.legendRule() : slots.legendSwatch()} style={{ background: stroke }} />
             {labels?.[key] ?? key}
           </span>
         ))
@@ -968,6 +1376,10 @@ export const AreaChart = Object.assign(AreaChartRoot, {
   Header: AreaChartHeader,
   Grid: AreaChartGrid,
   Area: AreaChartArea,
+  Line: AreaChartLine,
+  ReferenceLine: AreaChartReferenceLine,
+  Marker: AreaChartMarker,
+  Labels: AreaChartLabels,
   Skeleton: AreaChartSkeleton,
   XAxis: AreaChartXAxis,
   YAxis: AreaChartYAxis,
@@ -981,6 +1393,10 @@ export {
   AreaChartHeader,
   AreaChartGrid,
   AreaChartArea,
+  AreaChartLine,
+  AreaChartReferenceLine,
+  AreaChartMarker,
+  AreaChartLabels,
   AreaChartSkeleton,
   AreaChartXAxis,
   AreaChartYAxis,

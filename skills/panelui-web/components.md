@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 
 ## Feedback and status
 

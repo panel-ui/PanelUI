@@ -626,6 +626,43 @@
       ]
     },
     {
+      "name": "line-chart",
+      "type": "registry:component",
+      "title": "Line Chart",
+      "description": "A series over time, drawn in from the left.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "d3-shape",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/line-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/line-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/line-chart/line-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/line-chart/line-scale.ts"
+        }
+      ]
+    },
+    {
       "name": "menu",
       "type": "registry:component",
       "title": "Menu",

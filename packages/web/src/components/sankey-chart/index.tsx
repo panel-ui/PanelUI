@@ -158,7 +158,7 @@ const sankeyChartVariants = tv({
     headerMuted: 'text-xs text-muted-foreground',
     headerValue: 'text-xl font-bold tabular-nums tracking-tight',
     headerTrailing: 'flex shrink flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground',
-    breakdown: 'col-start-1 row-start-3 mt-3 border-t pt-3 text-[0.8125rem] leading-5',
+    breakdown: 'col-start-1 row-start-3 mt-3 border-t pt-3 text-[0.8125rem] leading-5 outline-none',
     breakdownSides: 'grid grid-cols-2 gap-x-4 sm:gap-x-6',
     breakdownSide: 'flex min-w-0 flex-col gap-0.5',
     breakdownTitle: 'pb-0.5 text-xs text-muted-foreground',
@@ -322,7 +322,12 @@ function distanceToRibbon(row: LinkRow, x: number, y: number, vertical: boolean,
 /** The nodes and ribbons before and after one reading, by key. */
 function routeOf(reading: Reading, links: readonly LinkRow[]): Set<string> {
   const route = new Set<string>();
+  // A node reached by many paths is walked once, or the cost grows with the paths.
+  const seen = { forward: new Set<string>(), backward: new Set<string>() };
   const walk = (id: string, forward: boolean) => {
+    const visited = forward ? seen.forward : seen.backward;
+    if (visited.has(id)) return;
+    visited.add(id);
     route.add(`node:${id}`);
     for (const row of links) {
       if ((forward ? row.source : row.target) !== id) continue;
@@ -944,11 +949,27 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     if (pinnedRef.current) interactionRef.current?.setControlledFocus(pinnedRef.current);
   }, [definition]);
 
+  // The chart has no points until it has drawn, so a request can have to wait for them.
+  const pendingId = useRef<string | null>(null);
+  const request = useCallback(
+    (id: string | null) => {
+      const known = pointsRef.current.some(({ datum }) => isNode(datum) && datum.id === id);
+      pendingId.current = id !== null && !known ? id : null;
+      select(id);
+    },
+    [select]
+  );
+
   // Only a change the chart has not already reported is a request to move it.
   useEffect(() => {
     if (activeId === undefined || activeId === reportedId.current) return;
-    select(activeId);
-  }, [activeId, select]);
+    request(activeId);
+  }, [activeId, request]);
+
+  const chartKey = `${revision}:${status}`;
+  const drawnKey = useRef<string | null>(null);
+  const resetKey = useRef<string | null>(null);
+  const latestActiveId = useLatest(activeId);
 
   // A remounted chart says nothing about the focus it lost.
   useEffect(() => {
@@ -956,7 +977,13 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     reportedId.current = null;
     pinnedRef.current = null;
     focusedRef.current = null;
-  }, [revision, status]);
+    // A new chart can draw before this runs or after it, and clearing the
+    // reading has to come first, so whichever is second applies the request.
+    resetKey.current = chartKey;
+    const id = latestActiveId.current ?? null;
+    if (drawnKey.current === chartKey) request(id);
+    else pendingId.current = id;
+  }, [chartKey, latestActiveId, request]);
 
   const context = useMemo<SankeyChartContextValue>(
     () => ({ rows, reading, status, select, setSlot }),
@@ -1013,7 +1040,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
                 <Chart
                   // An entrance only plays on a chart's first paint, so the flow
                   // arriving after a load, or a replay, is a new chart.
-                  key={`${revision}:${status}`}
+                  key={chartKey}
                   definition={definition}
                   renderer={renderer}
                   ariaLabel={summary}
@@ -1024,6 +1051,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
                   onRender={({ scene, interaction }) => {
                     interactionRef.current = interaction;
                     pointsRef.current = pointsOf(scene.nodes);
+                    drawnKey.current = chartKey;
+                    if (pendingId.current !== null && resetKey.current === chartKey) request(pendingId.current);
                   }}
                 />
               ) : null}
@@ -1258,7 +1287,9 @@ function SankeyChartBreakdown({
       key={flow.id}
       type="button"
       className={slots.breakdownRow()}
-      onClick={() => {
+      onClick={(event) => {
+        // This row is about to be replaced, and focus would fall out of the chart with it.
+        event.currentTarget.closest<HTMLElement>('[data-slot="sankey-chart-breakdown"]')?.focus();
         select(flow.id);
         onSelectNode?.(flow.id);
       }}
@@ -1289,6 +1320,7 @@ function SankeyChartBreakdown({
       {
         'data-slot': 'sankey-chart-breakdown',
         'aria-live': 'polite' as const,
+        tabIndex: -1,
         className: slots.breakdown({ className }),
         // A row is 1.625rem with its gap, the heading over a side about as much, and 0.75rem pads the top.
         style: { minHeight: `${(tallest + 1) * 1.625 + 0.8125}rem`, ...style },
@@ -1326,7 +1358,7 @@ SankeyChartBreakdown.displayName = 'SankeyChart.Breakdown';
 export interface SankeyChartLegendProps extends ComponentProps<'div'> {
   /** How many names to show before stopping. */
   limit?: number;
-  /** Show each node's share of the widest stage beside its name. */
+  /** Show each node's share of the largest column's total beside its name. */
   showShare?: boolean;
 }
 
@@ -1339,7 +1371,7 @@ function SankeyChartLegend({ limit, showShare = true, className, render, ...prop
   const slots = sankeyChartVariants();
   const activeId = reading?.kind === 'node' ? reading.id : null;
 
-  // Against the widest stage rather than every node, which counts what passes through twice.
+  // Against the largest column rather than every node, which counts what passes through twice.
   const byLayer = new Map<number, number>();
   for (const node of rows.nodes) byLayer.set(node.layer, (byLayer.get(node.layer) ?? 0) + node.value);
   const total = Math.max(0, ...byLayer.values());

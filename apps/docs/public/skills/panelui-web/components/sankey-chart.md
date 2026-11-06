@@ -50,7 +50,7 @@ For a total cut into parts with no routing between them, or what survived each s
 - `SankeyChart.Labels` — The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.
 - `SankeyChart.Tooltip` — The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.
 - `SankeyChart.Breakdown` — Optional. The figures, written out under the diagram. At rest it lists where the flow starts and ends. Reading a stage swaps in where each of its streams came from and went, with its share of the stage. A row selects the node it names. It holds its height, so reading a stage does not move the page.
-- `SankeyChart.Legend` — Optional. Every stage named under the diagram with its share of the widest stage. Use it when some bars are too small to carry a name: pressing an entry selects that node.
+- `SankeyChart.Legend` — Optional. Every stage named under the diagram with its share of the largest column's total. Use it when some bars are too small to carry a name: pressing an entry selects that node.
 
 ## Props
 
@@ -127,7 +127,7 @@ For a total cut into parts with no routing between them, or what survived each s
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `limit` | `number` | — | How many names to show before stopping. |
-| `showShare` | `boolean` | — | Show each node's share of the widest stage beside its name. |
+| `showShare` | `boolean` | — | Show each node's share of the largest column's total beside its name. |
 
 #### `SankeyChartHeaderProps`
 

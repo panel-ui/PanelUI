@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Heatmap Chart](components/heatmap-chart.md) — A calendar of bins, shaded by how much happened in each.
 
 ## Feedback and status
 

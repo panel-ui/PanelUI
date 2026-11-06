@@ -68,8 +68,13 @@ export function candlesOf(data: readonly Record<string, unknown>[], keys: Candle
  */
 export function candleExtent(candles: readonly Candle[]): [number, number] {
   if (candles.length === 0) return [0, 1];
-  const min = Math.min(...candles.map(({ low }) => low));
-  const max = Math.max(...candles.map(({ high }) => high));
+  let min = Infinity;
+  let max = -Infinity;
+  // A loop, because a long series spread into `Math.min` passes the engine's argument limit.
+  for (const { low, high } of candles) {
+    min = Math.min(min, low);
+    max = Math.max(max, high);
+  }
   // A price that never moved still needs a span to divide by.
   if (min === max) {
     const nudge = Math.abs(min) * 0.05 || 1;

@@ -331,7 +331,7 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
     const [activeIndex, setActiveIndex] = useState(-1);
     const [revision, setRevision] = useState(0);
     const interactionRef = useRef<ChartInteractionController<Candle, number, number> | null>(null);
-    const dragging = useRef(false);
+    const releaseDrag = useRef<(() => void) | null>(null);
 
     /*
      * The chart mounts once its width is known. Mounted at a guess, the first
@@ -586,6 +586,9 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
     // A remounted chart says nothing about the focus it lost.
     useEffect(() => reportActive(-1), [revision, status]);
 
+    // A held reading ends with the next press, or with the chart it was read from.
+    useEffect(() => () => releaseDrag.current?.(), [revision, status]);
+
     /*
      * The chart follows a mouse on its own but not a finger, which it treats as a
      * tap. A sideways drag reads the periods it crosses, and the last one stays
@@ -598,16 +601,16 @@ const CandlestickChartRoot = forwardRef<CandlestickChartHandle, CandlestickChart
       const target = interaction?.resolvePointer(event.clientX, event.clientY);
       if (!interaction || !target) return;
       interaction.setControlledFocus(target);
-      if (dragging.current) return;
-      dragging.current = true;
-      document.addEventListener(
-        'pointerdown',
-        () => {
-          dragging.current = false;
-          interactionRef.current?.setControlledFocus(null);
-        },
-        { capture: true, once: true }
-      );
+      if (releaseDrag.current) return;
+      const onPress = () => {
+        releaseDrag.current?.();
+        interactionRef.current?.setControlledFocus(null);
+      };
+      document.addEventListener('pointerdown', onPress, { capture: true });
+      releaseDrag.current = () => {
+        document.removeEventListener('pointerdown', onPress, { capture: true });
+        releaseDrag.current = null;
+      };
     };
 
     const renderReadout = (index: number) => {

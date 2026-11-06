@@ -44,6 +44,11 @@ test('the domain runs low to high with a margin and does not reach for zero', ()
   assert.deepEqual(candleExtent(candles), [177.5, 183.5]);
 });
 
+test('a series too long to spread into arguments still has a domain', () => {
+  const candles = Array.from({ length: 200_000 }, (_unused, index) => ({ index, open: 5, high: 11, low: 1, close: 5, rising: true }));
+  assert.deepEqual(candleExtent(candles), [0, 12]);
+});
+
 test('a price that never moved still gets a span, including at zero', () => {
   const flat = (price) => candlesOf([{ o: price, h: price, l: price, c: price }], KEYS);
   assert.deepEqual(candleExtent(flat(100)), [95, 105]);

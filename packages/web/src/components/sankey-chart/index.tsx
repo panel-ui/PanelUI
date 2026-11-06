@@ -38,14 +38,19 @@
  * usually joined from somewhere nobody in the room owns. `collapse`, a pinned
  * node `value` and a vertical flow all happen in the layout, so it runs before
  * the chart and the marks draw its pixels, through scales that change nothing.
+ *
+ * ## A ribbon is a filled shape
+ *
+ * A stroke has one thickness from end to end. `targetRows` needs a ribbon to
+ * narrow into its row, so each one is drawn as its two edges and the space
+ * between them.
  */
 import {
+  createMark,
   defineChart,
-  link as linkMark,
   rect,
   text,
   whenFocused,
-  type ChartCurve,
   type ChartFocusStrategy,
   type ChartInteractionController,
   type ChartMotionContext,
@@ -103,8 +108,10 @@ export interface SankeyNode {
   id: string;
   /** Name drawn beside the bar. Defaults to the id. */
   label?: string;
-  /** Which of the theme's roles the bar is drawn in, instead of its place in the palette. */
-  color?: SankeyChartColor;
+  /** The bar's colour: a theme role or any CSS colour. Defaults to its place in the palette. */
+  color?: SankeyChartColor | (string & {});
+  /** Set to `false` to draw no bar. The node keeps its place and can still be read. */
+  bar?: boolean;
   /**
    * Pins what passes through the node, for a stage that loses some of what it
    * received to somewhere the links do not describe. Left unset the node is
@@ -120,8 +127,30 @@ export interface SankeyLink {
   target: string;
   /** How much travels. Zero, negative and non-finite rows are dropped. */
   value: number;
-  /** Which of the theme's roles it is coloured in when read, instead of the source node's. */
-  color?: SankeyChartColor;
+  /** Its colour, a theme role or any CSS colour, instead of the source node's. */
+  color?: SankeyChartColor | (string & {});
+  /** With `SankeyChart.Links gradient`, the opacity it fades between, from its source to its target. */
+  opacity?: readonly [number, number];
+}
+
+/** Rows beside the chart for the last column's ribbons to end on, in pixels. */
+export interface SankeyRowGrid {
+  /** Where the first row starts, under a table's header. */
+  top: number;
+  /** How tall each row is. */
+  height: number;
+  /** How much of its thickness a ribbon keeps at the row. Defaults to `0.4`. */
+  taper?: number;
+  /** The thinnest a ribbon gets at the row. Defaults to `3`. */
+  minThickness?: number;
+}
+
+/** Where a node of the last column sits across the flow, in pixels. */
+export interface SankeyTargetLayout {
+  id: string;
+  y: number;
+  y0: number;
+  y1: number;
 }
 
 const COLOR_VAR: Record<SankeyChartColor, string> = {
@@ -137,6 +166,9 @@ const COLOR_VAR: Record<SankeyChartColor, string> = {
   'chart-5': 'var(--chart-5)',
 };
 
+const resolveColor = (color: string): string =>
+  Object.hasOwn(COLOR_VAR, color) ? COLOR_VAR[color as SankeyChartColor] : color;
+
 const PALETTE = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
 
 const THEME = {
@@ -147,12 +179,13 @@ const THEME = {
   palette: PALETTE,
 };
 
+// The labels are placed in pixels already mirrored, so the svg's own direction must not flip their anchors.
 const sankeyChartVariants = tv({
   slots: {
     root: 'relative grid w-full grid-cols-1 text-foreground',
     plot: "relative col-start-1 row-start-2 w-full [&_[data-ts-key^='sankey-links:']]:transition-opacity data-dimmed:[&_[data-ts-key^='sankey-links:']]:opacity-25",
     chart:
-      'absolute! inset-0 rounded-lg text-xs [--ts-chart-tooltip-background:var(--popover)] [--ts-chart-tooltip-border-radius:var(--radius-xl)] [--ts-chart-tooltip-border:1px_solid_var(--border)] [--ts-chart-tooltip-color:var(--popover-foreground)] [--ts-chart-tooltip-shadow:var(--shadow-lg)] [&_svg]:rounded-lg [&_svg]:outline-none [&_svg:focus-visible]:ring-2 [&_svg:focus-visible]:ring-ring',
+      'absolute! inset-0 rounded-lg text-xs [--ts-chart-tooltip-background:var(--popover)] [--ts-chart-tooltip-border-radius:var(--radius-xl)] [--ts-chart-tooltip-border:1px_solid_var(--border)] [--ts-chart-tooltip-color:var(--popover-foreground)] [--ts-chart-tooltip-shadow:var(--shadow-lg)] [&_svg]:[direction:ltr] [&_svg]:rounded-lg [&_svg]:outline-none [&_svg:focus-visible]:ring-2 [&_svg:focus-visible]:ring-ring',
     header: 'col-start-1 row-start-1 flex items-start justify-between gap-3 pb-3',
     headerText: 'flex min-w-0 flex-1 flex-col gap-0.5',
     headerMuted: 'text-xs text-muted-foreground',
@@ -205,7 +238,9 @@ const SKELETON_COLUMNS = 3;
 
 const NODES_MARK = 'sankey-nodes';
 const LINKS_MARK = 'sankey-links';
-const STRAIGHT_NUDGE = 0.1;
+const DEFAULT_TAPER = 0.4;
+const DEFAULT_MIN_THICKNESS = 3;
+const RIBBON_SAMPLES = 12;
 const gradientId = (row: LinkRow) => row.key.replace(':', '-');
 
 const COMPACT = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
@@ -220,13 +255,19 @@ interface NodeRow {
   value: number;
   layer: number;
   color: string;
+  /** `false` keeps the node readable with nothing painted. */
+  bar: boolean;
+  /** It ends on a row beside the chart, which carries its name. */
+  onRow: boolean;
   x0: number;
   x1: number;
   y0: number;
   y1: number;
 }
 
-/** A ribbon, in the chart's pixels: a stroke as wide as its value between two points. */
+type Span = readonly [number, number];
+
+/** A ribbon, in the chart's pixels: its two edges, along the flow and across it. */
 interface LinkRow {
   kind: 'link';
   key: string;
@@ -235,14 +276,14 @@ interface LinkRow {
   target: string;
   value: number;
   layer: number;
-  width: number;
   color: string;
   /** Where the ribbon's gradient ends: the target's colour, or its own when it was given one. */
   endColor: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  fade?: readonly [number, number];
+  from: number;
+  to: number;
+  start: Span;
+  end: Span;
 }
 
 /** A name, or the figure under it, placed beside its bar. */
@@ -259,6 +300,7 @@ interface LabelRow {
 type Row = NodeRow | LinkRow | LabelRow;
 type RowPoint = ChartPoint<Row, number, number>;
 
+const barFill = (row: NodeRow) => (row.bar ? row.color : 'transparent');
 const isNode = (row: Row): row is NodeRow => 'kind' in row && row.kind === 'node';
 const isLink = (row: Row): row is LinkRow => 'kind' in row && row.kind === 'link';
 
@@ -286,37 +328,111 @@ export interface SankeyChartActiveLink {
   value: number;
 }
 
-/** A ribbon's control points, reaching along the flow by `reach` of its run. */
-function flowCurve(vertical: boolean, reach: number): ChartCurve {
-  const line: ChartCurve['line'] = (points) => {
-    const [from, to] = [points[0], points[points.length - 1]];
-    if (!from || !to) return '';
-    const [x1, y1] = from;
-    const [x2, y2] = to;
-    if (vertical) {
-      const run = (y2 - y1) * reach;
-      return `M${x1},${y1}C${x1},${y1 + run} ${x2},${y2 - run} ${x2},${y2}`;
-    }
-    const run = (x2 - x1) * reach;
-    return `M${x1},${y1}C${x1 + run},${y1} ${x2 - run},${y2} ${x2},${y2}`;
-  };
-  return { line, area: () => '' };
+const cubic = (a: number, b: number, c: number, d: number, t: number) => {
+  const u = 1 - t;
+  return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d;
+};
+
+/** A ribbon's outline. Both edges bend alike, so its control points reach along the flow only. */
+function ribbonPath({ from, to, start, end }: LinkRow, vertical: boolean, reach: number): string {
+  const run = (to - from) * reach;
+  const at = (along: number, across: number) => (vertical ? `${across},${along}` : `${along},${across}`);
+  return (
+    `M${at(from, start[0])}C${at(from + run, start[0])} ${at(to - run, end[0])} ${at(to, end[0])}` +
+    `L${at(to, end[1])}C${at(to - run, end[1])} ${at(from + run, start[1])} ${at(from, start[1])}Z`
+  );
 }
 
-/** How far a point is from the centre line of a ribbon, measured along its curve. */
-function distanceToRibbon(row: LinkRow, x: number, y: number, vertical: boolean, reach: number): number {
-  const [c1x, c1y, c2x, c2y] = vertical
-    ? [row.x1, row.y1 + (row.y2 - row.y1) * reach, row.x2, row.y2 - (row.y2 - row.y1) * reach]
-    : [row.x1 + (row.x2 - row.x1) * reach, row.y1, row.x2 - (row.x2 - row.x1) * reach, row.y2];
-  let least = Infinity;
-  for (let step = 0; step <= 24; step += 1) {
-    const t = step / 24;
-    const u = 1 - t;
-    const px = u * u * u * row.x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * row.x2;
-    const py = u * u * u * row.y1 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * row.y2;
-    least = Math.min(least, Math.hypot(px - x, py - y));
+function ribbonOutline({ from, to, start, end }: LinkRow, vertical: boolean, reach: number): (readonly [number, number])[] {
+  const run = (to - from) * reach;
+  const steps = Array.from({ length: RIBBON_SAMPLES + 1 }, (_unused, step) => step / RIBBON_SAMPLES);
+  const edge = (side: 0 | 1) =>
+    steps.map((t): readonly [number, number] => {
+      const along = cubic(from, from + run, to - run, to, t);
+      const across = cubic(start[side], start[side], end[side], end[side], t);
+      return vertical ? [across, along] : [along, across];
+    });
+  return [...edge(0), ...edge(1).reverse()];
+}
+
+/** How far a point is inside a ribbon, negative within it, or `Infinity` past its ends. */
+function ribbonGap(row: LinkRow, x: number, y: number, vertical: boolean, reach: number): number {
+  const { from, to, start, end } = row;
+  const [along, across] = vertical ? [y, x] : [x, y];
+  if (along < Math.min(from, to) || along > Math.max(from, to)) return Infinity;
+  const run = (to - from) * reach;
+  let low = 0;
+  let high = 1;
+  for (let step = 0; step < 16; step += 1) {
+    const t = (low + high) / 2;
+    const reached = cubic(from, from + run, to - run, to, t);
+    if (to > from ? reached < along : reached > along) low = t;
+    else high = t;
   }
-  return least;
+  const t = (low + high) / 2;
+  const first = cubic(start[0], start[0], end[0], end[0], t);
+  const second = cubic(start[1], start[1], end[1], end[1], t);
+  return Math.abs(across - (first + second) / 2) - Math.abs(second - first) / 2;
+}
+
+/** The ribbons, drawn from pixels the layout already worked out. */
+function ribbonMark(
+  rows: readonly LinkRow[],
+  options: {
+    id: string;
+    vertical: boolean;
+    reach: number;
+    fill: (row: LinkRow) => string;
+    fillOpacity?: (row: LinkRow) => number;
+    still?: boolean;
+  }
+) {
+  const { id, vertical, reach, fill, fillOpacity, still } = options;
+  return createMark<LinkRow, number, number>(
+    () => ({
+      id,
+      channels: {},
+      render: () => {
+        const points = rows.map((row, datumIndex) => {
+          const key = `${id}:${row.key}`;
+          const [along, across] = [(row.from + row.to) / 2, (row.start[0] + row.start[1] + row.end[0] + row.end[1]) / 4];
+          return {
+            key,
+            markId: id,
+            group: null,
+            groupLabel: id,
+            datum: row,
+            datumIndex,
+            xValue: row.to,
+            yValue: row.value,
+            x: vertical ? across : along,
+            y: vertical ? along : across,
+            color: row.color,
+          };
+        });
+        return {
+          nodes: [
+            {
+              kind: 'group' as const,
+              key: id,
+              className: 'ts-chart__link',
+              ariaHidden: true,
+              children: rows.map((row, index) => ({
+                kind: 'area' as const,
+                key: `${id}:${row.key}`,
+                path: ribbonPath(row, vertical, reach),
+                points: ribbonOutline(row, vertical, reach),
+                interaction: { point: points[index]!, affinity: 'geometry' as const },
+                style: { fill: fill(row), fillOpacity: fillOpacity?.(row) },
+              })),
+            },
+          ],
+          points,
+        };
+      },
+    }),
+    still ? false : undefined
+  );
 }
 
 /** The nodes and ribbons before and after one reading, by key. */
@@ -389,7 +505,7 @@ function routeFocus(links: readonly LinkRow[], vertical: boolean, reach: number,
       let nearestGap = Infinity;
       for (const point of points) {
         if (!isLink(point.datum)) continue;
-        const gap = distanceToRibbon(point.datum, x, y, vertical, reach) - point.datum.width / 2;
+        const gap = ribbonGap(point.datum, x, y, vertical, reach);
         if (gap <= 0 && gap < nearestGap) {
           nearest = point;
           nearestGap = gap;
@@ -587,6 +703,14 @@ export interface SankeyChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   /** Fires with the id of the node being read, and `null` when none is. */
   onActiveIdChange?: (id: string | null) => void;
   /**
+   * Ends the last column's ribbons on rows beside the chart, such as a table's,
+   * in the order those nodes were given, with no bars or names of their own.
+   * Set `height` to fit the rows. A horizontal flow only.
+   */
+  targetRows?: SankeyRowGrid;
+  /** Fires with where the last column landed, and again when that moves. */
+  onLayout?: (targets: readonly SankeyTargetLayout[]) => void;
+  /**
    * Fires with how many link rows could not be drawn: ones naming a node that is
    * not there, carrying nothing, or closing a loop. `0` after a clean render.
    */
@@ -618,6 +742,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     staggerDelay = DEFAULT_STAGGER,
     status = 'ready',
     activeId,
+    targetRows,
+    onLayout,
     onActiveIdChange,
     onDropLinks,
     label,
@@ -691,8 +817,48 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     // A flow reads from where it starts, which is the right-hand edge in a
     // right-to-left page. A vertical flow starts at the top in every script.
     const mirror = size.rtl && !vertical;
+    const onRows = targetRows && !vertical ? targetRows : undefined;
+    const rowOf = new Map<number, number>();
+    if (onRows) {
+      layout.nodes.forEach((node, index) => {
+        if (node.layer === layout.columns - 1) rowOf.set(index, rowOf.size);
+      });
+    }
+    const rowCentre = (row: number) => (onRows ? onRows.top + onRows.height * (row + 0.5) : 0);
+
+    // A source's ribbons leave it in the order of the rows they reach, or they would cross.
+    const leaving = new Map<number, Span>();
+    const ending = new Map<number, Span>();
+    if (onRows) {
+      const reachOf = (target: number) => {
+        const row = rowOf.get(target);
+        const node = layout.nodes[target];
+        return row === undefined ? ((node?.y0 ?? 0) + (node?.y1 ?? 0)) / 2 : rowCentre(row);
+      };
+      for (const [index, node] of layout.nodes.entries()) {
+        let cursor = node.y0;
+        const out = layout.links.filter(({ source }) => source === index).sort((a, b) => reachOf(a.target) - reachOf(b.target) || a.y0 - b.y0);
+        for (const link of out) {
+          leaving.set(link.index, [cursor, cursor + link.width]);
+          cursor += link.width;
+        }
+      }
+      for (const [target, row] of rowOf) {
+        const into = layout.links.filter((link) => link.target === target).sort((a, b) => (leaving.get(a.index)?.[0] ?? 0) - (leaving.get(b.index)?.[0] ?? 0));
+        const thickness = into.map((link) => Math.max(link.width * (onRows.taper ?? DEFAULT_TAPER), onRows.minThickness ?? DEFAULT_MIN_THICKNESS));
+        let cursor = rowCentre(row) - thickness.reduce((sum, value) => sum + value, 0) / 2;
+        into.forEach((link, position) => {
+          const end = cursor + (thickness[position] ?? 0);
+          ending.set(link.index, [cursor, end]);
+          cursor = end;
+        });
+      }
+    }
+
     const nodeRows = layout.nodes.map((node, index): NodeRow => {
       const input = nodes[node.index];
+      const row = rowOf.get(index);
+      const spans = row === undefined ? [] : layout.links.flatMap((link) => (link.target === index ? (ending.get(link.index) ?? []) : []));
       return {
         kind: 'node',
         key: `node:${node.id}`,
@@ -702,11 +868,13 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
         layer: node.layer,
         // The node's place in the data rather than its column: a colour per
         // column would say the column means something, and it does not.
-        color: input?.color ? COLOR_VAR[input.color] : PALETTE[index % PALETTE.length]!,
+        color: input?.color ? resolveColor(input.color) : PALETTE[index % PALETTE.length]!,
+        bar: input?.bar !== false && row === undefined,
+        onRow: row !== undefined,
         x0: mirror ? width - node.x1 : node.x0,
         x1: mirror ? width - node.x0 : node.x1,
-        y0: node.y0,
-        y1: node.y1,
+        y0: spans.length ? Math.min(...spans) : node.y0,
+        y1: spans.length ? Math.max(...spans) : node.y1,
       };
     });
     const linkRows = layout.links.flatMap((link): LinkRow[] => {
@@ -714,11 +882,13 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       const target = nodeRows[link.target];
       if (!source || !target) return [];
       const input = links[link.input];
-      const [fromX, toX] = mirror ? [source.x0, target.x1] : [source.x1, target.x0];
-      const color = input?.color ? COLOR_VAR[input.color] : source.color;
-      // A gradient is sized to the path's box, and a straight path has no box to
-      // size it to, so it would not paint at all. Rounding can leave a sliver too.
-      const unbent = Math.abs(link.y1 - link.y0) < STRAIGHT_NUDGE ? link.y0 + STRAIGHT_NUDGE : link.y1;
+      const color = input?.color ? resolveColor(input.color) : source.color;
+      const half = link.width / 2;
+      const [from, to] = vertical
+        ? [source.y1, target.y0]
+        : mirror
+          ? [source.x0, target.onRow ? target.x0 : target.x1]
+          : [source.x1, target.onRow ? target.x1 : target.x0];
       return [
         {
           kind: 'link',
@@ -728,54 +898,61 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
           target: target.id,
           value: link.value,
           layer: source.layer,
-          width: link.width,
           color,
           endColor: input?.color ? color : target.color,
-          ...(vertical
-            ? { x1: link.y0, y1: source.y1, x2: unbent, y2: target.y0 }
-            : { x1: fromX, y1: link.y0, x2: toX, y2: unbent }),
+          ...(input?.opacity ? { fade: input.opacity } : {}),
+          from,
+          to,
+          start: leaving.get(link.index) ?? [link.y0 - half, link.y0 + half],
+          end: ending.get(link.index) ?? [link.y1 - half, link.y1 + half],
         },
       ];
     });
-    return { nodes: nodeRows, links: linkRows };
-  }, [layout, nodes, links, width, vertical, size.rtl]);
+    const targets = nodeRows
+      .filter(({ layer }) => layer === layout.columns - 1)
+      .map((node): SankeyTargetLayout => {
+        const [y0, y1] = vertical ? [node.x0, node.x1] : [node.y0, node.y1];
+        return { id: node.id, y: (y0 + y1) / 2, y0, y1 };
+      });
+    return { nodes: nodeRows, links: linkRows, targets };
+  }, [layout, nodes, links, width, vertical, size.rtl, targetRows?.top, targetRows?.height, targetRows?.taper, targetRows?.minThickness]);
+
+  // By what the positions say, because a parent's inline data makes new rows every render.
+  const reportedLayout = useRef('');
+  const latestOnLayout = useLatest(onLayout);
+  useEffect(() => {
+    const signature = JSON.stringify(rows.targets);
+    if (signature === reportedLayout.current || width === 0) return;
+    reportedLayout.current = signature;
+    latestOnLayout.current?.(rows.targets);
+  }, [rows.targets, width, latestOnLayout]);
 
   const { links: linksSlot, nodes: nodesSlot, labels: labelsSlot, tooltip, skeleton } = slots;
 
   const definition = useMemo(() => {
-    const curveShape = flowCurve(vertical, curve);
-    const position = {
-      x1: (row: LinkRow) => row.x1,
-      y1: (row: LinkRow) => row.y1,
-      x2: (row: LinkRow) => row.x2,
-      y2: (row: LinkRow) => row.y2,
-      key: (row: LinkRow) => row.key,
-      lineCap: 'butt' as const,
-      curve: curveShape,
-      strokeWidth: (row: LinkRow) => row.width,
-    };
+    const ribbon = { vertical, reach: curve };
 
     const fade = { type: 'tween' as const, duration: 120, easing: 'ease-out' as const };
 
     const marks = loading
       ? skeleton
-        ? skeletonMarks(width, height, vertical, nodeWidth, curveShape)
+        ? skeletonMarks(width, height, vertical, nodeWidth, curve)
         : []
       : [
           ...(linksSlot
             ? [
-                linkMark(rows.links, {
-                  ...position,
+                ribbonMark(rows.links, {
+                  ...ribbon,
                   id: LINKS_MARK,
-                  stroke: linksSlot.gradient ? (row: LinkRow) => `url(#${gradientId(row)})` : 'var(--foreground)',
-                  strokeOpacity: linksSlot.opacity,
+                  fill: linksSlot.gradient ? (row) => `url(#${gradientId(row)})` : () => 'var(--foreground)',
+                  fillOpacity: (row) => (linksSlot.gradient && row.fade ? 1 : linksSlot.opacity),
                 }),
                 whenFocused(
-                  linkMark(rows.links, {
-                    ...position,
+                  ribbonMark(rows.links, {
+                    ...ribbon,
                     id: `${LINKS_MARK}-route`,
-                    stroke: linksSlot.gradient ? (row: LinkRow) => `url(#${gradientId(row)})` : (row: LinkRow) => row.color,
-                    strokeOpacity: linksSlot.activeOpacity,
+                    fill: linksSlot.gradient ? (row) => `url(#${gradientId(row)})` : (row) => row.color,
+                    fillOpacity: () => linksSlot.activeOpacity,
                   }),
                   { match: 'group' }
                 ),
@@ -784,9 +961,9 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
           ...(nodesSlot
             ? [
                 // A rect takes one fill, so the bars are one mark per colour.
-                ...[...new Set(rows.nodes.map(({ color }) => color))].map((fill) =>
-                  rect(rows.nodes.filter((row) => row.color === fill), {
-                    id: `${NODES_MARK}-${fill}`,
+                ...[...new Set(rows.nodes.map(barFill))].map((fill, index) =>
+                  rect(rows.nodes.filter((row) => barFill(row) === fill), {
+                    id: `${NODES_MARK}-${index}`,
                     x1: (row: NodeRow) => row.x0,
                     x2: (row: NodeRow) => row.x1,
                     y1: (row: NodeRow) => row.y0,
@@ -802,7 +979,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
           ...(labelsSlot
             ? [
                 text(
-                  placeLabels(rows.nodes, {
+                  placeLabels(rows.nodes.filter(({ onRow }) => !onRow), {
                     width,
                     height,
                     vertical,
@@ -871,12 +1048,12 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
             // From where the flow starts, which is the right-hand edge in a right-to-left page.
             ...(vertical
               ? { x1: 0, y1: 0, x2: 0, y2: 1 }
-              : row.x1 > row.x2
+              : row.from > row.to
                 ? { x1: 1, y1: 0, x2: 0, y2: 0 }
                 : { x1: 0, y1: 0, x2: 1, y2: 0 }),
             stops: [
-              { offset: 0, color: row.color },
-              { offset: 1, color: row.endColor },
+              { offset: 0, color: row.color, ...(row.fade ? { opacity: row.fade[0] } : {}) },
+              { offset: 1, color: row.endColor, ...(row.fade ? { opacity: row.fade[1] } : {}) },
             ],
           }))
         : [],
@@ -1084,38 +1261,37 @@ SankeyChartRoot.displayName = 'SankeyChart';
  * The waiting shape: plain equal bars and ribbons. Varied thicknesses would be
  * an invented routing, and nobody can tell one from a real one until it changes.
  */
-function skeletonMarks(width: number, height: number, vertical: boolean, bar: number, curveShape: ChartCurve) {
+function skeletonMarks(width: number, height: number, vertical: boolean, bar: number, reach: number) {
   const along = vertical ? height : width;
   const cross = vertical ? width : height;
   const step = (along - bar) / Math.max(SKELETON_COLUMNS - 1, 1);
   const flip = <T,>(a: T, b: T): [T, T] => (vertical ? [b, a] : [a, b]);
-  const blank = { value: 0, layer: 0, color: 'var(--muted)', endColor: 'var(--muted)' };
+  const blank = { value: 0, layer: 0, color: 'var(--muted)', endColor: 'var(--muted)', bar: true, onRow: false };
   const bars = Array.from({ length: SKELETON_COLUMNS }, (_unused, column): NodeRow => {
     const [x0, y0] = flip(column * step, cross / 6);
     const [x1, y1] = flip(column * step + bar, (cross * 5) / 6);
     return { ...blank, kind: 'node', key: `bar-${column}`, id: `bar-${column}`, name: '', x0, y0, x1, y1 };
   });
+  const lane = cross / 6;
   const ribbons = Array.from({ length: SKELETON_COLUMNS - 1 }, (_unused, column) =>
-    [cross / 3, (cross * 2) / 3].map((at, lane): LinkRow => {
-      const [x1, y1] = flip(column * step + bar, at);
-      const [x2, y2] = flip((column + 1) * step, at);
-      return { ...blank, kind: 'link', key: `ribbon-${column}-${lane}`, input: -1, source: '', target: '', width: cross / 6, x1, y1, x2, y2 };
+    [cross / 3, (cross * 2) / 3].map((at, index): LinkRow => {
+      const edges: Span = [at - lane / 2, at + lane / 2];
+      return {
+        ...blank,
+        kind: 'link',
+        key: `ribbon-${column}-${index}`,
+        input: -1,
+        source: '',
+        target: '',
+        from: column * step + bar,
+        to: (column + 1) * step,
+        start: edges,
+        end: edges,
+      };
     })
   ).flat();
   return [
-    linkMark(ribbons, {
-      id: 'sankey-skeleton-links',
-      x1: (row: LinkRow) => row.x1,
-      y1: (row: LinkRow) => row.y1,
-      x2: (row: LinkRow) => row.x2,
-      y2: (row: LinkRow) => row.y2,
-      key: (row: LinkRow) => row.key,
-      lineCap: 'butt',
-      curve: curveShape,
-      stroke: 'var(--muted)',
-      strokeWidth: cross / 6,
-      motion: false,
-    }),
+    ribbonMark(ribbons, { id: 'sankey-skeleton-links', vertical, reach, fill: () => 'var(--muted)', still: true }),
     rect(bars, {
       id: 'sankey-skeleton-nodes',
       x1: (row: NodeRow) => row.x0,
@@ -1130,7 +1306,6 @@ function skeletonMarks(width: number, height: number, vertical: boolean, bar: nu
   ];
 }
 
-/** Hands a part's formatters to the root without a new function rebuilding the chart. */
 function useLatest<T>(value: T) {
   const [latest] = useState(() => ({ current: value }));
   useEffect(() => {

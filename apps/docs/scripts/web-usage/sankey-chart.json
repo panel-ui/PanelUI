@@ -14,8 +14,8 @@
   "parts": {
     "Header": "The strip above the diagram: `title`, `value` and `caption`, with your own control on the trailing side. The value is not derived, because 128400 can be a count, a currency or a rate.",
     "Skeleton": "Plain equal bars and ribbons, drawn only while `status` is `loading`. Equal, because varied thicknesses would look like real routing.",
-    "Links": "The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others.",
-    "Nodes": "The bars the ribbons run between. A bar's height is what passes through it.",
+    "Links": "The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others. A ribbon's `opacity` on the data fades it within that gradient.",
+    "Nodes": "The bars the ribbons run between. A bar's height is what passes through it. A node with `bar: false` draws none and can still be read.",
     "Labels": "The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.",
     "Tooltip": "The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.",
     "Breakdown": "Optional. The figures, written out under the diagram. At rest it lists where the flow starts and ends. Reading a stage swaps in where each of its streams came from and went, with its share of the stage. A row selects the node it names. It holds its height, so reading a stage does not move the page.",
@@ -32,6 +32,12 @@
       "title": "Ribbons in colour",
       "description": "Pass `gradient` to `SankeyChart.Links` to blend each ribbon from its source's colour to its target's. A ribbon with its own `color` stays that colour. The colours compete with the labels, so use it when the stages are few enough to tell apart.",
       "demo": "gradient",
+      "height": 380
+    },
+    {
+      "title": "Ribbons into a table",
+      "description": "`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.",
+      "demo": "rows",
       "height": 380
     },
     {

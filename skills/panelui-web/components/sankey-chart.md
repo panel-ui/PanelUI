@@ -45,8 +45,8 @@ For a total cut into parts with no routing between them, or what survived each s
 
 - `SankeyChart.Header` — The strip above the diagram: `title`, `value` and `caption`, with your own control on the trailing side. The value is not derived, because 128400 can be a count, a currency or a rate.
 - `SankeyChart.Skeleton` — Plain equal bars and ribbons, drawn only while `status` is `loading`. Equal, because varied thicknesses would look like real routing.
-- `SankeyChart.Links` — The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others.
-- `SankeyChart.Nodes` — The bars the ribbons run between. A bar's height is what passes through it.
+- `SankeyChart.Links` — The ribbons, grey at rest and in their source's colour on the route being read. With `gradient` each one blends from its source's colour to its target's all the time, and a reading dims the others. A ribbon's `opacity` on the data fades it within that gradient.
+- `SankeyChart.Nodes` — The bars the ribbons run between. A bar's height is what passes through it. A node with `bar: false` draws none and can still be read.
 - `SankeyChart.Labels` — The names beside the bars, with the figure under each if you pass `showValue`. Where two names would collide, the larger stage keeps its name.
 - `SankeyChart.Tooltip` — The figures in a popover beside what is being read. It covers some of the diagram, so a chart with a `Breakdown` usually does not need it.
 - `SankeyChart.Breakdown` — Optional. The figures, written out under the diagram. At rest it lists where the flow starts and ends. Reading a stage swaps in where each of its streams came from and went, with its share of the stage. A row selects the node it names. It holds its height, so reading a stage does not move the page.
@@ -75,6 +75,8 @@ For a total cut into parts with no routing between them, or what survived each s
 | `status` | `SankeyChartStatus` | `'ready'` | `loading` holds the data back. Add `SankeyChart.Skeleton` for a shape to stand in meanwhile. |
 | `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
 | `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the id of the node being read, and `null` when none is. |
+| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows. A horizontal flow only. |
+| `onLayout` | `(targets: readonly SankeyTargetLayout[]) => void` | — | Fires with where the last column landed, and again when that moves. |
 | `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn: ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render. |
 | `label` | `string` | — | What a screen reader calls the chart. |
 | `labelForLink` | `(link: SankeyLink, index: number) => string` | — | What a screen reader says for one ribbon. Defaults to "source to target, value". |

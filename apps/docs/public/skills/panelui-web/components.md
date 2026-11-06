@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Waterfall Chart](components/waterfall-chart.md) — How a run of changes carried one total to another, with each step floating on the running balance.
 
 ## Feedback and status
 

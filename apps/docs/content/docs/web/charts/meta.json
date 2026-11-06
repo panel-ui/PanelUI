@@ -1,6 +1,7 @@
 {
   "title": "Charts",
   "pages": [
-    "bar-chart"
+    "bar-chart",
+    "waterfall-chart"
   ]
 }

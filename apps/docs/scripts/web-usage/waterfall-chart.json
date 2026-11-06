@@ -1,0 +1,55 @@
+{
+  "slug": "waterfall-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 500
+  },
+  "intro": "Use it to show how a series of changes carried one total to another, such as a revenue bridge or a month of cash flow. Each step's bar starts where the previous one ended, so the gap under it is the balance it acted on and its length is what it changed by.\n\nThe steps are drawn in the order you give them. The chart never sorts them, because the order is what it shows.\n\nFor categories with no order to keep, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<WaterfallChart data={bridge}>\n  <WaterfallChart.Grid />\n  <WaterfallChart.Connectors />\n  <WaterfallChart.Bars />\n  <WaterfallChart.XAxis />\n  <WaterfallChart.Tooltip />\n</WaterfallChart>",
+  "anatomy": "<WaterfallChart data={…}>\n  <WaterfallChart.Header />\n  <WaterfallChart.Grid />\n  <WaterfallChart.Skeleton />\n  <WaterfallChart.Connectors />\n  <WaterfallChart.Bars />\n  <WaterfallChart.Values />\n  <WaterfallChart.XAxis />\n  <WaterfallChart.YAxis />\n  <WaterfallChart.Tooltip />\n  <WaterfallChart.Legend />\n</WaterfallChart>",
+  "parts": {
+    "Header": "The strip above the plot: `title`, `value` and `caption`, with the legend or your own control on the trailing side. The value is a string you pass, so it can follow `onActiveIndexChange`.",
+    "Grid": "Lines across the value axis, so a bar can be read against a number.",
+    "Skeleton": "Equal stubs on the baseline, with a highlight moving across them, drawn only while `status` is `loading`.",
+    "Connectors": "The lines from each bar's end to the next band. They always pass behind the bars, wherever you declare them.",
+    "Bars": "The bars. Each takes its kind's colour, or the step's own `color`. Without this part nothing can be read.",
+    "Values": "Each step's change, signed and written just past the end of its bar. It needs vertical room, and it is not drawn sideways.",
+    "XAxis": "The step names under the bands. Sideways, `YAxis` has them instead.",
+    "YAxis": "Value labels down the side. Sideways, the side is the step axis, so it draws the names.",
+    "Tooltip": "The readout, and the reading of a step by hover, press, drag or arrow keys. It reports the change and the balance after it. The other bars fade while one is read.",
+    "Legend": "A swatch and a name for each kind the run contains, over the plot's top corner. On a chart with a header, use the header's `legend` instead."
+  },
+  "examples": [
+    {
+      "title": "Writing the changes on the bars",
+      "description": "`WaterfallChart.Values` puts each step's change just past the end of its bar. At the default `aspectRatio` of `2`, a label can crowd the top of the plot, so give the chart a squarer shape when you turn them on.",
+      "demo": "values",
+      "height": 500
+    },
+    {
+      "title": "Sideways, when the names do not fit",
+      "description": "`orientation=\"horizontal\"` lays the run down the side and moves the step names to the left, where `YAxis` draws them. Use it from about five steps on a narrow screen. `Values` is not drawn in this orientation, so the readout carries the numbers.",
+      "demo": "sideways",
+      "height": 560
+    },
+    {
+      "title": "Colours and a cropped axis",
+      "description": "`riseColor`, `fallColor` and `totalColor` set the three kinds, and `color` on one step overrides its kind, here to pull out Travel. Keep to those: a fourth colour is a meaning the reader has to be told.\n\n`yDomain` fixes the value axis, here so a small variance can be seen. A cropped axis makes a total's length misleading, so use it only when the movement matters more than the size.",
+      "demo": "colors",
+      "height": 460
+    },
+    {
+      "title": "Loading",
+      "description": "`status=\"loading\"` holds the bars back, and `WaterfallChart.Skeleton` shows equal stubs on the baseline meanwhile. The bars grow in when it turns `ready`.",
+      "demo": "loading",
+      "height": 420
+    },
+    {
+      "title": "Changing data",
+      "description": "New data moves the bars and the axis from where they are. `replay()` on the ref runs the entrance again.",
+      "demo": "changing-data",
+      "height": 460
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart fills its container's width and takes the plot's height from `aspectRatio`, so a header does not shrink it.\n\nThe plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.\n\n### Bundle size\n\nThe chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.\n\n### Data\n\n`value` is what the step changes the running total by, so a decrease is negative and the colour follows from the sign.\n\n`total: true` marks a reading rather than a change. It is measured from the baseline, and its `value` is added to the running total first, so an opening balance carries the figure it opens at and a closing total carries `0`.\n\nA value that is not a finite number counts as zero, so the step keeps its label and later totals stay correct. `waterfallSteps` is the same arithmetic the chart runs, exported so a header or a table can read the running balances.\n\n### The value axis\n\nThe derived axis spans both ends of every bar and always includes zero. `yDomain` overrides it when both ends are finite.\n\n### Reading a step\n\nHovering anywhere in a band reads it, and the other bars fade. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the bands it crosses, and a vertical drag scrolls the page.\n\n`onActiveIndexChange` fires when the step changes, not on every frame, and passes the resolved step, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useWaterfallChart` gives the same step.\n\n### Keyboard\n\nThe chart takes focus. The arrow keys walk the steps, Home and End go to the first and last, and Escape clears the reading.\n\n### Screen readers\n\nEach step is given as text beside the drawing, with its change and the balances either side. `label` names the chart and `labelForDatum` writes a step, for values with a unit.\n\n### Reduced motion\n\nWith reduced motion set, the bars appear at their final lengths and the skeleton's highlight stays still."
+}

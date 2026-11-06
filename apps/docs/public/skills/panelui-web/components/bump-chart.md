@@ -160,7 +160,7 @@ More than three or four lines in their own colours are hard to follow through th
 
 #### The data
 
-One row per column. Each series is a key holding its rank in that column, with `1` at the top. A missing or non-numeric value leaves a gap in that line. The number of rows is the lowest rank any series holds, so a table of five with one series missing keeps five rows.
+One row per column. Each series is a key holding its rank in that column, with `1` at the top. A missing or non-numeric value leaves a gap in that line, and a line that stops before the last column has its name beside the point where it stopped. The number of rows is the lowest rank any series holds, so a table of five with one series missing keeps five rows.
 
 #### Sizing
 

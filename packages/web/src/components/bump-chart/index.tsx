@@ -953,7 +953,7 @@ function BumpChartLabels({
   render,
   ...props
 }: BumpChartLabelsProps & RenderProp<'div'>) {
-  const { series, ranks, rowY, box, status, morphDuration, highlight, setHighlight, setSlot } = useChart('BumpChart.Labels');
+  const { data, series, ranks, rowY, box, status, morphDuration, highlight, setHighlight, setSlot } = useChart('BumpChart.Labels');
   const slots = bumpChartVariants();
 
   useEffect(() => {
@@ -961,7 +961,6 @@ function BumpChartLabels({
     return () => setSlot('labels', undefined);
   }, [width, setSlot]);
 
-  const left = box.left + box.width + LABELS_GAP;
   const element = useRender({
     defaultTagName: 'div',
     render,
@@ -970,8 +969,12 @@ function BumpChartLabels({
         'data-slot': 'bump-chart-labels',
         className: slots.labels({ className }),
         children: series.flatMap((entry) => {
-          const last = (ranks[entry.key] ?? []).filter((rank) => rank !== null).pop();
-          if (last === undefined) return [];
+          const line = ranks[entry.key] ?? [];
+          const end = line.reduce<number>((found, rank, index) => (rank === null ? found : index), -1);
+          const last = line[end];
+          if (last === null || last === undefined) return [];
+          // A line that stops early keeps its name beside where it stopped, not at a rank another line holds.
+          const left = box.left + (data.length > 1 ? end / (data.length - 1) : 0.5) * box.width + LABELS_GAP;
           const picked = highlight === entry.key;
           const dimmed = highlight !== null && !picked;
           const shared = {

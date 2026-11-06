@@ -43,7 +43,7 @@ const CATEGORIES = {
   navigation: ['Navigation', 'Moving between places, and showing where you are in them.'],
   layout: ['Layout and structure', 'The surfaces the rest of it sits on.'],
   data: ['Data', 'Rows, sequences and numbers, laid out to be read.'],
-  charts: ['Charts', 'Series drawn on the UI thread, one file each, no chart library.'],
+  charts: ['Charts', 'Series, proportions and flows, drawn to be read.'],
   feedback: ['Feedback and status', 'Saying what happened, what is happening, and what is missing.'],
   media: ['Media and motion', 'Pictures, conversation and things that move.'],
   ai: ['AI components', 'The parts an assistant interface is built from.'],

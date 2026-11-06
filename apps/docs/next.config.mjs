@@ -82,6 +82,13 @@ const config = {
    */
   async redirects() {
     return [
+      // Bar Chart shipped under Components in web 0.13.0, before the web
+      // collection had a Charts section.
+      {
+        source: '/docs/web/components/bar-chart',
+        destination: '/docs/web/charts/bar-chart',
+        permanent: true,
+      },
       // Moved into the Skills section when Apparatus joined it.
       {
         source: '/docs/integrations/logo-maker',

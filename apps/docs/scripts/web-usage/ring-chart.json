@@ -1,0 +1,56 @@
+{
+  "slug": "ring-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 500
+  },
+  "intro": "Use it for a few values that each have their own target: calories, minutes and steps against today's goals, or tasks done against a sprint. Each ring is measured against its own `maxValue`, so three rings can all be at ninety percent of three unrelated numbers.\n\nThe rings do not add up, so the chart has no total. A value past its target fills the ring and stops.\n\nFor parts of one whole, use a [Pie Chart](/docs/web/charts/pie-chart). For values on one shared scale, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<RingChart data={goals} size={208}>\n  <RingChart.Ring index={0} />\n  <RingChart.Ring index={1} />\n  <RingChart.Ring index={2} />\n  <RingChart.Center />\n  <RingChart.Legend />\n</RingChart>",
+  "anatomy": "<RingChart data={…}>\n  <RingChart.Header />\n  <RingChart.Ring index={0} />\n  <RingChart.Center />\n  <RingChart.Legend />\n</RingChart>",
+  "parts": {
+    "Header": "The strip above the rings: `title`, `value` and `caption`, with a colour key or your own control on the trailing side.",
+    "Ring": "One ring, drawn from the entry at `index` in `data`. The chart draws only the rings it is given a part for.",
+    "Center": "The readout in the hole: the outermost ring's value and target, then the same for the ring being read.",
+    "Legend": "A swatch, a name and a percentage per ring, under the plot. Each entry is a button that reads its ring."
+  },
+  "examples": [
+    {
+      "title": "Reading from outside",
+      "description": "Pass `activeIndex` and `onActiveIndexChange` when something else on the page has to stay in step. The callback fires for hovering as well as pressing, and with `-1` when the reading ends.",
+      "demo": "selecting",
+      "height": 400
+    },
+    {
+      "title": "Gauge",
+      "description": "Set `startAngle` and `endAngle` less than a turn apart to leave a gap. The track stops where the arc stops, and the gap does not respond to the pointer.",
+      "demo": "gauge",
+      "height": 300
+    },
+    {
+      "title": "Segments",
+      "description": "Set `segments` when the target is a count of things, such as eight of twelve sessions. Ticks light one at a time and the ends default to square.",
+      "demo": "segments",
+      "height": 300
+    },
+    {
+      "title": "Header with a key",
+      "description": "`legend` on the header puts the names on its trailing side, which suits two or three short names. The header's `value` is yours to pass, because the rings have no total.",
+      "demo": "header",
+      "height": 360
+    },
+    {
+      "title": "Custom centre",
+      "description": "Give `RingChart.Center` a function to draw the middle yourself. It receives the ring being read, or `null` when there is none.",
+      "demo": "center",
+      "height": 300
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, each arc moves to its new length. A `ref` on the chart has `replay()`, which sweeps the rings in again from nothing.",
+      "demo": "changing-data",
+      "height": 380
+    }
+  ],
+  "notes": "### Sizing\n\nThe chart takes `size` as its diameter, or fills its container's width as a square without it. `strokeWidth` and `ringGap` stay in pixels at any size, so a small chart fits fewer rings. An inner ring that runs out of room stays at its minimum radius and overlaps the one outside it.\n\nThe plot draws in the browser after it has been measured, so it is not in server-rendered HTML.\n\n### Colour\n\n`color` on a datum or on `RingChart.Ring` names a role in the theme, and the part's wins. Without either, rings take the five chart colours in order.\n\n### Reading a ring\n\nHovering a ring reads it. A click or a tap holds the reading until you press that ring again or press outside the rings. A touch drag does not read rings, so the page can still scroll.\n\n`useRingChart` gives the ring being read to anything rendered inside the chart.\n\n### Keyboard\n\nThe plot takes focus. The arrow keys, Home and End move between rings, Enter or Space holds the reading, and Escape clears it. Moving to another ring lets go of a held reading. The legend's entries are buttons, reached with Tab.\n\n### Screen readers\n\nEach ring is given as text beside the drawing, as its name and percentage, and a ring read with the keyboard is announced. `label` names the chart and `labelForDatum` writes a ring, for values with a unit.\n\n### Reduced motion\n\nWith reduced motion set, the rings appear at their values without sweeping, and a data change lands in one step.",
+  "propsNote": "`RingChart`, `RingChart.Header` and `RingChart.Legend` also take the props of the element they render, and a `className`. `RingChart.Center` takes a `className` for its readout. `RingChart.Ring` draws into the chart's SVG and takes only the props listed."
+}

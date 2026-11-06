@@ -851,6 +851,29 @@
       ]
     },
     {
+      "name": "ring-chart",
+      "type": "registry:component",
+      "title": "Ring Chart",
+      "description": "Progress towards several targets, as concentric arcs.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/ring-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/ring-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/ring-chart/ring-layout.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/ring-chart/ring-layout.ts"
+        }
+      ]
+    },
+    {
       "name": "rolling-number",
       "type": "registry:component",
       "title": "Rolling Number",

@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Mirror Area Chart](components/mirror-area-chart.md) — Two readings of one timeline, one above a baseline and one below it.
 
 ## Feedback and status
 

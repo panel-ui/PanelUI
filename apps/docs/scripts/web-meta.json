@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "mirror-area-chart": [
+    "MirrorAreaChart",
+    "Two readings of one timeline, one above a baseline and one below it.",
+    "react mirror area chart component two scales baseline",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Mirror Area Chart"
+    }
   ]
 }

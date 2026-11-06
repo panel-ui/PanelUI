@@ -1513,11 +1513,11 @@ function SankeyChartBreakdown({
         children: activeLink ? (
           <div className={slots.breakdownSides()}>
             <div className={slots.breakdownSide()}>
-              <div className={slots.breakdownTitle()}>From</div>
+              <div className={slots.breakdownTitle()}>{sourcesTitle}</div>
               {flowRow(activeLink.source, true)}
             </div>
             <div className={slots.breakdownSide()}>
-              <div className={slots.breakdownTitle()}>To</div>
+              <div className={slots.breakdownTitle()}>{targetsTitle}</div>
               {flowRow(activeLink.target, true)}
             </div>
           </div>

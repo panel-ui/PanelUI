@@ -72,6 +72,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Heatmap Chart](components/heatmap-chart.md) — A calendar of bins, shaded by how much happened in each.
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.
+- [Mirror Area Chart](components/mirror-area-chart.md) — Two readings of one timeline, one above a baseline and one below it.
 - [Pie Chart](components/pie-chart.md) — One total, divided between its parts.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
 - [Pyramid Chart](components/pyramid-chart.md) — Two series mirrored about a centre line, one row per category, on one shared scale.

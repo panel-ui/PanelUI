@@ -10,6 +10,7 @@
     "heatmap-chart",
     "line-chart",
     "live-line-chart",
+    "mirror-area-chart",
     "pie-chart",
     "plot",
     "pyramid-chart",

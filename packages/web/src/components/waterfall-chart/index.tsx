@@ -79,6 +79,7 @@ import type { ElementType as RenderElementType } from 'react';
 import {
   waterfallExtent,
   waterfallKinds,
+  waterfallReaches,
   waterfallSteps as resolveSteps,
   type WaterfallDatum as StepDatum,
   type WaterfallKind,
@@ -255,19 +256,21 @@ export function useWaterfallChart() {
 /**
  * Holds a non-zero step at the smallest length it may be drawn. A step that rounds
  * to nothing still happened. The floor is in pixels, so it is applied once the
- * scales have placed the bar, and the bar's far end is the end that moves.
+ * scales have placed the bar, and the bar's far end is the end that moves. A step
+ * wholly past a cropped `domain` stays at nothing, because its change is off the plot.
  */
 function withMinimumLength<TMark extends ChartMark<StepRow, number, number, number, number>>(
   mark: TMark,
   floor: number,
-  horizontal: boolean
+  horizontal: boolean,
+  domain: readonly [number, number] | undefined
 ): TMark {
   const adjust = (node: SceneNode): SceneNode => {
     if (node.kind === 'group') return { ...node, children: node.children.map(adjust) };
     if (node.kind !== 'rect' || !node.interaction?.point) return node;
     const { step } = node.interaction.point.datum as StepRow;
     const length = horizontal ? node.width : node.height;
-    if (step.end === step.start || length >= floor) return node;
+    if (step.end === step.start || length >= floor || !waterfallReaches(step, domain)) return node;
     const forward = step.end > step.start;
     return horizontal
       ? { ...node, width: floor, x: forward ? node.x : node.x + length - floor }
@@ -420,7 +423,7 @@ const WaterfallChartRoot = forwardRef<WaterfallChartHandle, WaterfallChartProps 
   const [revision, setRevision] = useState(0);
   const [stubs, setStubs] = useState('');
   const interactionRef = useRef<ChartInteractionController<StepRow, number, number> | null>(null);
-  const dragging = useRef(false);
+  const dragRelease = useRef<AbortController | null>(null);
 
   /*
    * The chart mounts once its width is known. Mounted at a guess, the first
@@ -480,7 +483,7 @@ const WaterfallChartRoot = forwardRef<WaterfallChartHandle, WaterfallChartProps 
     const drawn = horizontal
       ? barX(rows, { ...shared, y: 'index', x1: (row: StepRow) => row.step.start, x2: (row: StepRow) => row.step.end })
       : barY(rows, { ...shared, x: 'index', y1: (row: StepRow) => row.step.start, y2: (row: StepRow) => row.step.end });
-    const shaped = minBarLength > 0 ? withMinimumLength(drawn, minBarLength, horizontal) : drawn;
+    const shaped = minBarLength > 0 ? withMinimumLength(drawn, minBarLength, horizontal, yDomain) : drawn;
 
     const stubShared = {
       id: SKELETON_MARK,
@@ -736,21 +739,23 @@ const WaterfallChartRoot = forwardRef<WaterfallChartHandle, WaterfallChartProps 
    * the next press, the same as a tap's. A vertical drag never gets here: `pan-y`
    * gives it to the page, and the browser cancels the pointer.
    */
+  useEffect(() => () => dragRelease.current?.abort(), []);
   const readDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'touch' || !readable || loading) return;
     const interaction = interactionRef.current;
     const target = interaction?.resolvePointer(event.clientX, event.clientY);
     if (!interaction || !target) return;
     interaction.setControlledFocus(target);
-    if (dragging.current) return;
-    dragging.current = true;
+    if (dragRelease.current) return;
+    const release = new AbortController();
+    dragRelease.current = release;
     document.addEventListener(
       'pointerdown',
       () => {
-        dragging.current = false;
+        dragRelease.current = null;
         interactionRef.current?.setControlledFocus(null);
       },
-      { capture: true, once: true }
+      { capture: true, once: true, signal: release.signal }
     );
   };
 

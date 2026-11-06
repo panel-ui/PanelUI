@@ -73,6 +73,20 @@ export function waterfallExtent(
   return [min === 0 ? 0 : min * 1.1, max === 0 ? 0 : max * 1.1];
 }
 
+/**
+ * Whether any of a step's bar lies inside a fixed `domain`. Past either end the
+ * scale clamps it to nothing. A step that only touches an end also has no length there.
+ */
+export function waterfallReaches(
+  { start, end }: Pick<WaterfallStep, 'start' | 'end'>,
+  domain?: readonly [number, number]
+): boolean {
+  if (!domain || !domain.every(Number.isFinite)) return true;
+  const low = Math.min(domain[0], domain[1]);
+  const high = Math.max(domain[0], domain[1]);
+  return Math.max(start, end) > low && Math.min(start, end) < high;
+}
+
 /** The kinds a run actually contains, in the order a legend lists them. */
 export function waterfallKinds(steps: readonly Pick<WaterfallStep, 'kind'>[]): WaterfallKind[] {
   const seen = new Set(steps.map(({ kind }) => kind));

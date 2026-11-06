@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   waterfallExtent,
   waterfallKinds,
+  waterfallReaches,
   waterfallSteps,
 } from '../packages/web/src/components/waterfall-chart/waterfall-steps.ts';
 
@@ -69,4 +70,12 @@ test('an explicit domain wins only when both ends are finite', () => {
 
 test('a legend lists only the kinds the run contains', () => {
   assert.deepEqual(waterfallKinds([{ kind: 'total' }, { kind: 'rise' }]), ['rise', 'total']);
+});
+
+test('a step reaches a fixed domain only if part of its bar is inside it', () => {
+  assert.equal(waterfallReaches({ start: 110, end: 100 }, [0, 50]), false);
+  assert.equal(waterfallReaches({ start: 50, end: 60 }, [0, 50]), false);
+  assert.equal(waterfallReaches({ start: 40, end: 60 }, [0, 50]), true);
+  assert.equal(waterfallReaches({ start: 110, end: 100 }), true);
+  assert.equal(waterfallReaches({ start: 110, end: 100 }, [Number.NaN, 50]), true);
 });

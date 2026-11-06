@@ -105,12 +105,15 @@ test('a slice new to the data grows from its own start, and a removed one is dro
   assert.equal(pieSlicesBetween(after, before, 0.5).length, 1);
 });
 
-test('the keys walk from the reading and stop at the ends', () => {
-  assert.equal(pieKeyWalk(-1, 3, 'ArrowRight'), 0);
-  assert.equal(pieKeyWalk(2, 3, 'ArrowRight'), 2);
-  assert.equal(pieKeyWalk(0, 3, 'ArrowLeft'), 0);
-  assert.equal(pieKeyWalk(0, 3, 'End'), 2);
-  assert.equal(pieKeyWalk(2, 3, 'Home'), 0);
-  assert.equal(pieKeyWalk(0, 3, 'a'), undefined);
-  assert.equal(pieKeyWalk(-1, 0, 'ArrowRight'), undefined);
+test('the keys walk the drawn slices from the reading and stop at the ends', () => {
+  const drawn = [0, 2, 3];
+  assert.equal(pieKeyWalk(-1, drawn, 'ArrowRight'), 0);
+  assert.equal(pieKeyWalk(0, drawn, 'ArrowRight'), 2);
+  assert.equal(pieKeyWalk(3, drawn, 'ArrowRight'), 3);
+  assert.equal(pieKeyWalk(2, drawn, 'ArrowLeft'), 0);
+  assert.equal(pieKeyWalk(0, drawn, 'ArrowUp'), 0);
+  assert.equal(pieKeyWalk(0, drawn, 'End'), 3);
+  assert.equal(pieKeyWalk(3, drawn, 'Home'), 0);
+  assert.equal(pieKeyWalk(0, drawn, 'a'), undefined);
+  assert.equal(pieKeyWalk(-1, [], 'ArrowRight'), undefined);
 });

@@ -96,21 +96,25 @@ export function pieSlicesBetween(
   });
 }
 
-/** The slice a navigation key moves the reading to, or undefined for any other key. Stops at the ends. */
-export function pieKeyWalk(current: number, count: number, key: string): number | undefined {
-  const last = count - 1;
+/**
+ * The slice a navigation key moves the reading to, or undefined for any other key.
+ * Takes the slices that are drawn, because a slice with no share has nothing to light. Stops at the ends.
+ */
+export function pieKeyWalk(current: number, drawn: readonly number[], key: string): number | undefined {
+  const last = drawn.length - 1;
   if (last < 0) return undefined;
+  const at = drawn.indexOf(current);
   switch (key) {
     case 'ArrowRight':
     case 'ArrowDown':
-      return Math.min(current + 1, last);
+      return drawn[Math.min(at + 1, last)];
     case 'ArrowLeft':
     case 'ArrowUp':
-      return Math.max(current - 1, 0);
+      return drawn[Math.max(at - 1, 0)];
     case 'Home':
-      return 0;
+      return drawn[0];
     case 'End':
-      return last;
+      return drawn[last];
     default:
       return undefined;
   }

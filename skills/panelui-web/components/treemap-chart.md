@@ -79,20 +79,20 @@ The tiles are sorted largest first and share one colour that fades with rank, be
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `dimOpacity` | `number` | — | Opacity of the tiles that are not being read, once one is. |
+| `dimOpacity` | `number` | `0.35` | Opacity of the tiles that are not being read, once one is. |
 
 #### `TreemapChartSkeletonProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `duration` | `number` | — | Milliseconds for one pass of the sweep. |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
 
 #### `TreemapChartLabelsProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `showValue` | `boolean` | — | Show each tile's value under its name. |
-| `showShare` | `boolean` | `true` | Show each tile's share of the total beside its value. |
+| `showValue` | `boolean` | `true` | Show each tile's value under its name. |
+| `showShare` | `boolean` | `false` | Show each tile's share of the total beside its value. |
 | `formatValue` | `(value: number, tile: TreemapTile) => string` | — | Format the value. Defaults to a compact number. |
 | `className` | `string` | — | — |
 

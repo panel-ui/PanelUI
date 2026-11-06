@@ -756,7 +756,9 @@ export interface TreemapChartTilesProps {
  * Every tile. One part rather than one per datum, because a tile's box is decided
  * by every tile before it in its row. Draws nothing itself: it asks the root to.
  */
-function TreemapChartTiles({ dimOpacity = 0.35 }: TreemapChartTilesProps) {
+function TreemapChartTiles({
+  dimOpacity = 0.35,
+}: TreemapChartTilesProps) {
   const { setSlot } = useChart('TreemapChart.Tiles');
   useEffect(() => {
     setSlot('tiles', { dimOpacity });
@@ -776,7 +778,9 @@ export interface TreemapChartSkeletonProps {
  * only while `status` is `loading`. Undivided on purpose: placeholder tiles would
  * be a made-up split, and a reader cannot tell an invented one from a real one.
  */
-function TreemapChartSkeleton({ duration = 1400 }: TreemapChartSkeletonProps) {
+function TreemapChartSkeleton({
+  duration = 1400,
+}: TreemapChartSkeletonProps) {
   const { status, aspectRatio, hue } = useChart('TreemapChart.Skeleton');
   const slots = treemapChartVariants();
   if (status !== 'loading') return null;
@@ -809,7 +813,12 @@ export interface TreemapChartLabelsProps {
  * line, then the name alone, then nothing. Tiles with no room are read through
  * `Tooltip` or `Breakdown`. Real text over the drawing, so it follows the theme's font.
  */
-function TreemapChartLabels({ showValue = true, showShare = false, formatValue, className }: TreemapChartLabelsProps) {
+function TreemapChartLabels({
+  showValue = true,
+  showShare = false,
+  formatValue,
+  className,
+}: TreemapChartLabelsProps) {
   const { tiles, status, aspectRatio, animationDuration, staggerDelay, chartKey, activeIndex } =
     useChart('TreemapChart.Labels');
   const slots = treemapChartVariants();

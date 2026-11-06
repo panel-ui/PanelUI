@@ -1088,7 +1088,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       },
       keyboard: interactive,
       pointer: interactive,
-      focus: interactive ? routeFocus(rows.links, vertical, curve, nodesSlot?.interactive ?? true) : false,
+      focus: interactive ? routeFocus(rows.links, vertical, curve, nodesSlot?.interactive ?? false) : false,
       maxFocusDistance: Number.POSITIVE_INFINITY,
       ...(interactive && readout ? { tooltip: readout } : {}),
     });
@@ -1250,7 +1250,9 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
                     pointsRef.current = pointsOf(scene.nodes);
                     drawnKey.current = chartKey;
                     setEnteredKey(chartKey);
-                    if (pendingId.current !== null && resetKey.current === chartKey) request(pendingId.current);
+                    const pending = pendingId.current;
+                    // Only once it can land: asking for a node that is not there clears the pin.
+                    if (pending !== null && resetKey.current === chartKey && pointsRef.current.some(({ datum }) => isNode(datum) && datum.id === pending)) request(pending);
                   }}
                 />
               ) : null}

@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "scatter-chart": [
+    "ScatterChart",
+    "Two measured quantities against each other, to show how they relate.",
+    "react scatter plot chart component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Scatter Chart"
+    }
   ]
 }

@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Scatter Chart](components/scatter-chart.md) — Two measured quantities against each other, to show how they relate.
 
 ## Feedback and status
 

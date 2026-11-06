@@ -6,6 +6,7 @@
     "bubble-chart",
     "bump-chart",
     "candlestick-chart",
+    "funnel-chart",
     "heatmap-chart",
     "line-chart",
     "live-line-chart",

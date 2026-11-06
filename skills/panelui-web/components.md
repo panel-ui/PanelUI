@@ -68,6 +68,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
 - [Bump Chart](components/bump-chart.md) — How a set of things ranked against each other over time.
 - [Candlestick Chart](components/candlestick-chart.md) — Open, high, low and close for a period, drawn as one mark.
+- [Funnel Chart](components/funnel-chart.md) — Where a population drained away, one step at a time.
 - [Heatmap Chart](components/heatmap-chart.md) — A calendar of bins, shaded by how much happened in each.
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.

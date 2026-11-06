@@ -638,6 +638,42 @@
       ]
     },
     {
+      "name": "funnel-chart",
+      "type": "registry:component",
+      "title": "Funnel Chart",
+      "description": "Where a population drained away, one step at a time.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/funnel-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/funnel-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/funnel-chart/funnel-layout.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/funnel-chart/funnel-layout.ts"
+        }
+      ]
+    },
+    {
       "name": "heatmap-chart",
       "type": "registry:component",
       "title": "Heatmap Chart",

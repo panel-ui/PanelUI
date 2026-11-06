@@ -1,0 +1,64 @@
+{
+  "slug": "bubble-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 600
+  },
+  "intro": "Use it to compare named things on three measures at once: growth, margin and revenue for a set of products. Each row of `data` is one circle. `xDataKey` and `yDataKey` place it, `sizeKey` sets its area and `labelKey` names it. Colour cycles by row, or comes from `colorKey`.\n\nArea is hard to judge exactly, and overlapping circles hide each other, so it suits a dozen or two named rows. For many unnamed rows, use a [Scatter Chart](/docs/web/charts/scatter-chart).",
+  "usage": "<BubbleChart data={products} xDataKey=\"growth\" yDataKey=\"margin\" sizeKey=\"revenue\" labelKey=\"code\">\n  <BubbleChart.Grid />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n</BubbleChart>",
+  "anatomy": "<BubbleChart data={…}>\n  <BubbleChart.Header />\n  <BubbleChart.Grid />\n  <BubbleChart.Quadrants />\n  <BubbleChart.Trend />\n  <BubbleChart.Bubbles />\n  <BubbleChart.Labels />\n  <BubbleChart.SizeKey />\n  <BubbleChart.Skeleton />\n  <BubbleChart.XAxis />\n  <BubbleChart.YAxis />\n  <BubbleChart.Tooltip />\n  <BubbleChart.Legend />\n</BubbleChart>",
+  "parts": {
+    "Header": "The strip above the plot: `title`, `value` and `caption`, with your own control on the trailing side.",
+    "Grid": "Lines both ways, in the theme's border colour. `rows` and `columns` are roughly how many: the axes pick round numbers near them.",
+    "Quadrants": "A crosshair splitting the plot into four, with an optional word for each corner. It stands at the mean of each axis unless `x` and `y` pin it.",
+    "Trend": "The straight line that fits the cloud best, dashed and under the circles. `onFit` gives you the slope, the intercept and how tight the fit is.",
+    "Bubbles": "The circles. Without this part nothing is drawn or readable.",
+    "Labels": "The names, inside the circles. A bubble under `minRadius` goes without, and a name longer than its circle is cut.",
+    "SizeKey": "Three nested circles saying what an area is worth, over a corner of the plot. It needs `sizeKey` on the chart.",
+    "Skeleton": "A still field of muted circles, drawn only while `status` is `loading`.",
+    "XAxis": "Value labels under the plot, in round numbers. `label` names the axis.",
+    "YAxis": "Value labels down the side, in round numbers. `label` names the axis.",
+    "Tooltip": "Makes the field readable by pointer and keyboard, and floats a readout beside what is being read. `showLabel={false}` keeps the reading without the readout. `labels` names the keys in it.",
+    "Legend": "A swatch and a name per row, under the plot, up to `limit`."
+  },
+  "examples": [
+    {
+      "title": "Quadrants",
+      "description": "`BubbleChart.Quadrants` splits the plot at the mean of each axis and names the corners. Pass `x` and `y` to split at a target instead. Set `tint={false}` when all four corners matter equally.",
+      "demo": "quadrants",
+      "height": 520
+    },
+    {
+      "title": "Trend",
+      "description": "`BubbleChart.Trend` fits a straight line through the circles. `onFit` reports how tight the fit is, and fires only when the numbers change, so it can go straight into state.",
+      "demo": "trend",
+      "height": 560
+    },
+    {
+      "title": "Size key",
+      "description": "Area has no axis to read it off, so `BubbleChart.SizeKey` shows what the smallest, middle and largest areas are worth. Place it in the corner the circles leave empty.",
+      "demo": "size-key",
+      "height": 520
+    },
+    {
+      "title": "Colours and a legend",
+      "description": "`colorKey` reads a colour from each row: a theme role, any CSS colour, or a number from 1 to 5 naming a chart colour. `BubbleChart.Legend` lists the rows under the plot.",
+      "demo": "colors",
+      "height": 540
+    },
+    {
+      "title": "Loading, then data",
+      "description": "Add `BubbleChart.Skeleton` and drive `status`. The placeholder circles stay still, because a shimmer would read as them moving. The real bubbles grow in where they belong when it turns `ready`.",
+      "demo": "loading",
+      "height": 500
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, the circles, names, rules and axes move to their new values over `domainDuration`, and a bubble keeps its identity through its row. A `ref` on the chart has `replay()`, which grows the bubbles in again.",
+      "demo": "changing-data",
+      "height": 520
+    }
+  ],
+  "notes": "### Rows\n\nA row with no finite number at `xDataKey` or `yDataKey` draws no bubble, and a numeric string does not count as a number. Convert strings before passing the data.\n\n### Sizing\n\nThe chart fills its container's width and takes its height from `aspectRatio`, which applies to the plot alone, so a header does not shrink it. The default of `1` suits a bubble field.\n\nEvery edge of the plot holds back the largest radius in `sizeRange`, so raising it costs room. On a narrow screen, lower `sizeRange` before lowering anything else.\n\n### Domains\n\nEach axis is the data's extent widened to round numbers, and neither is floored at zero. `xDomain` and `yDomain` fix one instead, which also keeps the frame still when the data changes.\n\n### Reading\n\nA mouse reads the nearest bubble as it moves. A tap reads one, and a sideways drag reads the bubbles it passes. A click or a tap pins the reading until the next press elsewhere or Escape. The arrow keys walk the bubbles once the chart has focus. `onActivePointChange` gives you the bubble being read, for a readout outside the chart.\n\n### Accessibility\n\nThe chart renders a list of its rows for screen readers, and `label` and `labelForDatum` set what it says. With reduced motion set, the bubbles appear at their final size without the entrance, and data changes jump to their new places. `animationDuration={0}` draws the bubbles at once for everybody.",
+  "propsNote": "`BubbleChart`, `BubbleChart.Header`, `BubbleChart.SizeKey` and `BubbleChart.Legend` also take the props of the element they render, and a `className`. `BubbleChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed."
+}

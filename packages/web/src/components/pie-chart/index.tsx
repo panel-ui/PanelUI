@@ -128,6 +128,7 @@ const pieChartVariants = tv({
 /** Room kept outside the pie so a selected slice has somewhere to lift into. */
 const LIFT = 8;
 const MORPH_DURATION = 420;
+const NAVIGATION_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']);
 
 /** Milliseconds for a slice to lift out and settle back. */
 const SELECT_DURATION = 180;
@@ -345,18 +346,26 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
 
   // A reading is reported when it changes, not per pointer event.
   const reported = useRef(-1);
-  const report = useCallback(
-    (index: number) => {
-      if (reported.current === index) return;
-      reported.current = index;
-      setInternalActive(index);
-      onActiveIndexChange?.(index);
-    },
-    [onActiveIndexChange]
-  );
+  // Latest in a ref, so an inline callback does not count as a new reading.
+  const onChange = useRef(onActiveIndexChange);
+  useEffect(() => {
+    onChange.current = onActiveIndexChange;
+  });
+  const report = useCallback((index: number) => {
+    if (reported.current === index) return;
+    reported.current = index;
+    setInternalActive(index);
+    onChange.current?.(index);
+  }, []);
 
   // Held in a ref because the pointer's reports must not move a slice that was pressed.
   const pinned = useRef(-1);
+  // A controlled value is the reading now, whatever was last reported or pressed.
+  useEffect(() => {
+    if (activeIndexProp === undefined) return;
+    reported.current = activeIndexProp;
+    if (pinned.current !== activeIndexProp) pinned.current = -1;
+  }, [activeIndexProp]);
   const read = useCallback(
     (index: number) => {
       if (pinned.current < 0) report(index);
@@ -435,7 +444,7 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
       // on whichever slice is furthest left.
       focus: {
         resolve: (points, { x, y }) => {
-          const hit = pieSliceAt(slices, x - box / 2, y - box / 2, hole, radius);
+          const hit = pieSliceAt(drawn, x - box / 2, y - box / 2, hole, radius);
           return points.filter((point) => point.datum.index === hit);
         },
         group: (_points, { point }) => [point],
@@ -443,7 +452,7 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
       },
       motion: false,
     });
-  }, [drawn, slices, colors, box, radius, hole, slicesConfig?.cornerRadius]);
+  }, [drawn, colors, box, radius, hole, slicesConfig?.cornerRadius]);
 
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
 
@@ -519,6 +528,10 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
                 const point = target?.point;
                 if (point) togglePin(point.datum.index);
                 else if (pinned.current >= 0) release();
+              }}
+              // Before the chart moves its focus, so the move is read rather than ignored.
+              onKeyDownCapture={(event) => {
+                if (NAVIGATION_KEYS.has(event.key)) pinned.current = -1;
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {

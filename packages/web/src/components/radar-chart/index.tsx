@@ -322,7 +322,8 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
     const began = performance.now();
     let frame = 0;
     const step = (now: number) => {
-      const elapsed = Math.min(1, (now - began) / duration);
+      // A frame's timestamp can be earlier than the clock read that started the tween.
+      const elapsed = Math.max(0, Math.min(1, (now - began) / duration));
       const progress = 1 - (1 - elapsed) ** 3;
       show(
         elapsed < 1
@@ -487,6 +488,8 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
                 setActive(pinned.current ? axis : -1);
               }}
               onKeyDown={(event) => {
+                // The browser's own shortcuts, such as going back.
+                if (event.altKey || event.ctrlKey || event.metaKey) return;
                 const next = radarKeyWalk(activeIndex, count, event.key);
                 if (next !== undefined) {
                   event.preventDefault();
@@ -778,7 +781,7 @@ function RadarChartHeader({ title, value, caption, legend = false, className, ch
           <>
             <div className={slots.headerText()}>
               {title ? <div className={slots.headerMuted()}>{title}</div> : null}
-              {value ? <div className={slots.headerValue()}>{value}</div> : null}
+              {value || value === 0 ? <div className={slots.headerValue()}>{value}</div> : null}
               {caption ? <div className={slots.headerMuted()}>{caption}</div> : null}
             </div>
             {trailing ? <div className={slots.headerTrailing()}>{trailing}</div> : null}

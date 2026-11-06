@@ -49,6 +49,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Data
 
+- [Area Chart](components/area-chart.md) — Filled bands over time, stacked or overlaid.
 - [Avatar](components/avatar.md) — A person or a team as a picture, or their initials in a colour of their own, with a badge and a group that opens up.
 - [Badge](components/badge.md) — A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.

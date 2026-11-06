@@ -355,13 +355,35 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
   }, []);
   const activeIndex = !loading && count >= 3 && active < count ? active : -1;
   useEffect(() => {
-    if (loading || active >= count) release();
+    if (loading || count < 3 || active >= count) release();
   }, [loading, active, count, release]);
 
   const axisUnder = (clientX: number, clientY: number) => {
     const rect = plotRef.current?.getBoundingClientRect();
     return rect ? radarAxisAt(clientX - rect.left - cx, clientY - rect.top - cy, count, radius) : -1;
   };
+
+  const marks = useMemo(
+    () =>
+      series.flatMap((config, order) => {
+        const color = config.color ? COLORS[config.color] : PALETTE[order % PALETTE.length]!;
+        const values = fractions[config.dataKey] ?? [];
+        const vertices: VertexRow[] = [];
+        values.forEach((fraction, index) => {
+          if (fraction !== null) vertices.push({ angle: (index / count) * Math.PI * 2, radius: fraction });
+        });
+        // Fewer than three readings is not a shape, and two spokes' worth of line would read as one.
+        if (count < 3 || vertices.length < 3) return [];
+        const outline = [...vertices, vertices[0]!];
+        const shape = { angle: (row: VertexRow) => row.angle, radius: (row: VertexRow) => row.radius };
+        return [
+          radialArea(outline, { ...shape, id: `radar-area-${config.dataKey}`, radius1: 0, fill: () => color, fillOpacity: config.fillOpacity }),
+          radialLine(outline, { ...shape, id: `radar-line-${config.dataKey}`, stroke: () => color, strokeWidth: config.strokeWidth }),
+          ...(config.showDots ? [radialDot(vertices, { ...shape, id: `radar-dot-${config.dataKey}`, r: 3, fill: () => color })] : []),
+        ];
+      }),
+    [series, fractions, count]
+  );
 
   const definition = useMemo(
     () =>
@@ -374,23 +396,7 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
               angle: { scale: scaleLinear([0, Math.PI * 2], [0, Math.PI * 2]) },
               radius: { scale: scaleLinear([0, 1], [0, 1]), range: [0, radius] },
             },
-            marks: series.flatMap((config, order) => {
-              const color = config.color ? COLORS[config.color] : PALETTE[order % PALETTE.length]!;
-              const values = fractions[config.dataKey] ?? [];
-              const vertices: VertexRow[] = [];
-              values.forEach((fraction, index) => {
-                if (fraction !== null) vertices.push({ angle: (index / count) * Math.PI * 2, radius: fraction });
-              });
-              // Fewer than three readings is not a shape, and two spokes' worth of line would read as one.
-              if (count < 3 || vertices.length < 3) return [];
-              const outline = [...vertices, vertices[0]!];
-              const shape = { angle: (row: VertexRow) => row.angle, radius: (row: VertexRow) => row.radius };
-              return [
-                radialArea(outline, { ...shape, id: `radar-area-${config.dataKey}`, radius1: 0, fill: () => color, fillOpacity: config.fillOpacity }),
-                radialLine(outline, { ...shape, id: `radar-line-${config.dataKey}`, stroke: () => color, strokeWidth: config.strokeWidth }),
-                ...(config.showDots ? [radialDot(vertices, { ...shape, id: `radar-dot-${config.dataKey}`, r: 3, fill: () => color })] : []),
-              ];
-            }),
+            marks,
           }),
         ],
         scales: { x: null, y: null },
@@ -401,7 +407,7 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
         pointer: false,
         motion: false,
       }),
-    [series, fractions, count, radius]
+    [marks, radius]
   );
 
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
@@ -495,7 +501,7 @@ const RadarChartRoot = forwardRef<RadarChartHandle, RadarChartProps & RenderProp
               }}
             >
               {/* The chart refuses a scale no mark uses, so it waits for a shape. */}
-              {radius > 0 && count >= 3 && Object.values(fractions).some((values) => values.filter((value) => value !== null).length >= 3) ? (
+              {radius > 0 && marks.length ? (
                 // Inert, because the drawing would otherwise take focus away from the plot, which reads the keys.
                 <div inert className={slots.surface()}>
                   <Chart definition={definition} renderer={renderer} ariaLabel={summary} aspectRatio={width / height} initialWidth={width} className={slots.chart()} />

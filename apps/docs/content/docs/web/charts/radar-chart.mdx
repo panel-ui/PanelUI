@@ -170,7 +170,7 @@ export default function RadarChartProfiles() {
 
 ### Fix the scale
 
-Pass `domain` when there is a known maximum. A scale derived from the data moves with the data, so two charts stop being comparable and a small value can look large.
+Pass `domain` when there is a known maximum. A scale derived from the data moves with the data, so two charts stop being comparable and a small value can look large. A value past the domain draws past the outer ring.
 
 <ComponentPreview name="radar-chart/domain" height={360}>
 

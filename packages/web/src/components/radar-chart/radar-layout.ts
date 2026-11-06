@@ -27,10 +27,10 @@ export function radarDomain(
   return [0, max <= 0 ? 1 : max * 1.05];
 }
 
-/** A value's distance from the centre as a share of the radius, held inside the rings. */
+/** A value's distance from the centre as a share of the radius. A value past the domain draws past the outer ring, so a wrong `domain` shows. */
 export function radarFraction(value: number, [min, max]: readonly [number, number]): number {
   if (max <= min) return 0;
-  return Math.min(Math.max((value - min) / (max - min), 0), 1);
+  return (value - min) / (max - min);
 }
 
 /** Fractions part way through a change, `progress` running 0 to 1. A vertex with no earlier place grows from the centre. */

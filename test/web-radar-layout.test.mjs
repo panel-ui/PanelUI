@@ -32,10 +32,9 @@ test('the scale starts at zero, leaves headroom, and only reads the series drawn
   assert.deepEqual(radarDomain(data, ['a'], [5, 50]), [5, 50]);
 });
 
-test('a value is held inside the rings', () => {
+test('a value is a share of the domain, and one past it draws past the rings', () => {
   assert.equal(radarFraction(50, [0, 100]), 0.5);
-  assert.equal(radarFraction(200, [0, 100]), 1);
-  assert.equal(radarFraction(-5, [0, 100]), 0);
+  assert.equal(radarFraction(120, [0, 100]), 1.2);
   assert.equal(radarFraction(5, [5, 5]), 0);
 });
 

@@ -71,6 +71,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
 - [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
+- [Pyramid Chart](components/pyramid-chart.md) — Two series mirrored about a centre line, one row per category, on one shared scale.
 - [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 - [Scatter Chart](components/scatter-chart.md) — Two measured quantities against each other, to show how they relate.
 - [Treemap Chart](components/treemap-chart.md) — A total, cut into the parts it is made of, sized by area.

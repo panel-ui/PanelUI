@@ -1040,6 +1040,42 @@
       ]
     },
     {
+      "name": "pyramid-chart",
+      "type": "registry:component",
+      "title": "Pyramid Chart",
+      "description": "Two series mirrored about a centre line, one row per category, on one shared scale.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/pyramid-chart/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/pyramid-chart/index.tsx"
+        },
+        {
+          "path": "components/panelui/pyramid-chart/pyramid-scale.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/pyramid-chart/pyramid-scale.ts"
+        }
+      ]
+    },
+    {
       "name": "radio-group",
       "type": "registry:component",
       "title": "Radio Group",

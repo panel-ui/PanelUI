@@ -629,5 +629,15 @@
       "category": "charts",
       "title": "Pyramid Chart"
     }
+  ],
+  "heatmap-chart": [
+    "HeatmapChart",
+    "A calendar of bins, shaded by how much happened in each.",
+    "react heatmap calendar contribution graph component",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Heatmap Chart"
+    }
   ]
 }

@@ -741,7 +741,9 @@ export interface FunnelChartStagesProps {
  * Every stage, in the order the data lists them. One part rather than one per
  * stage, because a stage's near edge is the previous stage's far edge.
  */
-function FunnelChartStages({ dimOpacity = 0.3 }: FunnelChartStagesProps) {
+function FunnelChartStages({
+  dimOpacity = 0.3,
+}: FunnelChartStagesProps) {
   const { setSlot } = useChart('FunnelChart.Stages');
   useEffect(() => {
     setSlot('stages', { dimOpacity });
@@ -760,7 +762,9 @@ export interface FunnelChartSkeletonProps {
  * The loading state: one plain ribbon over the whole run, undivided. Placeholder
  * stages would be an invented drop-off, and a reader cannot tell one from a real one.
  */
-function FunnelChartSkeleton({ color }: FunnelChartSkeletonProps) {
+function FunnelChartSkeleton({
+  color,
+}: FunnelChartSkeletonProps) {
   const { setSlot } = useChart('FunnelChart.Skeleton');
   useEffect(() => {
     setSlot('skeleton', { color });
@@ -793,7 +797,14 @@ export interface FunnelChartLabelsProps {
  * under it, and the conversion in a pill on the band. Split this way, each has
  * the stage's whole column, so a name stays whole at phone width.
  */
-function FunnelChartLabels({ className, formatValue, formatShare, share, showValue, showLabel }: FunnelChartLabelsProps) {
+function FunnelChartLabels({
+  className,
+  formatValue,
+  formatShare,
+  share,
+  showValue,
+  showLabel,
+}: FunnelChartLabelsProps) {
   const { setSlot } = useChart('FunnelChart.Labels');
   useEffect(() => {
     setSlot('labels', { className, formatValue, formatShare, share, showValue, showLabel });

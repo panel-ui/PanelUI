@@ -72,13 +72,13 @@ For categories that do not nest, use a [Bar Chart](/docs/web/charts/bar-chart).
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `dimOpacity` | `number` | — | Opacity of the stages that are not being read, once one is. |
+| `dimOpacity` | `number` | `0.3` | Opacity of the stages that are not being read, once one is. |
 
 #### `FunnelChartSkeletonProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `color` | `FunnelChartColor` | `'chart-1'` | Which of the theme's roles to draw the placeholder in. Defaults to the theme's skeleton colour. |
+| `color` | `FunnelChartColor` | — | Which of the theme's roles to draw the placeholder in. Defaults to the theme's skeleton colour. |
 
 #### `FunnelChartLabelsProps`
 

@@ -508,5 +508,15 @@
       "category": "charts",
       "title": "Bar Chart"
     }
+  ],
+  "sankey-chart": [
+    "SankeyChart",
+    "Where a quantity came from and where it ended up, as ribbons between stages.",
+    "react sankey chart component flow diagram",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Sankey Chart"
+    }
   ]
 }

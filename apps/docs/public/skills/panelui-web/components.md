@@ -64,6 +64,7 @@ Generated from the collection's source. Read a component's own file before using
 ## Charts
 
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 
 ## Feedback and status
 

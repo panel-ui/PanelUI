@@ -52,3 +52,7 @@ test('the axis reaches a reference line outside the data', () => {
   assert.ok(high >= 50);
   assert.ok(low <= -5);
 });
+
+test('an infinite reference line leaves the axis to the data', () => {
+  assert.deepEqual(lineDomain([{ a: 10 }, { a: 20 }], ['a'], 4, [Infinity]), lineDomain([{ a: 10 }, { a: 20 }], ['a'], 4));
+});

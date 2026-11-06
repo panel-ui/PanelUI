@@ -150,7 +150,7 @@ The value axis fits the data and does not have to reach zero, so a small change 
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `color` | `LineChartColor` | `'foreground'` | The crosshair's colour, as one of the theme's roles. |
+| `color` | `LineChartColor` | `'foreground'` | The crosshair's colour: a role in the theme, or any CSS colour. |
 | `showLabel` | `boolean` | `true` | Draw the popover. Without it the crosshair and dots still follow the reading, for a readout in the header. |
 | `formatValue` | `(value: number, key: string) => string` | — | Format one series' value. Defaults to a compact number. |
 | `formatX` | `(datum: LineChartDatum) => string` | — | Format the readout's heading from the row. Defaults to the value at xDataKey. |

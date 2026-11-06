@@ -447,7 +447,11 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps & RenderProp<'d
         curve: CURVES[own ?? curve],
       })
     );
-    const annotationMarks = annotations.flatMap(({ id, axis, at, stroke, dashArray, label: name }) => {
+    // A computed value can be infinite, and a row can be gone once the data shrinks.
+    const drawable = annotations.filter(({ axis, at }) =>
+      axis === 'y' ? Number.isFinite(at) : Number.isInteger(at) && at >= 0 && at < data.length
+    );
+    const annotationMarks = drawable.flatMap(({ id, axis, at, stroke, dashArray, label: name }) => {
       const nearEnd = axis === 'x' && at > span * 0.75;
       return [
         decorative(
@@ -1000,7 +1004,7 @@ function LineChartYAxis({
 LineChartYAxis.displayName = 'LineChart.YAxis';
 
 export interface LineChartTooltipProps {
-  /** The crosshair's colour, as one of the theme's roles. */
+  /** The crosshair's colour: a role in the theme, or any CSS colour. */
   color?: LineChartColor;
   /** Draw the popover. Without it the crosshair and dots still follow the reading, for a readout in the header. */
   showLabel?: boolean;

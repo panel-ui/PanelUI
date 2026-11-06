@@ -35,6 +35,7 @@ export function lineDomain(
     }
   }
   for (const value of extras) {
+    if (!Number.isFinite(value)) continue;
     if (value < min) min = value;
     if (value > max) max = value;
   }

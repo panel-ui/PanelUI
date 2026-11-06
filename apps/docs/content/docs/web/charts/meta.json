@@ -1,0 +1,7 @@
+{
+  "title": "Charts",
+  "pages": [
+    "bar-chart",
+    "sankey-chart"
+  ]
+}

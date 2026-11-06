@@ -1,5 +1,6 @@
 /**
- * Writes the web collection's docs pages, at content/docs/web/components.
+ * Writes the web collection's docs pages, at content/docs/web/components, and
+ * at content/docs/web/charts for those whose category is `charts`.
  *
  * A page is assembled from four things, and none of them is prose typed into
  * an MDX file:
@@ -28,6 +29,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../../..');
 const USAGE = path.join(HERE, 'web-usage');
 const CONTENT = path.join(HERE, '../content/docs/web/components');
+const CHARTS = path.join(HERE, '../content/docs/web/charts');
 
 const meta = JSON.parse(fs.readFileSync(path.join(HERE, 'web-meta.json'), 'utf8'));
 const webVersion = JSON.parse(
@@ -78,6 +80,8 @@ const inlineCode = (text) => '`' + String(text).replace(/`/g, '') + '`';
 const fence = (code, info = 'tsx') => '```' + info + '\n' + code + '\n```';
 
 const optionsOf = (entry) => entry[3] ?? {};
+/** The folder a page is written to, which is also its URL under /docs/web. */
+const folderOf = (slug) => (optionsOf(meta[slug]).category === 'charts' ? 'charts' : 'components');
 /** What the page and the sidebar call it, which need not be what you import. */
 const titleOf = (entry) => optionsOf(entry).title ?? entry[0];
 
@@ -117,7 +121,7 @@ function installation(slug, item) {
     manual.push(`<Step>\n\nInstall the packages it uses:\n\n<InstallTabs kind="add" packages="${npm}" />\n\n</Step>`);
   }
   if (builtOn.length > 0) {
-    const links = builtOn.map((other) => `[${titleOf(meta[other])}](/docs/web/components/${other})`);
+    const links = builtOn.map((other) => `[${titleOf(meta[other])}](/docs/web/${folderOf(other)}/${other})`);
     manual.push(`<Step>\n\nAdd the ${links.length > 1 ? 'components' : 'component'} it is built on: ${links.join(', ')}.\n\n</Step>`);
   }
   // The source is fetched when the tab is opened, from the item the CLI
@@ -162,8 +166,10 @@ ${manual.join('\n\n')}
 /* Pages                                                                      */
 /* -------------------------------------------------------------------------- */
 
-fs.rmSync(CONTENT, { recursive: true, force: true });
-fs.mkdirSync(CONTENT, { recursive: true });
+for (const directory of [CONTENT, CHARTS]) {
+  fs.rmSync(directory, { recursive: true, force: true });
+  fs.mkdirSync(directory, { recursive: true });
+}
 
 const used = new Set();
 
@@ -252,7 +258,7 @@ for (const slug of slugs) {
   }
   if (notes.length > 0) sections.push(`## Notes\n\n${notes.join('\n\n')}`);
 
-  fs.writeFileSync(path.join(CONTENT, `${slug}.mdx`), `${sections.join('\n\n')}\n`);
+  fs.writeFileSync(path.join(folderOf(slug) === 'charts' ? CHARTS : CONTENT, `${slug}.mdx`), `${sections.join('\n\n')}\n`);
 }
 
 /*
@@ -281,7 +287,12 @@ const ordered = [...slugs].sort((a, b) => titleOf(meta[a]).localeCompare(titleOf
 
 fs.writeFileSync(
   path.join(CONTENT, 'meta.json'),
-  `${JSON.stringify({ title: 'Components', pages: ['!index', ...ordered] }, null, 2)}\n`
+  `${JSON.stringify({ title: 'Components', pages: ['!index', ...ordered.filter((slug) => folderOf(slug) === 'components')] }, null, 2)}\n`
+);
+
+fs.writeFileSync(
+  path.join(CHARTS, 'meta.json'),
+  `${JSON.stringify({ title: 'Charts', pages: ordered.filter((slug) => folderOf(slug) === 'charts') }, null, 2)}\n`
 );
 
 fs.writeFileSync(

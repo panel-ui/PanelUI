@@ -505,7 +505,7 @@
     "react bar chart component grouped stacked",
     {
       "addedIn": "0.13.0",
-      "category": "data",
+      "category": "charts",
       "title": "Bar Chart"
     }
   ],
@@ -515,7 +515,7 @@
     "react sankey chart component flow diagram",
     {
       "addedIn": "0.14.0",
-      "category": "data",
+      "category": "charts",
       "title": "Sankey Chart"
     }
   ]

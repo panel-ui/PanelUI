@@ -206,6 +206,10 @@ All three go through `statusOf()` in `scripts/page-status.mjs`, which throws on 
 not `x.y.z` and on an `updatedIn` older than its `addedIn`; `test/page-status.test.mjs` pins the
 windows.
 
+**Web charts have their own section.** A `web-meta.json` entry with `"category": "charts"` is
+written to `content/docs/web/charts/` and served at `/docs/web/charts/<slug>`, under **Charts** in
+the sidebar. A contract test requires it for every slug the app files under `group: "charts"`.
+
 ### Full-screen demos go behind a version row
 
 A component whose demo needs the whole screen — a chat transcript, a scroller, an editor — is

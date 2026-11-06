@@ -812,9 +812,11 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
   }, [nodes, links, width, height, nodeWidth, nodePadding, align, iterations, collapse, vertical]);
 
   const dropped = layout.dropped;
+  // Nothing is laid out until the width is known, so that first zero says nothing.
+  const measured = width > 0;
   useEffect(() => {
-    onDropLinks?.(dropped);
-  }, [dropped, onDropLinks]);
+    if (measured) onDropLinks?.(dropped);
+  }, [dropped, onDropLinks, measured]);
 
   const rows = useMemo(() => {
     // A flow reads from where it starts, which is the right-hand edge in a
@@ -866,7 +868,8 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
         kind: 'node',
         key: `node:${node.id}`,
         id: node.id,
-        name: input?.label ?? node.id,
+        // A bucket's id can carry a suffix to keep it unique, so its name is the one asked for.
+        name: node.collapsed ? (collapse?.label ?? 'Other') : (input?.label ?? node.id),
         value: node.value,
         layer: node.layer,
         // The node's place in the data rather than its column: a colour per
@@ -918,7 +921,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
         return { id: node.id, y: (y0 + y1) / 2, y0, y1 };
       });
     return { nodes: nodeRows, links: linkRows, targets };
-  }, [layout, nodes, links, width, vertical, size.rtl, targetRows?.top, targetRows?.height, targetRows?.taper, targetRows?.minThickness]);
+  }, [layout, nodes, links, collapse?.label, width, vertical, size.rtl, targetRows?.top, targetRows?.height, targetRows?.taper, targetRows?.minThickness]);
 
   // By what the positions say, because a parent's inline data makes new rows every render.
   const reportedLayout = useRef('');
@@ -1477,7 +1480,8 @@ function SankeyChartBreakdown({
       );
     }
     most = Math.max(most, starts.length, ends.length);
-    return Math.min(most, limit ?? most);
+    // Past the limit, "and N more" takes a row of its own.
+    return limit && most > limit ? limit + 1 : most;
   }, [rows, starts, ends, limit]);
 
   const flowRow = (flow: SankeyChartFlow, showShare: boolean) => (

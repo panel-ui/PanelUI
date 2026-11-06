@@ -63,6 +63,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Charts
 
+- [Area Chart](components/area-chart.md) — Filled bands over time, stacked or overlaid.
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
 - [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.

@@ -1,6 +1,7 @@
 {
   "title": "Charts",
   "pages": [
+    "area-chart",
     "bar-chart",
     "bubble-chart",
     "plot",

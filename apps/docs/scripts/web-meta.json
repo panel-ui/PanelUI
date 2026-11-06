@@ -539,5 +539,15 @@
       "category": "charts",
       "title": "Bubble Chart"
     }
+  ],
+  "area-chart": [
+    "AreaChart",
+    "Filled bands over time, stacked or overlaid.",
+    "react area chart component stacked gradient",
+    {
+      "addedIn": "0.14.0",
+      "category": "charts",
+      "title": "Area Chart"
+    }
   ]
 }

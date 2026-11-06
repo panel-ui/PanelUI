@@ -66,6 +66,41 @@
       ]
     },
     {
+      "name": "area-chart",
+      "type": "registry:component",
+      "title": "Area Chart",
+      "description": "Filled bands over time, stacked or overlaid.",
+      "dependencies": [
+        "@base-ui/react",
+        "@tanstack/charts",
+        "d3-shape",
+        "tailwind-variants"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/area-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/area-chart.tsx"
+        }
+      ]
+    },
+    {
       "name": "avatar",
       "type": "registry:component",
       "title": "Avatar",

@@ -76,7 +76,7 @@ For a fixed series that is not going to grow, such as a week of visits, use a li
 | `aspectRatio` | `number` | `2` | The plot's width ÷ height. |
 | `status` | `LiveLineChartStatus` | `'ready'` | `loading` holds the clock and draws `Skeleton` in place of the line. |
 | `momentumColors` | `LiveLineMomentumColors` | — | Which role to draw in per direction. Left out, the chart keeps to one colour. |
-| `color` | `LiveLineChartColor` | — | Which of the theme's roles the chart is drawn in, `chart-1` by default. Ignored when `momentumColors` is set. |
+| `color` | `LiveLineChartColor` | — | Which of the theme's roles the chart is drawn in, `chart-1` by default. With `momentumColors` it only colours a flat reading, and only if `momentumColors.flat` is not set. |
 | `onActivePointChange` | `(point: LiveLinePoint \| null) => void` | — | The reading under the crosshair as it moves, and `null` when it is let go. |
 | `label` | `string` | — | Names the chart for a screen reader. Falls back to the Header's title, then to "Live line chart". |
 | `hint` | `string` | — | Further guidance after the snapshot a screen reader gets. |

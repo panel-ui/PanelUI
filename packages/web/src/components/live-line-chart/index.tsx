@@ -286,7 +286,7 @@ export interface LiveLineChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   status?: LiveLineChartStatus;
   /** Which role to draw in per direction. Left out, the chart keeps to one colour. */
   momentumColors?: LiveLineMomentumColors;
-  /** Which of the theme's roles the chart is drawn in, `chart-1` by default. Ignored when `momentumColors` is set. */
+  /** Which of the theme's roles the chart is drawn in, `chart-1` by default. With `momentumColors` it only colours a flat reading, and only if `momentumColors.flat` is not set. */
   color?: LiveLineChartColor;
   /** The reading under the crosshair as it moves, and `null` when it is let go. */
   onActivePointChange?: (point: LiveLinePoint | null) => void;

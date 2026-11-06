@@ -322,6 +322,11 @@ const PieChartRoot = forwardRef<PieChartHandle, PieChartProps & RenderProp<'div'
   useEffect(() => {
     const from = drawnRef.current;
     if (from === slices) return;
+    // An inline `data` array is new on every render without anything having moved.
+    if (from.length === slices.length && from.every((slice, i) => slice.from === slices[i]!.from && slice.to === slices[i]!.to)) {
+      drawnRef.current = slices;
+      return;
+    }
     const show = (next: readonly PieSliceAngles[]) => {
       drawnRef.current = next;
       setDrawn(next);

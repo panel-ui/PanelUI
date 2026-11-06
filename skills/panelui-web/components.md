@@ -67,6 +67,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
 - [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
 - [Line Chart](components/line-chart.md) — A series over time, drawn in from the left.
+- [Live Line Chart](components/live-line-chart.md) — A reading that keeps arriving, against a window that keeps moving.
 - [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
 - [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 - [Scatter Chart](components/scatter-chart.md) — Two measured quantities against each other, to show how they relate.

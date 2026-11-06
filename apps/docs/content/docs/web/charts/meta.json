@@ -5,6 +5,7 @@
     "bar-chart",
     "bubble-chart",
     "line-chart",
+    "live-line-chart",
     "plot",
     "sankey-chart",
     "scatter-chart",

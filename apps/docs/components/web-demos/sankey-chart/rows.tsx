@@ -70,7 +70,7 @@ export default function SankeyChartRows() {
               onMouseEnter={() => setActive(id)}
               onMouseLeave={() => setActive(null)}
             >
-              <Table.Cell>
+              <Table.Cell className="whitespace-nowrap">
                 <span className="flex items-center gap-2">
                   <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                   {label}

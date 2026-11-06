@@ -183,7 +183,7 @@ const THEME = {
 const sankeyChartVariants = tv({
   slots: {
     root: 'relative grid w-full grid-cols-1 text-foreground',
-    plot: "relative col-start-1 row-start-2 w-full [&_[data-ts-key^='sankey-links:']]:transition-opacity data-dimmed:[&_[data-ts-key^='sankey-links:']]:opacity-25",
+    plot: "relative col-start-1 row-start-2 w-full [&_.sankey-ribbon]:transition-opacity data-dimmed:[&_.sankey-ribbon]:opacity-25",
     chart:
       'absolute! inset-0 rounded-lg text-xs [--ts-chart-tooltip-background:var(--popover)] [--ts-chart-tooltip-border-radius:var(--radius-xl)] [--ts-chart-tooltip-border:1px_solid_var(--border)] [--ts-chart-tooltip-color:var(--popover-foreground)] [--ts-chart-tooltip-shadow:var(--shadow-lg)] [&_svg]:[direction:ltr] [&_svg]:rounded-lg [&_svg]:outline-none [&_svg:focus-visible]:ring-2 [&_svg:focus-visible]:ring-ring',
     header: 'col-start-1 row-start-1 flex items-start justify-between gap-3 pb-3',
@@ -384,10 +384,11 @@ function ribbonMark(
     reach: number;
     fill: (row: LinkRow) => string;
     fillOpacity?: (row: LinkRow) => number;
+    className?: string;
     still?: boolean;
   }
 ) {
-  const { id, vertical, reach, fill, fillOpacity, still } = options;
+  const { id, vertical, reach, fill, fillOpacity, className, still } = options;
   return createMark<LinkRow, number, number>(
     () => ({
       id,
@@ -420,6 +421,7 @@ function ribbonMark(
               children: rows.map((row, index) => ({
                 kind: 'area' as const,
                 key: `${id}:${row.key}`,
+                ...(className ? { className } : {}),
                 path: ribbonPath(row, vertical, reach),
                 points: ribbonOutline(row, vertical, reach),
                 interaction: { point: points[index]!, affinity: 'geometry' as const },
@@ -705,7 +707,8 @@ export interface SankeyChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   /**
    * Ends the last column's ribbons on rows beside the chart, such as a table's,
    * in the order those nodes were given, with no bars or names of their own.
-   * Set `height` to fit the rows. A horizontal flow only.
+   * Set `height` to fit the rows, and keep each row to one line, because a taller
+   * row moves those below it off their ribbons. A horizontal flow only.
    */
   targetRows?: SankeyRowGrid;
   /** Fires with where the last column landed, and again when that moves. */
@@ -929,8 +932,14 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
 
   const { links: linksSlot, nodes: nodesSlot, labels: labelsSlot, tooltip, skeleton } = slots;
 
+  // Only what is added to a drawn chart fades in, so a new chart draws its marks empty first.
+  const chartKey = `${revision}:${status}`;
+  const [enteredKey, setEnteredKey] = useState<string | null>(null);
+  const entering = !loading && enteredKey !== chartKey;
+
   const definition = useMemo(() => {
     const ribbon = { vertical, reach: curve };
+    const shown = entering ? { nodes: [], links: [] } : rows;
 
     const fade = { type: 'tween' as const, duration: 120, easing: 'ease-out' as const };
 
@@ -941,9 +950,10 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       : [
           ...(linksSlot
             ? [
-                ribbonMark(rows.links, {
+                ribbonMark(shown.links, {
                   ...ribbon,
                   id: LINKS_MARK,
+                  className: 'sankey-ribbon',
                   fill: linksSlot.gradient ? (row) => `url(#${gradientId(row)})` : () => 'var(--foreground)',
                   fillOpacity: (row) => (linksSlot.gradient && row.fade ? 1 : linksSlot.opacity),
                 }),
@@ -962,7 +972,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
             ? [
                 // A rect takes one fill, so the bars are one mark per colour.
                 ...[...new Set(rows.nodes.map(barFill))].map((fill, index) =>
-                  rect(rows.nodes.filter((row) => barFill(row) === fill), {
+                  rect(shown.nodes.filter((row) => barFill(row) === fill), {
                     id: `${NODES_MARK}-${index}`,
                     x1: (row: NodeRow) => row.x0,
                     x2: (row: NodeRow) => row.x1,
@@ -979,7 +989,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
           ...(labelsSlot
             ? [
                 text(
-                  placeLabels(rows.nodes.filter(({ onRow }) => !onRow), {
+                  placeLabels(shown.nodes.filter(({ onRow }) => !onRow), {
                     width,
                     height,
                     vertical,
@@ -1082,7 +1092,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
       maxFocusDistance: Number.POSITIVE_INFINITY,
       ...(interactive && readout ? { tooltip: readout } : {}),
     });
-  }, [rows, width, height, vertical, curve, loading, nodeWidth, animationDuration, staggerDelay, size.rtl, linksSlot, nodesSlot, labelsSlot, tooltip, skeleton]);
+  }, [rows, width, height, vertical, curve, loading, entering, nodeWidth, animationDuration, staggerDelay, size.rtl, linksSlot, nodesSlot, labelsSlot, tooltip, skeleton]);
 
   // Marks take their timing from the definition. This one is what the readout moves with.
   const renderer = useMemo(() => motion({ transition: { type: 'tween', duration: 160, easing: 'ease-out' } }), []);
@@ -1155,7 +1165,6 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [askedParent]);
 
-  const chartKey = `${revision}:${status}`;
   const drawnKey = useRef<string | null>(null);
   const resetKey = useRef<string | null>(null);
 
@@ -1240,6 +1249,7 @@ const SankeyChartRoot = forwardRef<SankeyChartHandle, SankeyChartProps & RenderP
                     interactionRef.current = interaction;
                     pointsRef.current = pointsOf(scene.nodes);
                     drawnKey.current = chartKey;
+                    setEnteredKey(chartKey);
                     if (pendingId.current !== null && resetKey.current === chartKey) request(pendingId.current);
                   }}
                 />

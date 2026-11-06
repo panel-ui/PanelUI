@@ -75,7 +75,7 @@ For a total cut into parts with no routing between them, or what survived each s
 | `status` | `SankeyChartStatus` | `'ready'` | `loading` holds the data back. Add `SankeyChart.Skeleton` for a shape to stand in meanwhile. |
 | `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
 | `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the id of the node being read, and `null` when none is. |
-| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows. A horizontal flow only. |
+| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows, and keep each row to one line, because a taller row moves those below it off their ribbons. A horizontal flow only. |
 | `onLayout` | `(targets: readonly SankeyTargetLayout[]) => void` | — | Fires with where the last column landed, and again when that moves. |
 | `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn: ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render. |
 | `label` | `string` | — | What a screen reader calls the chart. |

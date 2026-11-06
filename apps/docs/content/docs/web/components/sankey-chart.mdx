@@ -269,7 +269,7 @@ export default function SankeyChartGradient() {
 
 ### Ribbons into a table
 
-`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.
+`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. A row whose text wraps grows past it and moves every row below off its ribbon, so keep the cells to one line with `whitespace-nowrap`. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.
 
 <ComponentPreview name="sankey-chart/rows" height={380}>
 
@@ -346,7 +346,7 @@ export default function SankeyChartRows() {
               onMouseEnter={() => setActive(id)}
               onMouseLeave={() => setActive(null)}
             >
-              <Table.Cell>
+              <Table.Cell className="whitespace-nowrap">
                 <span className="flex items-center gap-2">
                   <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                   {label}
@@ -617,7 +617,7 @@ export default function SankeyChartDropped() {
 | `status` | `SankeyChartStatus` | `'ready'` | `loading` holds the data back. Add `SankeyChart.Skeleton` for a shape to stand in meanwhile. |
 | `activeId` | `string \| null` | — | Selected node. Leave unset to let the chart track it. |
 | `onActiveIdChange` | `(id: string \| null) => void` | — | Fires with the id of the node being read, and `null` when none is. |
-| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows. A horizontal flow only. |
+| `targetRows` | `SankeyRowGrid` | — | Ends the last column's ribbons on rows beside the chart, such as a table's, in the order those nodes were given, with no bars or names of their own. Set `height` to fit the rows, and keep each row to one line, because a taller row moves those below it off their ribbons. A horizontal flow only. |
 | `onLayout` | `(targets: readonly SankeyTargetLayout[]) => void` | — | Fires with where the last column landed, and again when that moves. |
 | `onDropLinks` | `(count: number) => void` | — | Fires with how many link rows could not be drawn: ones naming a node that is not there, carrying nothing, or closing a loop. `0` after a clean render. |
 | `label` | `string` | — | What a screen reader calls the chart. |

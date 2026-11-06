@@ -36,7 +36,7 @@
     },
     {
       "title": "Ribbons into a table",
-      "description": "`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.",
+      "description": "`targetRows` ends the last column's ribbons on the rows of a table beside the chart, in the order those nodes were given, and those nodes draw no bars or names because the rows carry them. Set `height` to `top` plus the rows, and give the table rows that exact height. A row whose text wraps grows past it and moves every row below off its ribbon, so keep the cells to one line with `whitespace-nowrap`. It applies to a horizontal flow only. To line up something other than rows, `onLayout` reports where the last column landed.",
       "demo": "rows",
       "height": 380
     },

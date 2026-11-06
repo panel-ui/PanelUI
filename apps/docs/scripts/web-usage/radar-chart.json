@@ -1,0 +1,52 @@
+{
+  "slug": "radar-chart",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 460
+  },
+  "intro": "Use it to show the profile of one thing across several measures, and to lay two profiles over each other. Each row of `data` is an axis, and each `RadarChart.Series` is a shape drawn from one of its keys.\n\nThe order of the axes changes the outline, and the outline is what people read. Keep the order the same between charts you compare. Three axes is the minimum, and past about eight the labels start to collide.\n\nFor data whose axes have no natural order, use a [Bar Chart](/docs/web/charts/bar-chart).",
+  "usage": "<RadarChart data={scores} axisKey=\"skill\" domain={[0, 100]}>\n  <RadarChart.Grid />\n  <RadarChart.Axis />\n  <RadarChart.Series dataKey=\"you\" showDots />\n  <RadarChart.Tooltip />\n</RadarChart>",
+  "anatomy": "<RadarChart data={…}>\n  <RadarChart.Header />\n  <RadarChart.Grid />\n  <RadarChart.Axis />\n  <RadarChart.Series dataKey=\"…\" />\n  <RadarChart.Tooltip />\n  <RadarChart.Legend />\n</RadarChart>",
+  "parts": {
+    "Header": "The strip above the rings: `title`, `value` and `caption`, with the series key or your own control on the trailing side.",
+    "Grid": "The rings and the spokes. Polygons by default, and circles with `circular`.",
+    "Axis": "The axis names around the rings, each running away from the shape.",
+    "Series": "One shape. Declare one per key. Later ones draw on top.",
+    "Tooltip": "The reading for the nearest axis: the spoke lit, a dot per series, and each value in a readout. Without this part the chart does not show a reading.",
+    "Legend": "A swatch and a name per series, in the bottom-left corner of the plot. On a chart with a header, use the header's `legend` prop instead."
+  },
+  "examples": [
+    {
+      "title": "Two profiles",
+      "description": "Add a `Series` per key. Fill only the first with `fillOpacity={0}` on the others, because two translucent fills make a third colour that means nothing.",
+      "demo": "profiles",
+      "height": 400
+    },
+    {
+      "title": "Fix the scale",
+      "description": "Pass `domain` when there is a known maximum. A scale derived from the data moves with the data, so two charts stop being comparable and a small value can look large. A value past the domain draws past the outer ring.",
+      "demo": "domain",
+      "height": 360
+    },
+    {
+      "title": "Circular rings",
+      "description": "`circular` draws the rings as circles, for reading a value off one spoke rather than comparing outlines. `spokes={false}` removes the spokes.",
+      "demo": "circular",
+      "height": 340
+    },
+    {
+      "title": "Without labels",
+      "description": "`compact` drops the room kept for axis labels, for a small chart beside a figure. Pair it with no `Axis`.",
+      "demo": "compact",
+      "height": 220
+    },
+    {
+      "title": "Changing data",
+      "description": "When `data` changes, each vertex travels to its new place. Keep `domain` fixed across the change, or the rings move too and nothing is comparable. A `ref` on the chart has `replay()`, which grows the shape again from the centre.",
+      "demo": "changing-data",
+      "height": 420
+    }
+  ],
+  "notes": "### Sizing\n\n`size` is the diameter of the outer ring, 180 pixels by default, and the plot adds room for the labels around it, so it is wider than it is tall. Pass `size={null}` to fill the container's width at `aspectRatio`. The drawing happens in the browser after it has been measured, so it is not in server-rendered HTML.\n\nFor labels that still crowd the shape, shorten them with `formatLabel`. A label with no room left ends in an ellipsis.\n\n### Colour\n\n`color` on a series names a role in the theme. Without it, series take the chart colours in the order they are declared.\n\n### Missing values\n\nA row without a number for a series is left out of that series' outline, and the outline joins the axes either side. A series with fewer than three numbers draws nothing.\n\n### Reading an axis\n\nWith `RadarChart.Tooltip`, hovering inside the rings reads the nearest axis. A click or a tap holds the reading until you press that axis again or press outside the rings. A touch drag does not read axes, so the page can still scroll.\n\n### Keyboard\n\nThe plot takes focus. The arrow keys move round the axes, Enter or Space holds the reading, and Escape clears it. Moving to another axis lets go of a held reading.\n\n### Screen readers\n\nEach axis is given as text beside the drawing, with every series' value, and the reading is announced as it changes. `label` names the chart and `labelForDatum` writes an axis, for values with a unit.\n\n### Loading\n\nWith `status=\"loading\"` the rings are drawn with no shape, and the shapes grow when it turns `ready`.\n\n### Reduced motion\n\nWith reduced motion set, the shapes appear at their full size, and a data change lands in one step.",
+  "propsNote": "`RadarChart`, `RadarChart.Header` and `RadarChart.Legend` also take the props of the element they render, and a `className`. `RadarChart.Tooltip` takes a `className` for the readout. `RadarChart.Grid`, `RadarChart.Axis` and `RadarChart.Series` take only the props listed."
+}

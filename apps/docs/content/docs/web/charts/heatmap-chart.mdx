@@ -1,0 +1,472 @@
+---
+title: Heatmap Chart
+description: A calendar of bins, shaded by how much happened in each.
+status: new
+---
+
+<ComponentPreview name="heatmap-chart/overview" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { HeatmapChart, buildHeatmapCalendar } from '@/components/panelui/heatmap-chart';
+
+const activity = (date: Date) => {
+  const day = date.getDate() + date.getMonth() * 31;
+  const wave = Math.sin(day / 9) + Math.sin(day / 2.3);
+  return date.getDay() % 6 === 0 ? 0 : Math.max(0, Math.round((wave + 1.2) * 4));
+};
+
+const START = new Date(2026, 0, 1);
+const DAYS = Array.from({ length: 180 }, (_unused, index) => new Date(2026, 0, 1 + index));
+const WEEKS = buildHeatmapCalendar(
+  DAYS.map((date) => ({ date, count: activity(date) })),
+  { start: START, end: DAYS.at(-1) }
+);
+const TOTAL = DAYS.reduce((sum, date) => sum + activity(date), 0);
+
+export default function HeatmapChartOverview() {
+  return (
+    <HeatmapChart data={WEEKS} layout="fill" className="w-full max-w-2xl">
+      <HeatmapChart.Header title="Contributions" value={TOTAL.toLocaleString('en-US')} caption="January to June" />
+      <HeatmapChart.XAxis />
+      <HeatmapChart.YAxis />
+      <HeatmapChart.Cells />
+      <HeatmapChart.Tooltip />
+      <HeatmapChart.Legend />
+    </HeatmapChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show when something was busy, across many days: commits, spending, requests per hour. Each column is a period, usually a week, and each row a bin inside it, usually a day. The shade carries the count.
+
+It does not suit reading exact values. Use it to find where to look, and the tooltip or a [Bar Chart](/docs/web/charts/bar-chart) to say how much.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/heatmap-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/heatmap-chart` instead of `@/components/panelui/heatmap-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/heatmap-chart/`, one file for each below:
+
+<RegistrySource name="heatmap-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { HeatmapChart } from "@/components/panelui/heatmap-chart"
+```
+
+```tsx
+<HeatmapChart data={weeks}>
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis />
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip />
+  <HeatmapChart.Legend />
+</HeatmapChart>
+```
+
+## Composition
+
+```tsx
+<HeatmapChart data={…}>
+  <HeatmapChart.Header />
+  <HeatmapChart.XAxis />
+  <HeatmapChart.YAxis />
+  <HeatmapChart.Separator />
+  <HeatmapChart.Cells />
+  <HeatmapChart.Tooltip />
+  <HeatmapChart.Legend />
+</HeatmapChart>
+```
+
+- **`HeatmapChart.Header`** — The strip above the grid: `title`, `value` and `caption`, with the ramp or your own control on the trailing side.
+- **`HeatmapChart.XAxis`** — Month labels above the grid, one where the month changes. `labels` puts your own over each column.
+- **`HeatmapChart.YAxis`** — Weekday labels beside the grid. The grid is sized around its `width`.
+- **`HeatmapChart.Separator`** — Vertical rules that group the columns, behind the cells.
+- **`HeatmapChart.Cells`** — The grid. Without this part no cells are drawn.
+- **`HeatmapChart.Tooltip`** — Makes the grid readable by pointer and keyboard, and shows a line for the cell being read.
+- **`HeatmapChart.Legend`** — The key under the grid: `lessLabel`, the five steps of the ramp, `moreLabel`.
+
+## Examples
+
+### Scrolling a full year
+
+The default `layout` is `fluid`, which draws cells at `binSize` and is as wide as that needs. Put the chart in a horizontal scroller. A `legend` on the header stays above the grid, and `HeatmapChart.Separator` marks the quarters.
+
+<ComponentPreview name="heatmap-chart/scrolling" height={280}>
+
+```tsx lineNumbers
+'use client';
+
+import { HeatmapChart, buildHeatmapCalendar } from '@/components/panelui/heatmap-chart';
+
+const activity = (date: Date) => {
+  const day = date.getDate() + date.getMonth() * 31;
+  const wave = Math.sin(day / 9) + Math.sin(day / 2.3);
+  return date.getDay() % 6 === 0 ? 0 : Math.max(0, Math.round((wave + 1.2) * 4));
+};
+
+const END = new Date(2026, 11, 31);
+const DAYS = Array.from({ length: 365 }, (_unused, index) => new Date(2026, 0, 1 + index));
+const WEEKS = buildHeatmapCalendar(DAYS.map((date) => ({ date, count: activity(date) })), { end: END });
+
+export default function HeatmapChartScrolling() {
+  return (
+    <div className="w-full max-w-xl overflow-x-auto pb-1">
+      <HeatmapChart data={WEEKS}>
+        <HeatmapChart.Header title="A year of commits" legend />
+        <HeatmapChart.XAxis />
+        <HeatmapChart.YAxis />
+        <HeatmapChart.Separator every="quarter" />
+        <HeatmapChart.Cells />
+        <HeatmapChart.Tooltip />
+      </HeatmapChart>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Week start, language and labels
+
+Pass the same `weekStartDay` to `buildHeatmapCalendar` and to the chart. `formatLabel` on the x-axis, `labels` on the y-axis, and `lessLabel` and `moreLabel` on the legend take your own strings. `Tooltip.formatLabel` also receives the cells outside the range, which have no date. `formatCellLabel` is what a screen reader says for each day, and returning nothing leaves that day out.
+
+<ComponentPreview name="heatmap-chart/localized" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { HeatmapChart, buildHeatmapCalendar, type HeatmapCell } from '@/components/panelui/heatmap-chart';
+
+const SPENDING: { date: Date; count: number }[] = Array.from({ length: 84 }, (_unused, index) => ({
+  date: new Date(2026, 2, 2 + index),
+  count: index % 4 === 0 ? 0 : ((index * 37) % 90) + 4,
+}));
+
+const START = new Date(2026, 2, 2);
+const END = new Date(2026, 4, 24);
+const MONDAY = 1;
+
+const month = new Intl.DateTimeFormat('es', { month: 'short' });
+const weekday = new Intl.DateTimeFormat('es', { weekday: 'narrow' });
+const fullDay = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long' });
+const amount = new Intl.NumberFormat('es', { style: 'currency', currency: 'EUR' });
+
+// 2026-03-02 was a Monday, so these run from the top row down.
+const WEEKDAYS = Array.from({ length: 7 }, (_unused, row) => weekday.format(new Date(2026, 2, 2 + row)));
+const WEEKS = buildHeatmapCalendar(SPENDING, { start: START, end: END, weekStartDay: MONDAY });
+
+const dayLabel = (cell: HeatmapCell) => (cell.date ? `${amount.format(cell.count)} el ${fullDay.format(cell.date)}` : 'Sin datos');
+
+export default function HeatmapChartLocalized() {
+  return (
+    <HeatmapChart
+      data={WEEKS}
+      layout="fill"
+      weekStartDay={MONDAY}
+      color="--chart-3"
+      label="Gasto diario"
+      formatCellLabel={(cell) => (cell.date && cell.count > 0 ? dayLabel(cell) : null)}
+      className="w-full max-w-md"
+    >
+      <HeatmapChart.XAxis formatLabel={(date) => month.format(date)} />
+      <HeatmapChart.YAxis labelFormat="initial" labels={WEEKDAYS} />
+      <HeatmapChart.Cells />
+      <HeatmapChart.Tooltip formatLabel={dayLabel} />
+      <HeatmapChart.Legend lessLabel="Menos" moreLabel="Más" />
+    </HeatmapChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing the colour
+
+`color` swaps the base of the ramp and `emptyColor` the empty cell. Each takes a theme role, a token by name such as `--chart-3`, or any CSS colour. `levelColors` replaces all five colours, and `levelOpacity` retunes the contrast.
+
+<ComponentPreview name="heatmap-chart/colors" height={280}>
+
+```tsx lineNumbers
+'use client';
+
+import { HeatmapChart, buildHeatmapCalendar } from '@/components/panelui/heatmap-chart';
+
+const activity = (date: Date) => {
+  const day = date.getDate() + date.getMonth() * 31;
+  const wave = Math.sin(day / 9) + Math.sin(day / 2.3);
+  return date.getDay() % 6 === 0 ? 0 : Math.max(0, Math.round((wave + 1.2) * 4));
+};
+
+const DAYS = Array.from({ length: 112 }, (_unused, index) => new Date(2026, 0, 4 + index));
+const WEEKS = buildHeatmapCalendar(DAYS.map((date) => ({ date, count: activity(date) })));
+
+export default function HeatmapChartColors() {
+  return (
+    <div className="grid w-full max-w-2xl gap-6 sm:grid-cols-2">
+      <HeatmapChart data={WEEKS} layout="fill" color="success" animationDuration={0}>
+        <HeatmapChart.Cells />
+        <HeatmapChart.Legend />
+      </HeatmapChart>
+      <HeatmapChart
+        data={WEEKS}
+        layout="fill"
+        animationDuration={0}
+        levelColors={['var(--muted)', '#fde68a', '#fbbf24', '#f97316', '#dc2626']}
+      >
+        <HeatmapChart.Cells />
+        <HeatmapChart.Legend />
+      </HeatmapChart>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A grid whose bins are not days
+
+Build `data` yourself, without dates, and pass `labels` to both axes. Set `rows` when there are not seven of them. Add `formatLabel` on the tooltip to name what a cell counts.
+
+<ComponentPreview name="heatmap-chart/hours" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { HeatmapChart, type HeatmapCell } from '@/components/panelui/heatmap-chart';
+
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const HOURS = Array.from({ length: 24 }, (_unused, hour) => (hour % 6 === 0 ? `${hour}:00` : ''));
+
+// Twenty-four columns of hours, seven rows of days, and no dates at all.
+const LOAD = HOURS.map((_label, hour) => ({
+  bin: hour,
+  bins: WEEKDAYS.map((_day, day) => ({
+    bin: day,
+    count: Math.max(0, Math.round(10 * Math.sin(((hour - 6) / 24) * Math.PI * 2) * (day > 4 ? 0.4 : 1) + 4)),
+  })),
+}));
+
+const describe = (cell: HeatmapCell) => `${cell.count} ${cell.count === 1 ? 'request' : 'requests'}, ${WEEKDAYS[cell.row]} at ${cell.column}:00`;
+
+export default function HeatmapChartHours() {
+  return (
+    <HeatmapChart data={LOAD} layout="fill" formatCellLabel={describe} className="w-full max-w-lg">
+      <HeatmapChart.XAxis labels={HOURS} />
+      <HeatmapChart.YAxis labels={WEEKDAYS} tickFilter="all" />
+      <HeatmapChart.Cells />
+      <HeatmapChart.Tooltip formatLabel={describe} />
+    </HeatmapChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Reading the cell above the chart
+
+`onActiveCellChange` reports the cell being read, and `null` when there is none, for a readout outside the chart or in its header. `inactiveOpacity` dims the others. A `formatLabel` that returns an empty string hides the line beside the cell.
+
+<ComponentPreview name="heatmap-chart/readout" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { HeatmapChart, buildHeatmapCalendar, type HeatmapCell } from '@/components/panelui/heatmap-chart';
+
+const activity = (date: Date) => {
+  const day = date.getDate() + date.getMonth() * 31;
+  const wave = Math.sin(day / 9) + Math.sin(day / 2.3);
+  return date.getDay() % 6 === 0 ? 0 : Math.max(0, Math.round((wave + 1.2) * 4));
+};
+
+const DAYS = Array.from({ length: 140 }, (_unused, index) => new Date(2026, 1, 1 + index));
+const WEEKS = buildHeatmapCalendar(DAYS.map((date) => ({ date, count: activity(date) })));
+const TOTAL = DAYS.reduce((sum, date) => sum + activity(date), 0);
+const dayName = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric' });
+
+export default function HeatmapChartReadout() {
+  const [cell, setCell] = useState<HeatmapCell | null>(null);
+  return (
+    <HeatmapChart
+      data={WEEKS}
+      layout="fill"
+      inactiveOpacity={0.45}
+      onActiveCellChange={setCell}
+      formatCellLabel={({ count, date }) => (date ? `${count} ${count === 1 ? 'deploy' : 'deploys'} on ${dayName.format(date)}` : null)}
+      className="w-full max-w-xl"
+    >
+      <HeatmapChart.Header
+        title="Deploys"
+        value={(cell ? cell.count : TOTAL).toLocaleString('en-US')}
+        caption={cell?.date ? dayName.format(cell.date) : 'February to June'}
+        legend
+      />
+      <HeatmapChart.XAxis />
+      <HeatmapChart.YAxis />
+      <HeatmapChart.Cells />
+      <HeatmapChart.Tooltip formatLabel={() => ''} />
+    </HeatmapChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### HeatmapChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly HeatmapColumn[]` | — | One column per period, with its row bins inside. `buildHeatmapCalendar` makes these from dated counts. |
+| `layout` | `HeatmapLayout` | `'fluid'` | `fluid` draws cells at `binSize`, and the chart is as wide as that needs. Put it in a horizontal scroller for a full year. `fill` divides the available width between the columns instead. |
+| `binSize` | `number` | `12` | Side of one cell in `fluid` layout, in pixels. |
+| `gap` | `number` | `3` | Space between cells, in pixels. |
+| `cornerRadius` | `number` | `2` | Corner radius of a cell. |
+| `weekStartDay` | `number` | `0` | Which weekday is the top row. `0` is Sunday. The labels follow it. |
+| `rows` | `number` | `7` | Rows per column. Seven for a calendar, twenty-four for a grid of hours. |
+| `levels` | `readonly number[]` | — | The four counts at which the ramp steps up. Derived from the data's quartiles when omitted. |
+| `levelColors` | `readonly string[]` | — | Five colours, empty first, that replace the derived ramp. |
+| `color` | `string` | — | The colour of the busiest cells, with the quieter levels the same colour at lower opacity. A theme role, a token by name, or any CSS colour. Defaults to `chart-1`. |
+| `emptyColor` | `string` | — | The colour of a cell with nothing in it. Takes the same values as `color`. Defaults to the muted surface. |
+| `levelOpacity` | `readonly number[]` | — | Opacity of the base colour at each of the five levels, quietest first. Ignored when `levelColors` is given. |
+| `animationDuration` | `number` | `900` | Milliseconds for the reveal on mount. `0` draws the chart at once. |
+| `inactiveOpacity` | `number` | `1` | Opacity of every cell other than the one being read. |
+| `onActiveCellChange` | `(cell: HeatmapCell \| null) => void` | — | The cell being read as it changes, and `null` when there is none. For a readout outside the chart. Reading needs `HeatmapChart.Tooltip`; `formatLabel={() => ''}` hides its line. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `formatCellLabel` | `(cell: HeatmapCell) => string \| null \| undefined` | — | What a screen reader says for one cell, in the list of days and as the keyboard reaches it. Return nothing to leave a cell out of the list. Defaults to its count and date, and days outside the calendar's range are left out. |
+
+### HeatmapChart.Cells
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cornerRadius` | `number` | `2` | Corner radius of a cell. Falls back to the chart's. |
+
+### HeatmapChart.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `every` | `'quarter' \| number` | `'quarter'` | `quarter` draws a rule every thirteen columns, and a number one every that many columns. |
+| `color` | `string` | — | A theme role, a token by name, or any CSS colour. Defaults to the border colour. |
+| `dashArray` | `string` | — | Dash pattern, such as `"2,4"`. Omit it for a solid rule. |
+
+### HeatmapChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatLabel` | `(date: Date, column: number) => string` | — | Label a column, given the first dated bin in it. Return an empty string to leave it unlabelled. |
+| `labels` | `readonly string[]` | — | Column labels, left to right, for a grid whose columns are not weeks. Overrides the month names. |
+
+### HeatmapChart.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `width` | `number` | `26` | Width reserved for the labels, in pixels. The grid is sized around it. |
+| `tickFilter` | `'all' \| 'odd' \| 'even'` | `'odd'` | Which rows get a label. Every other row is the usual choice. |
+| `labelFormat` | `'initial' \| 'full'` | `'full'` | `initial` is the single letter, and `full` the abbreviated name. |
+| `labels` | `readonly string[]` | — | Row labels, top to bottom, used as they are. For localised weekdays, or rows that are not days. |
+
+### HeatmapChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatLabel` | `(cell: HeatmapCell) => string` | — | The line shown for a cell, including a cell with no date. Defaults to the count and the date. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### HeatmapChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `lessLabel` | `string` | `'Less'` | Text at the low end of the ramp. |
+| `moreLabel` | `string` | `'More'` | Text at the high end. |
+| `swatchSize` | `number` | — | Side of a swatch, in pixels. Defaults to the chart's cell size, and at least 10. |
+
+### HeatmapChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the grid is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a total, the cell being read. |
+| `legend` | `boolean` | `false` | Draw the ramp along the trailing edge. For a grid that scrolls, where a legend under the cells would scroll away. |
+| `lessLabel` | `string` | `'Less'` | Text at the low end of the ramp, when `legend` is set. |
+| `moreLabel` | `string` | `'More'` | Text at the high end. |
+
+`HeatmapChart`, `HeatmapChart.Header`, `HeatmapChart.XAxis`, `HeatmapChart.YAxis` and `HeatmapChart.Legend` also take the props of the element they render, and a `className`. `HeatmapChart.Tooltip` puts its `className` on the readout. The other parts draw nothing themselves and take only the props listed.
+
+## Notes
+
+### Sizing
+
+A `fluid` chart is as wide as its cells need, and its height always follows from the cell size and `rows`. A `fill` chart fits its container's width, so a long range makes small cells. Cells narrower than about 6 pixels are hard to point at. For those, use `fluid` in a scroller.
+
+### The ramp
+
+The levels come from the quartiles of the non-zero counts, so small and large numbers both use the whole ramp. Pass `levels` to fix the thresholds, for instance to compare two charts on one scale.
+
+### Reading
+
+A mouse reads the cell under it. A click or a tap pins the reading, and pressing the same cell again clears it. A swipe does not read a cell, so a scroller around the chart still scrolls. Once the grid has focus, the arrow keys walk it, Home and End go to the ends of a row, and Escape clears the reading. All of this comes from `HeatmapChart.Tooltip`.
+
+### Accessibility
+
+The chart renders a list of its days for a screen reader, and announces the cell being read. The default label is a count of contributions and a date, so pass `formatCellLabel` when the cells count something else, and `label` to name the chart. A year is a long list, so return nothing from `formatCellLabel` for days that have nothing to say.
+
+With reduced motion set, or `animationDuration={0}`, the grid draws at once with no reveal.
+
+### Building the weeks
+
+`buildHeatmapCalendar` turns dated counts into `weeks`. It comes from the chart's client entry, so a Server Component cannot call it. Call it in a client file, and pass dates and counts from the server as props.
+
+### Server Components
+
+`HeatmapChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `HeatmapChart.Header` off the import, so each part is also exported by name: `HeatmapChartHeader` is `HeatmapChart.Header`, and so on for the others.
+
+```tsx
+import { HeatmapChart, HeatmapChartHeader, HeatmapChartCells, HeatmapChartSeparator, HeatmapChartXAxis, HeatmapChartYAxis, HeatmapChartTooltip, HeatmapChartLegend } from "@/components/panelui/heatmap-chart"
+```

@@ -1,0 +1,529 @@
+---
+title: Waterfall Chart
+description: How a run of changes carried one total to another, with each step floating on the running balance.
+status: new
+---
+
+<ComponentPreview name="waterfall-chart/overview" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Frame } from '@/components/panelui/frame';
+import { WaterfallChart, type WaterfallDatum, type WaterfallStep } from '@/components/panelui/waterfall-chart';
+
+const BRIDGE: WaterfallDatum[] = [
+  { label: 'Q3', value: 482000, total: true },
+  { label: 'New', value: 96400 },
+  { label: 'Upsell', value: 41200 },
+  { label: 'Churn', value: -58700 },
+  { label: 'Down', value: -19300 },
+  { label: 'Q4', value: 0, total: true },
+];
+
+const money = (value: number) => `$${Math.abs(value).toLocaleString('en')}`;
+
+export default function WaterfallChartOverview() {
+  const [step, setStep] = useState<WaterfallStep | null>(null);
+
+  return (
+    <Frame variant="band" className="w-full max-w-lg">
+      <Frame.Header>
+        <Frame.Title>Revenue bridge</Frame.Title>
+        <Frame.Action>Hover to read</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <WaterfallChart data={BRIDGE} aspectRatio={1.6} onActiveIndexChange={(_index, next) => setStep(next)}>
+          <WaterfallChart.Header
+            title={step ? step.label : 'Closing'}
+            value={money(step ? step.value : 541600)}
+            caption={step && step.kind !== 'total' ? `Balance after: ${money(step.end)}` : 'Annual run rate'}
+            legend
+          />
+          <WaterfallChart.Grid />
+          <WaterfallChart.YAxis />
+          <WaterfallChart.Connectors />
+          <WaterfallChart.Bars />
+          <WaterfallChart.XAxis />
+          <WaterfallChart.Tooltip />
+        </WaterfallChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to show how a series of changes carried one total to another, such as a revenue bridge or a month of cash flow. Each step's bar starts where the previous one ended, so the gap under it is the balance it acted on and its length is what it changed by.
+
+The steps are drawn in the order you give them. The chart never sorts them, because the order is what it shows.
+
+For categories with no order to keep, use a [Bar Chart](/docs/web/charts/bar-chart).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/waterfall-chart.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/waterfall-chart` instead of `@/components/panelui/waterfall-chart`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react @tanstack/charts tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/waterfall-chart/`, one file for each below:
+
+<RegistrySource name="waterfall-chart" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { WaterfallChart } from "@/components/panelui/waterfall-chart"
+```
+
+```tsx
+<WaterfallChart data={bridge}>
+  <WaterfallChart.Grid />
+  <WaterfallChart.Connectors />
+  <WaterfallChart.Bars />
+  <WaterfallChart.XAxis />
+  <WaterfallChart.Tooltip />
+</WaterfallChart>
+```
+
+## Composition
+
+```tsx
+<WaterfallChart data={…}>
+  <WaterfallChart.Header />
+  <WaterfallChart.Grid />
+  <WaterfallChart.Skeleton />
+  <WaterfallChart.Connectors />
+  <WaterfallChart.Bars />
+  <WaterfallChart.Values />
+  <WaterfallChart.XAxis />
+  <WaterfallChart.YAxis />
+  <WaterfallChart.Tooltip />
+  <WaterfallChart.Legend />
+</WaterfallChart>
+```
+
+- **`WaterfallChart.Header`** — The strip above the plot: `title`, `value` and `caption`, with the legend or your own control on the trailing side. The value is a string you pass, so it can follow `onActiveIndexChange`.
+- **`WaterfallChart.Grid`** — Lines across the value axis, so a bar can be read against a number.
+- **`WaterfallChart.Skeleton`** — Equal stubs on the baseline, with a highlight moving across them, drawn only while `status` is `loading`.
+- **`WaterfallChart.Connectors`** — The lines from each bar's end to the next band. They always pass behind the bars, wherever you declare them.
+- **`WaterfallChart.Bars`** — The bars. Each takes its kind's colour, or the step's own `color`. Without this part nothing can be read.
+- **`WaterfallChart.Values`** — Each step's change, signed and written just past the end of its bar. It needs vertical room, and it is not drawn sideways.
+- **`WaterfallChart.XAxis`** — The step names under the bands. Sideways, `YAxis` has them instead.
+- **`WaterfallChart.YAxis`** — Value labels down the side. Sideways, the side is the step axis, so it draws the names.
+- **`WaterfallChart.Tooltip`** — The readout, and the reading of a step by hover, press, drag or arrow keys. It reports the change and the balance after it. The other bars fade while one is read.
+- **`WaterfallChart.Legend`** — A swatch and a name for each kind the run contains, over the plot's top corner. On a chart with a header, use the header's `legend` instead.
+
+## Examples
+
+### Writing the changes on the bars
+
+`WaterfallChart.Values` puts each step's change just past the end of its bar. At the default `aspectRatio` of `2`, a label can crowd the top of the plot, so give the chart a squarer shape when you turn them on.
+
+<ComponentPreview name="waterfall-chart/values" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { WaterfallChart, type WaterfallDatum } from '@/components/panelui/waterfall-chart';
+
+const BRIDGE: WaterfallDatum[] = [
+  { label: 'Q3', value: 482000, total: true },
+  { label: 'New', value: 96400 },
+  { label: 'Upsell', value: 41200 },
+  { label: 'Churn', value: -58700 },
+  { label: 'Down', value: -19300 },
+  { label: 'Q4', value: 0, total: true },
+];
+
+export default function WaterfallChartValues() {
+  return (
+    <WaterfallChart data={BRIDGE} aspectRatio={1.5} className="w-full max-w-lg">
+      <WaterfallChart.Grid />
+      <WaterfallChart.YAxis />
+      <WaterfallChart.Connectors />
+      <WaterfallChart.Bars />
+      <WaterfallChart.Values />
+      <WaterfallChart.XAxis />
+      <WaterfallChart.Tooltip />
+    </WaterfallChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Sideways, when the names do not fit
+
+`orientation="horizontal"` lays the run down the side and moves the step names to the left, where `YAxis` draws them. Use it from about five steps on a narrow screen. `Values` is not drawn in this orientation, so the readout carries the numbers.
+
+<ComponentPreview name="waterfall-chart/sideways" height={560}>
+
+```tsx lineNumbers
+'use client';
+
+import { WaterfallChart, type WaterfallDatum } from '@/components/panelui/waterfall-chart';
+
+const CASH_FLOW: WaterfallDatum[] = [
+  { label: 'Opening', value: 128000, total: true },
+  { label: 'Receipts', value: 74500 },
+  { label: 'Payroll', value: -61200 },
+  { label: 'Hosting', value: -14800 },
+  { label: 'Marketing', value: -22400 },
+  { label: 'Tax', value: -18600 },
+  { label: 'Closing', value: 0, total: true },
+];
+
+export default function WaterfallChartSideways() {
+  return (
+    <WaterfallChart data={CASH_FLOW} orientation="horizontal" aspectRatio={1.2} className="w-full max-w-lg">
+      <WaterfallChart.Grid />
+      <WaterfallChart.Connectors />
+      <WaterfallChart.Bars />
+      <WaterfallChart.YAxis />
+      <WaterfallChart.Tooltip />
+    </WaterfallChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Colours and a cropped axis
+
+`riseColor`, `fallColor` and `totalColor` set the three kinds, and `color` on one step overrides its kind, here to pull out Travel. Keep to those: a fourth colour is a meaning the reader has to be told.
+
+`yDomain` fixes the value axis, here so a small variance can be seen. A cropped axis makes a total's length misleading, so use it only when the movement matters more than the size.
+
+<ComponentPreview name="waterfall-chart/colors" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { WaterfallChart, type WaterfallDatum } from '@/components/panelui/waterfall-chart';
+
+const VARIANCE: WaterfallDatum[] = [
+  { label: 'Budget', value: 210000, total: true },
+  { label: 'Salaries', value: 18200 },
+  { label: 'Contractors', value: -9400 },
+  { label: 'Travel', value: 6300, color: 'chart-2' },
+  { label: 'Software', value: -2700 },
+  { label: 'Actual', value: 0, total: true },
+];
+
+export default function WaterfallChartColors() {
+  return (
+    <WaterfallChart
+      data={VARIANCE}
+      yDomain={[180000, 240000]}
+      riseColor="info"
+      fallColor="chart-3"
+      totalColor="chart-5"
+      aspectRatio={1.7}
+      className="w-full max-w-lg"
+    >
+      <WaterfallChart.Header title="Budget variance" value="$12,400 over" legend />
+      <WaterfallChart.Connectors />
+      <WaterfallChart.Bars />
+      <WaterfallChart.XAxis />
+      <WaterfallChart.Tooltip />
+    </WaterfallChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Loading
+
+`status="loading"` holds the bars back, and `WaterfallChart.Skeleton` shows equal stubs on the baseline meanwhile. The bars grow in when it turns `ready`.
+
+<ComponentPreview name="waterfall-chart/loading" height={420}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { WaterfallChart, type WaterfallChartStatus, type WaterfallDatum } from '@/components/panelui/waterfall-chart';
+
+const BRIDGE: WaterfallDatum[] = [
+  { label: 'Q3', value: 482000, total: true },
+  { label: 'New', value: 96400 },
+  { label: 'Upsell', value: 41200 },
+  { label: 'Churn', value: -58700 },
+  { label: 'Down', value: -19300 },
+  { label: 'Q4', value: 0, total: true },
+];
+
+export default function WaterfallChartLoading() {
+  const [status, setStatus] = useState<WaterfallChartStatus>('loading');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <WaterfallChart data={BRIDGE} status={status}>
+        <WaterfallChart.Grid />
+        <WaterfallChart.Skeleton />
+        <WaterfallChart.Connectors />
+        <WaterfallChart.Bars />
+        <WaterfallChart.XAxis />
+      </WaterfallChart>
+      <Button variant="outline" onClick={() => setStatus(status === 'loading' ? 'ready' : 'loading')}>
+        {status === 'loading' ? 'Finish loading' : 'Load again'}
+      </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing data
+
+New data moves the bars and the axis from where they are. `replay()` on the ref runs the entrance again.
+
+<ComponentPreview name="waterfall-chart/changing-data" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef, useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { WaterfallChart, type WaterfallChartHandle, type WaterfallDatum } from '@/components/panelui/waterfall-chart';
+
+const QUARTERS: Record<'Q4' | 'Q1', WaterfallDatum[]> = {
+  Q4: [
+    { label: 'Open', value: 482000, total: true },
+    { label: 'New', value: 96400 },
+    { label: 'Upsell', value: 41200 },
+    { label: 'Churn', value: -58700 },
+    { label: 'Close', value: 0, total: true },
+  ],
+  Q1: [
+    { label: 'Open', value: 561000, total: true },
+    { label: 'New', value: 48300 },
+    { label: 'Upsell', value: 112600 },
+    { label: 'Churn', value: -146000 },
+    { label: 'Close', value: 0, total: true },
+  ],
+};
+
+export default function WaterfallChartChangingData() {
+  const chart = useRef<WaterfallChartHandle>(null);
+  const [quarter, setQuarter] = useState<keyof typeof QUARTERS>('Q4');
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-start gap-4">
+      <WaterfallChart ref={chart} data={QUARTERS[quarter]} aspectRatio={1.8}>
+        <WaterfallChart.Header title={quarter} />
+        <WaterfallChart.Grid />
+        <WaterfallChart.Connectors />
+        <WaterfallChart.Bars />
+        <WaterfallChart.XAxis />
+        <WaterfallChart.YAxis />
+        <WaterfallChart.Tooltip />
+      </WaterfallChart>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setQuarter(quarter === 'Q4' ? 'Q1' : 'Q4')}>
+          Show {quarter === 'Q4' ? 'Q1' : 'Q4'}
+        </Button>
+        <Button variant="ghost" onClick={() => chart.current?.replay()}>
+          Replay
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### WaterfallChart
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `readonly WaterfallDatum[]` | — | The steps, in the order they happen. The chart never sorts them. |
+| `status` | `WaterfallChartStatus` | `'ready'` | `loading` holds the bars back and grows them in when it turns `ready`. Add a `WaterfallChart.Skeleton` for something to stand in the plot meanwhile. |
+| `aspectRatio` | `number` | `2` | The plot's width ÷ height. `2` is the wide card shape. |
+| `animationDuration` | `number` | `700` | Milliseconds for the bars to grow in. |
+| `domainDuration` | `number` | `500` | Milliseconds for the bars and the axis to settle after the data changes. |
+| `yDomain` | `[number, number]` | — | Fix the value axis instead of deriving it. The derived axis always includes zero, and bar lengths cannot be compared on one that does not. |
+| `orientation` | `WaterfallChartOrientation` | `'vertical'` | `vertical` stands the bars up; `horizontal` lays the run down the side. |
+| `barGap` | `number` | `0.34` | Fraction of each band left empty, `0` to `1`. |
+| `barWidth` | `number` | — | Largest bar thickness in pixels. Derived from the band when omitted. |
+| `cornerRadius` | `number` | `4` | Corner radius on the ends of a bar. |
+| `minBarLength` | `number` | `2` | Smallest length a non-zero bar is drawn at, in pixels. |
+| `fadedOpacity` | `number` | `0.3` | Opacity of the bars that are not being read. |
+| `riseColor` | `WaterfallChartColor` | `'success'` | Which of the theme's roles a step that adds is drawn in. |
+| `fallColor` | `WaterfallChartColor` | `'destructive'` | Which of the theme's roles a step that subtracts is drawn in. |
+| `totalColor` | `WaterfallChartColor` | `'chart-1'` | Which of the theme's roles a `total` step is drawn in. |
+| `onActiveIndexChange` | `(index: number, step: WaterfallStep \| null) => void` | — | The step being read, and `-1`/`null` when there is none. Fires when the index changes, not per frame. |
+| `compact` | `boolean` | `false` | Drop the axis padding, for a run with no axis or readout. |
+| `label` | `string` | — | What a screen reader calls the chart. |
+| `labelForDatum` | `(step: WaterfallStep, index: number) => string` | — | What a screen reader says for one step. Defaults to its name, change and balance. |
+
+### WaterfallChart.Grid
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `number` | `4` | Roughly how many lines to draw across the value axis. |
+| `dashArray` | `string` | `'4 6'` | The stroke's dash pattern. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+
+### WaterfallChart.Bars
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cornerRadius` | `number` | — | Corner radius, overriding the chart's. |
+
+### WaterfallChart.Connectors
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dashArray` | `string` | `'3 4'` | The stroke's dash pattern. |
+| `strokeWidth` | `number` | `1` | The stroke's width in pixels. |
+| `opacity` | `number` | `1` | Opacity of the lines. |
+
+### WaterfallChart.Skeleton
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `bars` | `number` | — | How many placeholder bars to draw. Defaults to one per step, and to six when the data has not arrived. |
+| `duration` | `number` | `1400` | Milliseconds for one pass of the sweep. |
+
+### WaterfallChart.XAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | — | How many labels to show. Every step by default, thinned only when the bands get too narrow to read. Pass a number to force it lower. |
+| `format` | `(step: WaterfallStep, index: number) => string` | — | Turn a step into its label. Defaults to its `label`. |
+
+### WaterfallChart.YAxis
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ticks` | `number` | `4` | Roughly how many labels to show along the value axis. |
+| `format` | `(value: number) => string` | — | Format a value for its label. Defaults to a compact number. |
+
+### WaterfallChart.Values
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `format` | `(step: WaterfallStep, index: number) => string` | — | Format a step's number. Defaults to a signed compact number. |
+
+### WaterfallChart.Tooltip
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `formatValue` | `(step: WaterfallStep) => string` | — | Format the step's change. Defaults to a signed compact number. |
+| `formatTotal` | `(step: WaterfallStep) => string \| null` | — | Format the running total line. Return `null` to drop it. |
+| `labels` | `Partial<Record<WaterfallKind \| 'balance', string>>` | — | Names for the three kinds and for the running total line. |
+| `className` | `string` | — | Added to the readout's surface. |
+
+### WaterfallChart.Legend
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `labels` | `Partial<Record<WaterfallKind, string>>` | — | Names for the three kinds. Defaults to Increase, Decrease and Total. |
+
+### WaterfallChart.Header
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | Small line above the value: what the run is of. |
+| `value` | `ReactNode` | — | The readout. The largest thing on the card, and the first thing read. |
+| `caption` | `ReactNode` | — | One muted line under the value: a period, a comparison, a total. |
+| `labels` | `Partial<Record<WaterfallKind, string>>` | — | Names for the three kinds, as the legend takes. |
+| `legend` | `boolean` | `false` | Draw a swatch and a name per kind along the trailing edge. Prefer this to `WaterfallChart.Legend` on a chart that has a header: the legend sits over the plot, in the corner the bars also want. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Sizing
+
+The chart fills its container's width and takes the plot's height from `aspectRatio`, so a header does not shrink it.
+
+The plot draws in the browser after it has been measured, and the space is reserved until then, so it is not in server-rendered HTML.
+
+### Bundle size
+
+The chart adds about 60 KB of gzipped JavaScript to a page that uses it. A page that does not import it pays nothing, including one that imports other components from the package root.
+
+### Data
+
+`value` is what the step changes the running total by, so a decrease is negative and the colour follows from the sign.
+
+`total: true` marks a reading rather than a change. It is measured from the baseline, and its `value` is added to the running total first, so an opening balance carries the figure it opens at and a closing total carries `0`.
+
+A value that is not a finite number counts as zero, so the step keeps its label and later totals stay correct. `waterfallSteps` is the same arithmetic the chart runs, exported so a header or a table can read the running balances.
+
+### The value axis
+
+The derived axis spans both ends of every bar and always includes zero. `yDomain` overrides it when both ends are finite. A bar past a fixed axis stops at the edge of the plot, and a step wholly past it draws nothing.
+
+### Reading a step
+
+Hovering anywhere in a band reads it, and the other bars fade. A click or a tap pins the reading until the next press elsewhere, or Escape. On a touch screen a sideways drag reads the bands it crosses, and a vertical drag scrolls the page.
+
+`onActiveIndexChange` fires when the step changes, not on every frame, and passes the resolved step, so it can drive a readout outside the chart, as the first example does. Inside the chart, `useWaterfallChart` gives the same step.
+
+### Keyboard
+
+The chart takes focus. The arrow keys walk the steps, Home and End go to the first and last, and Escape clears the reading.
+
+### Screen readers
+
+Each step is given as text beside the drawing, with its change and the balances either side. `label` names the chart and `labelForDatum` writes a step, for values with a unit.
+
+### Reduced motion
+
+With reduced motion set, the bars appear at their final lengths and the skeleton's highlight stays still.
+
+### Server Components
+
+`WaterfallChart` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `WaterfallChart.Header` off the import, so each part is also exported by name: `WaterfallChartHeader` is `WaterfallChart.Header`, and so on for the others.
+
+```tsx
+import { WaterfallChart, WaterfallChartHeader, WaterfallChartGrid, WaterfallChartConnectors, WaterfallChartBars, WaterfallChartSkeleton, WaterfallChartXAxis, WaterfallChartYAxis, WaterfallChartValues, WaterfallChartTooltip, WaterfallChartLegend } from "@/components/panelui/waterfall-chart"
+```

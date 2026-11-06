@@ -49,10 +49,8 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Data
 
-- [Area Chart](components/area-chart.md) — Filled bands over time, stacked or overlaid.
 - [Avatar](components/avatar.md) — A person or a team as a picture, or their initials in a colour of their own, with a badge and a group that opens up.
 - [Badge](components/badge.md) — A short label for a state or a kind, tinted in its theme colour, with a dot for a state that is still changing.
-- [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
 - [Bar Picker](components/bar-picker.md) — A short run of values as columns of lights, one column picked.
 - [Day Grid](components/day-grid.md) — A run of days as a field of dots, each sized by how much happened on it.
 - [Flow](components/flow.md) — A canvas of nodes joined by edges, that you pan, zoom and rearrange.
@@ -62,6 +60,14 @@ Generated from the collection's source. Read a component's own file before using
 - [Rolling Number](components/rolling-number.md) — A number whose digits roll to their new values.
 - [Stat](components/stat.md) — One figure written large, with a label over it, a unit after it and a badge beside it.
 - [Table](components/table.md) — Rows of records with the same columns, with numbers aligned and a header that stays pinned.
+
+## Charts
+
+- [Area Chart](components/area-chart.md) — Filled bands over time, stacked or overlaid.
+- [Bar Chart](components/bar-chart.md) — Categories compared by length, grouped or stacked.
+- [Bubble Chart](components/bubble-chart.md) — One labelled circle per row, on two measured axes, with a third quantity on each circle's area.
+- [Plot](components/plot.md) — A chart you assemble from marks on one shared scale, for the shapes the named charts do not cover.
+- [Sankey Chart](components/sankey-chart.md) — Where a quantity came from and where it ended up, as ribbons between stages.
 
 ## Feedback and status
 

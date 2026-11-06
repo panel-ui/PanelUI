@@ -13,6 +13,8 @@
     "composition",
     "theme",
     "---Components---",
-    "...components"
+    "...components",
+    "---Charts---",
+    "...charts"
   ]
 }

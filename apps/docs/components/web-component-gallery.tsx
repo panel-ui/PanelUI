@@ -54,7 +54,9 @@ function ComponentCard({ slug, entry }: { slug: string; entry: MetaEntry }) {
         <h3 className="text-sm font-semibold text-fd-foreground">
           {/* The link's own box is only the name, stretched over the card,
               so the heading keeps its semantics. */}
-          <Link href={`/docs/web/components/${slug}`} className="before:absolute before:inset-0">
+          <Link
+            href={`/docs/web/${entry[3]?.category === 'charts' ? 'charts' : 'components'}/${slug}`}
+            className="before:absolute before:inset-0">
             {titleOf(entry)}
           </Link>
         </h3>

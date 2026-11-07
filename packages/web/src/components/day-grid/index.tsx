@@ -62,6 +62,14 @@ export interface DayCell {
   label?: string;
 }
 
+/** How many days have something on them, and how many there are. */
+export interface DayGridSummaryCounts {
+  /** Days whose level is above 0. */
+  active: number;
+  /** Every day in the grid. */
+  total: number;
+}
+
 const dayGridVariants = tv({
   slots: {
     root: 'relative grid w-full gap-1',
@@ -151,6 +159,13 @@ export interface DayGridProps extends Omit<ComponentProps<'div'>, 'children' | '
   lens?: boolean;
   /** What a screen reader calls the grid. */
   label?: string;
+  /**
+   * The sentence a screen reader says for the whole grid, written in the
+   * reader's language. It is given `active`, the days with something on them,
+   * and `total`, every day in the grid. Without it the grid says the same
+   * thing in English.
+   */
+  summary?: (counts: DayGridSummaryCounts) => string;
 }
 
 function DayGridRoot({
@@ -162,6 +177,7 @@ function DayGridRoot({
   onValueChange,
   lens = true,
   label = 'Activity',
+  summary: formatSummary,
   className,
   style,
   onPointerMove,
@@ -198,9 +214,13 @@ function DayGridRoot({
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   const summary = useMemo(() => {
-    const active = cells.filter((cell) => cell.level > 0).length;
-    return `${label}: something on ${active} of ${cells.length} days.`;
-  }, [cells, label]);
+    const counts = { active: cells.filter((cell) => cell.level > 0).length, total: cells.length };
+    // Written here even when the caller supplies a sentence, so a formatter in
+    // another language is handed the counts instead of walking the days again.
+    return formatSummary
+      ? formatSummary(counts)
+      : `${label}: something on ${counts.active} of ${counts.total} days.`;
+  }, [cells, label, formatSummary]);
 
   const moveLens = (event: ReactPointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);

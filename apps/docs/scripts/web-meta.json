@@ -709,5 +709,15 @@
       "category": "charts",
       "title": "Ring Chart"
     }
+  ],
+  "scroll-header": [
+    "ScrollHeader",
+    "A page title with room around it that hands over to a compact sticky bar as the reader scrolls.",
+    "react sticky collapsing header large title scroll component",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation",
+      "title": "Scroll Header"
+    }
   ]
 }

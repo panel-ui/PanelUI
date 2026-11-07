@@ -48,6 +48,28 @@
  * flyout on hover and focus. The visible label is `aria-hidden` while folded,
  * so a screen reader hears the row once rather than twice.
  *
+ * ## Nested destinations
+ *
+ * A destination can own a child list with `NavRail.Sub`. The parent stays an
+ * ordinary row — a link when it has an `href` — and the list is indented under
+ * it, with a disclosure button that says whether it is open. Zoomed in, the
+ * child rows are part of the rail's single pill and its arrow-key order; when
+ * the child that is active is folded away inside a closed list, the parent
+ * holds the pill so the rail still shows a place.
+ *
+ * Folded, the same list becomes a flyout to the side of the rail, opened by
+ * hover or focus and kept out of the rail's clipping so a narrow column can
+ * still show names. The parent is not the flyout's trigger in the sense a menu
+ * is: the child rows are links in a real `<ul>`, and the button beside the
+ * parent is a disclosure with `aria-expanded` and `aria-controls`. One level is
+ * supported; a child list is not meant to contain another `NavRail.Sub`, and
+ * deeper trees are the caller's own component.
+ *
+ * The open state is the parent's, not the rail's: `NavRail.Sub` takes
+ * `defaultOpen`, or `open` and `onOpenChange` when the app holds it, and it
+ * does not change when the rail folds. An open list becomes a pinned flyout
+ * folded, and hover opens one without changing that state.
+ *
  * ## Two weights
  *
  * `variant="tonal"`, the default, keeps the current place as a quiet primary
@@ -56,15 +78,18 @@
  * row with the primary colour and sets its text in `primary-foreground`, the
  * same weight Tabs, Toolbar and Inspector give their chosen item, for an app
  * that wants the rail to speak as loudly as the rest of the collection. The
- * choice applies folded as well: the icon square and the count dot follow it.
+ * choice applies folded as well: the icon square, the count dot and the active
+ * child in a flyout follow it.
  *
  * ## The keyboard
  *
  * Every row is an ordinary tab stop, so Tab walks the rail the way it walks
  * the rest of the page. Once focus is on a row, Up and Down move it, wrapping
  * at the ends and stepping over disabled rows; Home and End go to the first and
- * last. `NavRail.Trigger` is a button and says whether the rail is open with
- * `aria-expanded`.
+ * last visible row, skipping children hidden in a closed list. On a parent,
+ * Right opens a closed list or steps into an open one, Left closes it, and
+ * Escape closes it wherever focus is inside it. `NavRail.Trigger` is a button
+ * and says whether the rail is open with `aria-expanded`.
  *
  * ## It does not collapse itself
  *
@@ -97,7 +122,7 @@ import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
-import { indicatorBox, isRovingKey, railWidth, rovingIndex, textOf } from './rail';
+import { indicatorBox, isRovingKey, railWidth, rovingRow, activeRowIndex, subKeyAction, textOf, type RailRowState } from './rail';
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
@@ -156,36 +181,48 @@ const navRailVariants = tv({
       'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-medium outline-none select-none',
       'text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground',
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
+      'data-[holding]:text-foreground data-[holding]:hover:bg-foreground/[0.03]',
       'data-solid-active:text-primary-foreground! data-solid-active:hover:bg-transparent',
+      'data-[holding]:data-solid-active:text-primary-foreground!',
       'data-disabled:pointer-events-none data-disabled:opacity-40',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
-      'group-data-[collapsed]/nav-rail:justify-center group-data-[collapsed]/nav-rail:gap-0 group-data-[collapsed]/nav-rail:px-0',
+      'data-[icons-only]:justify-center data-[icons-only]:gap-0 data-[icons-only]:px-0',
+      'data-[nested]:h-9 data-[nested]:text-[13px]',
+      // A child in a flyout has no pill behind it, so it carries its own
+      // active weight: the same tint, ring and solid fill the rail gives the
+      // row it draws the pill over.
+      'data-[flyout]:data-active:bg-primary/[0.12] data-[flyout]:data-active:ring-1 data-[flyout]:data-active:ring-primary/20 data-[flyout]:data-active:ring-inset',
+      'data-[flyout]:data-solid-active:bg-primary data-[flyout]:data-solid-active:ring-0',
     ],
     icon: [
       'flex size-5 shrink-0 items-center justify-center text-muted-foreground',
       'transition-colors duration-150 group-hover/item:text-foreground group-data-[active]/item:text-primary',
-      'group-data-[solid-active]/item:text-primary-foreground',
+      'group-data-[solid-active]/item:text-primary-foreground!',
+      'group-data-[nested]/item:[&_svg]:size-4',
+      // The parent of the active child is tinted rather than pilled: it is a
+      // sign that the current page is under it, not a second current place.
+      'group-data-[child-active]/item:text-primary',
       '[&_svg]:pointer-events-none [&_svg]:size-[18px]',
     ],
     label: [
       'min-w-0 max-w-full flex-1 truncate whitespace-nowrap',
       `transition-[opacity,translate,max-width] duration-300 ${EASE} motion-reduce:transition-none`,
-      'group-data-[collapsed]/nav-rail:max-w-0 group-data-[collapsed]/nav-rail:-translate-x-1 group-data-[collapsed]/nav-rail:pointer-events-none group-data-[collapsed]/nav-rail:opacity-0',
+      'group-data-[icons-only]/item:max-w-0 group-data-[icons-only]/item:-translate-x-1 group-data-[icons-only]/item:pointer-events-none group-data-[icons-only]/item:opacity-0',
     ],
     badges: [
       'pointer-events-none ms-auto flex shrink-0 items-center gap-1',
-      'group-data-[collapsed]/nav-rail:absolute group-data-[collapsed]/nav-rail:end-0.5 group-data-[collapsed]/nav-rail:top-0.5 group-data-[collapsed]/nav-rail:ms-0',
-      'group-data-[collapsed]/nav-rail:[&>*+*]:hidden',
+      'group-data-[icons-only]/item:absolute group-data-[icons-only]/item:end-0.5 group-data-[icons-only]/item:top-0.5 group-data-[icons-only]/item:ms-0',
+      'group-data-[icons-only]/item:[&>*+*]:hidden',
     ],
     badge: [
       'inline-flex h-5 min-w-5 shrink-0 items-center justify-center overflow-hidden rounded-full px-1.5',
       'bg-foreground/[0.07] text-[11px] font-medium text-muted-foreground tabular-nums',
       'transition-colors duration-150 group-data-[active]/item:bg-primary/15 group-data-[active]/item:text-foreground',
       'group-data-[solid-active]/item:bg-primary-foreground/20! group-data-[solid-active]/item:text-primary-foreground!',
-      'group-data-[collapsed]/nav-rail:group-data-[solid-active]/item:bg-primary-foreground!',
+      'group-data-[icons-only]/item:group-data-[solid-active]/item:bg-primary-foreground!',
       // Folded, the count is a dot: the label is gone and a number would have
       // nowhere to sit, but the fact that something is waiting still reads.
-      'group-data-[collapsed]/nav-rail:size-2 group-data-[collapsed]/nav-rail:min-w-0 group-data-[collapsed]/nav-rail:bg-primary group-data-[collapsed]/nav-rail:p-0 group-data-[collapsed]/nav-rail:text-[0px] group-data-[collapsed]/nav-rail:text-transparent',
+      'group-data-[icons-only]/item:size-2 group-data-[icons-only]/item:min-w-0 group-data-[icons-only]/item:bg-primary group-data-[icons-only]/item:p-0 group-data-[icons-only]/item:text-[0px] group-data-[icons-only]/item:text-transparent',
     ],
     tooltip: [
       'pointer-events-none absolute start-[calc(100%+0.5rem)] top-1/2 z-50 origin-left -translate-y-1/2 scale-95',
@@ -193,6 +230,46 @@ const navRailVariants = tv({
       'transition-[opacity,scale] duration-150 group-hover/item:scale-100 group-hover/item:opacity-100',
       'group-focus-visible/item:scale-100 group-focus-visible/item:opacity-100 motion-reduce:transition-none',
     ],
+    // A parent and its child list. The wrapper is what the flyout is positioned
+    // against, and what hover and focus are read from.
+    branch: 'group/branch relative flex w-full flex-col',
+    toggle: [
+      'absolute end-1 top-5 z-20 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted-foreground/70 outline-none',
+      'transition-[opacity,background-color,color,scale] duration-150 hover:bg-foreground/[0.06] hover:text-foreground',
+      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset active:scale-95 motion-reduce:transition-none',
+      // Folded, the whole row is an icon square: the disclosure becomes a
+      // small corner caret that appears with the row or on focus, so it does
+      // not fight the count dot for the same corner.
+      'group-data-[collapsed]/nav-rail:bottom-0.5 group-data-[collapsed]/nav-rail:end-0.5 group-data-[collapsed]/nav-rail:top-auto group-data-[collapsed]/nav-rail:size-4 group-data-[collapsed]/nav-rail:translate-y-0 group-data-[collapsed]/nav-rail:opacity-0',
+      'group-data-[collapsed]/nav-rail:group-hover/branch:opacity-100 group-data-[collapsed]/nav-rail:focus-visible:opacity-100 group-data-[collapsed]/nav-rail:data-[open]:opacity-100',
+      'group-data-[solid-active]/branch:text-primary-foreground/80',
+    ],
+    chevron: `size-3.5 shrink-0 opacity-70 transition-transform duration-200 ${EASE} motion-reduce:transition-none`,
+    descendantDot: 'size-1.5 shrink-0 rounded-full bg-primary group-data-[icons-only]/item:hidden',
+    // Inline, the list unfolds by grid rows so its height travels rather than
+    // popping. Folded, the same element becomes the flyout beside the rail,
+    // with the tooltip's fade and scale.
+    sub: [
+      'grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-200',
+      `${EASE} motion-reduce:transition-none`,
+      'data-[open]:grid-rows-[1fr] data-[open]:opacity-100',
+      'group-data-[collapsed]/nav-rail:pointer-events-none group-data-[collapsed]/nav-rail:absolute group-data-[collapsed]/nav-rail:start-full group-data-[collapsed]/nav-rail:top-0 group-data-[collapsed]/nav-rail:z-50 group-data-[collapsed]/nav-rail:grid-rows-[1fr] group-data-[collapsed]/nav-rail:origin-left group-data-[collapsed]/nav-rail:scale-95 group-data-[collapsed]/nav-rail:ps-2 group-data-[collapsed]/nav-rail:opacity-0 group-data-[collapsed]/nav-rail:transition-[opacity,scale] group-data-[collapsed]/nav-rail:duration-150',
+      'group-data-[collapsed]/nav-rail:data-[visible]:pointer-events-auto group-data-[collapsed]/nav-rail:data-[visible]:scale-100 group-data-[collapsed]/nav-rail:data-[visible]:opacity-100',
+    ],
+    subPanel: [
+      'min-h-0 overflow-hidden',
+      // The flyout's own surface, kept on the inner element so the outer one
+      // can stay the transition and arrow-key container.
+      'group-data-[collapsed]/nav-rail:min-w-52 group-data-[collapsed]/nav-rail:overflow-visible group-data-[collapsed]/nav-rail:rounded-xl group-data-[collapsed]/nav-rail:border group-data-[collapsed]/nav-rail:border-border group-data-[collapsed]/nav-rail:bg-popover group-data-[collapsed]/nav-rail:p-1 group-data-[collapsed]/nav-rail:text-popover-foreground group-data-[collapsed]/nav-rail:shadow-lg',
+    ],
+    subList: [
+      'flex flex-col gap-0.5',
+      // The indent and the rule are what make a child read as subordinate
+      // rather than as a row that happens to be smaller.
+      'ms-2.5 border-s border-border/60 ps-2',
+      'group-data-[collapsed]/nav-rail:ms-0 group-data-[collapsed]/nav-rail:border-s-0 group-data-[collapsed]/nav-rail:ps-0',
+    ],
+    subEntry: 'flex w-full min-w-0',
     separator: 'mx-1.5 h-px shrink-0 rounded-full bg-border group-data-[collapsed]/nav-rail:mx-0.5',
     footer: 'mt-auto flex shrink-0 flex-col gap-0.5 pt-1',
     // One pill for the whole rail. The accent is its own small bar so the fill
@@ -224,7 +301,82 @@ function useNavRail(part: string): NavRailContextValue {
   return context;
 }
 
+interface NavRailSubContextValue {
+  /** Whether the child list is logically open. */
+  open: boolean;
+  /** Whether it is drawn: open inline, or showing as a flyout. */
+  visible: boolean;
+  /** The id of the `<ul>`, for the disclosure's `aria-controls`. */
+  listId: string;
+  /** The parent's accessible name, used to name the list. */
+  name?: string;
+  /** Whether the rail is folded, so the children live in a flyout. */
+  folded: boolean;
+  /** Opens or closes the list from the parent row. */
+  toggle(): void;
+}
+
+const NavRailSubContext = createContext<NavRailSubContextValue | null>(null);
+
+/** True for an item drawn inside a child list, so it is indented and quieter. */
+const NavRailNestedContext = createContext(false);
+
+/** True for an item drawn inside a folded flyout, where it keeps its label. */
+const NavRailFlyoutContext = createContext(false);
+
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * Sets `inert` on an element while it is out of sight.
+ *
+ * Passed as a prop, a boolean would be written differently by different React
+ * versions; set on the node, it is the attribute the browser reads.
+ */
+function useInert<T extends HTMLElement>(inert: boolean) {
+  const ref = useRef<T>(null);
+  useIsomorphicLayoutEffect(() => {
+    ref.current?.toggleAttribute('inert', inert);
+  }, [inert]);
+  return ref;
+}
+
+/**
+ * Whether a `NavRail.Sub`'s direct children include the active destination.
+ *
+ * Only the elements the caller passes are read: a child drawn by a wrapper
+ * component cannot be seen here, and the parent simply goes without its
+ * secondary marker. One level is the supported shape.
+ */
+function subHasActive(sub: ReactElement): boolean {
+  const children = (sub.props as { children?: ReactNode }).children;
+  return Children.toArray(children).some(
+    (child) => isValidElement(child) && (child.props as { active?: boolean }).active === true
+  );
+}
+
+/**
+ * Reads a row's state for focus movement and the pill.
+ *
+ * A child in a folded flyout is not part of the rail's own order: the flyout
+ * has its own reading order when focus is inside it, and the pill stays on the
+ * parent in the rail.
+ */
+function railRowState(row: HTMLElement, collapsed: boolean): RailRowState {
+  const branch = row.closest<HTMLElement>('[data-slot="nav-rail-branch"]');
+  const owns = branch !== null && row.parentElement === branch;
+  const sub = owns ? branch.querySelector<HTMLElement>(':scope > [data-slot="nav-rail-sub"]') : null;
+  const container = row.closest<HTMLElement>('[data-slot="nav-rail-sub"]');
+  const hidden = container ? collapsed || !container.hasAttribute('data-open') : false;
+  return {
+    active: row.hasAttribute('data-active'),
+    disabled: row.getAttribute('aria-disabled') === 'true' || row.hasAttribute('disabled'),
+    hidden,
+    branch: owns,
+    expanded: sub?.hasAttribute('data-open') ?? false,
+    childActive: row.hasAttribute('data-child-active'),
+    nested: container !== null,
+  };
+}
 
 export interface NavRailProps extends Omit<ComponentProps<'nav'>, 'className'> {
   /** Whether the rail is folded. Pass it with `onCollapsedChange` to hold the state yourself. */
@@ -303,11 +455,11 @@ function NavRailRoot({
 
     let frame = 0;
     let live = true;
-    let rows: HTMLElement[] = [];
-
     const place = () => {
       if (!live) return;
-      const active = box.querySelector<HTMLElement>('[data-slot="nav-rail-item"][data-active]');
+      const rows = [...box.querySelectorAll<HTMLElement>('[data-slot="nav-rail-item"]')];
+      const index = activeRowIndex(rows.map((row) => railRowState(row, collapsed)));
+      const active = index === null ? null : rows[index];
       if (!active) {
         pill.removeAttribute('data-ready');
         return;
@@ -342,16 +494,22 @@ function NavRailRoot({
     const observe = () => {
       observer.disconnect();
       observer.observe(box);
-      rows = [...box.querySelectorAll<HTMLElement>('[data-slot="nav-rail-item"]')];
-      rows.forEach((row) => observer.observe(row));
+      box
+        .querySelectorAll<HTMLElement>('[data-slot="nav-rail-item"]')
+        .forEach((row) => observer.observe(row));
+      // A child list opening changes the height of the rows below it without
+      // changing any row's own box, so the list itself is measured too.
+      box
+        .querySelectorAll<HTMLElement>('[data-slot="nav-rail-sub"]')
+        .forEach((sub) => observer.observe(sub));
     };
 
     observe();
     place();
 
-    // Which row is active is an attribute on a child, not a prop of the rail,
-    // so a mutation is what tells the pill to follow. Adding or removing rows
-    // is observed for the same reason.
+    // Which row is active, and whether a child list is open, are attributes on
+    // children rather than props of the rail, so a mutation is what tells the
+    // pill to follow. Adding or removing rows is observed for the same reason.
     const mutations = new MutationObserver(() => {
       observe();
       place();
@@ -360,7 +518,7 @@ function NavRailRoot({
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['data-active'],
+      attributeFilter: ['data-active', 'data-open'],
     });
 
     // A webfont arriving after the first paint changes the width of a label.
@@ -374,22 +532,77 @@ function NavRailRoot({
       observer.disconnect();
       mutations.disconnect();
     };
-  }, []);
+  }, [collapsed]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (!isRovingKey(event.key) || event.defaultPrevented) return;
+    if (event.defaultPrevented) return;
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    const row = target.closest<HTMLElement>('[data-slot="nav-rail-item"]');
-    if (!row) return;
     const host = root.current;
     if (!host) return;
 
     const rows = [...host.querySelectorAll<HTMLElement>('[data-slot="nav-rail-item"]')];
+    const toggle = target.closest<HTMLElement>('[data-slot="nav-rail-item-toggle"]');
+    // The disclosure sits beside the row rather than inside it, since a link
+    // cannot contain a button. Keyboard actions on it belong to the row it
+    // belongs to.
+    const row =
+      target.closest<HTMLElement>('[data-slot="nav-rail-item"]') ??
+      (toggle
+        ? (toggle
+            .closest<HTMLElement>('[data-slot="nav-rail-branch"]')
+            ?.querySelector<HTMLElement>(':scope > [data-slot="nav-rail-item"]') ?? null)
+        : null);
+    if (!row) return;
     const current = rows.indexOf(row);
     if (current < 0) return;
-    const disabled = rows.map((each) => each.getAttribute('aria-disabled') === 'true' || each.hasAttribute('disabled'));
-    const next = rovingIndex(event.key, current, disabled);
+
+    const states = rows.map((each) => railRowState(each, collapsed));
+    const branch = row.closest<HTMLElement>('[data-slot="nav-rail-branch"]');
+    const owns = branch !== null && row.parentElement === branch;
+    const sub = owns ? branch.querySelector<HTMLElement>(':scope > [data-slot="nav-rail-sub"]') : null;
+
+    // Right, Left and Escape act on the child list before the arrow keys do.
+    const action = subKeyAction(event.key, states[current]!);
+    if (action) {
+      event.preventDefault();
+      if (action === 'open') {
+        branch?.dispatchEvent(new Event('nav-rail-sub-open'));
+        // The list renders immediately, but its `inert` comes off in the
+        // layout effect that follows, so focus waits one frame.
+        window.requestAnimationFrame(() => {
+          sub?.querySelector<HTMLElement>('[data-slot="nav-rail-item"]')?.focus();
+        });
+      } else if (action === 'enter') {
+        sub?.querySelector<HTMLElement>('[data-slot="nav-rail-item"]')?.focus();
+      } else {
+        // A child closes the list it sits in and puts focus back on the row
+        // that owns it; a parent closes its own list and keeps focus.
+        const container = states[current]!.nested
+          ? row.closest<HTMLElement>('[data-slot="nav-rail-sub"]')
+          : null;
+        const owner = container ? container.parentElement : branch;
+        owner?.dispatchEvent(new Event('nav-rail-sub-close'));
+        if (container) {
+          owner?.querySelector<HTMLElement>(':scope > [data-slot="nav-rail-item"]')?.focus();
+        }
+      }
+      return;
+    }
+
+    if (!isRovingKey(event.key)) return;
+
+    // Folded, a child list is a flyout with its own reading order: focus inside
+    // one moves within it, and focus on the rail moves over the top-level rows.
+    const inside = row.closest<HTMLElement>('[data-slot="nav-rail-sub"]');
+    const scoped =
+      collapsed && inside
+        ? states.map((state, index) => ({
+            ...state,
+            hidden: rows[index]!.closest('[data-slot="nav-rail-sub"]') !== inside,
+          }))
+        : states;
+    const next = rovingRow(event.key, current, scoped);
     if (next === null) return;
     event.preventDefault();
     rows[next]?.focus();
@@ -616,16 +829,27 @@ export interface NavRailBadgeProps extends Omit<ComponentProps<'span'>, 'classNa
   className?: string;
 }
 
-/** Pulls the badges out of an item's children so the label can truncate on its own. */
-function splitBadges(children: ReactNode): { label: ReactNode; badges: ReactElement[] } {
+/**
+ * Pulls the badges and the child list out of an item's children.
+ *
+ * A badge sits beside the label and a `NavRail.Sub` becomes the row's own
+ * child list; everything else is the label, which is free to truncate.
+ */
+function splitItemChildren(children: ReactNode): {
+  label: ReactNode;
+  badges: ReactElement[];
+  sub?: ReactElement;
+} {
   const parts = Children.toArray(children);
   const label: ReactNode[] = [];
   const badges: ReactElement[] = [];
+  let sub: ReactElement | undefined;
   for (const part of parts) {
     if (isValidElement(part) && part.type === NavRailBadge) badges.push(part);
+    else if (isValidElement(part) && part.type === NavRailSub) sub ??= part;
     else label.push(part);
   }
-  return { label: label.length === 1 ? label[0] : label, badges };
+  return { label: label.length === 1 ? label[0] : label, badges, sub };
 }
 
 export interface NavRailItemProps extends Omit<ComponentProps<'a'>, 'href' | 'className' | 'children'> {
@@ -639,17 +863,41 @@ export interface NavRailItemProps extends Omit<ComponentProps<'a'>, 'href' | 'cl
   icon?: ReactNode;
   /**
    * What a screen reader calls the row once the label is folded away, and what
-   * the folded flyout shows. Taken from text children when they are plain text.
+   * the folded tooltip shows. Taken from text children when they are plain text.
    */
   label?: string;
   className?: string;
   children?: ReactNode;
 }
 
+/** A small chevron for the row that owns a child list. */
+function NavRailChevron({ open, className }: { open: boolean; className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={[className, open ? 'rotate-90' : undefined].filter(Boolean).join(' ')}
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
 /**
- * One destination: an icon, a label and optionally a `NavRail.Badge`. It is an
- * anchor with `href` and a button without one, so a client-side router can
- * draw links and a one-off action can be a button without a second part.
+ * One destination: an icon, a label and optionally a `NavRail.Badge` or a
+ * `NavRail.Sub` child list. It is an anchor with `href` and a button without
+ * one, so a client-side router can draw links and a one-off action can be a
+ * button without a second part.
+ *
+ * With a child list and an `href`, the row stays a link and a separate
+ * disclosure button beside it carries `aria-expanded` and `aria-controls`.
+ * Without an `href`, the row itself is the disclosure: pressing it opens the
+ * list rather than navigating.
  */
 function NavRailItem({
   href,
@@ -664,33 +912,142 @@ function NavRailItem({
 }: NavRailItemProps & RenderProp<'a'>) {
   const { collapsed, variant } = useNavRail('NavRail.Item');
   const slots = navRailVariants();
-  const { label: labelChildren, badges } = splitBadges(children);
+  const nested = useContext(NavRailNestedContext);
+  const inFlyout = useContext(NavRailFlyoutContext);
+  // A child list folded into a flyout is back on a wide surface: the children
+  // keep their labels even though the rail itself is a column of icons.
+  const iconsOnly = collapsed && !inFlyout;
+  const { label: labelChildren, badges, sub } = splitItemChildren(children);
   const name = label ?? textOf(labelChildren);
   const { onClick, ...rest } = props;
+
+  const branch = sub !== undefined;
+  const rowIsToggle = branch && href === undefined;
+  const activeDescendant = sub !== undefined && subHasActive(sub);
+
+  const listId = useId();
+  const subProps = sub ? (sub.props as NavRailSubProps) : undefined;
+  const [innerOpen, setInnerOpen] = useState(subProps?.defaultOpen ?? false);
+  const open = subProps?.open ?? innerOpen;
+  // The active destination may be a child that is not drawn: a closed list, or
+  // a folded flyout. The parent then holds the pill so the rail still shows a
+  // place, and takes the same weight as if it were the active row.
+  const holdsPill = activeDescendant && (collapsed || !open);
+  const solidActive = variant === 'solid' && (active || holdsPill);
+  // Folded, hover and focus show the flyout without changing the open state;
+  // Escape dismisses it until focus or the pointer leaves the parent.
+  const [dismissed, setDismissed] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
+  const container = useRef<HTMLDivElement>(null);
+
+  const liveSub = useRef({
+    open,
+    controlled: subProps?.open !== undefined,
+    onOpenChange: subProps?.onOpenChange,
+  });
+  liveSub.current = {
+    open,
+    controlled: subProps?.open !== undefined,
+    onOpenChange: subProps?.onOpenChange,
+  };
+
+  const setOpen = useCallback((next: boolean) => {
+    if (!liveSub.current.controlled) setInnerOpen(next);
+    if (next !== liveSub.current.open) liveSub.current.onOpenChange?.(next);
+    if (next) setDismissed(false);
+  }, []);
+  const toggleSub = useCallback(() => setOpen(!liveSub.current.open), [setOpen]);
+
+  const visible = open || (collapsed && !dismissed && (hovered || focusWithin));
+  const subContext = useMemo<NavRailSubContextValue | null>(
+    () =>
+      branch
+        ? { open, visible, listId, name, folded: collapsed, toggle: toggleSub }
+        : null,
+    [branch, open, visible, listId, name, collapsed, toggleSub]
+  );
+
+  // The rail's arrow keys ask the child list to open or close through an event
+  // on the branch, so the state stays here where the disclosure button is.
+  useEffect(() => {
+    const node = container.current;
+    if (!node || !branch) return;
+    const openSub = () => {
+      setDismissed(false);
+      setOpen(true);
+    };
+    const closeSub = () => {
+      setOpen(false);
+      setDismissed(true);
+    };
+    node.addEventListener('nav-rail-sub-open', openSub);
+    node.addEventListener('nav-rail-sub-close', closeSub);
+    return () => {
+      node.removeEventListener('nav-rail-sub-open', openSub);
+      node.removeEventListener('nav-rail-sub-close', closeSub);
+    };
+  }, [branch, setOpen]);
+
+  // A pinned flyout is a transient surface: a press anywhere else closes it.
+  useEffect(() => {
+    if (!branch || !collapsed || !open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const node = container.current;
+      if (!node) return;
+      if (event.target instanceof Node && node.contains(event.target)) return;
+      setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [branch, collapsed, open, setOpen]);
 
   const stop = (event: ReactMouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
   };
 
-  return useRender({
+  const rowClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (disabled) {
+      stop(event);
+      return;
+    }
+    onClick?.(event);
+    if (event.defaultPrevented) return;
+    if (rowIsToggle) {
+      event.preventDefault();
+      toggleSub();
+    }
+  };
+
+  const row = useRender({
     defaultTagName: href === undefined ? 'button' : 'a',
     render,
     props: mergeProps(
       {
         'data-slot': 'nav-rail-item',
         'data-active': active ? '' : undefined,
-        'data-solid-active': active && variant === 'solid' ? '' : undefined,
+        'data-solid-active': solidActive ? '' : undefined,
+        'data-holding': holdsPill ? '' : undefined,
         'data-disabled': disabled ? '' : undefined,
+        'data-icons-only': iconsOnly ? '' : undefined,
+        'data-nested': nested ? '' : undefined,
+        'data-flyout': inFlyout ? '' : undefined,
+        'data-branch': branch ? '' : undefined,
+        'data-child-active': activeDescendant ? '' : undefined,
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,
-        'aria-label': collapsed && name ? name : undefined,
+        'aria-label': iconsOnly && name ? name : undefined,
+        'aria-expanded': rowIsToggle ? open : undefined,
+        'aria-controls': rowIsToggle ? listId : undefined,
         href,
         type: href === undefined ? 'button' : undefined,
         disabled: href === undefined ? disabled : undefined,
         tabIndex: disabled ? -1 : undefined,
-        onClick: disabled ? stop : onClick,
-        className: slots.item({ className }),
+        onClick: disabled ? stop : branch ? rowClick : onClick,
+        className: slots.item({
+          className: [branch && !rowIsToggle ? 'pe-9' : undefined, className],
+        }),
         children: (
           <>
             {icon ? (
@@ -698,7 +1055,12 @@ function NavRailItem({
                 {icon}
               </span>
             ) : null}
-            <span aria-hidden={collapsed || undefined} data-slot="nav-rail-label" className={slots.label()}>
+            {/* A parent whose child is active but has no icon needs a marker of
+                its own; with an icon the tint is enough. */}
+            {activeDescendant && !icon ? (
+              <span aria-hidden="true" data-slot="nav-rail-active-descendant" className={slots.descendantDot()} />
+            ) : null}
+            <span aria-hidden={iconsOnly || undefined} data-slot="nav-rail-label" className={slots.label()}>
               {labelChildren}
             </span>
             {badges.length > 0 ? (
@@ -706,7 +1068,8 @@ function NavRailItem({
                 {badges}
               </span>
             ) : null}
-            {collapsed && name ? (
+            {rowIsToggle ? <NavRailChevron open={open} className={slots.chevron()} /> : null}
+            {iconsOnly && name && !branch ? (
               <span aria-hidden="true" data-slot="nav-rail-tooltip" className={slots.tooltip()}>
                 {name}
               </span>
@@ -717,8 +1080,142 @@ function NavRailItem({
       rest
     ),
   });
+
+  if (!branch) return row;
+
+  return (
+    <div
+      ref={container}
+      data-slot="nav-rail-branch"
+      data-solid-active={solidActive ? '' : undefined}
+      className={slots.branch()}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => {
+        setHovered(false);
+        setDismissed(false);
+      }}
+      onFocus={() => setFocusWithin(true)}
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (next instanceof Node && event.currentTarget.contains(next)) return;
+        setFocusWithin(false);
+        setDismissed(false);
+      }}
+    >
+      {row}
+      {rowIsToggle ? null : (
+        <button
+          type="button"
+          data-slot="nav-rail-item-toggle"
+          data-open={open ? '' : undefined}
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-label={name ? `${name} submenu` : 'Submenu'}
+          tabIndex={disabled ? -1 : undefined}
+          disabled={disabled}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleSub();
+          }}
+          className={slots.toggle()}
+        >
+          <NavRailChevron open={open} className={slots.chevron()} />
+        </button>
+      )}
+      {sub ? <NavRailSubContext.Provider value={subContext}>{sub}</NavRailSubContext.Provider> : null}
+    </div>
+  );
 }
 NavRailItem.displayName = 'NavRail.Item';
+
+export interface NavRailSubProps extends Omit<ComponentProps<'div'>, 'className' | 'children'> {
+  /**
+   * Whether the child list is open. Pass it with `onOpenChange` to hold the
+   * state yourself; it is separate from the rail's fold.
+   */
+  open?: boolean;
+  /** Whether it starts open when the caller does not hold it. Default `false`. */
+  defaultOpen?: boolean;
+  /** Called when the parent's disclosure asks to open or close the list. */
+  onOpenChange?: (open: boolean) => void;
+  /**
+   * What a screen reader calls the child list. Defaults to the parent row's
+   * name, which is usually the right thing to hear.
+   */
+  label?: string;
+  className?: string;
+  children?: ReactNode;
+}
+
+/**
+ * The child list under a destination: one level of nesting, indented inline
+ * when the rail is open and shown as a flyout beside it when the rail is
+ * folded. The children are ordinary `NavRail.Item`s, so they carry their own
+ * `href`, `active` and icons.
+ *
+ * The list is a real `<ul>` of links, not a menu: these are destinations, and
+ * the parent's disclosure button is what says whether it is open.
+ */
+function NavRailSub({
+  open: _open,
+  defaultOpen: _defaultOpen,
+  onOpenChange: _onOpenChange,
+  label,
+  className,
+  children,
+  render,
+  ...props
+}: NavRailSubProps & RenderProp<'div'>) {
+  const sub = useContext(NavRailSubContext);
+  const slots = navRailVariants();
+  // Only the parent row reads `open`, `defaultOpen` and `onOpenChange`: it owns
+  // the disclosure state, so they are taken here to keep them off the DOM.
+  void _open;
+  void _defaultOpen;
+  void _onOpenChange;
+  // Out of sight, the list leaves the tab order and the accessibility tree.
+  const ref = useInert<HTMLDivElement>(!sub?.visible);
+  if (!sub) throw new Error('NavRail.Sub must be used inside a NavRail.Item.');
+
+  const entries = Children.toArray(children).map((child, index) => (
+    <li key={index} data-slot="nav-rail-sub-entry" className={slots.subEntry()}>
+      {child}
+    </li>
+  ));
+
+  return useRender({
+    defaultTagName: 'div',
+    ref,
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'nav-rail-sub',
+        'data-open': sub.open ? '' : undefined,
+        'data-visible': sub.visible ? '' : undefined,
+        'data-layout': sub.folded ? 'flyout' : 'inline',
+        'aria-hidden': sub.visible ? undefined : true,
+        className: slots.sub({ className }),
+        children: (
+          <div data-slot="nav-rail-sub-panel" className={slots.subPanel()}>
+            <ul
+              id={sub.listId}
+              data-slot="nav-rail-sub-list"
+              aria-label={label ?? sub.name}
+              className={slots.subList()}
+            >
+              <NavRailNestedContext.Provider value>
+                <NavRailFlyoutContext.Provider value={sub.folded}>{entries}</NavRailFlyoutContext.Provider>
+              </NavRailNestedContext.Provider>
+            </ul>
+          </div>
+        ),
+      },
+      props
+    ),
+  });
+}
+NavRailSub.displayName = 'NavRail.Sub';
 
 export interface NavRailSeparatorProps extends Omit<ComponentProps<'div'>, 'className'> {
   className?: string;
@@ -762,6 +1259,7 @@ export const NavRail = Object.assign(NavRailRoot, {
   Trigger: NavRailTrigger,
   Group: NavRailGroup,
   Item: NavRailItem,
+  Sub: NavRailSub,
   Badge: NavRailBadge,
   Separator: NavRailSeparator,
   Footer: NavRailFooter,
@@ -773,6 +1271,7 @@ export {
   NavRailTrigger,
   NavRailGroup,
   NavRailItem,
+  NavRailSub,
   NavRailBadge,
   NavRailSeparator,
   NavRailFooter,

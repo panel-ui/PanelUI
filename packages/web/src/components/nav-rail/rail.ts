@@ -100,6 +100,104 @@ export function rovingIndex(key: string, current: number, disabled: readonly boo
   return null;
 }
 
+/**
+ * What the rail needs to know about one row to move focus and the pill.
+ *
+ * The component reads these off the DOM; keeping the shape here is what makes
+ * "which rows are reachable" and "where does the pill go" testable without a
+ * browser.
+ */
+export interface RailRowState {
+  /** It is the destination the reader is on. */
+  active: boolean;
+  /** It cannot be chosen, and the arrow keys step over it. */
+  disabled: boolean;
+  /** It is not drawn: inside a closed sub-list, or in a folded flyout that is away. */
+  hidden: boolean;
+  /** It owns a child list. */
+  branch: boolean;
+  /** Its child list is open. */
+  expanded: boolean;
+  /** One of its children is the active destination. */
+  childActive: boolean;
+  /** It sits inside a child list rather than at the top of the rail. */
+  nested: boolean;
+}
+
+/** The indexes of the rows that are drawn, in the order they are read. */
+export function visibleIndexes(rows: readonly RailRowState[]): number[] {
+  return rows.flatMap((row, index) => (row.hidden ? [] : [index]));
+}
+
+/**
+ * The row focus should move to, or `null` when there is nowhere to go.
+ *
+ * Hidden rows are left out entirely: a child in a closed sub-list is not a
+ * place the arrow keys can reach, and Home and End land on the first and last
+ * row that is actually on screen. The wrapping and disabled-row rules are the
+ * same ones the rail uses everywhere else, applied to what is visible.
+ */
+export function rovingRow(
+  key: string,
+  current: number,
+  rows: readonly RailRowState[]
+): number | null {
+  const visible = visibleIndexes(rows);
+  if (visible.length === 0) return null;
+  const next = rovingIndex(
+    key,
+    visible.indexOf(current),
+    visible.map((index) => rows[index]!.disabled)
+  );
+  return next === null ? null : visible[next]!;
+}
+
+/**
+ * Where the one pill is drawn.
+ *
+ * A visible active row wins. When the only active destination is a child in a
+ * closed list, its parent holds the pill instead: the reader still sees where
+ * they are on the rail rather than losing the marker with the label. The
+ * parent is a fallback, not a theft — as soon as the child is drawn it takes
+ * the pill back.
+ */
+export function activeRowIndex(rows: readonly RailRowState[]): number | null {
+  const direct = rows.findIndex((row) => row.active && !row.hidden);
+  if (direct >= 0) return direct;
+  const parent = rows.findIndex((row) => row.childActive && !row.hidden);
+  return parent >= 0 ? parent : null;
+}
+
+/** What a movement key asks of a parent row and its child list. */
+export type SubKeyAction = 'open' | 'enter' | 'close';
+
+/**
+ * The action a key takes on a row that owns a child list, or `null`.
+ *
+ * Right opens a closed list and steps into an open one, Left closes the list a
+ * row sits in (and a parent's own list), and Escape closes either. The rail
+ * only answers these keys when the row has something for them to act on, so
+ * Left on a plain destination is left to the browser.
+ */
+export function subKeyAction(
+  key: string,
+  row: Pick<RailRowState, 'branch' | 'expanded' | 'nested'>
+): SubKeyAction | null {
+  if (key === 'ArrowRight') {
+    if (!row.branch) return null;
+    return row.expanded ? 'enter' : 'open';
+  }
+  if (key === 'ArrowLeft') {
+    if (row.nested) return 'close';
+    if (row.branch && row.expanded) return 'close';
+    return null;
+  }
+  if (key === 'Escape') {
+    return row.nested || row.branch ? 'close' : null;
+  }
+  return null;
+}
+
 /** The text of a node when it is only text, for a name that has to survive collapsing. */
 export function textOf(node: unknown): string | undefined {
   if (typeof node === 'string' || typeof node === 'number' || typeof node === 'bigint') {

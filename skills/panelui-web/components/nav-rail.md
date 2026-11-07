@@ -18,6 +18,8 @@ It folds for a narrow window or a screen that needs the room, and folding is alw
 
 When the destinations are peers that swap one panel, use [Tabs](/docs/web/components/tabs). When they lead to other pages, a rail gives every page a permanent place and a visible current one.
 
+It can also hold one level of hierarchy: a destination with a child list, expanded inline while the rail is open and shown as a flyout beside it when the rail is folded. That is the shape of a file explorer, a project tree or settings with sub-pages. Deeper trees are the app’s own component rather than another `NavRail.Sub`.
+
 ## Usage
 
 ```tsx
@@ -55,6 +57,9 @@ When the destinations are peers that swap one panel, use [Tabs](/docs/web/compon
   <NavRail.Group>
     <NavRail.Item>
       <NavRail.Badge />
+      <NavRail.Sub>
+        <NavRail.Item />
+      </NavRail.Sub>
     </NavRail.Item>
   </NavRail.Group>
   <NavRail.Separator />
@@ -66,7 +71,8 @@ When the destinations are peers that swap one panel, use [Tabs](/docs/web/compon
 - `NavRail.Brand` — The product's mark and name. `icon` is the mark and is what remains when the rail folds; the children are the name. Give it an `href` to make it a link, and a `label` when the children are not plain text so the folded mark still has a name.
 - `NavRail.Trigger` — The button that folds and unfolds the rail. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.
 - `NavRail.Group` — A set of destinations under one `label`: the workspace, the account, the things you can do to it. Open, the label is a small uppercase heading; folded, it becomes a divider and stays the group's accessible name.
-- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it, in the weight the rail's `variant` asks for; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it.
+- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it, in the weight the rail’s `variant` asks for; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it. A `NavRail.Sub` child makes the row a parent: with an `href` it stays a link to its own page and a disclosure button beside it opens the list; without one the row itself is the disclosure.
+- `NavRail.Sub` — The child list under a destination: one level of ordinary `NavRail.Item`s, indented inline in the open rail and shown as a flyout beside a folded one. `defaultOpen`, or `open` and `onOpenChange`, holds the disclosure state, separately from whether the rail is folded. The children are a real `<ul>` of links, and the parent’s disclosure reports `aria-expanded` and `aria-controls`.
 - `NavRail.Badge` — A count beside a destination's label: unread, open, waiting. Folded, it becomes a dot on the corner of the icon, and only the first badge is drawn.
 - `NavRail.Separator` — A rule between groups of destinations that belong apart, such as the workspace and the account at the bottom.
 - `NavRail.Footer` — The bottom of the rail, held against the floor for account, settings, help or a sign-out action. Items in it take part in the same focus order and the same single pill.
@@ -131,7 +137,17 @@ Every part also takes the props of the element it renders, and a `className`.
 | `active` | `boolean` | `false` | Whether this is the page the reader is on. Sets `aria-current="page"` and lights the pill. |
 | `disabled` | `boolean` | `false` | Whether it can be chosen. A folded disabled row is also skipped by the arrow keys. |
 | `icon` | `ReactNode` | — | The mark before the label: what remains, with the label, when the rail folds. |
-| `label` | `string` | — | What a screen reader calls the row once the label is folded away, and what the folded flyout shows. Taken from text children when they are plain text. |
+| `label` | `string` | — | What a screen reader calls the row once the label is folded away, and what the folded tooltip shows. Taken from text children when they are plain text. |
+| `className` | `string` | — | — |
+
+#### `NavRailSubProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `open` | `boolean` | — | Whether the child list is open. Pass it with `onOpenChange` to hold the state yourself; it is separate from the rail's fold. |
+| `defaultOpen` | `boolean` | — | Whether it starts open when the caller does not hold it. Default `false`. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the parent's disclosure asks to open or close the list. |
+| `label` | `string` | — | What a screen reader calls the child list. Defaults to the parent row's name, which is usually the right thing to hear. |
 | `className` | `string` | — | — |
 
 #### `NavRailSeparatorProps`
@@ -148,17 +164,27 @@ Every part also takes the props of the element it renders, and a `className`.
 
 ## In a Server Component
 
-`NavRail` is a client component. A Server Component cannot read `NavRail.Header` off the import, so import each part by name: `NavRailHeader`, `NavRailBrand`, `NavRailTrigger`, `NavRailGroup`, `NavRailItem`, `NavRailBadge`, `NavRailSeparator`, `NavRailFooter`.
+`NavRail` is a client component. A Server Component cannot read `NavRail.Header` off the import, so import each part by name: `NavRailHeader`, `NavRailBrand`, `NavRailTrigger`, `NavRailGroup`, `NavRailItem`, `NavRailSub`, `NavRailBadge`, `NavRailSeparator`, `NavRailFooter`.
 
 ## Notes
 
+#### Nested destinations
+
+`NavRail.Sub` carries one level: a parent `NavRail.Item` and its child `NavRail.Item`s. That is the shape of a file explorer, a project tree or a settings section, and it is deliberately not recursive — a `NavRail.Sub` inside a child list is not supported, and a deeper tree belongs to the app’s own component.
+
+With the rail open, the list unfolds under the parent with a height and opacity transition, indented and marked with a rule so the children read as subordinate. Folded, the same list is a flyout beside the rail: hover or focus the parent to open it, Tab into its links, and press outside to close a pinned one. It is not clipped by the rail. The open state belongs to the sub-list and does not follow the rail’s fold: pass `defaultOpen`, or `open` with `onOpenChange`, on `NavRail.Sub`.
+
+A parent with an active child keeps a quiet secondary marker — its icon tinted primary, or a small dot when it has no icon — while the active child carries `aria-current="page"` and the single pill. When the child is folded away inside a closed list, the parent holds the pill so the rail still shows the current place.
+
 #### Two weights
 
-`variant="tonal"` is the default: a primary tint and a short accent bar, quiet enough to sit on screen all day. `variant="solid"` fills the active row with the primary colour and sets its text in `primary-foreground`, the same weight as the chosen item in [Tabs](/docs/web/components/tabs) and [Toolbar](/docs/web/components/toolbar). The choice applies to the open and folded rail together, including the count dot on an active folded row.
+`variant="tonal"` is the default: a primary tint and a short accent bar, quiet enough to sit on screen all day. `variant="solid"` fills the active row with the primary colour and sets its text in `primary-foreground`, the same weight as the chosen item in [Tabs](/docs/web/components/tabs) and [Toolbar](/docs/web/components/toolbar). The choice applies to the open and folded rail together, including the count dot on an active folded row and the active child inside a folded flyout.
 
 #### Keyboard
 
-Every enabled destination is an ordinary tab stop, so Tab walks the rail the way it walks the rest of the page. With focus on a row, Up and Down move between rows and wrap at the ends, stepping over disabled ones; Home and End go to the first and last. Enter or Space follows the row, whether it is an anchor or a button.
+Every enabled destination is an ordinary tab stop, so Tab walks the rail the way it walks the rest of the page. With focus on a row, Up and Down move between rows and wrap at the ends, stepping over disabled ones; Home and End go to the first and last visible row, skipping children hidden in a closed list. Enter or Space follows the row, whether it is an anchor or a button.
+
+On a parent, Right opens a closed child list and steps into an open one, Left closes the list the row sits in and returns focus to the parent, and Escape closes it from anywhere inside. Folded, the flyout has its own reading order: Up and Down move within it while focus is in the children. A press anywhere outside a pinned flyout closes it.
 
 `NavRail.Trigger` is a button with a name that says what it will do and `aria-expanded` for the state, so it is reachable and understandable from the keyboard alone. Arrow keys work the same folded and open.
 
@@ -168,7 +194,9 @@ With the system set to reduce motion, the pill appears on its destination withou
 
 #### Accessibility
 
-The root is a `<nav>` landmark, and `aria-label` names it when a page has more than one. The active row carries `aria-current="page"`. Folded, the visible label is `aria-hidden` and the row's name comes from `label`, or from its text children when they are plain text, so an icon-only row is never nameless and a screen reader does not hear the label twice. The folded flyout is decorative for the same reason. Group headings remain available as the group's name when they are drawn as dividers, and the trigger says "Expand navigation" or "Collapse navigation" rather than only showing an arrow.
+The root is a `<nav>` landmark, and `aria-label` names it when a page has more than one. The active row carries `aria-current="page"`. Folded, the visible label is `aria-hidden` and the row's name comes from `label`, or from its text children when they are plain text, so an icon-only row is never nameless and a screen reader does not hear the label twice. The folded tooltip is decorative for the same reason. Group headings remain available as the group's name when they are drawn as dividers, and the trigger says "Expand navigation" or "Collapse navigation" rather than only showing an arrow.
+
+A destination with children exposes the disclosure through `aria-expanded` and `aria-controls` — on the row itself when it has no `href`, and on the button beside it when the row is a link. The child list is a real `<ul>` of links named after the parent, not a `menu`, because these are navigation destinations. Out of sight it is `inert`, so its links leave the tab order and the accessibility tree until it is shown. The active child is the current page; the parent is a marker, not a second one.
 
 Counts live inside the row, so an open item is announced with its label and its count. Folded, the count becomes a dot and the row's name is its label; the dot is a visual signal rather than a second name.
 

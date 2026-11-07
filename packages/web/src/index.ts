@@ -1435,6 +1435,18 @@ export {
   type HexChartSkeletonProps,
 } from './components/hex-chart';
 export {
+  TableOfContents,
+  TableOfContentsTitle,
+  TableOfContentsList,
+  TableOfContentsItem,
+  TableOfContentsLink,
+  type TableOfContentsProps,
+  type TableOfContentsTitleProps,
+  type TableOfContentsListProps,
+  type TableOfContentsItemProps,
+  type TableOfContentsLinkProps,
+} from './components/table-of-contents';
+export {
   RingChart,
   RingChartHeader,
   RingChartRing,

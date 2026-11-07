@@ -35,6 +35,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Navigation
 
+- [Table of Contents](components/table-of-contents.md) — The sections of a long page as a quiet rail, with one mark that moves to what you are reading.
 - [Tabs](components/tabs.md) — A few views of one thing, one at a time, chosen from a row of tabs whose marker slides to the one chosen.
 
 ## Layout and structure

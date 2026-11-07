@@ -210,6 +210,29 @@
       ]
     },
     {
+      "name": "breadcrumb",
+      "type": "registry:component",
+      "title": "Breadcrumb",
+      "description": "The trail of links back up a hierarchy to the page you are on, with the middle folded away when the path runs long.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/breadcrumb/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/breadcrumb/index.tsx"
+        },
+        {
+          "path": "components/panelui/breadcrumb/collapse.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/breadcrumb/collapse.ts"
+        }
+      ]
+    },
+    {
       "name": "bubble-chart",
       "type": "registry:component",
       "title": "Bubble Chart",

@@ -35,6 +35,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Navigation
 
+- [Steps](components/steps.md) — A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.
 - [Tabs](components/tabs.md) — A few views of one thing, one at a time, chosen from a row of tabs whose marker slides to the one chosen.
 
 ## Layout and structure

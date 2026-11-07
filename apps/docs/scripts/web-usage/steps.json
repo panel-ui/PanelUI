@@ -1,0 +1,45 @@
+{
+  "slug": "steps",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 180
+  },
+  "intro": "Use it for a flow that moves forward one stop at a time: a checkout, a wizard, onboarding, an upload. Each stop is a circle with a number, a tick or a spinner, and the stops are joined by a line that fills as far as the flow has got.\n\nA stepper is not navigation and not a set of views. When the places are peers a reader should be able to look at in any order, use [Tabs](/docs/web/components/tabs). When they are separate pages worth linking to, use links. Steps is for a sequence with a beginning and an end, where the reader needs to know how much of it is behind them and how much is left.\n\nKeep it to three to five stops. A flow with twelve steps is not a stepper, it is a form with a progress bar.",
+  "usage": "<Steps value={step} onValueChange={setStep}>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Basket</Steps.Title>\n    </Steps.Trigger>\n  </Steps.Item>\n  <Steps.Item step={1}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Delivery</Steps.Title>\n    </Steps.Trigger>\n  </Steps.Item>\n  <Steps.Item step={2}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title>Payment</Steps.Title>\n    </Steps.Trigger>\n  </Steps.Item>\n</Steps>",
+  "anatomy": "<Steps>\n  <Steps.Item step={0}>\n    <Steps.Trigger>\n      <Steps.Indicator />\n      <Steps.Title />\n      <Steps.Description />\n    </Steps.Trigger>\n    <Steps.Separator />\n  </Steps.Item>\n</Steps>",
+  "parts": {
+    "Item": "One stop. Its `step` is its place in the flow, and its state is worked out by comparing that with the root's active step, so it never has to be kept in sync by hand. `completed` forces it done out of order, `loading` swaps the number for a spinner while it is the current step, `disabled` keeps it from being chosen, and `reachable` allows a step ahead to be chosen. The connector after it is drawn for you unless it is the last one or holds its own `Steps.Separator`.",
+    "Trigger": "The part that makes a step selectable. A completed step renders a `<button>` and takes you back to itself; the step the flow is on, and any after it, render as plain content — a control that would only press itself, or that has not been earned, is not a dead stop in the tab order. `render` draws it as something else, such as a router link.",
+    "Indicator": "The circle. It shows the position in the row, a tick once the step is complete, or a spinner while it is loading. Give it children to replace all of that with something of your own, such as an icon.",
+    "Title": "What the step is called. In a horizontal stepper it sits under the circle; in a vertical one it sits beside it.",
+    "Description": "A quieter line about the step: what it asks for, or what happened there. It runs on under the title without moving the connector.",
+    "Separator": "The connector to the next step. Every item draws one automatically, so this is only worth writing to dress a particular one; an item holding its own is given no second. It fills with the primary colour once the step before it is complete, so the line runs solid up to the flow and stays muted past it."
+  },
+  "examples": [
+    {
+      "title": "Up and down",
+      "description": "`orientation=\"vertical\"` runs the flow top to bottom, with the circle in a column of its own beside each label. The line drops from the circle to the next one. It is the shape for a flow in a narrow column, or one whose steps need a sentence each.",
+      "demo": "vertical",
+      "height": 320
+    },
+    {
+      "title": "A sentence for every stop",
+      "description": "A `Steps.Description` under each title says what the step asks for. In the horizontal layout the circle, the title and the line all stay where they are, so a longer description wraps without pushing the circles apart.",
+      "demo": "descriptions",
+      "height": 220
+    },
+    {
+      "title": "Held by you",
+      "description": "Pass `value` and `onValueChange` to hold the step yourself, here so the Back and Next buttons move the same flow the steps report. A completed step is also a button: pressing one takes the flow back to it.",
+      "demo": "controlled",
+      "height": 300
+    },
+    {
+      "title": "While a step is working",
+      "description": "`loading` on the current step swaps its number for a spinner, for the wait between finishing a stage and being able to go on. A completed step asked to load stays completed: the work there is done.",
+      "demo": "loading",
+      "height": 200
+    }
+  ],
+  "notes": "### Two directions\n\n`orientation=\"horizontal\"` lays the stops across a row with the labels under the circles and the connectors between them, at circle height. `vertical` lays them down a column with the circle beside each label and the connector dropping from one to the next. Which state is which, and which steps can be pressed, does not change with the direction.\n\n### The state is worked out, not told\n\nAn item compares its own `step` with the root's active one: behind is complete, level is current, ahead is still to come. The circle, the title and the connector after it all read that one answer, so two current steps, or a tick on a step that has not been reached, cannot be written. `completed` is the one way to say a later stage was finished out of order; it fills the connector after it but does not make the step current.\n\n### The connectors\n\nThe root counts the items it holds and each one draws the connector to the next, so there is no separator to place, order or leave hanging past the last stop. Items have to be direct children of `Steps`, or in a fragment inside it, for that count to see them. `separators={false}` turns the automatic ones off; a `Steps.Separator` written by hand is kept either way and is not doubled.\n\n### Keyboard and screen readers\n\nThese are not tabs, and deliberately have no tablist semantics: a stepper is a line to walk, not a set to browse, so the arrow keys do nothing. Completed steps are ordinary buttons in the tab order — Tab reaches them, Enter or Space takes the flow back — and the step the flow is on and those ahead of it are not buttons at all. The current trigger carries `aria-current=\"step\"`, and every trigger's name carries its position: a screen reader hears \"Payment, step 2 of 3\", and a completed one adds \"completed\". Pass `render={<a href=\"…\" />}` when a step is a page of its own; the link keeps its semantics and its address.\n\n### Reduced motion\n\nColours settle over 200ms and the connector fills over 300ms. With reduced motion asked for, both change at once and nothing moves — there is no travel to remove, only the pause before the new colour.\n\n### Built on\n\nNothing but React and Tailwind, and the collection's own [Spinner](/docs/web/components/spinner) for the loading state. It adds no dependency and no stylesheet: every colour is a theme token, so a stepper follows the theme it is put in."
+}

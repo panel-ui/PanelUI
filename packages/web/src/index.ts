@@ -471,6 +471,7 @@ export {
   NavRailFooter,
   navRailVariants,
   type NavRailProps,
+  type NavRailVariant,
   type NavRailHeaderProps,
   type NavRailBrandProps,
   type NavRailTriggerProps,

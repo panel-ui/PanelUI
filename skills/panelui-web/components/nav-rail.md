@@ -12,6 +12,8 @@ From npm the path is `panelui-web/nav-rail`. Install with `npx shadcn@latest add
 
 Use it for the destinations of a product that should stay visible while the work beside them changes: the sections of a studio, the parts of an editor, the pages of an account. It is a `<nav>` landmark, so there is one per set of destinations and its `aria-label` says which set.
 
+The active row has two weights. `variant="tonal"` (the default) keeps it as a quiet primary tint with a short accent bar, which suits a rail that is on screen all the time. `variant="solid"` fills it with the primary colour, the weight [Tabs](/docs/web/components/tabs) and [Toolbar](/docs/web/components/toolbar) give the item they have chosen.
+
 It folds for a narrow window or a screen that needs the room, and folding is always the app's decision. The rail never picks a width from the viewport itself, so a server-rendered page cannot jump after hydration. Pass `collapsed` and `onCollapsedChange` and drive it from a media query, a stored preference or a keyboard shortcut.
 
 When the destinations are peers that swap one panel, use [Tabs](/docs/web/components/tabs). When they lead to other pages, a rail gives every page a permanent place and a visible current one.
@@ -64,7 +66,7 @@ When the destinations are peers that swap one panel, use [Tabs](/docs/web/compon
 - `NavRail.Brand` — The product's mark and name. `icon` is the mark and is what remains when the rail folds; the children are the name. Give it an `href` to make it a link, and a `label` when the children are not plain text so the folded mark still has a name.
 - `NavRail.Trigger` — The button that folds and unfolds the rail. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.
 - `NavRail.Group` — A set of destinations under one `label`: the workspace, the account, the things you can do to it. Open, the label is a small uppercase heading; folded, it becomes a divider and stays the group's accessible name.
-- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it.
+- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it, in the weight the rail's `variant` asks for; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it.
 - `NavRail.Badge` — A count beside a destination's label: unread, open, waiting. Folded, it becomes a dot on the corner of the icon, and only the first badge is drawn.
 - `NavRail.Separator` — A rule between groups of destinations that belong apart, such as the workspace and the account at the bottom.
 - `NavRail.Footer` — The bottom of the rail, held against the floor for account, settings, help or a sign-out action. Items in it take part in the same focus order and the same single pill.
@@ -82,6 +84,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `onCollapsedChange` | `(collapsed: boolean) => void` | — | Called when the rail asks to fold or unfold. |
 | `expandedWidth` | `number \| string` | `'15rem'` | Its width open, as pixels or any CSS length. Default `15rem`. |
 | `collapsedWidth` | `number \| string` | `'3.5rem'` | Its width folded, as pixels or any CSS length. Default `3.5rem`. |
+| `variant` | `NavRailVariant` | `'tonal'` | How loudly the active row is drawn. `tonal` is a quiet primary tint with an accent bar; `solid` is the primary fill and `primary-foreground` text that Tabs, Toolbar and Inspector use. Default `tonal`. |
 | `className` | `string` | — | — |
 
 #### `NavRailHeaderProps`
@@ -148,6 +151,10 @@ Every part also takes the props of the element it renders, and a `className`.
 `NavRail` is a client component. A Server Component cannot read `NavRail.Header` off the import, so import each part by name: `NavRailHeader`, `NavRailBrand`, `NavRailTrigger`, `NavRailGroup`, `NavRailItem`, `NavRailBadge`, `NavRailSeparator`, `NavRailFooter`.
 
 ## Notes
+
+#### Two weights
+
+`variant="tonal"` is the default: a primary tint and a short accent bar, quiet enough to sit on screen all day. `variant="solid"` fills the active row with the primary colour and sets its text in `primary-foreground`, the same weight as the chosen item in [Tabs](/docs/web/components/tabs) and [Toolbar](/docs/web/components/toolbar). The choice applies to the open and folded rail together, including the count dot on an active folded row.
 
 #### Keyboard
 

@@ -48,6 +48,16 @@
  * flyout on hover and focus. The visible label is `aria-hidden` while folded,
  * so a screen reader hears the row once rather than twice.
  *
+ * ## Two weights
+ *
+ * `variant="tonal"`, the default, keeps the current place as a quiet primary
+ * tint with a short accent bar — the right volume for a rail that is part of
+ * the app's chrome and is on screen the whole time. `variant="solid"` fills the
+ * row with the primary colour and sets its text in `primary-foreground`, the
+ * same weight Tabs, Toolbar and Inspector give their chosen item, for an app
+ * that wants the rail to speak as loudly as the rest of the collection. The
+ * choice applies folded as well: the icon square and the count dot follow it.
+ *
  * ## The keyboard
  *
  * Every row is an ordinary tab stop, so Tab walks the rail the way it walks
@@ -91,6 +101,9 @@ import { indicatorBox, isRovingKey, railWidth, rovingIndex, textOf } from './rai
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
+
+/** How loudly the active row is drawn: a quiet tint, or the primary fill. */
+export type NavRailVariant = 'tonal' | 'solid';
 
 /** One curve for the width, the pill and the labels, so they move as one thing. */
 const EASE = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
@@ -143,6 +156,7 @@ const navRailVariants = tv({
       'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-medium outline-none select-none',
       'text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground',
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
+      'data-solid-active:text-primary-foreground! data-solid-active:hover:bg-transparent',
       'data-disabled:pointer-events-none data-disabled:opacity-40',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
       'group-data-[collapsed]/nav-rail:justify-center group-data-[collapsed]/nav-rail:gap-0 group-data-[collapsed]/nav-rail:px-0',
@@ -150,6 +164,7 @@ const navRailVariants = tv({
     icon: [
       'flex size-5 shrink-0 items-center justify-center text-muted-foreground',
       'transition-colors duration-150 group-hover/item:text-foreground group-data-[active]/item:text-primary',
+      'group-data-[solid-active]/item:text-primary-foreground',
       '[&_svg]:pointer-events-none [&_svg]:size-[18px]',
     ],
     label: [
@@ -166,6 +181,8 @@ const navRailVariants = tv({
       'inline-flex h-5 min-w-5 shrink-0 items-center justify-center overflow-hidden rounded-full px-1.5',
       'bg-foreground/[0.07] text-[11px] font-medium text-muted-foreground tabular-nums',
       'transition-colors duration-150 group-data-[active]/item:bg-primary/15 group-data-[active]/item:text-foreground',
+      'group-data-[solid-active]/item:bg-primary-foreground/20! group-data-[solid-active]/item:text-primary-foreground!',
+      'group-data-[collapsed]/nav-rail:group-data-[solid-active]/item:bg-primary-foreground!',
       // Folded, the count is a dot: the label is gone and a number would have
       // nowhere to sit, but the fact that something is waiting still reads.
       'group-data-[collapsed]/nav-rail:size-2 group-data-[collapsed]/nav-rail:min-w-0 group-data-[collapsed]/nav-rail:bg-primary group-data-[collapsed]/nav-rail:p-0 group-data-[collapsed]/nav-rail:text-[0px] group-data-[collapsed]/nav-rail:text-transparent',
@@ -183,7 +200,8 @@ const navRailVariants = tv({
     indicator: [
       'pointer-events-none absolute top-(--indicator-y) left-(--indicator-x) z-0 h-(--indicator-h) w-(--indicator-w) rounded-[10px]',
       'bg-primary/[0.12] opacity-0 ring-1 ring-primary/20 ring-inset',
-      "group-data-[collapsed]/nav-rail:before:hidden",
+      'group-data-[variant=solid]/nav-rail:bg-primary group-data-[variant=solid]/nav-rail:ring-0',
+      "group-data-[collapsed]/nav-rail:before:hidden group-data-[variant=solid]/nav-rail:before:hidden",
       "before:absolute before:inset-y-2.5 before:start-1 before:w-[3px] before:rounded-full before:bg-primary before:content-['']",
       'data-ready:opacity-100',
       'data-ready:transition-[left,top,width,height] data-ready:duration-300 data-ready:ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none',
@@ -193,6 +211,7 @@ const navRailVariants = tv({
 
 interface NavRailContextValue {
   collapsed: boolean;
+  variant: NavRailVariant;
   setCollapsed(next: boolean): void;
   toggle(): void;
 }
@@ -218,6 +237,12 @@ export interface NavRailProps extends Omit<ComponentProps<'nav'>, 'className'> {
   expandedWidth?: number | string;
   /** Its width folded, as pixels or any CSS length. Default `3.5rem`. */
   collapsedWidth?: number | string;
+  /**
+   * How loudly the active row is drawn. `tonal` is a quiet primary tint with an
+   * accent bar; `solid` is the primary fill and `primary-foreground` text that
+   * Tabs, Toolbar and Inspector use. Default `tonal`.
+   */
+  variant?: NavRailVariant;
   className?: string;
 }
 
@@ -231,6 +256,7 @@ function NavRailRoot({
   onCollapsedChange,
   expandedWidth = '15rem',
   collapsedWidth = '3.5rem',
+  variant = 'tonal',
   className,
   style,
   children,
@@ -254,8 +280,8 @@ function NavRailRoot({
   const toggle = useCallback(() => setCollapsed(!live.current.collapsed), [setCollapsed]);
 
   const context = useMemo<NavRailContextValue>(
-    () => ({ collapsed, setCollapsed, toggle }),
-    [collapsed, setCollapsed, toggle]
+    () => ({ collapsed, variant, setCollapsed, toggle }),
+    [collapsed, variant, setCollapsed, toggle]
   );
 
   const root = useRef<HTMLElement>(null);
@@ -377,6 +403,7 @@ function NavRailRoot({
       {
         'data-slot': 'nav-rail',
         'data-collapsed': collapsed ? '' : undefined,
+        'data-variant': variant,
         'aria-label': ariaLabel,
         className: slots.root({ className }),
         style: {
@@ -635,7 +662,7 @@ function NavRailItem({
   render,
   ...props
 }: NavRailItemProps & RenderProp<'a'>) {
-  const { collapsed } = useNavRail('NavRail.Item');
+  const { collapsed, variant } = useNavRail('NavRail.Item');
   const slots = navRailVariants();
   const { label: labelChildren, badges } = splitBadges(children);
   const name = label ?? textOf(labelChildren);
@@ -653,6 +680,7 @@ function NavRailItem({
       {
         'data-slot': 'nav-rail-item',
         'data-active': active ? '' : undefined,
+        'data-solid-active': active && variant === 'solid' ? '' : undefined,
         'data-disabled': disabled ? '' : undefined,
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,

@@ -262,6 +262,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'nav-rail/groups': dynamic(() => import('./nav-rail/groups')),
   'nav-rail/overview': dynamic(() => import('./nav-rail/overview')),
   'nav-rail/thumb': dynamic(() => import('./nav-rail/thumb')),
+  'nav-rail/variants': dynamic(() => import('./nav-rail/variants')),
   'not-found/dissolve': dynamic(() => import('./not-found/dissolve')),
   'not-found/outline': dynamic(() => import('./not-found/outline')),
   'not-found/page': dynamic(() => import('./not-found/page')),

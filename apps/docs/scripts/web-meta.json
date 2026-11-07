@@ -729,5 +729,14 @@
       "category": "navigation",
       "title": "Table of Contents"
     }
+  ],
+  "breadcrumb": [
+    "Breadcrumb",
+    "The trail of links back up a hierarchy to the page you are on, with the middle folded away when the path runs long.",
+    "react breadcrumb navigation path trail component",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation"
+    }
   ]
 }

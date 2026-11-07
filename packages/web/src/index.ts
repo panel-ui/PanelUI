@@ -460,6 +460,27 @@ export {
   type TabsContentProps,
 } from './components/tabs';
 export {
+  NavRail,
+  NavRailHeader,
+  NavRailBrand,
+  NavRailTrigger,
+  NavRailGroup,
+  NavRailItem,
+  NavRailBadge,
+  NavRailSeparator,
+  NavRailFooter,
+  navRailVariants,
+  type NavRailProps,
+  type NavRailHeaderProps,
+  type NavRailBrandProps,
+  type NavRailTriggerProps,
+  type NavRailGroupProps,
+  type NavRailItemProps,
+  type NavRailBadgeProps,
+  type NavRailSeparatorProps,
+  type NavRailFooterProps,
+} from './components/nav-rail';
+export {
   Message,
   MessageGroup,
   MessageAvatar,

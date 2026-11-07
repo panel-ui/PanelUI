@@ -1,0 +1,41 @@
+{
+  "slug": "nav-rail",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 420
+  },
+  "intro": "Use it for the destinations of a product that should stay visible while the work beside them changes: the sections of a studio, the parts of an editor, the pages of an account. It is a `<nav>` landmark, so there is one per set of destinations and its `aria-label` says which set.\n\nIt folds for a narrow window or a screen that needs the room, and folding is always the app's decision. The rail never picks a width from the viewport itself, so a server-rendered page cannot jump after hydration. Pass `collapsed` and `onCollapsedChange` and drive it from a media query, a stored preference or a keyboard shortcut.\n\nWhen the destinations are peers that swap one panel, use [Tabs](/docs/web/components/tabs). When they lead to other pages, a rail gives every page a permanent place and a visible current one.",
+  "usage": "<NavRail aria-label=\"Main\">\n  <NavRail.Header>\n    <NavRail.Brand icon={<LayersIcon />}>Meridian</NavRail.Brand>\n    <NavRail.Trigger />\n  </NavRail.Header>\n\n  <NavRail.Group label=\"Workspace\">\n    <NavRail.Item href=\"/\" active icon={<HomeIcon />}>\n      Overview\n    </NavRail.Item>\n    <NavRail.Item href=\"/inbox\" icon={<InboxIcon />}>\n      Inbox <NavRail.Badge>12</NavRail.Badge>\n    </NavRail.Item>\n  </NavRail.Group>\n\n  <NavRail.Footer>\n    <NavRail.Item href=\"/settings\" icon={<SettingsIcon />}>\n      Settings\n    </NavRail.Item>\n  </NavRail.Footer>\n</NavRail>",
+  "anatomy": "<NavRail>\n  <NavRail.Header>\n    <NavRail.Brand />\n    <NavRail.Trigger />\n  </NavRail.Header>\n  <NavRail.Group>\n    <NavRail.Item>\n      <NavRail.Badge />\n    </NavRail.Item>\n  </NavRail.Group>\n  <NavRail.Separator />\n  <NavRail.Footer />\n</NavRail>",
+  "parts": {
+    "Header": "The strip across the top of the rail, where a brand and the trigger usually sit. It becomes a column when the rail folds so the mark and the trigger each get their square.",
+    "Brand": "The product's mark and name. `icon` is the mark and is what remains when the rail folds; the children are the name. Give it an `href` to make it a link, and a `label` when the children are not plain text so the folded mark still has a name.",
+    "Trigger": "The button that folds and unfolds the rail. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.",
+    "Group": "A set of destinations under one `label`: the workspace, the account, the things you can do to it. Open, the label is a small uppercase heading; folded, it becomes a divider and stays the group's accessible name.",
+    "Item": "One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current=\"page\"` and moves the pill onto it; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it.",
+    "Badge": "A count beside a destination's label: unread, open, waiting. Folded, it becomes a dot on the corner of the icon, and only the first badge is drawn.",
+    "Separator": "A rule between groups of destinations that belong apart, such as the workspace and the account at the bottom.",
+    "Footer": "The bottom of the rail, held against the floor for account, settings, help or a sign-out action. Items in it take part in the same focus order and the same single pill."
+  },
+  "examples": [
+    {
+      "title": "Folded",
+      "description": "The same rail with `defaultCollapsed`. Rows become icon squares, the group headings become dividers and a badge becomes a dot. Every row keeps its accessible name, and shows it in a flyout on hover or focus.",
+      "demo": "collapsed",
+      "height": 480
+    },
+    {
+      "title": "Groups",
+      "description": "Groups keep related destinations together under a heading, and a `NavRail.Separator` marks the step from the workspace to the account. The active pill is one element for the whole rail, so it crosses a heading when the choice does.",
+      "demo": "groups",
+      "height": 460
+    },
+    {
+      "title": "Held by you",
+      "description": "Pass `collapsed` and `onCollapsedChange` to hold the fold yourself, here beside the same state on the page. The trigger in the rail reports through the pair too, so the two never disagree.",
+      "demo": "controlled",
+      "height": 440
+    }
+  ],
+  "notes": "### Keyboard\n\nEvery enabled destination is an ordinary tab stop, so Tab walks the rail the way it walks the rest of the page. With focus on a row, Up and Down move between rows and wrap at the ends, stepping over disabled ones; Home and End go to the first and last. Enter or Space follows the row, whether it is an anchor or a button.\n\n`NavRail.Trigger` is a button with a name that says what it will do and `aria-expanded` for the state, so it is reachable and understandable from the keyboard alone. Arrow keys work the same folded and open.\n\n### Reduced motion\n\nWith the system set to reduce motion, the pill appears on its destination without travelling, and the rail's width, the labels and the trigger's icon change without transitions. Nothing is lost: the pill is still the thing that says where you are.\n\n### Accessibility\n\nThe root is a `<nav>` landmark, and `aria-label` names it when a page has more than one. The active row carries `aria-current=\"page\"`. Folded, the visible label is `aria-hidden` and the row's name comes from `label`, or from its text children when they are plain text, so an icon-only row is never nameless and a screen reader does not hear the label twice. The folded flyout is decorative for the same reason. Group headings remain available as the group's name when they are drawn as dividers, and the trigger says \"Expand navigation\" or \"Collapse navigation\" rather than only showing an arrow.\n\nCounts live inside the row, so an open item is announced with its label and its count. Folded, the count becomes a dot and the row's name is its label; the dot is a visual signal rather than a second name.\n\n### Built on\n\nBase UI's `useRender` and `mergeProps` for the element each part draws, and React state, refs and effects for the fold and the pill. There is no headless navigation primitive underneath, and no other component in the collection is a dependency. Icons are whatever the app passes; the package does not ship an icon set.\n\n### Server rendering and width\n\nNo width is read from `window` and no collapse is chosen from the viewport. `expandedWidth` and `collapsedWidth` take pixels or any CSS length (default `15rem` and `3.5rem`), and the rail's width is written as a custom property. Measurement happens in a layout effect after mount, inside guards, so a server render draws the rail at the right size with no pill and the first client frame places it before paint."
+}

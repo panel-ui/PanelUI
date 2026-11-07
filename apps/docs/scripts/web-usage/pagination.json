@@ -1,0 +1,46 @@
+{
+  "slug": "pagination",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 160
+  },
+  "intro": "Use it under a table or a list that is longer than one screen, when the rows arrive a page at a time and a reader needs to reach a particular part of the set.\n\nIt never fetches and never slices. Give it how many pages there are, and either let it keep the page or pass `page` and `onPageChange` to hold it yourself; the rows are yours.\n\nThe run of numbers has a fixed width. `siblings` sets how many pages sit either side of the one you are on and `boundaries` how many stay pinned at each end, so a narrow column shows fewer numbers rather than a row that reshuffles as you move through it.\n\nFor moving between a few views of one thing, use [Tabs](/docs/web/components/tabs). When the pages have addresses of their own, pass `getPageHref` and every number becomes a real link that can be opened in another tab.",
+  "usage": "<Pagination count={12} page={page} onPageChange={setPage}>\n  <Pagination.Status page={page} pageSize={20} total={240} />\n</Pagination>",
+  "anatomy": "<Pagination>\n  <Pagination.Status />\n  <Pagination.Previous />\n  <Pagination.Item />\n  <Pagination.Link />\n  <Pagination.Ellipsis />\n  <Pagination.Summary />\n  <Pagination.Next />\n</Pagination>",
+  "parts": {
+    "Previous": "Back one page. With `label` it writes the word beside the arrow, which is what `simple` turns on. It is dead on the first page and does not loop to the last.",
+    "Next": "Forward one page. With `label` it writes the word beside the arrow. It is dead on the last page.",
+    "Item": "One numbered target. On the page being shown it carries `aria-current=\"page\"` and the solid primary marker, so the current page is spoken as state and not only painted. A screen reader calls it \"Go to page 3\" unless `aria-label` says otherwise.",
+    "Link": "A numbered target drawn as a real link, with an `href`. `getPageHref` on the root is what puts these in the run; used directly, it is the target for a pager you are assembling yourself. A plain click moves the component before the navigation lands; a click with a modifier is left to the browser, so opening a page in another tab does not change the one behind it.",
+    "Ellipsis": "The gap where the folded pages would be. It is a button, not punctuation: pressing it jumps `pageJump` pages in the direction of the gap, because a dead target among live ones reads as broken. The two gaps are told apart so the jump follows the row.",
+    "Status": "The line that says how much of the set is on screen: `1–20 of 143` when given `pageSize` and `total`, `3 / 12` when only the page is known, or children of your own while the size is still arriving.",
+    "Summary": "The `3 / 12` in the middle of `compact`, between the two arrows. A screen reader hears \"Page 3 of 12\"; the slash is for the eye."
+  },
+  "examples": [
+    {
+      "title": "Compact",
+      "description": "`variant=\"compact\"` puts the two arrows either side of `6 / 18`. It is the shape for a table footer or a phone, where a row of numbers would take more room than the data above it.",
+      "demo": "compact",
+      "height": 140
+    },
+    {
+      "title": "Simple",
+      "description": "`variant=\"simple\"` replaces the numbers with the words Previous and Next. Use it for a flow that is walked rather than jumped around in: a wizard, a set of cards, the pages of an article. The page count can sit beside it in a `Pagination.Status`.",
+      "demo": "simple",
+      "height": 140
+    },
+    {
+      "title": "Many pages",
+      "description": "A sixty-four-page archive at page 32. Each gap is a real target that jumps five pages, and the run stays seven wide from the first page to the last, so nothing moves under the hand.",
+      "demo": "many-pages",
+      "height": 140
+    },
+    {
+      "title": "With a status line",
+      "description": "`Pagination.Status` with `pageSize` and `total` says how much of the set is on screen. A page number alone does not answer the question people actually have, which is how much is left. It updates as the page changes.",
+      "demo": "with-status",
+      "height": 180
+    }
+  ],
+  "notes": "### The three variants\n\n`numbers` is the default: the run of pages with folded gaps. `compact` keeps the arrows and puts `3 / 12` between them. `simple` shows labelled Previous and Next and no page numbers.\n\nWhich one to use follows from how the reader moves. Jumping to a known place wants numbers; stepping through in order wants words; a footer with no room wants the compact line.\n\n### Folding\n\nThe run is a fixed width rather than a sliding window. `siblings`, default 1, is how many pages stay either side of the current one; `boundaries`, default 1, is how many stay pinned at each end. A gap of exactly one page is drawn as that page, because a gap marker wider than the number it hides is a worse trade than the number.\n\n`pageJump`, default 5, is how far a press on a gap moves. It is clamped to the set, so a gap near the end never asks for a page that does not exist.\n\n### Sizes\n\n`size=\"sm\"` is 32px per target for a dense table footer; the default is 36px. The row tightens, but the target stays a comfortable square, and the gap between targets shrinks with it.\n\n### Links\n\nPass `getPageHref` and every numbered target is drawn as an `<a href>` instead of a button, which is what a pager backed by real URLs wants: the pages can be opened in another tab, shared, and followed without JavaScript. A plain click still moves the component first, so a router or a caller holding the page updates before the navigation lands; a modified click is left to the browser. `Pagination.Link` is the part underneath, and can be used directly in a row you assemble yourself.\n\n### Keyboard\n\nEvery part is a real control, so Tab moves through the row, Shift+Tab moves back, and Enter or Space presses the focused target. A link part also takes Enter and can be opened in another tab from its context menu.\n\nAn arrow that is dead at an end stays in the tab order with `aria-disabled`, so a keyboard user hears that the control exists and is unavailable rather than finding the row shorter than it looked. Pressing it does nothing.\n\n### Accessibility\n\nThe root is a `nav` labelled \"Pagination\" unless `aria-label` says otherwise, and the targets are a list. The current page carries `aria-current=\"page\"`. Every gap has a label such as \"Jump forward 5 pages\", and the arrows say \"Previous page\" and \"Next page\" even when their visible label is a glyph.\n\nWhen there is more than one pager on a page — one above a table and one below it — give each its own `aria-label` so a screen reader can tell them apart.\n\n### Motion\n\nThe only movement is the colour of a target's background on hover or focus, over 150ms. With reduced motion turned on, even that transition is dropped; nothing slides.\n\n### Built on\n\nNative `nav`, `ul`, `button` and `a` elements, with no headless library in between. The range arithmetic lives in a sibling `pagination-range.ts` and is exported as `paginationRange`, `paginationSpan` and `clampPage` for a caller that needs the same run for a control of its own."
+}

@@ -1060,6 +1060,30 @@
       ]
     },
     {
+      "name": "pagination",
+      "type": "registry:component",
+      "title": "Pagination",
+      "description": "Page controls for a long result set: the pages near you, the gaps between them, and a way across.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/pagination/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/pagination/index.tsx"
+        },
+        {
+          "path": "components/panelui/pagination/pagination-range.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/pagination/pagination-range.ts"
+        }
+      ]
+    },
+    {
       "name": "pie-chart",
       "type": "registry:component",
       "title": "Pie Chart",

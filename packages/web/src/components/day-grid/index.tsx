@@ -298,7 +298,11 @@ function DayGridRoot({
     else if (event.key === 'Home') next = 0;
     else if (event.key === 'End') next = cells.length - 1;
     if (next === undefined || next < 0 || next >= cells.length) return;
+    // Home or End on the day that already has focus is not a move. Swallow the
+    // key so the page does not scroll, but report nothing: a caller that clears
+    // the selection when the same day is pressed again would lose it here.
     event.preventDefault();
+    if (next === index) return;
     nodes.current[next]?.focus();
     onValueChange?.(next);
   };

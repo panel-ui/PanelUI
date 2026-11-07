@@ -35,6 +35,7 @@ Generated from the collection's source. Read a component's own file before using
 
 ## Navigation
 
+- [Scroll Header](components/scroll-header.md) — A page title with room around it that hands over to a compact sticky bar as the reader scrolls.
 - [Tabs](components/tabs.md) — A few views of one thing, one at a time, chosen from a row of tabs whose marker slides to the one chosen.
 
 ## Layout and structure

@@ -1491,6 +1491,31 @@
       ]
     },
     {
+      "name": "scroll-header",
+      "type": "registry:component",
+      "title": "Scroll Header",
+      "description": "A page title with room around it that hands over to a compact sticky bar as the reader scrolls.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/scroll-header/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/scroll-header/index.tsx"
+        },
+        {
+          "path": "components/panelui/scroll-header/scroll-header-math.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/scroll-header/scroll-header-math.ts"
+        }
+      ]
+    },
+    {
       "name": "select",
       "type": "registry:component",
       "title": "Select",

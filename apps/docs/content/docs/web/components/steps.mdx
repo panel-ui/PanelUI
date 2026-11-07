@@ -1,0 +1,401 @@
+---
+title: Steps
+description: A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.
+status: new
+---
+
+<ComponentPreview name="steps/overview" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { Steps } from '@/components/panelui/steps';
+
+const STOPS = ['Basket', 'Delivery', 'Payment', 'Review'];
+
+export default function StepsOverview() {
+  return (
+    <Steps defaultValue={1} className="max-w-lg">
+      {STOPS.map((title, at) => (
+        <Steps.Item key={title} step={at}>
+          <Steps.Trigger>
+            <Steps.Indicator />
+            <Steps.Title>{title}</Steps.Title>
+          </Steps.Trigger>
+        </Steps.Item>
+      ))}
+    </Steps>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for a flow that moves forward one stop at a time: a checkout, a wizard, onboarding, an upload. Each stop is a circle with a number, a tick or a spinner, and the stops are joined by a line that fills as far as the flow has got.
+
+A stepper is not navigation and not a set of views. When the places are peers a reader should be able to look at in any order, use [Tabs](/docs/web/components/tabs). When they are separate pages worth linking to, use links. Steps is for a sequence with a beginning and an end, where the reader needs to know how much of it is behind them and how much is left.
+
+Keep it to three to five stops. A flow with twelve steps is not a stepper, it is a form with a progress bar.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/steps.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/steps` instead of `@/components/panelui/steps`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Add the component it is built on: [Spinner](/docs/web/components/spinner).
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/steps/`, one file for each below:
+
+<RegistrySource name="steps" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Steps } from "@/components/panelui/steps"
+```
+
+```tsx
+<Steps value={step} onValueChange={setStep}>
+  <Steps.Item step={0}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Basket</Steps.Title>
+    </Steps.Trigger>
+  </Steps.Item>
+  <Steps.Item step={1}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Delivery</Steps.Title>
+    </Steps.Trigger>
+  </Steps.Item>
+  <Steps.Item step={2}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title>Payment</Steps.Title>
+    </Steps.Trigger>
+  </Steps.Item>
+</Steps>
+```
+
+## Composition
+
+```tsx
+<Steps>
+  <Steps.Item step={0}>
+    <Steps.Trigger>
+      <Steps.Indicator />
+      <Steps.Title />
+      <Steps.Description />
+    </Steps.Trigger>
+    <Steps.Separator />
+  </Steps.Item>
+</Steps>
+```
+
+- **`Steps.Item`** — One stop. Its `step` is its place in the flow, and its state is worked out by comparing that with the root's active step, so it never has to be kept in sync by hand. `completed` forces it done out of order, `loading` swaps the number for a spinner while it is the current step, `disabled` keeps it from being chosen, and `reachable` allows a step ahead to be chosen. The connector after it is drawn for you unless it is the last one or holds its own `Steps.Separator`.
+- **`Steps.Trigger`** — The part that makes a step selectable. A completed step renders a `<button>` and takes you back to itself; the step the flow is on, and any after it, render as plain content — a control that would only press itself, or that has not been earned, is not a dead stop in the tab order. `render` draws it as something else, such as a router link.
+- **`Steps.Indicator`** — The circle. It shows the position in the row, a tick once the step is complete, or a spinner while it is loading. Give it children to replace all of that with something of your own, such as an icon.
+- **`Steps.Title`** — What the step is called. In a horizontal stepper it sits under the circle; in a vertical one it sits beside it.
+- **`Steps.Description`** — A quieter line about the step: what it asks for, or what happened there. It runs on under the title without moving the connector.
+- **`Steps.Separator`** — The connector to the next step. Every item draws one automatically, so this is only worth writing to dress a particular one; an item holding its own is given no second. It fills with the primary colour once the step before it is complete, so the line runs solid up to the flow and stays muted past it.
+
+## Examples
+
+### Up and down
+
+`orientation="vertical"` runs the flow top to bottom, with the circle in a column of its own beside each label. The line drops from the circle to the next one. It is the shape for a flow in a narrow column, or one whose steps need a sentence each.
+
+<ComponentPreview name="steps/vertical" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { Steps } from '@/components/panelui/steps';
+
+const STOPS = [
+  { title: 'Order placed', description: '14 March, 09:12' },
+  { title: 'Packed', description: '14 March, 16:40' },
+  { title: 'On its way', description: 'Out for delivery today' },
+  { title: 'Delivered', description: 'Signature required' },
+];
+
+export default function StepsVertical() {
+  return (
+    <Steps defaultValue={2} orientation="vertical" className="max-w-sm">
+      {STOPS.map((stop, at) => (
+        <Steps.Item key={stop.title} step={at}>
+          <Steps.Trigger>
+            <Steps.Indicator />
+            <Steps.Title>{stop.title}</Steps.Title>
+            <Steps.Description>{stop.description}</Steps.Description>
+          </Steps.Trigger>
+        </Steps.Item>
+      ))}
+    </Steps>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A sentence for every stop
+
+A `Steps.Description` under each title says what the step asks for. In the horizontal layout the circle, the title and the line all stay where they are, so a longer description wraps without pushing the circles apart.
+
+<ComponentPreview name="steps/descriptions" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { Steps } from '@/components/panelui/steps';
+
+const STOPS = [
+  { title: 'Connect', description: 'Sign in to the repository' },
+  { title: 'Configure', description: 'Choose the branch and the build' },
+  { title: 'Deploy', description: 'Waiting for the first build' },
+  { title: 'Verify', description: 'Check the live address' },
+];
+
+export default function StepsDescriptions() {
+  return (
+    <Steps defaultValue={1} className="max-w-2xl">
+      {STOPS.map((stop, at) => (
+        <Steps.Item key={stop.title} step={at}>
+          <Steps.Trigger>
+            <Steps.Indicator />
+            <Steps.Title>{stop.title}</Steps.Title>
+            <Steps.Description>{stop.description}</Steps.Description>
+          </Steps.Trigger>
+        </Steps.Item>
+      ))}
+    </Steps>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Held by you
+
+Pass `value` and `onValueChange` to hold the step yourself, here so the Back and Next buttons move the same flow the steps report. A completed step is also a button: pressing one takes the flow back to it.
+
+<ComponentPreview name="steps/controlled" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { Steps } from '@/components/panelui/steps';
+
+const STOPS = [
+  { title: 'Basket', body: 'Three items — a linen shirt, two pairs of socks and a notebook. £42.80.' },
+  { title: 'Delivery', body: 'Standard delivery to 14 Marlborough Road, arriving Thursday. £3.95.' },
+  { title: 'Payment', body: 'Paid with the card ending 4417. A receipt is on its way to your inbox.' },
+];
+
+export default function StepsControlled() {
+  const [active, setActive] = useState(0);
+  const stop = STOPS[active]!;
+
+  return (
+    <div className="flex w-full max-w-lg flex-col gap-5">
+      <Steps value={active} onValueChange={setActive}>
+        {STOPS.map((item, at) => (
+          <Steps.Item key={item.title} step={at}>
+            <Steps.Trigger>
+              <Steps.Indicator />
+              <Steps.Title>{item.title}</Steps.Title>
+            </Steps.Trigger>
+          </Steps.Item>
+        ))}
+      </Steps>
+      <p className="min-h-10 rounded-xl border bg-card px-4 py-3 text-sm leading-5 text-muted-foreground">
+        {stop.body}
+      </p>
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" disabled={active === 0} onClick={() => setActive(active - 1)}>
+          <ArrowLeftIcon />
+          Back
+        </Button>
+        <Button size="sm" disabled={active === STOPS.length - 1} onClick={() => setActive(active + 1)}>
+          Next
+          <ArrowRightIcon />
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### While a step is working
+
+`loading` on the current step swaps its number for a spinner, for the wait between finishing a stage and being able to go on. A completed step asked to load stays completed: the work there is done.
+
+<ComponentPreview name="steps/loading" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { Steps } from '@/components/panelui/steps';
+
+const STOPS = ['Choose files', 'Upload', 'Process', 'Done'];
+
+export default function StepsLoading() {
+  return (
+    <Steps defaultValue={1} className="max-w-xl">
+      {STOPS.map((title, at) => (
+        <Steps.Item key={title} step={at} loading={at === 1}>
+          <Steps.Trigger>
+            <Steps.Indicator />
+            <Steps.Title>{title}</Steps.Title>
+            <Steps.Description>
+              {at === 0 ? '3 files' : at === 1 ? 'Uploading 12 of 38' : at === 2 ? 'Not started' : '—'}
+            </Steps.Description>
+          </Steps.Trigger>
+        </Steps.Item>
+      ))}
+    </Steps>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Steps
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | — | The active step, when the caller holds it. |
+| `defaultValue` | `number` | `0` | The step it starts on, when the caller does not. Default `0`. |
+| `onValueChange` | `(value: number) => void` | — | Called with the step chosen, whether by a trigger or by your own controls. |
+| `orientation` | `StepsOrientation` | `'horizontal'` | Which way the flow runs. Default `horizontal`. |
+| `separators` | `boolean` | `true` | Draw the connector between one step and the next. On by default. An item holding its own `Steps.Separator` is left alone either way, so this is for a stepper that wants no connectors at all. |
+| `className` | `string` | — | Classes for the row, or column, that holds the steps. |
+
+### Steps.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `step` | `number` | — | This step's position in the flow, as you number it. |
+| `completed` | `boolean` | `false` | Force it complete, whatever the active step is. |
+| `disabled` | `boolean` | `false` | Keep it from being chosen, and quiet its trigger. |
+| `loading` | `boolean` | `false` | Show a spinner in the indicator while this is the active step. |
+| `reachable` | `boolean` | `false` | Let this step be chosen while it is still ahead of the active one. For a flow that can be entered at any point; without it only steps already reached are pressable. |
+| `className` | `string` | — | Classes for the box holding the trigger and its connector. |
+
+### Steps.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the button, or the element `render` draws. |
+| `render` | `useRender.ComponentProps<'button'>['render']` | — | Draw the trigger as another element, or compose it with a component: `render={<a href="/step-2" />}`. The step's classes, handlers and announcement are put on it. |
+
+### Steps.Indicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the circle. |
+| `render` | `useRender.ComponentProps<'span'>['render']` | — | Draw it as another element, or compose it with a component. |
+
+### Steps.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the step's name. |
+| `render` | `useRender.ComponentProps<'span'>['render']` | — | Draw it as another element, such as a heading: `render={<h3 />}`. |
+
+### Steps.Description
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the quieter line under the name. |
+| `render` | `useRender.ComponentProps<'span'>['render']` | — | Draw it as another element. |
+
+### Steps.Separator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the connector. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Two directions
+
+`orientation="horizontal"` lays the stops across a row with the labels under the circles and the connectors between them, at circle height. `vertical` lays them down a column with the circle beside each label and the connector dropping from one to the next. Which state is which, and which steps can be pressed, does not change with the direction.
+
+### The state is worked out, not told
+
+An item compares its own `step` with the root's active one: behind is complete, level is current, ahead is still to come. The circle, the title and the connector after it all read that one answer, so two current steps, or a tick on a step that has not been reached, cannot be written. `completed` is the one way to say a later stage was finished out of order; it fills the connector after it but does not make the step current.
+
+### The connectors
+
+The root counts the items it holds and each one draws the connector to the next, so there is no separator to place, order or leave hanging past the last stop. Items have to be direct children of `Steps`, or in a fragment inside it, for that count to see them. `separators={false}` turns the automatic ones off; a `Steps.Separator` written by hand is kept either way and is not doubled.
+
+### Keyboard and screen readers
+
+These are not tabs, and deliberately have no tablist semantics: a stepper is a line to walk, not a set to browse, so the arrow keys do nothing. Completed steps are ordinary buttons in the tab order — Tab reaches them, Enter or Space takes the flow back — and the step the flow is on and those ahead of it are not buttons at all. The current trigger carries `aria-current="step"`, and every trigger's name carries its position: a screen reader hears "Payment, step 2 of 3", and a completed one adds "completed". Pass `render={<a href="…" />}` when a step is a page of its own; the link keeps its semantics and its address.
+
+### Reduced motion
+
+Colours settle over 200ms and the connector fills over 300ms. With reduced motion asked for, both change at once and nothing moves — there is no travel to remove, only the pause before the new colour.
+
+### Built on
+
+Nothing but React and Tailwind, and the collection's own [Spinner](/docs/web/components/spinner) for the loading state. It adds no dependency and no stylesheet: every colour is a theme token, so a stepper follows the theme it is put in.
+
+### Server Components
+
+`Steps` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Steps.Item` off the import, so each part is also exported by name: `StepsItem` is `Steps.Item`, and so on for the others.
+
+```tsx
+import { Steps, StepsItem, StepsTrigger, StepsIndicator, StepsTitle, StepsDescription, StepsSeparator } from "@/components/panelui/steps"
+```

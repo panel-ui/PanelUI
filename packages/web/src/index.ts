@@ -485,6 +485,27 @@ export {
   type NavRailFooterProps,
 } from './components/nav-rail';
 export {
+  Steps,
+  StepsItem,
+  StepsTrigger,
+  StepsIndicator,
+  StepsTitle,
+  StepsDescription,
+  StepsSeparator,
+  stepsVariants,
+  deriveStepState,
+  stepAnnouncement,
+  type StepsProps,
+  type StepsItemProps,
+  type StepsTriggerProps,
+  type StepsIndicatorProps,
+  type StepsTitleProps,
+  type StepsDescriptionProps,
+  type StepsSeparatorProps,
+  type StepState,
+  type StepsOrientation,
+} from './components/steps';
+export {
   Message,
   MessageGroup,
   MessageAvatar,

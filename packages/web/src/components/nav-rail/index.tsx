@@ -1564,6 +1564,12 @@ function NavRailItem({
               </span>
             ) : null}
             {rowIsToggle && !collapsed ? <NavRailChevron open={open} className={slots.chevron()} /> : null}
+            {/* Folded, a branch with no mark of its own would be an empty
+                square. A centred chevron is the one affordance that still says
+                it opens a list. */}
+            {iconsOnly && branch && !icon && badges.length === 0 ? (
+              <NavRailChevron open={visible} className={slots.chevron()} />
+            ) : null}
             {hasTooltip && tooltipAt ? (
               <span
                 aria-hidden="true"

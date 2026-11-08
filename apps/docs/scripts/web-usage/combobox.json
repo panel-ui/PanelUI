@@ -1,0 +1,47 @@
+{
+  "slug": "combobox",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 300
+  },
+  "intro": "Use it to choose from a list of options the reader already knows the name of: a city, a repository, a tag. Typing narrows the list, so the hand stays on the keyboard and a long list stays short.\n\nThe difference from [Select](/docs/web/components/select) is where the typing happens. A select is a button that opens a list, and its optional filter lives inside that list once it opens. A combobox is the field itself: the options appear while the reader is already typing.\n\nUse a select when the options are few enough to recognise by scrolling, and a combobox when there are enough of them that the name is easier to type than the list is to read.",
+  "usage": "<Combobox value={framework} onValueChange={setFramework} placeholder=\"Search frameworks\" clearable>\n  <Combobox.Item value=\"expo\" label=\"Expo\" />\n  <Combobox.Item value=\"next\" label=\"Next.js\" />\n</Combobox>",
+  "anatomy": "<Combobox>\n  <Combobox.Item value=\"…\" label=\"…\" />\n  <Combobox.Group label=\"…\">\n    <Combobox.Item value=\"…\" label=\"…\" />\n  </Combobox.Group>\n</Combobox>",
+  "parts": {
+    "Item": "One option. `value` identifies it, `label` is what is shown and what the default filter matches on, `description` adds a second line, `start` draws something before the label, and `disabled` keeps it listed but unselectable.",
+    "Group": "A titled run of options. Presentational only: a grouped Combobox reports the same values a flat one would, and a group with nothing left in it disappears from the filtered list."
+  },
+  "examples": [
+    {
+      "title": "Grouped options",
+      "description": "Options under headings. Typing drops a group once the query empties it, rather than leaving its heading over nothing.",
+      "demo": "grouped",
+      "height": 260
+    },
+    {
+      "title": "Several at once",
+      "description": "`mode=\"multiple\"` draws each pick as a removable chip in front of the input and keeps the list open between picks.",
+      "demo": "multiple",
+      "height": 300
+    },
+    {
+      "title": "Values it does not know about",
+      "description": "`allowCustomValue` keeps whatever was typed when it matches no option, so the list suggests rather than restricts. Press Enter to add it.",
+      "demo": "custom",
+      "height": 300
+    },
+    {
+      "title": "Results from a server",
+      "description": "`filter={false}` stops the field filtering again, for results already matched elsewhere. Hold the text with `inputValue` and `onInputValueChange`, and show `loading` while the request is out.",
+      "demo": "async",
+      "height": 320
+    },
+    {
+      "title": "Expanding in place",
+      "description": "`presentation=\"inline\"` puts the list in normal layout flow, pushing what is below it down instead of covering it.",
+      "demo": "inline",
+      "height": 320
+    }
+  ],
+  "notes": "### One value or several\n\n`mode=\"multiple\"` draws the chosen options as removable chips in front of the input and keeps the list open between picks, so several can be taken in a row. The value is an array there and a single string otherwise: the type follows `mode`, so nothing has to be cast.\n\nA chip can be removed with its ✕, or from the keyboard: press Left Arrow from the start of the input to reach the chips, then Backspace or Delete to take one out.\n\n### Filtering, and turning it off\n\nFiltering happens in the component by default, matching case-insensitively on any part of an option's label. Pass a function to `filter` to match on something else — a description, an alias list, an initialism.\n\nPass `filter={false}` when options come from a server that is doing the matching itself. The field then shows exactly what it was given, because a second filter over results it cannot see the query behind would only remove correct answers. Pair it with the controlled `inputValue` / `onInputValueChange` so the query can drive the request, and with `loading` so the list says it is working rather than saying there are no matches.\n\n### Values it does not know about\n\n`allowCustomValue` lets the typed text become the value when it matches no option, committed on Enter. The list becomes a set of suggestions rather than the set of legal answers, which is what a tag field is.\n\n### Overlay or inline\n\n`overlay` (the default) floats the list above the page, anchored under the field and flipped above it when there is no room below; nothing else on the screen moves. `contentWidth` and `offset` apply there only.\n\n`inline` expands the list in normal layout flow instead, pushing what is below it down. Reach for it in a form where nothing should be covered.\n\n### Width\n\nAn overlay list is as wide as the field by default. `contentWidth=\"content\"` sizes it to the longest option, and a number sets an exact width; a list wider than the field stays on screen by moving left or right.\n\n### Keyboard\n\nThe field is a combobox: typing filters, the arrow keys move through the options, Enter chooses the highlighted one, and Escape closes the list. Enter also takes the typed text when `allowCustomValue` is on and nothing matches it.\n\n### Forms\n\nPut it in a [Field](/docs/web/components/field) to give it a label and a line of help, and pass `name` to send the value with the form. In `multiple` mode each chosen value is sent as its own entry."
+}

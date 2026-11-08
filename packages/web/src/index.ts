@@ -1570,3 +1570,14 @@ export {
   type BreadcrumbSeparatorProps,
   type BreadcrumbEllipsisProps,
 } from './components/breadcrumb';
+export {
+  Combobox,
+  ComboboxItem,
+  ComboboxGroup,
+  type ComboboxProps,
+  type ComboboxPresentation,
+  type ComboboxMode,
+  type ComboboxSelection,
+  type ComboboxItemProps,
+  type ComboboxGroupProps,
+} from './components/combobox';

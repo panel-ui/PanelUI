@@ -766,5 +766,14 @@
       "addedIn": "0.15.0",
       "category": "navigation"
     }
+  ],
+  "combobox": [
+    "Combobox",
+    "A text field that filters a list of options as you type.",
+    "react combobox autocomplete select search field component",
+    {
+      "addedIn": "0.16.0",
+      "category": "forms"
+    }
   ]
 }

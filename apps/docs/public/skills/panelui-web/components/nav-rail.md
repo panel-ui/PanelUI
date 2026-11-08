@@ -255,7 +255,7 @@ The rail scrolls as one column: the header and the footer stay against their edg
 
 #### Mobile
 
-Below `mobileBreakpoint` the rail is drawn as a drawer instead of a column, and the page keeps the full width. A trigger outside the rail is what opens it, since the one inside the rail is not on screen until the drawer is. Following a destination closes the drawer; opening a child list or pressing the rail's own trigger does not.
+Below `mobileBreakpoint` the rail is drawn as a drawer instead of a column, and the page keeps the full width. A trigger outside the rail is what opens it, since the one inside the rail is not on screen until the drawer is. Following a destination or pressing the rail's own trigger closes the drawer; opening a child list does not.
 
 #### Two weights
 

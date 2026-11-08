@@ -153,13 +153,16 @@ const SURFACE = 'bg-background bg-[linear-gradient(var(--muted),var(--muted))]';
 const navRailVariants = tv({
   slots: {
     root: [
-      'group/nav-rail relative isolate flex h-full w-(--nav-rail-width) shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain rounded-2xl p-2',
+      // Above the page beside it, so a folded label or flyout is never covered
+      // by the inset.
+      'group/nav-rail relative isolate z-10 flex h-full w-(--nav-rail-width) shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain rounded-2xl p-2',
       `${SURFACE} text-foreground ring-1 ring-foreground/[0.045] dark:ring-foreground/[0.08]`,
-      `transition-[width,opacity] duration-300 ${EASE} motion-reduce:transition-none`,
+      `transition-[width,opacity,visibility] duration-300 ${EASE} motion-reduce:transition-none`,
       '[scrollbar-width:thin]',
       // Folded right out of the layout, the rail keeps no width, padding or
-      // surface. An outside trigger is what brings it back.
-      'data-[collapsible=offcanvas]:data-[collapsed]:w-0 data-[collapsible=offcanvas]:data-[collapsed]:gap-0 data-[collapsible=offcanvas]:data-[collapsed]:p-0 data-[collapsible=offcanvas]:data-[collapsed]:opacity-0 data-[collapsible=offcanvas]:data-[collapsed]:ring-0 data-[collapsible=offcanvas]:data-[collapsed]:pointer-events-none',
+      // surface, and leaves the tab order once the fade ends. An outside
+      // trigger is what brings it back.
+      'data-[collapsible=offcanvas]:data-[collapsed]:invisible data-[collapsible=offcanvas]:data-[collapsed]:w-0 data-[collapsible=offcanvas]:data-[collapsed]:gap-0 data-[collapsible=offcanvas]:data-[collapsed]:p-0 data-[collapsible=offcanvas]:data-[collapsed]:opacity-0 data-[collapsible=offcanvas]:data-[collapsed]:ring-0 data-[collapsible=offcanvas]:data-[collapsed]:pointer-events-none',
       // In a drawer, the surface is the sheet: no width, no rounding, no ring.
       'data-[mobile]:h-full data-[mobile]:w-full data-[mobile]:rounded-none data-[mobile]:p-3 data-[mobile]:ring-0',
     ],
@@ -559,7 +562,15 @@ function NavRailRoot({
     [collapsed, variant, collapsible, side, mobile, isMobile, mobileOpen, setMobileOpen, setCollapsed, toggle]
   );
 
-  const root = useRef<HTMLElement>(null);
+  const root = useRef<HTMLElement | null>(null);
+  // The drawer mounts its navigation after the first render, and crossing the
+  // breakpoint swaps one element for another. A callback ref is what tells the
+  // indicator to bind again when that happens, whatever caused it.
+  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
+  const setRoot = useCallback((node: HTMLElement | null) => {
+    root.current = node;
+    setRootElement(node);
+  }, []);
   const indicator = useRef<HTMLSpanElement>(null);
 
   /*
@@ -572,7 +583,7 @@ function NavRailRoot({
    * what keeps it from animating out of the top-left corner on mount.
    */
   useIsomorphicLayoutEffect(() => {
-    const box = root.current;
+    const box = rootElement;
     const pill = indicator.current;
     if (!box || !pill) return;
 
@@ -655,7 +666,7 @@ function NavRailRoot({
       observer.disconnect();
       mutations.disconnect();
     };
-  }, [collapsed]);
+  }, [collapsed, rootElement]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.defaultPrevented) return;
@@ -743,7 +754,8 @@ function NavRailRoot({
   };
 
   // In the drawer, following a destination closes it. A row that only opens
-  // its child list, or the trigger that folds the rail, stays put.
+  // its child list stays put; the trigger closes the drawer through its own
+  // handler, which this one leaves alone.
   const onClick = (event: ReactMouseEvent<HTMLElement>) => {
     if (!mobile) return;
     const target = event.target;
@@ -763,7 +775,7 @@ function NavRailRoot({
 
   const nav = useRender({
     defaultTagName: 'nav',
-    ref: root,
+    ref: setRoot,
     render,
     props: mergeProps(
       {
@@ -1621,7 +1633,10 @@ function NavRailSub({
       // property so a right-to-left page reads the same way.
       const fromInlineStart = rtl ? window.innerWidth - rect.left : rect.right;
       const fromInlineEnd = rtl ? rect.right : window.innerWidth - rect.left;
-      node.style.top = `${Math.max(8, rect.top)}px`;
+      // Keep the whole flyout inside the viewport, including when its parent
+      // is a footer row near the floor.
+      const highest = window.innerHeight - node.offsetHeight - 8;
+      node.style.top = `${Math.max(8, Math.min(rect.top, highest))}px`;
       if (rail.side === 'start') {
         node.style.insetInlineStart = `${Math.min(window.innerWidth - 8, fromInlineStart)}px`;
         node.style.insetInlineEnd = '';

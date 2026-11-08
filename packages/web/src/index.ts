@@ -1529,6 +1529,7 @@ export {
   type ScrollHeaderSurface,
   type ScrollHeaderScrollSource,
 } from './components/scroll-header';
+export {
   Pagination,
   PaginationPrevious,
   PaginationNext,

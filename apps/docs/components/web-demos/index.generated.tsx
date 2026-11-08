@@ -126,6 +126,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'command/thumb': dynamic(() => import('./command/thumb')),
   'day-grid/colours': dynamic(() => import('./day-grid/colours')),
   'day-grid/localized': dynamic(() => import('./day-grid/localized')),
+  'day-grid/offset': dynamic(() => import('./day-grid/offset')),
   'day-grid/pick-a-day': dynamic(() => import('./day-grid/pick-a-day')),
   'day-grid/thumb': dynamic(() => import('./day-grid/thumb')),
   'day-grid/writing': dynamic(() => import('./day-grid/writing')),

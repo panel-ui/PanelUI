@@ -423,7 +423,11 @@ function NavRailRoot({
   // One live object, so a callback written on the first render still sees the
   // state and handlers from the last one.
   const live = useRef({ collapsed, controlled: collapsedProp !== undefined, onCollapsedChange });
-  live.current = { collapsed, controlled: collapsedProp !== undefined, onCollapsedChange };
+  // Written after commit, so a render React throws away never leaves its
+  // values behind for the next click to read.
+  useIsomorphicLayoutEffect(() => {
+    live.current = { collapsed, controlled: collapsedProp !== undefined, onCollapsedChange };
+  });
 
   const setCollapsed = useCallback((next: boolean) => {
     if (!live.current.controlled) setInner(next);
@@ -536,6 +540,8 @@ function NavRailRoot({
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.defaultPrevented) return;
+    // A chord belongs to the browser or the system: Cmd+ArrowUp, Ctrl+Home.
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     const host = root.current;
@@ -563,7 +569,16 @@ function NavRailRoot({
     const sub = owns ? branch.querySelector<HTMLElement>(':scope > [data-slot="nav-rail-sub"]') : null;
 
     // Right, Left and Escape act on the child list before the arrow keys do.
-    const action = subKeyAction(event.key, states[current]!);
+    // The child list opens towards the inline end, which is the left in a
+    // right-to-left page, so the keys that open and close it swap with it.
+    const rtl = getComputedStyle(host).direction === 'rtl';
+    const key =
+      rtl && event.key === 'ArrowLeft'
+        ? 'ArrowRight'
+        : rtl && event.key === 'ArrowRight'
+          ? 'ArrowLeft'
+          : event.key;
+    const action = subKeyAction(key, states[current]!);
     if (action) {
       event.preventDefault();
       if (action === 'open') {
@@ -677,6 +692,9 @@ function NavRailBrand({ href, icon, label, className, children, render, ...props
         'data-slot': 'nav-rail-brand',
         href,
         'aria-label': collapsed && name ? name : undefined,
+        // Folded, the name is only in the label, and a plain `div` may not
+        // carry one. As an image it can, and its hidden children add nothing.
+        role: collapsed && name && href === undefined ? 'img' : undefined,
         className: slots.brand({
           className: [href !== undefined && 'cursor-pointer hover:bg-foreground/[0.04]', className],
         }),
@@ -857,7 +875,7 @@ export interface NavRailItemProps extends Omit<ComponentProps<'a'>, 'href' | 'cl
   href?: string;
   /** Whether this is the page the reader is on. Sets `aria-current="page"` and lights the pill. */
   active?: boolean;
-  /** Whether it can be chosen. A folded disabled row is also skipped by the arrow keys. */
+  /** Draws the row unavailable: it cannot be chosen, and the arrow keys step over it. */
   disabled?: boolean;
   /** The mark before the label: what remains, with the label, when the rail folds. */
   icon?: ReactNode;
@@ -919,6 +937,13 @@ function NavRailItem({
   const iconsOnly = collapsed && !inFlyout;
   const { label: labelChildren, badges, sub } = splitItemChildren(children);
   const name = label ?? textOf(labelChildren);
+  // Folded, a badge is a dot hidden from assistive technology, so its count
+  // joins the row's name instead of going unannounced.
+  const badgeText = badges
+    .map((badge) => (isValidElement(badge) ? textOf((badge.props as { children?: ReactNode }).children) : undefined))
+    .filter((text): text is string => text !== undefined)
+    .join(', ');
+  const foldedName = name && badgeText ? `${name}, ${badgeText}` : name;
   const { onClick, ...rest } = props;
 
   const branch = sub !== undefined;
@@ -1037,7 +1062,7 @@ function NavRailItem({
         'data-child-active': activeDescendant ? '' : undefined,
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,
-        'aria-label': iconsOnly && name ? name : undefined,
+        'aria-label': iconsOnly && foldedName ? foldedName : undefined,
         'aria-expanded': rowIsToggle ? open : undefined,
         'aria-controls': rowIsToggle ? listId : undefined,
         href,

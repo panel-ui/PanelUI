@@ -930,7 +930,7 @@ export default function NavRailNestedFolded() {
 | --- | --- | --- | --- |
 | `href` | `string` | — | Where it goes. With it the row is an anchor; without it, a button. |
 | `active` | `boolean` | `false` | Whether this is the page the reader is on. Sets `aria-current="page"` and lights the pill. |
-| `disabled` | `boolean` | `false` | Whether it can be chosen. A folded disabled row is also skipped by the arrow keys. |
+| `disabled` | `boolean` | `false` | Draws the row unavailable: it cannot be chosen, and the arrow keys step over it. |
 | `icon` | `ReactNode` | — | The mark before the label: what remains, with the label, when the rail folds. |
 | `label` | `string` | — | What a screen reader calls the row once the label is folded away, and what the folded tooltip shows. Taken from text children when they are plain text. |
 | `className` | `string` | — |  |

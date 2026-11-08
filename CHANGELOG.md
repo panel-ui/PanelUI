@@ -9,6 +9,57 @@ fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [1.3.0] — 2026-11-08
+
+Two new components for scheduling screens, and fixes for chart readouts that still took taps,
+Select lists that ignored `contentWidth="content"`, and blur that did nothing on Android.
+
+### Added
+
+- **`WeekStrip`.** One row of days to pick from: the seven days of a week filling the row, or
+  with `scroll` a run of days in fixed-width cells. Each day is a column with its weekday and
+  number, filled when selected and ringed on today, and `marks` can add up to three tone dots,
+  a short label in their place, or a corner dot. `disabled` days cannot be pressed; `faded`
+  days are dimmed but stay pressable, for days in the past. `weekStartsOn="auto"` reads the
+  locale, as Calendar does. Requested by @cemo in
+  [#264](https://github.com/panel-ui/PanelUI/issues/264).
+- **`WeekHoursGrid`.** A week of hours, one row per day, room or person, with the taken
+  stretches filled in. Hours are numbers, so 9.5 is half past nine; `from` and `to` set the
+  visible range and clip what reaches outside it. Rows can be `off` or `selected`, `onSelect`
+  makes each row a button read out as its label and time ranges, and `ticks` and `legend` sit
+  under the bars. Requested by @cemo in [#265](https://github.com/panel-ui/PanelUI/issues/265).
+- **`Switch` `interactive={false}`** draws only the track, with no press and no role, for a row
+  that is itself the switch. Without it a pressable row around a Switch was announced as two
+  switches and took two Tab stops on the web.
+- **`Toast.Close` `accessibilityLabel`** is now passed to the button, so the label can be
+  translated. It defaults to "Dismiss notification" as before.
+
+### Fixed
+
+- **Chart readouts wait for the hold again.** 1.1.0 added a 180 ms hold before a chart's
+  Tooltip takes a touch, but each chart also set a pan distance of 0, which the first move
+  event meets, so the pan still activated at once and cancelled a Pressable floating over the
+  chart. With a hold, only the timer starts the readout now; `activateAfterLongPress={0}` keeps
+  read-on-contact. Reported by @arnabJ in [#260](https://github.com/panel-ui/PanelUI/issues/260).
+- **`contentWidth="content"` sizes an overlay list to its longest option**, in Select and
+  Combobox. Option labels had a flex basis of 0, which gave the floating list nothing to
+  measure, so it opened at the trigger's width. A list wider than the trigger also moves left
+  to stay on screen. Reported by @arnabJ in [#302](https://github.com/panel-ui/PanelUI/issues/302).
+- **`ScrollHeader.Bar surface="blur"` and `ScrollBlur` blur on Android.** Android blurs only a
+  view it has been pointed at, so both drew a faint tint over sharp content. They now wrap
+  their scroller in the view the blur samples. This needs Android 12 or later; below that the
+  bar falls back to `plain` and ScrollBlur to its fade. `Scrim` covers the app from a portal and
+  has nothing to point at, so on Android `blur` now falls back to a dim instead of a
+  see-through tint. Reported by @arnabJ in [#303](https://github.com/panel-ui/PanelUI/issues/303).
+- **Web accessibility.** Switch states `aria-checked` when off, which react-native-web dropped,
+  and reaches its full target on the web, which ignores `hitSlop`. Toast.Close reaches a 44 pt
+  target. Reported by @gentleboii in [#293](https://github.com/panel-ui/PanelUI/issues/293).
+
+### Docs
+
+- The Colors page says that `muted` is a fill and `muted-foreground` is the text colour, and
+  that a token redefined in `@theme` is overridden by the theme's `@variant` blocks.
+
 ## [1.2.0] — 2026-11-06
 
 BottomSheet can open at any height, not only `half` and `full`.

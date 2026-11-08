@@ -81,10 +81,12 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ComponentType,
   type ReactNode,
   type Ref,
+  type RefObject,
 } from 'react';
 import {
   Image,
@@ -120,7 +122,12 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
-import { hasBlur, useReduceTransparency } from '../../primitives/scrim';
+import {
+  androidBlurProps,
+  BlurTargetView,
+  canBlurHere,
+  useReduceTransparency,
+} from '../../primitives/scrim';
 import { Text, textChildren, type TextProps } from '../../primitives/text';
 import { useThemeMode } from '../../theme/use-theme';
 import { cn } from '../../utils/cn';
@@ -164,6 +171,8 @@ const BlurView: ComponentType<{
   intensity?: number;
   tint?: ScrollHeaderMaterial;
   style?: unknown;
+  blurMethod?: string;
+  blurTarget?: RefObject<View | null>;
 }> | null = (() => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -234,6 +243,11 @@ interface ScrollHeaderContextValue {
   /** Whether there is a large block at all. A bar-only header has no crossing. */
   hasLarge: boolean;
   measureLarge: (event: LayoutChangeEvent) => void;
+  /**
+   * The view wrapping the scroller on Android, which a blurred bar samples.
+   * Null on other platforms, and when the bar is not blurred.
+   */
+  blurTarget: RefObject<View | null> | null;
 }
 
 const ScrollHeaderContext = createContext<ScrollHeaderContextValue | undefined>(undefined);
@@ -500,35 +514,54 @@ const ScrollHeaderRoot = forwardRef<ViewRef, ScrollHeaderProps>(
 
     const hasLarge = largeSize >= 1;
 
+    // Android blurs only a view it is pointed at, so a blurred bar needs the
+    // scroller wrapped in a target. Only then: the wrapper records every frame
+    // the scroller draws.
+    const targetRef = useRef<View>(null);
+    const wantsTarget =
+      BlurTargetView !== null &&
+      isValidElement(parts.bar) &&
+      (parts.bar.props as { surface?: ScrollHeaderSurface }).surface === 'blur';
+    const blurTarget = wantsTarget ? targetRef : null;
+
     const context = useMemo<ScrollHeaderContextValue>(
-      () => ({ progress, offset, largeHeight, collapsed, hasLarge, measureLarge }),
-      [progress, offset, largeHeight, collapsed, hasLarge, measureLarge]
+      () => ({ progress, offset, largeHeight, collapsed, hasLarge, measureLarge, blurTarget }),
+      [progress, offset, largeHeight, collapsed, hasLarge, measureLarge, blurTarget]
     );
 
     const { root, band } = scrollHeaderVariants();
 
+    const scroller =
+      AnimatedScrollable && isValidElement(scrollable) ? (
+        <AnimatedScrollable
+          {...childProps}
+          ref={composeRefs(scrollRef, childProps.ref)}
+          onScroll={onScroll}
+          scrollEventThrottle={childProps.scrollEventThrottle ?? 16}
+          // The band is the inset. iOS would otherwise add one of its own
+          // on top of it, for a header it cannot see.
+          contentInsetAdjustmentBehavior={
+            childProps.contentInsetAdjustmentBehavior ?? 'never'
+          }
+          contentContainerStyle={[
+            childProps.contentContainerStyle,
+            { paddingTop: headerHeight },
+          ]}
+          scrollIndicatorInsets={{ top: barBand, ...childProps.scrollIndicatorInsets }}
+        />
+      ) : (
+        scrollable
+      );
+
     return (
       <ScrollHeaderContext.Provider value={context}>
         <View {...props} ref={ref} className={root({ className })}>
-          {AnimatedScrollable && isValidElement(scrollable) ? (
-            <AnimatedScrollable
-              {...childProps}
-              ref={composeRefs(scrollRef, childProps.ref)}
-              onScroll={onScroll}
-              scrollEventThrottle={childProps.scrollEventThrottle ?? 16}
-              // The band is the inset. iOS would otherwise add one of its own
-              // on top of it, for a header it cannot see.
-              contentInsetAdjustmentBehavior={
-                childProps.contentInsetAdjustmentBehavior ?? 'never'
-              }
-              contentContainerStyle={[
-                childProps.contentContainerStyle,
-                { paddingTop: headerHeight },
-              ]}
-              scrollIndicatorInsets={{ top: barBand, ...childProps.scrollIndicatorInsets }}
-            />
+          {wantsTarget && BlurTargetView ? (
+            <BlurTargetView ref={targetRef} collapsable={false} style={styles.target}>
+              {scroller}
+            </BlurTargetView>
           ) : (
-            scrollable
+            scroller
           )}
 
           <Animated.View
@@ -569,8 +602,10 @@ export interface ScrollHeaderBarProps extends ViewProps {
    * content passing under the bar stays legible as shape and colour.
    *
    * `blur` needs `expo-blur`, which is optional, and it is replaced by an
-   * opaque bar under Reduce Transparency. Both fall back to `plain` — a bar
-   * whose title cannot be read is a worse answer than one that is not frosted.
+   * opaque bar under Reduce Transparency. On Android it needs Android 12 (API
+   * 31) or later, and the header wraps its scroller in the view the blur
+   * samples. Each of these falls back to `plain` — a bar whose title cannot be
+   * read is a worse answer than one that is not frosted.
    */
   surface?: ScrollHeaderSurface;
   /** A hairline under the bar, drawn with its surface. */
@@ -609,7 +644,7 @@ const ScrollHeaderBar = forwardRef<ViewRef, ScrollHeaderBarProps>(
     },
     ref
   ) => {
-    const { progress } = useScrollHeader('ScrollHeader.Bar');
+    const { progress, blurTarget } = useScrollHeader('ScrollHeader.Bar');
     const { barBand, insetTop } = useContext(BandMetricsContext);
     const { mode } = useThemeMode();
     const reduceTransparency = useReduceTransparency();
@@ -617,7 +652,7 @@ const ScrollHeaderBar = forwardRef<ViewRef, ScrollHeaderBarProps>(
     // Three gates, and a preference that has not been answered yet counts as
     // switched on: the case worth being careful about is the one where it is.
     const blurring =
-      surface === 'blur' && hasBlur && BlurView !== null && reduceTransparency === false;
+      surface === 'blur' && canBlurHere && BlurView !== null && reduceTransparency === false;
     const fill = surface === 'blur' && !blurring ? 'plain' : surface;
     const { bar, barSurface } = scrollHeaderVariants({ surface: fill, divider });
 
@@ -652,6 +687,7 @@ const ScrollHeaderBar = forwardRef<ViewRef, ScrollHeaderBarProps>(
               intensity={intensity}
               tint={material === 'default' ? mode : material}
               style={StyleSheet.absoluteFill}
+              {...androidBlurProps(blurTarget)}
             />
           ) : null}
         </Animated.View>
@@ -893,6 +929,8 @@ const styles = StyleSheet.create({
   // Android draws by elevation before z-order, so a band with none of its own
   // ends up under the scroller's own background.
   lift: { elevation: 4 },
+  // Takes the scroller's place in the root, which it fills.
+  target: { flex: 1 },
 });
 
 export const ScrollHeader = Object.assign(ScrollHeaderRoot, {

@@ -15,8 +15,8 @@
  * It fills its parent and does not intercept touches itself — the overlay layers
  * its own dismiss `Pressable` over it — so it is purely the visual backdrop.
  */
-import { useEffect, useState, type ComponentType } from 'react';
-import { AccessibilityInfo, StyleSheet, View, type ViewProps } from 'react-native';
+import { useEffect, useState, type ComponentType, type Ref, type RefObject } from 'react';
+import { AccessibilityInfo, Platform, StyleSheet, View, type ViewProps } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -51,6 +51,46 @@ const BlurView: ComponentType<BlurViewProps> | null = (() => {
 
 /** True when a real blur can be drawn — for a caller that wants to know. */
 export const hasBlur = BlurView !== null;
+
+/**
+ * `expo-blur`'s BlurTargetView, or null when the installed version has none.
+ *
+ * Android cannot blur whatever happens to be behind a view. It blurs one view
+ * it has been pointed at, and that view has to be a BlurTargetView wrapping
+ * the content. A component that owns the content passing under its blur — a
+ * scroller under a header — wraps it in one and hands the ref to the blur.
+ */
+export const BlurTargetView: ComponentType<ViewProps & { ref?: Ref<View> }> | null = (() => {
+  if (Platform.OS !== 'android') return null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('expo-blur');
+    return (mod?.BlurTargetView as ComponentType<ViewProps & { ref?: Ref<View> }>) ?? null;
+  } catch {
+    return null;
+  }
+})();
+
+/**
+ * Whether this device can draw a blur at all, given a target on Android. The
+ * Android blur is held to API 31 and later, where it runs on the GPU; below
+ * that it costs every frame of a scroll, and a component falls back to its
+ * plain surface instead.
+ */
+export const canBlurHere =
+  BlurView !== null &&
+  (Platform.OS !== 'android' ||
+    (BlurTargetView !== null && typeof Platform.Version === 'number' && Platform.Version >= 31));
+
+/**
+ * The extra props a BlurView needs to blur on Android: the method, and the
+ * target it samples. Empty on every other platform, where the blur reads
+ * whatever is behind it.
+ */
+export function androidBlurProps(target: RefObject<View | null> | null | undefined) {
+  if (Platform.OS !== 'android' || !target) return {};
+  return { blurMethod: 'dimezisBlurViewSdk31Plus' as const, blurTarget: target };
+}
 
 /**
  * The same view, able to take its `intensity` from the UI thread. The package
@@ -157,6 +197,14 @@ function scrimMode(blur: boolean, canBlur: boolean, reduceTransparency: boolean 
   return canBlur ? 'blur' : 'dim';
 }
 
+/*
+ * A scrim covers the whole app from a portal, so there is no view of the app
+ * it could point an Android blur at. Without a target the platform draws only
+ * a faint tint, which leaves the screen behind fully legible. A dim is what
+ * `blur` promises when it cannot draw, so Android gets the dim.
+ */
+const scrimCanBlur = BlurView !== null && Platform.OS !== 'android';
+
 function opaqueClassName(tint: BlurTint) {
   if (tint === 'light') return 'bg-white';
   if (tint === 'dark') return 'bg-black';
@@ -164,7 +212,11 @@ function opaqueClassName(tint: BlurTint) {
 }
 
 export interface ScrimProps extends Omit<ViewProps, 'children'> {
-  /** Frost the backdrop instead of dimming it. Falls back to a dim if it can't. */
+  /**
+   * Frost the backdrop instead of dimming it. Falls back to a dim where it
+   * can't: without `expo-blur`, and on Android, where an overlay has no view
+   * of the app behind it to point a blur at.
+   */
   blur?: boolean;
   /** Blur strength, 0–100. */
   intensity?: number;
@@ -196,7 +248,7 @@ export function Scrim({
   ...props
 }: ScrimProps) {
   const reduceTransparency = useReduceTransparency();
-  const mode = scrimMode(blur, BlurView !== null, reduceTransparency);
+  const mode = scrimMode(blur, scrimCanBlur, reduceTransparency);
 
   if (progress) {
     return (

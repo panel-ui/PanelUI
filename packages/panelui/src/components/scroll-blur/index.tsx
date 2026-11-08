@@ -62,9 +62,11 @@ import {
   Children,
   isValidElement,
   useMemo,
+  useRef,
   type ComponentType,
   type ReactElement,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import {
   StyleSheet,
@@ -83,7 +85,12 @@ import Animated, {
   type DerivedValue,
 } from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
-import { hasBlur, useReduceTransparency } from '../../primitives/scrim';
+import {
+  androidBlurProps,
+  BlurTargetView,
+  canBlurHere,
+  useReduceTransparency,
+} from '../../primitives/scrim';
 import { useThemeMode } from '../../theme/use-theme';
 
 /**
@@ -95,6 +102,8 @@ const BlurView: ComponentType<{
   intensity?: number;
   tint?: ScrollBlurTint;
   style?: unknown;
+  blurMethod?: string;
+  blurTarget?: RefObject<View | null>;
 }> | null = (() => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -190,7 +199,11 @@ export function ScrollBlur({
    * arriving a frame late costs nothing, while a blur flashed at somebody who
    * switched Reduce Transparency on is the whole thing that setting is for.
    */
-  const blurring = hasBlur && BlurView !== null && reduceTransparency === false;
+  const blurring = canBlurHere && BlurView !== null && reduceTransparency === false;
+  // Android blurs only a view it is pointed at, so the scroller is wrapped in a
+  // target when there is a blur to draw over it.
+  const targetRef = useRef<View>(null);
+  const wantsTarget = blurring && BlurTargetView !== null;
   const materialTint: ScrollBlurTint = material === 'default' ? mode : material;
 
   const themeBackground = useCSSVariable('--color-background');
@@ -278,6 +291,7 @@ export function ScrollBlur({
   }
 
   const edgeProps = {
+    blurTarget: wantsTarget ? targetRef : null,
     size,
     horizontal,
     layers: Math.max(1, Math.round(layers)),
@@ -290,7 +304,13 @@ export function ScrollBlur({
 
   return (
     <View {...props} className={className}>
-      {scrollable}
+      {wantsTarget && BlurTargetView ? (
+        <BlurTargetView ref={targetRef} collapsable={false} style={{ flex: 1 }}>
+          {scrollable}
+        </BlurTargetView>
+      ) : (
+        scrollable
+      )}
 
       {edges !== 'end' ? (
         <Edge {...edgeProps} opacity={startOpacity} edge="start" />
@@ -306,6 +326,7 @@ ScrollBlur.displayName = 'ScrollBlur';
 
 /** One edge's band: the stack of blur views, and the wash that joins them up. */
 function Edge({
+  blurTarget,
   size,
   horizontal,
   layers,
@@ -317,6 +338,7 @@ function Edge({
   opacity,
   edge,
 }: {
+  blurTarget: RefObject<View | null> | null;
   size: number;
   horizontal: boolean;
   layers: number;
@@ -385,9 +407,15 @@ function Edge({
               style={[{ position: 'absolute', opacity: step.opacity }, along(step.span)]}
             >
               <BlurView
-                intensity={intensity / layers}
+                // Elsewhere each layer blurs the layers under it, so the
+                // strength adds up towards the edge. Android's layers each
+                // blur the scroller itself, so each carries its own share.
+                intensity={
+                  blurTarget ? (intensity * (step.key + 1)) / layers : intensity / layers
+                }
                 tint={material}
                 style={StyleSheet.absoluteFill}
+                {...androidBlurProps(blurTarget)}
               />
             </View>
           ))

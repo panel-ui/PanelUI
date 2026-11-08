@@ -89,7 +89,9 @@ const selectVariants = tv({
     search: 'pb-2',
     empty: 'px-3 py-6 text-center text-sm text-muted-foreground',
     item: 'flex-row items-center gap-2 rounded-lg px-3 py-3',
-    itemLabel: 'flex-1 text-base font-medium text-foreground',
+    // Grows to fill the row but keeps its natural width as its basis, so an
+    // overlay sized to `content` can measure the longest label.
+    itemLabel: 'grow shrink text-base font-medium text-foreground',
     itemIndicator: 'h-5 w-5 items-center justify-center',
     group: 'gap-1',
     groupLabel: 'px-3 pb-1 pt-2',
@@ -483,7 +485,8 @@ export interface SelectProps {
   sheetProps?: SelectSheetProps;
   /**
    * Width of the floating list. `trigger` matches the trigger, `content` sizes
-   * to the longest option, or pass a pixel value. `overlay` only.
+   * to the longest option, or pass a pixel value. A list wider than the
+   * trigger moves left to stay on screen. `overlay` only.
    */
   contentWidth?: 'trigger' | 'content' | number;
   /** Gap between the trigger and the floating list. `overlay` only. */
@@ -521,6 +524,18 @@ export interface SelectProps {
   children: ReactNode;
 }
 
+/** Space kept between a floating list and the side of the screen. */
+const OVERLAY_EDGE = 8;
+
+/**
+ * Where a floating list starts. It lines up with the trigger, and moves left
+ * when a list wider than the trigger would run off the right of the screen.
+ */
+function overlayLeft(anchor: { x: number }, width: number, screenWidth: number) {
+  const furthest = screenWidth - OVERLAY_EDGE - width;
+  return Math.max(Math.min(anchor.x, furthest), Math.min(anchor.x, OVERLAY_EDGE));
+}
+
 function SelectRoot({
   className,
   value,
@@ -554,9 +569,10 @@ function SelectRoot({
   const [query, setQuery] = useState('');
   const [anchor, setAnchor] = useState<Anchor | null>(null);
   const [listHeight, setListHeight] = useState(0);
+  const [listWidth, setListWidth] = useState(0);
   const triggerRef = useRef<ViewRef>(null);
   const chevron = useSharedValue(0);
-  const { height: screenHeight } = useWindowDimensions();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
   const options = useMemo(() => {
@@ -866,15 +882,15 @@ function SelectRoot({
   const overlayPosition = anchor
     ? {
         position: 'absolute' as const,
-        left: anchor.x,
+        left: overlayLeft(anchor, contentWidth === 'trigger' ? anchor.width : listWidth, screenWidth),
         ...(flip
           ? { bottom: screenHeight - anchor.y + offset }
           : { top: anchor.y + anchor.height + offset }),
         ...(contentWidth === 'trigger'
           ? { width: anchor.width }
           : typeof contentWidth === 'number'
-            ? { width: contentWidth }
-            : { minWidth: anchor.width }),
+            ? { width: contentWidth, maxWidth: screenWidth - OVERLAY_EDGE * 2 }
+            : { minWidth: anchor.width, maxWidth: screenWidth - OVERLAY_EDGE * 2 }),
         // Never collapse to nothing in a cramped viewport — the list scrolls.
         maxHeight: Math.max((flip ? anchor.y : spaceBelow) - offset, 160),
       }
@@ -882,6 +898,7 @@ function SelectRoot({
 
   const onListLayout = (event: LayoutChangeEvent) => {
     setListHeight(event.nativeEvent.layout.height);
+    setListWidth(event.nativeEvent.layout.width);
   };
 
   return (

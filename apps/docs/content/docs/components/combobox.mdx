@@ -229,7 +229,7 @@ const { results, loading } = useCitySearch(query);
 | `clearable` | `boolean` | `false` | Offer a ✕ that clears the query and the selection. |
 | `openOnFocus` | `boolean` | `false` | Open the list as soon as the field takes focus, before anything is typed. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the list opens or closes. |
-| `contentWidth` | `'field' \| 'content' \| number` | `'field'` | Width of the floating list. `field` matches the field, `content` sizes to the longest option, or pass a pixel value. `overlay` only. |
+| `contentWidth` | `'field' \| 'content' \| number` | `'field'` | Width of the floating list. `field` matches the field, `content` sizes to the longest option, or pass a pixel value. A list wider than the field moves left to stay on screen. `overlay` only. |
 | `offset` | `number` | `8` | Gap between the field and the floating list. `overlay` only. |
 | `listClassName` | `string` | — | Extra classes for the list surface. |
 | `accessibilityLabel` | `string` | — | Accessible name for the field. |

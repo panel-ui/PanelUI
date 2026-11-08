@@ -121,7 +121,9 @@ const comboboxVariants = tv({
     action: 'h-6 w-6 items-center justify-center rounded-full',
     list: 'overflow-hidden rounded-xl border border-border bg-popover p-2 shadow-sm',
     item: 'flex-row items-center gap-2 rounded-lg px-3 py-3',
-    itemLabel: 'flex-1 text-base font-medium text-foreground',
+    // Grows to fill the row but keeps its natural width as its basis, so an
+    // overlay sized to `content` can measure the longest label.
+    itemLabel: 'grow shrink text-base font-medium text-foreground',
     itemIndicator: 'h-5 w-5 items-center justify-center',
     group: 'gap-1',
     groupLabel: 'px-3 pb-1 pt-2',
@@ -405,7 +407,8 @@ export interface ComboboxProps<Mode extends ComboboxMode = 'single'>
   onOpenChange?: (open: boolean) => void;
   /**
    * Width of the floating list. `field` matches the field, `content` sizes to
-   * the longest option, or pass a pixel value. `overlay` only.
+   * the longest option, or pass a pixel value. A list wider than the field
+   * moves left to stay on screen. `overlay` only.
    */
   contentWidth?: 'field' | 'content' | number;
   /** Gap between the field and the floating list. `overlay` only. */
@@ -415,6 +418,18 @@ export interface ComboboxProps<Mode extends ComboboxMode = 'single'>
   /** Accessible name for the field. */
   accessibilityLabel?: string;
   children: ReactNode;
+}
+
+/** Space kept between a floating list and the side of the screen. */
+const OVERLAY_EDGE = 8;
+
+/**
+ * Where a floating list starts. It lines up with the field, and moves left
+ * when a list wider than the field would run off the right of the screen.
+ */
+function overlayLeft(anchor: { x: number }, width: number, screenWidth: number) {
+  const furthest = screenWidth - OVERLAY_EDGE - width;
+  return Math.max(Math.min(anchor.x, furthest), Math.min(anchor.x, OVERLAY_EDGE));
 }
 
 function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
@@ -468,7 +483,8 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
    */
   const fieldRef = useRef<ViewRef>(null);
   const inputRef = useRef<TextInputRef>(null);
-  const { height: screenHeight } = useWindowDimensions();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const [listWidth, setListWidth] = useState(0);
   /*
    * The keyboard is up whenever this list is open — the field is a text input
    * and opening the list is what typing in it does. So the space the list has
@@ -1022,7 +1038,7 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
   const overlayPosition = anchor
     ? {
         position: 'absolute' as const,
-        left: anchor.x,
+        left: overlayLeft(anchor, contentWidth === 'field' ? anchor.width : listWidth, screenWidth),
         ...(flip
           ? { bottom: screenHeight - anchor.y + offset }
           : { top: anchor.y + anchor.height + offset }),
@@ -1034,8 +1050,8 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
         ...(contentWidth === 'field'
           ? { width: anchor.width }
           : typeof contentWidth === 'number'
-            ? { width: contentWidth }
-            : { minWidth: anchor.width }),
+            ? { width: contentWidth, maxWidth: screenWidth - OVERLAY_EDGE * 2 }
+            : { minWidth: anchor.width, maxWidth: screenWidth - OVERLAY_EDGE * 2 }),
         // Never collapse to nothing in a cramped viewport — the list scrolls.
         maxHeight: Math.max((flip ? anchor.y : spaceBelow) - offset, 160),
       }
@@ -1102,6 +1118,7 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>({
               onLayout={(event: LayoutChangeEvent) => {
                 // The first measurement decides the side, and nothing after it
                 // does — see `flipped`.
+                setListWidth(event.nativeEvent.layout.width);
                 const measured = event.nativeEvent.layout.height;
                 setFlipped((current) =>
                   current === null ? measured > spaceBelow : current

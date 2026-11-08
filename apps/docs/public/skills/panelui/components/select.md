@@ -84,7 +84,7 @@ import { Select } from 'panelui-native';
 | `presentation` | `SelectPresentation` | `sheet` | Where the options appear. `sheet` takes the bottom of the screen, `inline` expands the list in layout flow, `overlay` floats it above the page anchored to the trigger. |
 | `title` | `string` | — | Sheet title shown above the options. `sheet` presentation only. |
 | `sheetProps` | `SelectSheetProps` | — | How the sheet is drawn — the platform's own sheet, its detents and surface, or a fixed height. `sheet` presentation only. |
-| `contentWidth` | `'trigger' \| 'content' \| number` | `trigger` | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. `overlay` only. |
+| `contentWidth` | `'trigger' \| 'content' \| number` | `trigger` | Width of the floating list. `trigger` matches the trigger, `content` sizes to the longest option, or pass a pixel value. A list wider than the trigger moves left to stay on screen. `overlay` only. |
 | `offset` | `number` | `8` | Gap between the trigger and the floating list. `overlay` only. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the options open or close. |
 | `searchable` | `boolean` | `false` | Put a filter above the options, matching case-insensitively on any part of an option's label. For a list long enough that scrolling it is not finding anything — countries, currencies, a repository's branches. The field is not focused on open: on a phone that would throw the keyboard over the very list you are trying to look at. |

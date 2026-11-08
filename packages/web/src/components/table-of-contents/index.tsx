@@ -52,6 +52,7 @@
  */
 import {
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -189,13 +190,28 @@ function useTableOfContents(component: string): TableOfContentsContextValue {
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-/** One ref callback that sets every ref given, skipping the missing ones. */
-function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): (node: T | null) => void {
+/**
+ * One ref callback that sets every ref given, skipping the missing ones.
+ *
+ * A callback ref may return a cleanup (React 19); each is collected and
+ * returned so React can run it on detach instead of it being dropped.
+ */
+function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): (node: T | null) => (() => void) | void {
   return (node) => {
+    const cleanups: (() => void)[] = [];
     for (const ref of refs) {
-      if (typeof ref === 'function') ref(node);
-      else if (ref) (ref as { current: T | null }).current = node;
+      if (typeof ref === 'function') {
+        const cleanup = ref(node);
+        if (typeof cleanup === 'function') cleanups.push(cleanup);
+      } else if (ref) {
+        (ref as { current: T | null }).current = node;
+      }
     }
+    return cleanups.length > 0
+      ? () => {
+          for (const cleanup of cleanups) cleanup();
+        }
+      : undefined;
   };
 }
 
@@ -237,7 +253,7 @@ export interface TableOfContentsProps
  * Holds the active section and, when uncontrolled, keeps it in step with the
  * page. Its `<nav>` is the landmark a screen reader jumps to.
  */
-function TableOfContentsRoot({
+const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, 'ref'>>(function TableOfContentsRoot({
   value: valueProp,
   defaultValue,
   onValueChange,
@@ -249,7 +265,7 @@ function TableOfContentsRoot({
   'aria-label': ariaLabel = 'Table of contents',
   children,
   ...props
-}: TableOfContentsProps) {
+}: Omit<TableOfContentsProps, 'ref'>, forwardedRef) {
   const [innerValue, setInnerValue] = useState<string | undefined>(defaultValue);
   const controlled = valueProp !== undefined;
   const value = controlled ? valueProp : innerValue;
@@ -378,6 +394,7 @@ function TableOfContentsRoot({
   }, [value, inView, spying]);
 
   const context = useMemo(() => ({ value, select, variant, lit }), [value, select, variant, lit]);
+  const mergedRef = useMemo(() => mergeRefs(nav, forwardedRef), [forwardedRef]);
 
   return (
     <TableOfContentsContext.Provider value={context}>
@@ -387,13 +404,13 @@ function TableOfContentsRoot({
         className={tableOfContentsVariants().root({ className })}
         {...props}
         // After the spread, so a caller's ref is joined to ours, not swapped for it.
-        ref={mergeRefs(nav, props.ref)}
+        ref={mergedRef}
       >
         {children}
       </nav>
     </TableOfContentsContext.Provider>
   );
-}
+});
 TableOfContentsRoot.displayName = 'TableOfContents';
 
 export interface TableOfContentsTitleProps extends Omit<ComponentProps<'p'>, 'className'> {
@@ -418,7 +435,7 @@ export interface TableOfContentsListProps extends Omit<ComponentProps<'ol'>, 'cl
  * The ordered list of sections. It draws the rail and the segment that marks
  * the current one, measured from the active item.
  */
-function TableOfContentsList({ className, children, ...props }: TableOfContentsListProps) {
+const TableOfContentsList = forwardRef<HTMLOListElement, Omit<TableOfContentsListProps, 'ref'>>(function TableOfContentsList({ className, children, ...props }, forwardedRef) {
   const { value, variant, lit } = useTableOfContents('TableOfContents.List');
   const list = useRef<HTMLOListElement>(null);
   const placed = useRef(false);
@@ -527,6 +544,7 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
   }, [value, variant, litKey]);
 
   const slots = tableOfContentsVariants({ variant });
+  const mergedRef = useMemo(() => mergeRefs(list, forwardedRef), [forwardedRef]);
 
   return (
     <ol
@@ -534,7 +552,7 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
       data-variant={variant}
       className={slots.list({ className })}
       {...props}
-      ref={mergeRefs(list, props.ref)}
+      ref={mergedRef}
     >
       {children}
       {variant === 'contour' ? (
@@ -552,7 +570,7 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
       ) : null}
     </ol>
   );
-}
+});
 TableOfContentsList.displayName = 'TableOfContents.List';
 
 export interface TableOfContentsItemProps extends Omit<ComponentProps<'li'>, 'className' | 'value'> {

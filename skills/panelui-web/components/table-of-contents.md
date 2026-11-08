@@ -68,7 +68,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `observe` | `boolean` | — | Watch the page and keep the active section at the reading line. On by default when uncontrolled; pass `false` to leave the active section alone, or `true` with `value` to report scroll position without holding state. |
 | `offset` | `number` | `16` | How far below the top of the scroll viewport counts as the reading line, in pixels. Raise it to clear a sticky header. |
 | `root` | `HTMLElement \| null \| RefObject<HTMLElement \| null>` | — | The element that scrolls, when the page is not what scrolls. A section inside a panel needs the panel here; the viewport is the default. |
-| `variant` | `TableOfContentsVariant` | `'rail'` | How the list marks where the reader is. `rail` is a hairline with one segment on the active section. `contour` is a line that steps in and out with each level and lights every section on screen. Default `rail`. |
+| `variant` | `TableOfContentsVariant` | `rail` | How the list marks where the reader is. `rail` is a hairline with one segment on the active section. `contour` is a line that steps in and out with each level and lights every section on screen. Default `rail`. |
 | `className` | `string` | — | Classes for the `<nav>`. |
 
 #### `TableOfContentsTitleProps`

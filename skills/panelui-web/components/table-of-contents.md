@@ -49,9 +49,10 @@ Scroll tracking is on by default. Pass `value` to hold the active section yourse
 ```
 
 - `TableOfContents.Title` — A small heading above the list, such as “On this page”. It is optional: the `<nav>` is already named for a screen reader, so the title is for the eye.
-- `TableOfContents.List` — The ordered list of sections, and the hairline rail down its leading edge. One segment in the primary colour is measured from the active row and travels when the section changes. The rail and the segment are decoration, drawn in pseudo-elements, so the list keeps only its items and nothing extra is announced.
+- `TableOfContents.List` — The ordered list of sections, and the hairline rail down its leading edge. One segment in the primary colour is measured from the active row and travels when the section changes. The rail and the segment are decoration, drawn in pseudo-elements, so the list keeps only its items and nothing extra is announced. With `variant="contour"` on the root it draws the contour line instead, in an SVG hidden from assistive technology.
 - `TableOfContents.Item` — One section. `value` names it and matches the root's `value`, and `depth` indents it by one step per level, for a heading under another heading.
 - `TableOfContents.Link` — The anchor to the section, hash included in `href`. It is a real `<a>`, so the browser scrolls, the URL gains the hash and middle-click opens the section in a new tab; `render` lets a router's link take its place. Pressing it moves the mark at once, and the current one carries `aria-current="location"`.
+- `TableOfContents.Code` — An identifier inside a link, such as a prop name listed under an API heading. It is drawn as a small pill in the link's colour, so it dims and lights with its row.
 
 ## Props
 
@@ -67,6 +68,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `observe` | `boolean` | — | Watch the page and keep the active section at the reading line. On by default when uncontrolled; pass `false` to leave the active section alone, or `true` with `value` to report scroll position without holding state. |
 | `offset` | `number` | `16` | How far below the top of the scroll viewport counts as the reading line, in pixels. Raise it to clear a sticky header. |
 | `root` | `HTMLElement \| null \| RefObject<HTMLElement \| null>` | — | The element that scrolls, when the page is not what scrolls. A section inside a panel needs the panel here; the viewport is the default. |
+| `variant` | `TableOfContentsVariant` | `'rail'` | How the list marks where the reader is. `rail` is a hairline with one segment on the active section. `contour` is a line that steps in and out with each level and lights every section on screen. Default `rail`. |
 | `className` | `string` | — | Classes for the `<nav>`. |
 
 #### `TableOfContentsTitleProps`
@@ -96,9 +98,15 @@ Every part also takes the props of the element it renders, and a `className`.
 | `href` | `string` | **required** | The section this link jumps to, hash included: `#install`. |
 | `className` | `string` | — | Classes for the `<a>`. |
 
+#### `TableOfContentsCodeProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the `<code>`. |
+
 ## In a Server Component
 
-`TableOfContents` is a client component. A Server Component cannot read `TableOfContents.Title` off the import, so import each part by name: `TableOfContentsTitle`, `TableOfContentsList`, `TableOfContentsItem`, `TableOfContentsLink`.
+`TableOfContents` is a client component. A Server Component cannot read `TableOfContents.Title` off the import, so import each part by name: `TableOfContentsTitle`, `TableOfContentsList`, `TableOfContentsItem`, `TableOfContentsLink`, `TableOfContentsCode`.
 
 ## Notes
 
@@ -121,6 +129,10 @@ With reduced motion turned on, the segment jumps to its new row without travelli
 #### Built on
 
 No dependency beyond React and the package's own theme tokens. The spy is the browser's `IntersectionObserver`, and the segment is one pseudo-element placed in a layout effect, so no measuring library is needed.
+
+#### Contour
+
+The contour lights a range rather than one row, so it needs to know what is on screen. With the scroll spy on, that is the section at the reading line and every section whose heading is above the bottom of the viewport. With `value` held and the spy off, only the active section is lit. The line, its lit stretch and the dot are drawn from the rows' measured positions and move with a transition that turns off under reduced motion.
 
 ## Example
 

@@ -171,9 +171,10 @@ import { TableOfContents } from "@/components/panelui/table-of-contents"
 ```
 
 - **`TableOfContents.Title`** — A small heading above the list, such as “On this page”. It is optional: the `<nav>` is already named for a screen reader, so the title is for the eye.
-- **`TableOfContents.List`** — The ordered list of sections, and the hairline rail down its leading edge. One segment in the primary colour is measured from the active row and travels when the section changes. The rail and the segment are decoration, drawn in pseudo-elements, so the list keeps only its items and nothing extra is announced.
+- **`TableOfContents.List`** — The ordered list of sections, and the hairline rail down its leading edge. One segment in the primary colour is measured from the active row and travels when the section changes. The rail and the segment are decoration, drawn in pseudo-elements, so the list keeps only its items and nothing extra is announced. With `variant="contour"` on the root it draws the contour line instead, in an SVG hidden from assistive technology.
 - **`TableOfContents.Item`** — One section. `value` names it and matches the root's `value`, and `depth` indents it by one step per level, for a heading under another heading.
 - **`TableOfContents.Link`** — The anchor to the section, hash included in `href`. It is a real `<a>`, so the browser scrolls, the URL gains the hash and middle-click opens the section in a new tab; `render` lets a router's link take its place. Pressing it moves the mark at once, and the current one carries `aria-current="location"`.
+- **`TableOfContents.Code`** — An identifier inside a link, such as a prop name listed under an API heading. It is drawn as a small pill in the link's colour, so it dims and lights with its row.
 
 ## Examples
 
@@ -217,6 +218,138 @@ export default function TableOfContentsNested() {
           </TableOfContents.Item>
         </TableOfContents.List>
       </TableOfContents>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A line that follows the outline
+
+`variant="contour"` draws the rail as a line that steps in with each level and bends back out where the level changes. It lights every section on screen, from the one at the reading line to the last heading in view, and a dot marks the end it is moving towards: the bottom while you read down, the top while you scroll back up. Use it for a long page with deep nesting, where the reader wants to see how much of the outline the screen is showing.
+
+<ComponentPreview name="table-of-contents/contour" height={440}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+type Section = {
+  value: string;
+  label: string;
+  depth: 0 | 1;
+  code?: boolean;
+  text: string;
+};
+
+const SECTIONS: Section[] = [
+  {
+    value: 'usage',
+    label: 'Usage',
+    depth: 0,
+    text: 'Import the button and give it a label. It takes the full press, hover and focus treatment from the theme, so a plain call already matches every other control on the page.',
+  },
+  {
+    value: 'sizes',
+    label: 'Sizes',
+    depth: 0,
+    text: 'Five sizes share one type scale. Pick the one that matches the row it sits in rather than the importance of the action: emphasis is the variant’s job.',
+  },
+  {
+    value: 'size',
+    label: 'size',
+    depth: 1,
+    code: true,
+    text: 'From xs to xl. The default is md, which lines up with an input of the same size, so a field and its submit button share a baseline.',
+  },
+  {
+    value: 'full-width',
+    label: 'fullWidth',
+    depth: 1,
+    code: true,
+    text: 'Stretches the button across its container, for the single action at the end of a form or the bottom of a sheet.',
+  },
+  {
+    value: 'api',
+    label: 'API reference',
+    depth: 0,
+    text: 'Every prop is typed and documented in the source. The table below is generated from those types, so it cannot drift from what the component accepts.',
+  },
+  {
+    value: 'button',
+    label: 'Button',
+    depth: 1,
+    text: 'Accepts every attribute of a native button as well as its own props. A render prop draws it as a link or a router’s link instead.',
+  },
+  {
+    value: 'notes',
+    label: 'Notes',
+    depth: 0,
+    text: 'A few details that only matter in particular layouts.',
+  },
+  {
+    value: 'large-text',
+    label: 'Large text',
+    depth: 1,
+    text: 'Labels wrap rather than truncate when the reader has asked for larger text, so an action is never cut down to its first word.',
+  },
+  {
+    value: 'icons',
+    label: 'Icon buttons',
+    depth: 1,
+    text: 'A button with only an icon needs an aria-label. The icon is decoration to a screen reader, and a button with no name is announced as nothing.',
+  },
+  {
+    value: 'loading',
+    label: 'Loading',
+    depth: 1,
+    text: 'While loading is set the label stays in place and a spinner covers it, so the button keeps its width and the row around it does not jump.',
+  },
+];
+
+const heading = { 0: "text-base font-semibold", 1: "text-sm font-semibold" };
+
+export default function TableOfContentsContour() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card">
+      <div className="grid grid-cols-[minmax(0,1fr)_10rem]">
+        <div ref={scroller} className="h-96 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+          <article className="px-5 pt-5 pb-48">
+            {SECTIONS.map((section) => (
+              <section key={section.value} id={"toc-contour-" + section.value} className="mt-6 scroll-mt-4 first:mt-0">
+                <h3 className={heading[section.depth] + " text-foreground"}>
+                  {section.code ? <code className="font-mono">{section.label}</code> : section.label}
+                </h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
+              </section>
+            ))}
+          </article>
+        </div>
+
+        <TableOfContents
+          variant="contour"
+          root={scroller}
+          offset={16}
+          defaultValue="usage"
+          className="self-start p-4 ps-2"
+        >
+          <TableOfContents.Title>On this page</TableOfContents.Title>
+          <TableOfContents.List>
+            {SECTIONS.map((section) => (
+              <TableOfContents.Item key={section.value} value={section.value} depth={section.depth}>
+                <TableOfContents.Link href={"#toc-contour-" + section.value}>
+                  {section.code ? <TableOfContents.Code>{section.label}</TableOfContents.Code> : section.label}
+                </TableOfContents.Link>
+              </TableOfContents.Item>
+            ))}
+          </TableOfContents.List>
+        </TableOfContents>
+      </div>
     </div>
   );
 }
@@ -414,6 +547,7 @@ export default function TableOfContentsScrolling() {
 | `observe` | `boolean` | — | Watch the page and keep the active section at the reading line. On by default when uncontrolled; pass `false` to leave the active section alone, or `true` with `value` to report scroll position without holding state. |
 | `offset` | `number` | `16` | How far below the top of the scroll viewport counts as the reading line, in pixels. Raise it to clear a sticky header. |
 | `root` | `HTMLElement \| null \| RefObject<HTMLElement \| null>` | — | The element that scrolls, when the page is not what scrolls. A section inside a panel needs the panel here; the viewport is the default. |
+| `variant` | `TableOfContentsVariant` | `'rail'` | How the list marks where the reader is. `rail` is a hairline with one segment on the active section. `contour` is a line that steps in and out with each level and lights every section on screen. Default `rail`. |
 | `className` | `string` | — | Classes for the `<nav>`. |
 
 ### TableOfContents.Title
@@ -443,6 +577,12 @@ export default function TableOfContentsScrolling() {
 | `href` | `string` | — | The section this link jumps to, hash included: `#install`. |
 | `className` | `string` | — | Classes for the `<a>`. |
 
+### TableOfContents.Code
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the `<code>`. |
+
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
@@ -467,10 +607,14 @@ With reduced motion turned on, the segment jumps to its new row without travelli
 
 No dependency beyond React and the package's own theme tokens. The spy is the browser's `IntersectionObserver`, and the segment is one pseudo-element placed in a layout effect, so no measuring library is needed.
 
+### Contour
+
+The contour lights a range rather than one row, so it needs to know what is on screen. With the scroll spy on, that is the section at the reading line and every section whose heading is above the bottom of the viewport. With `value` held and the spy off, only the active section is lit. The line, its lit stretch and the dot are drawn from the rows' measured positions and move with a transition that turns off under reduced motion.
+
 ### Server Components
 
 `TableOfContents` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `TableOfContents.Title` off the import, so each part is also exported by name: `TableOfContentsTitle` is `TableOfContents.Title`, and so on for the others.
 
 ```tsx
-import { TableOfContents, TableOfContentsTitle, TableOfContentsList, TableOfContentsItem, TableOfContentsLink } from "@/components/panelui/table-of-contents"
+import { TableOfContents, TableOfContentsTitle, TableOfContentsList, TableOfContentsItem, TableOfContentsLink, TableOfContentsCode } from "@/components/panelui/table-of-contents"
 ```

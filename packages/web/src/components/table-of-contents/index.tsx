@@ -25,6 +25,15 @@
  * links themselves stay muted until they are current, so the rail is what the
  * eye catches and the words are what it finds when it arrives.
  *
+ * ## Or a line that follows the outline
+ *
+ * `variant="contour"` draws the rail as a path that steps in with each level
+ * and bends back out, so the outline's shape is in the line itself. Instead of
+ * one segment it lights every section on screen, from the one at the reading
+ * line to the last heading in view, with a dot on the end it is moving
+ * towards. It suits a long page with deep nesting, where a reader wants to see
+ * how much of the outline the screen is showing.
+ *
  * ## It knows where you are
  *
  * With no `value` given, the component watches the elements its links point at
@@ -58,7 +67,15 @@ import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
-import { hashTarget, sectionAt, type TocSection } from './spy';
+import {
+  contourPath,
+  contourWidth,
+  hashTarget,
+  sectionAt,
+  sectionsInView,
+  type ContourRow,
+  type TocSection,
+} from './spy';
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
@@ -69,6 +86,10 @@ const EASE = 'ease-[cubic-bezier(0.3,0.7,0.1,1)]';
 const DEPTH_STEP = 12;
 /** Where the first level starts, clear of the rail. */
 const INDENT = 16;
+/** How far the contour line steps in for each level. */
+const CONTOUR_STEP = 10;
+/** Half the height of a contour bend, centred on the boundary between rows. */
+const CONTOUR_BEND = 5;
 
 const tableOfContentsVariants = tv({
   slots: {
@@ -93,16 +114,57 @@ const tableOfContentsVariants = tv({
       'block rounded-sm py-1 text-sm text-muted-foreground outline-none',
       'transition-colors duration-150 hover:text-foreground motion-reduce:transition-none',
       'focus-visible:ring-2 focus-visible:ring-ring',
-      'data-active:font-medium data-active:text-foreground',
+    ],
+    // An identifier in a row, such as a prop name. It takes the row's colour,
+    // so it lights with the rest of the row.
+    code: 'rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-xs',
+    contour: 'pointer-events-none absolute inset-y-0 start-0 overflow-visible rtl:-scale-x-100',
+    contourLit: [
+      'pointer-events-none absolute inset-y-0 start-0 overflow-visible rtl:-scale-x-100',
+      // Cut down to the lit stretch. Only the cut moves, so the path itself is
+      // never redrawn while the reader scrolls.
+      '[clip-path:inset(var(--toc-lit-top,0px)_-4px_calc(100%_-_var(--toc-lit-bottom,0px))_-4px)]',
+      'opacity-0 group-data-ready/toc:opacity-100',
+      `group-data-ready/toc:transition-[clip-path] group-data-ready/toc:duration-300 ${EASE} motion-reduce:transition-none`,
+    ],
+    contourDot: [
+      'pointer-events-none absolute start-0 top-0 size-[5px] rounded-full bg-foreground',
+      'translate-x-(--toc-dot-x,0px) translate-y-(--toc-dot-y,0px) rtl:-translate-x-(--toc-dot-x,0px)',
+      'opacity-0 group-data-ready/toc:opacity-100',
+      `group-data-ready/toc:transition-transform group-data-ready/toc:duration-300 ${EASE} motion-reduce:transition-none`,
     ],
   },
+  variants: {
+    variant: {
+      rail: {
+        link: 'data-active:font-medium data-active:text-foreground',
+      },
+      contour: {
+        // The line is the decoration here, so the list draws no rail of its
+        // own and every section in view reads in the foreground colour.
+        list: 'group/toc before:hidden after:hidden',
+        link: 'data-lit:text-foreground',
+      },
+    },
+  },
+  defaultVariants: { variant: 'rail' },
 });
+
+/** How the list marks where the reader is. */
+export type TableOfContentsVariant = 'rail' | 'contour';
 
 interface TableOfContentsContextValue {
   /** The section being read, or `undefined` while nothing is active. */
   value: string | undefined;
   /** Makes a section active, from a link press or from the scroll spy. */
   select: (value: string) => void;
+  /** How the list marks where the reader is. */
+  variant: TableOfContentsVariant;
+  /**
+   * Every section on screen, in page order, starting with the active one.
+   * Only the contour lights more than one.
+   */
+  lit: readonly string[];
 }
 
 const TableOfContentsContext = createContext<TableOfContentsContextValue | null>(null);
@@ -150,6 +212,12 @@ export interface TableOfContentsProps
    * inside a panel needs the panel here; the viewport is the default.
    */
   root?: HTMLElement | null | RefObject<HTMLElement | null>;
+  /**
+   * How the list marks where the reader is. `rail` is a hairline with one
+   * segment on the active section. `contour` is a line that steps in and out
+   * with each level and lights every section on screen. Default `rail`.
+   */
+  variant?: TableOfContentsVariant;
   /** Classes for the `<nav>`. */
   className?: string;
 }
@@ -165,6 +233,7 @@ function TableOfContentsRoot({
   observe,
   offset = 16,
   root,
+  variant = 'rail',
   className,
   'aria-label': ariaLabel = 'Table of contents',
   children,
@@ -177,9 +246,16 @@ function TableOfContentsRoot({
   // The spy and a press read the value as it is now, not as it was when the
   // effect that owns them was created.
   const currentValue = useRef(value);
-  currentValue.current = value;
   const live = useRef({ controlled, onValueChange });
-  live.current = { controlled, onValueChange };
+  // Written after commit, so a render React throws away leaves nothing behind.
+  useIsomorphicLayoutEffect(() => {
+    currentValue.current = value;
+    live.current = { controlled, onValueChange };
+  });
+
+  // The sections on screen after the active one, for the contour. Held as a
+  // joined string so an unchanged set does not re-render the list.
+  const [inView, setInView] = useState('');
 
   const select = useCallback((next: string) => {
     if (next === currentValue.current) return;
@@ -227,6 +303,8 @@ function TableOfContentsRoot({
       const top = scroller ? scroller.getBoundingClientRect().top : 0;
       return top + Math.max(0, offset);
     };
+    const floor = () =>
+      scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
 
     const measure = () => {
       const at = line();
@@ -234,6 +312,7 @@ function TableOfContentsRoot({
         const rect = element.getBoundingClientRect();
         return { value: section, top: rect.top, bottom: rect.bottom };
       });
+      setInView(sectionsInView(sections, at, floor()).join('\n'));
       const next = sectionAt(sections, at);
       if (next === undefined) return;
       // The first placement is not a change of section: the page opened where
@@ -256,15 +335,38 @@ function TableOfContentsRoot({
       rootMargin: `${-Math.max(0, offset)}px 0px 0px 0px`,
       threshold: 0,
     });
+    // A section is current until the next one reaches the line, which is not
+    // an intersection change of its own, so the contour also reads on scroll.
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        measure();
+      });
+    };
+    const scrollTarget: HTMLElement | Window = scroller ?? window;
+    if (variant === 'contour') scrollTarget.addEventListener('scroll', onScroll, { passive: true });
 
     // The first read is synchronous: a page that opens halfway down should
     // not show the first section until something happens to scroll.
     measure();
     for (const { element } of targets) observer.observe(element);
-    return () => observer.disconnect();
-  }, [spying, offset, root, select]);
+    return () => {
+      observer.disconnect();
+      scrollTarget.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [spying, offset, root, select, variant]);
 
-  const context = useMemo(() => ({ value, select }), [value, select]);
+  const lit = useMemo(() => {
+    if (value === undefined) return [];
+    // Without the spy only the active section is known to be on screen.
+    const rest = spying && inView ? inView.split('\n') : [];
+    return rest[0] === value ? rest : [value, ...rest.filter((each) => each !== value)];
+  }, [value, inView, spying]);
+
+  const context = useMemo(() => ({ value, select, variant, lit }), [value, select, variant, lit]);
 
   return (
     <TableOfContentsContext.Provider value={context}>
@@ -305,16 +407,89 @@ export interface TableOfContentsListProps extends Omit<ComponentProps<'ol'>, 'cl
  * the current one, measured from the active item.
  */
 function TableOfContentsList({ className, children, ...props }: TableOfContentsListProps) {
-  const { value } = useTableOfContents('TableOfContents.List');
+  const { value, variant, lit } = useTableOfContents('TableOfContents.List');
   const list = useRef<HTMLOListElement>(null);
   const placed = useRef(false);
+  const track = useRef<SVGSVGElement>(null);
+  const litLayer = useRef<SVGSVGElement>(null);
+  /** Where the lit stretch started last time, to tell which way it moved. */
+  const lastStart = useRef<number | null>(null);
+  const heading = useRef<'up' | 'down'>('down');
+  const litKey = lit.join('\n');
 
   useIsomorphicLayoutEffect(() => {
     const box = list.current;
     if (!box) return;
 
     let frame: number | undefined;
+    const ready = () => {
+      if (placed.current) {
+        box.setAttribute('data-ready', '');
+        return;
+      }
+      // Shown once it is in place, so it does not arrive by sliding down
+      // from the top of the list.
+      frame = requestAnimationFrame(() => {
+        placed.current = true;
+        box.setAttribute('data-ready', '');
+      });
+    };
+
+    const placeContour = () => {
+      const items = [
+        ...box.querySelectorAll<HTMLElement>(':scope > [data-slot="table-of-contents-item"]'),
+      ];
+      if (items.length === 0) return;
+      const boxRect = box.getBoundingClientRect();
+      const rows: ContourRow[] = items.map((item) => {
+        const rect = item.getBoundingClientRect();
+        return {
+          top: rect.top - boxRect.top,
+          bottom: rect.bottom - boxRect.top,
+          depth: Number(item.dataset.depth ?? 0),
+        };
+      });
+      const path = contourPath(rows, CONTOUR_STEP, CONTOUR_BEND);
+      const width = `${contourWidth(rows, CONTOUR_STEP)}`;
+      for (const svg of [track.current, litLayer.current]) {
+        if (!svg) continue;
+        svg.setAttribute('width', width);
+        svg.firstElementChild?.setAttribute('d', path);
+      }
+
+      const indexes = items
+        .map((item, index) => (item.hasAttribute('data-lit') ? index : -1))
+        .filter((index) => index >= 0);
+      if (indexes.length === 0) {
+        box.removeAttribute('data-ready');
+        return;
+      }
+      const first = indexes[0]!;
+      const last = indexes[indexes.length - 1]!;
+      // The dot leads: on the bottom end while the reader moves down the page,
+      // on the top end while they move back up.
+      if (lastStart.current !== null && first !== lastStart.current) {
+        heading.current = first < lastStart.current ? 'up' : 'down';
+      }
+      lastStart.current = first;
+      const top = rows[first]!.top;
+      const bottom = rows[last]!.bottom;
+      const end = heading.current === 'up' ? rows[first]! : rows[last]!;
+      box.style.setProperty('--toc-lit-top', `${top}px`);
+      box.style.setProperty('--toc-lit-bottom', `${bottom}px`);
+      box.style.setProperty('--toc-dot-x', `${end.depth * CONTOUR_STEP - 2}px`);
+      box.style.setProperty(
+        '--toc-dot-y',
+        `${(heading.current === 'up' ? top : bottom) - 2.5}px`
+      );
+      ready();
+    };
+
     const place = () => {
+      if (variant === 'contour') {
+        placeContour();
+        return;
+      }
       const active = box.querySelector<HTMLElement>(
         '[data-slot="table-of-contents-item"][data-active]'
       );
@@ -327,17 +502,7 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
       const activeRect = active.getBoundingClientRect();
       box.style.setProperty('--toc-indicator-top', `${activeRect.top - boxRect.top}px`);
       box.style.setProperty('--toc-indicator-height', `${activeRect.height}px`);
-
-      if (placed.current) {
-        box.setAttribute('data-ready', '');
-        return;
-      }
-      // Shown once it is in place, so the first section does not arrive by
-      // sliding down from the top of the list.
-      frame = requestAnimationFrame(() => {
-        placed.current = true;
-        box.setAttribute('data-ready', '');
-      });
+      ready();
     };
 
     place();
@@ -347,11 +512,32 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
       if (frame !== undefined) cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [value]);
+  }, [value, variant, litKey]);
+
+  const slots = tableOfContentsVariants({ variant });
 
   return (
-    <ol ref={list} data-slot="table-of-contents-list" className={tableOfContentsVariants().list({ className })} {...props}>
+    <ol
+      ref={list}
+      data-slot="table-of-contents-list"
+      data-variant={variant}
+      className={slots.list({ className })}
+      {...props}
+    >
       {children}
+      {variant === 'contour' ? (
+        // Inside the list for positioning, and kept out of it for everyone
+        // else: hidden from assistive technology and from the item queries.
+        <li aria-hidden="true" role="presentation" data-slot="table-of-contents-contour" className="contents">
+          <svg ref={track} className={slots.contour()} height="100%">
+            <path fill="none" className="stroke-border" strokeWidth={1} />
+          </svg>
+          <svg ref={litLayer} className={slots.contourLit()} height="100%">
+            <path fill="none" className="stroke-foreground" strokeWidth={1} />
+          </svg>
+          <span className={slots.contourDot()} />
+        </li>
+      ) : null}
     </ol>
   );
 }
@@ -378,7 +564,7 @@ function TableOfContentsItem({
   children,
   ...props
 }: TableOfContentsItemProps) {
-  const { value: active } = useTableOfContents('TableOfContents.Item');
+  const { value: active, variant, lit } = useTableOfContents('TableOfContents.Item');
   const level = Math.max(0, Math.trunc(depth));
   const indent = INDENT + level * DEPTH_STEP;
   const item = useMemo(() => ({ value, depth: level }), [value, level]);
@@ -389,6 +575,7 @@ function TableOfContentsItem({
       data-value={value}
       data-depth={level}
       data-active={active === value ? '' : undefined}
+      data-lit={variant === 'contour' && lit.includes(value) ? '' : undefined}
       style={{ ...style, paddingInlineStart: indent }}
       className={tableOfContentsVariants().item({ className })}
       {...props}
@@ -417,7 +604,7 @@ function TableOfContentsLink({
   render,
   ...props
 }: TableOfContentsLinkProps & RenderProp<'a'>) {
-  const { value, select } = useTableOfContents('TableOfContents.Link');
+  const { value, select, variant, lit } = useTableOfContents('TableOfContents.Link');
   const item = useContext(TableOfContentsItemContext);
   const section = item?.value ?? hashTarget(props.href);
   const active = section !== null && section === value;
@@ -435,8 +622,9 @@ function TableOfContentsLink({
       {
         'data-slot': 'table-of-contents-link',
         'data-active': active ? '' : undefined,
+        'data-lit': variant === 'contour' && section !== null && lit.includes(section) ? '' : undefined,
         'aria-current': active ? 'location' : undefined,
-        className: tableOfContentsVariants().link({ className }),
+        className: tableOfContentsVariants({ variant }).link({ className }),
         onClick: handleClick,
       },
       props
@@ -445,11 +633,35 @@ function TableOfContentsLink({
 }
 TableOfContentsLink.displayName = 'TableOfContents.Link';
 
+export interface TableOfContentsCodeProps extends Omit<ComponentProps<'code'>, 'className'> {
+  /** Classes for the `<code>`. */
+  className?: string;
+}
+
+/**
+ * An identifier inside a link, such as a prop name under an API heading. It
+ * is drawn as a small pill in the link's own colour, so it dims and lights
+ * with the row it sits in.
+ */
+function TableOfContentsCode({ className, ...props }: TableOfContentsCodeProps) {
+  return (
+    <code data-slot="table-of-contents-code" className={tableOfContentsVariants().code({ className })} {...props} />
+  );
+}
+TableOfContentsCode.displayName = 'TableOfContents.Code';
+
 export const TableOfContents = Object.assign(TableOfContentsRoot, {
   Title: TableOfContentsTitle,
   List: TableOfContentsList,
   Item: TableOfContentsItem,
   Link: TableOfContentsLink,
+  Code: TableOfContentsCode,
 });
 
-export { TableOfContentsTitle, TableOfContentsList, TableOfContentsItem, TableOfContentsLink };
+export {
+  TableOfContentsTitle,
+  TableOfContentsList,
+  TableOfContentsItem,
+  TableOfContentsLink,
+  TableOfContentsCode,
+};

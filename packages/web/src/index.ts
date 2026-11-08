@@ -1440,11 +1440,14 @@ export {
   TableOfContentsList,
   TableOfContentsItem,
   TableOfContentsLink,
+  TableOfContentsCode,
   type TableOfContentsProps,
   type TableOfContentsTitleProps,
   type TableOfContentsListProps,
   type TableOfContentsItemProps,
   type TableOfContentsLinkProps,
+  type TableOfContentsCodeProps,
+  type TableOfContentsVariant,
 } from './components/table-of-contents';
 export {
   RingChart,

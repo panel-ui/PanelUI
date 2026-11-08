@@ -37,6 +37,8 @@ Generated from the collection's source. Read a component's own file before using
 
 - [Nav Rail](components/nav-rail.md) — A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.
 - [Pagination](components/pagination.md) — Page controls for a long result set: the pages near you, the gaps between them, and a way across.
+- [Scroll Header](components/scroll-header.md) — A page title with room around it that hands over to a compact sticky bar as the reader scrolls.
+- [Steps](components/steps.md) — A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.
 - [Table of Contents](components/table-of-contents.md) — The sections of a long page as a quiet rail, with one mark that moves to what you are reading.
 - [Tabs](components/tabs.md) — A few views of one thing, one at a time, chosen from a row of tabs whose marker slides to the one chosen.
 

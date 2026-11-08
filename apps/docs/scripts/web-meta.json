@@ -730,6 +730,16 @@
       "title": "Table of Contents"
     }
   ],
+  "scroll-header": [
+    "ScrollHeader",
+    "A page title with room around it that hands over to a compact sticky bar as the reader scrolls.",
+    "react sticky collapsing header large title scroll component",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation",
+      "title": "Scroll Header"
+    }
+  ],
   "steps": [
     "Steps",
     "A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.",

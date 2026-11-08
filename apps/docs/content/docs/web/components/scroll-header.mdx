@@ -1,0 +1,496 @@
+---
+title: Scroll Header
+description: A page title with room around it that hands over to a compact sticky bar as the reader scrolls.
+status: new
+---
+
+<ComponentPreview name="scroll-header/overview" height={520} align="start">
+
+```tsx lineNumbers
+'use client';
+
+import { BookmarkIcon, MoreHorizontalIcon, Share2Icon } from 'lucide-react';
+import { useRef } from 'react';
+import { Button } from '@/components/panelui/button';
+import { ScrollHeader } from '@/components/panelui/scroll-header';
+
+const PARAGRAPHS = [
+  'The press has been in the same building since 1974: two floors, a stone stair, and a loading door on the lane that is exactly wide enough for a pallet of paper. Nothing about it was chosen for efficiency. It was chosen because it was there, and because the rent was low enough that a bad year would not close it.',
+  'That is the whole model, in a sentence. A small publisher does not compete on speed or scale. It competes by being able to wait — for a book to find its reader, for a printing decision to become obvious, for a title to earn back its advance over four years instead of four months.',
+  'The autumn list has eleven titles. Six are reprints, which means the typesetting is already done and the only question is how many to print. The other five are new, and each one arrives with a different kind of risk: a first novel with a good agent, a translation that took three years to license, a cookbook that needs colour on every spread, a memoir with a difficult author, and a book of essays that nobody expects to sell and everybody wants to publish.',
+  'The print run for the novel is four thousand. That is not a guess. It is the number the sales team can place in independent shops before publication, plus the number the wholesalers will take on a sale-or-return basis, minus the number that usually come back. The arithmetic is unglamorous and it is the whole job.',
+  'What the reader sees is a cover, a page, a sentence. What makes the sentence arrive is a schedule that has been revised six times, a paper stock that was tested against the cover proof, and a printer who answers the phone on a Tuesday afternoon in November.',
+  'The building is quiet in the morning. By ten the desk has three parcels on it and the kettle is on, and somebody is asking whether the index for the essays has come back from the author. It has not. It will, eventually. The book will be late by a week, and the week will not matter.',
+];
+
+export default function ScrollHeaderOverview() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={scroller}
+      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
+    >
+      <ScrollHeader scrollRef={scroller}>
+        <ScrollHeader.Cover />
+        <ScrollHeader.Bar>
+          <ScrollHeader.Title>Field notes</ScrollHeader.Title>
+          <ScrollHeader.Actions>
+            <Button variant="ghost" size="icon" aria-label="Share this issue">
+              <Share2Icon />
+            </Button>
+            <Button variant="ghost" size="icon" aria-label="More actions">
+              <MoreHorizontalIcon />
+            </Button>
+          </ScrollHeader.Actions>
+        </ScrollHeader.Bar>
+        <ScrollHeader.Large>
+          <ScrollHeader.Description>Issue 12 · November</ScrollHeader.Description>
+          <ScrollHeader.Title>Field notes from the coast</ScrollHeader.Title>
+          <ScrollHeader.Actions>
+            <Button variant="secondary" size="sm">
+              <BookmarkIcon />
+              Save
+            </Button>
+          </ScrollHeader.Actions>
+        </ScrollHeader.Large>
+
+        <article className="px-6 py-6">
+          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+            The press
+          </p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+            Eleven titles and a loading door
+          </h2>
+          <div className="mt-4 flex flex-col gap-4 leading-7 text-muted-foreground">
+            {PARAGRAPHS.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        </article>
+      </ScrollHeader>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for the top of a page that a reader scrolls: an article, a changelog, a settings surface with a long body. The title starts large with room around it and, once the reader is in the content, hands over to a compact bar that stays pinned to the top.
+
+The two states are one component because the interesting part is the transit between them. The band shrinks, the large block is carried up behind the bar, the bar's surface closes, and the two titles cross-fade in that order — so no title is ever read over another and the article underneath never jumps.
+
+It is not a replacement for the site's navigation. The bar holds the page's own title and the actions that belong to it; the links that go elsewhere stay where they are.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/scroll-header.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/scroll-header` instead of `@/components/panelui/scroll-header`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/scroll-header/`, one file for each below:
+
+<RegistrySource name="scroll-header" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { ScrollHeader } from "@/components/panelui/scroll-header"
+```
+
+```tsx
+<ScrollHeader>
+  <ScrollHeader.Cover />
+  <ScrollHeader.Bar>
+    <ScrollHeader.Title>Field notes</ScrollHeader.Title>
+    <ScrollHeader.Actions>
+      <Button variant="ghost" size="icon" aria-label="Share">
+        <ShareIcon />
+      </Button>
+    </ScrollHeader.Actions>
+  </ScrollHeader.Bar>
+  <ScrollHeader.Large>
+    <ScrollHeader.Description>Issue 12 · November</ScrollHeader.Description>
+    <ScrollHeader.Title>Field notes from the coast</ScrollHeader.Title>
+  </ScrollHeader.Large>
+  <article>{body}</article>
+</ScrollHeader>
+```
+
+## Composition
+
+```tsx
+<ScrollHeader>
+  <ScrollHeader.Cover />
+  <ScrollHeader.Bar>
+    <ScrollHeader.Title />
+    <ScrollHeader.Actions />
+  </ScrollHeader.Bar>
+  <ScrollHeader.Large>
+    <ScrollHeader.Description />
+    <ScrollHeader.Title />
+    <ScrollHeader.Actions />
+  </ScrollHeader.Large>
+  {content}
+</ScrollHeader>
+```
+
+- **`ScrollHeader.Bar`** — The pinned row. Its contents never move; its surface — background, blur and hairline — fades in as the large block leaves. `surface` is `blur`, `plain` or `none`, and `divider` draws the hairline, or leaves it transparent. Write it once, with the compact title and the controls that should stay reachable.
+- **`ScrollHeader.Large`** — The expanded block. Its measured height is the distance the header collapses over, so whatever is in it — a title, a byline, a row of chips — sets the scroll distance rather than a prop having to agree with it. It is anchored to the band's bottom, which is what carries it up behind the bar.
+- **`ScrollHeader.Title`** — The page's title. Write it in both `Bar` and `Large`: the one in the block is large and at rest, the one in the bar is compact and truncates to a line. Only the one being shown is exposed to assistive technology. It is a `span` with a heading role; `render={<h1 />}` gives the page a real heading element where one is wanted.
+- **`ScrollHeader.Description`** — The quiet line under the title — a count, a byline, a date. It fades with the large block it sits in.
+- **`ScrollHeader.Actions`** — The controls at the trailing end. In the bar they stay put and stay reachable through the whole transition; only the bar's surface and title are part of the fade. In the large block they leave with the rest of it, which is the place for a save or a share that belongs to the article rather than the page.
+- **`ScrollHeader.Cover`** — A picture or a gradient filling the band behind the large block. With no `src` it uses the theme's chart tokens, so an app that puts its charts on brand puts this on brand with them. `scrim` lays a background-coloured wash under the title so it stays legible on a bright picture; turn it off when the cover is already dark.
+
+## Examples
+
+### With tabs
+
+The header is the page's top layer, so anything else that pins belongs under it. A `Tabs.List` set to `sticky` at exactly the bar's height stays below the condensed bar and scrolls with the page until it reaches it. Pass `barHeight` and the list's `top` the same number.
+
+<ComponentPreview name="scroll-header/with-tabs" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { ScrollHeader } from '@/components/panelui/scroll-header';
+import { Tabs } from '@/components/panelui/tabs';
+
+const SECTIONS = [
+  {
+    value: 'desktop',
+    label: 'Desktop',
+    notes: [
+      'The Mac build now restores the window you had open last, including the scroll position of each tab. Opening a file from the recent list puts it back in the window it came from rather than a new one.',
+      'Menus have moved to the system menu bar. The in-window menu strip stays available while a full-screen window has no menu bar to show, and both read the same command list.',
+      'A long rebuild no longer blocks the window. Progress appears in the title bar and the app can be quit from the menu while it runs, with the build resumed on the next launch.',
+    ],
+  },
+  {
+    value: 'mobile',
+    label: 'Mobile',
+    notes: [
+      'The phone build has a new reader view, reached from the page menu. It keeps the text, the images and the captions, and drops the navigation around them.',
+      'Downloading a file now waits for a network that is not metered by default. A switch in settings lets a download start on any connection, and the list shows which items are waiting for wifi.',
+      'The home screen widget can show one project or a shared list. It refreshes when the app is opened and once an hour in the background.',
+    ],
+  },
+  {
+    value: 'api',
+    label: 'API',
+    notes: [
+      'The sync endpoint accepts partial documents. A client can now send only the fields that changed, and the server merges them into the stored revision instead of replacing the whole document.',
+      'Rate limits are per token rather than per account. A token that is shared by a build machine no longer uses the allowance of the person who created it.',
+      'Webhooks carry a signature header. Verify it against the secret shown when the webhook was created; the old unsigned delivery is still sent for one more release.',
+    ],
+  },
+];
+
+export default function ScrollHeaderWithTabs() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={scroller}
+      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
+    >
+      <ScrollHeader scrollRef={scroller}>
+        <ScrollHeader.Bar surface="plain">
+          <ScrollHeader.Title>Release notes</ScrollHeader.Title>
+        </ScrollHeader.Bar>
+        <ScrollHeader.Large>
+          <ScrollHeader.Description>Version 4.2 · 12 November</ScrollHeader.Description>
+          <ScrollHeader.Title>What changed this month</ScrollHeader.Title>
+        </ScrollHeader.Large>
+
+        <div className="px-6 pt-2">
+          <Tabs defaultValue="desktop" variant="underline">
+            {/* Pinned under the condensed bar, at exactly the bar's height. */}
+            <Tabs.List aria-label="Platform" className="sticky top-14 z-10 bg-background">
+              {SECTIONS.map((section) => (
+                <Tabs.Trigger key={section.value} value={section.value}>
+                  {section.label}
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+            {SECTIONS.map((section) => (
+              <Tabs.Content key={section.value} value={section.value}>
+                <ul className="flex flex-col gap-4 py-5">
+                  {section.notes.map((note) => (
+                    <li key={note} className="flex gap-3 leading-7 text-muted-foreground">
+                      <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-border" />
+                      {note}
+                    </li>
+                  ))}
+                </ul>
+              </Tabs.Content>
+            ))}
+          </Tabs>
+        </div>
+      </ScrollHeader>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### In a scroll container
+
+`scrollRef` takes an element or a ref to one, for a page whose scroller is not the window. Here `threshold={0.5}` lets the bar take over halfway through the block, and `barHeight={48}` tightens the bar for a denser list. The header is the first child of the scroller, so offset zero is its resting position.
+
+<ComponentPreview name="scroll-header/in-scroller" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { ScrollHeader } from '@/components/panelui/scroll-header';
+
+const ENTRIES = [
+  {
+    version: '0.14.0',
+    date: '2 November',
+    title: 'Charts, all of them',
+    text: 'The nine remaining chart types arrived with the same axes, tooltips and empty states as the first four. Every one is a compound component, so a chart is assembled from the parts it needs.',
+  },
+  {
+    version: '0.13.0',
+    date: '19 October',
+    title: 'The workbench',
+    text: 'A canvas, a sidebar and an inspector in one shell, with the panels resizable and the whole thing keyboard reachable. It is the first component in the collection that holds other components as a workspace.',
+  },
+  {
+    version: '0.12.0',
+    date: '5 October',
+    title: 'A quieter toast',
+    text: 'Toasts can now be queued from outside React, which is what a fetch handler needs. The queue is one object, created once and passed to the provider, and it survives a route change.',
+  },
+  {
+    version: '0.11.0',
+    date: '21 September',
+    title: 'Motion, measured',
+    text: 'Every transition now uses the same curve and the same durations, and every one of them is turned off under reduced motion. The numbers live in one file rather than in each component.',
+  },
+  {
+    version: '0.10.0',
+    date: '7 September',
+    title: 'The inspector',
+    text: 'A rail of icons beside a page of sections. It reads a variant from a data attribute, so the panel renders on the server and the rail is the only part that needs a client boundary.',
+  },
+  {
+    version: '0.9.0',
+    date: '24 August',
+    title: 'Tables that scroll',
+    text: 'A table wider than its container scrolls sideways on its own, with the header row pinned above the body. Numbers line up on their last digit when a column is aligned to the end.',
+  },
+];
+
+export default function ScrollHeaderInScroller() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={scroller}
+      className="h-[420px] w-full max-w-xl overflow-y-auto rounded-2xl border bg-background"
+    >
+      <ScrollHeader scrollRef={scroller} barHeight={48} threshold={0.5}>
+        <ScrollHeader.Bar>
+          <ScrollHeader.Title>Changelog</ScrollHeader.Title>
+        </ScrollHeader.Bar>
+        <ScrollHeader.Large>
+          <ScrollHeader.Description>Everything shipped, newest first</ScrollHeader.Description>
+          <ScrollHeader.Title>Changelog</ScrollHeader.Title>
+        </ScrollHeader.Large>
+
+        <ol className="divide-y px-6 pb-6">
+          {ENTRIES.map((entry) => (
+            <li key={entry.version} className="py-5">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs font-medium text-foreground">{entry.version}</span>
+                <span className="text-xs text-muted-foreground">{entry.date}</span>
+              </div>
+              <h2 className="mt-1.5 text-sm font-semibold text-foreground">{entry.title}</h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">{entry.text}</p>
+            </li>
+          ))}
+        </ol>
+      </ScrollHeader>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A long title
+
+The two titles are separate elements, so the large one is allowed to wrap and the bar one truncates to a line. They cross-fade rather than morphing, which is what keeps a title long enough to truncate from animating between two different strings.
+
+<ComponentPreview name="scroll-header/long-title" height={480}>
+
+```tsx lineNumbers
+'use client';
+
+import { Share2Icon } from 'lucide-react';
+import { useRef } from 'react';
+import { Button } from '@/components/panelui/button';
+import { ScrollHeader } from '@/components/panelui/scroll-header';
+
+const PARAGRAPHS = [
+  'There is a particular kind of bookshop that exists because somebody wanted it to, not because the numbers asked for it. It has a table near the door, a chair that nobody is supposed to sit in, and a shelf of local history that has been in the same order for a decade.',
+  'The economics are not mysterious. Rent is the largest line, then staff, then stock. The stock turns slowly and the margins are thin, and the whole thing works because the person running it has decided that a modest living is enough and that the alternative — a bigger shop, more events, a café — would be a different job.',
+  'What that buys is patience. A book can sit on the table for six months and find the two people in town who want it. A publisher can take a chance on a first novel because the shop will hand-sell it, and the shop can hand-sell it because it is not trying to turn the stock over before the rent is due.',
+  'None of this scales. That is the point. The question a small house asks is not how to become a large one, but how to keep being a small one without becoming a hobby. The answer, when there is one, is usually a shorter list and a longer horizon.',
+];
+
+export default function ScrollHeaderLongTitle() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={scroller}
+      className="h-[440px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background"
+    >
+      <ScrollHeader scrollRef={scroller}>
+        <ScrollHeader.Cover />
+        <ScrollHeader.Bar>
+          <ScrollHeader.Title>The quiet economics of a small publishing house</ScrollHeader.Title>
+          <ScrollHeader.Actions>
+            <Button variant="ghost" size="icon" aria-label="Share">
+              <Share2Icon />
+            </Button>
+          </ScrollHeader.Actions>
+        </ScrollHeader.Bar>
+        <ScrollHeader.Large>
+          <ScrollHeader.Description>Essay · 8 minute read</ScrollHeader.Description>
+          <ScrollHeader.Title>The quiet economics of a small publishing house on the coast</ScrollHeader.Title>
+        </ScrollHeader.Large>
+
+        <article className="px-6 py-6">
+          <div className="flex flex-col gap-4 text-sm leading-7 text-muted-foreground">
+            {PARAGRAPHS.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        </article>
+      </ScrollHeader>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### ScrollHeader
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `barHeight` | `number` | `56` | Height of the pinned bar in pixels. The large block and the article are laid out around it, so changing it moves the resting state rather than cropping the bar. Default `56`. |
+| `threshold` | `number` | `1` | How much of the large block has to leave before the bar has fully taken over, as a fraction of its height. Below 1 the crossing happens early, which suits a tall block whose last few pixels are not worth waiting for. Default `1`. |
+| `snap` | `boolean` | `false` | Settle a part-scrolled band open or closed once the scroller comes to rest, rather than leaving the header half-collapsed. It moves the page, so it is off by default; turn it on for a header that owns the scroll. Default `false`. |
+| `stretch` | `boolean` | `true` | Let the band grow past its resting height when the scroller is pulled down. A cover fills the band, so this is what stretches it. Only a platform that reports a negative scroll offset can do it — Safari and other rubber-banding scrollers — and it is off under reduced motion. Default `true`. |
+| `scrollRef` | `ScrollHeaderScrollSource` | — | The element to read scroll from: the window by default, or an element or a ref to one for a page with its own scroller. The header must be the first thing in that scroller, so offset zero is its resting position. |
+| `onCollapsedChange` | `(collapsed: boolean) => void` | — | Called as the bar takes over, and again when the large block comes back. Fires on the crossing, not on every frame, and not for a page that merely loaded scrolled. |
+
+### ScrollHeader.Bar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `surface` | `ScrollHeaderSurface` | `'blur'` | What the bar is drawn on once it has taken over. `blur` frosts it, so the content passing under the bar stays legible as shape and colour. `plain` is the background token, and `none` leaves it clear for a bar over a cover that should stay visible. Default `blur`. |
+| `divider` | `boolean` | `true` | A hairline under the bar, drawn with its surface. Default `true`. |
+
+### ScrollHeader.Cover
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `src` | `string` | — | A picture behind the header, laid out to fill the band rather than cropped by the document. |
+| `alt` | `string` | `''` | Alt text for `src`. Empty by default: the cover is decoration behind the title. |
+| `scrim` | `boolean` | `true` | A wash over the cover, so the title stays legible on a bright picture. Default `true`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### The scroll source
+
+The window by default. A page with its own scroller passes `scrollRef` an element or a ref to one, and the header listens there instead. The header has to be the first thing in that scroller: the offset it reads is measured from zero, and a header that starts below something else would be measured against the wrong origin.
+
+The listener is passive and the read is batched into one `requestAnimationFrame`. Per-frame values are written as CSS custom properties on the header's root (`--scroll-header-fade`, `--scroll-header-band`, `--scroll-header-shift`); React is re-rendered only when the progress reaches an end. The server renders the expanded state, and the first client frame measures the content that is already laid out, so a page that loads at the top does not jump.
+
+### The two titles
+
+The large title and the bar title are both in the tree, and only one of them is exposed to a screen reader at a time. The crossing point is published as `collapsed`, and `onCollapsedChange` fires there — once per crossing, not on every frame, and not for a page that merely loaded scrolled.
+
+The fades are ordered: the large block is gone before the bar's surface has finished closing, and the bar's title arrives only after that. A single crossfade would put both titles on the same pixels at the same time, and the block would be seen through a half-transparent bar.
+
+### No jump underneath
+
+The band shrinks, but the sticky box around it keeps the height the expanded header had. The article therefore starts where it always started and simply scrolls, while the visible band above it gets shorter. The article's first line stays flush with the band's bottom edge until the block has gone, and then slides under the bar.
+
+### Accessibility
+
+`ScrollHeader.Title` is a `span` with `role="heading"` and `aria-level={1}`, so the same part works in both halves. Render it as `render={<h1 />}` for a page that wants a real heading element; the bar's copy is hidden from assistive technology while the large one is showing, so the page still has one heading.
+
+When the bar has taken over, the large block is `inert` as well as clipped, so its links and buttons leave the tab order with it. The bar's actions never leave the tab order. Give icon-only buttons an `aria-label`, as in the examples.
+
+### Reduced motion
+
+With reduced motion on, the bar still condenses as the reader scrolls; it is the fades that stop travelling. They change once at the crossing and spend a short transition there. The over-scroll stretch is off, and a `snap` settles instantly rather than smoothly.
+
+### Setting the distance
+
+`barHeight` is the pinned bar's height in pixels and defaults to `56`. `threshold` is how much of the large block has to leave before the bar has fully taken over, as a fraction of its height; below `1` the crossing happens early, which suits a tall block. `snap` settles a part-scrolled band open or closed once the scroller comes to rest — it moves the page, so it is off by default. `stretch` lets the band grow when a rubber-banding scroller is pulled down; platforms that clamp the scroll at zero report nothing and get no stretch.
+
+A global navigation bar above the page can be cleared by setting `--scroll-header-top` on the header's root, which the sticky box reads as its `top`.
+
+### Built on
+
+The header is React and Tailwind theme tokens, with `tailwind-variants` for the slots and Base UI's `useRender` and `mergeProps` for the `render` prop on its parts. It adds no dependency of its own and uses no third-party scroll or sticky library: the sticky positioning, the clipping and the animation are the browser's.
+
+### Server Components
+
+`ScrollHeader` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ScrollHeader.Bar` off the import, so each part is also exported by name: `ScrollHeaderBar` is `ScrollHeader.Bar`, and so on for the others.
+
+```tsx
+import { ScrollHeader, ScrollHeaderBar, ScrollHeaderLarge, ScrollHeaderTitle, ScrollHeaderDescription, ScrollHeaderActions, ScrollHeaderCover } from "@/components/panelui/scroll-header"
+```

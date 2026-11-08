@@ -270,11 +270,6 @@ const navRailVariants = tv({
       'absolute end-1 top-5 z-20 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted-foreground/70 outline-none',
       'transition-[opacity,background-color,color,scale] duration-150 hover:bg-foreground/[0.06] hover:text-foreground',
       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset active:scale-95 motion-reduce:transition-none',
-      // Folded, the whole row is an icon square: the disclosure becomes a
-      // small corner caret that appears with the row or on focus, so it does
-      // not fight the count dot for the same corner.
-      'group-data-[collapsed]/nav-rail:bottom-0.5 group-data-[collapsed]/nav-rail:end-0.5 group-data-[collapsed]/nav-rail:top-auto group-data-[collapsed]/nav-rail:size-4 group-data-[collapsed]/nav-rail:translate-y-0 group-data-[collapsed]/nav-rail:opacity-0',
-      'group-data-[collapsed]/nav-rail:group-hover/branch:opacity-100 group-data-[collapsed]/nav-rail:focus-visible:opacity-100 group-data-[collapsed]/nav-rail:data-[open]:opacity-100',
       'group-data-[solid-active]/branch:text-primary-foreground/80',
     ],
     chevron: `size-3.5 shrink-0 opacity-70 transition-transform duration-200 ${EASE} motion-reduce:transition-none`,
@@ -1330,6 +1325,9 @@ function NavRailItem({
 
   const branch = sub !== undefined;
   const rowIsToggle = branch && href === undefined;
+  // Folded, there is no disclosure arrow: the icon is the whole row. Hover and
+  // focus show the flyout, and the row still reports whether it is out.
+  const rowOwnsDisclosure = rowIsToggle || collapsed;
   const activeDescendant = sub !== undefined && subHasActive(sub);
 
   const listId = useId();
@@ -1513,8 +1511,8 @@ function NavRailItem({
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,
         'aria-label': iconsOnly && foldedName ? foldedName : undefined,
-        'aria-expanded': rowIsToggle ? open : undefined,
-        'aria-controls': rowIsToggle ? listId : undefined,
+        'aria-expanded': rowOwnsDisclosure ? open : undefined,
+        'aria-controls': rowOwnsDisclosure ? listId : undefined,
         href,
         type: href === undefined ? 'button' : undefined,
         disabled: href === undefined ? disabled : undefined,
@@ -1525,7 +1523,7 @@ function NavRailItem({
         onFocus: (event: ReactFocusEvent<HTMLElement>) => showTooltip(event.currentTarget),
         onBlur: () => setTooltipAt(null),
         className: slots.item({
-          className: [branch && !rowIsToggle ? 'pe-9' : undefined, className],
+          className: [branch && !rowIsToggle && !collapsed ? 'pe-9' : undefined, className],
         }),
         children: (
           <>
@@ -1584,7 +1582,7 @@ function NavRailItem({
       }}
     >
       {row}
-      {rowIsToggle ? null : (
+      {rowIsToggle || collapsed ? null : (
         <button
           type="button"
           data-slot="nav-rail-item-toggle"
@@ -1621,6 +1619,11 @@ export interface NavRailSubProps extends Omit<ComponentProps<'div'>, 'className'
   /** Called when the parent's disclosure asks to open or close the list. */
   onOpenChange?: (open: boolean) => void;
   /**
+   * Whether a folded flyout is headed by the parent's mark and name. Off by
+   * default: the children are the destination list, and a heading is opt-in.
+   */
+  heading?: boolean;
+  /**
    * What a screen reader calls the child list. Defaults to the parent row's
    * name, which is usually the right thing to hear.
    */
@@ -1642,6 +1645,7 @@ function NavRailSub({
   open: _open,
   defaultOpen: _defaultOpen,
   onOpenChange: _onOpenChange,
+  heading = false,
   label,
   className,
   children,
@@ -1718,7 +1722,7 @@ function NavRailSub({
         className: slots.sub({ className }),
         children: (
           <div data-slot="nav-rail-sub-panel" className={slots.subPanel()}>
-            {sub.folded && sub.name ? (
+            {sub.folded && heading && sub.name ? (
               <div aria-hidden="true" data-slot="nav-rail-sub-header" className={slots.subHeader()}>
                 {sub.icon ? <span className={slots.subHeaderIcon()}>{sub.icon}</span> : null}
                 <span className={slots.subHeaderLabel()}>{sub.name}</span>

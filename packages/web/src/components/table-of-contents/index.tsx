@@ -199,19 +199,31 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : us
 function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): (node: T | null) => (() => void) | void {
   return (node) => {
     const cleanups: (() => void)[] = [];
+    const cleanupOwners = new Set<unknown>();
     for (const ref of refs) {
       if (typeof ref === 'function') {
         const cleanup = ref(node);
-        if (typeof cleanup === 'function') cleanups.push(cleanup);
+        if (typeof cleanup === 'function') {
+          cleanups.push(cleanup);
+          cleanupOwners.add(ref);
+        }
       } else if (ref) {
         (ref as { current: T | null }).current = node;
       }
     }
-    return cleanups.length > 0
-      ? () => {
-          for (const cleanup of cleanups) cleanup();
+    if (cleanups.length === 0) return undefined;
+    // Once a cleanup is returned React calls it instead of calling the ref
+    // again with null, so the detach every other ref expects happens here.
+    return () => {
+      for (const cleanup of cleanups) cleanup();
+      for (const ref of refs) {
+        if (typeof ref === 'function') {
+          if (!cleanupOwners.has(ref)) ref(null);
+        } else if (ref) {
+          (ref as { current: T | null }).current = null;
         }
-      : undefined;
+      }
+    };
   };
 }
 

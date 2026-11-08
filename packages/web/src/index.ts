@@ -1490,3 +1490,21 @@ export {
   type RingChartCenterProps,
   type RingChartLegendProps,
 } from './components/ring-chart';
+export {
+  ScrollHeader,
+  ScrollHeaderBar,
+  ScrollHeaderLarge,
+  ScrollHeaderTitle,
+  ScrollHeaderDescription,
+  ScrollHeaderActions,
+  ScrollHeaderCover,
+  type ScrollHeaderProps,
+  type ScrollHeaderBarProps,
+  type ScrollHeaderLargeProps,
+  type ScrollHeaderTitleProps,
+  type ScrollHeaderDescriptionProps,
+  type ScrollHeaderActionsProps,
+  type ScrollHeaderCoverProps,
+  type ScrollHeaderSurface,
+  type ScrollHeaderScrollSource,
+} from './components/scroll-header';

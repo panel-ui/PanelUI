@@ -739,5 +739,14 @@
       "category": "navigation",
       "title": "Scroll Header"
     }
+  ],
+  "steps": [
+    "Steps",
+    "A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.",
+    "react stepper steps wizard progress component",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation"
+    }
   ]
 }

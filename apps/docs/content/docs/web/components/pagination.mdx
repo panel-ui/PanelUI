@@ -94,14 +94,8 @@ import { Pagination } from "@/components/panelui/pagination"
 ## Composition
 
 ```tsx
-<Pagination>
+<Pagination count={12} page={page} onPageChange={setPage}>
   <Pagination.Status />
-  <Pagination.Previous />
-  <Pagination.Item />
-  <Pagination.Link />
-  <Pagination.Ellipsis />
-  <Pagination.Summary />
-  <Pagination.Next />
 </Pagination>
 ```
 
@@ -261,7 +255,7 @@ export default function PaginationWithStatus() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `page` | `number` | — | The page this link goes to. |
-| `href` | `string` | — | The address of that page. A real link opens in a new tab and works without JavaScript. |
+| `href` | `string` | — | The address of that page. A real link works without JavaScript and can be opened in another tab. |
 | `className` | `string` | — | Extra classes for the target. |
 
 ### Pagination.Previous

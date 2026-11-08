@@ -6,7 +6,7 @@
   },
   "intro": "Use it under a table or a list that is longer than one screen, when the rows arrive a page at a time and a reader needs to reach a particular part of the set.\n\nIt never fetches and never slices. Give it how many pages there are, and either let it keep the page or pass `page` and `onPageChange` to hold it yourself; the rows are yours.\n\nThe run of numbers has a fixed width. `siblings` sets how many pages sit either side of the one you are on and `boundaries` how many stay pinned at each end, so a narrow column shows fewer numbers rather than a row that reshuffles as you move through it.\n\nFor moving between a few views of one thing, use [Tabs](/docs/web/components/tabs). When the pages have addresses of their own, pass `getPageHref` and every number becomes a real link that can be opened in another tab.",
   "usage": "<Pagination count={12} page={page} onPageChange={setPage}>\n  <Pagination.Status page={page} pageSize={20} total={240} />\n</Pagination>",
-  "anatomy": "<Pagination>\n  <Pagination.Status />\n  <Pagination.Previous />\n  <Pagination.Item />\n  <Pagination.Link />\n  <Pagination.Ellipsis />\n  <Pagination.Summary />\n  <Pagination.Next />\n</Pagination>",
+  "anatomy": "<Pagination count={12} page={page} onPageChange={setPage}>\n  <Pagination.Status />\n</Pagination>",
   "parts": {
     "Previous": "Back one page. With `label` it writes the word beside the arrow, which is what `simple` turns on. It is dead on the first page and does not loop to the last.",
     "Next": "Forward one page. With `label` it writes the word beside the arrow. It is dead on the last page.",

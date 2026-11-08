@@ -67,7 +67,7 @@
  * announced as disabled and stays in place, so the row does not rearrange
  * under the pointer.
  */
-import { createContext, useCallback, useContext, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { Children, createContext, useCallback, useContext, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
 import { tv } from 'tailwind-variants';
 import { cn } from '../../lib/cn';
 import {
@@ -257,7 +257,7 @@ function PaginationRoot({
   );
 
   const slots = paginationVariants({ size });
-  const hasChildren = children !== undefined && children !== null;
+  const hasChildren = Children.toArray(children).length > 0;
 
   return (
     <PaginationContext.Provider value={context}>
@@ -380,7 +380,7 @@ PaginationItem.displayName = 'Pagination.Item';
 export interface PaginationLinkProps extends Omit<ComponentProps<'a'>, 'children' | 'href'> {
   /** The page this link goes to. */
   page: number;
-  /** The address of that page. A real link opens in a new tab and works without JavaScript. */
+  /** The address of that page. A real link works without JavaScript and can be opened in another tab. */
   href: string;
   /** What a screen reader calls this target. Defaults to "Go to page N". */
   'aria-label'?: string;

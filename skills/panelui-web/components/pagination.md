@@ -29,14 +29,8 @@ For moving between a few views of one thing, use [Tabs](/docs/web/components/tab
 ## Parts
 
 ```tsx
-<Pagination>
+<Pagination count={12} page={page} onPageChange={setPage}>
   <Pagination.Status />
-  <Pagination.Previous />
-  <Pagination.Item />
-  <Pagination.Link />
-  <Pagination.Ellipsis />
-  <Pagination.Summary />
-  <Pagination.Next />
 </Pagination>
 ```
 
@@ -82,7 +76,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `page` | `number` | **required** | The page this link goes to. |
-| `href` | `string` | **required** | The address of that page. A real link opens in a new tab and works without JavaScript. |
+| `href` | `string` | **required** | The address of that page. A real link works without JavaScript and can be opened in another tab. |
 | `className` | `string` | — | Extra classes for the target. |
 
 #### `PaginationPreviousProps`

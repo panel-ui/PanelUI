@@ -142,6 +142,8 @@ export const COMPONENTS = [
   {"slug":"treemap-chart","name":"TreemapChart","summary":"A total, cut into the parts it is made of, sized by area"},
   {"slug":"typography","name":"Typography","summary":"Semantic text presets"},
   {"slug":"waterfall-chart","name":"WaterfallChart","summary":"How a run of changes carried one total to another"},
+  {"slug":"week-hours-grid","name":"WeekHoursGrid","summary":"A week of hours, one row per day, with the taken parts filled in"},
+  {"slug":"week-strip","name":"WeekStrip","summary":"One row of days to pick from, with marks for what is on each"},
 ] as const;
 
 export type ComponentMetadata = (typeof COMPONENTS)[number];

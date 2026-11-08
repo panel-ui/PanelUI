@@ -564,6 +564,14 @@
     {
       "slug": "waterfall-chart",
       "signature": "3040878d53b45360026f2fc9315910975dd36af6a2e0ed70103da04d35b62288"
+    },
+    {
+      "slug": "week-hours-grid",
+      "signature": "460b138420c0fa0ccf99f23d89dcc03d7e79672ba0e461842a04266054f64f56"
+    },
+    {
+      "slug": "week-strip",
+      "signature": "0a8f8d4536682d883e34fb27f39d6a891be535979c7d9767ea6613a9da6dfb10"
     }
   ]
 }

@@ -550,6 +550,21 @@ export {
   type CalendarSelection,
   type DateRange,
 } from './components/calendar';
+export {
+  WeekStrip,
+  type WeekStripProps,
+  type WeekStripMarks,
+  type WeekStripTone,
+  type WeekStripSize,
+} from './components/week-strip';
+export {
+  WeekHoursGrid,
+  type WeekHoursGridProps,
+  type WeekHoursRow,
+  type WeekHoursBlock,
+  type WeekHoursLegendItem,
+  type WeekHoursTone,
+} from './components/week-hours-grid';
 export { Card, type CardProps } from './components/card';
 export { Checkbox, type CheckboxProps, type CheckboxSize } from './components/checkbox';
 export {

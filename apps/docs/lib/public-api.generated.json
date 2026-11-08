@@ -1,11 +1,11 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1507,
-    "values": 374,
-    "types": 1133,
-    "modules": 169,
-    "components": 141,
+    "exports": 1518,
+    "values": 376,
+    "types": 1142,
+    "modules": 171,
+    "components": 143,
     "hooks": 13
   },
   "groups": {
@@ -6209,6 +6209,64 @@
           },
           {
             "name": "WaterfallKind",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/week-hours-grid/index.tsx",
+        "slug": "week-hours-grid",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "WeekHoursGrid",
+            "kind": "value"
+          },
+          {
+            "name": "WeekHoursGridProps",
+            "kind": "type"
+          },
+          {
+            "name": "WeekHoursRow",
+            "kind": "type"
+          },
+          {
+            "name": "WeekHoursBlock",
+            "kind": "type"
+          },
+          {
+            "name": "WeekHoursLegendItem",
+            "kind": "type"
+          },
+          {
+            "name": "WeekHoursTone",
+            "kind": "type"
+          }
+        ]
+      },
+      {
+        "source": "components/week-strip/index.tsx",
+        "slug": "week-strip",
+        "category": "components",
+        "symbols": [
+          {
+            "name": "WeekStrip",
+            "kind": "value"
+          },
+          {
+            "name": "WeekStripProps",
+            "kind": "type"
+          },
+          {
+            "name": "WeekStripMarks",
+            "kind": "type"
+          },
+          {
+            "name": "WeekStripTone",
+            "kind": "type"
+          },
+          {
+            "name": "WeekStripSize",
             "kind": "type"
           }
         ]

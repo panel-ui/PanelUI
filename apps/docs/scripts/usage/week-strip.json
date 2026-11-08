@@ -1,0 +1,37 @@
+{
+  "slug": "week-strip",
+  "preview": {
+    "src": "/previews/week-strip.jpg",
+    "alt": "WeekStrip in the example app: a week of classes with dots under each day and Sunday selected.",
+    "width": 1206,
+    "height": 2622
+  },
+  "intro": "Use it at the top of a schedule, where a reader picks a day and the screen below shows what is on it. It is one row, so it leaves the screen to the day's content rather than spending it on a month.\n\nBy default it shows the seven days of one week, filling the row. Pass `scroll` for a run of days in fixed-width cells that scroll sideways, for a picker that reaches a few weeks ahead.\n\nFor picking a date far from today, or a range, use [Calendar](/docs/components/calendar).",
+  "usage": "const [day, setDay] = useState(() => new Date());\n\n<WeekStrip value={day} onValueChange={setDay} weekStartsOn=\"auto\" />",
+  "extraImports": [
+    "Text"
+  ],
+  "examples": [
+    {
+      "title": "Marks",
+      "description": "`marks` returns what each day shows: up to three `dots` in theme tones, a short `label` in their place, or a `corner` dot for a day that needs attention.",
+      "code": "<WeekStrip\n  value={day}\n  onValueChange={setDay}\n  marks={(date) => (date.getDay() === 3 ? { dots: ['primary', 'success'] } : undefined)}\n/>"
+    },
+    {
+      "title": "Labels instead of dots",
+      "description": "A `label` replaces the dots, for a figure that reads better as words, such as the places left in a class.",
+      "code": "<WeekStrip\n  value={day}\n  onValueChange={setDay}\n  marks={(date) => ({ label: `${freeOn(date)} free` })}\n/>"
+    },
+    {
+      "title": "Disabled and faded days",
+      "description": "`disabled` days are faded and cannot be pressed, such as a day the studio is closed. `faded` days are faded but stay pressable, such as past days a reader may still want to look back at.",
+      "code": "<WeekStrip\n  value={day}\n  onValueChange={setDay}\n  disabled={(date) => date.getDay() === 0}\n  faded={(date) => date < startOfToday}\n/>"
+    },
+    {
+      "title": "Scrolling",
+      "description": "`scroll` lays out `length` days from `start`, in fixed-width cells that scroll sideways. The strip opens with the selected day in view.",
+      "code": "<WeekStrip scroll size=\"sm\" length={21} value={day} onValueChange={setDay} />"
+    }
+  ],
+  "notes": "### The week\n\n`weekStartsOn` is the first day of the week, 0 for Sunday to 6 for Saturday. `auto` asks `locale`, the same way Calendar does, so `en-GB` starts on Monday. `week` picks which week is shown; it defaults to the week of `value`, or this week.\n\n### Today\n\nToday has a ring, and the selected day is filled. Pass `today` to set the day counted as today, for a screen that is showing a different time zone.\n\n### Accessibility\n\nEach day is a button. A screen reader hears the whole date in `locale`, followed by its label when it has one, and the selected day is announced as selected. Disabled days are announced as disabled."
+}

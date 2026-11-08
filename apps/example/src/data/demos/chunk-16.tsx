@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, View, Image } from "react-native";
-import { AIInput, Avatar, AvatarCropper, type AvatarCropperHandle, type AvatarCropperShape, type AvatarCropperSource, pickAvatarImage, CameraIcon, ImageIcon, Badge, Button, Card, Compare, Countdown, OtpInput, Frame, Leaderboard, type LeaderboardEntry, Tabs, Message, MessageScroller, Rating, Response, SankeyChart, type SankeyLink, type SankeyNode, Support, Text, BugIcon, CardIcon, ChevronLeftIcon, HeadsetIcon, LockIcon, MailIcon, MessageCircleIcon, PaperclipIcon, SparklesIcon, FileUpload, Input, SendIcon, useFileUpload, type FileUploadFile, type FileUploadHandler } from "panelui-native";
+import { AIInput, Avatar, AvatarCropper, type AvatarCropperHandle, type AvatarCropperShape, type AvatarCropperSource, pickAvatarImage, CameraIcon, ImageIcon, Badge, Button, Card, Compare, Countdown, OtpInput, Frame, Leaderboard, type LeaderboardEntry, Tabs, Message, MessageScroller, Rating, Response, SankeyChart, type SankeyLink, type SankeyNode, Support, Text, BugIcon, CardIcon, ChevronLeftIcon, HeadsetIcon, LockIcon, MailIcon, MessageCircleIcon, PaperclipIcon, SparklesIcon, FileUpload, Input, SendIcon, useFileUpload, type FileUploadFile, type FileUploadHandler, WeekStrip, type WeekStripMarks, WeekHoursGrid, type WeekHoursRow } from "panelui-native";
 import type { ComponentEntry } from '../component-types';
 
 /* -------------------------------------------------------------------------- */
@@ -2157,6 +2157,193 @@ function FileUploadDisabledDemo() {
   );
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* WeekStrip                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const dayKey = (day: Date) => day.getDay();
+
+/** What a studio runs on each weekday, by Sunday-first index. */
+const STUDIO_WEEK: Record<number, WeekStripMarks> = {
+  1: { dots: ['primary', 'success'] },
+  2: { dots: ['success'] },
+  3: { dots: ['primary', 'success', 'warning'] },
+  4: { dots: ['success'] },
+  5: { dots: ['primary'] },
+  6: { dots: ['success', 'warning'] },
+};
+
+const CLASS_TIMES: Record<number, string[]> = {
+  0: ['10:00 Gentle stretch'],
+  1: ['07:00 Mobility · booked', '18:30 Strength'],
+  2: ['12:15 Spin'],
+  3: ['07:00 Mobility · booked', '17:00 Strength', '19:30 Private lesson'],
+  4: ['12:15 Spin'],
+  5: ['07:00 Mobility · booked'],
+  6: ['09:00 Open gym', '11:00 Private lesson'],
+};
+
+function WeekStripScheduleDemo() {
+  const [day, setDay] = useState(() => new Date());
+  return (
+    <View className="w-full gap-4">
+      <WeekStrip value={day} onValueChange={setDay} weekStartsOn={1} marks={(date) => STUDIO_WEEK[dayKey(date)]} />
+      <View className="gap-2">
+        {(CLASS_TIMES[day.getDay()] ?? []).map((line) => (
+          <Text key={line} className="text-sm text-foreground">
+            {line}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const FREE_SPOTS: Record<number, string> = { 1: '3 free', 2: 'Full', 3: '1 free', 4: '6 free', 5: '2 free' };
+
+/** This week's day at a Monday-first index, for a demo that needs a fixed day. */
+function thisWeek(index: number) {
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+  day.setDate(day.getDate() - ((day.getDay() + 6) % 7) + index);
+  return day;
+}
+
+function WeekStripLabelsDemo() {
+  // Tuesday: the studio is closed on Sundays, so today may not be pickable.
+  const [day, setDay] = useState(() => thisWeek(1));
+  return (
+    <WeekStrip
+      value={day}
+      onValueChange={setDay}
+      weekStartsOn={1}
+      disabled={(date) => date.getDay() === 0}
+      marks={(date) => (FREE_SPOTS[dayKey(date)] ? { label: FREE_SPOTS[dayKey(date)] } : undefined)}
+    />
+  );
+}
+
+function WeekStripStaffDemo() {
+  // Wednesday stands in for today, so the week shows past days, today and
+  // days still to come whichever day the demo is opened on.
+  const [today] = useState(() => thisWeek(2));
+  const [day, setDay] = useState(today);
+  return (
+    <WeekStrip
+      today={today}
+      value={day}
+      onValueChange={setDay}
+      weekStartsOn={1}
+      faded={(date) => date < today}
+      disabled={(date) => date.getDay() === 0}
+      marks={(date) =>
+        date.getDay() === 2 || date.getDay() === 5
+          ? { corner: 'warning', dots: ['primary'] }
+          : date.getDay() === 4
+            ? { corner: 'info' }
+            : undefined
+      }
+    />
+  );
+}
+
+function WeekStripScrollDemo() {
+  const [tomorrow] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    return date;
+  });
+  const [day, setDay] = useState<Date | null>(null);
+  return (
+    <View className="w-full gap-3">
+      <WeekStrip
+        scroll
+        size="sm"
+        start={tomorrow}
+        length={21}
+        value={day}
+        onValueChange={setDay}
+        disabled={(date) => date.getDay() === 0}
+      />
+      <Text className="text-sm text-muted-foreground">
+        {day ? `Lesson requested for ${day.toDateString()}` : 'Pick a day in the next three weeks'}
+      </Text>
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* WeekHoursGrid                                                              */
+/* -------------------------------------------------------------------------- */
+
+const TRAINER_HOURS: WeekHoursRow[] = [
+  { key: 'mon', label: 'Mon', blocks: [{ start: 7, end: 12 }, { start: 16, end: 20 }] },
+  { key: 'tue', label: 'Tue', blocks: [{ start: 9, end: 17.5 }] },
+  { key: 'wed', label: 'Wed', blocks: [{ start: 7, end: 12 }, { start: 16, end: 20 }] },
+  { key: 'thu', label: 'Thu', blocks: [{ start: 12, end: 21 }] },
+  { key: 'fri', label: 'Fri', blocks: [{ start: 7, end: 13 }] },
+  { key: 'sat', label: 'Sat', blocks: [{ start: 9, end: 12.5 }] },
+  { key: 'sun', label: 'Sun', off: true, blocks: [] },
+];
+
+function WeekHoursWorkingDemo() {
+  const [selected, setSelected] = useState('wed');
+  return (
+    <View className="w-full gap-3">
+      <WeekHoursGrid
+        from={6}
+        to={22}
+        ticks={[6, 10, 14, 18, 22]}
+        rows={TRAINER_HOURS.map((row) => ({ ...row, selected: row.key === selected }))}
+        onSelect={setSelected}
+      />
+      <Text className="text-sm text-muted-foreground">Editing {selected.toUpperCase()}</Text>
+    </View>
+  );
+}
+
+const BOOKINGS: WeekHoursRow[] = [
+  { key: 'mon', label: 'Mon', blocks: [{ start: 8, end: 9 }, { start: 13, end: 15, tone: 'muted' }, { start: 18, end: 19 }] },
+  { key: 'tue', label: 'Tue', blocks: [{ start: 10, end: 12, tone: 'muted' }] },
+  { key: 'wed', label: 'Wed', blocks: [{ start: 7, end: 8 }, { start: 9, end: 11, tone: 'muted' }, { start: 17, end: 18.5, tone: 'muted' }] },
+  { key: 'thu', label: 'Thu', blocks: [] },
+  { key: 'fri', label: 'Fri', blocks: [{ start: 12, end: 13 }, { start: 15, end: 17, tone: 'muted' }] },
+];
+
+function WeekHoursBookedDemo() {
+  return (
+    <WeekHoursGrid
+      from={6}
+      to={22}
+      ticks={[6, 10, 14, 18, 22]}
+      rows={BOOKINGS}
+      legend={[{ label: 'Your sessions' }, { label: 'Booked by others', tone: 'muted' }]}
+    />
+  );
+}
+
+const SHIFTS: WeekHoursRow[] = [
+  { key: 'amira', label: 'Amira', blocks: [{ start: 0, end: 8, tone: 'info' }] },
+  { key: 'jonas', label: 'Jonas', blocks: [{ start: 8, end: 16, tone: 'success' }] },
+  { key: 'leila', label: 'Leila', blocks: [{ start: 14, end: 22, tone: 'warning' }] },
+  { key: 'tomas', label: 'Tomás', blocks: [{ start: 22, end: 24, tone: 'info' }, { start: 0, end: 2, tone: 'info' }] },
+];
+
+function WeekHoursShiftsDemo() {
+  return (
+    <WeekHoursGrid
+      rows={SHIFTS}
+      ticks={['00', '06', '12', '18', '24']}
+      legend={[
+        { label: 'Night', tone: 'info' },
+        { label: 'Day', tone: 'success' },
+        { label: 'Late', tone: 'warning' },
+      ]}
+    />
+  );
+}
+
 export const ENTRIES: ComponentEntry[] = [
   {
     slug: 'sankey-chart',
@@ -2425,6 +2612,27 @@ export const ENTRIES: ComponentEntry[] = [
       { label: 'Rules and rejections', render: () => <FileUploadRulesDemo /> },
       { label: 'Photo strip', render: () => <FileUploadStripDemo /> },
       { label: 'Disabled', render: () => <FileUploadDisabledDemo /> },
+    ],
+  },
+  {
+    slug: 'week-strip',
+    name: 'WeekStrip',
+    summary: 'One row of days to pick from, with marks for what is on each',
+    demos: [
+      { label: 'A week of classes', render: () => <WeekStripScheduleDemo /> },
+      { label: 'Labels instead of dots', render: () => <WeekStripLabelsDemo /> },
+      { label: 'Past, closed and flagged days', render: () => <WeekStripStaffDemo /> },
+      { label: 'Three weeks ahead', render: () => <WeekStripScrollDemo /> },
+    ],
+  },
+  {
+    slug: 'week-hours-grid',
+    name: 'WeekHoursGrid',
+    summary: 'A week of hours, one row per day, with the taken parts filled in',
+    demos: [
+      { label: 'Working hours', render: () => <WeekHoursWorkingDemo /> },
+      { label: 'Yours and others', render: () => <WeekHoursBookedDemo /> },
+      { label: 'A shift plan', render: () => <WeekHoursShiftsDemo /> },
     ],
   },
 ];

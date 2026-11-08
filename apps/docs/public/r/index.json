@@ -2712,5 +2712,34 @@
     "stability": "stable",
     "description": "Passes a Reanimated dependency list on the web only, where it is used.",
     "registryDependencies": []
+  },
+  {
+    "name": "week-hours-grid",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "A week of hours, one row per day, with the taken parts filled in.",
+    "registryDependencies": [
+      "cn",
+      "refs",
+      "text"
+    ],
+    "docsPath": "components/week-hours-grid"
+  },
+  {
+    "name": "week-strip",
+    "type": "registry:ui",
+    "kind": "ui",
+    "group": "components",
+    "stability": "stable",
+    "description": "One row of days to pick from, with marks for what is on each.",
+    "registryDependencies": [
+      "cn",
+      "date",
+      "refs",
+      "text"
+    ],
+    "docsPath": "components/week-strip"
   }
 ]

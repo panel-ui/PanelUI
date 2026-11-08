@@ -1374,5 +1374,23 @@
       "alpha": true,
       "category": "media"
     }
+  ],
+  "week-strip": [
+    "WeekStrip",
+    "One row of days to pick from, with marks for what is on each.",
+    "react native week strip date picker",
+    {
+      "addedIn": "1.3.0",
+      "category": "forms"
+    }
+  ],
+  "week-hours-grid": [
+    "WeekHoursGrid",
+    "A week of hours, one row per day, with the taken parts filled in.",
+    "react native weekly hours availability grid",
+    {
+      "addedIn": "1.3.0",
+      "category": "data"
+    }
   ]
 }

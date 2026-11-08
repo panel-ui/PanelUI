@@ -22,6 +22,9 @@ const LOADERS: Record<string, () => Promise<ComponentEntry | undefined>> = {
   'file-upload': () =>
     load16().then((module) => module.ENTRIES_BY_SLUG['file-upload']),
   camera: () => load10().then((module) => module.ENTRIES_BY_SLUG['camera']),
+  'week-strip': () => load16().then((module) => module.ENTRIES_BY_SLUG['week-strip']),
+  'week-hours-grid': () =>
+    load16().then((module) => module.ENTRIES_BY_SLUG['week-hours-grid']),
   'sankey-chart': () =>
     load16().then((module) => module.ENTRIES_BY_SLUG['sankey-chart']),
   compare: () => load16().then((module) => module.ENTRIES_BY_SLUG['compare']),

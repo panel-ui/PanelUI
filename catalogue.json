@@ -141,7 +141,9 @@
     "tree",
     "treemap-chart",
     "typography",
-    "waterfall-chart"
+    "waterfall-chart",
+    "week-hours-grid",
+    "week-strip"
   ],
   "visualizations": [
     {
@@ -230,17 +232,17 @@
     }
   ],
   "counts": {
-    "componentModules": 141,
-    "packageComponentExports": 141,
-    "documentedComponents": 141,
-    "exampleEntries": 141,
+    "componentModules": 143,
+    "packageComponentExports": 143,
+    "documentedComponents": 143,
+    "exampleEntries": 143,
     "registry": {
-      "componentItems": 141,
+      "componentItems": 143,
       "blockItems": 4,
       "supportItems": 39,
-      "totalItems": 184,
+      "totalItems": 186,
       "byType": {
-        "registry:ui": 159,
+        "registry:ui": 161,
         "registry:hook": 13,
         "registry:lib": 7,
         "registry:theme": 1,

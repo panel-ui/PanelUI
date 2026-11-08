@@ -1,0 +1,29 @@
+{
+  "slug": "week-hours-grid",
+  "preview": {
+    "src": "/previews/week-hours-grid.jpg",
+    "alt": "WeekHoursGrid in the example app: a trainer's working hours from 06 to 22, with Wednesday outlined for editing and Sunday off.",
+    "width": 1206,
+    "height": 2622
+  },
+  "intro": "Use it to show which hours of each day are taken: a trainer's working hours, the sessions already booked in a room, a shift plan. Each row is a bar across the visible hours with the taken stretches filled in, so reading down compares the days and reading along shows the gaps.\n\nHours are numbers, so 9.5 is half past nine and no date library is needed. `from` and `to` set the visible range, and a block outside it is cut at the edge.\n\nFor a month of days, use [Planner](/docs/components/planner).",
+  "usage": "<WeekHoursGrid\n  from={6}\n  to={22}\n  ticks={[6, 10, 14, 18, 22]}\n  rows={[\n    { key: 'mon', label: 'Mon', blocks: [{ start: 9, end: 12 }, { start: 16, end: 20 }] },\n    { key: 'sun', label: 'Sun', off: true, blocks: [] },\n  ]}\n/>",
+  "examples": [
+    {
+      "title": "Pressing a row",
+      "description": "With `onSelect` each row is a button, called with the row's `key`. Mark the row being edited `selected` to outline it.",
+      "code": "<WeekHoursGrid\n  from={6}\n  to={22}\n  rows={rows.map((row) => ({ ...row, selected: row.key === editing }))}\n  onSelect={setEditing}\n/>"
+    },
+    {
+      "title": "A legend",
+      "description": "A block's `tone` picks its colour from the theme. Use `muted` for time taken by someone else, and explain each tone with `legend`.",
+      "code": "<WeekHoursGrid\n  from={6}\n  to={22}\n  rows={bookings}\n  legend={[{ label: 'Your sessions' }, { label: 'Booked by others', tone: 'muted' }]}\n/>"
+    },
+    {
+      "title": "Rows that are not days",
+      "description": "A row is a key, a label and its blocks, so the same grid holds one row per person for a shift plan.",
+      "code": "<WeekHoursGrid\n  rows={[\n    { key: 'jonas', label: 'Jonas', blocks: [{ start: 8, end: 16, tone: 'success' }] },\n    { key: 'leila', label: 'Leila', blocks: [{ start: 14, end: 22, tone: 'warning' }] },\n  ]}\n  ticks={['00', '06', '12', '18', '24']}\n/>"
+    }
+  ],
+  "notes": "### Ticks\n\n`ticks` are spread evenly from `from` to `to`, so pass evenly spaced hours. A number is written as a two-digit hour; a string is shown as given.\n\n### Rows that are off\n\nA row marked `off` is drawn faded with no blocks. A screen reader hears its label followed by `offLabel`, which defaults to \"off\".\n\n### Accessibility\n\nEach row is read as its label followed by every block as a range of times, such as \"Mon, 09:00 to 12:00, 16:00 to 20:00\". With `onSelect` the row is a button and a `selected` row is announced as selected. The ticks are hidden from assistive technology, since the times are already in each row's label."
+}

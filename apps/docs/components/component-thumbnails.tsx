@@ -1251,6 +1251,47 @@ const map = (
   </div>
 );
 
+const weekStrip = (
+  <Row className="w-48 justify-between">
+    {Array.from({ length: 7 }, (_, i) => (
+      <Stack key={i} className="items-center gap-1">
+        <Bar className="w-3" faint />
+        {i === 3 ? (
+          <Accent className="size-5 rounded-full" />
+        ) : (
+          <div className="size-5 rounded-full bg-fd-muted-foreground/8" />
+        )}
+        <div className={i % 2 ? 'size-1 rounded-full bg-fd-muted-foreground/40' : 'size-1'} />
+      </Stack>
+    ))}
+  </Row>
+);
+
+const weekHoursGrid = (
+  <Stack className="w-48 gap-1.5">
+    {[
+      [10, 40, 60, 85],
+      [25, 70],
+      [10, 40, 60, 85],
+      [45, 95],
+      [],
+    ].map((cuts, i) => (
+      <Row key={i} className="gap-2">
+        <Bar className="w-4 shrink-0" faint />
+        <div className="relative h-2.5 flex-1 overflow-hidden rounded-sm bg-fd-muted-foreground/8">
+          {Array.from({ length: cuts.length / 2 }, (_, j) => (
+            <div
+              key={j}
+              className="absolute inset-y-0 rounded-sm bg-fd-primary/80"
+              style={{ left: `${cuts[j * 2]}%`, width: `${cuts[j * 2 + 1]! - cuts[j * 2]!}%` }}
+            />
+          ))}
+        </div>
+      </Row>
+    ))}
+  </Stack>
+);
+
 const planner = (
   <div className="grid w-44 grid-cols-5 gap-1">
     {Array.from({ length: 5 }, (_, i) => (
@@ -2352,6 +2393,8 @@ const thinkingOrb = (
 /* -------------------------------------------------------------------------- */
 
 const THUMBNAILS: Record<string, ReactNode> = {
+  'week-strip': weekStrip,
+  'week-hours-grid': weekHoursGrid,
   // Actions
   button,
   'button-group': buttonGroup,

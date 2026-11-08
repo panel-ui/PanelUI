@@ -78,6 +78,7 @@
  */
 import {
   Children,
+  cloneElement,
   Fragment,
   createContext,
   isValidElement,
@@ -227,10 +228,13 @@ function useStepItem(component: string): StepItemContextValue {
  * be: an item buried inside another component cannot be given a connector
  * that lines up with its siblings.
  */
-function flattenSteps(children: ReactNode): ReactNode[] {
+function flattenSteps(children: ReactNode, prefix = ''): ReactNode[] {
   return Children.toArray(children).flatMap((node) => {
     if (isValidElement<{ children?: ReactNode }>(node) && node.type === Fragment) {
-      return flattenSteps(node.props.children);
+      return flattenSteps(node.props.children, `${prefix}${String(node.key ?? '')}/`);
+    }
+    if (prefix && isValidElement(node)) {
+      return [cloneElement(node, { key: `${prefix}${String(node.key ?? '')}` })];
     }
     return [node];
   });
@@ -548,9 +552,12 @@ StepsSeparator.displayName = 'Steps.Separator';
  * Makes its item selectable. Omit it for a stepper that only reports where
  * the flow is.
  *
- * It is a `<button>` while the step can be chosen, and a plain element while
- * it cannot — the step the flow is on, and any still to come, are not dead
- * stops in the tab order. Pass `render` to make it a link instead.
+ * It is always a `<button>`, so the element does not change under a reader
+ * when a completed step becomes the current one and focus would otherwise be
+ * thrown away. A step that cannot be chosen is `aria-disabled` and
+ * `tabIndex={-1}` instead of being a different tag: it is out of the tab
+ * order, but a reader already on it keeps their place. Pass `render` to make
+ * it a link instead.
  */
 function StepsTrigger({
   className,
@@ -576,7 +583,7 @@ function StepsTrigger({
   const slots = stepsVariants({ orientation, state, clickable, disabled });
   // Loading is still the step the flow is on, so it is marked as current too.
   const current = state === 'current' || state === 'loading';
-  const unavailable = disabled || (render !== undefined && !clickable);
+  const unavailable = disabled || !clickable;
 
   const announcement = stepAnnouncement(
     placement?.position ?? -1,
@@ -585,7 +592,7 @@ function StepsTrigger({
   );
 
   return useRender({
-    defaultTagName: clickable ? 'button' : 'span',
+    defaultTagName: 'button',
     render,
     props: mergeProps(
       {
@@ -596,15 +603,17 @@ function StepsTrigger({
         'aria-current': current ? 'step' : undefined,
         'aria-disabled': unavailable ? true : undefined,
         'aria-busy': state === 'loading' ? true : undefined,
-        // Only a tag that accepts it gets `type`; a link keeps its own.
-        ...(clickable && render === undefined ? { type } : null),
+        // Only a rendered tag gets `type`; a link keeps its own.
+        ...(render === undefined ? { type, tabIndex: unavailable ? -1 : undefined } : { tabIndex: unavailable ? -1 : undefined }),
         className: slots.trigger({ className }),
-        onClick: clickable
-          ? (event: ReactMouseEvent<HTMLElement>) => {
-              onClick?.(event as ReactMouseEvent<HTMLButtonElement>);
-              setActiveStep(item.step);
-            }
-          : undefined,
+        onClick: (event: ReactMouseEvent<HTMLElement>) => {
+          if (unavailable) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event as ReactMouseEvent<HTMLButtonElement>);
+          setActiveStep(item.step);
+        },
         children: (
           <>
             {children}

@@ -57,7 +57,7 @@ Keep it to three to five stops. A flow with twelve steps is not a stepper, it is
 ```
 
 - `Steps.Item` — One stop. Its `step` is its place in the flow, and its state is worked out by comparing that with the root's active step, so it never has to be kept in sync by hand. `completed` forces it done out of order, `loading` swaps the number for a spinner while it is the current step, `disabled` keeps it from being chosen, and `reachable` allows a step ahead to be chosen. The connector after it is drawn for you unless it is the last one or holds its own `Steps.Separator`.
-- `Steps.Trigger` — The part that makes a step selectable. A completed step renders a `<button>` and takes you back to itself; the step the flow is on, and any after it, render as plain content — a control that would only press itself, or that has not been earned, is not a dead stop in the tab order. `render` draws it as something else, such as a router link.
+- `Steps.Trigger` — The part that makes a step selectable. Every step is a `<button>` — the element does not change under a reader when a completed step becomes the current one, so focus stays put. A completed step is in the tab order and takes you back to itself; the step the flow is on, and any after it, are `aria-disabled` with `tabIndex={-1}`, so they are not dead stops but a reader already on one keeps their place. `render` draws it as something else, such as a router link.
 - `Steps.Indicator` — The circle. It shows the position in the row, a tick once the step is complete, or a spinner while it is loading. Give it children to replace all of that with something of your own, such as an icon.
 - `Steps.Title` — What the step is called. In a horizontal stepper it sits under the circle; in a vertical one it sits beside it.
 - `Steps.Description` — A quieter line about the step: what it asks for, or what happened there. It runs on under the title without moving the connector.
@@ -143,7 +143,7 @@ The root counts the items it holds and each one draws the connector to the next,
 
 #### Keyboard and screen readers
 
-These are not tabs, and deliberately have no tablist semantics: a stepper is a line to walk, not a set to browse, so the arrow keys do nothing. Completed steps are ordinary buttons in the tab order — Tab reaches them, Enter or Space takes the flow back — and the step the flow is on and those ahead of it are not buttons at all. The current trigger carries `aria-current="step"`, and every trigger's name carries its position: a screen reader hears "Payment, step 2 of 3", and a completed one adds "completed". Pass `render={<a href="…" />}` when a step is a page of its own; the link keeps its semantics and its address.
+These are not tabs, and deliberately have no tablist semantics: a stepper is a line to walk, not a set to browse, so the arrow keys do nothing. Completed steps are buttons in the tab order — Tab reaches them, Enter or Space takes the flow back — and the step the flow is on and those ahead are also buttons, `aria-disabled` and removed from the tab order with `tabIndex={-1}`; the element type does not change when the flow moves, so focus is not lost. The current trigger carries `aria-current="step"`, and every trigger's name carries its position: a screen reader hears "Payment, step 2 of 3", and a completed one adds "completed". Pass `render={<a href="…" />}` when a step is a page of its own; the link keeps its semantics and its address.
 
 #### Reduced motion
 

@@ -59,11 +59,12 @@ Extends `ViewProps`.
 
 #### `ToastCloseProps`
 
-Extends `ViewProps`.
+Extends `Omit<ViewProps, 'accessibilityLabel'>`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
+| `accessibilityLabel` | `string` | `Dismiss notification` | What a screen reader calls the button. Defaults to "Dismiss notification"; pass your own in an app that is not in English. |
 
 ### Example — Firing one
 

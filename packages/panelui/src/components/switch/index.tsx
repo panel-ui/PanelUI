@@ -1,5 +1,5 @@
 import { forwardRef, useEffect } from 'react';
-import { Pressable, View, type PressableProps } from 'react-native';
+import { Platform, Pressable, View, type PressableProps } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -62,6 +62,25 @@ const SWITCH_HIT_SLOP: Record<SwitchSize, { top: number; bottom: number; left: n
   xl: { top: 6, bottom: 6, left: 0, right: 0 },
 };
 
+/**
+ * The same room as padding, with a negative margin that gives it back to the
+ * layout. The web ignores `hitSlop`, so without this its target would be the
+ * bare track.
+ */
+const webTarget = (size: SwitchSize) => {
+  const slop = SWITCH_HIT_SLOP[size];
+  return {
+    paddingTop: slop.top,
+    paddingBottom: slop.bottom,
+    paddingLeft: slop.left,
+    paddingRight: slop.right,
+    marginTop: -slop.top,
+    marginBottom: -slop.bottom,
+    marginLeft: -slop.left,
+    marginRight: -slop.right,
+  };
+};
+
 export interface SwitchProps
   extends VariantProps<typeof switchVariants>,
     Pick<PressableProps, 'accessibilityLabel' | 'accessibilityHint' | 'accessibilityLabelledBy'> {
@@ -86,6 +105,13 @@ export interface SwitchProps
    * the platform control owns its own feedback.
    */
   haptics?: boolean;
+  /**
+   * Set to `false` to draw only the track, with no press and no role of its
+   * own. Use it when a whole row is the switch: the row is the one
+   * `Pressable` with `accessibilityRole="switch"`, and a second switch inside
+   * it would be announced twice and take two Tab stops.
+   */
+  interactive?: boolean;
 }
 
 /**
@@ -115,6 +141,7 @@ export const Switch = forwardRef<ViewRef, SwitchProps>(
       accessibilityLabel,
       accessibilityHint,
       accessibilityLabelledBy,
+      interactive = true,
     },
     ref
   ) => {
@@ -173,11 +200,35 @@ export const Switch = forwardRef<ViewRef, SwitchProps>(
       );
     }
 
+    const track = (
+      <View className={slots.track({ className })}>
+        <Animated.View style={activeTrackStyle} className={slots.activeTrack()} />
+        <Animated.View style={thumbStyle} className={slots.thumb()} />
+      </View>
+    );
+
+    if (!interactive) {
+      return (
+        <View
+          ref={ref}
+          accessible={false}
+          aria-hidden
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
+        >
+          {track}
+        </View>
+      );
+    }
+
     return (
       <Pressable
         ref={ref}
         accessibilityRole="switch"
         accessibilityState={{ checked: value, disabled: !!disabled }}
+        // Stated as well, because the web drops `checked: false` from the
+        // state and a switch with no `aria-checked` is an incomplete one.
+        aria-checked={value}
         accessibilityLabel={accessibilityLabel ?? label}
         accessibilityHint={accessibilityHint}
         accessibilityLabelledBy={
@@ -189,11 +240,9 @@ export const Switch = forwardRef<ViewRef, SwitchProps>(
           onValueChange?.(!value);
         }}
         hitSlop={SWITCH_HIT_SLOP[size]}
+        style={Platform.OS === 'web' ? webTarget(size) : undefined}
       >
-        <View className={slots.track({ className })}>
-          <Animated.View style={activeTrackStyle} className={slots.activeTrack()} />
-          <Animated.View style={thumbStyle} className={slots.thumb()} />
-        </View>
+        {track}
       </Pressable>
     );
   }

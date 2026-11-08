@@ -20,6 +20,7 @@ import {
 } from 'react';
 import {
   AppState,
+  Platform,
   View,
   type ViewProps,
 } from 'react-native';
@@ -266,11 +267,29 @@ const ToastAction = ({ variant = 'secondary', size = 'sm', onPress, ...props }: 
 };
 ToastAction.displayName = 'Toast.Action';
 
-export interface ToastCloseProps extends ViewProps {
+export interface ToastCloseProps extends Omit<ViewProps, 'accessibilityLabel'> {
   className?: string;
+  /**
+   * What a screen reader calls the button. Defaults to "Dismiss notification";
+   * pass your own in an app that is not in English.
+   */
+  accessibilityLabel?: string;
 }
 
-const ToastClose = ({ className, ...props }: ToastCloseProps) => {
+/*
+ * The cross is drawn at 24 points so it stays quiet beside the text, and its
+ * target reaches 44 on both axes. Natively that is hit slop. The web ignores
+ * hit slop, so there the button itself is 44 and a negative margin gives the
+ * room back to the layout.
+ */
+const CLOSE_SIZE = Platform.OS === 'web' ? '-m-2.5 h-11 w-11' : 'h-6 w-6';
+const CLOSE_SLOP = Platform.OS === 'web' ? undefined : 10;
+
+const ToastClose = ({
+  className,
+  accessibilityLabel = 'Dismiss notification',
+  ...props
+}: ToastCloseProps) => {
   const { hide } = useContext(ToastContext);
   const color = useCSSVariable('--color-muted-foreground');
 
@@ -279,8 +298,9 @@ const ToastClose = ({ className, ...props }: ToastCloseProps) => {
       <Button
         variant="ghost"
         size="icon"
-        accessibilityLabel="Dismiss notification"
-        className="h-6 w-6 rounded-full"
+        accessibilityLabel={accessibilityLabel}
+        className={cn(CLOSE_SIZE, 'rounded-full')}
+        hitSlop={CLOSE_SLOP}
         onPress={hide}
       >
         <XIcon size={14} color={typeof color === 'string' ? color : undefined} />

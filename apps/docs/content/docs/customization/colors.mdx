@@ -54,6 +54,10 @@ page; `overlay` describes leaving it.
 | `ring` | Focus rings |
 | `skeleton` | The shimmer fill |
 
+In each pair the plain token is a fill and the `-foreground` token is the text drawn on it. For
+supporting text use `text-muted-foreground`. `muted` is a fill at about 6% alpha, so `text-muted`
+compiles without a warning but draws text you can barely see.
+
 In the default theme `primary` is the same neutral as `foreground` — `#262626` in light, `#f5f5f5`
 in dark — so text drawn in `text-primary` looks the same as body text. To set something apart by
 colour, [give `primary` a hue](#changing-a-colour), or use the Moon or Grass theme, where it
@@ -114,6 +118,11 @@ Redefine the token in your own `global.css`, in the same `@variant` shape the li
 ```
 
 Every component drawing `bg-primary` follows, including ones you have not written yet.
+
+Write the override inside the `@variant` blocks, not in an `@theme` block. The library sets every
+token inside a `@variant` block, and those take precedence over an `@theme` declaration of the same
+name, so `@theme { --color-muted: … }` is overridden at runtime with no warning. For a colour of
+your own, give it a name the library does not use, such as `--color-hint`.
 
 <Callout type="warn" title="Two rules Uniwind enforces">
   **Every theme must define the same variables.** Adding a token to one theme without adding it

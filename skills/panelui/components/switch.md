@@ -34,6 +34,7 @@ Extends `VariantProps<typeof switchVariants>, Pick<PressableProps, 'accessibilit
 | `native` | `boolean` | — | Render the platform's own switch instead of this one. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the control, so `className` and `size` are ignored. |
 | `label` | `string` | — | Names the control to assistive technology; native mode also draws it. |
 | `haptics` | `boolean` | — | Tick the haptic engine each time the switch is flipped — a toggle you feel click rather than one that merely slides. Needs the optional `expo-haptics`, and is silent without it. Ignored in `native` mode, where the platform control owns its own feedback. |
+| `interactive` | `boolean` | `true` | Set to `false` to draw only the track, with no press and no role of its own. Use it when a whole row is the switch: the row is the one `Pressable` with `accessibilityRole="switch"`, and a second switch inside it would be announced twice and take two Tab stops. |
 
 ### Example — In a settings row
 

@@ -41,7 +41,7 @@ Use a select when the options are few enough to recognise by scrolling, and a co
 
 ## Props
 
-Every part also takes the props of the element it renders, and a `className`.
+`Combobox.Item` and `Combobox.Group` take only the props listed here: they describe the options, and do not render an element of their own. `Combobox` takes the props of the wrapper it renders, plus `className`.
 
 #### `ComboboxItemProps`
 

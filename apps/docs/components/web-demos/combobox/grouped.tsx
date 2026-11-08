@@ -1,3 +1,5 @@
+'use client';
+
 import { Combobox } from 'panelui-web/combobox';
 
 export default function ComboboxGrouped() {

@@ -417,8 +417,19 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
   const model = useMemo(() => readItems(children), [children]);
   const options = model.options;
 
+  // A selected value can leave the rendered options when a server or the
+  // caller filters them. Remember the labels it was shown with, so a chip or
+  // the field does not fall back to an id.
+  const labelCache = useRef(new Map<string, string>());
+  useEffect(() => {
+    for (const option of options) labelCache.current.set(option.value, option.label);
+  }, [options]);
+
   const labelOf = useCallback(
-    (candidate: string) => options.find((option) => option.value === candidate)?.label ?? candidate,
+    (candidate: string) =>
+      options.find((option) => option.value === candidate)?.label ??
+      labelCache.current.get(candidate) ??
+      candidate,
     [options]
   );
 
@@ -584,7 +595,6 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
       // has to be told.
       if (presentation === 'inline') setQuery(labelOf(chosen));
       setOpen(false);
-      if (details?.reason === 'item-press') inputRef.current?.blur();
     },
     [multiple, commit, presentation, setQuery, labelOf, setOpen]
   );
@@ -609,7 +619,6 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
       commit(exactMatch.value as ComboboxSelection[Mode]);
       setQuery(exactMatch.label);
       setOpen(false);
-      inputRef.current?.blur();
       return;
     }
 
@@ -623,7 +632,6 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
 
     commit(typed as ComboboxSelection[Mode]);
     setOpen(false);
-    inputRef.current?.blur();
   }, [query, exactMatch, allowCustomValue, multiple, values, commit, setQuery, setOpen]);
 
   const onInputKeyDown = useCallback(

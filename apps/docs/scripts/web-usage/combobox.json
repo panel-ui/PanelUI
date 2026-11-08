@@ -11,6 +11,8 @@
     "Item": "One option. `value` identifies it, `label` is what is shown and what the default filter matches on, `description` adds a second line, `start` draws something before the label, and `disabled` keeps it listed but unselectable.",
     "Group": "A titled run of options. Presentational only: a grouped Combobox reports the same values a flat one would, and a group with nothing left in it disappears from the filtered list."
   },
+  "propsNote": "`Combobox.Item` and `Combobox.Group` take only the props listed here: they describe the options, and do not render an element of their own. `Combobox` takes the props of the wrapper it renders, plus `className`.",
+
   "examples": [
     {
       "title": "Grouped options",

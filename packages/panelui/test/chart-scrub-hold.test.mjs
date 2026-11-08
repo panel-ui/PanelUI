@@ -30,6 +30,10 @@ function panChains(source) {
   return chains;
 }
 
+/** Whether a pan starts on contact: a distance of 0, at least when the hold is off. */
+const scrubs = (chain) =>
+  chain.includes('.minDistance(0)') || chain.includes('.minDistance(activateAfterLongPress > 0 ?');
+
 async function chartSources() {
   const entries = await readdir(COMPONENTS, { withFileTypes: true });
   const charts = entries
@@ -49,8 +53,15 @@ test('every chart pan that starts on contact waits for a held press', async () =
   let checked = 0;
   for (const { name, source } of sources) {
     for (const chain of panChains(source)) {
-      if (!chain.includes('.minDistance(0)')) continue;
+      if (!scrubs(chain)) continue;
       checked += 1;
+      // A bare distance of 0 is met by the first move event, which activates
+      // the pan before the hold has run and cancels the Pressable above it.
+      assert.doesNotMatch(
+        chain,
+        /\.minDistance\(0\)/,
+        `${name}: with a hold, the distance must not let the pan activate on its own`
+      );
       assert.match(
         chain,
         /\.activateAfterLongPress\(activateAfterLongPress\)/,
@@ -70,7 +81,7 @@ test('every chart pan that starts on contact waits for a held press', async () =
 
 test('the hold is a prop with a default on every chart that scrubs', async () => {
   for (const { name, source } of await chartSources()) {
-    if (!panChains(source).some((chain) => chain.includes('.minDistance(0)'))) continue;
+    if (!panChains(source).some(scrubs)) continue;
     assert.match(source, /activateAfterLongPress\?: number;/, `${name}: missing the prop`);
     assert.match(
       source,

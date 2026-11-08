@@ -132,7 +132,9 @@ test('the hook owns the subscription cleanup and opaque fallback layers', () => 
   assert.match(source, /let knownReduceTransparency: boolean \| null = null/);
   assert.match(source, /useState<boolean \| null>\(knownReduceTransparency\)/);
   assert.match(source, /knownReduceTransparency = next/);
-  assert.match(source, /const mode = scrimMode\(blur, BlurView !== null, reduceTransparency\)/);
+  assert.match(source, /const mode = scrimMode\(blur, scrimCanBlur, reduceTransparency\)/);
+  // Android has no view behind a portal to point its blur at, so it dims.
+  assert.match(source, /const scrimCanBlur = BlurView !== null && Platform\.OS !== 'android'/);
   assert.match(source, /if \(mode === 'blur' && BlurView\)/);
   assert.match(source, /if \(mode === 'opaque'\)/);
   assert.match(source, /className=\{opaqueClassName\(tint\)\}/);

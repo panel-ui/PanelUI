@@ -1,0 +1,620 @@
+---
+title: Table of Contents
+description: The sections of a long page as a quiet rail, with one mark that moves to what you are reading.
+status: new
+---
+
+<ComponentPreview name="table-of-contents/overview" height={440} align="start">
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+const SECTIONS = [
+  {
+    value: 'introduction',
+    label: 'Introduction',
+    text: 'Orders leave the warehouse within two working days. What follows is how a parcel gets from there to a doorstep, and what to do when it does not arrive at all.',
+  },
+  {
+    value: 'shipping',
+    label: 'Shipping',
+    text: 'Standard delivery is free over £40 and takes three to five working days. Express orders placed before noon are sent the same day, and a tracking link arrives by email as soon as the carrier has scanned the parcel.',
+  },
+  {
+    value: 'returns',
+    label: 'Returns',
+    text: 'Anything unused can come back within thirty days. Print the label from the order page, put the item in its original box, and leave it at any drop-off point; the refund is issued when it reaches the warehouse.',
+  },
+  {
+    value: 'exchanges',
+    label: 'Exchanges',
+    text: 'For a different size or colour, send the first item back and place a new order. It is quicker than a two-way exchange, and the new parcel is not held while the old one is in transit.',
+  },
+  {
+    value: 'contact',
+    label: 'Contact',
+    text: 'The team answers from 09:00 to 18:00 on weekdays. Include the order number in the first message and the reply can be answered in one go rather than three.',
+  },
+];
+
+export default function TableOfContentsOverview() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="grid w-full max-w-2xl grid-cols-[minmax(0,1fr)_8.5rem] gap-5">
+      <div
+        ref={scroller}
+        className="h-80 overflow-y-auto overscroll-contain rounded-xl border bg-card [scrollbar-width:thin]"
+      >
+        <article className="px-5 py-5">
+          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Guide</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Shipping and returns</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Everything about getting an order to you, and getting it back to us.
+          </p>
+
+          {SECTIONS.map((section) => (
+            <section key={section.value} id={`toc-overview-${section.value}`} className="mt-8 scroll-mt-4">
+              <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
+            </section>
+          ))}
+        </article>
+      </div>
+
+      <TableOfContents root={scroller} offset={16} defaultValue="introduction" className="self-start py-1">
+        <TableOfContents.Title>On this page</TableOfContents.Title>
+        <TableOfContents.List>
+          {SECTIONS.map((section) => (
+            <TableOfContents.Item key={section.value} value={section.value}>
+              <TableOfContents.Link href={`#toc-overview-${section.value}`}>{section.label}</TableOfContents.Link>
+            </TableOfContents.Item>
+          ))}
+        </TableOfContents.List>
+      </TableOfContents>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it beside a long page that is read in sections: a documentation article, a settings screen, a statement of terms. It lists the headings once, quietly, and keeps one mark on the section at the top of the viewport, so a reader can see how far in they are and jump without losing their place.
+
+It is a navigation, not a printed contents table. Every row is a real link with a hash, so the URL follows the reader and a section can be sent to somebody else, and the current row is marked for a screen reader. Keep the labels to the page's own headings and the list to three levels: a rail of twenty equal rows stops saying where you are and becomes a second page.
+
+Scroll tracking is on by default. Pass `value` to hold the active section yourself, or a `root` when the page scrolls inside a panel rather than as a window.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/table-of-contents.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/table-of-contents` instead of `@/components/panelui/table-of-contents`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/table-of-contents/`, one file for each below:
+
+<RegistrySource name="table-of-contents" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { TableOfContents } from "@/components/panelui/table-of-contents"
+```
+
+```tsx
+<TableOfContents defaultValue="install" offset={80}>
+  <TableOfContents.Title>On this page</TableOfContents.Title>
+  <TableOfContents.List>
+    <TableOfContents.Item value="install">
+      <TableOfContents.Link href="#install">Install</TableOfContents.Link>
+    </TableOfContents.Item>
+    <TableOfContents.Item value="configure" depth={1}>
+      <TableOfContents.Link href="#configure">Configure</TableOfContents.Link>
+    </TableOfContents.Item>
+    <TableOfContents.Item value="api">
+      <TableOfContents.Link href="#api">API reference</TableOfContents.Link>
+    </TableOfContents.Item>
+  </TableOfContents.List>
+</TableOfContents>
+```
+
+## Composition
+
+```tsx
+<TableOfContents>
+  <TableOfContents.Title />
+  <TableOfContents.List>
+    <TableOfContents.Item>
+      <TableOfContents.Link />
+    </TableOfContents.Item>
+  </TableOfContents.List>
+</TableOfContents>
+```
+
+- **`TableOfContents.Title`** — A small heading above the list, such as “On this page”. It is optional: the `<nav>` is already named for a screen reader, so the title is for the eye.
+- **`TableOfContents.List`** — The ordered list of sections, and the hairline rail down its leading edge. One segment in the primary colour is measured from the active row and travels when the section changes. The rail and the segment are decoration, drawn in pseudo-elements, so the list keeps only its items and nothing extra is announced. With `variant="contour"` on the root it draws the contour line instead, in an SVG hidden from assistive technology.
+- **`TableOfContents.Item`** — One section. `value` names it and matches the root's `value`, and `depth` indents it by one step per level, for a heading under another heading.
+- **`TableOfContents.Link`** — The anchor to the section, hash included in `href`. It is a real `<a>`, so the browser scrolls, the URL gains the hash and middle-click opens the section in a new tab; `render` lets a router's link take its place. Pressing it moves the mark at once, and the current one carries `aria-current="location"`.
+- **`TableOfContents.Code`** — An identifier inside a link, such as a prop name listed under an API heading. It is drawn as a small pill in the link's colour, so it dims and lights with its row.
+
+## Examples
+
+### Nested sections
+
+`depth` steps a row in by one indent, for a subsection under the heading above it. The mark follows the row wherever it sits, so a page of two levels still reads as one rail.
+
+<ComponentPreview name="table-of-contents/nested" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+export default function TableOfContentsNested() {
+  return (
+    <div className="w-full max-w-xs rounded-xl border bg-card p-4">
+      <TableOfContents defaultValue="presets">
+        <TableOfContents.Title>On this page</TableOfContents.Title>
+        <TableOfContents.List>
+          <TableOfContents.Item value="overview">
+            <TableOfContents.Link href="#toc-nested-overview">Overview</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="installation">
+            <TableOfContents.Link href="#toc-nested-installation">Installation</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="npm" depth={1}>
+            <TableOfContents.Link href="#toc-nested-npm">From npm</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="manual" depth={1}>
+            <TableOfContents.Link href="#toc-nested-manual">By hand</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="configuration">
+            <TableOfContents.Link href="#toc-nested-configuration">Configuration</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="presets" depth={1}>
+            <TableOfContents.Link href="#toc-nested-presets">Presets</TableOfContents.Link>
+          </TableOfContents.Item>
+          <TableOfContents.Item value="api">
+            <TableOfContents.Link href="#toc-nested-api">API reference</TableOfContents.Link>
+          </TableOfContents.Item>
+        </TableOfContents.List>
+      </TableOfContents>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A line that follows the outline
+
+`variant="contour"` draws the rail as a line that steps in with each level and bends back out where the level changes. It lights every section on screen, from the one at the reading line to the last heading in view, and a dot marks the end it is moving towards: the bottom while you read down, the top while you scroll back up. Use it for a long page with deep nesting, where the reader wants to see how much of the outline the screen is showing.
+
+<ComponentPreview name="table-of-contents/contour" height={440}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+type Section = {
+  value: string;
+  label: string;
+  depth: 0 | 1;
+  code?: boolean;
+  text: string;
+};
+
+const SECTIONS: Section[] = [
+  {
+    value: 'usage',
+    label: 'Usage',
+    depth: 0,
+    text: 'Import the button and give it a label. It takes the full press, hover and focus treatment from the theme, so a plain call already matches every other control on the page.',
+  },
+  {
+    value: 'sizes',
+    label: 'Sizes',
+    depth: 0,
+    text: 'Five sizes share one type scale. Pick the one that matches the row it sits in rather than the importance of the action: emphasis is the variant’s job.',
+  },
+  {
+    value: 'size',
+    label: 'size',
+    depth: 1,
+    code: true,
+    text: 'From xs to xl. The default is md, which lines up with an input of the same size, so a field and its submit button share a baseline.',
+  },
+  {
+    value: 'full-width',
+    label: 'fullWidth',
+    depth: 1,
+    code: true,
+    text: 'Stretches the button across its container, for the single action at the end of a form or the bottom of a sheet.',
+  },
+  {
+    value: 'api',
+    label: 'API reference',
+    depth: 0,
+    text: 'Every prop is typed and documented in the source. The table below is generated from those types, so it cannot drift from what the component accepts.',
+  },
+  {
+    value: 'button',
+    label: 'Button',
+    depth: 1,
+    text: 'Accepts every attribute of a native button as well as its own props. A render prop draws it as a link or a router’s link instead.',
+  },
+  {
+    value: 'notes',
+    label: 'Notes',
+    depth: 0,
+    text: 'A few details that only matter in particular layouts.',
+  },
+  {
+    value: 'large-text',
+    label: 'Large text',
+    depth: 1,
+    text: 'Labels wrap rather than truncate when the reader has asked for larger text, so an action is never cut down to its first word.',
+  },
+  {
+    value: 'icons',
+    label: 'Icon buttons',
+    depth: 1,
+    text: 'A button with only an icon needs an aria-label. The icon is decoration to a screen reader, and a button with no name is announced as nothing.',
+  },
+  {
+    value: 'loading',
+    label: 'Loading',
+    depth: 1,
+    text: 'While loading is set the label stays in place and a spinner covers it, so the button keeps its width and the row around it does not jump.',
+  },
+];
+
+const heading = { 0: "text-base font-semibold", 1: "text-sm font-semibold" };
+
+export default function TableOfContentsContour() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card">
+      <div className="grid grid-cols-[minmax(0,1fr)_10rem]">
+        <div ref={scroller} className="h-96 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+          <article className="px-5 pt-5 pb-48">
+            {SECTIONS.map((section) => (
+              <section key={section.value} id={"toc-contour-" + section.value} className="mt-6 scroll-mt-4 first:mt-0">
+                <h3 className={heading[section.depth] + " text-foreground"}>
+                  {section.code ? <code className="font-mono">{section.label}</code> : section.label}
+                </h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
+              </section>
+            ))}
+          </article>
+        </div>
+
+        <TableOfContents
+          variant="contour"
+          root={scroller}
+          offset={16}
+          defaultValue="usage"
+          className="self-start p-4 ps-2"
+        >
+          <TableOfContents.Title>On this page</TableOfContents.Title>
+          <TableOfContents.List>
+            {SECTIONS.map((section) => (
+              <TableOfContents.Item key={section.value} value={section.value} depth={section.depth}>
+                <TableOfContents.Link href={"#toc-contour-" + section.value}>
+                  {section.code ? <TableOfContents.Code>{section.label}</TableOfContents.Code> : section.label}
+                </TableOfContents.Link>
+              </TableOfContents.Item>
+            ))}
+          </TableOfContents.List>
+        </TableOfContents>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Held by you
+
+Pass `value` and `onValueChange` to hold the active section yourself, here so the Back and Next buttons move the mark as well as the links. `observe={false}` leaves the scroll spy out of it: with the value held, only you change it.
+
+<ComponentPreview name="table-of-contents/controlled" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/panelui/button';
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+const STEPS = [
+  {
+    value: 'details',
+    label: 'Details',
+    heading: 'Order details',
+    text: 'Three items, placed on 2 November and shipping to 14 Corfield Road. The invoice is addressed to the card holder.',
+  },
+  {
+    value: 'delivery',
+    label: 'Delivery',
+    heading: 'Delivery',
+    text: 'Standard delivery, three to five working days. The parcel is with the carrier and the tracking link is live.',
+  },
+  {
+    value: 'payment',
+    label: 'Payment',
+    heading: 'Payment',
+    text: 'Paid in full with the card ending 4417. Nothing else is due, and the receipt is in the order email.',
+  },
+];
+
+export default function TableOfContentsControlled() {
+  const [active, setActive] = useState('details');
+  const at = Math.max(
+    0,
+    STEPS.findIndex((step) => step.value === active)
+  );
+  const section = STEPS[at]!;
+
+  return (
+    <div className="w-full max-w-lg overflow-hidden rounded-xl border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+        <p className="text-sm font-medium text-foreground">Invoice 2041</p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={at === 0}
+            onClick={() => setActive(STEPS[at - 1]!.value)}
+          >
+            Back
+          </Button>
+          <Button size="sm" disabled={at === STEPS.length - 1} onClick={() => setActive(STEPS[at + 1]!.value)}>
+            Next
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-5 p-4">
+        <TableOfContents value={active} onValueChange={setActive} observe={false}>
+          <TableOfContents.Title>On this page</TableOfContents.Title>
+          <TableOfContents.List>
+            {STEPS.map((step) => (
+              <TableOfContents.Item key={step.value} value={step.value}>
+                <TableOfContents.Link href={`#toc-controlled-${step.value}`}>{step.label}</TableOfContents.Link>
+              </TableOfContents.Item>
+            ))}
+          </TableOfContents.List>
+        </TableOfContents>
+
+        <div className="rounded-lg bg-muted/40 p-4">
+          <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+            Step {at + 1} of {STEPS.length}
+          </p>
+          <h3 id={`toc-controlled-${section.value}`} className="mt-1 scroll-mt-4 text-sm font-semibold text-foreground">
+            {section.heading}
+          </h3>
+          <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A page inside a panel
+
+When the page scrolls inside a panel rather than as a window, give the scroller to `root`. `offset` moves the reading line down from the top, here to clear the panel's sticky bar, so a heading counts as read when it arrives under it rather than behind it.
+
+<ComponentPreview name="table-of-contents/scrolling" height={420} align="start">
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { TableOfContents } from '@/components/panelui/table-of-contents';
+
+const SECTIONS = [
+  {
+    value: 'highlights',
+    label: 'Highlights',
+    text: 'Charts can now stack a series by a second key, tooltips stay inside the plot at its edges, and a legend can be placed on any side. The theme gained a muted surface for panels that sit inside a card.',
+  },
+  {
+    value: 'fixes',
+    label: 'Fixes',
+    text: 'A popover opened from a row no longer closes when the row is scrolled under the pointer. Menus keep their place after a resize, and the focus ring is drawn on the element that takes focus rather than the one that wraps it.',
+  },
+  {
+    value: 'breaking',
+    label: 'Breaking changes',
+    text: 'The `tone` prop on Alert is now `variant`. The old name still works for this release and is removed in 3.0, with a warning in development. Nothing else changes shape.',
+  },
+  {
+    value: 'upgrade',
+    label: 'Upgrade guide',
+    text: 'Upgrade the package, then run the codemod if the project uses `tone`. The theme file needs no edits: every token the release reads already exists in 2.3, and the new surface is an addition rather than a rename.',
+  },
+  {
+    value: 'next',
+    label: 'What comes next',
+    text: 'Work has started on a table that sorts and filters without a data library, and on a command palette that can be opened from anywhere in an app. Both are in the next minor.',
+  },
+];
+
+export default function TableOfContentsScrolling() {
+  const scroller = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card">
+      <div className="grid grid-cols-[minmax(0,1fr)_8.5rem]">
+        <div ref={scroller} className="h-80 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-5 py-2.5 text-xs font-medium text-muted-foreground backdrop-blur">
+            <span>Release notes</span>
+            <span className="tabular-nums">v2.4</span>
+          </div>
+
+          <article className="px-5 pt-5 pb-6">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">What changed in 2.4</h2>
+            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+              A small release: one new surface, a few fixes, and one rename that will be removed in 3.0.
+            </p>
+
+            {SECTIONS.map((section) => (
+              <section key={section.value} id={`toc-scrolling-${section.value}`} className="mt-7 scroll-mt-12">
+                <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
+              </section>
+            ))}
+          </article>
+        </div>
+
+        {/* The bar inside the scroller is why the reading line is pushed down:
+            without `offset`, a heading would count as read while it was still
+            behind the bar. */}
+        <TableOfContents root={scroller} offset={56} defaultValue="highlights" className="self-start p-4 ps-2">
+          <TableOfContents.Title>On this page</TableOfContents.Title>
+          <TableOfContents.List>
+            {SECTIONS.map((section) => (
+              <TableOfContents.Item key={section.value} value={section.value}>
+                <TableOfContents.Link href={`#toc-scrolling-${section.value}`}>{section.label}</TableOfContents.Link>
+              </TableOfContents.Item>
+            ))}
+          </TableOfContents.List>
+        </TableOfContents>
+      </div>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### TableOfContents
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The active section, when the caller holds it. The scroll spy stands aside. |
+| `defaultValue` | `string` | — | The section active at first, when the caller does not hold it. |
+| `onValueChange` | `(value: string) => void` | — | Called with a section's `value` when a link is pressed or the spy moves on. |
+| `observe` | `boolean` | — | Watch the page and keep the active section at the reading line. On by default when uncontrolled; pass `false` to leave the active section alone, or `true` with `value` to report scroll position without holding state. |
+| `offset` | `number` | `16` | How far below the top of the scroll viewport counts as the reading line, in pixels. Raise it to clear a sticky header. |
+| `root` | `HTMLElement \| null \| RefObject<HTMLElement \| null>` | — | The element that scrolls, when the page is not what scrolls. A section inside a panel needs the panel here; the viewport is the default. |
+| `variant` | `TableOfContentsVariant` | `'rail'` | How the list marks where the reader is. `rail` is a hairline with one segment on the active section. `contour` is a line that steps in and out with each level and lights every section on screen. Default `rail`. |
+| `className` | `string` | — | Classes for the `<nav>`. |
+
+### TableOfContents.Title
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the heading. |
+
+### TableOfContents.List
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the `<ol>`. |
+
+### TableOfContents.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The section this row stands for. Matches the root's `value`. |
+| `depth` | `number` | `0` | How deep the section sits. Each step indents the row and its link, for a section under a section. |
+| `className` | `string` | — | Classes for the `<li>`. |
+
+### TableOfContents.Link
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `href` | `string` | — | The section this link jumps to, hash included: `#install`. |
+| `className` | `string` | — | Classes for the `<a>`. |
+
+### TableOfContents.Code
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — | Classes for the `<code>`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### The scroll spy
+
+With no `value` given, the spy watches the elements named by the links' `href` hashes with an `IntersectionObserver`. It makes the section at the reading line active, which is the section the line falls through, or the one most recently passed when the line is in a gap. `offset` is how far below the top of the scroll viewport that line sits, in pixels, and defaults to `16`. A hash that points at nothing is skipped rather than throwing, the observer disconnects on unmount, and a controlled `value` is never overwritten.
+
+### Keyboard
+
+Every link is an ordinary tab stop, in the order the sections appear. Enter follows it, and the browser moves focus and the URL with it. There is no roving focus, no arrow-key mode and nothing hidden to learn: the list behaves like the links it is made of.
+
+### Accessibility
+
+The root is a `<nav>` labelled “Table of contents”. Give it another `aria-label` when the page has more than one navigation landmark. The list keeps its `<ol>` semantics, the current link carries `aria-current="location"`, and the rail and its mark are pseudo-elements outside the accessibility tree. Focus is drawn as a ring around the link.
+
+### Reduced motion
+
+With reduced motion turned on, the segment jumps to its new row without travelling. Nothing else moves.
+
+### Built on
+
+It uses `@base-ui/react` for the `render` prop and `tailwind-variants` for its styles, as the rest of the collection does. The spy is the browser's `IntersectionObserver`, and the marks are placed in a layout effect from the rows' measured positions, so no measuring library is needed.
+
+### Contour
+
+The contour lights a range rather than one row, so it needs to know what is on screen. With the scroll spy on, that is the section at the reading line and every section whose heading is above the bottom of the viewport. With `value` held and the spy off, only the active section is lit. The line, its lit stretch and the dot are drawn from the rows' measured positions and move with a transition that turns off under reduced motion.
+
+### Server Components
+
+`TableOfContents` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `TableOfContents.Title` off the import, so each part is also exported by name: `TableOfContentsTitle` is `TableOfContents.Title`, and so on for the others.
+
+```tsx
+import { TableOfContents, TableOfContentsTitle, TableOfContentsList, TableOfContentsItem, TableOfContentsLink, TableOfContentsCode } from "@/components/panelui/table-of-contents"
+```

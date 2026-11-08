@@ -719,5 +719,15 @@
       "category": "navigation",
       "title": "Nav Rail"
     }
+  ],
+  "table-of-contents": [
+    "TableOfContents",
+    "The sections of a long page as a quiet rail, with one mark that moves to what you are reading.",
+    "react table of contents anchor links scroll spy toc component",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation",
+      "title": "Table of Contents"
+    }
   ]
 }

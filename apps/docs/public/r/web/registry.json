@@ -1699,6 +1699,29 @@
       ]
     },
     {
+      "name": "table-of-contents",
+      "type": "registry:component",
+      "title": "Table of Contents",
+      "description": "The sections of a long page as a quiet rail, with one mark that moves to what you are reading.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/table-of-contents/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/table-of-contents/index.tsx"
+        },
+        {
+          "path": "components/panelui/table-of-contents/spy.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/table-of-contents/spy.ts"
+        }
+      ]
+    },
+    {
       "name": "tabs",
       "type": "registry:component",
       "title": "Tabs",

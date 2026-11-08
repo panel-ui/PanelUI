@@ -1386,7 +1386,9 @@ function WaterfallChartTooltip({
     };
 
     return Gesture.Pan()
-      .minDistance(0)
+      // With a hold, only the timer may start the readout: a distance of 0 would
+      // activate on the first move event and take the touch from a Pressable above.
+      .minDistance(activateAfterLongPress > 0 ? 10_000 : 0)
       .activateAfterLongPress(activateAfterLongPress)
       .onStart((event) => {
         'worklet';

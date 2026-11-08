@@ -154,6 +154,21 @@ function fadeOut([from, to]: FadeStep): string {
  */
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
+/**
+ * Sets `inert` as an attribute rather than as a prop.
+ *
+ * React 18 drops a boolean `inert`; React 19 understands it. Writing the
+ * attribute on the node is the one behaviour both versions share, and it is
+ * the same pattern the nav rail uses.
+ */
+function useInert<T extends HTMLElement>(inert: boolean) {
+  const ref = useRef<T>(null);
+  useIsomorphicLayoutEffect(() => {
+    ref.current?.toggleAttribute('inert', inert);
+  }, [inert]);
+  return ref;
+}
+
 const scrollHeaderVariants = tv({
   slots: {
     root: 'relative w-full',
@@ -387,11 +402,12 @@ function ScrollHeaderRoot({
   // the measurement is of content that is already laid out.
   useIsomorphicLayoutEffect(() => {
     measure();
-    apply(offsetOf(resolveSource(config.current.scrollSource)));
-    // Only now is the header's first position settled; anything after this is
-    // a real crossing.
-    mounted.current = true;
-  }, [apply, measure, barHeight, threshold, snap, stretch, reducedMotion, scrollRef]);
+    const scrollSource = config.current.scrollSource;
+    const resolved = resolveSource(scrollSource);
+    // A ref to a parent scroller is not attached yet, so do not read the
+    // window in its place. The passive effect reads it once it exists.
+    apply(resolved || !scrollSource ? offsetOf(resolved) : 0);
+  }, [apply, measure, hasLarge, barHeight, threshold, snap, stretch, reducedMotion, scrollRef]);
 
   // Content changes and font loading both change the distance the header
   // collapses over. The observer is the only thing that notices either.
@@ -445,6 +461,9 @@ function ScrollHeaderRoot({
 
     // A page restored mid-scroll has a header that is already collapsed.
     read();
+    // Only now is the first position settled; anything after this is a real
+    // crossing.
+    mounted.current = true;
     target.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       target.removeEventListener('scroll', onScroll);
@@ -592,6 +611,7 @@ function ScrollHeaderLarge({
   const { collapsed, hasBar, setLargeNode } = useScrollHeader('ScrollHeader.Large');
   const slots = scrollHeaderVariants();
   const hidden = hasBar && collapsed;
+  const inertRef = useInert<HTMLDivElement>(hidden);
 
   return useRender({
     defaultTagName: 'div',
@@ -601,7 +621,7 @@ function ScrollHeaderLarge({
         'data-slot': 'scroll-header-large',
         // The block is carried up by the same amount the band shrank, which
         // keeps its bottom edge on the band's.
-        ref: composeRefs(setLargeNode, ref),
+        ref: composeRefs(setLargeNode, ref, inertRef),
         className: cn(
           slots.large({ className }),
           'motion-reduce:transition-opacity motion-reduce:duration-200',
@@ -615,8 +635,8 @@ function ScrollHeaderLarge({
         },
         // `inert` is the whole answer: it takes the block out of the tab order
         // and out of the accessibility tree together, without a second state
-        // to keep in step with this one.
-        inert: hidden || undefined,
+        // to keep in step with this one. It is written to the node by
+        // `inertRef`, so it works in React 18 and 19 alike.
         'aria-hidden': hidden || undefined,
         children: (
           <ScrollHeaderSlotContext.Provider value="large">{children}</ScrollHeaderSlotContext.Provider>
@@ -666,7 +686,7 @@ function ScrollHeaderTitle({
           EASE
         ),
         style: {
-          opacity: slot === 'bar' ? (hasLarge ? BAR_TITLE_OPACITY : 1) : LARGE_OPACITY,
+          opacity: slot === 'bar' ? (hasLarge ? BAR_TITLE_OPACITY : 1) : undefined,
           ...style,
         },
       },

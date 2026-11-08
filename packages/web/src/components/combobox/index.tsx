@@ -48,6 +48,7 @@
 import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import {
   Children,
+  Fragment,
   isValidElement,
   useCallback,
   useEffect,
@@ -288,6 +289,19 @@ interface ItemModel {
   options: OptionData[];
 }
 
+/** React does not walk fragments for `Children.forEach`, so unwrap them first. */
+function withoutFragments(children: ReactNode): ReactNode[] {
+  const flat: ReactNode[] = [];
+  Children.forEach(children, (child) => {
+    if (isValidElement(child) && child.type === Fragment) {
+      flat.push(...withoutFragments((child.props as { children?: ReactNode }).children));
+      return;
+    }
+    flat.push(child);
+  });
+  return flat;
+}
+
 /**
  * Walk the declared children into the flat or grouped shape the primitive
  * filters and renders.
@@ -309,13 +323,13 @@ function readItems(children: ReactNode): ItemModel {
     loose = [];
   };
 
-  Children.forEach(children, (child, index) => {
+  withoutFragments(children).forEach((child, index) => {
     if (!isValidElement(child)) return;
 
     if (child.type === ComboboxGroup) {
       const props = child.props as ComboboxGroupProps;
       const items: OptionData[] = [];
-      Children.forEach(props.children, (nested) => {
+      withoutFragments(props.children).forEach((nested) => {
         if (!isValidElement(nested) || nested.type !== ComboboxItem) return;
         items.push((nested.props as ComboboxItemProps) as OptionData);
       });
@@ -495,18 +509,26 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
   // typed into. Base UI writes it on a pick; an external value change has to be
   // written back here.
   const previousValue = useRef(singleValue);
+  const previousLabel = useRef(singleValue == null ? '' : labelOf(singleValue));
   useEffect(() => {
-    if (previousValue.current === singleValue) return;
-    // A value arriving while the reader is typing waits for the blur: writing
-    // it now would fight the query. The reference advances only when the
-    // update is actually applied, so blur can still see it is pending.
-    if (multiple || focused || inputValueControlled) return;
+    if (multiple || inputValueControlled) return;
+    const nextLabel = singleValue == null ? '' : labelOf(singleValue);
+    const valueChanged = previousValue.current !== singleValue;
+    const labelChanged = previousLabel.current !== nextLabel;
+    if (!valueChanged && !labelChanged) return;
+    // A selection or its label arriving while the reader is typing waits for
+    // the blur; writing it now would fight the query. The references advance
+    // only when the update is applied, so blur can still see it is pending.
+    if (focused) return;
+    const unedited =
+      query === '' || query === previousLabel.current || query === previousValue.current;
     previousValue.current = singleValue;
-    setQuery(singleValue == null ? '' : labelOf(singleValue));
+    previousLabel.current = nextLabel;
+    if (unedited) setQuery(nextLabel);
     // `setQuery` is stable per controlled-ness; re-running on every identity
     // change would overwrite the query the caller is controlling.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [singleValue, multiple, focused, inputValueControlled, labelOf]);
+  }, [singleValue, multiple, focused, inputValueControlled, labelOf, query]);
 
   const itemCollection = useMemo(
     () =>
@@ -608,7 +630,8 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
     const typed = query.trim();
     if (!typed) return;
 
-    if (exactMatch && !exactMatch.disabled) {
+    if (exactMatch) {
+      if (exactMatch.disabled) return;
       if (multiple) {
         if (!values.includes(exactMatch.value)) {
           commit([...values, exactMatch.value] as ComboboxSelection[Mode]);
@@ -646,6 +669,9 @@ function ComboboxRoot<Mode extends ComboboxMode = 'single'>(allProps: ComboboxPr
       if (highlighted && !highlightedExact) return;
       if (!exactMatch && !allowCustomValue) return;
       event.preventDefault();
+      if (highlightedExact) {
+        (event as ReactKeyboardEvent<HTMLInputElement> & { preventBaseUIHandler?: () => void }).preventBaseUIHandler?.();
+      }
       submitCustom();
     },
     [multiple, highlighted, exactMatch, allowCustomValue, submitCustom]

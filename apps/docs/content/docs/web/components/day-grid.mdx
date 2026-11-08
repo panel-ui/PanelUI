@@ -297,6 +297,59 @@ export default function DayGridColours() {
 
 </ComponentPreview>
 
+### Another language
+
+`summary` writes the sentence a screen reader says for the whole grid, given `active`, the days with something on them, and `total`, every day in the grid. Day `label`s, the weekday `labels` and the legend's words are yours too, so nothing on the page stays in English.
+
+<ComponentPreview name="day-grid/localized" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { DayGrid, type DayCell, type DayLevel } from '@/components/panelui/day-grid';
+
+/** Minutes practised on each day of four weeks, oldest first, starting on a Monday. */
+const MINUTES = [0, 20, 35, 45, 0, 60, 30, 15, 0, 50, 25, 40, 0, 0, 55, 70, 35, 20, 0, 45, 30, 65, 0, 25, 50, 15, 0, 40];
+
+const levelOf = (minutes: number): DayLevel =>
+  minutes === 0 ? 0 : minutes < 25 ? 1 : minutes < 45 ? 2 : minutes < 65 ? 3 : 4;
+
+const START = new Date(2026, 8, 7);
+const dayOf = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long' });
+
+const CELLS: DayCell[] = MINUTES.map((minutes, index) => {
+  const date = new Date(START);
+  date.setDate(START.getDate() + index);
+  return {
+    level: levelOf(minutes),
+    label: minutes === 0 ? `${dayOf.format(date)}, sin práctica` : `${dayOf.format(date)}, ${minutes} min`,
+  };
+});
+
+// A week to a column, so the names run down the side of the grid.
+const WEEKDAYS = ['L', '', 'X', '', 'V', '', 'D'];
+
+export default function DayGridLocalized() {
+  return (
+    <div className="flex w-full max-w-64 flex-col gap-3">
+      <div className="flex gap-2">
+        <DayGrid.Weekdays labels={WEEKDAYS} />
+        <DayGrid
+          cells={CELLS}
+          rows={7}
+          color="success"
+          label="Práctica"
+          summary={({ active, total }) => `Práctica: ${active} de ${total} días con actividad.`}
+        />
+      </div>
+      <DayGrid.Legend color="success" className="self-end" less="Menos" more="Más" />
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
 ## API Reference
 
 ### DayGrid
@@ -312,6 +365,7 @@ export default function DayGridColours() {
 | `onValueChange` | `(index: number) => void` | — | Called with the index of a day when it is pressed. Passing this makes the days buttons; without it the grid is a picture. |
 | `lens` | `boolean` | `true` | Set to `false` for dots that hold still under the pointer. |
 | `label` | `string` | `'Activity'` | What a screen reader calls the grid. |
+| `summary` | `(counts: DayGridSummaryCounts) => string` | — | The sentence a screen reader says for the whole grid, written in the reader's language. It is given `active`, the days with something on them, and `total`, every day in the grid. Without it the grid says the same thing in English. |
 
 ### DayGrid.Legend
 
@@ -380,7 +434,7 @@ The grid takes the width of its container. Set a `max-w-*` class on it or on its
 
 `label` on a day is its tag and what a screen reader says for it, so write the date and the figure: "14 May, 6 commits". A day without a label has no tag, and a pressable one is announced by its position and level.
 
-The grid as a whole is announced with its `label` and how many of the days have something on them.
+The grid as a whole is announced with its `label` and how many of the days have something on them. Pass `summary` to write that sentence yourself, in your own language: it is given the counts, so you do not have to work them out again. An `aria-label` put straight on the grid is merged after the summary and takes its place, but it knows nothing about the counts.
 
 ### Keyboard
 

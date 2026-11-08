@@ -131,6 +131,7 @@ export {
   type DayGridTitleProps,
   type DayGridDescriptionProps,
   type DayGridColor,
+  type DayGridSummaryCounts,
   type DayCell,
   type DayLevel,
 } from './components/day-grid';

@@ -64,6 +64,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `onValueChange` | `(index: number) => void` | — | Called with the index of a day when it is pressed. Passing this makes the days buttons; without it the grid is a picture. |
 | `lens` | `boolean` | `true` | Set to `false` for dots that hold still under the pointer. |
 | `label` | `string` | `'Activity'` | What a screen reader calls the grid. |
+| `summary` | `(counts: DayGridSummaryCounts) => string` | — | The sentence a screen reader says for the whole grid, written in the reader's language. It is given `active`, the days with something on them, and `total`, every day in the grid. Without it the grid says the same thing in English. |
 
 #### `DayGridLegendProps`
 
@@ -134,7 +135,7 @@ The grid takes the width of its container. Set a `max-w-*` class on it or on its
 
 `label` on a day is its tag and what a screen reader says for it, so write the date and the figure: "14 May, 6 commits". A day without a label has no tag, and a pressable one is announced by its position and level.
 
-The grid as a whole is announced with its `label` and how many of the days have something on them.
+The grid as a whole is announced with its `label` and how many of the days have something on them. Pass `summary` to write that sentence yourself, in your own language: it is given the counts, so you do not have to work them out again. An `aria-label` put straight on the grid is merged after the summary and takes its place, but it knows nothing about the counts.
 
 #### Keyboard
 

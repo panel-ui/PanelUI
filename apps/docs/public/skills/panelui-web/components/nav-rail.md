@@ -20,62 +20,90 @@ When the destinations are peers that swap one panel, use [Tabs](/docs/web/compon
 
 It can also hold one level of hierarchy: a destination with a child list, expanded inline while the rail is open and shown as a flyout beside it when the rail is folded. That is the shape of a file explorer, a project tree or settings with sub-pages. Deeper trees are the app’s own component rather than another `NavRail.Sub`.
 
+The rail can also be the side of a whole screen rather than a panel inside one. Wrap it and the page beside it in `NavRail.Provider`; the provider owns the fold, so a `NavRail.Trigger` in the page's own header controls the same state as the one in the rail, <kbd>⌘B</kbd> / <kbd>Ctrl+B</kbd> works from anywhere outside a field, and `storageKey` remembers the choice. Below `mobileBreakpoint` the rail becomes a drawer.
+
 ## Usage
 
 ```tsx
-<NavRail aria-label="Main">
-  <NavRail.Header>
-    <NavRail.Brand icon={<LayersIcon />}>Meridian</NavRail.Brand>
-    <NavRail.Trigger />
-  </NavRail.Header>
+<NavRail.Provider defaultCollapsed={false} shortcutKey="b" storageKey="studio-rail">
+  <div className="flex min-h-svh">
+    <NavRail aria-label="Main">
+      <NavRail.Header>
+        <NavRail.Brand icon={<LayersIcon />}>Meridian</NavRail.Brand>
+        <NavRail.Trigger />
+      </NavRail.Header>
 
-  <NavRail.Group label="Workspace">
-    <NavRail.Item href="/" active icon={<HomeIcon />}>
-      Overview
-    </NavRail.Item>
-    <NavRail.Item href="/inbox" icon={<InboxIcon />}>
-      Inbox <NavRail.Badge>12</NavRail.Badge>
-    </NavRail.Item>
-  </NavRail.Group>
+      <NavRail.Content>
+        <NavRail.Group label="Workspace">
+          <NavRail.Item href="/" active icon={<HomeIcon />}>
+            Overview
+          </NavRail.Item>
+          <NavRail.Item href="/inbox" icon={<InboxIcon />}>
+            Inbox <NavRail.Badge>12</NavRail.Badge>
+          </NavRail.Item>
+        </NavRail.Group>
+      </NavRail.Content>
 
-  <NavRail.Footer>
-    <NavRail.Item href="/settings" icon={<SettingsIcon />}>
-      Settings
-    </NavRail.Item>
-  </NavRail.Footer>
-</NavRail>
+      <NavRail.Footer>
+        <NavRail.Item href="/settings" icon={<SettingsIcon />}>
+          Settings
+        </NavRail.Item>
+      </NavRail.Footer>
+
+      <NavRail.Rail />
+    </NavRail>
+
+    <NavRail.Inset>
+      <header className="flex items-center gap-2 border-b p-3">
+        <NavRail.Trigger />
+        <span>Meridian</span>
+      </header>
+      <main className="min-h-0 flex-1 overflow-y-auto p-5">{children}</main>
+    </NavRail.Inset>
+  </div>
+</NavRail.Provider>
 ```
 
 ## Parts
 
 ```tsx
-<NavRail>
-  <NavRail.Header>
-    <NavRail.Brand />
-    <NavRail.Trigger />
-  </NavRail.Header>
-  <NavRail.Group>
-    <NavRail.Item>
-      <NavRail.Badge />
-      <NavRail.Sub>
-        <NavRail.Item />
-      </NavRail.Sub>
-    </NavRail.Item>
-  </NavRail.Group>
-  <NavRail.Separator />
-  <NavRail.Footer />
-</NavRail>
+<NavRail.Provider>
+  <NavRail>
+    <NavRail.Header>
+      <NavRail.Brand />
+      <NavRail.Trigger />
+    </NavRail.Header>
+    <NavRail.Content>
+      <NavRail.Group>
+        <NavRail.Item>
+          <NavRail.Badge />
+          <NavRail.Sub>
+            <NavRail.Item />
+          </NavRail.Sub>
+        </NavRail.Item>
+      </NavRail.Group>
+      <NavRail.Separator />
+    </NavRail.Content>
+    <NavRail.Footer />
+    <NavRail.Rail />
+  </NavRail>
+  <NavRail.Inset />
+</NavRail.Provider>
 ```
 
-- `NavRail.Header` — The strip across the top of the rail, where a brand and the trigger usually sit. It becomes a column when the rail folds so the mark and the trigger each get their square.
+- `NavRail.Provider` — Holds the fold for a whole screen, so a trigger in the page's own header and the one in the rail never disagree. It also owns the keyboard shortcut, the saved preference and the width at which the rail becomes a drawer. Optional: a stand-alone `NavRail` holds its own state, while a rail inside a provider reads the provider's and ignores its own `collapsed` props.
+- `NavRail.Header` — The strip across the top of the rail, where a brand and the trigger usually sit. It stays against the top while the destinations scroll. It becomes a column when the rail folds so the mark and the trigger each get their square.
+- `NavRail.Content` — The destinations between the header and the footer. The rail scrolls when they outgrow it, and the footer stays at the floor. Groups belong here.
 - `NavRail.Brand` — The product's mark and name. `icon` is the mark and is what remains when the rail folds; the children are the name. Give it an `href` to make it a link, and a `label` when the children are not plain text so the folded mark still has a name.
-- `NavRail.Trigger` — The button that folds and unfolds the rail. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.
+- `NavRail.Trigger` — The button that folds and unfolds the rail, or opens the drawer on a phone. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.
+- `NavRail.Rail` — A thin grab handle down the rail's outer edge. Clicking it folds the rail. It is a pointer affordance and stays out of the tab order, where the trigger already does the job.
+- `NavRail.Inset` — The page beside the rail: the surface the work sits on. It fills the rest of the shell and keeps its own scroll, so the rail never slides away with the page.
 - `NavRail.Group` — A set of destinations under one `label`: the workspace, the account, the things you can do to it. Open, the label is a small uppercase heading; folded, it becomes a divider and stays the group's accessible name.
-- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it, in the weight the rail’s `variant` asks for; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it. A `NavRail.Sub` child makes the row a parent: with an `href` it stays a link to its own page and a disclosure button beside it opens the list; without one the row itself is the disclosure.
-- `NavRail.Sub` — The child list under a destination: one level of ordinary `NavRail.Item`s, indented inline in the open rail and shown as a flyout beside a folded one. `defaultOpen`, or `open` and `onOpenChange`, holds the disclosure state, separately from whether the rail is folded. The children are a real `<ul>` of links, and the parent’s disclosure reports `aria-expanded` and `aria-controls`.
+- `NavRail.Item` — One destination. It is an anchor with `href` and a button without one. `active` sets `aria-current="page"` and moves the pill onto it, in the weight the rail's `variant` asks for; `icon` sits before the children, which are the label. A `NavRail.Badge` child shows a count and becomes a dot when folded. `disabled` keeps it from being chosen and the arrow keys step over it. A `NavRail.Sub` child makes the row a parent: with an `href` it stays a link to its own page and a disclosure button beside it opens the list; without one the row itself is the disclosure.
+- `NavRail.Sub` — The child list under a destination: one level of ordinary `NavRail.Item`s, indented inline in the open rail and shown as a flyout beside a folded one. `defaultOpen`, or `open` and `onOpenChange`, holds the disclosure state, separately from whether the rail is folded. The children are a real `<ul>` of links, and the parent's disclosure reports `aria-expanded` and `aria-controls`.
 - `NavRail.Badge` — A count beside a destination's label: unread, open, waiting. Folded, it becomes a dot on the corner of the icon, and only the first badge is drawn.
 - `NavRail.Separator` — A rule between groups of destinations that belong apart, such as the workspace and the account at the bottom.
-- `NavRail.Footer` — The bottom of the rail, held against the floor for account, settings, help or a sign-out action. Items in it take part in the same focus order and the same single pill.
+- `NavRail.Footer` — The bottom of the rail, held against the floor for account, settings, help or a sign-out action. It stays there while the destinations scroll. Items in it take part in the same focus order and the same single pill.
 
 ## Props
 
@@ -90,10 +118,30 @@ Every part also takes the props of the element it renders, and a `className`.
 | `onCollapsedChange` | `(collapsed: boolean) => void` | — | Called when the rail asks to fold or unfold. |
 | `expandedWidth` | `number \| string` | `'15rem'` | Its width open, as pixels or any CSS length. Default `15rem`. |
 | `collapsedWidth` | `number \| string` | `'3.5rem'` | Its width folded, as pixels or any CSS length. Default `3.5rem`. |
+| `collapsible` | `NavRailCollapsible` | `'icon'` | What folding does. `icon` keeps a column of icon squares, `offcanvas` takes the rail out of the layout entirely, and `none` keeps it open and ignores the fold entirely. Default `icon`. |
+| `side` | `NavRailSide` | `'start'` | Which edge of the shell it sits on, for the rail handle and the drawer. Default `start`. |
 | `variant` | `NavRailVariant` | `'tonal'` | How loudly the active row is drawn. `tonal` is a quiet primary tint with an accent bar; `solid` is the primary fill and `primary-foreground` text that Tabs, Toolbar and Inspector use. Default `tonal`. |
 | `className` | `string` | — | — |
 
+#### `NavRailProviderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `collapsed` | `boolean` | — | Whether the rail is folded. Pass it with `onCollapsedChange` to hold the state yourself. |
+| `defaultCollapsed` | `boolean` | `false` | Whether it starts folded, when the caller does not hold it. Default `false`. |
+| `onCollapsedChange` | `(collapsed: boolean) => void` | — | Called when the rail asks to fold or unfold. |
+| `shortcutKey` | `string \| false` | `'b'` | The key that folds and unfolds the rail with the command or control modifier, or `false` for no shortcut. Default `'b'`. |
+| `storageKey` | `string` | — | Where the folded state is remembered between visits. Off by default. |
+| `mobileBreakpoint` | `string` | `'48rem'` | The viewport width below which the rail is a drawer. Default `'48rem'`. |
+| `className` | `string` | — | — |
+
 #### `NavRailHeaderProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+
+#### `NavRailContentProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -114,6 +162,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `expandLabel` | `string` | `'Expand navigation'` | What it is called when the rail is folded and pressing it opens it. Default "Expand navigation". |
 | `collapseLabel` | `string` | `'Collapse navigation'` | What it is called when the rail is open and pressing it folds it. Default "Collapse navigation". |
+| `className` | `string` | — | — |
+
+#### `NavRailRailProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `label` | `string` | — | What the handle is called. Default "Toggle navigation". |
 | `className` | `string` | — | — |
 
 #### `NavRailGroupProps`
@@ -150,6 +205,12 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `string` | — | What a screen reader calls the child list. Defaults to the parent row's name, which is usually the right thing to hear. |
 | `className` | `string` | — | — |
 
+#### `NavRailInsetProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+
 #### `NavRailSeparatorProps`
 
 | Prop | Type | Default | What it does |
@@ -164,7 +225,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 ## In a Server Component
 
-`NavRail` is a client component. A Server Component cannot read `NavRail.Header` off the import, so import each part by name: `NavRailHeader`, `NavRailBrand`, `NavRailTrigger`, `NavRailGroup`, `NavRailItem`, `NavRailSub`, `NavRailBadge`, `NavRailSeparator`, `NavRailFooter`.
+`NavRail` is a client component. A Server Component cannot read `NavRail.Provider` off the import, so import each part by name: `NavRailProvider`, `NavRailHeader`, `NavRailContent`, `NavRailBrand`, `NavRailTrigger`, `NavRailRail`, `NavRailInset`, `NavRailGroup`, `NavRailItem`, `NavRailSub`, `NavRailBadge`, `NavRailSeparator`, `NavRailFooter`.
 
 ## Notes
 
@@ -175,6 +236,26 @@ Every part also takes the props of the element it renders, and a `className`.
 With the rail open, the list unfolds under the parent with a height and opacity transition, indented and marked with a rule so the children read as subordinate. Folded, the same list is a flyout beside the rail: hover or focus the parent to open it, Tab into its links, and press outside to close a pinned one. It is not clipped by the rail. The open state belongs to the sub-list and does not follow the rail’s fold: pass `defaultOpen`, or `open` with `onOpenChange`, on `NavRail.Sub`.
 
 A parent with an active child keeps a quiet secondary marker — its icon tinted primary, or a small dot when it has no icon — while the active child carries `aria-current="page"` and the single pill. When the child is folded away inside a closed list, the parent holds the pill so the rail still shows the current place.
+
+#### The shell
+
+`NavRail.Provider` is optional: without it a rail keeps its own `collapsed` state, which is the shortest way to show one. Inside it, the rail reads the provider's state and ignores its own `collapsed`, `defaultCollapsed` and `onCollapsedChange`, so a `NavRail.Trigger` placed in the page header controls the same fold as the one in the rail. The provider adds three things a stand-alone rail does not have: the keyboard shortcut, the saved preference and the drawer.
+
+`shortcutKey` defaults to `'b'` and is pressed with the command or control modifier. Pass `false` for none. It is ignored while focus is in an input, textarea, select or editable region, so typing the letter still types it. `storageKey` remembers the fold in `localStorage`; the stored value is read after the first paint, so pass `collapsed` when the server already knows the preference. `mobileBreakpoint` defaults to `'48rem'`.
+
+`collapsible` decides what folding means. `icon` (the default) leaves the column of icon squares, `offcanvas` takes the rail out of the layout entirely, and `none` keeps it open and hides the trigger and the handle. `side` puts the handle and the drawer on the start or the end edge.
+
+#### Scrolling
+
+The rail scrolls as one column: the header and the footer stay against their edges and the destinations between them move. Put the groups in `NavRail.Content` to make that region explicit, and a long rail no longer pushes its footer out of the rounded surface. The active pill is positioned in the scrolling content, so it stays on its row when the rail moves.
+
+#### The handle
+
+`NavRail.Rail` is a thin strip down the outer edge that folds the rail when pressed. It is a pointer affordance and is left out of the tab order: the trigger is the control a keyboard reaches, and the arrow keys still walk the destinations.
+
+#### Mobile
+
+Below `mobileBreakpoint` the rail is drawn as a drawer instead of a column, and the page keeps the full width. A trigger outside the rail is what opens it, since the one inside the rail is not on screen until the drawer is. Following a destination closes the drawer; opening a child list or pressing the rail's own trigger does not.
 
 #### Two weights
 
@@ -202,11 +283,13 @@ Counts live inside the row, so an open item is announced with its label and its 
 
 #### Built on
 
-Base UI's `useRender` and `mergeProps` for the element each part draws, and React state, refs and effects for the fold and the pill. There is no headless navigation primitive underneath, and no other component in the collection is a dependency. Icons are whatever the app passes; the package does not ship an icon set.
+Base UI's `useRender` and `mergeProps` for the element each part draws, and React state, refs and effects for the fold and the pill. The drawer is [Sheet](/docs/web/components/sheet), so a rail on a narrow screen inherits its swipe, focus trap and backdrop. There is no headless navigation primitive underneath. Icons are whatever the app passes; the package does not ship an icon set.
 
 #### Server rendering and width
 
-No width is read from `window` and no collapse is chosen from the viewport. `expandedWidth` and `collapsedWidth` take pixels or any CSS length (default `15rem` and `3.5rem`), and the rail's width is written as a custom property. Measurement happens in a layout effect after mount, inside guards, so a server render draws the rail at the right size with no pill and the first client frame places it before paint.
+`expandedWidth` and `collapsedWidth` take pixels or any CSS length (default `15rem` and `3.5rem`), and the rail's width is written as a custom property. Measurement happens in a layout effect after mount, inside guards, so a server render draws the rail at the right size with no pill and the first client frame places it before paint.
+
+The provider reads the viewport for one thing only: whether to draw the drawer. The server snapshot is the wide layout, so the HTML a crawler receives is the rail, and the first client frame swaps in the drawer below the breakpoint without a hydration mismatch. Nothing else about the rail depends on the window.
 
 ## Example
 
@@ -222,6 +305,7 @@ import {
   LayoutDashboardIcon,
   LayersIcon,
   LifeBuoyIcon,
+  SettingsIcon,
   UsersIcon,
 } from 'lucide-react';
 import { NavRail } from '@/components/panelui/nav-rail';
@@ -234,100 +318,96 @@ const ITEMS = [
   { id: 'billing', label: 'Billing', icon: CreditCardIcon, note: 'The studio plan renews on 1 December.' },
 ];
 
-export default function NavRailOverview() {
+export default function NavRailShell() {
   const [active, setActive] = useState('overview');
   const current = ITEMS.find((item) => item.id === active) ?? ITEMS[0]!;
 
   return (
-    <div className="flex h-[380px] w-full max-w-2xl items-stretch gap-2 rounded-2xl border border-border/70 bg-background p-2">
-      <NavRail aria-label="Meridian">
-        <NavRail.Header>
-          <NavRail.Brand icon={<LayersIcon />}>Meridian</NavRail.Brand>
-          <NavRail.Trigger />
-        </NavRail.Header>
+    <NavRail.Provider defaultCollapsed={false} shortcutKey="b" className="h-[620px] min-h-0">
+      <div className="flex h-full w-full gap-2 rounded-2xl border border-border/70 bg-background p-2">
+        <NavRail aria-label="Meridian">
+          <NavRail.Header>
+            <NavRail.Brand icon={<LayersIcon />}>Meridian</NavRail.Brand>
+            <NavRail.Trigger />
+          </NavRail.Header>
 
-        <NavRail.Group label="Workspace">
-          {ITEMS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavRail.Item
-                key={item.id}
-                href="#"
-                active={active === item.id}
-                icon={<Icon />}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setActive(item.id);
-                }}
-              >
-                {item.label}
-                {item.count ? <NavRail.Badge>{item.count}</NavRail.Badge> : null}
+          <NavRail.Content>
+            <NavRail.Group label="Workspace">
+              {ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavRail.Item
+                    key={item.id}
+                    href="#"
+                    active={active === item.id}
+                    icon={<Icon />}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setActive(item.id);
+                    }}
+                  >
+                    {item.label}
+                    {item.count ? <NavRail.Badge>{item.count}</NavRail.Badge> : null}
+                  </NavRail.Item>
+                );
+              })}
+            </NavRail.Group>
+
+            <NavRail.Group label="Studio">
+              <NavRail.Item href="#" icon={<SettingsIcon />} onClick={(event) => event.preventDefault()}>
+                Settings
               </NavRail.Item>
-            );
-          })}
-        </NavRail.Group>
+            </NavRail.Group>
+          </NavRail.Content>
 
-        <NavRail.Footer>
-          <NavRail.Separator className="mb-1" />
-          <NavRail.Item href="#" icon={<LifeBuoyIcon />} label="Help and support">
-            Help and support
-          </NavRail.Item>
-        </NavRail.Footer>
-      </NavRail>
+          <NavRail.Footer>
+            <NavRail.Separator className="mb-1" />
+            <NavRail.Item href="#" icon={<LifeBuoyIcon />} label="Help and support">
+              Help and support
+            </NavRail.Item>
+          </NavRail.Footer>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl bg-muted/30 p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-[0.09em] text-muted-foreground uppercase">
-              Thursday, 6 November
-            </p>
-            <h3 className="mt-1 truncate text-xl font-semibold tracking-[-0.02em]">{current.label}</h3>
-          </div>
-          <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
-            <BellIcon className="size-4" aria-hidden="true" />
-            <span className="absolute end-1.5 top-1.5 size-1.5 rounded-full bg-primary" />
-          </span>
-        </div>
+          <NavRail.Rail />
+        </NavRail>
 
-        <p className="text-sm leading-6 text-muted-foreground">{current.note}</p>
+        <NavRail.Inset className="bg-muted/30">
+          <header className="flex shrink-0 items-center gap-2 border-b border-border/70 px-4 py-3">
+            <NavRail.Trigger />
+            <p className="text-sm font-medium">Meridian</p>
+          </header>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-background p-3 ring-1 ring-border/70">
-            <p className="text-[11px] font-medium text-muted-foreground">Open reviews</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">07</p>
-            <div className="mt-2 flex items-end gap-1">
-              {[30, 46, 38, 62, 54, 74, 68].map((height, index) => (
-                <span
-                  key={index}
-                  className="w-full rounded-sm bg-primary/25 last:bg-primary"
-                  style={{ height: `${height / 4}px` }}
-                />
-              ))}
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold tracking-[0.09em] text-muted-foreground uppercase">
+                  Thursday, 6 November
+                </p>
+                <h3 className="mt-1 truncate text-xl font-semibold tracking-[-0.02em]">{current.label}</h3>
+              </div>
+              <span className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
+                <BellIcon className="size-4" aria-hidden="true" />
+                <span className="absolute end-1.5 top-1.5 size-1.5 rounded-full bg-primary" />
+              </span>
+            </div>
+
+            <p className="text-sm leading-6 text-muted-foreground">{current.note}</p>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl bg-background p-3 ring-1 ring-border/70">
+                <p className="text-[11px] font-medium text-muted-foreground">Open reviews</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">07</p>
+              </div>
+              <div className="rounded-xl bg-background p-3 ring-1 ring-border/70">
+                <p className="text-[11px] font-medium text-muted-foreground">Time saved</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">
+                  6.4<span className="ms-1 text-sm font-medium text-muted-foreground">h</span>
+                </p>
+              </div>
             </div>
           </div>
-          <div className="rounded-xl bg-background p-3 ring-1 ring-border/70">
-            <p className="text-[11px] font-medium text-muted-foreground">Time saved</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">
-              6.4<span className="ms-1 text-sm font-medium text-muted-foreground">h</span>
-            </p>
-            <p className="mt-2 text-[11px] leading-4 text-muted-foreground">Since the new flow shipped.</p>
-          </div>
-        </div>
-
-        <div className="mt-auto flex items-center gap-3 rounded-xl bg-background p-3 ring-1 ring-border/70">
-          <span className="flex size-8 items-center justify-center rounded-full bg-primary/12 text-xs font-semibold text-primary">
-            ID
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-xs font-medium">Ines Duarte</p>
-            <p className="truncate text-[11px] text-muted-foreground">ines@meridian.studio</p>
-          </div>
-          <span className="ms-auto rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-            Owner
-          </span>
-        </div>
+        </NavRail.Inset>
       </div>
-    </div>
+    </NavRail.Provider>
   );
 }
 ```

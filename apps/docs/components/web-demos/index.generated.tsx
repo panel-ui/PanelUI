@@ -271,6 +271,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'nav-rail/nested': dynamic(() => import('./nav-rail/nested')),
   'nav-rail/nested-folded': dynamic(() => import('./nav-rail/nested-folded')),
   'nav-rail/overview': dynamic(() => import('./nav-rail/overview')),
+  'nav-rail/shell': dynamic(() => import('./nav-rail/shell')),
   'nav-rail/thumb': dynamic(() => import('./nav-rail/thumb')),
   'nav-rail/variants': dynamic(() => import('./nav-rail/variants')),
   'not-found/dissolve': dynamic(() => import('./not-found/dissolve')),

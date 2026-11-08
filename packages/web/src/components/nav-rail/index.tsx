@@ -111,10 +111,13 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentProps,
   type CSSProperties,
+  type FocusEvent as ReactFocusEvent,
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -122,6 +125,7 @@ import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
+import { Sheet } from '../sheet';
 import { indicatorBox, isRovingKey, railWidth, rovingRow, activeRowIndex, subKeyAction, textOf, type RailRowState } from './rail';
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
@@ -130,19 +134,46 @@ type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentP
 /** How loudly the active row is drawn: a quiet tint, or the primary fill. */
 export type NavRailVariant = 'tonal' | 'solid';
 
+/** What folding does: to icons, right out of the layout, or nothing at all. */
+export type NavRailCollapsible = 'icon' | 'offcanvas' | 'none';
+
+/** Which edge of the shell the rail sits on. */
+export type NavRailSide = 'start' | 'end';
+
 /** One curve for the width, the pill and the labels, so they move as one thing. */
 const EASE = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
+
+/**
+ * The rail's surface. `--muted` is a translucent tint in the theme, so it is
+ * laid over an opaque page colour instead of being mixed with it: that keeps
+ * the header and the footer able to cover the rows that scroll beneath them.
+ */
+const SURFACE = 'bg-background bg-[linear-gradient(var(--muted),var(--muted))]';
 
 const navRailVariants = tv({
   slots: {
     root: [
-      'group/nav-rail relative isolate flex h-full w-(--nav-rail-width) shrink-0 flex-col gap-1 rounded-2xl p-2',
-      'bg-muted/50 text-foreground ring-1 ring-foreground/[0.045] dark:bg-muted/40 dark:ring-foreground/[0.08]',
-      `transition-[width] duration-300 ${EASE} motion-reduce:transition-none`,
+      'group/nav-rail relative isolate flex h-full w-(--nav-rail-width) shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain rounded-2xl p-2',
+      `${SURFACE} text-foreground ring-1 ring-foreground/[0.045] dark:ring-foreground/[0.08]`,
+      `transition-[width,opacity] duration-300 ${EASE} motion-reduce:transition-none`,
+      '[scrollbar-width:thin]',
+      // Folded right out of the layout, the rail keeps no width, padding or
+      // surface. An outside trigger is what brings it back.
+      'data-[collapsible=offcanvas]:data-[collapsed]:w-0 data-[collapsible=offcanvas]:data-[collapsed]:gap-0 data-[collapsible=offcanvas]:data-[collapsed]:p-0 data-[collapsible=offcanvas]:data-[collapsed]:opacity-0 data-[collapsible=offcanvas]:data-[collapsed]:ring-0 data-[collapsible=offcanvas]:data-[collapsed]:pointer-events-none',
+      // In a drawer, the surface is the sheet: no width, no rounding, no ring.
+      'data-[mobile]:h-full data-[mobile]:w-full data-[mobile]:rounded-none data-[mobile]:p-3 data-[mobile]:ring-0',
     ],
     header: [
-      'flex shrink-0 items-center gap-2 px-0.5 pb-1',
+      `sticky top-0 z-20 flex shrink-0 items-center gap-2 rounded-t-[inherit] px-0.5 pb-1 ${SURFACE}`,
       'group-data-[collapsed]/nav-rail:flex-col group-data-[collapsed]/nav-rail:gap-1 group-data-[collapsed]/nav-rail:pb-0',
+    ],
+    content: 'flex min-h-0 flex-col gap-0.5',
+    rail: [
+      'absolute inset-y-6 z-30 hidden w-2 touch-none cursor-ew-resize rounded-full bg-transparent outline-none',
+      'transition-colors duration-150 hover:bg-primary/30 focus-visible:bg-primary/30 motion-reduce:transition-none',
+      'group-data-[side=start]/nav-rail:end-0 group-data-[side=end]/nav-rail:start-0',
+      'group-data-[collapsible=offcanvas]/nav-rail:hidden group-data-[mobile]/nav-rail:hidden',
+      'sm:block',
     ],
     brand: [
       'group/brand flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] px-1.5 py-1 text-start outline-none',
@@ -225,10 +256,8 @@ const navRailVariants = tv({
       'group-data-[icons-only]/item:size-2 group-data-[icons-only]/item:min-w-0 group-data-[icons-only]/item:bg-primary group-data-[icons-only]/item:p-0 group-data-[icons-only]/item:text-[0px] group-data-[icons-only]/item:text-transparent',
     ],
     tooltip: [
-      'pointer-events-none absolute start-[calc(100%+0.5rem)] top-1/2 z-50 origin-left -translate-y-1/2 scale-95',
-      'rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background opacity-0 shadow-md',
-      'transition-[opacity,scale] duration-150 group-hover/item:scale-100 group-hover/item:opacity-100',
-      'group-focus-visible/item:scale-100 group-focus-visible/item:opacity-100 motion-reduce:transition-none',
+      'pointer-events-none fixed z-50 origin-left -translate-y-1/2',
+      'rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background shadow-md',
     ],
     // A parent and its child list. The wrapper is what the flyout is positioned
     // against, and what hover and focus are read from.
@@ -253,14 +282,15 @@ const navRailVariants = tv({
       'grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-200',
       `${EASE} motion-reduce:transition-none`,
       'data-[open]:grid-rows-[1fr] data-[open]:opacity-100',
-      'group-data-[collapsed]/nav-rail:pointer-events-none group-data-[collapsed]/nav-rail:absolute group-data-[collapsed]/nav-rail:start-full group-data-[collapsed]/nav-rail:top-0 group-data-[collapsed]/nav-rail:z-50 group-data-[collapsed]/nav-rail:grid-rows-[1fr] group-data-[collapsed]/nav-rail:origin-left group-data-[collapsed]/nav-rail:scale-95 group-data-[collapsed]/nav-rail:ps-2 group-data-[collapsed]/nav-rail:opacity-0 group-data-[collapsed]/nav-rail:transition-[opacity,scale] group-data-[collapsed]/nav-rail:duration-150',
+      'group-data-[collapsed]/nav-rail:pointer-events-none group-data-[collapsed]/nav-rail:fixed group-data-[collapsed]/nav-rail:top-0 group-data-[collapsed]/nav-rail:z-50 group-data-[collapsed]/nav-rail:grid-rows-[1fr] group-data-[collapsed]/nav-rail:origin-left group-data-[collapsed]/nav-rail:scale-95 group-data-[collapsed]/nav-rail:ps-2 group-data-[collapsed]/nav-rail:pe-0 group-data-[collapsed]/nav-rail:opacity-0 group-data-[collapsed]/nav-rail:transition-[opacity,scale] group-data-[collapsed]/nav-rail:duration-150',
+      'group-data-[side=end]/nav-rail:group-data-[collapsed]/nav-rail:ps-0 group-data-[side=end]/nav-rail:group-data-[collapsed]/nav-rail:pe-2',
       'group-data-[collapsed]/nav-rail:data-[visible]:pointer-events-auto group-data-[collapsed]/nav-rail:data-[visible]:scale-100 group-data-[collapsed]/nav-rail:data-[visible]:opacity-100',
     ],
     subPanel: [
       'min-h-0 overflow-hidden',
       // The flyout's own surface, kept on the inner element so the outer one
       // can stay the transition and arrow-key container.
-      'group-data-[collapsed]/nav-rail:min-w-52 group-data-[collapsed]/nav-rail:overflow-visible group-data-[collapsed]/nav-rail:rounded-xl group-data-[collapsed]/nav-rail:border group-data-[collapsed]/nav-rail:border-border group-data-[collapsed]/nav-rail:bg-popover group-data-[collapsed]/nav-rail:p-1 group-data-[collapsed]/nav-rail:text-popover-foreground group-data-[collapsed]/nav-rail:shadow-lg',
+      'group-data-[collapsed]/nav-rail:min-w-52 group-data-[collapsed]/nav-rail:max-h-[calc(100dvh-1rem)] group-data-[collapsed]/nav-rail:overflow-y-auto group-data-[collapsed]/nav-rail:rounded-xl group-data-[collapsed]/nav-rail:border group-data-[collapsed]/nav-rail:border-border group-data-[collapsed]/nav-rail:bg-popover group-data-[collapsed]/nav-rail:p-1 group-data-[collapsed]/nav-rail:text-popover-foreground group-data-[collapsed]/nav-rail:shadow-lg',
     ],
     subList: [
       'flex flex-col gap-0.5',
@@ -271,7 +301,13 @@ const navRailVariants = tv({
     ],
     subEntry: 'flex w-full min-w-0',
     separator: 'mx-1.5 h-px shrink-0 rounded-full bg-border group-data-[collapsed]/nav-rail:mx-0.5',
-    footer: 'mt-auto flex shrink-0 flex-col gap-0.5 pt-1',
+    footer: [
+      `sticky bottom-0 z-20 mt-auto flex shrink-0 flex-col gap-0.5 rounded-b-[inherit] pt-1 ${SURFACE}`,
+    ],
+    inset: [
+      'relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl bg-background ring-1 ring-border/70',
+    ],
+    provider: 'group/nav-rail-shell flex min-h-svh w-full',
     // One pill for the whole rail. The accent is its own small bar so the fill
     // can stay a tint rather than a solid block of colour.
     indicator: [
@@ -286,19 +322,63 @@ const navRailVariants = tv({
   },
 });
 
-interface NavRailContextValue {
+export interface NavRailContextValue {
+  /** Whether the rail is folded. In a drawer this is always `false`. */
   collapsed: boolean;
   variant: NavRailVariant;
+  collapsible: NavRailCollapsible;
+  side: NavRailSide;
+  /** Whether the rail is drawn as a drawer rather than in the layout. */
+  mobile: boolean;
+  /** Whether the viewport is below the shell's mobile breakpoint. */
+  isMobile: boolean;
+  /** Whether the drawer is open. */
+  mobileOpen: boolean;
   setCollapsed(next: boolean): void;
+  setMobileOpen(open: boolean): void;
   toggle(): void;
 }
 
 const NavRailContext = createContext<NavRailContextValue | null>(null);
 
-function useNavRail(part: string): NavRailContextValue {
+/**
+ * Reads the rail's state from inside a `NavRail.Provider` or a `NavRail`.
+ *
+ * Use it for a trigger in the page's own chrome, beside the rail: a menu
+ * button in the top bar, a keyboard hint, a stored preference.
+ */
+export function useNavRail(): NavRailContextValue {
+  const context = useContext(NavRailContext);
+  if (!context) throw new Error('useNavRail must be used inside a <NavRail.Provider> or a <NavRail>.');
+  return context;
+}
+
+function useNavRailPart(part: string): NavRailContextValue {
   const context = useContext(NavRailContext);
   if (!context) throw new Error(`${part} must be used inside a <NavRail>.`);
   return context;
+}
+
+/**
+ * Whether the viewport is below a breakpoint, read in a way that is safe for a
+ * server render: the server draws the wide layout, and the first client frame
+ * corrects it without a hydration mismatch.
+ */
+function useIsBelow(breakpoint: string): boolean {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      if (typeof window === 'undefined') return () => {};
+      const query = window.matchMedia(`(max-width: ${breakpoint})`);
+      query.addEventListener('change', onChange);
+      return () => query.removeEventListener('change', onChange);
+    },
+    [breakpoint]
+  );
+  const read = useCallback(
+    () => typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint})`).matches,
+    [breakpoint]
+  );
+  return useSyncExternalStore(subscribe, read, () => false);
 }
 
 interface NavRailSubContextValue {
@@ -390,6 +470,14 @@ export interface NavRailProps extends Omit<ComponentProps<'nav'>, 'className'> {
   /** Its width folded, as pixels or any CSS length. Default `3.5rem`. */
   collapsedWidth?: number | string;
   /**
+   * What folding does. `icon` keeps a column of icon squares, `offcanvas`
+   * takes the rail out of the layout entirely, and `none` keeps it open and
+   * ignores the fold entirely. Default `icon`.
+   */
+  collapsible?: NavRailCollapsible;
+  /** Which edge of the shell it sits on, for the rail handle and the drawer. Default `start`. */
+  side?: NavRailSide;
+  /**
    * How loudly the active row is drawn. `tonal` is a quiet primary tint with an
    * accent bar; `solid` is the primary fill and `primary-foreground` text that
    * Tabs, Toolbar and Inspector use. Default `tonal`.
@@ -408,6 +496,8 @@ function NavRailRoot({
   onCollapsedChange,
   expandedWidth = '15rem',
   collapsedWidth = '3.5rem',
+  collapsible = 'icon',
+  side = 'start',
   variant = 'tonal',
   className,
   style,
@@ -417,27 +507,56 @@ function NavRailRoot({
   ...props
 }: NavRailProps & RenderProp<'nav'>) {
   const slots = navRailVariants();
+  // A `NavRail.Provider` around the rail owns the state, so the trigger in the
+  // page's top bar and the rail agree. Without one, the rail is its own owner,
+  // which keeps a single stand-alone rail as simple as it was.
+  const shared = useContext(NavRailContext);
   const [inner, setInner] = useState(defaultCollapsed);
-  const collapsed = collapsedProp ?? inner;
+  const [innerMobileOpen, setInnerMobileOpen] = useState(false);
+  const ownCollapsed = collapsedProp ?? inner;
 
   // One live object, so a callback written on the first render still sees the
   // state and handlers from the last one.
-  const live = useRef({ collapsed, controlled: collapsedProp !== undefined, onCollapsedChange });
+  const live = useRef({ collapsed: ownCollapsed, controlled: collapsedProp !== undefined, onCollapsedChange });
   // Written after commit, so a render React throws away never leaves its
   // values behind for the next click to read.
   useIsomorphicLayoutEffect(() => {
-    live.current = { collapsed, controlled: collapsedProp !== undefined, onCollapsedChange };
+    live.current = { collapsed: ownCollapsed, controlled: collapsedProp !== undefined, onCollapsedChange };
   });
 
-  const setCollapsed = useCallback((next: boolean) => {
+  const setOwnCollapsed = useCallback((next: boolean) => {
     if (!live.current.controlled) setInner(next);
     if (next !== live.current.collapsed) live.current.onCollapsedChange?.(next);
   }, []);
-  const toggle = useCallback(() => setCollapsed(!live.current.collapsed), [setCollapsed]);
+
+  const isMobile = shared?.isMobile ?? false;
+  const mobileOpen = shared?.mobileOpen ?? innerMobileOpen;
+  const setMobileOpen = shared?.setMobileOpen ?? setInnerMobileOpen;
+  const setCollapsed = shared?.setCollapsed ?? setOwnCollapsed;
+  // In a drawer the rail is always drawn open; `none` never folds at all.
+  const mobile = isMobile && collapsible !== 'none';
+  const collapsed = mobile || collapsible === 'none' ? false : (shared?.collapsed ?? ownCollapsed);
+  const closed = collapsed;
+
+  const toggle = useCallback(() => {
+    if (mobile) setMobileOpen(!mobileOpen);
+    else if (collapsible !== 'none') setCollapsed(!closed);
+  }, [mobile, mobileOpen, setMobileOpen, collapsible, setCollapsed, closed]);
 
   const context = useMemo<NavRailContextValue>(
-    () => ({ collapsed, variant, setCollapsed, toggle }),
-    [collapsed, variant, setCollapsed, toggle]
+    () => ({
+      collapsed,
+      variant,
+      collapsible,
+      side,
+      mobile,
+      isMobile,
+      mobileOpen,
+      setMobileOpen,
+      setCollapsed,
+      toggle,
+    }),
+    [collapsed, variant, collapsible, side, mobile, isMobile, mobileOpen, setMobileOpen, setCollapsed, toggle]
   );
 
   const root = useRef<HTMLElement>(null);
@@ -623,7 +742,26 @@ function NavRailRoot({
     rows[next]?.focus();
   };
 
-  return useRender({
+  // In the drawer, following a destination closes it. A row that only opens
+  // its child list, or the trigger that folds the rail, stays put.
+  const onClick = (event: ReactMouseEvent<HTMLElement>) => {
+    if (!mobile) return;
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (
+      target.closest(
+        '[data-slot="nav-rail-trigger"], [data-slot="nav-rail-item-toggle"], [data-slot="nav-rail-brand"]'
+      )
+    ) {
+      return;
+    }
+    const row = target.closest<HTMLElement>('[data-slot="nav-rail-item"]');
+    if (!row) return;
+    if (row.hasAttribute('data-branch') && !row.hasAttribute('href')) return;
+    setMobileOpen(false);
+  };
+
+  const nav = useRender({
     defaultTagName: 'nav',
     ref: root,
     render,
@@ -631,6 +769,9 @@ function NavRailRoot({
       {
         'data-slot': 'nav-rail',
         'data-collapsed': collapsed ? '' : undefined,
+        'data-collapsible': collapsible,
+        'data-side': side,
+        'data-mobile': mobile ? '' : undefined,
         'data-variant': variant,
         'aria-label': ariaLabel,
         className: slots.root({ className }),
@@ -639,6 +780,7 @@ function NavRailRoot({
           '--nav-rail-width': railWidth(collapsed, expandedWidth, collapsedWidth),
         } as CSSProperties,
         onKeyDown,
+        onClick,
         children: (
           <>
             <NavRailContext.Provider value={context}>{children}</NavRailContext.Provider>
@@ -649,8 +791,164 @@ function NavRailRoot({
       props
     ),
   });
+
+  if (!mobile) return nav;
+
+  return (
+    <Sheet open={mobileOpen} onOpenChange={setMobileOpen} side={side === 'end' ? 'right' : 'left'}>
+      <Sheet.Content
+        aria-label={ariaLabel}
+        data-slot="nav-rail-drawer"
+        detached={false}
+        showClose={false}
+        className="w-[18rem] max-w-[85vw] bg-transparent p-0 shadow-none ring-0"
+      >
+        {nav}
+      </Sheet.Content>
+    </Sheet>
+  );
 }
 NavRailRoot.displayName = 'NavRail';
+
+export interface NavRailProviderProps extends Omit<ComponentProps<'div'>, 'className'> {
+  /** Whether the rail is folded. Pass it with `onCollapsedChange` to hold the state yourself. */
+  collapsed?: boolean;
+  /** Whether it starts folded, when the caller does not hold it. Default `false`. */
+  defaultCollapsed?: boolean;
+  /** Called when the rail asks to fold or unfold. */
+  onCollapsedChange?: (collapsed: boolean) => void;
+  /**
+   * The key that folds and unfolds the rail with the command or control
+   * modifier, or `false` for no shortcut. Default `'b'`.
+   */
+  shortcutKey?: string | false;
+  /** Where the folded state is remembered between visits. Off by default. */
+  storageKey?: string;
+  /** The viewport width below which the rail is a drawer. Default `'48rem'`. */
+  mobileBreakpoint?: string;
+  className?: string;
+}
+
+/**
+ * Holds the rail's state for a whole screen, so a trigger in the page's own
+ * top bar can fold it, the keyboard shortcut works, and the saved preference
+ * is read once.
+ *
+ * It is optional: a single stand-alone `NavRail` holds its own state. Wrap the
+ * rail and the content beside it when the fold belongs to the shell.
+ */
+function NavRailProvider({
+  collapsed: collapsedProp,
+  defaultCollapsed = false,
+  onCollapsedChange,
+  shortcutKey = 'b',
+  storageKey,
+  mobileBreakpoint = '48rem',
+  className,
+  children,
+  render,
+  ...props
+}: NavRailProviderProps & RenderProp<'div'>) {
+  const slots = navRailVariants();
+  const [inner, setInner] = useState(defaultCollapsed);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useIsBelow(mobileBreakpoint);
+  const collapsed = collapsedProp ?? inner;
+
+  // One live object, so a callback written on the first render still sees the
+  // state and handlers from the last one.
+  const live = useRef({ collapsed, controlled: collapsedProp !== undefined, onCollapsedChange, storageKey });
+  useIsomorphicLayoutEffect(() => {
+    live.current = { collapsed, controlled: collapsedProp !== undefined, onCollapsedChange, storageKey };
+  });
+
+  // A stored preference arrives after the first paint, which is the only frame
+  // where the default is drawn. A page that needs it before paint can read the
+  // same key on the server and pass `collapsed`.
+  useEffect(() => {
+    if (!storageKey || collapsedProp !== undefined) return;
+    try {
+      const saved = window.localStorage.getItem(storageKey);
+      if (saved === 'collapsed') setInner(true);
+      else if (saved === 'open') setInner(false);
+    } catch {
+      // A blocked storage is not a reason to fail the page.
+    }
+  }, [storageKey, collapsedProp]);
+
+  const setCollapsed = useCallback((next: boolean) => {
+    if (!live.current.controlled) setInner(next);
+    if (next !== live.current.collapsed) live.current.onCollapsedChange?.(next);
+    // A controlled rail's state belongs to its owner; the saved value is only
+    // for the case where this component is the one that keeps it.
+    const key = live.current.controlled ? undefined : live.current.storageKey;
+    if (key) {
+      try {
+        window.localStorage.setItem(key, next ? 'collapsed' : 'open');
+      } catch {
+        // A blocked storage is not a reason to fail the toggle.
+      }
+    }
+  }, []);
+
+  const toggle = useCallback(() => {
+    if (isMobile) setMobileOpen((open) => !open);
+    else setCollapsed(!live.current.collapsed);
+  }, [isMobile, setCollapsed]);
+
+  // The shortcut belongs to the shell, not to focus: it works from anywhere on
+  // the page, but not from inside a field where the letter is being typed.
+  useEffect(() => {
+    if (!shortcutKey) return;
+    const key = shortcutKey.toLowerCase();
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+      if (event.key.toLowerCase() !== key) return;
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        if (target.isContentEditable) return;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+      }
+      event.preventDefault();
+      toggle();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [shortcutKey, toggle]);
+
+  const context = useMemo<NavRailContextValue>(
+    () => ({
+      collapsed,
+      variant: 'tonal',
+      collapsible: 'icon',
+      side: 'start',
+      mobile: isMobile,
+      isMobile,
+      mobileOpen,
+      setMobileOpen,
+      setCollapsed,
+      toggle,
+    }),
+    [collapsed, isMobile, mobileOpen, setCollapsed, toggle]
+  );
+
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'nav-rail-provider',
+        'data-collapsed': collapsed ? '' : undefined,
+        'data-mobile': isMobile ? '' : undefined,
+        className: slots.provider({ className }),
+        children: <NavRailContext.Provider value={context}>{children}</NavRailContext.Provider>,
+      },
+      props
+    ),
+  });
+}
+NavRailProvider.displayName = 'NavRail.Provider';
 
 export interface NavRailHeaderProps extends Omit<ComponentProps<'div'>, 'className'> {
   className?: string;
@@ -665,6 +963,24 @@ function NavRailHeader({ className, render, ...props }: NavRailHeaderProps & Ren
   });
 }
 NavRailHeader.displayName = 'NavRail.Header';
+
+export interface NavRailContentProps extends Omit<ComponentProps<'div'>, 'className'> {
+  className?: string;
+}
+
+/** The destinations between the header and the footer. The rail scrolls when they outgrow it. */
+function NavRailContent({ className, render, ...props }: NavRailContentProps & RenderProp<'div'>) {
+  useNavRailPart('NavRail.Content');
+  return useRender({
+    defaultTagName: 'div',
+    render,
+    props: mergeProps(
+      { 'data-slot': 'nav-rail-content', className: navRailVariants().content({ className }) },
+      props
+    ),
+  });
+}
+NavRailContent.displayName = 'NavRail.Content';
 
 export interface NavRailBrandProps extends Omit<ComponentProps<'a'>, 'href' | 'className'> {
   /** Where it goes. Without it the brand is a plain block rather than a link. */
@@ -681,7 +997,7 @@ export interface NavRailBrandProps extends Omit<ComponentProps<'a'>, 'href' | 'c
 
 /** The product's mark and name at the top of the rail. */
 function NavRailBrand({ href, icon, label, className, children, render, ...props }: NavRailBrandProps & RenderProp<'a'>) {
-  const { collapsed } = useNavRail('NavRail.Brand');
+  const { collapsed } = useNavRailPart('NavRail.Brand');
   const slots = navRailVariants();
   const name = label ?? textOf(children);
   return useRender({
@@ -738,17 +1054,19 @@ function NavRailTrigger({
   render,
   ...props
 }: NavRailTriggerProps & RenderProp<'button'>) {
-  const { collapsed, toggle } = useNavRail('NavRail.Trigger');
+  const { collapsed, toggle, isMobile, mobileOpen, collapsible } = useNavRailPart('NavRail.Trigger');
   const slots = navRailVariants();
-  return useRender({
+  const expanded = isMobile ? mobileOpen : !collapsed;
+  const trigger = useRender({
     defaultTagName: 'button',
     render,
     props: mergeProps(
       {
         'data-slot': 'nav-rail-trigger',
+        'data-state': expanded ? 'open' : 'closed',
         type: 'button',
-        'aria-expanded': !collapsed,
-        'aria-label': collapsed ? expandLabel : collapseLabel,
+        'aria-expanded': expanded,
+        'aria-label': expanded ? collapseLabel : expandLabel,
         className: slots.trigger({ className }),
         onClick: toggle,
         children: children ?? (
@@ -773,8 +1091,47 @@ function NavRailTrigger({
       props
     ),
   });
+  // A rail that cannot fold has nothing for the trigger to say or do.
+  if (collapsible === 'none') return null;
+  return trigger;
 }
 NavRailTrigger.displayName = 'NavRail.Trigger';
+
+export interface NavRailRailProps extends Omit<ComponentProps<'button'>, 'className'> {
+  /** What the handle is called. Default "Toggle navigation". */
+  label?: string;
+  className?: string;
+}
+
+/**
+ * A thin grab handle down the rail's outer edge. It is a pointer affordance,
+ * not a second control in the tab order: the rail's trigger is the one a
+ * keyboard uses.
+ */
+function NavRailRail({ label = 'Toggle navigation', className, render, ...props }: NavRailRailProps & RenderProp<'button'>) {
+  const { toggle, collapsible, mobile } = useNavRailPart('NavRail.Rail');
+  const rail = useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'nav-rail-rail',
+        type: 'button',
+        tabIndex: -1,
+        'aria-label': label,
+        title: label,
+        className: navRailVariants().rail({ className }),
+        onClick: toggle,
+      },
+      props
+    ),
+  });
+  // A drawer has its own backdrop, and a rail that cannot fold has nothing to
+  // grab.
+  if (collapsible === 'none' || mobile) return null;
+  return rail;
+}
+NavRailRail.displayName = 'NavRail.Rail';
 
 export interface NavRailGroupProps extends Omit<ComponentProps<'div'>, 'className'> {
   /**
@@ -827,7 +1184,7 @@ NavRailGroup.displayName = 'NavRail.Group';
 
 /** The count in a nav rail: a number beside the label, a dot on the icon when folded. */
 function NavRailBadge({ className, children, render, ...props }: NavRailBadgeProps & RenderProp<'span'>) {
-  const { collapsed } = useNavRail('NavRail.Badge');
+  const { collapsed } = useNavRailPart('NavRail.Badge');
   return useRender({
     defaultTagName: 'span',
     render,
@@ -928,7 +1285,7 @@ function NavRailItem({
   render,
   ...props
 }: NavRailItemProps & RenderProp<'a'>) {
-  const { collapsed, variant } = useNavRail('NavRail.Item');
+  const { collapsed, variant, side } = useNavRailPart('NavRail.Item');
   const slots = navRailVariants();
   const nested = useContext(NavRailNestedContext);
   const inFlyout = useContext(NavRailFlyoutContext);
@@ -965,17 +1322,53 @@ function NavRailItem({
   const [hovered, setHovered] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
   const container = useRef<HTMLDivElement>(null);
+  // A folded label is placed against the viewport rather than the row: the
+  // rail is a scroll container, and one that clipped its own tooltip would
+  // show nothing beside the icons.
+  const [tooltipAt, setTooltipAt] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const hasTooltip = iconsOnly && !branch && Boolean(name);
+
+  const showTooltip = (node: HTMLElement) => {
+    if (!iconsOnly || branch || !name) return;
+    const rect = node.getBoundingClientRect();
+    const rtl = getComputedStyle(node).direction === 'rtl';
+    // The label opens on the rail's inner side: inline-end when the rail sits
+    // on the start edge, inline-start when it sits on the end.
+    const towardEnd = side === 'start';
+    const inlineEnd = rtl ? { right: window.innerWidth - rect.left + 8 } : { left: rect.right + 8 };
+    const inlineStart = rtl ? { left: rect.right + 8 } : { right: window.innerWidth - rect.left + 8 };
+    setTooltipAt({ top: rect.top + rect.height / 2, ...(towardEnd ? inlineEnd : inlineStart) });
+  };
+
+  useEffect(() => {
+    if (!tooltipAt) return;
+    const hide = () => setTooltipAt(null);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+    };
+  }, [tooltipAt]);
+
+  useEffect(() => {
+    if (!iconsOnly) setTooltipAt(null);
+  }, [iconsOnly]);
 
   const liveSub = useRef({
     open,
     controlled: subProps?.open !== undefined,
     onOpenChange: subProps?.onOpenChange,
   });
-  liveSub.current = {
-    open,
-    controlled: subProps?.open !== undefined,
-    onOpenChange: subProps?.onOpenChange,
-  };
+  // Written after commit, so a render React throws away never leaves its
+  // values behind for the next click to read.
+  useIsomorphicLayoutEffect(() => {
+    liveSub.current = {
+      open,
+      controlled: subProps?.open !== undefined,
+      onOpenChange: subProps?.onOpenChange,
+    };
+  });
 
   const setOpen = useCallback((next: boolean) => {
     if (!liveSub.current.controlled) setInnerOpen(next);
@@ -1070,6 +1463,10 @@ function NavRailItem({
         disabled: href === undefined ? disabled : undefined,
         tabIndex: disabled ? -1 : undefined,
         onClick: disabled ? stop : branch ? rowClick : onClick,
+        onPointerEnter: (event: ReactPointerEvent<HTMLElement>) => showTooltip(event.currentTarget),
+        onPointerLeave: () => setTooltipAt(null),
+        onFocus: (event: ReactFocusEvent<HTMLElement>) => showTooltip(event.currentTarget),
+        onBlur: () => setTooltipAt(null),
         className: slots.item({
           className: [branch && !rowIsToggle ? 'pe-9' : undefined, className],
         }),
@@ -1094,8 +1491,13 @@ function NavRailItem({
               </span>
             ) : null}
             {rowIsToggle ? <NavRailChevron open={open} className={slots.chevron()} /> : null}
-            {iconsOnly && name && !branch ? (
-              <span aria-hidden="true" data-slot="nav-rail-tooltip" className={slots.tooltip()}>
+            {hasTooltip && tooltipAt ? (
+              <span
+                aria-hidden="true"
+                data-slot="nav-rail-tooltip"
+                className={slots.tooltip()}
+                style={tooltipAt}
+              >
                 {name}
               </span>
             ) : null}
@@ -1193,6 +1595,7 @@ function NavRailSub({
   ...props
 }: NavRailSubProps & RenderProp<'div'>) {
   const sub = useContext(NavRailSubContext);
+  const rail = useNavRailPart('NavRail.Sub');
   const slots = navRailVariants();
   // Only the parent row reads `open`, `defaultOpen` and `onOpenChange`: it owns
   // the disclosure state, so they are taken here to keep them off the DOM.
@@ -1201,6 +1604,41 @@ function NavRailSub({
   void _onOpenChange;
   // Out of sight, the list leaves the tab order and the accessibility tree.
   const ref = useInert<HTMLDivElement>(!sub?.visible);
+
+  // Folded, the list is a flyout. It is placed against the viewport so the
+  // rail's own scroll cannot clip it, and it is put back on its parent when
+  // the page or the rail moves.
+  useIsomorphicLayoutEffect(() => {
+    const node = ref.current;
+    if (!node || !sub?.folded || !sub.visible) return;
+    const place = () => {
+      const branch = node.parentElement;
+      if (!branch) return;
+      const rect = branch.getBoundingClientRect();
+      const rtl = getComputedStyle(branch).direction === 'rtl';
+      // The list opens away from the edge the rail sits on. The two offsets
+      // are the gap from the matching viewport edge, written in the logical
+      // property so a right-to-left page reads the same way.
+      const fromInlineStart = rtl ? window.innerWidth - rect.left : rect.right;
+      const fromInlineEnd = rtl ? rect.right : window.innerWidth - rect.left;
+      node.style.top = `${Math.max(8, rect.top)}px`;
+      if (rail.side === 'start') {
+        node.style.insetInlineStart = `${Math.min(window.innerWidth - 8, fromInlineStart)}px`;
+        node.style.insetInlineEnd = '';
+      } else {
+        node.style.insetInlineEnd = `${Math.min(window.innerWidth - 8, fromInlineEnd)}px`;
+        node.style.insetInlineStart = '';
+      }
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [ref, sub?.folded, sub?.visible, rail.side]);
+
   if (!sub) throw new Error('NavRail.Sub must be used inside a NavRail.Item.');
 
   const entries = Children.toArray(children).map((child, index) => (
@@ -1242,6 +1680,32 @@ function NavRailSub({
 }
 NavRailSub.displayName = 'NavRail.Sub';
 
+export interface NavRailInsetProps extends Omit<ComponentProps<'main'>, 'className'> {
+  className?: string;
+}
+
+/**
+ * The page beside the rail: the surface the work sits on. It fills the rest of
+ * the shell and keeps its own scroll, so the rail never slides away with the
+ * page.
+ */
+function NavRailInset({ className, render, ...props }: NavRailInsetProps & RenderProp<'main'>) {
+  const context = useContext(NavRailContext);
+  return useRender({
+    defaultTagName: 'main',
+    render,
+    props: mergeProps(
+      {
+        'data-slot': 'nav-rail-inset',
+        'data-mobile': context?.isMobile ? '' : undefined,
+        className: navRailVariants().inset({ className }),
+      },
+      props
+    ),
+  });
+}
+NavRailInset.displayName = 'NavRail.Inset';
+
 export interface NavRailSeparatorProps extends Omit<ComponentProps<'div'>, 'className'> {
   className?: string;
 }
@@ -1279,9 +1743,13 @@ function NavRailFooter({ className, render, ...props }: NavRailFooterProps & Ren
 NavRailFooter.displayName = 'NavRail.Footer';
 
 export const NavRail = Object.assign(NavRailRoot, {
+  Provider: NavRailProvider,
   Header: NavRailHeader,
+  Content: NavRailContent,
   Brand: NavRailBrand,
   Trigger: NavRailTrigger,
+  Rail: NavRailRail,
+  Inset: NavRailInset,
   Group: NavRailGroup,
   Item: NavRailItem,
   Sub: NavRailSub,
@@ -1291,9 +1759,13 @@ export const NavRail = Object.assign(NavRailRoot, {
 });
 
 export {
+  NavRailProvider,
   NavRailHeader,
+  NavRailContent,
   NavRailBrand,
   NavRailTrigger,
+  NavRailRail,
+  NavRailInset,
   NavRailGroup,
   NavRailItem,
   NavRailSub,

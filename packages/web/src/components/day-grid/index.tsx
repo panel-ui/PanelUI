@@ -62,6 +62,14 @@ export interface DayCell {
   label?: string;
 }
 
+/** How many days have something on them, and how many there are. */
+export interface DayGridSummaryCounts {
+  /** Days whose level is above 0. */
+  active: number;
+  /** Every day in the grid. */
+  total: number;
+}
+
 const dayGridVariants = tv({
   slots: {
     root: 'relative grid w-full gap-1',
@@ -138,6 +146,15 @@ export interface DayGridProps extends Omit<ComponentProps<'div'>, 'children' | '
    * period out wide and short.
    */
   rows?: number;
+  /**
+   * Empty slots before the first day, for a period that starts partway
+   * through the first row or column. Use it when a month does not begin on
+   * the first day of the week: `rows={7}` with `offset={4}` leaves four slots
+   * in the first column and puts the first day on a Friday. The offset is not
+   * a day: it holds space only, so it is left out of the summary and never
+   * becomes a button.
+   */
+  offset?: number;
   /** Which of the theme's roles the dots are drawn in. */
   color?: DayGridColor;
   /** The index of the selected day, when the caller holds it. */
@@ -151,17 +168,26 @@ export interface DayGridProps extends Omit<ComponentProps<'div'>, 'children' | '
   lens?: boolean;
   /** What a screen reader calls the grid. */
   label?: string;
+  /**
+   * The sentence a screen reader says for the whole grid, written in the
+   * reader's language. It is given `active`, the days with something on them,
+   * and `total`, every day in the grid. Without it the grid says the same
+   * thing in English.
+   */
+  summary?: (counts: DayGridSummaryCounts) => string;
 }
 
 function DayGridRoot({
   cells,
   columns = 7,
   rows: perColumn,
+  offset = 0,
   color = 'primary',
   value = null,
   onValueChange,
   lens = true,
   label = 'Activity',
+  summary: formatSummary,
   className,
   style,
   onPointerMove,
@@ -181,8 +207,12 @@ function DayGridRoot({
 
   // Which way the days run: along each row, or down each column.
   const byColumn = perColumn !== undefined;
-  const across = byColumn ? Math.ceil(cells.length / Math.max(1, perColumn)) : columns;
-  const rows = byColumn ? Math.max(1, perColumn) : Math.ceil(cells.length / columns);
+  // Empty slots before the first day. They take a place in the grid and in the
+  // entrance, but they are not days: the summary counts only `cells`.
+  const lead = Number.isFinite(offset) ? Math.max(0, Math.trunc(offset)) : 0;
+  const total = cells.length + lead;
+  const across = byColumn ? Math.ceil(total / Math.max(1, perColumn)) : columns;
+  const rows = byColumn ? Math.max(1, perColumn) : Math.ceil(total / Math.max(1, columns));
 
   useEffect(() => {
     const start = requestAnimationFrame(() => setArrived('arriving'));
@@ -198,9 +228,13 @@ function DayGridRoot({
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
 
   const summary = useMemo(() => {
-    const active = cells.filter((cell) => cell.level > 0).length;
-    return `${label}: something on ${active} of ${cells.length} days.`;
-  }, [cells, label]);
+    const counts = { active: cells.filter((cell) => cell.level > 0).length, total: cells.length };
+    // Written here even when the caller supplies a sentence, so a formatter in
+    // another language is handed the counts instead of walking the days again.
+    return formatSummary
+      ? formatSummary(counts)
+      : `${label}: something on ${counts.active} of ${counts.total} days.`;
+  }, [cells, label, formatSummary]);
 
   const moveLens = (event: ReactPointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);
@@ -249,9 +283,12 @@ function DayGridRoot({
   /** Where a dot is in its entrance, as the styles that put it there. */
   const dotStyle = (index: number): CSSProperties | undefined => {
     if (arrived === 'yes') return undefined;
+    // The offset takes part in the diagonals, so the stagger follows what is
+    // on screen rather than starting at the top-left of the grid.
+    const position = lead + index;
     const diagonal = byColumn
-      ? Math.floor(index / rows) + (index % rows)
-      : Math.floor(index / across) + (index % across);
+      ? Math.floor(position / rows) + (position % rows)
+      : Math.floor(position / across) + (position % across);
     return {
       ['--pu-in' as string]: arrived === 'no' ? 0 : 1,
       transitionDelay: `${diagonal * STAGGER}ms`,
@@ -281,6 +318,14 @@ function DayGridRoot({
   })();
 
 
+  // The offset is drawn as empty grid items, so the first day starts after
+  // them whichever way the grid fills. They are hidden from assistive
+  // technology, and the summary already counts days rather than slots.
+  const leadSlots =
+    lead > 0
+      ? Array.from({ length: lead }, (_, index) => <span key={`lead-${index}`} aria-hidden="true" />)
+      : null;
+
   // One Tab stop for the grid: the selected day, or the first.
   const focusable = value !== null && value >= 0 && value < cells.length ? value : 0;
 
@@ -298,7 +343,11 @@ function DayGridRoot({
     else if (event.key === 'Home') next = 0;
     else if (event.key === 'End') next = cells.length - 1;
     if (next === undefined || next < 0 || next >= cells.length) return;
+    // Home or End on the day that already has focus is not a move. Swallow the
+    // key so the page does not scroll, but report nothing: a caller that clears
+    // the selection when the same day is pressed again would lose it here.
     event.preventDefault();
+    if (next === index) return;
     nodes.current[next]?.focus();
     onValueChange?.(next);
   };
@@ -318,6 +367,7 @@ function DayGridRoot({
         onPointerLeave: leave,
         children: (
           <>
+            {leadSlots}
             {cells.map((cell, index) => {
               const part = dayGridVariants({
                 level: cell.level,
@@ -367,6 +417,7 @@ function DayGridRoot({
         onPointerLeave={leave}
         {...props}
       >
+        {leadSlots}
         {cells.map((cell, index) => {
           const part = dayGridVariants({ level: cell.level });
           return (

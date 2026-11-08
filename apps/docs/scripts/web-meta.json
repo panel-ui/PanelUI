@@ -710,6 +710,16 @@
       "title": "Ring Chart"
     }
   ],
+  "nav-rail": [
+    "NavRail",
+    "A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.",
+    "react sidebar navigation collapsible nav rail sidebar menu",
+    {
+      "addedIn": "0.15.0",
+      "category": "navigation",
+      "title": "Nav Rail"
+    }
+  ],
   "table-of-contents": [
     "TableOfContents",
     "The sections of a long page as a quiet rail, with one mark that moves to what you are reading.",

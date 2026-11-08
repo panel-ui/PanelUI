@@ -131,6 +131,7 @@ export {
   type DayGridTitleProps,
   type DayGridDescriptionProps,
   type DayGridColor,
+  type DayGridSummaryCounts,
   type DayCell,
   type DayLevel,
 } from './components/day-grid';
@@ -459,6 +460,30 @@ export {
   type TabsBadgeProps,
   type TabsContentProps,
 } from './components/tabs';
+export {
+  NavRail,
+  NavRailHeader,
+  NavRailBrand,
+  NavRailTrigger,
+  NavRailGroup,
+  NavRailItem,
+  NavRailSub,
+  NavRailBadge,
+  NavRailSeparator,
+  NavRailFooter,
+  navRailVariants,
+  type NavRailProps,
+  type NavRailVariant,
+  type NavRailHeaderProps,
+  type NavRailBrandProps,
+  type NavRailTriggerProps,
+  type NavRailGroupProps,
+  type NavRailItemProps,
+  type NavRailSubProps,
+  type NavRailBadgeProps,
+  type NavRailSeparatorProps,
+  type NavRailFooterProps,
+} from './components/nav-rail';
 export {
   Message,
   MessageGroup,

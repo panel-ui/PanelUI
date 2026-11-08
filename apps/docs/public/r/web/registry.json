@@ -1025,6 +1025,29 @@
       ]
     },
     {
+      "name": "nav-rail",
+      "type": "registry:component",
+      "title": "Nav Rail",
+      "description": "A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/nav-rail/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/nav-rail/index.tsx"
+        },
+        {
+          "path": "components/panelui/nav-rail/rail.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/nav-rail/rail.ts"
+        }
+      ]
+    },
+    {
       "name": "not-found",
       "type": "registry:component",
       "title": "Not Found",

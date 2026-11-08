@@ -58,11 +58,13 @@ Every part also takes the props of the element it renders, and a `className`.
 | `cells` | `DayCell[]` | **required** | The days, in order. They fill the grid row by row. |
 | `columns` | `number` | `7` | Cells per row. Seven makes each row a week. |
 | `rows` | `number` | — | Cells per column. Giving this fills the grid column by column, and `columns` is ignored. Seven makes each column a week, which lays a long period out wide and short. |
+| `offset` | `number` | `0` | Empty slots before the first day, for a period that starts partway through the first row or column. Use it when a month does not begin on the first day of the week: `rows={7}` with `offset={4}` leaves four slots in the first column and puts the first day on a Friday. The offset is not a day: it holds space only, so it is left out of the summary and never becomes a button. |
 | `color` | `DayGridColor` | `'primary'` | Which of the theme's roles the dots are drawn in. |
 | `value` | `number \| null` | `null` | The index of the selected day, when the caller holds it. |
 | `onValueChange` | `(index: number) => void` | — | Called with the index of a day when it is pressed. Passing this makes the days buttons; without it the grid is a picture. |
 | `lens` | `boolean` | `true` | Set to `false` for dots that hold still under the pointer. |
 | `label` | `string` | `'Activity'` | What a screen reader calls the grid. |
+| `summary` | `(counts: DayGridSummaryCounts) => string` | — | The sentence a screen reader says for the whole grid, written in the reader's language. It is given `active`, the days with something on them, and `total`, every day in the grid. Without it the grid says the same thing in English. |
 
 #### `DayGridLegendProps`
 
@@ -125,13 +127,15 @@ Days fill the grid row by row and stay round at any width. `columns` defaults to
 
 Give `rows` and the days run down each column, `rows` to a column, for as many columns as it takes. `rows={7}` makes each column a week, which lays a long period out wide and short.
 
+Give `offset` when the period starts partway through the first week. It leaves that many empty slots before the first day, and counts towards the number of columns or rows the grid needs, so a month that starts on a Friday still rests on the right weekday. An offset is not a day: it holds space only, so the summary and the `onValueChange` indexes count the days alone.
+
 The grid takes the width of its container. Set a `max-w-*` class on it or on its parent to stop the dots growing too large.
 
 #### Labels
 
 `label` on a day is its tag and what a screen reader says for it, so write the date and the figure: "14 May, 6 commits". A day without a label has no tag, and a pressable one is announced by its position and level.
 
-The grid as a whole is announced with its `label` and how many of the days have something on them.
+The grid as a whole is announced with its `label` and how many of the days have something on them. Pass `summary` to write that sentence yourself, in your own language: it is given the counts, so you do not have to work them out again. An `aria-label` put straight on the grid is merged after the summary and takes its place, but it knows nothing about the counts.
 
 #### Keyboard
 

@@ -53,8 +53,8 @@ It earns its place on pages reached through several levels, where the title alon
 - `Breadcrumb.Item` — One crumb, as a list item. Wrap a `Link` or the `Page` in it; a trail is a list of these.
 - `Breadcrumb.Link` — A navigable crumb: an ancestor to go back to. It renders an `<a>`, so `href` and the rest work as they do anywhere, and `render` swaps in your router's own link. A string label truncates to the space available and carries the full text as a `title`.
 - `Breadcrumb.Page` — The trailing crumb, where you are now. Not a link — it carries `aria-current="page"` and the full foreground, so the trail resolves to it.
-- `Breadcrumb.Separator` — The glyph between crumbs, hidden from screen readers. `List` inserts it for you; it is public only for a hand-assembled trail, where it sits beside the items.
-- `Breadcrumb.Ellipsis` — Stands in for the crumbs a folded trail hides. Static by default; give the root an `onEllipsisClick` and it becomes a button for a menu of the hidden steps.
+- `Breadcrumb.Separator` — The glyph between crumbs, hidden from screen readers. `List` inserts it for you and owns the gaps; a `Breadcrumb.Separator` passed directly to `List` is ignored, so change the glyph with the root's `separator` prop instead.
+- `Breadcrumb.Ellipsis` — Stands in for the crumbs a folded trail hides. Static by default; give the root an `onEllipsisClick` and it becomes a button for a menu of the hidden steps. Pass `ellipsisOpen` so it reports `aria-expanded`, and `ellipsisLabel` to change its name from the default "Show hidden items". A separately rendered `Breadcrumb.Ellipsis` takes those as its own `label` and `onClick`.
 
 ## Props
 
@@ -71,6 +71,8 @@ Every part also takes the props of the element it renders, and a `className`.
 | `itemsBeforeCollapse` | `number` | `1` | How many leading crumbs survive a collapse, at least one. Default 1. |
 | `itemsAfterCollapse` | `number` | `1` | How many trailing crumbs survive a collapse, at least one. Default 1. |
 | `onEllipsisClick` | `MouseEventHandler<HTMLElement>` | — | Makes the collapsed ellipsis pressable — the handle for a menu listing the hidden steps. Without it the ellipsis is a static marker. |
+| `ellipsisOpen` | `boolean` | — | Whether the menu the pressable ellipsis opens is showing. Sets `aria-expanded` on that button, so a screen reader knows the menu is open. |
+| `ellipsisLabel` | `string` | — | What the collapsed ellipsis is called when pressable. Default "Show hidden items"; set it to localize the button the list creates for you. |
 
 #### `BreadcrumbListProps`
 
@@ -118,7 +120,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 #### Accessibility
 
-The root is a `<nav>` with `aria-label="Breadcrumb"`. When a page carries more than one trail — one in the page and one in a dialog — give each its own `aria-label` naming the hierarchy it describes, so the landmarks are told apart. `Breadcrumb.Page` carries `aria-current="page"` and is not a link, and the separators are `aria-hidden`, so a screen reader hears the crumbs rather than a run of chevrons. A static ellipsis is announced as "More"; a pressable one is a button named "Show hidden items" unless you pass `label`.
+The root is a `<nav>` with `aria-label="Breadcrumb"`. When a page carries more than one trail — one in the page and one in a dialog — give each its own `aria-label` naming the hierarchy it describes, so the landmarks are told apart. `Breadcrumb.Page` carries `aria-current="page"` and is not a link, and the separators are `aria-hidden`, so a screen reader hears the crumbs rather than a run of chevrons. A static ellipsis is announced as "More"; a pressable one is a button named "Show hidden items" unless you pass `label`. When that button opens a menu, pass the menu's state as `ellipsisOpen` on the root so the button reports `aria-expanded`.
 
 #### Collapsing
 

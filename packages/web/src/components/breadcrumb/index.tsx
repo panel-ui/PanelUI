@@ -65,6 +65,7 @@ import {
   type ElementType as RenderElementType,
   type HTMLAttributes,
   type MouseEventHandler,
+  type ReactElement,
   type ReactNode,
 } from 'react';
 import { mergeProps } from '@base-ui/react/merge-props';
@@ -141,6 +142,8 @@ const BreadcrumbContext = createContext<{
   itemsBeforeCollapse: number;
   itemsAfterCollapse: number;
   onEllipsisClick?: MouseEventHandler<HTMLElement>;
+  ellipsisOpen?: boolean;
+  ellipsisLabel?: string;
 }>({
   size: 'default',
   itemsBeforeCollapse: 1,
@@ -197,6 +200,16 @@ export interface BreadcrumbProps extends ComponentProps<'nav'> {
    * hidden steps. Without it the ellipsis is a static marker.
    */
   onEllipsisClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Whether the menu the pressable ellipsis opens is showing. Sets
+   * `aria-expanded` on that button, so a screen reader knows the menu is open.
+   */
+  ellipsisOpen?: boolean;
+  /**
+   * What the collapsed ellipsis is called when pressable. Default "Show hidden
+   * items"; set it to localize the button the list creates for you.
+   */
+  ellipsisLabel?: string;
 }
 
 /**
@@ -211,13 +224,15 @@ function BreadcrumbRoot({
   itemsBeforeCollapse = 1,
   itemsAfterCollapse = 1,
   onEllipsisClick,
+  ellipsisOpen,
+  ellipsisLabel,
   className,
   children,
   ...props
 }: BreadcrumbProps) {
   return (
     <BreadcrumbContext.Provider
-      value={{ size, separator, maxItems, itemsBeforeCollapse, itemsAfterCollapse, onEllipsisClick }}
+      value={{ size, separator, maxItems, itemsBeforeCollapse, itemsAfterCollapse, onEllipsisClick, ellipsisOpen, ellipsisLabel }}
     >
       <nav
         data-slot="breadcrumb"
@@ -238,12 +253,27 @@ export interface BreadcrumbListProps extends ComponentProps<'ol'> {
 }
 
 /**
+ * Flattens fragments so a wrapped run of crumbs counts as the items inside it,
+ * and drops a separator passed straight to the list: the list places its own.
+ */
+function flattenCrumbs(nodes: ReactNode): ReactElement[] {
+  return Children.toArray(nodes).flatMap((node) => {
+    if (!isValidElement(node)) return [];
+    if (node.type === Fragment) {
+      return flattenCrumbs((node.props as { children?: ReactNode }).children);
+    }
+    if (node.type === BreadcrumbSeparator) return [];
+    return [node];
+  });
+}
+
+/**
  * The crumb row. It owns the separators — one between every pair of crumbs and
  * none at the ends — and the folding, so a caller only ever lists items.
  */
 function BreadcrumbList({ className, children, ...props }: BreadcrumbListProps) {
-  const { size, maxItems, itemsBeforeCollapse, itemsAfterCollapse, onEllipsisClick } = useBreadcrumb();
-  const crumbs = Children.toArray(children).filter(isValidElement);
+  const { size, maxItems, itemsBeforeCollapse, itemsAfterCollapse, onEllipsisClick, ellipsisLabel } = useBreadcrumb();
+  const crumbs = flattenCrumbs(children);
   const slots = breadcrumbVariants({ size });
   const sequence = collapseBreadcrumbItems(crumbs.length, {
     maxItems,
@@ -257,7 +287,9 @@ function BreadcrumbList({ className, children, ...props }: BreadcrumbListProps) 
         <Fragment key={position}>
           {position > 0 ? <BreadcrumbSeparator /> : null}
           {slot === BREADCRUMB_ELLIPSIS ? (
-            <BreadcrumbEllipsis onClick={onEllipsisClick} />
+            <li data-slot="breadcrumb-item" className={slots.item()}>
+              <BreadcrumbEllipsis onClick={onEllipsisClick} label={ellipsisLabel} />
+            </li>
           ) : (
             crumbs[slot]
           )}
@@ -392,7 +424,7 @@ export interface BreadcrumbEllipsisProps extends Omit<HTMLAttributes<HTMLElement
  * silent to assistive tech.
  */
 function BreadcrumbEllipsis({ className, children, onClick, label, ...props }: BreadcrumbEllipsisProps) {
-  const { size } = useBreadcrumb();
+  const { size, ellipsisOpen } = useBreadcrumb();
   const slots = breadcrumbVariants({ size, interactive: Boolean(onClick) });
   const glyph = children ?? <EllipsisGlyph />;
 
@@ -416,6 +448,7 @@ function BreadcrumbEllipsis({ className, children, onClick, label, ...props }: B
       type="button"
       aria-label={label ?? 'Show hidden items'}
       aria-haspopup="menu"
+      aria-expanded={ellipsisOpen}
       className={slots.ellipsis({ className })}
       onClick={onClick}
       {...props}

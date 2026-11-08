@@ -21,6 +21,7 @@ export default function BreadcrumbWithMenu() {
   return (
     <Breadcrumb
       maxItems={4}
+      ellipsisOpen={open}
       onEllipsisClick={(event) => {
         setAnchor(event.currentTarget);
         setOpen(true);

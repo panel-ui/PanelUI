@@ -210,6 +210,29 @@
       ]
     },
     {
+      "name": "breadcrumb",
+      "type": "registry:component",
+      "title": "Breadcrumb",
+      "description": "The trail of links back up a hierarchy to the page you are on, with the middle folded away when the path runs long.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/breadcrumb/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/breadcrumb/index.tsx"
+        },
+        {
+          "path": "components/panelui/breadcrumb/collapse.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/breadcrumb/collapse.ts"
+        }
+      ]
+    },
+    {
       "name": "bubble-chart",
       "type": "registry:component",
       "title": "Bubble Chart",
@@ -1083,6 +1106,30 @@
       ]
     },
     {
+      "name": "pagination",
+      "type": "registry:component",
+      "title": "Pagination",
+      "description": "Page controls for a long result set: the pages near you, the gaps between them, and a way across.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/pagination/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/pagination/index.tsx"
+        },
+        {
+          "path": "components/panelui/pagination/pagination-range.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/pagination/pagination-range.ts"
+        }
+      ]
+    },
+    {
       "name": "pie-chart",
       "type": "registry:component",
       "title": "Pie Chart",
@@ -1514,6 +1561,31 @@
       ]
     },
     {
+      "name": "scroll-header",
+      "type": "registry:component",
+      "title": "Scroll Header",
+      "description": "A page title with room around it that hands over to a compact sticky bar as the reader scrolls.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/scroll-header/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/scroll-header/index.tsx"
+        },
+        {
+          "path": "components/panelui/scroll-header/scroll-header-math.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/scroll-header/scroll-header-math.ts"
+        }
+      ]
+    },
+    {
       "name": "select",
       "type": "registry:component",
       "title": "Select",
@@ -1649,6 +1721,31 @@
           "path": "components/panelui/stat.tsx",
           "type": "registry:component",
           "target": "@components/panelui/stat.tsx"
+        }
+      ]
+    },
+    {
+      "name": "steps",
+      "type": "registry:component",
+      "title": "Steps",
+      "description": "A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/spinner.json"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/steps/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/steps/index.tsx"
+        },
+        {
+          "path": "components/panelui/steps/steps-state.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/steps/steps-state.ts"
         }
       ]
     },

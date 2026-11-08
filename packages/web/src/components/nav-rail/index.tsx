@@ -216,6 +216,7 @@ const navRailVariants = tv({
       'text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground',
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
       'data-[holding]:text-foreground data-[holding]:hover:bg-foreground/[0.03]',
+      'data-[expanded]:bg-foreground/[0.05] data-[expanded]:text-foreground',
       'data-solid-active:text-primary-foreground! data-solid-active:hover:bg-transparent',
       'data-[holding]:data-solid-active:text-primary-foreground!',
       'data-disabled:pointer-events-none data-disabled:opacity-40',
@@ -295,6 +296,16 @@ const navRailVariants = tv({
       // can stay the transition and arrow-key container.
       'group-data-[collapsed]/nav-rail:min-w-52 group-data-[collapsed]/nav-rail:max-h-[calc(100dvh-1rem)] group-data-[collapsed]/nav-rail:overflow-y-auto group-data-[collapsed]/nav-rail:rounded-xl group-data-[collapsed]/nav-rail:border group-data-[collapsed]/nav-rail:border-border group-data-[collapsed]/nav-rail:bg-popover group-data-[collapsed]/nav-rail:p-1 group-data-[collapsed]/nav-rail:text-popover-foreground group-data-[collapsed]/nav-rail:shadow-lg',
     ],
+    // A folded child list is shown away from the rail, where the parent's row
+    // is no longer beside it: its name and mark head the flyout, so the
+    // children are never shown without the branch they belong to.
+    subHeader: [
+      'hidden items-center gap-2 border-b border-border/60 px-2 pb-1.5 pt-1',
+      'group-data-[collapsed]/nav-rail:flex',
+    ],
+    subHeaderIcon: 'flex size-4 shrink-0 items-center justify-center text-muted-foreground [&_svg]:size-3.5',
+    subHeaderLabel:
+      'min-w-0 truncate text-[10px] font-semibold tracking-[0.09em] text-muted-foreground uppercase',
     subList: [
       'flex flex-col gap-0.5',
       // The indent and the rule are what make a child read as subordinate
@@ -393,6 +404,8 @@ interface NavRailSubContextValue {
   listId: string;
   /** The parent's accessible name, used to name the list. */
   name?: string;
+  /** The parent's mark, shown at the head of a folded flyout. */
+  icon?: ReactNode;
   /** Whether the rail is folded, so the children live in a flyout. */
   folded: boolean;
   /** Opens or closes the list from the parent row. */
@@ -1334,6 +1347,35 @@ function NavRailItem({
   const [hovered, setHovered] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
   const container = useRef<HTMLDivElement>(null);
+  // A flyout opens on hover, but not the instant the pointer crosses a row:
+  // the wait is what keeps a sweep down the rail from flashing every branch on
+  // the way to the one the reader wants. Focus does not wait.
+  const openHover = useRef<number | null>(null);
+  const enterBranch = () => {
+    if (openHover.current !== null) window.clearTimeout(openHover.current);
+    if (!collapsed) {
+      setHovered(true);
+      return;
+    }
+    openHover.current = window.setTimeout(() => {
+      openHover.current = null;
+      setHovered(true);
+    }, 120);
+  };
+  const leaveBranch = () => {
+    if (openHover.current !== null) {
+      window.clearTimeout(openHover.current);
+      openHover.current = null;
+    }
+    setHovered(false);
+    setDismissed(false);
+  };
+  useEffect(
+    () => () => {
+      if (openHover.current !== null) window.clearTimeout(openHover.current);
+    },
+    []
+  );
   // A folded label is placed against the viewport rather than the row: the
   // rail is a scroll container, and one that clipped its own tooltip would
   // show nothing beside the icons.
@@ -1393,9 +1435,9 @@ function NavRailItem({
   const subContext = useMemo<NavRailSubContextValue | null>(
     () =>
       branch
-        ? { open, visible, listId, name, folded: collapsed, toggle: toggleSub }
+        ? { open, visible, listId, name, icon, folded: collapsed, toggle: toggleSub }
         : null,
-    [branch, open, visible, listId, name, collapsed, toggleSub]
+    [branch, open, visible, listId, name, icon, collapsed, toggleSub]
   );
 
   // The rail's arrow keys ask the child list to open or close through an event
@@ -1465,6 +1507,9 @@ function NavRailItem({
         'data-flyout': inFlyout ? '' : undefined,
         'data-branch': branch ? '' : undefined,
         'data-child-active': activeDescendant ? '' : undefined,
+        // Folded, the flyout is a surface away from the rail; the row it
+        // belongs to stays marked while it is out, so the two read together.
+        'data-expanded': collapsed && visible ? '' : undefined,
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,
         'aria-label': iconsOnly && foldedName ? foldedName : undefined,
@@ -1528,11 +1573,8 @@ function NavRailItem({
       data-slot="nav-rail-branch"
       data-solid-active={solidActive ? '' : undefined}
       className={slots.branch()}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => {
-        setHovered(false);
-        setDismissed(false);
-      }}
+      onPointerEnter={enterBranch}
+      onPointerLeave={leaveBranch}
       onFocus={() => setFocusWithin(true)}
       onBlur={(event) => {
         const next = event.relatedTarget;
@@ -1676,6 +1718,12 @@ function NavRailSub({
         className: slots.sub({ className }),
         children: (
           <div data-slot="nav-rail-sub-panel" className={slots.subPanel()}>
+            {sub.folded && sub.name ? (
+              <div aria-hidden="true" data-slot="nav-rail-sub-header" className={slots.subHeader()}>
+                {sub.icon ? <span className={slots.subHeaderIcon()}>{sub.icon}</span> : null}
+                <span className={slots.subHeaderLabel()}>{sub.name}</span>
+              </div>
+            ) : null}
             <ul
               id={sub.listId}
               data-slot="nav-rail-sub-list"

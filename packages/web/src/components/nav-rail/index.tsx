@@ -217,6 +217,13 @@ const navRailVariants = tv({
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
       'data-[holding]:text-foreground data-[holding]:hover:bg-foreground/[0.03]',
       'data-[expanded]:bg-foreground/[0.05] data-[expanded]:text-foreground',
+      // The footer is an opaque, sticky surface above the shared pill, so an
+      // active destination there carries its own fill instead.
+      'group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-active:bg-primary/[0.12] group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-active:hover:bg-primary/[0.12]! group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-active:ring-1 group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-active:ring-primary/20 group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-active:ring-inset',
+      // A parent holding the pill for a closed or folded child is marked the
+      // same way: the footer's shared indicator is hidden, so it needs its own.
+      'group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-[holding]:bg-primary/[0.12] group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-[holding]:hover:bg-primary/[0.12]! group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-[holding]:ring-1 group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-[holding]:ring-primary/20 group-data-[footer-active]/nav-rail:not-data-[solid-active]:data-[holding]:ring-inset',
+      'group-data-[footer-active]/nav-rail:data-solid-active:bg-primary group-data-[footer-active]/nav-rail:data-solid-active:hover:bg-primary! group-data-[footer-active]/nav-rail:data-solid-active:ring-0',
       'data-solid-active:text-primary-foreground! data-solid-active:hover:bg-transparent',
       'data-[holding]:data-solid-active:text-primary-foreground!',
       'data-disabled:pointer-events-none data-disabled:opacity-40',
@@ -322,6 +329,7 @@ const navRailVariants = tv({
     indicator: [
       'pointer-events-none absolute top-(--indicator-y) left-(--indicator-x) z-0 h-(--indicator-h) w-(--indicator-w) rounded-[10px]',
       'bg-primary/[0.12] opacity-0 ring-1 ring-primary/20 ring-inset',
+      'group-data-[footer-active]/nav-rail:hidden',
       'group-data-[variant=solid]/nav-rail:bg-primary group-data-[variant=solid]/nav-rail:ring-0',
       "group-data-[collapsed]/nav-rail:before:hidden group-data-[variant=solid]/nav-rail:before:hidden",
       "before:absolute before:inset-y-2.5 before:start-1 before:w-[3px] before:rounded-full before:bg-primary before:content-['']",
@@ -604,8 +612,14 @@ function NavRailRoot({
       const active = index === null ? null : rows[index];
       if (!active) {
         pill.removeAttribute('data-ready');
+        box.removeAttribute('data-footer-active');
         return;
       }
+      // The footer is opaque and sticky, so the shared pill cannot show
+      // through it; the active row there carries its own fill instead.
+      const inFooter = active.closest('[data-slot="nav-rail-footer"]') !== null;
+      if (inFooter) box.setAttribute('data-footer-active', '');
+      else box.removeAttribute('data-footer-active');
       const rail = box.getBoundingClientRect();
       const item = active.getBoundingClientRect();
       // The pill is positioned against the rail's padding box, which starts
@@ -1326,8 +1340,10 @@ function NavRailItem({
   const branch = sub !== undefined;
   const rowIsToggle = branch && href === undefined;
   // Folded, there is no disclosure arrow: the icon is the whole row. Hover and
-  // focus show the flyout, and the row still reports whether it is out.
-  const rowOwnsDisclosure = rowIsToggle || collapsed;
+  // focus show the flyout, and the row still reports whether it is out. Only a
+  // branch has a list to disclose; a leaf must not point at an id that is not
+  // there.
+  const rowOwnsDisclosure = branch && (rowIsToggle || collapsed);
   const activeDescendant = sub !== undefined && subHasActive(sub);
 
   const listId = useId();
@@ -1511,7 +1527,9 @@ function NavRailItem({
         'aria-current': active ? 'page' : undefined,
         'aria-disabled': disabled || undefined,
         'aria-label': iconsOnly && foldedName ? foldedName : undefined,
-        'aria-expanded': rowOwnsDisclosure ? open : undefined,
+        // What is on screen, not only what is pinned: a folded flyout shows on
+        // hover or focus while `open` stays false.
+        'aria-expanded': rowOwnsDisclosure ? visible : undefined,
         'aria-controls': rowOwnsDisclosure ? listId : undefined,
         href,
         type: href === undefined ? 'button' : undefined,
@@ -1545,7 +1563,7 @@ function NavRailItem({
                 {badges}
               </span>
             ) : null}
-            {rowIsToggle ? <NavRailChevron open={open} className={slots.chevron()} /> : null}
+            {rowIsToggle && !collapsed ? <NavRailChevron open={open} className={slots.chevron()} /> : null}
             {hasTooltip && tooltipAt ? (
               <span
                 aria-hidden="true"

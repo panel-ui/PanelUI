@@ -605,7 +605,7 @@ With reduced motion turned on, the segment jumps to its new row without travelli
 
 ### Built on
 
-No dependency beyond React and the package's own theme tokens. The spy is the browser's `IntersectionObserver`, and the segment is one pseudo-element placed in a layout effect, so no measuring library is needed.
+It uses `@base-ui/react` for the `render` prop and `tailwind-variants` for its styles, as the rest of the collection does. The spy is the browser's `IntersectionObserver`, and the marks are placed in a layout effect from the rows' measured positions, so no measuring library is needed.
 
 ### Contour
 

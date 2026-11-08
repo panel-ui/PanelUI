@@ -61,6 +61,7 @@ import {
   useState,
   type ComponentProps,
   type MouseEvent as ReactMouseEvent,
+  type Ref,
   type RefObject,
 } from 'react';
 import { tv } from 'tailwind-variants';
@@ -187,6 +188,16 @@ function useTableOfContents(component: string): TableOfContentsContextValue {
 }
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/** One ref callback that sets every ref given, skipping the missing ones. */
+function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): (node: T | null) => void {
+  return (node) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') ref(node);
+      else if (ref) (ref as { current: T | null }).current = node;
+    }
+  };
+}
 
 export interface TableOfContentsProps
   extends Omit<ComponentProps<'nav'>, 'className' | 'defaultValue' | 'onChange'> {
@@ -371,11 +382,12 @@ function TableOfContentsRoot({
   return (
     <TableOfContentsContext.Provider value={context}>
       <nav
-        ref={nav}
         data-slot="table-of-contents"
         aria-label={ariaLabel}
         className={tableOfContentsVariants().root({ className })}
         {...props}
+        // After the spread, so a caller's ref is joined to ours, not swapped for it.
+        ref={mergeRefs(nav, props.ref)}
       >
         {children}
       </nav>
@@ -518,11 +530,11 @@ function TableOfContentsList({ className, children, ...props }: TableOfContentsL
 
   return (
     <ol
-      ref={list}
       data-slot="table-of-contents-list"
       data-variant={variant}
       className={slots.list({ className })}
       {...props}
+      ref={mergeRefs(list, props.ref)}
     >
       {children}
       {variant === 'contour' ? (
@@ -609,7 +621,17 @@ function TableOfContentsLink({
   const section = item?.value ?? hashTarget(props.href);
   const active = section !== null && section === value;
 
-  const handleClick = (_event: ReactMouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    // A click that opens the section somewhere else leaves this page where it
+    // is, so the mark stays where it is too.
+    const elsewhere =
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.currentTarget.target === '_blank';
+    if (elsewhere) return;
     // The browser does the scrolling. The mark moves at once, rather than
     // waiting for the spy to catch up on the way past.
     if (section) select(section);

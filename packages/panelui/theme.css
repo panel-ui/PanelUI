@@ -453,8 +453,8 @@
       --color-muted: rgba(0, 0, 0, 0.05);
       --color-muted-foreground: #6b6f76;
 
-      --color-accent: rgba(0, 0, 0, 0.06);
-      --color-accent-foreground: #08090a;
+      --color-accent: rgba(94, 106, 210, 0.1);
+      --color-accent-foreground: #3d47a8;
 
       --color-destructive: #eb5757;
       --color-destructive-foreground: #c62b30;
@@ -536,14 +536,14 @@
       --color-primary: #5e6ad2;
       --color-primary-foreground: #ffffff;
 
-      --color-secondary: rgba(255, 255, 255, 0.06);
+      --color-secondary: rgba(255, 255, 255, 0.08);
       --color-secondary-foreground: #f7f8f8;
 
       --color-muted: rgba(255, 255, 255, 0.06);
       --color-muted-foreground: #8a8f98;
 
-      --color-accent: rgba(255, 255, 255, 0.08);
-      --color-accent-foreground: #f7f8f8;
+      --color-accent: rgba(94, 106, 210, 0.18);
+      --color-accent-foreground: #b4baf5;
 
       --color-destructive: #eb5757;
       --color-destructive-foreground: #ff8a8a;

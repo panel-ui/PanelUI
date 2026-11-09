@@ -54,7 +54,7 @@ For a task rather than a yes or no, such as a form to fill in, use [Dialog](/doc
 - `AlertDialog.Media` — A glyph in a disc of the dialog's tone, above the title.
 - `AlertDialog.Title` — The question. The dialog is announced by it.
 - `AlertDialog.Description` — What follows from each answer, read out after the title.
-- `AlertDialog.Footer` — The answers, side by side at equal widths in the band under the panel. Keep it a direct child of `AlertDialog.Content`.
+- `AlertDialog.Footer` — The answers, side by side at equal widths in the band under the panel. It can sit at any depth inside `AlertDialog.Content`.
 - `AlertDialog.Cancel` — Closes the dialog and does nothing else. It reads "Cancel" unless given children.
 - `AlertDialog.Action` — Does what the dialog asks about, then closes it. It takes a [Button](/docs/web/components/button)'s props, a `tone`, and `variant="soft"` for an answer that is not the main one. When `onClick` returns a promise, it waits for it. `hold` makes it an action that must be pressed and held.
 

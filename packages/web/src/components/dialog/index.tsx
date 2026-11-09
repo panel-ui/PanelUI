@@ -55,19 +55,19 @@
 import { Dialog as Primitive } from '@base-ui/react/dialog';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import {
-  Children,
   createContext,
-  isValidElement,
   useContext,
   useEffect,
   useId,
   useMemo,
   useRef,
+  useState,
   type ComponentProps,
   type KeyboardEvent,
   type ReactElement,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
@@ -181,6 +181,8 @@ interface DialogContextValue {
   inline: boolean;
   showClose: boolean;
   variant: 'inset' | 'plain';
+  /** Where an inset footer portals to. `undefined` outside `Dialog.Content`. */
+  band?: HTMLElement | null;
 }
 
 const DialogContext = createContext<DialogContextValue>({ inline: false, showClose: true, variant: 'inset' });
@@ -268,8 +270,6 @@ export interface DialogContentProps extends Omit<ComponentProps<'div'>, 'childre
   inline?: boolean;
 }
 
-const isFooter = (child: ReactNode) => isValidElement(child) && child.type === DialogFooter;
-
 /** The dialog itself, with the dimmed page behind it. */
 function DialogContent({
   variant = 'inset',
@@ -282,20 +282,18 @@ function DialogContent({
   ...props
 }: DialogContentProps) {
   const slots = dialogVariants({ variant, size, blur });
-  const context = useMemo(() => ({ inline, showClose, variant }), [inline, showClose, variant]);
+  const [band, setBand] = useState<HTMLElement | null>(null);
+  const context = useMemo(() => ({ inline, showClose, variant, band }), [inline, showClose, variant, band]);
 
-  // In the inset look the footer leaves the panel for the band under it.
-  const all = Children.toArray(children);
-  const footer = variant === 'inset' ? all.filter(isFooter) : [];
-  const rest = variant === 'inset' ? all.filter((child) => !isFooter(child)) : all;
+  // In the inset look the footer leaves the panel for the band under it, from any depth.
   const inside = (
     <DialogContext.Provider value={context}>
       <div data-slot="dialog-panel" className={slots.panel()}>
-        {rest}
+        {children}
         {/* Last in the order, so focus starts on the task, not the way out. */}
         {showClose ? <DialogClose aria-label="Close" className={slots.close()} icon /> : null}
       </div>
-      {footer}
+      {variant === 'inset' ? <div data-slot="dialog-band" className="contents" ref={setBand} /> : null}
     </DialogContext.Provider>
   );
 
@@ -417,12 +415,12 @@ export interface DialogFooterProps extends ComponentProps<'div'> {}
 
 /**
  * The buttons. In the inset look they sit in the band under the panel as
- * equal pills; in `plain` they sit at the end of a ruled strip. Keep it a
- * direct child of `Dialog.Content`, so the band can find it.
+ * equal pills, wherever they are written inside `Dialog.Content`; in `plain`
+ * they sit at the end of a ruled strip.
  */
 function DialogFooter({ className, render, ...props }: DialogFooterProps & RenderProp<'div'>) {
-  const { variant } = useContext(DialogContext);
-  return useRender({
+  const { variant, band } = useContext(DialogContext);
+  const footer = useRender({
     defaultTagName: 'div',
     render,
     props: mergeProps(
@@ -430,6 +428,9 @@ function DialogFooter({ className, render, ...props }: DialogFooterProps & Rende
       props
     ),
   });
+  if (variant !== 'inset' || band === undefined) return footer;
+  // The band mounts in the same commit, so the footer lands there before the first paint.
+  return band ? createPortal(footer, band) : null;
 }
 DialogFooter.displayName = 'Dialog.Footer';
 

@@ -45,9 +45,7 @@
 // press outside; the role is still `alertdialog`, set on the popup.
 import { Dialog as Primitive } from '@base-ui/react/dialog';
 import {
-  Children,
   createContext,
-  isValidElement,
   useCallback,
   useContext,
   useEffect,
@@ -62,6 +60,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { tv } from 'tailwind-variants';
 import { Button, type ButtonProps } from '../button';
 import { mergeProps } from '@base-ui/react/merge-props';
@@ -167,6 +166,8 @@ interface AlertDialogContextValue {
   tone: AlertDialogTone;
   /** Set by `AlertDialog.Content`. */
   inline: boolean;
+  /** Where the footer portals to. `undefined` outside `AlertDialog.Content`. */
+  band?: HTMLElement | null;
 }
 
 const AlertDialogContext = createContext<AlertDialogContextValue | null>(null);
@@ -275,8 +276,6 @@ export interface AlertDialogContentProps extends Omit<ComponentProps<'div'>, 'ch
   inline?: boolean;
 }
 
-const isFooter = (child: ReactNode) => isValidElement(child) && child.type === AlertDialogFooter;
-
 /** The dialog: the panel with the question, in a band that holds the answers. */
 function AlertDialogContent({
   tone = 'neutral',
@@ -289,17 +288,16 @@ function AlertDialogContent({
 }: AlertDialogContentProps) {
   const dialog = useAlertDialog('AlertDialog.Content');
   const slots = alertDialogVariants({ palette: tone, size, blur });
-  const context = useMemo(() => ({ ...dialog, tone, inline }), [dialog, tone, inline]);
+  const [band, setBand] = useState<HTMLElement | null>(null);
+  const context = useMemo(() => ({ ...dialog, tone, inline, band }), [dialog, tone, inline, band]);
 
-  // The footer leaves the panel for the band under it.
-  const all = Children.toArray(children);
-  const footer = all.filter(isFooter);
+  // The footer leaves the panel for the band under it, from any depth.
   const inside = (
     <AlertDialogContext.Provider value={context}>
       <div data-slot="alert-dialog-panel" className={slots.panel()}>
-        {all.filter((child) => !isFooter(child))}
+        {children}
       </div>
-      {footer}
+      <div data-slot="alert-dialog-band" className="contents" ref={setBand} />
     </AlertDialogContext.Provider>
   );
 
@@ -380,11 +378,12 @@ AlertDialogDescription.displayName = 'AlertDialog.Description';
 export interface AlertDialogFooterProps extends ComponentProps<'div'> {}
 
 /**
- * The answers, side by side at equal widths in the band under the panel.
- * Keep it a direct child of `AlertDialog.Content`, so the band can find it.
+ * The answers, side by side at equal widths in the band under the panel,
+ * wherever they are written inside `AlertDialog.Content`.
  */
 function AlertDialogFooter({ className, render, ...props }: AlertDialogFooterProps & RenderProp<'div'>) {
-  return useRender({
+  const band = useContext(AlertDialogContext)?.band;
+  const footer = useRender({
     defaultTagName: 'div',
     render,
     props: mergeProps(
@@ -392,6 +391,8 @@ function AlertDialogFooter({ className, render, ...props }: AlertDialogFooterPro
       props
     ),
   });
+  if (band === undefined) return footer;
+  return band ? createPortal(footer, band) : null;
 }
 AlertDialogFooter.displayName = 'AlertDialog.Footer';
 

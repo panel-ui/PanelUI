@@ -484,6 +484,27 @@
       ]
     },
     {
+      "name": "combobox",
+      "type": "registry:component",
+      "title": "Combobox",
+      "description": "A text field that filters a list of options as you type.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/spinner.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "components/panelui/combobox.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/combobox.tsx"
+        }
+      ]
+    },
+    {
       "name": "command",
       "type": "registry:component",
       "title": "Command",
@@ -1056,7 +1077,9 @@
         "@base-ui/react",
         "tailwind-variants"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/sheet.json"
+      ],
       "files": [
         {
           "path": "components/panelui/nav-rail/index.tsx",

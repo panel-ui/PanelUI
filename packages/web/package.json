@@ -61,7 +61,7 @@
     "tailwindcss": ">=4.0.0"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "^1.8.0",
     "@tanstack/charts": "^1.4.0",
     "clsx": "^2.1.1",
     "d3-shape": "^3.2.0",

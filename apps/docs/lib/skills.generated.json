@@ -18,13 +18,13 @@
     "type": "skill-md",
     "description": "Build React Native and Expo UIs with PanelUI — adding components, theming, composing overlays and forms, and debugging why something is unstyled. Applies when working in an Expo or React Native project that has panelui-native installed or a panelui.json, when the user mentions PanelUI, or when they ask for a bottom sheet, dialog, chart, chat transcript, form or any other screen UI in React Native.",
     "path": "/skills/panelui/SKILL.md",
-    "digest": "sha256:a0a0b588272e7ce9e03cc0ca76e4ed13704efbdb28cee7a20f42b1e057f81f0a"
+    "digest": "sha256:836ce00d04a7c2c2471fc7fd00ab541b428ff68bd00120afc958426cd7d2123f"
   },
   {
     "name": "panelui-web",
     "type": "skill-md",
     "description": "Build React web UIs with PanelUI's web collection — adding its components from the shadcn registry or from npm, colouring them from the theme, and composing them into framed panels. Applies when working in a React project that has shadcn/ui set up with a @panelui registry or has panelui-web installed, when the user mentions PanelUI on the web, or when they ask for a dotted globe, a KPI card, a kanban board, a node graph, an activity grid or a feedback dialog in React.",
     "path": "/skills/panelui-web/SKILL.md",
-    "digest": "sha256:a836a997a887d744086fa3c4d9cf5c889efa34aeb0a8bb6487a6f7d79e251bcc"
+    "digest": "sha256:0729dac1b4b4c92ca72dc8166044aac09a53b6160241d217884056969af28cae"
   }
 ]

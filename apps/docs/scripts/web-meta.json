@@ -123,7 +123,7 @@
     {
       "addedIn": "0.2.0",
       "category": "overlays",
-      "updatedIn": "0.10.0"
+      "updatedIn": "0.16.0"
     }
   ],
   "card": [
@@ -299,6 +299,7 @@
     "A question that must be answered before the page can be used again, with the answers side by side under it.",
     "react alert dialog confirm modal destructive component",
     {
+      "updatedIn": "0.16.0",
       "addedIn": "0.8.0",
       "category": "overlays",
       "title": "Alert Dialog"
@@ -309,6 +310,7 @@
     "A task done in a panel over the page, with its buttons in the band beneath it.",
     "react dialog modal form popup component",
     {
+      "updatedIn": "0.16.0",
       "addedIn": "0.8.0",
       "category": "overlays"
     }
@@ -724,6 +726,7 @@
     "A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.",
     "react sidebar navigation collapsible nav rail sidebar menu",
     {
+      "updatedIn": "0.16.0",
       "addedIn": "0.15.0",
       "category": "navigation",
       "title": "Nav Rail"

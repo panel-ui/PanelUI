@@ -9,6 +9,44 @@ fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [1.4.0] — 2026-11-09
+
+Named themes now set the system appearance, so alerts, the keyboard and the native tab bar match
+the theme. Selected rows stay readable when `accent` is a solid colour, and Moon's accent is the
+lavender its description promised.
+
+### Added
+
+- **`PanelUITheme.setTheme`.** Sets the theme from outside React — at module scope before the app
+  mounts, from a deep link or a settings store — and sets the system appearance to the theme's
+  own mode in the same tick. Uniwind keeps the system appearance in step only for `light` and
+  `dark`, so before this a dark theme such as `grass-dark` on a phone set to Light got light
+  alerts, a light keyboard and a light native tab bar. `useTheme` and `useThemeMode` go through
+  it, so apps using the hooks get the fix without a change. `system` still follows the device,
+  and a theme the app registers itself is left to the device, since its mode is unknown.
+  Reported by @techzealot in [#308](https://github.com/panel-ui/PanelUI/issues/308).
+
+### Fixed
+
+- **Selected rows switch their text to `accent-foreground`.** Select, Combobox, SearchBar, Table,
+  Calendar's range band and month/year picker, SectionProgress, SectionRail, Questionnaire and
+  the card variants of RadioGroup and Checkbox drew a selected row on `accent` while keeping the
+  default text colour. With the stock tokens that was only faint; with `accent` set to a solid
+  colour, as the Colors page allows, the label disappeared into the fill. Check marks drawn on
+  the fill follow it too. Reported by @techzealot in
+  [#309](https://github.com/panel-ui/PanelUI/issues/309).
+- **Moon has a lavender accent.** Its `accent` was the neutral grey of the default theme, so a
+  selected Chip was barely distinguishable from an unselected one. `moon-dark`'s `secondary` also
+  rises from 6% to 8% white, so borderless controls at rest keep their shape on its near-black
+  background. Reported by @techzealot in [#309](https://github.com/panel-ui/PanelUI/issues/309).
+
+### Docs
+
+- The Theming page covers setting a theme at module scope and why `Uniwind.setTheme` on its own
+  leaves the system appearance behind.
+- panelui.dev has a [blog](https://panelui.dev/blog) and a [showcase](https://panelui.dev/showcase)
+  of apps built with PanelUI. Shipped an app with it? Open an issue or a pull request to add it.
+
 ## [1.3.0] — 2026-11-08
 
 Two new components for scheduling screens, and fixes for chart readouts that still took taps,

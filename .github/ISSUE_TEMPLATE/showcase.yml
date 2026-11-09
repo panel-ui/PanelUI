@@ -1,0 +1,67 @@
+name: Add my app to the showcase
+description: List an app built with PanelUI on panelui.dev/showcase.
+title: '[showcase]: '
+labels: ['showcase']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for building with PanelUI. Apps on the [showcase](https://panelui.dev/showcase)
+        are live in the App Store or Google Play, or publicly available on the web.
+
+        You can also add it yourself: send a pull request with an entry in
+        `apps/docs/lib/showcase.ts` and its images in `apps/docs/public/showcase/<your-app>/`.
+
+  - type: input
+    id: name
+    attributes:
+      label: App name
+    validations:
+      required: true
+
+  - type: input
+    id: website
+    attributes:
+      label: Website
+      placeholder: https://
+    validations:
+      required: true
+
+  - type: input
+    id: app-store
+    attributes:
+      label: App Store link
+      placeholder: https://apps.apple.com/app/…
+
+  - type: input
+    id: play-store
+    attributes:
+      label: Google Play link
+      placeholder: https://play.google.com/store/apps/details?id=…
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What it does
+      description: Two or three sentences, as they should appear on the showcase.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Which PanelUI does it use?
+      options:
+        - panelui-native
+        - panelui-web
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots and icon
+      description: Drop in three to five screenshots, uncropped, and a square app icon.
+    validations:
+      required: true

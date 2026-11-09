@@ -1189,7 +1189,7 @@ export default function SheetStageDemo() {
 | --- | --- | --- | --- |
 | `name` | `string` | — | What a `Sheet.Trigger` passes as `to` to open this sheet. Unique within one stack of sheets. |
 | `side` | `SheetSide` | `bottom` | The edge it rises from. Default: the edge of the sheet it is declared in. |
-| `dismissible` | `boolean` | — | Whether a click outside, a swipe or Escape closes it. Default true. |
+| `dismissible` | `boolean` | `true` | Whether a click outside, a swipe or Escape closes it. Default true. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
 | `onOpenChangeComplete` | `(open: boolean) => void` | — | Called once it has finished opening or closing, after its transition has ended. `false` means the exit is over, so a sheet mounted from state can be unmounted. |
 

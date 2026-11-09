@@ -573,7 +573,7 @@ function SheetNext({
   name,
   children,
   side,
-  dismissible,
+  dismissible = true,
   onOpenChange,
   onOpenChangeComplete,
   ...content

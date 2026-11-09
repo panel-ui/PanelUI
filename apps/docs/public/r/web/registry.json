@@ -1077,7 +1077,9 @@
         "@base-ui/react",
         "tailwind-variants"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/sheet.json"
+      ],
       "files": [
         {
           "path": "components/panelui/nav-rail/index.tsx",

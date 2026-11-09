@@ -185,11 +185,24 @@ export interface AlertDialogProps {
   defaultOpen?: boolean;
   /** Called when it opens or closes. */
   onOpenChange?: (open: boolean) => void;
+  /**
+   * Called once it has finished opening or closing, after its transition has
+   * ended. `false` means the exit is over, so a dialog mounted from state can
+   * be unmounted.
+   */
+  onOpenChangeComplete?: (open: boolean) => void;
   /** Whether a press outside it closes it, as Cancel would. Escape always does. Default `true`. */
   dismissible?: boolean;
 }
 
-function AlertDialogRoot({ children, open, defaultOpen = false, onOpenChange, dismissible = true }: AlertDialogProps) {
+function AlertDialogRoot({
+  children,
+  open,
+  defaultOpen = false,
+  onOpenChange,
+  onOpenChangeComplete,
+  dismissible = true,
+}: AlertDialogProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const resolvedOpen = open ?? internalOpen;
   const [busy, setBusy] = useState(false);
@@ -210,6 +223,7 @@ function AlertDialogRoot({ children, open, defaultOpen = false, onOpenChange, di
       <Primitive.Root
         open={resolvedOpen}
         disablePointerDismissal={!dismissible}
+        onOpenChangeComplete={onOpenChangeComplete}
         onOpenChange={(next) => {
           // While an action runs, the answer is already being acted on.
           if (!next && busy) return;

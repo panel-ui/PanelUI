@@ -194,6 +194,12 @@ export interface DialogProps {
   /** Called when it opens or closes. */
   onOpenChange?: (open: boolean) => void;
   /**
+   * Called once it has finished opening or closing, after its transition has
+   * ended. `false` means the exit is over, so a dialog mounted from state can
+   * be unmounted.
+   */
+  onOpenChangeComplete?: (open: boolean) => void;
+  /**
    * Whether a press outside it closes it. Turn it off while a form in it has
    * changes that would be lost; Escape and the close button still work.
    * Default `true`.
@@ -201,12 +207,20 @@ export interface DialogProps {
   dismissible?: boolean;
 }
 
-function DialogRoot({ children, open, defaultOpen, onOpenChange, dismissible = true }: DialogProps) {
+function DialogRoot({
+  children,
+  open,
+  defaultOpen,
+  onOpenChange,
+  onOpenChangeComplete,
+  dismissible = true,
+}: DialogProps) {
   return (
     <Primitive.Root
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange ? (next) => onOpenChange(next) : undefined}
+      onOpenChangeComplete={onOpenChangeComplete}
       disablePointerDismissal={!dismissible}
     >
       {children}

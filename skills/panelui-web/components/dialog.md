@@ -83,7 +83,8 @@ Every part also takes the props of the element it renders, and a `className`.
 | `open` | `boolean` | — | Whether it is open, when the caller holds that. |
 | `defaultOpen` | `boolean` | — | Whether it starts open, when the caller does not hold it. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
-| `dismissible` | `boolean` | — | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
+| `onOpenChangeComplete` | `(open: boolean) => void` | — | Called once it has finished opening or closing, after its transition has ended. `false` means the exit is over, so a dialog mounted from state can be unmounted. |
+| `dismissible` | `boolean` | `true` | Whether a press outside it closes it. Turn it off while a form in it has changes that would be lost; Escape and the close button still work. Default `true`. |
 
 #### `DialogTriggerProps`
 

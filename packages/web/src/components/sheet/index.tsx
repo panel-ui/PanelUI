@@ -386,6 +386,12 @@ export interface SheetProps {
   open?: boolean;
   /** Called when the sheet asks to open or close. */
   onOpenChange?: (open: boolean) => void;
+  /**
+   * Called once it has finished opening or closing, after its transition has
+   * ended. `false` means the exit is over, so a sheet mounted from state can
+   * be unmounted.
+   */
+  onOpenChangeComplete?: (open: boolean) => void;
   /** Whether it starts open, when the caller does not hold it. */
   defaultOpen?: boolean;
   /** The edge it rises from and is swiped back to. Default `bottom`. */
@@ -412,6 +418,7 @@ function SheetFrame({
   children,
   open,
   onOpenChange,
+  onOpenChangeComplete,
   defaultOpen = false,
   side = 'bottom',
   dismissible = true,
@@ -477,6 +484,7 @@ function SheetFrame({
         handle={drawerHandle}
         swipeDirection={SWIPE[side]}
         disablePointerDismissal={!dismissible}
+        onOpenChangeComplete={onOpenChangeComplete}
         onOpenChange={(next, details) => {
           // The primitive has a switch for a press outside and none for
           // Escape or a swipe, so those are refused here.
@@ -547,6 +555,12 @@ export interface SheetNextProps extends Omit<SheetContentProps, 'children' | 'in
   dismissible?: boolean;
   /** Called when it opens or closes. */
   onOpenChange?: (open: boolean) => void;
+  /**
+   * Called once it has finished opening or closing, after its transition has
+   * ended. `false` means the exit is over, so a sheet mounted from state can
+   * be unmounted.
+   */
+  onOpenChangeComplete?: (open: boolean) => void;
 }
 
 /**
@@ -555,7 +569,15 @@ export interface SheetNextProps extends Omit<SheetContentProps, 'children' | 'in
  * takes `Sheet.Content`'s props and draws its own content, so its children are
  * the header, body and footer.
  */
-function SheetNext({ name, children, side, dismissible, onOpenChange, ...content }: SheetNextProps) {
+function SheetNext({
+  name,
+  children,
+  side,
+  dismissible = true,
+  onOpenChange,
+  onOpenChangeComplete,
+  ...content
+}: SheetNextProps) {
   const parent = useSheet('Sheet.Next');
   return (
     <SheetFrame
@@ -563,6 +585,7 @@ function SheetNext({ name, children, side, dismissible, onOpenChange, ...content
       side={side ?? parent.side}
       dismissible={dismissible}
       onOpenChange={onOpenChange}
+      onOpenChangeComplete={onOpenChangeComplete}
     >
       {(payload) => (
         <SheetContent {...content}>

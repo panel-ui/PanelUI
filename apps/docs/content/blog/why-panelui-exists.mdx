@@ -1,0 +1,124 @@
+---
+title: Why PanelUI exists
+description: PanelUI is a React Native component library for Expo that runs in Expo Go, styles with Tailwind CSS v4 and animates on the UI thread. Here is what it is built to fix, and the choices behind it.
+date: "2026-11-09"
+author: khalid
+cover: why-panelui-exists
+tags: [Announcements]
+---
+
+Building the interface of an Expo app usually starts the same way. You need a bottom sheet, so you install one library. You need a date picker, so you install another, with a different API and a different idea of what "dark mode" means. A chart comes from a third. Three months in, the app has five visual languages and every one of them needs a native rebuild to upgrade.
+
+PanelUI is a React Native UI library for Expo that replaces that pile with one set of components. It has 143 of them today: buttons, fields, forms, dialogs, bottom sheets, calendars, charts, maps, chat transcripts. They share one set of design tokens, one animation model and one way of composing parts.
+
+This post covers what the library is for, the constraints it was built around, and where it fits next to the rest of your stack.
+
+## It runs in Expo Go
+
+PanelUI is pure TypeScript. There is no native module in the package, so there is nothing to compile, no `prebuild`, and no Xcode or Android Studio between `npm install` and seeing the component on your phone.
+
+```bash
+npx expo install panelui-native
+```
+
+That was the first constraint and it shaped everything after it. A component that needs a native module cannot run in Expo Go, so every component is built from what Expo Go already contains: React Native's core views, Reanimated, Gesture Handler, SVG and the Expo SDK modules. When a component can hand off to the platform, as Button does to SwiftUI on iOS, that path goes through Expo's own UI package and falls back to the drawn version when it is not available.
+
+The practical effect is that you can try the whole library on a real device in the time it takes to scan a QR code. The [example app](https://github.com/panel-ui/PanelUI/tree/main/apps/example) does exactly that, and every component in it is the same code you install.
+
+## Tailwind classes, resolved ahead of time
+
+Components are styled with Tailwind CSS v4 through [Uniwind](https://uniwind.dev), so you write the same `className` you would on the web:
+
+```tsx
+<Card className="gap-3">
+  <Card.Header>
+    <Card.Title>Monthly spend</Card.Title>
+  </Card.Header>
+  <Button variant="secondary" className="self-start">
+    View report
+  </Button>
+</Card>
+```
+
+Uniwind compiles those classes at build time rather than through a Babel transform at runtime, which is where most of the speed difference against older approaches comes from.
+
+There is one catch, and it explains how the theme file is written. Native cannot evaluate `color-mix()` or relative colours at runtime, so every semantic token in `panelui-native/theme.css` is precomputed to a static value. On the web the same tokens keep their expressions. The two files are checked against each other in CI, so a colour changed in one place cannot quietly drift in the other.
+
+## Semantic tokens, not colours
+
+Components never ask for a colour. They ask for a role: `background`, `card`, `primary`, `muted`, `accent`, `destructive`, each with a matching `-foreground` for the text drawn on it. A theme is a set of values for those roles.
+
+That is what makes theming a one-file change. PanelUI ships three families, each in light and dark, and switching between them is applied natively without re-rendering your tree:
+
+```tsx
+import { useThemeMode } from 'panelui-native/theme';
+
+const { setFamily, toggleMode } = useThemeMode();
+setFamily('moon');
+toggleMode();
+```
+
+Your own brand is the same mechanism: override `--color-primary` and its foreground in your `global.css`, and every button, switch, slider and selected row follows. The [theming guide](/docs/customization/theming) has the full list of roles.
+
+## Animations stay on the UI thread
+
+Every animation in the library runs on the UI thread with Reanimated 4. Press feedback, switches, sheets, dialogs, tabs and the chart readouts never wait on JavaScript, so a busy render does not turn into a stuttering sheet.
+
+The rule inside the codebase is strict: React Native's core `Animated` API is not used anywhere. Gesture-driven components, like a bottom sheet you drag or a list row you swipe, run the gesture and the animation in the same worklet, so the finger and the surface never disagree by a frame.
+
+## Parts you compose, not props you configure
+
+A component with forty props is hard to read and harder to extend. PanelUI components are compound: a Dialog is `Dialog.Trigger`, `Dialog.Content`, `Dialog.Title`, `Dialog.Description`, `Dialog.Footer` and `Dialog.Close`, and you put your own content between them.
+
+```tsx
+<Dialog>
+  <Dialog.Trigger>
+    <Button>Delete project</Button>
+  </Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Title>Delete this project?</Dialog.Title>
+    <Dialog.Description>Its history and settings go with it.</Dialog.Description>
+    <Dialog.Footer>
+      <Dialog.Close>
+        <Button variant="outline">Cancel</Button>
+      </Dialog.Close>
+      <Button variant="destructive">Delete</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+The markup reads in the order the screen does. Each part also takes `className` for layout, so moving a footer's buttons or widening the content does not mean forking the component.
+
+Overlays like Dialog, Select and Bottom Sheet mount through a portal only when opened and unmount after their exit animation, so a screen with ten of them closed costs nothing.
+
+## Accessible by default
+
+Every interactive component sets its `accessibilityRole` and mirrors its state: a Switch reports checked, a Tab reports selected, a Slider reports its value and responds to increment and decrement. Small controls such as Switch extend their touch area beyond what is drawn, so they stay easy to hit.
+
+This is checked, not promised. An accessibility gate runs every component through the rules in CI, on every pull request.
+
+## Install it, or copy it in
+
+There are two ways to use a component, and you can mix them in one project.
+
+- **The npm package.** `panelui-native` is the default. You get updates with `npm update`, and the API is stable: from 1.0.0, which shipped on 2 November 2026, a breaking change means a major version.
+- **The CLI.** `npx panelui-cli add bottom-sheet` copies that component's source into your project, with its imports rewritten to your paths. Use it when you want to change a component in ways a prop never will.
+
+The copied source comes from the same registry the package is built from, generated from the library on every release, so a copied component is never an older or different version of the installed one.
+
+```bash
+npx panelui-cli add calendar
+```
+
+## The web, too
+
+PanelUI started as a React Native library, and that is still what `panelui-native` is. Since October there is also [`panelui-web`](/docs/web), a separate collection of components for React on the web, in the same visual language and drawn in your project's own Tailwind theme. It is a sibling, not a port: the web components are built for the browser and the native ones for the device, and each is documented on its own terms.
+
+## Where to go from here
+
+- **New app:** `npx create-panelui-app` creates an Expo app with PanelUI and its theme already set up.
+- **Existing app:** the [installation guide](/docs/installation) is four steps, and the first is the install above.
+- **Looking around first:** the [components](/docs/components) are each documented with live previews, a props table generated from the source, and the anatomy of their parts.
+
+PanelUI is MIT-licensed and developed in the open on [GitHub](https://github.com/panel-ui/PanelUI). Many of the components and fixes in recent releases started as an issue or a pull request there, and it is the place to ask for the component you need next.

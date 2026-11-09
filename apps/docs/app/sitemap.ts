@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import type { MetadataRoute } from 'next';
+import { getPosts, slugOf } from '@/lib/blog';
 import { absoluteUrl } from '@/lib/site';
 import { source } from '@/lib/source';
 
@@ -91,6 +92,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    {
+      url: absoluteUrl('/showcase'),
+      lastModified: fallback,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: absoluteUrl('/blog'),
+      lastModified: getPosts()[0] ? new Date(getPosts()[0]!.date) : fallback,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    // A post is dated in its frontmatter, which is the day it changed meaning.
+    ...getPosts().map((post) => ({
+      url: absoluteUrl(`/blog/${slugOf(post)}`),
+      lastModified: new Date(post.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
     {
       url: absoluteUrl('/privacy'),
       lastModified: fallback,

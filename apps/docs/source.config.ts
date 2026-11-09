@@ -1,4 +1,4 @@
-import { defineConfig, defineDocs, frontmatterSchema } from 'fumadocs-mdx/config';
+import { defineCollections, defineConfig, defineDocs, frontmatterSchema } from 'fumadocs-mdx/config';
 import { z } from 'zod';
 
 export const docs = defineDocs({
@@ -18,6 +18,22 @@ export const docs = defineDocs({
       platforms: z.boolean().optional(),
     }),
   },
+});
+
+/*
+ * The blog: one MDX file per post in content/blog, outside the docs tree so it
+ * never appears in the sidebar. `author` is a key into lib/blog.ts, and `cover`
+ * names the post's pixel-art cover there.
+ */
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: frontmatterSchema.extend({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    author: z.string(),
+    cover: z.string(),
+    tags: z.array(z.string()).default([]),
+  }),
 });
 
 export default defineConfig();

@@ -80,7 +80,7 @@ const checkboxVariants = tv({
     {
       variant: 'card',
       checked: true,
-      class: { row: 'border-primary bg-accent' },
+      class: { row: 'border-primary bg-accent', label: 'text-accent-foreground' },
     },
   ],
   defaultVariants: {

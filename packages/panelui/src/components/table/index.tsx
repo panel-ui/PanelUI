@@ -227,6 +227,13 @@ const TableRowContext = createContext<{
   last: false,
 });
 
+/**
+ * Whether the row a cell is in is selected. A selected row is drawn on the
+ * accent fill, so the text in its cells has to switch to the colour made to be
+ * read on that fill rather than keep the table's own.
+ */
+const TableRowSelectedContext = createContext(false);
+
 export interface TableProps extends ViewProps, VariantProps<typeof tableVariants> {
   className?: string;
   /**
@@ -420,7 +427,7 @@ const TableRow = forwardRef<ViewRef, TableRowProps>(
           accessibilityState={{ disabled: !!disabled, selected: !!selected }}
           className={classes}
         >
-          {cells}
+          <TableRowSelectedContext.Provider value={!!selected}>{cells}</TableRowSelectedContext.Provider>
         </View>
       );
     }
@@ -437,7 +444,7 @@ const TableRow = forwardRef<ViewRef, TableRowProps>(
         onPress={onPress}
         className={classes}
       >
-        {cells}
+        <TableRowSelectedContext.Provider value={!!selected}>{cells}</TableRowSelectedContext.Provider>
       </AnimatedPressable>
     );
   }
@@ -668,6 +675,7 @@ const TableCell = forwardRef<ViewRef, TableCellProps>(
       width: ownWidth,
       align: ownAlign,
     });
+    const rowSelected = useContext(TableRowSelectedContext);
     const { cell, cellLabel } = tableVariants({ size });
 
     return (
@@ -679,7 +687,13 @@ const TableCell = forwardRef<ViewRef, TableCellProps>(
         {...props}
       >
         {textChildren(children, (text) => (
-          <Text className={cellLabel({ className: labelClassName })}>{text}</Text>
+          <Text
+            className={cellLabel({
+              className: cn(rowSelected && 'text-accent-foreground', labelClassName),
+            })}
+          >
+            {text}
+          </Text>
         ))}
       </View>
     );

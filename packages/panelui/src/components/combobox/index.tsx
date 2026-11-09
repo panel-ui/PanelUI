@@ -131,7 +131,7 @@ const comboboxVariants = tv({
   },
   variants: {
     selected: {
-      true: { item: 'bg-accent' },
+      true: { item: 'bg-accent', itemLabel: 'text-accent-foreground' },
     },
     disabled: {
       true: { field: 'opacity-[0.64]' },
@@ -198,7 +198,9 @@ function ComboboxItem({
     selected,
     itemDisabled: !!disabled,
   });
-  const checkColor = useCSSVariable('--color-muted-foreground');
+  // Drawn only on a selected row, so on the accent fill: it takes the colour
+  // made to be read there.
+  const checkColor = useCSSVariable('--color-accent-foreground');
 
   return (
     <Pressable

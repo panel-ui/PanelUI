@@ -118,7 +118,11 @@ const itemVariants = tv({
     },
   },
   compoundVariants: [
-    { variant: 'card', selected: true, class: { row: 'border-primary bg-accent' } },
+    {
+      variant: 'card',
+      selected: true,
+      class: { row: 'border-primary bg-accent', label: 'text-accent-foreground' },
+    },
     // Share the row instead of filling it, keeping the disc on the trailing
     // edge of each narrower card.
     { variant: 'card', horizontal: true, class: { row: 'w-auto flex-1' } },

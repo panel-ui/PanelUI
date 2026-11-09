@@ -363,7 +363,7 @@ const searchBarVariants = tv({
       bottom: { field: 'rounded-b-none rounded-t-2xl border-0' },
     },
     selected: {
-      true: { item: 'bg-accent' },
+      true: { item: 'bg-accent', itemLabel: 'text-accent-foreground' },
     },
   },
   defaultVariants: {

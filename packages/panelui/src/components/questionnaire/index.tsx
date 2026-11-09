@@ -218,6 +218,7 @@ const choiceVariants = tv({
     selected: {
       true: {
         row: 'border-primary bg-accent',
+        label: 'text-accent-foreground',
         // The badge follows the row rather than staying grey against a filled
         // surface, where it would read as the one part that did not respond.
         shortcut: 'border-primary/40 bg-primary/10',

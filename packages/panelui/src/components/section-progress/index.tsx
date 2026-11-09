@@ -795,7 +795,7 @@ function SectionProgressItem({ className, value, children }: SectionProgressItem
       <Text
         size="sm"
         weight={selected ? 'medium' : 'normal'}
-        className={selected ? 'text-foreground' : 'text-muted-foreground'}
+        className={selected ? 'text-accent-foreground' : 'text-muted-foreground'}
         // Two lines rather than one: an ellipsis in a navigator hides the very
         // word that says which section the row would jump to.
         numberOfLines={2}

@@ -612,7 +612,7 @@ function SectionRailItem({ className, value, level = 0, children }: SectionRailI
       <Text
         size="sm"
         weight={selected ? 'medium' : 'normal'}
-        className={selected ? 'text-foreground' : 'text-muted-foreground'}
+        className={selected ? 'text-accent-foreground' : 'text-muted-foreground'}
         // Two lines rather than one: a long section title is worth wrapping,
         // and an ellipsis in a navigator hides the very word that tells you
         // which section you are about to jump to.

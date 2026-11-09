@@ -151,6 +151,12 @@ const dayVariants = tv({
     label: 'text-sm',
   },
   variants: {
+    /*
+     * A day on the range band is drawn on the accent fill, so its number takes
+     * the colour made for that fill. Listed first: an end of the range is also
+     * selected, and the variants below it override this one.
+     */
+    inRange: { true: { label: 'text-accent-foreground' } },
     selected: { true: { disc: 'bg-primary', label: 'text-primary-foreground' } },
     today: { true: { disc: 'border border-primary', label: 'text-primary' } },
     outside: { true: { label: 'text-muted-foreground/40' } },
@@ -773,9 +779,10 @@ function CaptionDropdown({
   const list = useRef<ScrollViewRef>(null);
   /*
    * The check is given a colour rather than left to its own fallback, which is
-   * white — right inside a filled control, invisible on this panel.
+   * white — right inside a filled control, invisible on this panel. It is only
+   * drawn on the selected option, which sits on the accent fill.
    */
-  const rawTick = useCSSVariable('--color-foreground');
+  const rawTick = useCSSVariable('--color-accent-foreground');
   const tick = typeof rawTick === 'string' ? rawTick : undefined;
 
   /*
@@ -822,7 +829,11 @@ function CaptionDropdown({
                   selected ? 'bg-accent' : 'active:bg-accent'
                 )}
               >
-                <Text size="sm" weight={selected ? 'semibold' : 'normal'}>
+                <Text
+                  size="sm"
+                  weight={selected ? 'semibold' : 'normal'}
+                  className={selected ? 'text-accent-foreground' : undefined}
+                >
                   {option}
                 </Text>
                 {selected ? <CheckIcon size={16} color={tick} /> : null}
@@ -1031,6 +1042,7 @@ function CalendarDay({
   onPress,
 }: DayProps) {
   const styles = dayVariants({
+    inRange,
     selected,
     today: today && !selected,
     outside,

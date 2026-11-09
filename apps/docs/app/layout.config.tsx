@@ -175,6 +175,8 @@ export const baseOptions: BaseLayoutProps = {
  * to the page it points at, and a docs reader deep in a component's props table
  * is not being asked to fund anything. Studio sits beside it for the same
  * reason: it is a product pitch, and the docs have their own Studio section.
+ * Showcase and Blog are pages of the site rather than of the documentation,
+ * so they belong to this layout too.
  *
  * GitHub is the custom item rather than the plain one, for the reason given
  * above it. And the mobile menu needs the Components destination that
@@ -188,6 +190,8 @@ export const homeOptions: BaseLayoutProps = {
     docsLink,
     { type: 'main', text: 'Sponsors', url: '/sponsors', active: 'nested-url' },
     { type: 'main', text: 'Studio', url: site.studio, external: true },
+    { type: 'main', text: 'Showcase', url: '/showcase', active: 'nested-url' },
+    { type: 'main', text: 'Blog', url: '/blog', active: 'nested-url' },
     githubHomeLink,
     githubMenuLink,
     getStartedLink,

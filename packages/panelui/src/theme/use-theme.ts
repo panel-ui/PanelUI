@@ -1,3 +1,4 @@
+import { Appearance, Platform } from 'react-native';
 import { Uniwind, useUniwind } from 'uniwind';
 
 /** Themes shipped in `panelui-native/theme.css`. */
@@ -84,6 +85,58 @@ function findFamily(theme: string): PanelThemeFamily {
 }
 
 /**
+ * The light/dark side of a theme PanelUI knows, or `undefined` for one it does
+ * not. A theme registered by the app itself has no mode PanelUI can know, and
+ * guessing it from the name would pin the system to the wrong one.
+ */
+function modeOf(theme: string): ThemeMode | undefined {
+  const family = PANEL_THEMES.find(
+    (candidate) => candidate.light === theme || candidate.dark === theme
+  );
+  if (!family) return undefined;
+  return family.dark === theme ? 'dark' : 'light';
+}
+
+/**
+ * Applies a theme, and tells the operating system which side of light and dark
+ * it is on.
+ *
+ * Uniwind keeps the system appearance in step only for `light` and `dark`.
+ * Every other name resets it to the device's own setting, so `grass-dark` on a
+ * phone set to Light leaves everything the system draws — the native tab bar,
+ * alerts, action sheets, the keyboard — in light. The correction runs in the
+ * same tick as the theme change, so no frame is drawn with the two disagreeing.
+ *
+ * `system` is left alone: pinning the appearance there would stop the app
+ * hearing about the device changing.
+ */
+function applyTheme(name: ThemeName): void {
+  Uniwind.setTheme(name);
+  if (Platform.OS === 'web' || name === 'system' || name === 'light' || name === 'dark') {
+    return;
+  }
+  const mode = modeOf(name);
+  if (mode) Appearance.setColorScheme(mode);
+}
+
+/**
+ * Sets the theme from outside React — at module scope before the app mounts,
+ * from a deep link, or from a settings store.
+ *
+ * Use this rather than calling `Uniwind.setTheme` directly: it is the same
+ * change, plus the system appearance that a named theme needs to match.
+ * `useTheme` and `useThemeMode` go through it too.
+ *
+ * ```ts
+ * // app/_layout.tsx, before the root component
+ * PanelUITheme.setTheme('grass-dark');
+ * ```
+ */
+export const PanelUITheme = {
+  setTheme: applyTheme,
+} as const;
+
+/**
  * Reactive access to the current Uniwind theme plus a setter.
  * Theme changes are applied natively by Uniwind without re-rendering the tree.
  */
@@ -94,7 +147,7 @@ export function useTheme() {
     /** The active theme name, e.g. `'dark'` or `'moon-dark'`. */
     theme: theme as PanelTheme,
     /** Switch theme by name, or `'system'` to follow the device. */
-    setTheme: (name: ThemeName) => Uniwind.setTheme(name),
+    setTheme: applyTheme,
   };
 }
 
@@ -123,11 +176,11 @@ export function useThemeMode() {
     /** Switch brand, staying in the current light/dark mode. */
     setFamily: (id: string) => {
       const next = PANEL_THEMES.find((candidate) => candidate.id === id);
-      if (next) Uniwind.setTheme(next[mode]);
+      if (next) applyTheme(next[mode]);
     },
     /** Set the mode, staying in the current family. */
-    setMode: (next: ThemeMode) => Uniwind.setTheme(family[next]),
+    setMode: (next: ThemeMode) => applyTheme(family[next]),
     /** Flip light ↔ dark within the current family. */
-    toggleMode: () => Uniwind.setTheme(mode === 'dark' ? family.light : family.dark),
+    toggleMode: () => applyTheme(mode === 'dark' ? family.light : family.dark),
   };
 }

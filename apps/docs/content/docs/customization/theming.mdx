@@ -94,6 +94,29 @@ setFamily('grass');    // switch family, staying in the current mode
 Uniwind applies the change natively without re-rendering the tree, so a theme switch costs
 nothing beyond the repaint.
 
+### Setting the theme outside a component
+
+To set a theme before the app mounts, or from a deep link or a settings store, call
+`PanelUITheme.setTheme`. It is what both hooks call.
+
+```tsx title="app/_layout.tsx"
+import { PanelUITheme } from 'panelui-native/theme';
+
+// Module scope, before the root component renders.
+PanelUITheme.setTheme('grass-dark');
+```
+
+Every theme change also sets the system appearance to the theme's own mode, so what iOS and
+Android draw for you — the native tab bar, alerts, action sheets, the keyboard — matches the
+theme rather than the device setting. `system` leaves the appearance to the device.
+
+Calling `Uniwind.setTheme` directly skips that step. For any theme other than `light` and `dark`
+the system appearance then falls back to the device's, so a dark theme on a phone set to Light
+gets light alerts and a light keyboard. Use `PanelUITheme.setTheme` or the hooks instead.
+
+A theme you register yourself has no known mode, so its appearance is left to the device. Set it
+with `Appearance.setColorScheme` straight after the theme change.
+
 ### Why there are two hooks
 
 Uniwind gives `prefers-color-scheme` handling to `light` and `dark` and to nothing else — any

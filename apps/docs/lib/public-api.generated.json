@@ -1,8 +1,8 @@
 {
   "version": 1,
   "counts": {
-    "exports": 1518,
-    "values": 376,
+    "exports": 1519,
+    "values": 377,
     "types": 1142,
     "modules": 171,
     "components": 143,
@@ -6639,6 +6639,10 @@
           },
           {
             "name": "useThemeMode",
+            "kind": "value"
+          },
+          {
+            "name": "PanelUITheme",
             "kind": "value"
           },
           {

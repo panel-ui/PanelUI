@@ -5,6 +5,7 @@ export { PanelUIProvider, type PanelUIProviderProps } from './providers/panel-ui
 export {
   useTheme,
   useThemeMode,
+  PanelUITheme,
   PANEL_THEMES,
   PANEL_THEME_NAMES,
   PANEL_EXTRA_THEMES,

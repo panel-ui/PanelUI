@@ -165,7 +165,7 @@ When it opens, focus goes to the first field in it. The close button is drawn in
 
 #### Forms
 
-Put the `<form>` in `Dialog.Body` with an `id`, and give the submit button in the footer `type="submit"` and `form` set to that `id`. Enter in a field then submits it.
+Put the `<form>` in `Dialog.Body` with an `id`, and give the submit button in the footer `type="submit"` and `form` set to that `id`. Enter in a field then submits it. The inset footer moves to the band even when it is written inside the `<form>`, so it always needs `form`.
 
 #### State that starts fresh
 

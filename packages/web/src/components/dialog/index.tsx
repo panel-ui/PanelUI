@@ -416,7 +416,8 @@ export interface DialogFooterProps extends ComponentProps<'div'> {}
 /**
  * The buttons. In the inset look they sit in the band under the panel as
  * equal pills, wherever they are written inside `Dialog.Content`; in `plain`
- * they sit at the end of a ruled strip.
+ * they sit at the end of a ruled strip. Moving to the band takes them out of
+ * any `<form>`, so a submit button needs `form` set to the form's `id`.
  */
 function DialogFooter({ className, render, ...props }: DialogFooterProps & RenderProp<'div'>) {
   const { variant, band } = useContext(DialogContext);

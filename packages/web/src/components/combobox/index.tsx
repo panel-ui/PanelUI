@@ -109,7 +109,7 @@ const comboboxVariants = tv({
     list: 'max-h-80 scroll-py-1 overflow-y-auto overscroll-contain p-1.5 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]',
     item: [
       'flex min-h-10 cursor-default items-center gap-2.5 rounded-lg px-3 py-2 outline-none select-none',
-      'data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent',
+      'data-highlighted:bg-accent data-highlighted:text-accent-foreground data-selected:bg-accent data-selected:text-accent-foreground',
       'data-disabled:pointer-events-none data-disabled:opacity-50',
       '[&_svg]:pointer-events-none [&_svg]:shrink-0',
     ],
@@ -118,7 +118,7 @@ const comboboxVariants = tv({
     itemLabel: 'truncate text-sm font-medium',
     itemDescription: 'truncate text-xs text-muted-foreground',
     // The box is always there, so an option does not change width as it is chosen.
-    indicator: 'flex size-5 shrink-0 items-center justify-center text-foreground [&_svg:not([class*=size-])]:size-4',
+    indicator: 'flex size-5 shrink-0 items-center justify-center text-current [&_svg:not([class*=size-])]:size-4',
     group: 'flex flex-col gap-0.5',
     groupLabel: 'px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground',
     empty: 'px-3 py-6 text-center text-sm text-muted-foreground',

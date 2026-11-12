@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeftIcon } from 'lucide-react';
 import { Byline } from '@/components/blog/byline';
 import { PixelCover } from '@/components/blog/pixel-cover';
+import { Share } from '@/components/blog/share';
 import { getMDXComponents } from '@/mdx-components';
 import { authorOf, formatDate, getPost, getPosts, readingMinutes, slugOf } from '@/lib/blog';
 import { absoluteUrl, site } from '@/lib/site';
@@ -99,13 +100,16 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.description ? (
             <p className="text-lg text-muted-foreground text-pretty">{post.description}</p>
           ) : null}
-          <Byline
-            author={author}
-            date={formatDate(post.date)}
-            detail={`${minutes} min read`}
-            size="md"
-            linked
-          />
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <Byline
+              author={author}
+              date={formatDate(post.date)}
+              detail={`${minutes} min read`}
+              size="md"
+              linked
+            />
+            <Share url={absoluteUrl(`/blog/${slug}`)} title={post.title} />
+          </div>
         </header>
 
         <PixelCover cover={post.cover} className="rounded-2xl border" />

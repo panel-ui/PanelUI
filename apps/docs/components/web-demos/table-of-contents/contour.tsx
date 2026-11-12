@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { TableOfContents } from 'panelui-web/table-of-contents';
 
 type Section = {
@@ -84,10 +85,10 @@ export default function TableOfContentsContour() {
   return (
     <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card">
       <div className="grid grid-cols-[minmax(0,1fr)_10rem]">
-        <div ref={scroller} className="h-96 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
-          <article className="px-5 pt-5 pb-48">
+        <ScrollArea viewportRef={scroller} className="h-96">
+          <article className="px-5 pt-5 pb-5">
             {SECTIONS.map((section) => (
-              <section key={section.value} id={"toc-contour-" + section.value} className="mt-6 scroll-mt-4 first:mt-0">
+              <section key={section.value} id={"toc-contour-" + section.value} className="mt-6 first:mt-0">
                 <h3 className={heading[section.depth] + " text-foreground"}>
                   {section.code ? <code className="font-mono">{section.label}</code> : section.label}
                 </h3>
@@ -95,7 +96,7 @@ export default function TableOfContentsContour() {
               </section>
             ))}
           </article>
-        </div>
+        </ScrollArea>
 
         <TableOfContents
           variant="contour"

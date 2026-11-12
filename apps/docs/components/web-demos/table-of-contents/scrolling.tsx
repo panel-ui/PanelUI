@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { TableOfContents } from 'panelui-web/table-of-contents';
 
 const SECTIONS = [
@@ -37,7 +38,7 @@ export default function TableOfContentsScrolling() {
   return (
     <div className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card">
       <div className="grid grid-cols-[minmax(0,1fr)_8.5rem]">
-        <div ref={scroller} className="h-80 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+        <ScrollArea viewportRef={scroller} className="h-80">
           <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-5 py-2.5 text-xs font-medium text-muted-foreground backdrop-blur">
             <span>Release notes</span>
             <span className="tabular-nums">v2.4</span>
@@ -50,13 +51,13 @@ export default function TableOfContentsScrolling() {
             </p>
 
             {SECTIONS.map((section) => (
-              <section key={section.value} id={`toc-scrolling-${section.value}`} className="mt-7 scroll-mt-12">
+              <section key={section.value} id={`toc-scrolling-${section.value}`} className="mt-7">
                 <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
                 <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
               </section>
             ))}
           </article>
-        </div>
+        </ScrollArea>
 
         {/* The bar inside the scroller is why the reading line is pushed down:
             without `offset`, a heading would count as read while it was still

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { TableOfContents } from 'panelui-web/table-of-contents';
 
 const SECTIONS = [
@@ -36,10 +37,7 @@ export default function TableOfContentsOverview() {
 
   return (
     <div className="grid w-full max-w-2xl grid-cols-[minmax(0,1fr)_8.5rem] gap-5">
-      <div
-        ref={scroller}
-        className="h-80 overflow-y-auto overscroll-contain rounded-xl border bg-card [scrollbar-width:thin]"
-      >
+      <ScrollArea viewportRef={scroller} className="h-80 rounded-xl border bg-card">
         <article className="px-5 py-5">
           <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Guide</p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Shipping and returns</h2>
@@ -48,13 +46,13 @@ export default function TableOfContentsOverview() {
           </p>
 
           {SECTIONS.map((section) => (
-            <section key={section.value} id={`toc-overview-${section.value}`} className="mt-8 scroll-mt-4">
+            <section key={section.value} id={`toc-overview-${section.value}`} className="mt-8">
               <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
             </section>
           ))}
         </article>
-      </div>
+      </ScrollArea>
 
       <TableOfContents root={scroller} offset={16} defaultValue="introduction" className="self-start py-1">
         <TableOfContents.Title>On this page</TableOfContents.Title>

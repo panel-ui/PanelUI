@@ -160,6 +160,12 @@ interface TableOfContentsContextValue {
   value: string | undefined;
   /** Makes a section active, from a link press or from the scroll spy. */
   select: (value: string) => void;
+  /**
+   * Scrolls the root to a section's element and holds the mark on it until
+   * the scroll ends. Returns `false` when there is no root to scroll, so the
+   * browser's own jump is left to happen.
+   */
+  jump: (id: string, value: string, moveFocus: boolean) => boolean;
   /** How the list marks where the reader is. */
   variant: TableOfContentsVariant;
   /**
@@ -305,6 +311,67 @@ const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, '
 
   const spying = observe ?? !controlled;
   const nav = useRef<HTMLElement>(null);
+  /*
+   * The section a press is scrolling to. While it is set, the spy reports
+   * what is on screen but does not move the mark: on the way to a section the
+   * line crosses every one before it, and a short section near the end may
+   * never reach the line at all.
+   */
+  const heading = useRef<string | null>(null);
+  const jumpFrom = useRef({ root, offset });
+  useIsomorphicLayoutEffect(() => {
+    jumpFrom.current = { root, offset };
+  });
+
+  const jump = useCallback(
+    (id: string, next: string, moveFocus: boolean) => {
+      const { root: source, offset: gap } = jumpFrom.current;
+      const scroller = source && 'current' in source ? source.current : source;
+      if (!scroller) return false;
+      const target = scroller.ownerDocument.getElementById(id);
+      if (!target || !scroller.contains(target)) return false;
+
+      // From the top of the scrollport, inside the border, to the target's
+      // top, less the reading line's offset: the target lands on the line.
+      const port = scroller.getBoundingClientRect().top + scroller.clientTop;
+      const top = scroller.scrollTop + target.getBoundingClientRect().top - port - Math.max(0, gap);
+      const reduce = scroller.ownerDocument.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      heading.current = next;
+      select(next);
+      let timer = 0;
+      const release = () => {
+        heading.current = null;
+        window.clearTimeout(timer);
+        scroller.removeEventListener('scrollend', release);
+        for (const type of ['wheel', 'touchstart', 'keydown'] as const) scroller.removeEventListener(type, release);
+      };
+      scroller.addEventListener('scrollend', release, { once: true });
+      // The reader taking over ends the hold at once.
+      for (const type of ['wheel', 'touchstart', 'keydown'] as const)
+        scroller.addEventListener(type, release, { once: true, passive: true });
+      // A scroll that does not move, or a browser without `scrollend`.
+      timer = window.setTimeout(release, 1200);
+      scroller.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+
+      // Followed from the keyboard, focus goes to the section, as the
+      // browser's own jump would take it, so Tab carries on from there.
+      if (moveFocus) {
+        if (!target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1');
+          target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+        }
+        target.focus({ preventScroll: true });
+      }
+
+      // The hash is the link's address, so it is shareable; replaced, not
+      // pushed, so Back leaves the page rather than walking its sections.
+      const { location, history } = scroller.ownerDocument.defaultView ?? window;
+      if (location.hash !== `#${id}`) history.replaceState(history.state, '', `#${encodeURIComponent(id)}`);
+      return true;
+    },
+    [select]
+  );
   // Whether the spy has read the page once. The first read is placement,
   // not a change of section, so it does not call `onValueChange`.
   const placed = useRef(false);
@@ -338,9 +405,17 @@ const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, '
     }
     if (targets.length === 0) return;
 
+    // The line is measured from the scrollport, inside the scroller's
+    // border, which is where a scrolled-to section lands.
     const line = () => {
-      const top = scroller ? scroller.getBoundingClientRect().top : 0;
+      const top = scroller ? scroller.getBoundingClientRect().top + scroller.clientTop : 0;
       return top + Math.max(0, offset);
+    };
+    const atEnd = () => {
+      const el = scroller ?? doc.scrollingElement;
+      if (!el) return false;
+      const room = el.scrollHeight - el.clientHeight;
+      return room > 0 && el.scrollTop >= room - 1;
     };
     const floor = () =>
       scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
@@ -352,7 +427,11 @@ const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, '
         return { value: section, top: rect.top, bottom: rect.bottom };
       });
       setInView(sectionsInView(sections, at, floor()).join('\n'));
-      const next = sectionAt(sections, at);
+      // A press is on its way somewhere: the mark is already there.
+      if (heading.current !== null) return;
+      // A pixel of slack, so a section scrolled to the line by a rounded
+      // scroll position still counts as reached.
+      const next = sectionAt(sections, at + 1, atEnd());
       if (next === undefined) return;
       // The first placement is not a change of section: the page opened where
       // it opened. Every change after it is reported.
@@ -405,7 +484,7 @@ const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, '
     return rest[0] === value ? rest : [value, ...rest.filter((each) => each !== value)];
   }, [value, inView, spying]);
 
-  const context = useMemo(() => ({ value, select, variant, lit }), [value, select, variant, lit]);
+  const context = useMemo(() => ({ value, select, jump, variant, lit }), [value, select, jump, variant, lit]);
   const mergedRef = useMemo(() => mergeRefs(nav, forwardedRef), [forwardedRef]);
 
   return (
@@ -636,17 +715,18 @@ export interface TableOfContentsLinkProps extends Omit<ComponentProps<'a'>, 'cla
 }
 
 /**
- * A link to one section. It is a real anchor, so the browser scrolls, the URL
- * gains the hash and middle-click opens the section in a new tab; `render`
- * lets a router's link take its place. The current one is marked with
- * `aria-current="location"`.
+ * A link to one section. It is a real anchor, so the URL gains the hash and
+ * middle-click opens the section in a new tab; `render` lets a router's link
+ * take its place. With a `root`, a press scrolls that element to put the
+ * section on the reading line; on the page, the browser scrolls. The current
+ * one is marked with `aria-current="location"`.
  */
 function TableOfContentsLink({
   className,
   render,
   ...props
 }: TableOfContentsLinkProps & RenderProp<'a'>) {
-  const { value, select, variant, lit } = useTableOfContents('TableOfContents.Link');
+  const { value, select, jump, variant, lit } = useTableOfContents('TableOfContents.Link');
   const item = useContext(TableOfContentsItemContext);
   const section = item?.value ?? hashTarget(props.href);
   const active = section !== null && section === value;
@@ -661,10 +741,19 @@ function TableOfContentsLink({
       event.shiftKey ||
       event.altKey ||
       event.currentTarget.target === '_blank';
-    if (elsewhere) return;
-    // The browser does the scrolling. The mark moves at once, rather than
-    // waiting for the spy to catch up on the way past.
-    if (section) select(section);
+    if (elsewhere || !section) return;
+    // Inside a scroller, the list scrolls that scroller itself: the browser's
+    // jump would scroll the page around it too, and land the section by its
+    // `scroll-margin` rather than on the reading line.
+    const id = hashTarget(props.href);
+    // `detail` is 0 for a press that came from the keyboard.
+    if (id && jump(id, section, event.detail === 0)) {
+      event.preventDefault();
+      return;
+    }
+    // On the page the browser does the scrolling. The mark moves at once,
+    // rather than waiting for the spy to catch up on the way past.
+    select(section);
   };
 
   return useRender({

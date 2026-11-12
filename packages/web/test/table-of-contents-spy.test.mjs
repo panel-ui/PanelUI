@@ -117,3 +117,17 @@ test('the drawing is as wide as the deepest level plus the stroke', () => {
     32
   );
 });
+
+test('scrolled to the end, the last section is read even when it never reached the line', () => {
+  // `three` is too short to be scrolled up to a line at 16.
+  const page = sections(['one', -600, -100], ['two', -100, 300], ['three', 300, 380]);
+  assert.equal(sectionAt(page, 16), 'two');
+  assert.equal(sectionAt(page, 16, true), 'three');
+  assert.equal(sectionAt([], 16, true), undefined);
+});
+
+test('a section scrolled to the line counts as reached, and one a pixel short does not', () => {
+  const page = sections(['one', -300, 40], ['two', 40, 400]);
+  assert.equal(sectionAt(page, 40), 'two');
+  assert.equal(sectionAt(page, 39), 'one');
+});

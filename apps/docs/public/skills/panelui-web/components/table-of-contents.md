@@ -114,9 +114,17 @@ Every part also takes the props of the element it renders, and a `className`.
 
 With no `value` given, the spy watches the elements named by the links' `href` hashes with an `IntersectionObserver`. It makes the section at the reading line active, which is the section the line falls through, or the one most recently passed when the line is in a gap. `offset` is how far below the top of the scroll viewport that line sits, in pixels, and defaults to `16`. A hash that points at nothing is skipped rather than throwing, the observer disconnects on unmount, and a controlled `value` is never overwritten.
 
+Once the scroller can go no further, the last section is active, even when it is too short to reach the line.
+
+#### Following a link
+
+On the page, the browser does the jumping, so a section's `scroll-margin-top` decides where it lands. Set it to the same value as `offset`.
+
+With a `root`, a press scrolls the root itself and puts the section on the reading line, so `offset` is the only setting. The page around the root stays where it is, and the URL's hash is replaced rather than added to history. The pressed link stays marked until the scroll ends, so the mark does not pass through the sections on the way.
+
 #### Keyboard
 
-Every link is an ordinary tab stop, in the order the sections appear. Enter follows it, and the browser moves focus and the URL with it. There is no roving focus, no arrow-key mode and nothing hidden to learn: the list behaves like the links it is made of.
+Every link is an ordinary tab stop, in the order the sections appear. Enter follows it and moves focus to the section, so Tab carries on from there. There is no roving focus, no arrow-key mode and nothing hidden to learn: the list behaves like the links it is made of.
 
 #### Accessibility
 
@@ -140,6 +148,7 @@ The contour lights a range rather than one row, so it needs to know what is on s
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { TableOfContents } from '@/components/panelui/table-of-contents';
 
 const SECTIONS = [
@@ -175,10 +184,7 @@ export default function TableOfContentsOverview() {
 
   return (
     <div className="grid w-full max-w-2xl grid-cols-[minmax(0,1fr)_8.5rem] gap-5">
-      <div
-        ref={scroller}
-        className="h-80 overflow-y-auto overscroll-contain rounded-xl border bg-card [scrollbar-width:thin]"
-      >
+      <ScrollArea viewportRef={scroller} className="h-80 rounded-xl border bg-card">
         <article className="px-5 py-5">
           <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">Guide</p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">Shipping and returns</h2>
@@ -187,13 +193,13 @@ export default function TableOfContentsOverview() {
           </p>
 
           {SECTIONS.map((section) => (
-            <section key={section.value} id={`toc-overview-${section.value}`} className="mt-8 scroll-mt-4">
+            <section key={section.value} id={`toc-overview-${section.value}`} className="mt-8">
               <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{section.text}</p>
             </section>
           ))}
         </article>
-      </div>
+      </ScrollArea>
 
       <TableOfContents root={scroller} offset={16} defaultValue="introduction" className="self-start py-1">
         <TableOfContents.Title>On this page</TableOfContents.Title>

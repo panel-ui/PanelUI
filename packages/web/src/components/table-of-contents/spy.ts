@@ -45,12 +45,20 @@ export function hashTarget(href: string | null | undefined): string | null {
  * Sections may arrive in any order; they are sorted by where they start. A
  * line above the first section belongs to it, since that is the heading the
  * reader is about to reach, and a line below every section belongs to the last
- * one, so the rail never goes dark at the end of a page.
+ * one, so the rail never goes dark at the end of a page. `atEnd`, for a
+ * scroller that can go no further, picks the last section outright.
  */
-export function sectionAt(sections: readonly TocSection[], line: number): string | undefined {
+export function sectionAt(
+  sections: readonly TocSection[],
+  line: number,
+  atEnd = false
+): string | undefined {
   if (sections.length === 0) return undefined;
 
   const ordered = [...sections].sort((a, b) => a.top - b.top);
+  // Scrolled as far as it goes, the last section is the one being read, even
+  // when it is too short to ever reach the line: nothing below it can.
+  if (atEnd) return ordered[ordered.length - 1]?.value;
   let passed: TocSection | undefined;
   for (const section of ordered) {
     if (section.top > line) break;

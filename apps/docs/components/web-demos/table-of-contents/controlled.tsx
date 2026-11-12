@@ -58,7 +58,11 @@ export default function TableOfContentsControlled() {
           <TableOfContents.List>
             {STEPS.map((step) => (
               <TableOfContents.Item key={step.value} value={step.value}>
-                <TableOfContents.Link href={`#toc-controlled-${step.value}`}>{step.label}</TableOfContents.Link>
+                {/* The steps swap in place, so a press changes the step without
+                    the browser scrolling the page to its heading. */}
+                <TableOfContents.Link href={`#toc-controlled-${step.value}`} onClick={(event) => event.preventDefault()}>
+                  {step.label}
+                </TableOfContents.Link>
               </TableOfContents.Item>
             ))}
           </TableOfContents.List>

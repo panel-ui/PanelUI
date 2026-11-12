@@ -67,6 +67,12 @@
       "height": 520
     },
     {
+      "title": "In a card",
+      "description": "In a [Frame](/docs/web/components/frame), the frame's action can carry a summary the chart itself does not draw, here how many readings broke the target. `Plot.Rule` marks the target across the plot, and the header follows the reading under the cursor.",
+      "demo": "framed",
+      "height": 440
+    },
+    {
       "title": "Loading and changing data",
       "description": "With `status=\"loading\"` the grid stays and nothing else is drawn. Turning `ready` uncovers the marks from the left, and going back to `loading` arms that again.\n\nWhen the data changes, the marks and rules move to their new values over `domainDuration`. A `ref` on the chart has `replay()`, which uncovers it again.",
       "demo": "changing-data",

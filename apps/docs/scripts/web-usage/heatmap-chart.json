@@ -46,6 +46,12 @@
       "description": "`onActiveCellChange` reports the cell being read, and `null` when there is none, for a readout outside the chart or in its header. `inactiveOpacity` dims the others. A `formatLabel` that returns an empty string hides the line beside the cell.",
       "demo": "readout",
       "height": 340
+    },
+    {
+      "title": "In a card",
+      "description": "Set inside a [Frame](/docs/web/components/frame), the frame's header carries the title and a count, so the chart's own `Header` keeps only the value and the caption, which follow the cell being read. `levels` sets where each step of the ramp starts, here so a short weekday session and a long weekend one read differently.",
+      "demo": "framed",
+      "height": 380
     }
   ],
   "notes": "### Sizing\n\nA `fluid` chart is as wide as its cells need, and its height always follows from the cell size and `rows`. A `fill` chart fits its container's width, so a long range makes small cells. Cells narrower than about 6 pixels are hard to point at. For those, use `fluid` in a scroller.\n\n### The ramp\n\nThe levels come from the quartiles of the non-zero counts, so small and large numbers both use the whole ramp. Pass `levels` to fix the thresholds, for instance to compare two charts on one scale.\n\n### Reading\n\nA mouse reads the cell under it. A click or a tap pins the reading, and pressing the same cell again clears it. A swipe does not read a cell, so a scroller around the chart still scrolls. Once the grid has focus, the arrow keys walk it, Home and End go to the ends of a row, and Escape clears the reading. All of this comes from `HeatmapChart.Tooltip`.\n\n### Accessibility\n\nThe chart renders a list of its days for a screen reader, and announces the cell being read. The default label is a count of contributions and a date, so pass `formatCellLabel` when the cells count something else, and `label` to name the chart. A year is a long list, so return nothing from `formatCellLabel` for days that have nothing to say.\n\nWith reduced motion set, or `animationDuration={0}`, the grid draws at once with no reveal.\n\n### Building the weeks\n\n`buildHeatmapCalendar` turns dated counts into `weeks`. It comes from the chart's client entry, so a Server Component cannot call it. Call it in a client file, and pass dates and counts from the server as props.",

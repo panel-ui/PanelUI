@@ -32,6 +32,12 @@
       "height": 480
     },
     {
+      "title": "In a card",
+      "description": "In a [Frame](/docs/web/components/frame), the frame's header names the chart and its unit, and the chart's `Header` reports both halves of the hour being read. Download is drawn above the baseline and upload below it, each against its own scale.",
+      "demo": "framed",
+      "height": 440
+    },
+    {
       "title": "Loading, then data",
       "description": "Add `MirrorAreaChart.Skeleton` and drive `status`. The bands grow out of the baseline when it turns `ready`, and again each time it goes back to `loading` and returns.",
       "demo": "loading",

@@ -357,10 +357,20 @@ const TableOfContentsRoot = forwardRef<HTMLElement, Omit<TableOfContentsProps, '
       // Followed from the keyboard, focus goes to the section, as the
       // browser's own jump would take it, so Tab carries on from there.
       if (moveFocus) {
-        if (!target.hasAttribute('tabindex')) {
-          target.setAttribute('tabindex', '-1');
-          target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
-        }
+        // A section is not a control, so it is focused without a ring round it,
+        // as the browser's own jump would leave it; both are put back on blur.
+        const outline = target.style.outline;
+        const tabbable = target.hasAttribute('tabindex');
+        if (!tabbable) target.setAttribute('tabindex', '-1');
+        target.style.outline = 'none';
+        target.addEventListener(
+          'blur',
+          () => {
+            target.style.outline = outline;
+            if (!tabbable) target.removeAttribute('tabindex');
+          },
+          { once: true }
+        );
         target.focus({ preventScroll: true });
       }
 

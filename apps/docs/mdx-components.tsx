@@ -6,6 +6,7 @@ import { ComponentGallery } from '@/components/component-gallery';
 import { WebComponentGallery } from '@/components/web-component-gallery';
 import { ComponentPreview } from '@/components/component-preview';
 import { Diagram } from '@/components/diagram';
+import { NativeTimeline, SecondCodebase, StackComparison } from '@/components/blog/figures';
 import { FrameworkGrid } from '@/components/framework-grid';
 import { IconGallery } from '@/components/icon-gallery';
 import { InstallTabs } from '@/components/install-tabs';
@@ -31,6 +32,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Step,
     Steps,
     Diagram,
+    NativeTimeline,
+    SecondCodebase,
+    StackComparison,
     FrameworkGrid,
     IconGallery,
     InstallTabs,

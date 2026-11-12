@@ -1,0 +1,105 @@
+---
+title: Is this the end of React Native?
+description: Shopify is rebuilding its apps in Swift and Kotlin, Discord is moving its client to a Rust core, and Expo has previewed a runtime with no React in it. What each of them actually announced, what has not changed, and what it means if you build with Expo today.
+date: "2026-11-13"
+author: khalid
+cover: end-of-react-native
+tags: [Ecosystem]
+---
+
+In September, Shopify said it is moving its mobile apps off React Native and back to Swift and Kotlin. In November, Discord's CTO said the company is rebuilding its client in Rust, and that the phone apps will drop React Native along the way. A week later, Expo previewed Exact, a runtime written in Rust with no React in it at all.
+
+Three of the best-known names in React Native, in about two months. It is a fair question to ask whether the framework is on its way out, and plenty of people have asked it.
+
+This post goes through what each of them announced, the parts of the picture that did not move, and what it means for an app built with Expo and PanelUI today. The short version: the reason teams pick React Native is changing, and that is worth understanding, but the framework itself is in better shape than it has been for years.
+
+<NativeTimeline />
+
+## Shopify left because building twice got cheaper
+
+Shopify adopted React Native in 2020, and its own post is clear that the bet paid off. In [Native is now the future of mobile at Shopify](https://shopify.engineering/back-to-native), it says: "React Native was working well for us, and it remains an excellent framework."
+
+The reason it gives for leaving is cost. React Native's promise was to stop building every feature twice. Shopify's argument is that coding agents now write much of that second copy, so sharing one codebase saves less than it did, while building each app in its platform's own language still pays off in the ways it always has.
+
+The numbers it gives:
+
+- **Shop came first.** It went from a proof of concept to a rebuilt native app in the stores in 12 weeks, with agents doing much of the work.
+- **The main Shopify app is next.** It has more than 300 screens, plus widgets and a watch app, and is due later this year. Point of Sale and Inbox follow.
+- **It is a rebuild, not a migration.** Shopify chose to start each app from scratch rather than replace screens one at a time.
+
+The agents are not working unsupervised. Shopify built a system it calls Helix that splits each screen into checkpoints. Each one has to pass its tests, match the running app visually, get past two reviewing agents and be approved by a person before the next one starts.
+
+Shopify also maintains libraries that a lot of React Native apps use, and their future is part of the announcement:
+
+- **React Native Skia** is sponsored until the end of 2026. Its maintainer, William Candillon, will continue it under a new name, and the original repository will then be archived.
+- **FlashList** gets fixes for critical compatibility problems while Shopify talks to other companies about taking it on.
+- **Restyle** is archived. It works until the end of 2026 and then stops being maintained.
+
+If your app depends on one of these, that is the part of the news that affects you directly. Check what your list, canvas or styling layer is built on.
+
+## Discord is moving to Rust, not to Swift
+
+Discord's change is a different kind of change. Its co-founder and CTO, Stanislav Vishnevskiy, said in a post on X on 4 November that the whole client is being rebuilt in Rust, as [reported by Inven Global](https://www.invenglobal.com/articles/28182/discord-cto-confirms-the-desktop-and-mobile-apps-are-being-rebuilt-in-rust). Discord has not published a formal announcement or a release date.
+
+What has been described so far:
+
+- **Desktop leaves Electron.** The new desktop app draws its interface with GPUI, the Rust UI framework from the team behind the Zed editor.
+- **Phones keep native interfaces.** The iOS and Android apps share their application logic with desktop through a Rust core, replacing React Native.
+- **It is early.** An early desktop build was shown using about 290 MB of memory, and Vishnevskiy said testing with users would start soon.
+
+The iOS app started on React Native, and the Android app moved to it only a couple of years ago, because it kept falling behind on features. So Discord is not leaving because React Native failed on phones. It is leaving because it wants one core shared by desktop and phones, and React Native was never the answer on its desktop.
+
+<StackComparison />
+
+## Exact is Expo's experiment, and it still runs Hermes
+
+[Exact](https://github.com/expo/exact) is the one that surprised people, because it comes from Expo itself. It is a cross-platform runtime: you describe the interface in Contract, a small declarative language, and write the data logic in TypeScript or Rust. A compiler turns the interface into a plan. On the web that plan drives the browser's own DOM through a runtime of about 20 KB. On macOS, iOS and Linux, a Rust runner lays it out and each platform draws it with its own tools: AppKit, UIKit or a GPU painter.
+
+A few things are worth knowing before reading too much into it:
+
+- **It has no React tier.** The README says plainly that nothing runs JavaScript above the data layer. Your interface is not React components.
+- **It still uses Hermes.** TypeScript data code is compiled to Hermes bytecode, the same engine React Native runs on, and loaded after the first frame.
+- **It is built for agents.** Its headline feature is a driver with ten operations, the same on every platform, so an agent can build an app, look at it, operate it and test it without a person in the loop.
+- **It is pre-1.0 and changes daily.** There is no compatibility promise. Android support was added in October and is described as early.
+
+Exact is Expo exploring what an app framework looks like when much of the code is written by agents. It is not a replacement for Expo or React Native that you are being asked to move to.
+
+## What did not change
+
+Against those three, the state of React Native itself in 2026:
+
+- **It has a new home.** In February, Meta moved React and React Native to the [React Foundation](https://react.dev/blog/2026/02/24/the-react-foundation), hosted by the Linux Foundation. Amazon, Callstack, Expo, Huawei, Meta, Microsoft, Software Mansion and Vercel are its founding members. The framework no longer depends on one company's priorities.
+- **Releases are steady.** [React Native 0.88](https://reactnative.dev/blog/2026/10/19/react-native-0.88) shipped in October with web-style event dispatching and variable fonts, and no breaking changes, the third release in a row without any.
+- **Expo is current.** [Expo SDK 58](https://expo.dev/changelog/sdk-58) ships React Native 0.88, and its Expo Go client is the one the App Store serves today.
+
+Two large companies leaving is real news. It is still two companies, each with reasons that are specific to it.
+
+## What did change is the price of the second codebase
+
+The useful part of Shopify's post is the argument, because it applies to everyone. React Native's main selling point was always one team writing one codebase for two platforms. If agents make the second codebase cheap to write, that selling point is worth less.
+
+Writing is only part of the cost, though. Two codebases still mean two sets of changes to review, two apps to test, and two versions of every feature to keep in step. Shopify built Helix precisely to manage that: checkpoints, visual comparison, adversarial review and a person signing off. That is a platform team's worth of tooling.
+
+<SecondCodebase />
+
+So the decision looks different depending on who is making it:
+
+- **A large company with platform teams and its own agent tooling** can now weigh going native in a way it could not five years ago. Shopify is the first to say so publicly, and probably not the last.
+- **A team of a few people shipping to both stores** still gets the most out of one codebase. Agents help them too, and they help most in a codebase that exists once.
+- **A team that needs desktop as well as phones** has the problem Discord has, and React Native alone was never the whole answer for it.
+
+## What this means if you build with PanelUI
+
+PanelUI is a set of React Native components for Expo, so the question is a fair one to ask of this library too. Here is where things stand:
+
+- **Nothing to migrate.** PanelUI runs on Expo SDK 58 in Expo Go today, and React Native's release line and governance are more settled than they have been in years.
+- **Check your dependencies.** If your app uses FlashList, React Native Skia or Restyle, follow where their maintenance goes over the next year. PanelUI's components do not depend on any of the three.
+- **Watch Exact, but do not ship on it yet.** It is an interesting direction from the team that maintains Expo, and it is pre-1.0 by its own description.
+
+React Native is not ending. What is ending is the assumption that sharing one codebase is the obvious choice for every company. For most teams building on Expo it still is, and it is a choice worth making on purpose rather than by default.
+
+## Where to go from here
+
+- **Read the sources.** [Shopify's post](https://shopify.engineering/back-to-native), [Discord's plans as reported](https://www.invenglobal.com/articles/28182/discord-cto-confirms-the-desktop-and-mobile-apps-are-being-rebuilt-in-rust) and [Exact's README](https://github.com/expo/exact) are each worth reading in full.
+- **Start a project.** [Get started](/docs) with PanelUI on Expo SDK 58.
+- **Follow along.** New posts land on this blog and in its [RSS feed](/blog/rss.xml).

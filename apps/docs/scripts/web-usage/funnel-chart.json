@@ -40,6 +40,30 @@
       "height": 520
     },
     {
+      "title": "Stacked bars",
+      "description": "`shape=\"bars\"` puts each stage on a row of its own: the name at the start, a bar centred in the middle as wide as its count against the largest, and its shares at the end. A tapered neck joins each bar to the next, and each bar is a step fainter than the one above.\n\nThe share column gives each stage's share of the first. From the third stage on, a quieter line gives its share of the stage above, which for the second stage is the same number, so it is not repeated. Use this shape when the stage names are too long to sit under a ribbon.",
+      "demo": "bars",
+      "height": 300
+    },
+    {
+      "title": "Stacked bars, compact",
+      "description": "`rowHeight` sets the height of each row. A count that does not fit inside its bar is written just past the bar's end, as Offered and Hired are here. `minWidth` keeps a stage with very little in it from shrinking to a sliver.",
+      "demo": "bars-compact",
+      "height": 260
+    },
+    {
+      "title": "Stacked bars in a card",
+      "description": "In a [Frame](/docs/web/components/frame), the frame's action carries the overall conversion and the chart's `Header` follows the row being read. Hover a row, or use the arrow keys, to read a stage, and press to pin it.",
+      "demo": "bars-framed",
+      "height": 460
+    },
+    {
+      "title": "Stacked bars, one stage picked out",
+      "description": "`color` on one stage draws it at full strength in that colour, outside the fade the others step through. Use it for the stage that needs attention, such as the largest drop in the run.",
+      "demo": "bars-picked",
+      "height": 300
+    },
+    {
       "title": "Loading, then data",
       "description": "Add `FunnelChart.Skeleton` and drive `status`. The stages grow in one after another when it turns `ready`.",
       "demo": "loading",

@@ -53,7 +53,9 @@ For categories that do not nest, use a [Bar Chart](/docs/web/charts/bar-chart).
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `data` | `readonly FunnelDatum[]` | **required** | The steps, in the order they happen. Never reordered. |
-| `height` | `number` | `200` | How tall the run is drawn, in pixels. The width is the container's, and nothing in the data says how deep the ribbon should taper. |
+| `shape` | `FunnelShape` | `'ribbon'` | `ribbon` runs the stages along the width as one tapering band. `bars` puts each stage on a row of its own, as a centred bar with its name before it and its shares after it, for names too long to sit under a ribbon. Default `ribbon`. |
+| `rowHeight` | `number` | `56` | Height of one stage's row with `shape="bars"`, in pixels. Default `56`. |
+| `height` | `number` | `200` | How tall the run is drawn, in pixels. The width is the container's, and nothing in the data says how deep the ribbon should taper. With `shape="bars"` the rows set the height instead. |
 | `stageSize` | `number` | — | How wide one stage is, in pixels. Left unset, the stages divide the width between them. |
 | `gap` | `number` | `4` | Space between one stage and the next, in pixels. |
 | `layers` | `number` | `3` | Concentric rings drawn per stage. `1` draws the band once, flat. |
@@ -88,8 +90,9 @@ For categories that do not nest, use a [Bar Chart](/docs/web/charts/bar-chart).
 | `formatValue` | `(value: number, stage: FunnelDatum) => string` | — | Format the count. Defaults to a compact number. |
 | `formatShare` | `(share: number, stage: FunnelDatum) => string` | — | Format the conversion in the pill. Defaults to a whole percent. |
 | `share` | `FunnelShare` | `'top'` | Which conversion the pill reports. `top` is the share of the first stage. `previous` is the share of the stage above, so the first stage has no pill. |
-| `showValue` | `boolean` | `true` | Show the count above the ribbon. |
-| `showLabel` | `boolean` | `true` | Show the stage's name under the ribbon. |
+| `showValue` | `boolean` | `true` | Show the count above the ribbon, or on the bar with `shape="bars"`. |
+| `showLabel` | `boolean` | `true` | Show the stage's name under the ribbon, or before the bar with `shape="bars"`. |
+| `formatStep` | `(step: number, stage: FunnelDatum) => string` | — | With `shape="bars"`, the quieter line under a stage's share of the first, from the third stage on: its share of the stage above. Defaults to "57% of previous". |
 
 #### `FunnelChartLegendProps`
 

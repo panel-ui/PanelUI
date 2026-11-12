@@ -31,6 +31,15 @@
  * faint ring to a tight near-solid core, so the edge falls off and text can sit on
  * the low-opacity fill. Each ring is one area mark over pixel scales.
  *
+ * ## Or stacked bars
+ *
+ * `shape="bars"` lays the stages down the page instead: one row each, the name
+ * at the start, a bar centred in the middle as wide as its value against the
+ * largest, and the shares at the end. A tapered neck joins each bar to the next,
+ * so the drop-off reads from both sides. The rows are drawn in the page rather
+ * than in the chart, because each is text as much as a shape, and the height is
+ * the rows', not `height`.
+ *
  * ## The whole column is the target
  *
  * A late stage can be a sliver, so reading is by column rather than by shape, and
@@ -61,7 +70,7 @@ import { tv } from 'tailwind-variants';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { useRender } from '@base-ui/react/use-render';
 import type { ElementType as RenderElementType } from 'react';
-import { funnelLayout, ribbonCurve, stageAt, type FunnelLayout } from './funnel-layout';
+import { funnelBars, funnelLayout, labelFits, ribbonCurve, rowAt, stageAt, type FunnelLayout } from './funnel-layout';
 
 /** Draws a part as another element, or composes it with a component: `render={<a href="/" />}`. */
 type RenderProp<Tag extends RenderElementType> = { render?: useRender.ComponentProps<Tag>['render'] };
@@ -70,6 +79,9 @@ export type FunnelChartStatus = 'loading' | 'ready';
 
 /** Whether the sides of a band are drawn as curves or as straight diagonals. */
 export type FunnelEdges = 'curved' | 'straight';
+
+/** A ribbon along the width, or one centred bar per row down the page. */
+export type FunnelShape = 'ribbon' | 'bars';
 
 /** Which conversion a stage's pill reports. */
 export type FunnelShare = 'previous' | 'top' | 'none';
@@ -136,6 +148,22 @@ const funnelChartVariants = tv({
     columnPill:
       'shrink-0 whitespace-nowrap rounded-full border border-border bg-background px-1.5 py-0.5 text-xs font-bold tabular-nums',
     columnName: 'max-w-full truncate pt-1 text-xs font-medium text-muted-foreground',
+    // The stacked-bars shape: a name, a bar and the shares on each row.
+    bars: 'absolute inset-0 grid grid-cols-[minmax(0,max-content)_minmax(0,1fr)_minmax(0,max-content)] gap-x-5',
+    barsName:
+      'col-start-1 flex min-w-0 items-center truncate text-sm font-medium transition-opacity duration-150 motion-reduce:transition-none data-dimmed:opacity-40',
+    barsTrack: 'relative col-start-2 row-start-1 min-w-0',
+    barsNecks: 'absolute inset-0 overflow-visible',
+    bar: [
+      'absolute flex cursor-pointer items-center justify-center rounded-[min(14px,30%)] text-sm font-semibold tabular-nums outline-none',
+      'origin-center transition-opacity duration-150 motion-reduce:transition-none data-dimmed:opacity-30',
+      '[[data-revealing]_&]:animate-[panelui-funnel-bar_var(--funnel-grow)_cubic-bezier(0.2,0.7,0.2,1)_both] [[data-revealing]_&]:[animation-delay:calc(var(--funnel-stage)*var(--funnel-stagger))] motion-reduce:animate-none!',
+    ],
+    barValueOutside: 'absolute top-1/2 -translate-y-1/2 whitespace-nowrap text-sm font-semibold tabular-nums',
+    barsShare:
+      'col-start-3 flex flex-col items-end justify-center text-end transition-opacity duration-150 motion-reduce:transition-none data-dimmed:opacity-40',
+    barsShareTop: 'text-sm font-semibold tabular-nums',
+    barsShareStep: 'text-xs tabular-nums text-muted-foreground',
     legend: 'col-start-1 row-start-3 flex w-full pt-3',
     legendList: 'flex-col gap-1.5',
     legendInline: 'flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1.5',
@@ -181,7 +209,7 @@ const STAGE_MARK = 'funnel-chart-stage-';
  * entrance of its own to delay, so this runs in CSS on the marks' groups: every
  * ring of a stage shares its delay, through a variable the stage's rule sets.
  */
-const KEYFRAMES = `@keyframes panelui-funnel-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+const KEYFRAMES = `@keyframes panelui-funnel-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}@keyframes panelui-funnel-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @media (prefers-reduced-motion:no-preference){[data-slot=funnel-chart-plot][data-revealing] [data-ts-key^='${STAGE_MARK}']{transform-box:fill-box;transform-origin:center;animation:panelui-funnel-grow var(--funnel-grow) cubic-bezier(.33,1,.68,1) calc(var(--funnel-stage,0)*var(--funnel-stagger)) both}}`;
 
 const COMPACT = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
@@ -240,8 +268,17 @@ export interface FunnelChartProps extends Omit<ComponentProps<'div'>, 'ref'> {
   /** The steps, in the order they happen. Never reordered. */
   data: readonly FunnelDatum[];
   /**
+   * `ribbon` runs the stages along the width as one tapering band. `bars` puts
+   * each stage on a row of its own, as a centred bar with its name before it and
+   * its shares after it, for names too long to sit under a ribbon. Default `ribbon`.
+   */
+  shape?: FunnelShape;
+  /** Height of one stage's row with `shape="bars"`, in pixels. Default `56`. */
+  rowHeight?: number;
+  /**
    * How tall the run is drawn, in pixels. The width is the container's, and
-   * nothing in the data says how deep the ribbon should taper.
+   * nothing in the data says how deep the ribbon should taper. With
+   * `shape="bars"` the rows set the height instead.
    */
   height?: number;
   /** How wide one stage is, in pixels. Left unset, the stages divide the width between them. */
@@ -286,6 +323,8 @@ export interface FunnelChartHandle {
 const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderProp<'div'>>(function FunnelChartRoot(
   {
     data,
+    shape = 'ribbon',
+    rowHeight = 56,
     height = 200,
     stageSize,
     gap = 4,
@@ -316,6 +355,7 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
   const [revision, setRevision] = useState(0);
 
   const loading = status === 'loading';
+  const stacked = shape === 'bars';
   const { width, rtl } = size;
   const { stages, skeleton, labels } = slots;
   const controlled = activeIndexProp !== undefined;
@@ -526,8 +566,13 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
     return () => document.removeEventListener('pointerdown', onPress, { capture: true });
   }, [active, read]);
 
-  const stageUnder = (event: ReactPointerEvent<HTMLDivElement> | ReactMouseEvent<HTMLDivElement>) =>
-    stageAt(layout.bands, event.clientX - event.currentTarget.getBoundingClientRect().left);
+  const stageUnder = (event: ReactPointerEvent<HTMLDivElement> | ReactMouseEvent<HTMLDivElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    return stacked
+      ? rowAt(event.clientY - box.top, rowHeight, layout.bands.length)
+      : stageAt(layout.bands, event.clientX - box.left);
+  };
+  const plotHeight = stacked ? Math.max(1, count) * rowHeight : height;
 
   const interactive = !loading && layout.bands.length > 0;
 
@@ -602,14 +647,16 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
               data-slot="funnel-chart-plot"
               className={slotClasses.plot()}
               style={{
-                height,
+                height: plotHeight,
                 ['--funnel-grow' as string]: `${animationDuration}ms`,
                 ['--funnel-stagger' as string]: `${Math.max(0, staggerDelay)}ms`,
               }}
               data-revealing={!loading && revealedKey !== chartKey ? '' : undefined}
               onAnimationEnd={(event) => {
-                const key = (event.target as Element).getAttribute('data-ts-key');
-                if (key?.startsWith(`${STAGE_MARK}${lastDrawn}-`)) setRevealedKey(chartKey);
+                const target = event.target as HTMLElement;
+                const key = target.getAttribute('data-ts-key');
+                const last = stacked ? target.dataset.stage === String(lastDrawn) : key?.startsWith(`${STAGE_MARK}${lastDrawn}-`);
+                if (last) setRevealedKey(chartKey);
               }}
               {...(interactive
                 ? {
@@ -653,7 +700,24 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
                 : {})}
             >
               <style>{KEYFRAMES + stageRules}</style>
-              {width > 0 ? (
+              {stacked && width > 0 ? (
+                <FunnelChartBars
+                  key={chartKey}
+                  data={data}
+                  colors={colors}
+                  strengths={layout.strengths}
+                  shares={layout.shares}
+                  steps={layout.steps}
+                  rowHeight={rowHeight}
+                  minWidth={minWidth}
+                  active={active}
+                  loading={loading}
+                  stages={stages}
+                  skeleton={skeleton}
+                  labels={labels}
+                />
+              ) : null}
+              {!stacked && width > 0 ? (
                 <Chart
                   // Stages arriving after a load, or a replay, are a new chart.
                   key={chartKey}
@@ -665,7 +729,7 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
                   className={slotClasses.chart()}
                 />
               ) : null}
-              {labels && interactive ? (
+              {labels && interactive && !stacked ? (
                 <FunnelChartColumns {...labels} data={data} layout={layout} active={active} />
               ) : null}
             </div>
@@ -680,6 +744,240 @@ const FunnelChartRoot = forwardRef<FunnelChartHandle, FunnelChartProps & RenderP
   return <FunnelChartContext.Provider value={context}>{element}</FunnelChartContext.Provider>;
 });
 FunnelChartRoot.displayName = 'FunnelChart';
+
+/** A share as a percent: whole from 10%, one decimal under it, where a whole number would round a real drop away. */
+const percentOf = (ratio: number) => {
+  const percent = ratio * 100;
+  return `${percent >= 10 || percent === 0 ? Math.round(percent) : Number(percent.toFixed(1))}%`;
+};
+
+/** Relative luminance of a resolved CSS colour, read back through a one-pixel canvas. */
+function luminanceOf(color: string, context: CanvasRenderingContext2D): number | null {
+  context.clearRect(0, 0, 1, 1);
+  context.fillStyle = '#000';
+  context.fillStyle = color;
+  context.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+  if (a === 0) return null;
+  const linear = (channel: number) => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * linear(r!) + 0.7152 * linear(g!) + 0.0722 * linear(b!);
+}
+
+/**
+ * Which of the theme's foreground and background reads better on each bar.
+ * The stage colours are theme tokens that are light in one theme and dark in the
+ * other, so no one ink works for every bar; each bar's resolved fill is measured,
+ * and measured again when the theme changes.
+ */
+function useBarInk(bars: readonly (HTMLElement | null)[], deps: readonly unknown[]) {
+  const [ink, setInk] = useState<string[]>([]);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return;
+    const measure = () => {
+      const root = getComputedStyle(document.documentElement);
+      const foreground = luminanceOf(root.getPropertyValue('--foreground').trim(), context) ?? 0;
+      const background = luminanceOf(root.getPropertyValue('--background').trim(), context) ?? 1;
+      const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      const next = bars.map((bar) => {
+        if (!bar) return 'var(--foreground)';
+        const fill = luminanceOf(getComputedStyle(bar).backgroundColor, context);
+        if (fill === null) return 'var(--foreground)';
+        return contrast(fill, foreground) >= contrast(fill, background) ? 'var(--foreground)' : 'var(--background)';
+      });
+      setInk((current) => (current.join() === next.join() ? current : next));
+    };
+    measure();
+    // A theme switch changes the tokens without a render.
+    const observer = new MutationObserver(measure);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+    const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+    scheme.addEventListener('change', measure);
+    return () => {
+      observer.disconnect();
+      scheme.removeEventListener('change', measure);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return ink;
+}
+
+/**
+ * The stacked-bars shape: a row per stage, its name, a centred bar and its
+ * shares. The bars' column is measured on its own, since the names and the
+ * shares take what they need and the bars have the rest.
+ */
+function FunnelChartBars({
+  data,
+  colors,
+  strengths,
+  shares,
+  steps,
+  rowHeight,
+  minWidth,
+  active,
+  loading,
+  stages,
+  skeleton,
+  labels,
+}: {
+  data: readonly FunnelDatum[];
+  colors: readonly string[];
+  strengths: readonly number[];
+  shares: readonly number[];
+  steps: readonly number[];
+  rowHeight: number;
+  minWidth: number;
+  active: number;
+  loading: boolean;
+  stages: Slots['stages'];
+  skeleton: Slots['skeleton'];
+  labels: Slots['labels'];
+}) {
+  const slots = funnelChartVariants();
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [track, setTrack] = useState(0);
+  useEffect(() => {
+    const node = trackRef.current;
+    if (!node) return;
+    const read = () => setTrack(node.clientWidth);
+    read();
+    const observer = new ResizeObserver(read);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const bars = useMemo(() => funnelBars(data, { width: track, rowHeight, minWidth }), [data, track, rowHeight, minWidth]);
+  const barRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const ink = useBarInk(barRefs.current, [colors, strengths, bars.length, track > 0]);
+  const format = labels?.formatValue ?? ((value: number) => COMPACT.format(value));
+  const formatPercent = labels?.formatShare ?? percentOf;
+  const formatStep = labels?.formatStep ?? ((ratio: number) => `${percentOf(ratio)} of previous`);
+  const share = labels?.share ?? 'top';
+  const dim = (index: number) => (active >= 0 && active !== index ? '' : undefined);
+  const rows = { gridTemplateRows: `repeat(${Math.max(1, data.length)}, ${rowHeight}px)` };
+
+  if (loading) {
+    // One plain block, not placeholder stages: an invented drop-off cannot be told from a real one.
+    return skeleton ? (
+      <div className={slots.bars()} style={rows} aria-hidden="true">
+        <div
+          className="col-span-3 row-span-full my-2 animate-pulse rounded-2xl motion-reduce:animate-none"
+          style={{ background: skeleton.color ? COLOR_VAR[skeleton.color] : 'var(--skeleton, var(--muted))' }}
+        />
+      </div>
+    ) : null;
+  }
+
+  return (
+    <div className={slots.bars()} style={rows}>
+      {labels && labels.showLabel !== false
+        ? data.map((stage, index) => (
+            <span
+              key={`name-${index}`}
+              className={slots.barsName()}
+              style={{ gridRow: index + 1 }}
+              data-dimmed={dim(index)}
+            >
+              {stage.label}
+            </span>
+          ))
+        : null}
+      <div ref={trackRef} className={slots.barsTrack()} style={{ gridRow: `1 / span ${Math.max(1, data.length)}` }}>
+        {stages ? (
+          <>
+            {/* The necks: from one bar's foot to the next one's head, faint, under the bars. */}
+            <svg className={slots.barsNecks()} aria-hidden="true" focusable="false">
+              {bars.slice(0, -1).map((bar, index) => {
+                const next = bars[index + 1]!;
+                if (bar.width <= 0 || next.width <= 0) return null;
+                const foot = bar.y + bar.height;
+                return (
+                  <polygon
+                    key={index}
+                    points={`${bar.x},${foot} ${bar.x + bar.width},${foot} ${next.x + next.width},${next.y} ${next.x},${next.y}`}
+                    style={{
+                      fill: colors[index],
+                      fillOpacity: 0.16 * (active >= 0 && active !== index && active !== index + 1 ? stages.dimOpacity : 1),
+                      transition: 'fill-opacity 150ms',
+                    }}
+                  />
+                );
+              })}
+            </svg>
+            {bars.map((bar, index) => {
+              const stage = data[index];
+              if (!stage || bar.width <= 0) return null;
+              const value = format(stage.value, stage);
+              const inside = labels?.showValue !== false && labelFits(value.length, bar.width);
+              return (
+                <button
+                  key={index}
+                  ref={(node) => {
+                    barRefs.current[index] = node;
+                  }}
+                  type="button"
+                  tabIndex={-1}
+                  data-slot="funnel-chart-bar"
+                  data-stage={index}
+                  data-dimmed={dim(index)}
+                  aria-pressed={active === index}
+                  aria-label={`${stage.label}, ${value}, ${formatPercent(shares[index] ?? 0, stage)}`}
+                  className={slots.bar()}
+                  style={{
+                    left: bar.x,
+                    top: bar.y,
+                    width: bar.width,
+                    height: bar.height,
+                    background: `color-mix(in oklab, ${colors[index]} ${Math.round((strengths[index] ?? 1) * 100)}%, var(--background))`,
+                    ['--funnel-stage' as string]: index,
+                  }}
+                >
+                  {inside ? (
+                    <span className="truncate px-2" style={{ color: ink[index] ?? 'var(--foreground)' }}>
+                      {value}
+                    </span>
+                  ) : null}
+                  {!inside && labels?.showValue !== false ? (
+                    <span className={slots.barValueOutside()} style={{ left: `calc(100% + 10px)` }}>
+                      {value}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </>
+        ) : null}
+      </div>
+      {labels && share !== 'none'
+        ? data.map((stage, index) => {
+            const main = share === 'top' ? shares[index] : steps[index];
+            const showMain = !(share === 'previous' && index === 0);
+            // The second stage's share of the first is its share of the previous one, so it is said once.
+            const showStep = share === 'top' && index >= 2;
+            return (
+              <span
+                key={`share-${index}`}
+                className={slots.barsShare()}
+                style={{ gridRow: index + 1 }}
+                data-dimmed={dim(index)}
+              >
+                {showMain ? <span className={slots.barsShareTop()}>{formatPercent(main ?? 0, stage)}</span> : null}
+                {showStep ? <span className={slots.barsShareStep()}>{formatStep(steps[index] ?? 0, stage)}</span> : null}
+              </span>
+            );
+          })
+        : null}
+    </div>
+  );
+}
 
 /**
  * The readings around the ribbon. Each column is a button for a screen reader's
@@ -786,10 +1084,16 @@ export interface FunnelChartLabelsProps {
    * `previous` is the share of the stage above, so the first stage has no pill.
    */
   share?: FunnelShare;
-  /** Show the count above the ribbon. */
+  /** Show the count above the ribbon, or on the bar with `shape="bars"`. */
   showValue?: boolean;
-  /** Show the stage's name under the ribbon. */
+  /** Show the stage's name under the ribbon, or before the bar with `shape="bars"`. */
   showLabel?: boolean;
+  /**
+   * With `shape="bars"`, the quieter line under a stage's share of the first,
+   * from the third stage on: its share of the stage above. Defaults to
+   * "57% of previous".
+   */
+  formatStep?: (step: number, stage: FunnelDatum) => string;
 }
 
 /**
@@ -804,12 +1108,13 @@ function FunnelChartLabels({
   share,
   showValue,
   showLabel,
+  formatStep,
 }: FunnelChartLabelsProps) {
   const { setSlot } = useChart('FunnelChart.Labels');
   useEffect(() => {
-    setSlot('labels', { className, formatValue, formatShare, share, showValue, showLabel });
+    setSlot('labels', { className, formatValue, formatShare, share, showValue, showLabel, formatStep });
     return () => setSlot('labels', undefined);
-  }, [className, formatValue, formatShare, share, showValue, showLabel, setSlot]);
+  }, [className, formatValue, formatShare, share, showValue, showLabel, formatStep, setSlot]);
   return null;
 }
 FunnelChartLabels.displayName = 'FunnelChart.Labels';

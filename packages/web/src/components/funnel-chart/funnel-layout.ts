@@ -144,3 +144,62 @@ export function ribbonCurve(reach: number): ChartCurve {
     },
   };
 }
+
+/** One stage in the stacked-bars shape: a bar centred in its row. */
+export interface FunnelBar {
+  /** Left edge of the bar, in pixels from the left of the bars' column. */
+  x: number;
+  /** Width of the bar, in pixels. */
+  width: number;
+  /** Top of the bar, in pixels from the top of the plot. */
+  y: number;
+  /** Height of the bar, in pixels. */
+  height: number;
+}
+
+export interface FunnelBarsOptions {
+  /** Width of the column the bars are centred in, in pixels. */
+  width: number;
+  /** Height of one stage's row, in pixels. */
+  rowHeight: number;
+  /** The narrowest a non-zero stage is drawn, as a share of the widest. */
+  minWidth: number;
+  /** How much of a row the bar fills; the rest is the neck to the next one. */
+  fill?: number;
+}
+
+/**
+ * Lays the stages out as centred bars, one per row, each as wide as its value
+ * against the largest. The bars are centred so the drop-off reads from both
+ * sides, and the necks between them are the trapezoids from one bar's foot to
+ * the next one's head.
+ */
+export function funnelBars(stages: readonly FunnelLayoutStage[], { width, rowHeight, minWidth, fill = 0.72 }: FunnelBarsOptions): FunnelBar[] {
+  const values = stages.map(({ value }) => positive(value));
+  const peak = Math.max(0, ...values);
+  const floor = Math.max(0, Math.min(minWidth, 1));
+  const span = Math.max(0, width);
+  const height = Math.max(0, rowHeight * Math.max(0, Math.min(fill, 1)));
+  return values.map((value, index) => {
+    const share = value > 0 && peak > 0 ? Math.max(value / peak, floor) : 0;
+    const barWidth = span * share;
+    return {
+      x: (span - barWidth) / 2,
+      width: barWidth,
+      y: index * rowHeight + (rowHeight - height) / 2,
+      height,
+    };
+  });
+}
+
+/** Whether a label of `characters` fits inside a bar `width` wide, with room either side. */
+export function labelFits(characters: number, width: number, characterWidth = 8, padding = 24): boolean {
+  return characters * characterWidth + padding <= width;
+}
+
+/** The row under a pointer `y` pixels from the top, or `-1` outside the rows. */
+export function rowAt(y: number, rowHeight: number, count: number): number {
+  if (!(rowHeight > 0) || y < 0) return -1;
+  const row = Math.floor(y / rowHeight);
+  return row < count ? row : -1;
+}

@@ -271,6 +271,166 @@ export default function FunnelChartCompact() {
 
 </ComponentPreview>
 
+### Stacked bars
+
+`shape="bars"` puts each stage on a row of its own: the name at the start, a bar centred in the middle as wide as its count against the largest, and its shares at the end. A tapered neck joins each bar to the next, and each bar is a step fainter than the one above.
+
+The share column gives each stage's share of the first. From the third stage on, a quieter line gives its share of the stage above, which for the second stage is the same number, so it is not repeated. Use this shape when the stage names are too long to sit under a ribbon.
+
+<ComponentPreview name="funnel-chart/bars" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { FunnelChart, type FunnelDatum } from '@/components/panelui/funnel-chart';
+
+const SIGNUP: FunnelDatum[] = [
+  { label: 'Opened the invite', value: 18400 },
+  { label: 'Created an account', value: 6120 },
+  { label: 'Verified email', value: 3870 },
+  { label: 'Invited a teammate', value: 1240 },
+];
+
+export default function FunnelChartBars() {
+  return (
+    <FunnelChart data={SIGNUP} shape="bars" color="chart-2" className="w-full max-w-xl" label="Team sign-up funnel">
+      <FunnelChart.Stages />
+      <FunnelChart.Labels />
+    </FunnelChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Stacked bars, compact
+
+`rowHeight` sets the height of each row. A count that does not fit inside its bar is written just past the bar's end, as Offered and Hired are here. `minWidth` keeps a stage with very little in it from shrinking to a sliver.
+
+<ComponentPreview name="funnel-chart/bars-compact" height={260}>
+
+```tsx lineNumbers
+'use client';
+
+import { FunnelChart, type FunnelDatum } from '@/components/panelui/funnel-chart';
+
+const APPLICATIONS: FunnelDatum[] = [
+  { label: 'Applied', value: 412 },
+  { label: 'Screened', value: 138 },
+  { label: 'Interviewed', value: 41 },
+  { label: 'Offered', value: 9 },
+  { label: 'Hired', value: 6 },
+];
+
+export default function FunnelChartBarsCompact() {
+  return (
+    <FunnelChart
+      data={APPLICATIONS}
+      shape="bars"
+      rowHeight={40}
+      minWidth={0.06}
+      color="chart-4"
+      className="w-full max-w-xs"
+      label="Hiring funnel for one role"
+    >
+      <FunnelChart.Stages />
+      <FunnelChart.Labels formatValue={(value) => value.toLocaleString('en-US')} />
+    </FunnelChart>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Stacked bars in a card
+
+In a [Frame](/docs/web/components/frame), the frame's action carries the overall conversion and the chart's `Header` follows the row being read. Hover a row, or use the arrow keys, to read a stage, and press to pin it.
+
+<ComponentPreview name="funnel-chart/bars-framed" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { FunnelChart, type FunnelDatum } from '@/components/panelui/funnel-chart';
+import { Frame } from '@/components/panelui/frame';
+
+const ORDERS: FunnelDatum[] = [
+  { label: 'Product page', value: 52300 },
+  { label: 'Added to bag', value: 14900 },
+  { label: 'Checkout', value: 8120 },
+  { label: 'Payment', value: 6340 },
+  { label: 'Order placed', value: 5870 },
+];
+
+const OVERALL = (ORDERS.at(-1)!.value / ORDERS[0]!.value) * 100;
+
+export default function FunnelChartBarsFramed() {
+  const [index, setIndex] = useState(-1);
+  const stage = ORDERS[index];
+
+  return (
+    <Frame variant="band" className="w-full max-w-xl">
+      <Frame.Header>
+        <Frame.Title>Store funnel</Frame.Title>
+        <Frame.Action>{OVERALL.toFixed(1)}% bought</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <FunnelChart
+          data={ORDERS}
+          shape="bars"
+          rowHeight={52}
+          color="chart-1"
+          label="Store funnel for the last 30 days"
+          onActiveIndexChange={setIndex}
+        >
+          <FunnelChart.Header
+            title={stage ? stage.label : 'Product page'}
+            value={(stage ?? ORDERS[0]!).value.toLocaleString('en-US')}
+            caption="Last 30 days"
+          />
+          <FunnelChart.Stages />
+          <FunnelChart.Labels />
+        </FunnelChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Stacked bars, one stage picked out
+
+`color` on one stage draws it at full strength in that colour, outside the fade the others step through. Use it for the stage that needs attention, such as the largest drop in the run.
+
+<ComponentPreview name="funnel-chart/bars-picked" height={300}>
+
+```tsx lineNumbers
+'use client';
+
+import { FunnelChart, type FunnelDatum } from '@/components/panelui/funnel-chart';
+
+const ONBOARDING: FunnelDatum[] = [
+  { label: 'Installed', value: 9600 },
+  { label: 'Opened twice', value: 5100 },
+  // The biggest drop in the run, in a colour of its own.
+  { label: 'Connected a bank', value: 1480, color: 'destructive' },
+  { label: 'Set a budget', value: 1210 },
+];
+
+export default function FunnelChartBarsPicked() {
+  return (
+    <FunnelChart data={ONBOARDING} shape="bars" color="chart-3" className="w-full max-w-xl" label="App onboarding funnel">
+      <FunnelChart.Stages />
+      <FunnelChart.Labels />
+    </FunnelChart>
+  );
+}
+```
+
+</ComponentPreview>
+
 ### Loading, then data
 
 Add `FunnelChart.Skeleton` and drive `status`. The stages grow in one after another when it turns `ready`.
@@ -373,7 +533,9 @@ export default function FunnelChartChangingData() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `data` | `readonly FunnelDatum[]` | — | The steps, in the order they happen. Never reordered. |
-| `height` | `number` | `200` | How tall the run is drawn, in pixels. The width is the container's, and nothing in the data says how deep the ribbon should taper. |
+| `shape` | `FunnelShape` | `'ribbon'` | `ribbon` runs the stages along the width as one tapering band. `bars` puts each stage on a row of its own, as a centred bar with its name before it and its shares after it, for names too long to sit under a ribbon. Default `ribbon`. |
+| `rowHeight` | `number` | `56` | Height of one stage's row with `shape="bars"`, in pixels. Default `56`. |
+| `height` | `number` | `200` | How tall the run is drawn, in pixels. The width is the container's, and nothing in the data says how deep the ribbon should taper. With `shape="bars"` the rows set the height instead. |
 | `stageSize` | `number` | — | How wide one stage is, in pixels. Left unset, the stages divide the width between them. |
 | `gap` | `number` | `4` | Space between one stage and the next, in pixels. |
 | `layers` | `number` | `3` | Concentric rings drawn per stage. `1` draws the band once, flat. |
@@ -408,8 +570,9 @@ export default function FunnelChartChangingData() {
 | `formatValue` | `(value: number, stage: FunnelDatum) => string` | — | Format the count. Defaults to a compact number. |
 | `formatShare` | `(share: number, stage: FunnelDatum) => string` | — | Format the conversion in the pill. Defaults to a whole percent. |
 | `share` | `FunnelShare` | `'top'` | Which conversion the pill reports. `top` is the share of the first stage. `previous` is the share of the stage above, so the first stage has no pill. |
-| `showValue` | `boolean` | `true` | Show the count above the ribbon. |
-| `showLabel` | `boolean` | `true` | Show the stage's name under the ribbon. |
+| `showValue` | `boolean` | `true` | Show the count above the ribbon, or on the bar with `shape="bars"`. |
+| `showLabel` | `boolean` | `true` | Show the stage's name under the ribbon, or before the bar with `shape="bars"`. |
+| `formatStep` | `(step: number, stage: FunnelDatum) => string` | — | With `shape="bars"`, the quieter line under a stage's share of the first, from the third stage on: its share of the stage above. Defaults to "57% of previous". |
 
 ### FunnelChart.Legend
 

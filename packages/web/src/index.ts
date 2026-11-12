@@ -1395,6 +1395,7 @@ export {
   type FunnelChartColor,
   type FunnelEdges,
   type FunnelShare,
+  type FunnelShape,
   type FunnelLegendLayout,
   type FunnelChartHeaderProps,
   type FunnelChartStagesProps,

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import type { ReactNode } from 'react';
 import { site } from '@/lib/site';
 
 /**
@@ -38,9 +39,15 @@ export interface OgCardProps {
   description: string;
   /** Bottom-left slot. The install line on the root, the URL on a docs page. */
   footer: string;
+  /**
+   * A picture beside the title, such as a blog post's cover. The title column
+   * narrows to make room; everything else on the card stays where it is, so a
+   * card with art is still recognisably the same card.
+   */
+  art?: ReactNode;
 }
 
-export function OgCard({ eyebrow, title, description, footer }: OgCardProps) {
+export function OgCard({ eyebrow, title, description, footer, art }: OgCardProps) {
   return (
     <div
       style={{
@@ -71,21 +78,24 @@ export function OgCard({ eyebrow, title, description, footer }: OgCardProps) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 66,
-            fontWeight: 600,
-            lineHeight: 1.08,
-            letterSpacing: -1.5,
-          }}
-        >
-          {title}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22, flex: 1 }}>
+          <div
+            style={{
+              display: 'flex',
+              fontSize: art ? 58 : 66,
+              fontWeight: 600,
+              lineHeight: 1.08,
+              letterSpacing: -1.5,
+            }}
+          >
+            {title}
+          </div>
+          <div style={{ display: 'flex', fontSize: art ? 26 : 29, color: MUTED, lineHeight: 1.35 }}>
+            {description}
+          </div>
         </div>
-        <div style={{ display: 'flex', fontSize: 29, color: MUTED, lineHeight: 1.35 }}>
-          {description}
-        </div>
+        {art ? <div style={{ display: 'flex', flexShrink: 0 }}>{art}</div> : null}
       </div>
 
       {/* A rule above the footer so the card has a floor, and the footer reads

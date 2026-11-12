@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { authorOf, formatDate, getPost, getPosts, slugOf } from '@/lib/blog';
 import { COVER_HEIGHT, COVER_WIDTH, COVERS } from '@/lib/blog-covers';
-import { OG_SIZE } from '@/lib/og-card';
+import { OG_SIZE, OgCard } from '@/lib/og-card';
 import { site } from '@/lib/site';
 
 export const size = OG_SIZE;
@@ -14,7 +14,8 @@ export function generateStaticParams() {
 
 /**
  * The cover's roles in fixed colours. A social card is a picture of the page,
- * not the page, so there is no reader's theme to follow; it is drawn dark.
+ * not the page, so there is no reader's theme to follow; it is drawn dark, to
+ * sit on the card's own dark ground.
  */
 const PALETTE: Record<string, string> = {
   '-': '#2d2d32',
@@ -30,54 +31,45 @@ const PALETTE: Record<string, string> = {
   '5': '#f43f5e',
 };
 
+/** Cut at a word, with an ellipsis, so the description keeps to two lines beside the cover. */
+const clamp = (text: string, length: number) => {
+  if (text.length <= length) return text;
+  const cut = text.slice(0, length);
+  return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
+};
+
+/** The post's card: the site's own card, with the post's cover beside its title. */
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = getPost(slug);
   const rows = post ? COVERS[post.cover] : undefined;
-  const scale = 8;
+  const scale = 6;
+
+  const cover = rows ? (
+    <svg
+      width={COVER_WIDTH * scale}
+      height={COVER_HEIGHT * scale}
+      viewBox={`0 0 ${COVER_WIDTH} ${COVER_HEIGHT}`}
+      shapeRendering="crispEdges"
+      style={{ borderRadius: 16, background: '#1a1a1d' }}
+    >
+      {rows.flatMap((row, y) =>
+        [...row].map((char, x) =>
+          char === '.' ? null : <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={PALETTE[char]} />
+        )
+      )}
+    </svg>
+  ) : undefined;
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: '#18181b',
-          color: '#f5f5f5',
-          padding: 56,
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 40 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, flex: 1 }}>
-            <div style={{ fontSize: 26, color: '#a1a1aa' }}>{`${site.name} blog`}</div>
-            <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.1, letterSpacing: -1 }}>
-              {post?.title ?? site.name}
-            </div>
-          </div>
-          {rows ? (
-            <svg
-              width={COVER_WIDTH * scale}
-              height={COVER_HEIGHT * scale}
-              viewBox={`0 0 ${COVER_WIDTH} ${COVER_HEIGHT}`}
-              shapeRendering="crispEdges"
-            >
-              {rows.flatMap((row, y) =>
-                [...row].map((char, x) =>
-                  char === '.' ? null : (
-                    <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={PALETTE[char]} />
-                  )
-                )
-              )}
-            </svg>
-          ) : null}
-        </div>
-        <div style={{ fontSize: 26, color: '#a1a1aa' }}>
-          {post ? `${authorOf(post).name} · ${formatDate(post.date)}` : site.url}
-        </div>
-      </div>
+      <OgCard
+        eyebrow={post?.tags[0] ? `Blog · ${post.tags[0]}` : 'Blog'}
+        title={post?.title ?? site.name}
+        description={clamp(post?.description ?? site.tagline, 84)}
+        footer={post ? `${authorOf(post).name} · ${formatDate(post.date)}` : site.url}
+        art={cover}
+      />
     ),
     size
   );

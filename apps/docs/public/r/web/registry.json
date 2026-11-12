@@ -1584,6 +1584,24 @@
       ]
     },
     {
+      "name": "scroll-area",
+      "type": "registry:component",
+      "title": "Scroll Area",
+      "description": "A box that scrolls, with a thin scrollbar laid over its content in place of the browser's own.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/scroll-area.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/scroll-area.tsx"
+        }
+      ]
+    },
+    {
       "name": "scroll-header",
       "type": "registry:component",
       "title": "Scroll Header",

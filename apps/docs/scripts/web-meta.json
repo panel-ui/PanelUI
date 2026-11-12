@@ -778,5 +778,15 @@
       "addedIn": "0.16.0",
       "category": "forms"
     }
+  ],
+  "scroll-area": [
+    "ScrollArea",
+    "A box that scrolls, with a thin scrollbar laid over its content in place of the browser's own.",
+    "react scroll area custom scrollbar overflow scroller component",
+    {
+      "addedIn": "0.17.0",
+      "category": "layout",
+      "title": "Scroll Area"
+    }
   ]
 }

@@ -51,6 +51,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Frame](components/frame.md) — A panel of rows set into a tray, with the tray's top strip carrying the title.
 - [Inspector](components/inspector.md) — The settings panel beside an editor's canvas: a rail of icons, each opening a page of titled sections.
 - [Lane Board](components/lane-board.md) — Lanes of cards that can be dragged within a lane and from one lane to another.
+- [Scroll Area](components/scroll-area.md) — A box that scrolls, with a thin scrollbar laid over its content in place of the browser's own.
 - [Tilt Card](components/tilt-card.md) — A card that leans towards the pointer, with layers inside it that move by their depth.
 - [Workbench](components/workbench.md) — The frame of an editor: a canvas with the work on it, a toolbar over it, an inspector beside it and a timeline under it.
 

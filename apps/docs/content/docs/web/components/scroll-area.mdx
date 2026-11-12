@@ -1,0 +1,370 @@
+---
+title: Scroll Area
+description: A box that scrolls, with a thin scrollbar laid over its content in place of the browser's own.
+status: new
+---
+
+<ComponentPreview name="scroll-area/overview" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { ScrollArea } from '@/components/panelui/scroll-area';
+
+const RELEASES = [
+  { version: '2.4.0', date: '12 Nov', note: 'Exports can be scheduled for the first of each month.' },
+  { version: '2.3.2', date: '4 Nov', note: 'A shared link no longer drops its filters when it is opened on a phone.' },
+  { version: '2.3.1', date: '29 Oct', note: 'CSV imports keep leading zeros in postcodes and account numbers.' },
+  { version: '2.3.0', date: '21 Oct', note: 'Dashboards can be duplicated with or without their saved views.' },
+  { version: '2.2.4', date: '9 Oct', note: 'The date picker opens on the month that is already selected.' },
+  { version: '2.2.3', date: '30 Sep', note: 'Search matches an invoice number typed with or without its prefix.' },
+  { version: '2.2.2', date: '18 Sep', note: 'Two people editing one report no longer overwrite each other’s notes.' },
+  { version: '2.2.0', date: '2 Sep', note: 'Workspaces can require two-step sign-in for every member.' },
+  { version: '2.1.1', date: '20 Aug', note: 'Large tables scroll without the header row jumping.' },
+];
+
+export default function ScrollAreaOverview() {
+  return (
+    <ScrollArea className="h-80 w-full max-w-sm rounded-2xl border bg-background">
+      <ol className="flex flex-col divide-y">
+        {RELEASES.map((release) => (
+          <li key={release.version} className="flex flex-col gap-1 px-5 py-4">
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="font-medium tabular-nums">{release.version}</span>
+              <span className="text-xs text-muted-foreground">{release.date}</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{release.note}</p>
+          </li>
+        ))}
+      </ol>
+    </ScrollArea>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for any box with more content than it has room for: a list in a card, a panel beside an editor, a long article inside a frame. It scrolls like the browser's own scroller, with a thin bar drawn over the content's edge that shows while the box is hovered or scrolled.
+
+It needs a height to scroll in. Give the root a height, a `max-h-*`, or put it in a flex column where it can shrink.
+
+Put the border radius on the root, not on what is inside it. The root clips everything, including sticky, blurred or transformed children, which a rounded scroller on its own can let paint over its corners.
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/scroll-area.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/scroll-area` instead of `@/components/panelui/scroll-area`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/scroll-area.tsx`:
+
+<RegistrySource name="scroll-area" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { ScrollArea } from "@/components/panelui/scroll-area"
+```
+
+```tsx
+<ScrollArea className="h-80 rounded-2xl border">
+  <article>…</article>
+</ScrollArea>
+```
+
+## Composition
+
+```tsx
+<ScrollArea.Root>
+  <ScrollArea.Viewport>
+    <ScrollArea.Content />
+  </ScrollArea.Viewport>
+  <ScrollArea.Scrollbar />
+  <ScrollArea.Corner />
+</ScrollArea.Root>
+```
+
+- **`ScrollArea.Root`** — The frame. It clips its content to its own radius and holds the bars. `ScrollArea` on its own renders all the parts inside it, so you only need `Root` to compose them yourself.
+- **`ScrollArea.Viewport`** — The element that scrolls. Its `ref` is the one to pass to code that listens to scrolling, such as a table of contents' `root` or a scroll header's `scrollRef`. It takes `fade` and `gutter`, like `ScrollArea`.
+- **`ScrollArea.Content`** — What scrolls. It is measured to size the thumb.
+- **`ScrollArea.Scrollbar`** — The track and its thumb, over the content's edge. Pass `orientation="horizontal"` for a second one along the bottom.
+- **`ScrollArea.Corner`** — The square where two bars meet, for a box that scrolls both ways.
+
+## Examples
+
+### Sideways
+
+`orientation="horizontal"` scrolls along the row and draws the bar along the bottom. Give the content a width it keeps, such as `w-max`, or it wraps to the box instead. `both` scrolls either way, with a bar on each edge.
+
+<ComponentPreview name="scroll-area/horizontal" height={220}>
+
+```tsx lineNumbers
+'use client';
+
+import { ScrollArea } from '@/components/panelui/scroll-area';
+
+const DAYS = [
+  { day: 'Mon', high: 14, low: 7, sky: 'Showers' },
+  { day: 'Tue', high: 12, low: 6, sky: 'Cloudy' },
+  { day: 'Wed', high: 15, low: 8, sky: 'Bright spells' },
+  { day: 'Thu', high: 17, low: 9, sky: 'Sunny' },
+  { day: 'Fri', high: 16, low: 10, sky: 'Light rain' },
+  { day: 'Sat', high: 13, low: 7, sky: 'Windy' },
+  { day: 'Sun', high: 11, low: 5, sky: 'Heavy rain' },
+  { day: 'Mon', high: 12, low: 4, sky: 'Frost, then sun' },
+  { day: 'Tue', high: 14, low: 6, sky: 'Cloudy' },
+  { day: 'Wed', high: 15, low: 8, sky: 'Sunny' },
+];
+
+export default function ScrollAreaHorizontal() {
+  return (
+    <ScrollArea orientation="horizontal" className="w-full max-w-md rounded-2xl border bg-background">
+      <ul className="flex w-max gap-2 p-3">
+        {DAYS.map((d, i) => (
+          <li key={i} className="flex w-28 shrink-0 flex-col gap-2 rounded-xl bg-muted px-3 py-3">
+            <span className="text-xs font-medium text-muted-foreground">{d.day}</span>
+            <span className="text-lg font-semibold tabular-nums">
+              {d.high}°<span className="ms-1 text-sm font-normal text-muted-foreground">{d.low}°</span>
+            </span>
+            <span className="text-xs text-muted-foreground">{d.sky}</span>
+          </li>
+        ))}
+      </ul>
+    </ScrollArea>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Fading the edges
+
+`fade` fades the content out at an edge it continues past, by as much of it as is hidden, so the top stays sharp until you scroll and the bottom sharpens when you reach it.
+
+<ComponentPreview name="scroll-area/fade" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { ScrollArea } from '@/components/panelui/scroll-area';
+
+const TERMS = [
+  'You can cancel at any time from the billing page. Your plan stays active until the end of the period you have paid for, and nothing further is charged.',
+  'Refunds are given for annual plans cancelled within fourteen days of a renewal. Monthly plans are not refunded part way through a month.',
+  'Seats can be added at any point and are charged for the rest of the current period. Seats removed are credited against the next invoice.',
+  'Invoices are sent to the billing contact on the first working day of each period. A failed payment is retried three times over a week before the workspace is paused.',
+  'A paused workspace keeps all of its data for ninety days. Paying the outstanding invoice restores it with nothing lost.',
+  'Prices are shown before tax. Tax is added at checkout using the billing address on the account.',
+];
+
+export default function ScrollAreaFade() {
+  return (
+    <ScrollArea fade className="h-64 w-full max-w-md rounded-2xl border bg-background">
+      <div className="flex flex-col gap-4 px-5 py-5 text-sm leading-6 text-muted-foreground">
+        {TERMS.map((term, i) => (
+          <p key={i}>{term}</p>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Keeping rows clear of the bar
+
+The bar sits over the content, so text at the far end of a row can end up under the thumb. `gutter` pads the content away from the bar while there is something to scroll, and adds nothing when everything fits.
+
+<ComponentPreview name="scroll-area/gutter" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { ScrollArea } from '@/components/panelui/scroll-area';
+
+const MEMBERS = [
+  ['Amara Okafor', 'Owner'],
+  ['Jonas Weber', 'Admin'],
+  ['Priya Raman', 'Editor'],
+  ['Tomás Silva', 'Editor'],
+  ['Hana Sato', 'Viewer'],
+  ['Leila Haddad', 'Editor'],
+  ['Owen Price', 'Viewer'],
+  ['Mei Lin', 'Admin'],
+  ['Sven Larsen', 'Viewer'],
+];
+
+export default function ScrollAreaGutter() {
+  return (
+    <ScrollArea gutter className="h-64 w-full max-w-sm rounded-2xl border bg-background">
+      <ul className="flex flex-col py-1.5">
+        {MEMBERS.map(([name, role]) => (
+          <li key={name} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+            <span>{name}</span>
+            <span className="text-xs text-muted-foreground">{role}</span>
+          </li>
+        ))}
+      </ul>
+    </ScrollArea>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Composing the parts
+
+Write the parts out yourself to reach the viewport with a `ref`, here to report how far the log has been read. `viewportRef` on `ScrollArea` reaches the same element without the parts.
+
+<ComponentPreview name="scroll-area/parts" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { ScrollArea } from '@/components/panelui/scroll-area';
+import { useEffect, useRef, useState } from 'react';
+
+const ENTRIES = [
+  ['14:02', 'Build started on main (a41c9e2)'],
+  ['14:02', 'Restored dependency cache, 1,284 packages'],
+  ['14:03', 'Type check passed in 41s'],
+  ['14:04', 'Unit tests: 912 passed, 3 skipped'],
+  ['14:05', 'Bundled web app, 418 KB gzipped'],
+  ['14:05', 'Uploaded source maps'],
+  ['14:06', 'Preview deployed to staging'],
+  ['14:06', 'Smoke tests: checkout, sign-in, search'],
+  ['14:07', 'Smoke tests passed'],
+  ['14:07', 'Waiting for approval from release owner'],
+  ['14:12', 'Approved by J. Weber'],
+  ['14:12', 'Promoting staging to production'],
+  ['14:13', 'Production healthy on all regions'],
+  ['14:13', 'Build finished in 11m 04s'],
+];
+
+export default function ScrollAreaParts() {
+  const viewport = useRef<HTMLDivElement>(null);
+  const [read, setRead] = useState(0);
+
+  useEffect(() => {
+    const el = viewport.current;
+    if (!el) return;
+    const update = () => {
+      const max = el.scrollHeight - el.clientHeight;
+      setRead(max > 0 ? Math.round((el.scrollTop / max) * 100) : 100);
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    return () => el.removeEventListener('scroll', update);
+  }, []);
+
+  return (
+    <div className="flex w-full max-w-md flex-col gap-2">
+      <ScrollArea.Root className="h-64 rounded-2xl border bg-background">
+        <ScrollArea.Viewport ref={viewport}>
+          <ScrollArea.Content>
+            <ol className="flex flex-col py-2 font-mono text-xs">
+              {ENTRIES.map(([time, line], i) => (
+                <li key={i} className="flex gap-3 px-4 py-1.5">
+                  <span className="text-muted-foreground tabular-nums">{time}</span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ol>
+          </ScrollArea.Content>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar />
+      </ScrollArea.Root>
+      <p className="text-xs text-muted-foreground tabular-nums">Read: {read}%</p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### ScrollArea
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `ScrollAreaOrientation` | `'vertical'` | Which ways it scrolls. Each gets its own bar. Default `vertical`. |
+| `fade` | `boolean` | `false` | Fades the content out at an edge it continues past. Default `false`. |
+| `gutter` | `boolean` | `false` | Holds the content clear of the bar while there is something to scroll, instead of letting the bar sit over it. Default `false`. |
+| `viewportRef` | `Ref<HTMLDivElement>` | — | The element that scrolls, for code that listens to it: pass it as a table of contents' `root` or a scroll header's `scrollRef`. |
+| `viewportClassName` | `string` | — | Classes for the viewport, the element that scrolls. |
+| `contentClassName` | `string` | — | Classes for the element that holds the content inside the viewport. |
+
+### ScrollArea.Viewport
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fade` | `boolean` | `false` | Fades the content out at an edge it continues past. Default `false`. |
+| `gutter` | `boolean` | `false` | Holds the content clear of the bar while there is something to scroll. Default `false`. |
+
+### ScrollArea.Scrollbar
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Which way this bar moves. Default `vertical`. |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Scrolling
+
+The viewport is a real scroller, so the wheel, a trackpad, touch, the keyboard and find-in-page all work as they do anywhere else. The thumb can also be dragged, and a press on the track moves the thumb to where you pressed.
+
+### Keyboard
+
+The viewport takes focus when there is something to scroll, and shows a ring inside its edge. The arrow keys, Page Up, Page Down, Home and End scroll it.
+
+### Reduced motion
+
+With reduced motion set, the bar appears and disappears without fading.
+
+### Server Components
+
+`ScrollArea` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ScrollArea.Root` off the import, so each part is also exported by name: `ScrollAreaRoot` is `ScrollArea.Root`, and so on for the others.
+
+```tsx
+import { ScrollArea, ScrollAreaRoot, ScrollAreaViewport, ScrollAreaContent, ScrollAreaScrollbar, ScrollAreaCorner } from "@/components/panelui/scroll-area"
+```

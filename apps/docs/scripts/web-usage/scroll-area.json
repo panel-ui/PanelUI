@@ -1,0 +1,44 @@
+{
+  "slug": "scroll-area",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 380
+  },
+  "intro": "Use it for any box with more content than it has room for: a list in a card, a panel beside an editor, a long article inside a frame. It scrolls like the browser's own scroller, with a thin bar drawn over the content's edge that shows while the box is hovered or scrolled.\n\nIt needs a height to scroll in. Give the root a height, a `max-h-*`, or put it in a flex column where it can shrink.\n\nPut the border radius on the root, not on what is inside it. The root clips everything, including sticky, blurred or transformed children, which a rounded scroller on its own can let paint over its corners.",
+  "usage": "<ScrollArea className=\"h-80 rounded-2xl border\">\n  <article>…</article>\n</ScrollArea>",
+  "anatomy": "<ScrollArea.Root>\n  <ScrollArea.Viewport>\n    <ScrollArea.Content />\n  </ScrollArea.Viewport>\n  <ScrollArea.Scrollbar />\n  <ScrollArea.Corner />\n</ScrollArea.Root>",
+  "parts": {
+    "Root": "The frame. It clips its content to its own radius and holds the bars. `ScrollArea` on its own renders all the parts inside it, so you only need `Root` to compose them yourself.",
+    "Viewport": "The element that scrolls. Its `ref` is the one to pass to code that listens to scrolling, such as a table of contents' `root` or a scroll header's `scrollRef`. It takes `fade` and `gutter`, like `ScrollArea`.",
+    "Content": "What scrolls. It is measured to size the thumb.",
+    "Scrollbar": "The track and its thumb, over the content's edge. Pass `orientation=\"horizontal\"` for a second one along the bottom.",
+    "Corner": "The square where two bars meet, for a box that scrolls both ways."
+  },
+  "examples": [
+    {
+      "title": "Sideways",
+      "description": "`orientation=\"horizontal\"` scrolls along the row and draws the bar along the bottom. Give the content a width it keeps, such as `w-max`, or it wraps to the box instead. `both` scrolls either way, with a bar on each edge.",
+      "demo": "horizontal",
+      "height": 220
+    },
+    {
+      "title": "Fading the edges",
+      "description": "`fade` fades the content out at an edge it continues past, by as much of it as is hidden, so the top stays sharp until you scroll and the bottom sharpens when you reach it.",
+      "demo": "fade",
+      "height": 320
+    },
+    {
+      "title": "Keeping rows clear of the bar",
+      "description": "The bar sits over the content, so text at the far end of a row can end up under the thumb. `gutter` pads the content away from the bar while there is something to scroll, and adds nothing when everything fits.",
+      "demo": "gutter",
+      "height": 320
+    },
+    {
+      "title": "Composing the parts",
+      "description": "Write the parts out yourself to reach the viewport with a `ref`, here to report how far the log has been read. `viewportRef` on `ScrollArea` reaches the same element without the parts.",
+      "demo": "parts",
+      "height": 340
+    }
+  ],
+  "notes": "### Scrolling\n\nThe viewport is a real scroller, so the wheel, a trackpad, touch, the keyboard and find-in-page all work as they do anywhere else. The thumb can also be dragged, and a press on the track moves the thumb to where you pressed.\n\n### Keyboard\n\nThe viewport takes focus when there is something to scroll, and shows a ring inside its edge. The arrow keys, Page Up, Page Down, Home and End scroll it.\n\n### Reduced motion\n\nWith reduced motion set, the bar appears and disappears without fading."
+}

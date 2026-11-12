@@ -1542,6 +1542,21 @@ export {
   type ScrollHeaderScrollSource,
 } from './components/scroll-header';
 export {
+  ScrollArea,
+  ScrollAreaRoot,
+  ScrollAreaViewport,
+  ScrollAreaContent,
+  ScrollAreaScrollbar,
+  ScrollAreaCorner,
+  type ScrollAreaProps,
+  type ScrollAreaRootProps,
+  type ScrollAreaViewportProps,
+  type ScrollAreaContentProps,
+  type ScrollAreaScrollbarProps,
+  type ScrollAreaCornerProps,
+  type ScrollAreaOrientation,
+} from './components/scroll-area';
+export {
   Pagination,
   PaginationPrevious,
   PaginationNext,

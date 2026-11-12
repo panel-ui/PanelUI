@@ -100,10 +100,13 @@ For one series where the shape matters more than what it is made of, use a line 
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. |
 | `color` | `AreaChartColor` | `'chart-1'` | A role in the theme, or any CSS colour. |
 | `fillOpacity` | `number` | — | Opacity of the fill at the top of the band. Defaults to `0.6` stacked and `0.35` overlaid, so overlaid bands show each other through. |
-| `gradientToOpacity` | `number` | `0` | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
+| `gradientToOpacity` | `number` | — | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
 | `opacity` | `number` | `1` | Opacity of the whole series, fill and edge, for picking one out from the others. |
 | `showLine` | `boolean` | `true` | Draw the line along the top edge of the band. |
 | `strokeWidth` | `number` | `2` | Thickness of that line. |
+| `texture` | `AreaChartTexture` | `'solid'` | `dots` fills the band with a grid of dots instead of a wash, brightest at the top of the plot. Use it for one series picked out from the others, or for a chart that should read as a printout rather than a shape. Default `solid`. |
+| `dotSize` | `number` | `2.5` | Diameter of each dot, in pixels, with `texture="dots"`. Default `2.5`. |
+| `dotGap` | `number` | `5` | Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. |
 
 #### `AreaChartLineProps`
 

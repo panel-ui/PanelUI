@@ -193,11 +193,27 @@ interface SeriesEntry {
   key: string;
   stroke: string;
   fillOpacity: number | undefined;
-  gradientToOpacity: number;
+  gradientToOpacity: number | undefined;
   opacity: number;
   showLine: boolean;
   strokeWidth: number;
+  texture: AreaChartTexture;
+  dotSize: number;
+  dotGap: number;
 }
+
+/** How a band is filled: a smooth wash, or a grid of dots. */
+export type AreaChartTexture = 'solid' | 'dots';
+
+/** The fill's opacity at the top and the bottom of the plot. */
+const fillStops = (entry: SeriesEntry, stacked: boolean) => {
+  const dots = entry.texture === 'dots';
+  // Dots cover a fraction of the area, so they carry more opacity than a wash
+  // and keep some at the bottom, where a wash fades out entirely.
+  const top = entry.fillOpacity ?? (dots ? 0.95 : stacked ? 0.6 : 0.35);
+  const bottom = entry.gradientToOpacity ?? (dots ? 0.35 : 0);
+  return { top: top * entry.opacity, bottom: bottom * entry.opacity };
+};
 
 interface LineEntry {
   key: string;
@@ -424,6 +440,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
   const slotClasses = areaChartVariants();
   const plotRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
+  // Pattern ids for dotted bands, unique to this chart so two on a page do not share one.
+  const texturePrefix = `panelui-area-dots-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const [series, setSeriesState] = useState<readonly SeriesEntry[]>([]);
   const [lines, setLinesState] = useState<readonly LineEntry[]>([]);
   const [annotations, setAnnotations] = useState<readonly Annotation[]>([]);
@@ -515,6 +533,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
     const ruleRows = lineRows(data, lines);
     const strokes = new Map([...series, ...lines].map(({ key, stroke }) => [key, stroke]));
     const gradientId = (key: string) => `panelui-area-${series.findIndex((entry) => entry.key === key)}`;
+    const dotsId = (key: string) => `${texturePrefix}-${series.findIndex((entry) => entry.key === key)}`;
     const curveFactory = CURVES[curve];
     const span = Math.max(1, data.length - 1);
 
@@ -525,7 +544,10 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
       y2: 'top',
       z: 'series',
       key: 'index',
-      fill: (row: BandRow) => `url(#${gradientId(row.series)})`,
+      fill: (row: BandRow) =>
+        series.find((entry) => entry.key === row.series)?.texture === 'dots'
+          ? `url(#${dotsId(row.series)})`
+          : `url(#${gradientId(row.series)})`,
       fillOpacity: 1,
       curve: curveFactory,
     });
@@ -731,8 +753,8 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
         y2: 1,
         stops: [
           // Stacked bands touch and carry more weight. Overlaid ones have to show each other through.
-          { offset: 0, color: entry.stroke, opacity: (entry.fillOpacity ?? (stacked ? 0.6 : 0.35)) * entry.opacity },
-          { offset: 1, color: entry.stroke, opacity: entry.gradientToOpacity * entry.opacity },
+          { offset: 0, color: entry.stroke, opacity: fillStops(entry, stacked).top },
+          { offset: 1, color: entry.stroke, opacity: fillStops(entry, stacked).bottom },
         ],
       })),
       ...(compact ? { guides: false as const, margin: 0 } : {}),
@@ -775,6 +797,7 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
     yAxis,
     tooltip,
     skeleton,
+    texturePrefix,
   ]);
 
   // Marks take their timing from the definition. This one is what the readout
@@ -902,6 +925,15 @@ const AreaChartRoot = forwardRef<AreaChartHandle, AreaChartProps & Omit<RenderPr
               onPointerMove={readDrag}
               onPointerCancel={() => interactionRef.current?.setControlledFocus(null)}
             >
+              {width > 0 && series.some((entry) => entry.texture === 'dots') ? (
+                <DotTextures
+                  prefix={texturePrefix}
+                  series={series}
+                  stacked={stacked}
+                  width={width}
+                  height={width / aspectRatio}
+                />
+              ) : null}
               {width > 0 ? (
                 <Chart
                   // An entrance only grows from the baseline on a chart's first paint,
@@ -1003,6 +1035,63 @@ function AreaChartGrid({
 }
 AreaChartGrid.displayName = 'AreaChart.Grid';
 
+/*
+ * The dotted fills, defined once in the page and referenced by the bands.
+ *
+ * A band's fill is a pattern the size of the plot holding one rectangle: the
+ * series' colour fading from the top of the plot to the bottom, masked by a
+ * grid of dots. The fade is in the plot's coordinates rather than the band's,
+ * so every column's dots get brighter towards the top of the chart, and two
+ * dotted bands share one grid, so their dots line up where they overlap.
+ */
+function DotTextures({
+  prefix,
+  series,
+  stacked,
+  width,
+  height,
+}: {
+  prefix: string;
+  series: readonly SeriesEntry[];
+  stacked: boolean;
+  width: number;
+  height: number;
+}) {
+  return (
+    <svg aria-hidden="true" focusable="false" width="0" height="0" className="absolute">
+      <defs>
+        {series.map((entry, index) => {
+          if (entry.texture !== 'dots') return null;
+          const id = `${prefix}-${index}`;
+          const { top, bottom } = fillStops(entry, stacked);
+          const gap = entry.dotGap;
+          return (
+            <g key={entry.key}>
+              <pattern id={`${id}-grid`} width={gap} height={gap} patternUnits="userSpaceOnUse">
+                <circle cx={gap / 2} cy={gap / 2} r={entry.dotSize / 2} fill="white" />
+              </pattern>
+              <mask id={`${id}-mask`} maskUnits="userSpaceOnUse" x={0} y={0} width={width} height={height}>
+                <rect width={width} height={height} fill={`url(#${id}-grid)`} />
+              </mask>
+              <linearGradient id={`${id}-fade`} gradientUnits="userSpaceOnUse" x1={0} y1={0} x2={0} y2={height}>
+                {/* As styles, so a colour given as a CSS variable resolves. */}
+                <stop offset={0} style={{ stopColor: entry.stroke, stopOpacity: top }} />
+                <stop offset={1} style={{ stopColor: entry.stroke, stopOpacity: bottom }} />
+              </linearGradient>
+              <pattern id={id} width={width} height={height} patternUnits="userSpaceOnUse">
+                {/* A faint wash under the dots, so on a light surface the band still
+                    reads as a shape and not as loose dots on white. */}
+                <rect width={width} height={height} style={{ fill: entry.stroke, fillOpacity: 0.08 * entry.opacity }} />
+                <rect width={width} height={height} fill={`url(#${id}-fade)`} mask={`url(#${id}-mask)`} />
+              </pattern>
+            </g>
+          );
+        })}
+      </defs>
+    </svg>
+  );
+}
+
 export interface AreaChartAreaProps {
   /** Column in the data holding this series' values. */
   dataKey: string;
@@ -1021,6 +1110,16 @@ export interface AreaChartAreaProps {
   showLine?: boolean;
   /** Thickness of that line. */
   strokeWidth?: number;
+  /**
+   * `dots` fills the band with a grid of dots instead of a wash, brightest at
+   * the top of the plot. Use it for one series picked out from the others, or
+   * for a chart that should read as a printout rather than a shape. Default `solid`.
+   */
+  texture?: AreaChartTexture;
+  /** Diameter of each dot, in pixels, with `texture="dots"`. Default `2.5`. */
+  dotSize?: number;
+  /** Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. */
+  dotGap?: number;
 }
 
 /**
@@ -1032,16 +1131,30 @@ function AreaChartArea({
   dataKey,
   color = 'chart-1',
   fillOpacity,
-  gradientToOpacity = 0,
+  gradientToOpacity,
   opacity = 1,
   showLine = true,
   strokeWidth = 2,
+  texture = 'solid',
+  dotSize = 2.5,
+  dotGap = 5,
 }: AreaChartAreaProps) {
   const { setSeries, removeSeries } = useChart('AreaChart.Area');
   const stroke = paintOf(color);
   useEffect(() => {
-    setSeries({ key: dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth });
-  }, [dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth, setSeries]);
+    setSeries({
+      key: dataKey,
+      stroke,
+      fillOpacity,
+      gradientToOpacity,
+      opacity,
+      showLine,
+      strokeWidth,
+      texture,
+      dotSize: Math.max(0.5, dotSize),
+      dotGap: Math.max(1, dotGap),
+    });
+  }, [dataKey, stroke, fillOpacity, gradientToOpacity, opacity, showLine, strokeWidth, texture, dotSize, dotGap, setSeries]);
   // Apart from the update above, so a new colour keeps the series' place in the order.
   useEffect(() => () => removeSeries(dataKey), [dataKey, removeSeries]);
   return null;

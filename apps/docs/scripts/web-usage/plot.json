@@ -73,6 +73,12 @@
       "height": 440
     },
     {
+      "title": "Dragging events along the axis",
+      "description": "Each dot on the axis is a watering, and dragging one along the day redraws the moisture it leaves behind. The arrow keys move a focused dot by ten minutes, and Page Up and Page Down by an hour. The dragged watering's share of the curve is picked out in colour, and the rules follow the peak and the moisture left at 22:00.\n\nThe dotted fills are a `Plot.Layer` of your own: a pattern of dots clipped to the area, masked by a fade from the top of the plot. The dots on the axis are buttons in `Plot.Overlay`, which takes the pointer, and they report their position as sliders.",
+      "demo": "dragging",
+      "height": 500
+    },
+    {
       "title": "Loading and changing data",
       "description": "With `status=\"loading\"` the grid stays and nothing else is drawn. Turning `ready` uncovers the marks from the left, and going back to `loading` arms that again.\n\nWhen the data changes, the marks and rules move to their new values over `domainDuration`. A `ref` on the chart has `replay()`, which uncovers it again.",
       "demo": "changing-data",

@@ -289,6 +289,72 @@ export default function BarChartSmallValues() {
 
 </ComponentPreview>
 
+### Dot matrix
+
+`texture="dots"` fills the bars with a grid of dots instead of a solid colour. The dots are brightest towards the end a bar grows to, measured across the whole plot, so a taller bar reaches brighter dots. Every bar shares one grid, so the rows of dots line up across the chart.
+
+`dotSize` and `dotGap` set the grid, in pixels. Square bars with `cornerRadius={0}` keep the edge of the grid clean, and `font-mono uppercase` on the chart sets its axes in a readout's type.
+
+<ComponentPreview name="bar-chart/dot-matrix" height={460}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { BarChart, type BarChartDatum } from '@/components/panelui/bar-chart';
+
+/** Rain at one weather station, in millimetres, for each month of a year. */
+const RAIN = [
+  { month: 'Jan', rain: 92, normal: 84 },
+  { month: 'Feb', rain: 61, normal: 62 },
+  { month: 'Mar', rain: 48, normal: 58 },
+  { month: 'Apr', rain: 39, normal: 51 },
+  { month: 'May', rain: 55, normal: 49 },
+  { month: 'Jun', rain: 30, normal: 46 },
+  { month: 'Jul', rain: 22, normal: 44 },
+  { month: 'Aug', rain: 64, normal: 55 },
+  { month: 'Sep', rain: 71, normal: 60 },
+  { month: 'Oct', rain: 118, normal: 82 },
+  { month: 'Nov', rain: 104, normal: 88 },
+  { month: 'Dec', rain: 97, normal: 90 },
+];
+
+const TOTAL = RAIN.reduce((sum, row) => sum + row.rain, 0);
+const LABELS = { rain: 'This year', normal: 'Average' };
+
+export default function BarChartDotMatrix() {
+  const [active, setActive] = useState<BarChartDatum | null>(null);
+
+  return (
+    <BarChart
+      data={RAIN}
+      xDataKey="month"
+      aspectRatio={2.2}
+      barGap={0.3}
+      cornerRadius={0}
+      className="max-w-xl font-mono uppercase"
+      label="Monthly rainfall this year beside the long-run average, in millimetres"
+      onActiveIndexChange={(_index, datum) => setActive(datum)}
+    >
+      <BarChart.Header
+        title="Rainfall"
+        value={active ? `${active.rain} mm` : `${TOTAL} mm`}
+        caption={active ? `${active.month}, average ${active.normal} mm` : 'This year'}
+      />
+      <BarChart.Grid />
+      <BarChart.Bar dataKey="normal" color="chart-3" texture="dots" dotSize={3} dotGap={4.5} />
+      <BarChart.Bar dataKey="rain" color="chart-1" texture="dots" dotSize={3} dotGap={4.5} />
+      <BarChart.XAxis />
+      <BarChart.YAxis />
+      <BarChart.Legend labels={LABELS} />
+      <BarChart.Tooltip labels={LABELS} formatValue={(value) => `${value} mm`} />
+    </BarChart>
+  );
+}
+```
+
+</ComponentPreview>
+
 ### Loading, then data
 
 Add `BarChart.Skeleton` and drive `status`. The bars grow out of the baseline when it turns `ready`. It draws one stub per row, or seven with no rows yet; `bars` sets another count.
@@ -420,8 +486,11 @@ export default function BarChartChangingData() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | — | Column in the data holding this series' values. |
-| `color` | `BarChartColor` | — | Which of the theme's roles the series is drawn in. |
+| `color` | `BarChartColor` | `'chart-1'` | Which of the theme's roles the series is drawn in. |
 | `cornerRadius` | `number` | `4` | Corner radius, overriding the chart's. |
+| `texture` | `BarChartTexture` | `'solid'` | `dots` fills the bars with a grid of dots instead of a solid colour, brighter towards the end each bar grows to. Use it for a chart that should read as a printout, or to set one series apart from solid ones. Default `solid`. |
+| `dotSize` | `number` | `3` | Diameter of each dot, in pixels, with `texture="dots"`. Default `3`. |
+| `dotGap` | `number` | `5` | Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. |
 
 ### BarChart.Skeleton
 

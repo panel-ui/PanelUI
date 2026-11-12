@@ -62,6 +62,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -171,7 +172,13 @@ interface SeriesEntry {
   key: string;
   fill: string;
   radius: number | undefined;
+  texture: BarChartTexture;
+  dotSize: number;
+  dotGap: number;
 }
+
+/** How a bar is filled: solid colour, or a grid of dots. */
+export type BarChartTexture = 'solid' | 'dots';
 
 /**
  * What the parts have asked for. An axis formatter is part of the drawing, so a new one redraws it.
@@ -365,6 +372,8 @@ const BarChartRoot = forwardRef<BarChartHandle, BarChartProps & RenderProp<'div'
   const slotClasses = barChartVariants();
   const plotRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
+  // Pattern ids for dotted bars, unique to this chart so two on a page do not share one.
+  const texturePrefix = `panelui-bar-dots-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const [series, setSeriesState] = useState<readonly SeriesEntry[]>([]);
   const [slots, setSlots] = useState<Slots>({});
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -429,7 +438,11 @@ const BarChartRoot = forwardRef<BarChartHandle, BarChartProps & RenderProp<'div'
     const shared = {
       key: (row: BarRow) => `${row.index}:${row.series}`,
       z: (row: BarRow) => row.series,
-      fill: (row: BarRow) => bySeries.get(row.series)?.fill ?? COLOR_VAR['chart-1'],
+      fill: (row: BarRow) => {
+        const entry = bySeries.get(row.series);
+        if (entry?.texture === 'dots') return `url(#${texturePrefix}-${series.indexOf(entry)})`;
+        return entry?.fill ?? COLOR_VAR['chart-1'];
+      },
       radius: {
         end: (row: BarRow) => bySeries.get(row.series)?.radius ?? cornerRadius,
         stack: 'each' as const,
@@ -606,6 +619,7 @@ const BarChartRoot = forwardRef<BarChartHandle, BarChartProps & RenderProp<'div'
     yAxis,
     tooltip,
     skeleton,
+    texturePrefix,
   ]);
 
   // Marks take their timing from the definition. This one is what the readout
@@ -692,6 +706,15 @@ const BarChartRoot = forwardRef<BarChartHandle, BarChartProps & RenderProp<'div'
               onPointerMove={readDrag}
               onPointerCancel={() => interactionRef.current?.setControlledFocus(null)}
             >
+              {width > 0 && series.some((entry) => entry.texture === 'dots') ? (
+                <DotTextures
+                  prefix={texturePrefix}
+                  series={series}
+                  horizontal={horizontal}
+                  width={width}
+                  height={width / aspectRatio}
+                />
+              ) : null}
               {width > 0 ? (
                 <Chart
                   // An entrance only grows from the baseline on a chart's first paint,
@@ -766,6 +789,70 @@ function BarChartGrid({ rows = 4, dashArray = '4 6', opacity = 1 }: BarChartGrid
 }
 BarChartGrid.displayName = 'BarChart.Grid';
 
+/*
+ * The dotted fills, defined once in the page and referenced by the bars.
+ *
+ * Each is a pattern the size of the plot holding one rectangle in the series'
+ * colour, fading from the bars' far end to the baseline and masked by a grid
+ * of dots. The fade runs across the whole plot, not each bar, so a taller bar
+ * reaches brighter dots, and every bar shares one grid, so the dots line up
+ * from one bar to the next.
+ */
+function DotTextures({
+  prefix,
+  series,
+  horizontal,
+  width,
+  height,
+}: {
+  prefix: string;
+  series: readonly SeriesEntry[];
+  horizontal: boolean;
+  width: number;
+  height: number;
+}) {
+  return (
+    <svg aria-hidden="true" focusable="false" width="0" height="0" className="absolute">
+      <defs>
+        {series.map((entry, index) => {
+          if (entry.texture !== 'dots') return null;
+          const id = `${prefix}-${index}`;
+          const gap = entry.dotGap;
+          return (
+            <g key={entry.key}>
+              <pattern id={`${id}-grid`} width={gap} height={gap} patternUnits="userSpaceOnUse">
+                <circle cx={gap / 2} cy={gap / 2} r={entry.dotSize / 2} fill="white" />
+              </pattern>
+              <mask id={`${id}-mask`} maskUnits="userSpaceOnUse" x={0} y={0} width={width} height={height}>
+                <rect width={width} height={height} fill={`url(#${id}-grid)`} />
+              </mask>
+              {/* Brightest at the end a bar grows towards: the top, or the right when sideways. */}
+              <linearGradient
+                id={`${id}-fade`}
+                gradientUnits="userSpaceOnUse"
+                x1={horizontal ? width : 0}
+                y1={0}
+                x2={0}
+                y2={horizontal ? 0 : height}
+              >
+                {/* As styles, so a colour given as a CSS variable resolves. */}
+                <stop offset={0} style={{ stopColor: entry.fill, stopOpacity: 1 }} />
+                <stop offset={1} style={{ stopColor: entry.fill, stopOpacity: 0.55 }} />
+              </linearGradient>
+              <pattern id={id} width={width} height={height} patternUnits="userSpaceOnUse">
+                {/* A faint wash under the dots, so on a light surface the bar still
+                    reads as a shape and not as loose dots on white. */}
+                <rect width={width} height={height} style={{ fill: entry.fill, fillOpacity: 0.12 }} />
+                <rect width={width} height={height} fill={`url(#${id}-fade)`} mask={`url(#${id}-mask)`} />
+              </pattern>
+            </g>
+          );
+        })}
+      </defs>
+    </svg>
+  );
+}
+
 export interface BarChartBarProps {
   /** Column in the data holding this series' values. */
   dataKey: string;
@@ -773,15 +860,32 @@ export interface BarChartBarProps {
   color?: BarChartColor;
   /** Corner radius, overriding the chart's. */
   cornerRadius?: number;
+  /**
+   * `dots` fills the bars with a grid of dots instead of a solid colour, brighter
+   * towards the end each bar grows to. Use it for a chart that should read as a
+   * printout, or to set one series apart from solid ones. Default `solid`.
+   */
+  texture?: BarChartTexture;
+  /** Diameter of each dot, in pixels, with `texture="dots"`. Default `3`. */
+  dotSize?: number;
+  /** Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. */
+  dotGap?: number;
 }
 
 /** One series of bars. Their order is the order they stand in a band or stack. */
-function BarChartBar({ dataKey, color = 'chart-1', cornerRadius }: BarChartBarProps) {
+function BarChartBar({
+  dataKey,
+  color = 'chart-1',
+  cornerRadius,
+  texture = 'solid',
+  dotSize = 3,
+  dotGap = 5,
+}: BarChartBarProps) {
   const { setSeries, removeSeries } = useChart('BarChart.Bar');
   const fill = COLOR_VAR[color];
   useEffect(() => {
-    setSeries({ key: dataKey, fill, radius: cornerRadius });
-  }, [dataKey, fill, cornerRadius, setSeries]);
+    setSeries({ key: dataKey, fill, radius: cornerRadius, texture, dotSize: Math.max(0.5, dotSize), dotGap: Math.max(1, dotGap) });
+  }, [dataKey, fill, cornerRadius, texture, dotSize, dotGap, setSeries]);
   // Apart from the update above, so a new colour keeps the series' place in the order.
   useEffect(() => () => removeSeries(dataKey), [dataKey, removeSeries]);
   return null;

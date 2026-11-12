@@ -47,6 +47,12 @@
       "height": 300
     },
     {
+      "title": "Dot matrix",
+      "description": "`texture=\"dots\"` fills a band with a grid of dots instead of a wash. The dots are brightest at the top of the plot and dim towards the baseline, so a tall reading stands out even where two bands overlap. Here the room to watch is in a colour and the other is grey, with no line along its edge.\n\n`dotSize` and `dotGap` set the grid, in pixels. Two dotted bands share one grid, so their dots line up where they cross. `font-mono uppercase` on the chart sets its axes and labels in a readout's type.",
+      "demo": "dot-matrix",
+      "height": 500
+    },
+    {
       "title": "Loading, then data",
       "description": "Add `AreaChart.Skeleton` and drive `status`. The bands grow out of the baseline when it turns `ready`. Without the skeleton the plot is empty while loading.",
       "demo": "loading",

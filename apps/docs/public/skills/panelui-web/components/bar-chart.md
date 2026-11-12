@@ -92,8 +92,11 @@ The value axis always includes zero, because a bar cropped at the bottom misstat
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `dataKey` | `string` | **required** | Column in the data holding this series' values. |
-| `color` | `BarChartColor` | — | Which of the theme's roles the series is drawn in. |
+| `color` | `BarChartColor` | `'chart-1'` | Which of the theme's roles the series is drawn in. |
 | `cornerRadius` | `number` | `4` | Corner radius, overriding the chart's. |
+| `texture` | `BarChartTexture` | `'solid'` | `dots` fills the bars with a grid of dots instead of a solid colour, brighter towards the end each bar grows to. Use it for a chart that should read as a printout, or to set one series apart from solid ones. Default `solid`. |
+| `dotSize` | `number` | `3` | Diameter of each dot, in pixels, with `texture="dots"`. Default `3`. |
+| `dotGap` | `number` | `5` | Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. |
 
 #### `BarChartSkeletonProps`
 

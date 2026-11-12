@@ -43,6 +43,12 @@
       "height": 340
     },
     {
+      "title": "Dot matrix",
+      "description": "`texture=\"dots\"` fills the bars with a grid of dots instead of a solid colour. The dots are brightest towards the end a bar grows to, measured across the whole plot, so a taller bar reaches brighter dots. Every bar shares one grid, so the rows of dots line up across the chart.\n\n`dotSize` and `dotGap` set the grid, in pixels. Square bars with `cornerRadius={0}` keep the edge of the grid clean, and `font-mono uppercase` on the chart sets its axes in a readout's type.",
+      "demo": "dot-matrix",
+      "height": 460
+    },
+    {
       "title": "Loading, then data",
       "description": "Add `BarChart.Skeleton` and drive `status`. The bars grow out of the baseline when it turns `ready`. It draws one stub per row, or seven with no rows yet; `bars` sets another count.",
       "demo": "loading",

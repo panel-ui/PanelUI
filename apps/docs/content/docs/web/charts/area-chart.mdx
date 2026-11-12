@@ -368,6 +368,92 @@ export default function AreaChartDimmed() {
 
 </ComponentPreview>
 
+### Dot matrix
+
+`texture="dots"` fills a band with a grid of dots instead of a wash. The dots are brightest at the top of the plot and dim towards the baseline, so a tall reading stands out even where two bands overlap. Here the room to watch is in a colour and the other is grey, with no line along its edge.
+
+`dotSize` and `dotGap` set the grid, in pixels. Two dotted bands share one grid, so their dots line up where they cross. `font-mono uppercase` on the chart sets its axes and labels in a readout's type.
+
+<ComponentPreview name="area-chart/dot-matrix" height={500}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { AreaChart, type AreaChartDatum } from '@/components/panelui/area-chart';
+import { Frame } from '@/components/panelui/frame';
+
+/** CO₂ in parts per million through one working day, read every half hour. */
+const READINGS = [
+  ['08:00', 430, 440],
+  ['08:30', 470, 455],
+  ['09:00', 640, 520],
+  ['09:30', 820, 610],
+  ['10:00', 960, 700],
+  ['10:30', 1080, 760],
+  ['11:00', 1150, 790],
+  ['11:30', 990, 820],
+  ['12:00', 720, 760],
+  ['12:30', 560, 640],
+  ['13:00', 610, 580],
+  ['13:30', 780, 690],
+  ['14:00', 910, 840],
+  ['14:30', 1010, 930],
+  ['15:00', 1060, 960],
+  ['15:30', 880, 900],
+  ['16:00', 700, 850],
+  ['16:30', 590, 780],
+  ['17:00', 500, 640],
+] as const;
+
+const DAY = READINGS.map(([time, harbour, garden]) => ({ time, harbour, garden }));
+const LIMIT = 1000;
+const PEAK = DAY.reduce((top, row, index) => (row.harbour > DAY[top]!.harbour ? index : top), 0);
+const OVER = DAY.filter((row) => row.harbour > LIMIT).length / 2;
+const LABELS = { harbour: 'Harbour room', garden: 'Garden room' };
+
+export default function AreaChartDotMatrix() {
+  const [active, setActive] = useState<AreaChartDatum | null>(null);
+  const row = (active ?? DAY[PEAK]!) as (typeof DAY)[number];
+
+  return (
+    <Frame variant="band" className="w-full max-w-2xl">
+      <Frame.Header>
+        <Frame.Title>Meeting rooms · CO₂</Frame.Title>
+        <Frame.Action>{OVER} h over {LIMIT} ppm</Frame.Action>
+      </Frame.Header>
+      <Frame.Panel className="p-5">
+        <AreaChart
+          data={DAY}
+          xDataKey="time"
+          aspectRatio={2.2}
+          yDomain={[0, 1400]}
+          className="font-mono uppercase"
+          label="Carbon dioxide in two meeting rooms through the working day, in parts per million"
+          onActiveIndexChange={(_index, datum) => setActive(datum)}
+        >
+          <AreaChart.Header
+            value={`${row.harbour} ppm`}
+            caption={active ? `Harbour room at ${row.time}` : `Harbour room peak, ${row.time}`}
+            labels={LABELS}
+            legend
+          />
+          <AreaChart.Area dataKey="garden" color="var(--muted-foreground)" texture="dots" showLine={false} />
+          <AreaChart.Area dataKey="harbour" color="chart-1" texture="dots" strokeWidth={1.5} />
+          <AreaChart.ReferenceLine y={LIMIT} dashArray="2 4" color="var(--muted-foreground)" label={`Open a window · ${LIMIT}`} />
+          <AreaChart.Marker index={PEAK} color="var(--foreground)" label={`Peak ${DAY[PEAK]!.harbour} ppm`} />
+          <AreaChart.YAxis />
+          <AreaChart.XAxis />
+          <AreaChart.Tooltip labels={LABELS} formatValue={(value) => `${value} ppm`} />
+        </AreaChart>
+      </Frame.Panel>
+    </Frame>
+  );
+}
+```
+
+</ComponentPreview>
+
 ### Loading, then data
 
 Add `AreaChart.Skeleton` and drive `status`. The bands grow out of the baseline when it turns `ready`. Without the skeleton the plot is empty while loading.
@@ -495,10 +581,13 @@ export default function AreaChartChangingData() {
 | `dataKey` | `string` | — | Column in the data holding this series' values. |
 | `color` | `AreaChartColor` | `'chart-1'` | A role in the theme, or any CSS colour. |
 | `fillOpacity` | `number` | — | Opacity of the fill at the top of the band. Defaults to `0.6` stacked and `0.35` overlaid, so overlaid bands show each other through. |
-| `gradientToOpacity` | `number` | `0` | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
+| `gradientToOpacity` | `number` | — | Opacity at the bottom. `0` fades the band out; match `fillOpacity` for a flat fill. |
 | `opacity` | `number` | `1` | Opacity of the whole series, fill and edge, for picking one out from the others. |
 | `showLine` | `boolean` | `true` | Draw the line along the top edge of the band. |
 | `strokeWidth` | `number` | `2` | Thickness of that line. |
+| `texture` | `AreaChartTexture` | `'solid'` | `dots` fills the band with a grid of dots instead of a wash, brightest at the top of the plot. Use it for one series picked out from the others, or for a chart that should read as a printout rather than a shape. Default `solid`. |
+| `dotSize` | `number` | `2.5` | Diameter of each dot, in pixels, with `texture="dots"`. Default `2.5`. |
+| `dotGap` | `number` | `5` | Distance from one dot's centre to the next, in pixels, with `texture="dots"`. Default `5`. |
 
 ### AreaChart.Line
 

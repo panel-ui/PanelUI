@@ -360,11 +360,3 @@ The viewport takes focus when there is something to scroll, and shows a ring ins
 ### Reduced motion
 
 With reduced motion set, the bar appears and disappears without fading.
-
-### Server Components
-
-`ScrollArea` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ScrollArea.Root` off the import, so each part is also exported by name: `ScrollAreaRoot` is `ScrollArea.Root`, and so on for the others.
-
-```tsx
-import { ScrollArea, ScrollAreaRoot, ScrollAreaViewport, ScrollAreaContent, ScrollAreaScrollbar, ScrollAreaCorner } from "@/components/panelui/scroll-area"
-```

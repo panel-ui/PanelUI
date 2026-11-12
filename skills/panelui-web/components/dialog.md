@@ -69,7 +69,7 @@ For a yes-or-no question, use [Alert Dialog](/docs/web/components/alert-dialog).
 - `Dialog.List` — A list of one-line choices, such as time zones or the projects to move something to. The arrow keys, Home and End move between its items, and it opens scrolled to the selected one.
 - `Dialog.ListGroup` — A run of items under a `label`, which stays pinned at the top while its items scroll under it.
 - `Dialog.ListItem` — One choice. `selected` tints and checks it, `onSelect` is called when it is pressed or chosen with Enter, and `meta` puts quieter text at its end in figures that line up.
-- `Dialog.Footer` — The buttons. In the inset look they sit in the band as equal pills; in `plain` they sit at the end of a ruled strip. Keep it a direct child of `Dialog.Content`.
+- `Dialog.Footer` — The buttons. In the inset look they sit in the band as equal pills, from any depth inside `Dialog.Content`. In `plain` they stay where written, at the end of a ruled strip, so keep the footer after `Dialog.Body` to hold it outside the scroll.
 - `Dialog.Close` — Closes the dialog. Pass your own button as `render`, such as Cancel.
 
 ## Props
@@ -165,7 +165,11 @@ When it opens, focus goes to the first field in it. The close button is drawn in
 
 #### Forms
 
-Put the `<form>` in `Dialog.Body` with an `id`, and give the submit button in the footer `type="submit"` and `form` set to that `id`. Enter in a field then submits it, and the footer can stay a direct child of the content.
+Put the `<form>` in `Dialog.Body` with an `id`, and give the submit button in the footer `type="submit"` and `form` set to that `id`. Enter in a field then submits it. The inset footer moves to the band even when it is written inside the `<form>`, so it always needs `form`.
+
+#### State that starts fresh
+
+Everything inside `Dialog.Content` unmounts once the dialog has closed, and `Dialog.Footer` still reaches the band from inside a component of your own. Keep a form's state in a component rendered inside `Dialog.Content` and it starts empty on every opening, while the root stays mounted so opening and closing both animate.
 
 #### On a phone
 

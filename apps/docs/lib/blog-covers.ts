@@ -1,103 +1,36 @@
 /**
- * Pixel-art covers for blog posts, drawn by hand on a 64 × 36 grid.
+ * Cover images for blog posts, by the key a post names in its frontmatter
+ * (`cover: <key>`).
  *
- * Each character is one pixel, and each character names a theme role rather
- * than a colour, so a cover follows the reader's light or dark theme like the
- * rest of the page:
- *
- * | char | role |
- * | --- | --- |
- * | `.` | nothing — the cover's own background shows through |
- * | `-` | border |
- * | `#` | foreground |
- * | `o` | background |
- * | `c` | muted, over the background |
- * | `m` | muted foreground |
- * | `p` | primary |
- * | `1`–`5` | chart-1 to chart-5 |
- *
- * A post names its cover in frontmatter (`cover: <key>`).
+ * Each cover is a 16:9 image in `public/blog/covers`: a WebP at the width of
+ * the article column on a high-density screen, and a smaller JPEG for the
+ * social card, which embeds the image in the card and does not take WebP.
+ * The images sit on a mid-grey ground, so one file reads in either theme.
  */
-export const COVER_WIDTH = 64;
-export const COVER_HEIGHT = 36;
+export interface BlogCover {
+  /** The page's image, 1600 × 900. */
+  src: string;
+  /** The social card's image, 800 × 450. */
+  card: string;
+  width: number;
+  height: number;
+  /** What the image shows, for a screen reader. */
+  alt: string;
+}
 
-export const COVERS: Record<string, readonly string[]> = {
-  /** A phone assembling its screen from blocks, with finished panels beside it. */
-  'why-panelui-exists': [
-    '................................................................',
-    '..-...-...-...-...-...-...-...-...-...-...-...-...-...-...-...-.',
-    '........................################........................',
-    '.......................##################...................5...',
-    '.......................##ooooo####ooooo##..................5.5..',
-    '..-...11111...-...-...-##oooooooooooooo##.-...-...-...-...-.5.-.',
-    '......1pp11............##ommmoooooommmo##......###########......',
-    '......1p111............##oooooooooooooo##.....#ccccccccccc#.....',
-    '......11111m...........##o#######oooooo##.....#c######cccc#.....',
-    '..-...11111..m-...-...-##o#######oooooo##.-...#ccccccccccc#...-.',
-    '...............m.......##oooooooooooooo##.....#cmmmmmmmmmc#.....',
-    '.................m.....##ommmmmmmmmmooo##.....#ccccccccccc#.....',
-    '...................m...##oooooooooooooo##.....#cmmmmmccccc#.....',
-    '..-...-...-.22222.-...-##o.----------.o##.-...#ccccccccccc#...-.',
-    '............2pp22......##o-ccc2cccccc-o##......###########......',
-    '............2p222......##o-ccc2ccc4cc-o##.......................',
-    '............22222......##o-c1c2ccc4cc-o##.......................',
-    '..-...-...-.22222.m...-##o-c1c2c3c4cc-o##.-...-...----------..-.',
-    '....................m..##o-c1c2c3c4cc-o##........-cccccccccc-...',
-    '.......................##o-c1c2c3c4cc-o##........-c4444ccccc-...',
-    '.......................##o------------o##........-cccccccccc-...',
-    '..-..33333-...-...-...-##o.----------.o##.-...-..-cmmmmmmmcc-.-.',
-    '.....3pp33.............##oooooooooooooo##........-cccccccccc-...',
-    '.....3p333.............##oooooooo.ppp.o##.........----------....',
-    '.....33333.m..m........##ommmmmmopppopo##.......................',
-    '..-..33333-...-..m-.m.-##oooooooo.ppp.o##.-...-...-...-...-...-.',
-    '.......................##o2ommmmmmooooo##.....------------......',
-    '.......................##oooooooooooooo##....-c.pppp.ccccc-.....',
-    '.......................##o1ommmmmmmmooo##....-cppppppccmmc-.....',
-    '..-...-...-...-...-...-##oooooooooooooo##.-..-c.pppp.ccccc-...-.',
-    '.......................##o.pppppppppp.o##.....------------......',
-    '...5...................##oppppooooppppo##.......................',
-    '..5.5..................##o.pppppppppp.o##.......................',
-    '..-5..-...-...-...-...-##################.-...-...-...-...-...-.',
-    '........................################........................',
-    '................................................................',
-  ],
-  /** A phone whose React screen is cracking, a question mark, and the three ways teams are leaving: Swift, Kotlin and Rust. */
-  'end-of-react-native': [
-    '................................................................',
-    '................................................................',
-    '..-...-...-...-...-...####################-...-...-...-...-...-.',
-    '......................####################......................',
-    '......................##oooooooooooooooo##......333333333333....',
-    '......................##ooooo######ooooo##......33o333333333....',
-    '..-...-...-...-...-...##oooooooooooooooo##-...-.333oo333o333..-.',
-    '......................##oooo11oooo11oooo##......3333ooooo333....',
-    '......................##oooo111oo111oooo##.....m33333oooo333....',
-    '......................##oooo1o1111o1oooo##...m..3333oooo3333....',
-    '..-...-...-...-...-...##oooo1oo11oo1oooo##-m..-.333oo3333333..-.',
-    '.......#######........##oooo1o1111o1oooo##......333333333333....',
-    '......#########.......##o111111oo111111o##......................',
-    '.....###.....###......##o1ooo11pp11ooo1o##......................',
-    '..-..##...-...##..-...##11ooo11pp11ooo1o##-...-.444444444444..-.',
-    '.............###......##o111111oo111111o##......4444o44o4444....',
-    '............###.......##oooo1o1111o1oooo##......4444o4o44444....',
-    '...........###........##oooo1oo11oo1oooo##......4444oo444444....',
-    '..-...-...###.-...-...##oooo1o1111o1oooo##-m.m-m4444o4o44444..-.',
-    '.........###..........##oooo111oo111oooo##......4444o44o4444....',
-    '.........###..........##oooo11ooo#11oooo##......444444444444....',
-    '......................##oommmmmm#ommmmoo##......444444444444....',
-    '..-...-..###..-...-...##ooooooooo#oooooo##-...-...-...-...-...-.',
-    '.........###..........##oooooooooo#ooooo##......................',
-    '......................##oommmmmmm#ommmoo##......555555555555....',
-    '......................##oooooooo#ooooooo##......55555oo55555....',
-    '..-...-...-...-...-...##ooooooooo#oooooo##-m..-.5555o55o5555..-.',
-    '......................##oommmmmmmm#ommoo##...m..555o5oo5o555....',
-    '......................##ooooooooo#oooooo##.....m555o5oo5o555....',
-    '......................##oooooooo#ooooooo##......5555o55o5555....',
-    '..-...-...-...-...-...##oommmmmmm#ommmoo##-...-.55555oo55555..-.',
-    '......................##oooooooooo#ooooo##......555555555555....',
-    '......................##oooooooooooooooo##......................',
-    '......................####################......................',
-    '..-...-...-...-...-...####################-...-...-...-...-...-.',
-    '................................................................',
-  ],
+export const COVERS: Record<string, BlogCover> = {
+  'why-panelui-exists': {
+    src: '/blog/covers/why-panelui-exists.webp',
+    card: '/blog/covers/why-panelui-exists-card.jpg',
+    width: 1600,
+    height: 900,
+    alt: 'A phone with interface pieces drifting in from either side and settling into place on its screen: a toggle, a button, a chart, a calendar and a bottom sheet.',
+  },
+  'end-of-react-native': {
+    src: '/blog/covers/end-of-react-native.webp',
+    card: '/blog/covers/end-of-react-native-card.jpg',
+    width: 1600,
+    height: 900,
+    alt: 'A phone whose screen, showing a glowing atom, is split by a crack down the middle, with a question mark behind it and three coloured blocks to its right.',
+  },
 };

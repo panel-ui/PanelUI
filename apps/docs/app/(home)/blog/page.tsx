@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RssIcon } from 'lucide-react';
 import { Byline } from '@/components/blog/byline';
-import { PixelCover } from '@/components/blog/pixel-cover';
+import { BlogCover } from '@/components/blog/cover';
 import { authorOf, formatDate, getPosts, slugOf } from '@/lib/blog';
 import { absoluteUrl, site } from '@/lib/site';
 
@@ -45,8 +45,10 @@ export default function BlogPage() {
               href={`/blog/${slugOf(lead)}`}
               className="group grid items-center gap-6 lg:grid-cols-[3fr_2fr] lg:gap-10"
             >
-              <PixelCover
+              <BlogCover
                 cover={lead.cover}
+                priority
+                sizes="(min-width: 1024px) 600px, 100vw"
                 className="rounded-2xl border transition-opacity group-hover:opacity-90"
               />
               <div className="flex flex-col gap-4">
@@ -71,8 +73,9 @@ export default function BlogPage() {
               {rest.map((post) => (
                 <li key={slugOf(post)}>
                   <Link href={`/blog/${slugOf(post)}`} className="group flex flex-col gap-4">
-                    <PixelCover
+                    <BlogCover
                       cover={post.cover}
+                      sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
                       className="rounded-xl border transition-opacity group-hover:opacity-90"
                     />
                     {post.tags[0] ? (

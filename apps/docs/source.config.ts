@@ -23,7 +23,7 @@ export const docs = defineDocs({
 /*
  * The blog: one MDX file per post in content/blog, outside the docs tree so it
  * never appears in the sidebar. `author` is a key into lib/blog.ts, and `cover`
- * names the post's pixel-art cover there.
+ * names the post's cover image in lib/blog-covers.ts.
  */
 export const blog = defineCollections({
   type: 'doc',

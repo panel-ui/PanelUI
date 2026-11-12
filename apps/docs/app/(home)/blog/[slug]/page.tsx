@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeftIcon } from 'lucide-react';
 import { Byline } from '@/components/blog/byline';
-import { PixelCover } from '@/components/blog/pixel-cover';
+import { BlogCover } from '@/components/blog/cover';
 import { Share } from '@/components/blog/share';
 import { getMDXComponents } from '@/mdx-components';
 import { authorOf, formatDate, getPost, getPosts, readingMinutes, slugOf } from '@/lib/blog';
@@ -112,7 +112,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </header>
 
-        <PixelCover cover={post.cover} className="rounded-2xl border" />
+        <BlogCover cover={post.cover} priority className="rounded-2xl border" />
 
         <div className="prose max-w-none">
           <MDX components={getMDXComponents()} />
@@ -126,7 +126,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {others.map((other) => (
               <li key={slugOf(other)}>
                 <Link href={`/blog/${slugOf(other)}`} className="group flex flex-col gap-3">
-                  <PixelCover cover={other.cover} className="rounded-xl border" />
+                  <BlogCover cover={other.cover} sizes="(min-width: 640px) 370px, 100vw" className="rounded-xl border" />
                   <span className="font-medium group-hover:underline underline-offset-4">
                     {other.title}
                   </span>

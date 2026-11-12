@@ -1,6 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { ImageResponse } from 'next/og';
 import { authorOf, formatDate, getPost, getPosts, slugOf } from '@/lib/blog';
-import { COVER_HEIGHT, COVER_WIDTH, COVERS } from '@/lib/blog-covers';
+import { COVERS } from '@/lib/blog-covers';
 import { OG_SIZE, OgCard } from '@/lib/og-card';
 import { site } from '@/lib/site';
 
@@ -12,25 +14,6 @@ export function generateStaticParams() {
   return getPosts().map((post) => ({ slug: slugOf(post) }));
 }
 
-/**
- * The cover's roles in fixed colours. A social card is a picture of the page,
- * not the page, so there is no reader's theme to follow; it is drawn dark, to
- * sit on the card's own dark ground.
- */
-const PALETTE: Record<string, string> = {
-  '-': '#2d2d32',
-  '#': '#f0f0f0',
-  o: '#1e1e22',
-  c: '#26262b',
-  m: '#78787f',
-  p: '#f0f0f0',
-  '1': '#1d4ed8',
-  '2': '#10b981',
-  '3': '#f59e0b',
-  '4': '#a855f7',
-  '5': '#f43f5e',
-};
-
 /** Cut at a word, with an ellipsis, so the description keeps to two lines beside the cover. */
 const clamp = (text: string, length: number) => {
   if (text.length <= length) return text;
@@ -38,27 +21,22 @@ const clamp = (text: string, length: number) => {
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
 };
 
+/**
+ * The cover's card-sized JPEG as a data URI. The renderer has no network, so
+ * an image given by URL draws as nothing; the bytes go in the card instead.
+ */
+const coverData = (file: string) =>
+  `data:image/jpeg;base64,${fs.readFileSync(path.join(process.cwd(), 'public', file)).toString('base64')}`;
+
 /** The post's card: the site's own card, with the post's cover beside its title. */
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = getPost(slug);
-  const rows = post ? COVERS[post.cover] : undefined;
-  const scale = 6;
+  const image = post ? COVERS[post.cover] : undefined;
 
-  const cover = rows ? (
-    <svg
-      width={COVER_WIDTH * scale}
-      height={COVER_HEIGHT * scale}
-      viewBox={`0 0 ${COVER_WIDTH} ${COVER_HEIGHT}`}
-      shapeRendering="crispEdges"
-      style={{ borderRadius: 16, background: '#1a1a1d' }}
-    >
-      {rows.flatMap((row, y) =>
-        [...row].map((char, x) =>
-          char === '.' ? null : <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={PALETTE[char]} />
-        )
-      )}
-    </svg>
+  const cover = image ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={coverData(image.card)} width={400} height={225} alt="" style={{ borderRadius: 16 }} />
   ) : undefined;
 
   return new ImageResponse(

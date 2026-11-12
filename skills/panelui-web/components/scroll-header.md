@@ -102,6 +102,10 @@ Every part also takes the props of the element it renders, and a `className`.
 
 The window by default. A page with its own scroller passes `scrollRef` an element or a ref to one, and the header listens there instead. The header has to be the first thing in that scroller: the offset it reads is measured from zero, and a header that starts below something else would be measured against the wrong origin.
 
+For a scroller inside the page, use a [Scroll Area](/docs/web/components/scroll-area) and pass its `viewportRef`. Its bar is drawn over the content, so the cover runs to the right-hand edge instead of stopping at a native scrollbar's gutter.
+
+In a rounded scroller, the header takes the scroller's radius at its top corners, so the cover and the blurred bar follow the corner. Put the radius on the element that scrolls or on the Scroll Area, and the header picks it up.
+
 The listener is passive and the read is batched into one `requestAnimationFrame`. Per-frame values are written as CSS custom properties on the header's root (`--scroll-header-fade`, `--scroll-header-band`, `--scroll-header-shift`); React is re-rendered only when the progress reaches an end. The server renders the expanded state, and the first client frame measures the content that is already laid out, so a page that loads at the top does not jump.
 
 #### The two titles
@@ -142,6 +146,7 @@ The header is React and Tailwind theme tokens, with `tailwind-variants` for the 
 import { BookmarkIcon, MoreHorizontalIcon, Share2Icon } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from '@/components/panelui/button';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { ScrollHeader } from '@/components/panelui/scroll-header';
 
 const PARAGRAPHS = [
@@ -157,10 +162,7 @@ export default function ScrollHeaderOverview() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[460px] w-full max-w-2xl rounded-2xl border bg-background text-sm">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Cover />
         <ScrollHeader.Bar>
@@ -199,7 +201,7 @@ export default function ScrollHeaderOverview() {
           </div>
         </article>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }
 ```

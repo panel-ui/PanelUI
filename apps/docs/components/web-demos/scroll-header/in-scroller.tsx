@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { ScrollHeader } from 'panelui-web/scroll-header';
 
 const ENTRIES = [
@@ -46,10 +47,7 @@ export default function ScrollHeaderInScroller() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[420px] w-full max-w-xl overflow-y-auto rounded-2xl border bg-background"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[420px] w-full max-w-xl rounded-2xl border bg-background">
       <ScrollHeader scrollRef={scroller} barHeight={48} threshold={0.5}>
         <ScrollHeader.Bar>
           <ScrollHeader.Title>Changelog</ScrollHeader.Title>
@@ -72,6 +70,6 @@ export default function ScrollHeaderInScroller() {
           ))}
         </ol>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }

@@ -3,6 +3,7 @@
 import { Share2Icon } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from 'panelui-web/button';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { ScrollHeader } from 'panelui-web/scroll-header';
 
 const PARAGRAPHS = [
@@ -16,10 +17,7 @@ export default function ScrollHeaderLongTitle() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[440px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[440px] w-full max-w-2xl rounded-2xl border bg-background">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Cover />
         <ScrollHeader.Bar>
@@ -43,6 +41,6 @@ export default function ScrollHeaderLongTitle() {
           </div>
         </article>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }

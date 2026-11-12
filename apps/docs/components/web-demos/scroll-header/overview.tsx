@@ -3,6 +3,7 @@
 import { BookmarkIcon, MoreHorizontalIcon, Share2Icon } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from 'panelui-web/button';
+import { ScrollArea } from 'panelui-web/scroll-area';
 import { ScrollHeader } from 'panelui-web/scroll-header';
 
 const PARAGRAPHS = [
@@ -18,10 +19,7 @@ export default function ScrollHeaderOverview() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[460px] w-full max-w-2xl rounded-2xl border bg-background text-sm">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Cover />
         <ScrollHeader.Bar>
@@ -60,6 +58,6 @@ export default function ScrollHeaderOverview() {
           </div>
         </article>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }

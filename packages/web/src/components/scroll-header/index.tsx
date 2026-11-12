@@ -80,7 +80,9 @@
  * ## What it needs
  *
  * To be the first thing in its scroll container, so offset zero is the
- * header's resting position. It has no fixed height of its own: the large
+ * header's resting position. In a rounded container, the band takes the
+ * container's radius at its top corners, so the cover and the blurred bar
+ * follow the corner rather than painting square past it. It has no fixed height of its own: the large
  * block is measured, and whatever is put in it — a title, a byline, a row of
  * chips — sets the distance the header collapses over.
  */
@@ -171,15 +173,18 @@ function useInert<T extends HTMLElement>(inert: boolean) {
 
 const scrollHeaderVariants = tv({
   slots: {
-    root: 'relative w-full',
+    // The scroller's radius is handed down to the band, because a blurred
+    // bar's backdrop is not clipped by an ancestor's rounded corner, only by
+    // its own: without it the cover shows square past a rounded frame.
+    root: 'relative w-full rounded-[inherit]',
     // The box that keeps its height while the band inside it shrinks.
-    sticky: 'pointer-events-none sticky top-0 z-30 w-full',
-    band: 'pointer-events-auto relative w-full overflow-hidden',
+    sticky: 'pointer-events-none sticky top-0 z-30 w-full rounded-t-[inherit]',
+    band: 'pointer-events-auto relative w-full overflow-hidden rounded-t-[inherit]',
     spacer: 'w-full',
-    bar: 'absolute inset-x-0 top-0 z-20 flex items-center gap-3 px-6',
-    surface: 'pointer-events-none absolute inset-0 border-b',
+    bar: 'absolute inset-x-0 top-0 z-20 flex items-center gap-3 rounded-t-[inherit] px-6',
+    surface: 'pointer-events-none absolute inset-0 rounded-t-[inherit] border-b',
     large: 'relative z-10 flex flex-col gap-1.5 px-6 pb-6',
-    cover: 'pointer-events-none absolute inset-0 z-0 overflow-hidden',
+    cover: 'pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-t-[inherit]',
     actions: 'relative ml-auto flex shrink-0 items-center gap-2',
     titleLarge: 'block text-3xl font-bold tracking-tight text-balance text-foreground sm:text-4xl',
     titleBar: 'relative block min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-foreground',

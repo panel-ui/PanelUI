@@ -12,6 +12,7 @@ status: new
 import { BookmarkIcon, MoreHorizontalIcon, Share2Icon } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from '@/components/panelui/button';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { ScrollHeader } from '@/components/panelui/scroll-header';
 
 const PARAGRAPHS = [
@@ -27,10 +28,7 @@ export default function ScrollHeaderOverview() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[460px] w-full max-w-2xl rounded-2xl border bg-background text-sm">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Cover />
         <ScrollHeader.Bar>
@@ -69,7 +67,7 @@ export default function ScrollHeaderOverview() {
           </div>
         </article>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }
 ```
@@ -190,6 +188,7 @@ The header is the page's top layer, so anything else that pins belongs under it.
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { ScrollHeader } from '@/components/panelui/scroll-header';
 import { Tabs } from '@/components/panelui/tabs';
 
@@ -227,10 +226,7 @@ export default function ScrollHeaderWithTabs() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[460px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background text-sm"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[460px] w-full max-w-2xl rounded-2xl border bg-background text-sm">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Bar surface="plain">
           <ScrollHeader.Title>Release notes</ScrollHeader.Title>
@@ -265,7 +261,7 @@ export default function ScrollHeaderWithTabs() {
           </Tabs>
         </div>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }
 ```
@@ -274,7 +270,7 @@ export default function ScrollHeaderWithTabs() {
 
 ### In a scroll container
 
-`scrollRef` takes an element or a ref to one, for a page whose scroller is not the window. Here `threshold={0.5}` lets the bar take over halfway through the block, and `barHeight={48}` tightens the bar for a denser list. The header is the first child of the scroller, so offset zero is its resting position.
+`scrollRef` takes an element or a ref to one, for a page whose scroller is not the window. Here the scroller is a [Scroll Area](/docs/web/components/scroll-area), whose `viewportRef` is what scrolls. `threshold={0.5}` lets the bar take over halfway through the block, and `barHeight={48}` tightens the bar for a denser list. The header is the first child of the scroller, so offset zero is its resting position.
 
 <ComponentPreview name="scroll-header/in-scroller" height={460}>
 
@@ -282,6 +278,7 @@ export default function ScrollHeaderWithTabs() {
 'use client';
 
 import { useRef } from 'react';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { ScrollHeader } from '@/components/panelui/scroll-header';
 
 const ENTRIES = [
@@ -327,10 +324,7 @@ export default function ScrollHeaderInScroller() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[420px] w-full max-w-xl overflow-y-auto rounded-2xl border bg-background"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[420px] w-full max-w-xl rounded-2xl border bg-background">
       <ScrollHeader scrollRef={scroller} barHeight={48} threshold={0.5}>
         <ScrollHeader.Bar>
           <ScrollHeader.Title>Changelog</ScrollHeader.Title>
@@ -353,7 +347,7 @@ export default function ScrollHeaderInScroller() {
           ))}
         </ol>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }
 ```
@@ -372,6 +366,7 @@ The two titles are separate elements, so the large one is allowed to wrap and th
 import { Share2Icon } from 'lucide-react';
 import { useRef } from 'react';
 import { Button } from '@/components/panelui/button';
+import { ScrollArea } from '@/components/panelui/scroll-area';
 import { ScrollHeader } from '@/components/panelui/scroll-header';
 
 const PARAGRAPHS = [
@@ -385,10 +380,7 @@ export default function ScrollHeaderLongTitle() {
   const scroller = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scroller}
-      className="h-[440px] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background"
-    >
+    <ScrollArea viewportRef={scroller} className="h-[440px] w-full max-w-2xl rounded-2xl border bg-background">
       <ScrollHeader scrollRef={scroller}>
         <ScrollHeader.Cover />
         <ScrollHeader.Bar>
@@ -412,7 +404,7 @@ export default function ScrollHeaderLongTitle() {
           </div>
         </article>
       </ScrollHeader>
-    </div>
+    </ScrollArea>
   );
 }
 ```
@@ -454,6 +446,10 @@ Every part also takes the props of the element it renders, and a `className`.
 ### The scroll source
 
 The window by default. A page with its own scroller passes `scrollRef` an element or a ref to one, and the header listens there instead. The header has to be the first thing in that scroller: the offset it reads is measured from zero, and a header that starts below something else would be measured against the wrong origin.
+
+For a scroller inside the page, use a [Scroll Area](/docs/web/components/scroll-area) and pass its `viewportRef`. Its bar is drawn over the content, so the cover runs to the right-hand edge instead of stopping at a native scrollbar's gutter.
+
+In a rounded scroller, the header takes the scroller's radius at its top corners, so the cover and the blurred bar follow the corner. Put the radius on the element that scrolls or on the Scroll Area, and the header picks it up.
 
 The listener is passive and the read is batched into one `requestAnimationFrame`. Per-frame values are written as CSS custom properties on the header's root (`--scroll-header-fade`, `--scroll-header-band`, `--scroll-header-shift`); React is re-rendered only when the progress reaches an end. The server renders the expanded state, and the first client frame measures the content that is already laid out, so a page that loads at the top does not jump.
 

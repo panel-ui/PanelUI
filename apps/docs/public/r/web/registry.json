@@ -591,6 +591,42 @@
       ]
     },
     {
+      "name": "exchange",
+      "type": "registry:component",
+      "title": "Exchange",
+      "description": "An amount in one currency and what it comes to in another, in two cards that swap places with one press.",
+      "dependencies": [
+        "tailwind-variants"
+      ],
+      "registryDependencies": [
+        "https://panelui.dev/r/web/scroll-area.json"
+      ],
+      "cssVars": {
+        "light": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)",
+          "info": "oklch(0.623 0.214 259.815)"
+        }
+      },
+      "files": [
+        {
+          "path": "components/panelui/exchange/index.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/exchange/index.tsx"
+        },
+        {
+          "path": "components/panelui/exchange/parse.ts",
+          "type": "registry:component",
+          "target": "@components/panelui/exchange/parse.ts"
+        }
+      ]
+    },
+    {
       "name": "feedback",
       "type": "registry:component",
       "title": "Feedback",

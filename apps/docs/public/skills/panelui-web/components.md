@@ -14,6 +14,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Chip](components/chip.md) — A pill that can be pressed: a filter turned on and off, or an added value with a × to take it out.
 - [Choice Cards](components/choice-cards.md) — One option chosen from a few, each shown as a picture of what it does.
 - [Combobox](components/combobox.md) — A text field that filters a list of options as you type.
+- [Exchange](components/exchange.md) — An amount in one currency and what it comes to in another, in two cards that swap places with one press.
 - [Field](components/field.md) — A form control with its label, a line of help and its error, wired to each other.
 - [Input](components/input.md) — A single line to type into, with icons, units and buttons set inside its box.
 - [Label](components/label.md) — The name of a field, with its required mark, a hint and an action on one line.

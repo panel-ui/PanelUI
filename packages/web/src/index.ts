@@ -1560,6 +1560,19 @@ export {
   type ScrollAreaOrientation,
 } from './components/scroll-area';
 export {
+  Exchange,
+  ExchangeField,
+  ExchangeSwap,
+  parseAmount,
+  type ExchangeProps,
+  type ExchangeFieldProps,
+  type ExchangeSwapProps,
+  type ExchangeCurrency,
+  type ExchangeValue,
+  type ExchangeSide,
+  type ExchangeColor,
+} from './components/exchange';
+export {
   Pagination,
   PaginationPrevious,
   PaginationNext,

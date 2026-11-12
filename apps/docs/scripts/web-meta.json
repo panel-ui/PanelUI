@@ -788,5 +788,14 @@
       "category": "layout",
       "title": "Scroll Area"
     }
+  ],
+  "exchange": [
+    "Exchange",
+    "An amount in one currency and what it comes to in another, in two cards that swap places with one press.",
+    "react currency converter exchange swap amount money component",
+    {
+      "addedIn": "0.17.0",
+      "category": "forms"
+    }
   ]
 }

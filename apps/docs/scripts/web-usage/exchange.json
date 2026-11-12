@@ -1,0 +1,41 @@
+{
+  "slug": "exchange",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 360
+  },
+  "intro": "Use it where someone converts an amount between two currencies: sending money abroad, ordering travel money, or showing what a price comes to at home. Each side is a card with its label, the amount, the currency and the rate. The round button between them swaps the two cards, figures and all.\n\nIt fetches no rates. Pass `rates`, how many units of each currency one unit of a common base is worth, or `convert` for a rule of your own, such as a fee. The amount on the other side is rounded to that currency's minor unit.\n\nEither card can be typed in. The one typed in holds its figure and the other follows, which is how someone asks for an exact amount to arrive.",
+  "usage": "<Exchange currencies={currencies} rates={rates} defaultValue={{ from: 'USD', to: 'EUR', amount: 100 }}>\n  <Exchange.Field side=\"from\" label=\"You pay\" />\n  <Exchange.Swap />\n  <Exchange.Field side=\"to\" label=\"You receive\" />\n</Exchange>",
+  "anatomy": "<Exchange>\n  <Exchange.Field side=\"from\" />\n  <Exchange.Swap />\n  <Exchange.Field side=\"to\" />\n</Exchange>",
+  "parts": {
+    "Field": "One card: its `label`, the amount in large figures, the currency's pill and a quieter line under them. The line is the rate to the other currency unless `detail` says otherwise, and `detail={null}` removes it. Pressing the pill opens the currency list over both cards.",
+    "Swap": "The round button on the seam. It swaps the two cards' places, so the figure each one showed moves with it, and its arrow turns half a turn each time."
+  },
+  "examples": [
+    {
+      "title": "Held by you",
+      "description": "Pass `value` and `onValueChange` to hold the currencies and the amount yourself. `side` says which card the amount belongs to: here `to`, so what arrives is fixed at 500 rupees and what is sent follows from the rate.",
+      "demo": "controlled",
+      "height": 380
+    },
+    {
+      "title": "A fee of your own",
+      "description": "`convert` replaces `rates` with a rule of your own. This one takes a 0.6% fee from what arrives, and adds it back when the amount is worked out the other way. `detail` replaces the rate line under a card with your own text, here to say the fee is included.",
+      "demo": "fee",
+      "height": 360
+    },
+    {
+      "title": "In a card",
+      "description": "In a [Frame](/docs/web/components/frame), the frame's header carries what the conversion is for, and the button that acts on it sits under the cards. The Exchange fills the width it is given, up to `max-w-sm`.",
+      "demo": "framed",
+      "height": 480
+    },
+    {
+      "title": "A long list of currencies",
+      "description": "The list scrolls once it has more rows than room. It opens on the chosen currency, the arrow keys, Home and End move through it, and Enter chooses. A currency with no minor unit, such as the won, takes `decimals: 0`.",
+      "demo": "many",
+      "height": 380
+    }
+  ],
+  "notes": "### Typing an amount\n\nThe field takes digits and one point, and no more decimals than the currency has. Grouping commas are added once the field is left and ignored while typing. Clearing the field leaves both sides empty.\n\n### Choosing a currency\n\nThe list takes over the whole control while it is open, and the cards are out of the tab order behind it. Choosing the currency already on the other side swaps the two. Escape or the close button shuts the list and puts focus back on the pill.\n\n### Rates\n\n`rates` can use any base, because only the ratio between two entries is used. A pair with no rate shows no amount and no rate line. A rate is written to four significant figures, so a small one such as yen to dollars is not rounded to zero.\n\n### Figures\n\nFigures are written in `locale`, `en-US` by default, so the digits are Western whatever the device's language. Pass another locale to change how a finished figure is grouped. While typing, the decimal mark is always a point.\n\n### Reduced motion\n\nWith reduced motion set, the cards change places without travelling, and the list opens without scaling."
+}

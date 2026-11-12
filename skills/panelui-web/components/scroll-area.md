@@ -70,10 +70,6 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Which way this bar moves. Default `vertical`. |
 
-## In a Server Component
-
-`ScrollArea` is a client component. A Server Component cannot read `ScrollArea.Root` off the import, so import each part by name: `ScrollAreaRoot`, `ScrollAreaViewport`, `ScrollAreaContent`, `ScrollAreaScrollbar`, `ScrollAreaCorner`.
-
 ## Notes
 
 #### Scrolling

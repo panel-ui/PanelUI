@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * ScrollArea — a box that scrolls, with a thin scrollbar drawn over its
  * content instead of the browser's own.

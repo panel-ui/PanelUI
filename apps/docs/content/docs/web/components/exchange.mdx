@@ -69,76 +69,7 @@ Import from `panelui-web/exchange` instead of `@/components/panelui/exchange`. T
 
 Install the packages it uses:
 
-<InstallTabs kind="add" packages=" ?   label=  |  ,
-    });
-    setTurns((count) => count + 1);
-    requestAnimationFrame(animateSwap);
-  }, [commit, animateSwap]);
-
-  const choose = useCallback(
-    (side: ExchangeSide, code: string) => {
-      const current = latest.current.value;
-      const other: ExchangeSide = side ===  ,
-  }));
-  const controlled = valueProp !== undefined;
-  const value: Required<ExchangeValue> = controlled ? { side:  , ...valueProp } : inner;
-
-  const latest = useRef({ value, controlled, onValueChange });
-  latest.current = { value, controlled, onValueChange };
-  const commit = useCallback((next: Required<ExchangeValue>) => {
-    if (!latest.current.controlled) setInner(next);
-    latest.current.onValueChange?.(next);
-  }, []);
-
-  const byCode = useMemo(() => new Map(currencies.map((currency) => [currency.code, currency])), [currencies]);
-
-  const convertWith = useCallback(
-    (amount: number, from: string, to: string) => {
-      if (from === to) return amount;
-      if (convert) return convert(amount, from, to);
-      const a = rates?.[from];
-      const b = rates?.[to];
-      return a && b ? (amount  ;
-       ;
-    const result: Record<ExchangeSide, number | null> = {
-      from: null,
-      to: null,
-    };
-    result[value.side] = value.amount;
-    if (value.amount !== null) {
-      const worked = convertWith(value.amount, value[value.side], value[other]);
-      result[other] = Number.isFinite(worked) ? roundTo(worked, decimalsOf(byCode.get(value[other]))) : null;
-    }
-    return result;
-  }, [value, convertWith, byCode]);
-
-  const rate = useMemo(() => {
-    const forward = convertWith(1, value.from, value.to);
-    const back = convertWith(1, value.to, value.from);
-    return {
-      from: Number.isFinite(forward) ? forward : null,
-      to: Number.isFinite(back) ? back : null,
-    };
-  }, [value.from, value.to, convertWith]);
-
-  const [picking, setPickingState] = useState<ExchangeSide | null>(null);
-  const [turns, setTurns] = useState(0);
-  const cards = useRef<Record<ExchangeSide, HTMLElement | null>>({
-    from: null,
-    to: null,
-  });
-  const pills = useRef<Record<ExchangeSide, HTMLButtonElement | null>>({
-    from: null,
-    to: null,
-  });
-
-  const setPicking = useCallback((side: ExchangeSide | null) => {
-    setPickingState((current) => {
-       ]);
-  const decimals = decimalsOf(currency);
-  const labelId = useId();
-
-   tailwind-variants" />
+<InstallTabs kind="add" packages="tailwind-variants" />
 
 </Step>
 

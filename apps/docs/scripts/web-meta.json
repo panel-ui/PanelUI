@@ -299,7 +299,7 @@
     "A question that must be answered before the page can be used again, with the answers side by side under it.",
     "react alert dialog confirm modal destructive component",
     {
-      "updatedIn": "0.16.0",
+      "updatedIn": "0.17.0",
       "addedIn": "0.8.0",
       "category": "overlays",
       "title": "Alert Dialog"
@@ -310,7 +310,7 @@
     "A task done in a panel over the page, with its buttons in the band beneath it.",
     "react dialog modal form popup component",
     {
-      "updatedIn": "0.16.0",
+      "updatedIn": "0.17.0",
       "addedIn": "0.8.0",
       "category": "overlays"
     }
@@ -515,6 +515,7 @@
     "Categories compared by length, grouped or stacked.",
     "react bar chart component grouped stacked",
     {
+      "updatedIn": "0.17.0",
       "addedIn": "0.13.0",
       "category": "charts",
       "title": "Bar Chart"
@@ -556,6 +557,7 @@
     "Filled bands over time, stacked or overlaid.",
     "react area chart component stacked gradient",
     {
+      "updatedIn": "0.17.0",
       "addedIn": "0.14.0",
       "category": "charts",
       "title": "Area Chart"
@@ -666,6 +668,7 @@
     "Where a population drained away, one step at a time.",
     "react funnel chart component conversion",
     {
+      "updatedIn": "0.17.0",
       "addedIn": "0.14.0",
       "category": "charts",
       "title": "Funnel Chart"
@@ -737,6 +740,7 @@
     "The sections of a long page as a quiet rail, with one mark that moves to what you are reading.",
     "react table of contents anchor links scroll spy toc component",
     {
+      "updatedIn": "0.17.0",
       "addedIn": "0.15.0",
       "category": "navigation",
       "title": "Table of Contents"

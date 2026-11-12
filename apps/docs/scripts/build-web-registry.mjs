@@ -37,7 +37,9 @@ function packageOf(specifier) {
   return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
 }
 
-const IMPORT = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])([^'"]+)\2/g;
+// A specifier starts with a name character and holds no whitespace, so a string
+// that merely ends in the word, such as `side === 'from' ? …`, is not taken for an import.
+const IMPORT = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])([@\w./-][^'"\s]*)\2/g;
 
 /**
  * The roles the collection draws in that a stock shadcn theme does not define.

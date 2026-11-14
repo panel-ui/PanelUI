@@ -212,7 +212,8 @@ const navRailVariants = tv({
       'group-data-[collapsed]/nav-rail:opacity-100',
     ],
     item: [
-      'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-medium outline-none select-none',
+      // A row without `href` is a button, which centres its text by default.
+      'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-start text-sm font-medium outline-none select-none',
       'text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground',
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
       'data-[holding]:text-foreground data-[holding]:hover:bg-foreground/[0.03]',

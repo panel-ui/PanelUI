@@ -385,14 +385,14 @@ function useIsBelow(breakpoint: string): boolean {
   const subscribe = useCallback(
     (onChange: () => void) => {
       if (typeof window === 'undefined') return () => {};
-      const query = window.matchMedia(`(max-width: ${breakpoint})`);
+      const query = window.matchMedia(`(width < ${breakpoint})`);
       query.addEventListener('change', onChange);
       return () => query.removeEventListener('change', onChange);
     },
     [breakpoint]
   );
   const read = useCallback(
-    () => typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint})`).matches,
+    () => typeof window !== 'undefined' && window.matchMedia(`(width < ${breakpoint})`).matches,
     [breakpoint]
   );
   return useSyncExternalStore(subscribe, read, () => false);

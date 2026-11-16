@@ -1573,6 +1573,13 @@ export {
   type ExchangeColor,
 } from './components/exchange';
 export {
+  CurrencyInput,
+  type CurrencyInputProps,
+  type CurrencyOption,
+  type CurrencyValue,
+  type CurrencyColor,
+} from './components/currency-input';
+export {
   Pagination,
   PaginationPrevious,
   PaginationNext,

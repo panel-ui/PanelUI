@@ -24,11 +24,13 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
     <NavigationMenu.Item>
       <NavigationMenu.Link href="/docs" active>Docs</NavigationMenu.Link>
     </NavigationMenu.Item>
-    <NavigationMenu.Item value="explore">
-      <NavigationMenu.Trigger>Explore</NavigationMenu.Trigger>
+    <NavigationMenu.Item value="more">
+      <NavigationMenu.Trigger>More</NavigationMenu.Trigger>
       <NavigationMenu.Content>
-        <NavigationMenu.Card href="/install" eyebrow="Start here">Install</NavigationMenu.Card>
-        <NavigationMenu.Link href="/blog" description="Long reads">Blog</NavigationMenu.Link>
+        <NavigationMenu.Card href="/install" tone="success" eyebrow="Start here">Install</NavigationMenu.Card>
+        <NavigationMenu.Pills>
+          <NavigationMenu.Pill href="https://github.com" external>GitHub</NavigationMenu.Pill>
+        </NavigationMenu.Pills>
       </NavigationMenu.Content>
     </NavigationMenu.Item>
   </NavigationMenu.List>
@@ -47,12 +49,21 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
     <NavigationMenu.Item>
       <NavigationMenu.Trigger />
       <NavigationMenu.Content>
+        <NavigationMenu.Profile />
         <NavigationMenu.Card />
+        <NavigationMenu.Value />
+        <NavigationMenu.Pills>
+          <NavigationMenu.Pill />
+        </NavigationMenu.Pills>
         <NavigationMenu.Group>
           <NavigationMenu.Link />
         </NavigationMenu.Group>
-        <NavigationMenu.Setting />
         <NavigationMenu.Separator />
+        <NavigationMenu.Setting>
+          <NavigationMenu.Options>
+            <NavigationMenu.Option />
+          </NavigationMenu.Options>
+        </NavigationMenu.Setting>
         <NavigationMenu.Footer>
           <NavigationMenu.Hint />
         </NavigationMenu.Footer>
@@ -63,16 +74,22 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
 </NavigationMenu>
 ```
 
-- `NavigationMenu.NavigationMenu` — The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, and `side` which way the panel opens. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.
-- `NavigationMenu.Brand` — The product's mark at the start of the bar, drawn in a round tile. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.
+- `NavigationMenu.NavigationMenu` — The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, `side` which way the panel opens, and `openOn` whether a trigger opens on a press only or also under the pointer. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.
+- `NavigationMenu.Brand` — The mark at the start of the bar, drawn in a round tile: an avatar or a logo. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.
 - `NavigationMenu.List` — The destinations and triggers. A highlight rests on the current page, moves to an open trigger, and follows the pointer and the keyboard across the rest.
 - `NavigationMenu.Item` — One entry in the list. Give it a `value` when it holds a trigger you want to open from outside.
 - `NavigationMenu.Link` — A destination. In the bar it is a pill; mark the current page with `active`. Inside a panel it is a row, with an optional `icon` in a square of its own and a `description` under the label.
-- `NavigationMenu.Trigger` — Opens its item's content, on a press or after a short pause under the pointer. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.
+- `NavigationMenu.Trigger` — Opens its item's content. In an island it keeps a fill of its own, so it reads as a control rather than a destination. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.
 - `NavigationMenu.Content` — What a trigger opens. `className` lays out the panel: its width, a grid, its padding. Its children arrive one after another as it opens.
-- `NavigationMenu.Card` — A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. Use one or two at the top of a panel for where most people are going.
+- `NavigationMenu.Profile` — Who or what the panel is about: a name, a `description` under it, and a `status` at the end, such as a [Badge](/docs/web/components/badge).
+- `NavigationMenu.Card` — A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. The card is washed with its tone from the tile's corner. Use one or two near the top of a panel, for where most people are going.
+- `NavigationMenu.Value` — A value worth taking away, such as a command or an address, with `actions` at its end. Put a Copy pill there.
+- `NavigationMenu.Pills` — A row of pills that wraps when it runs out of room.
+- `NavigationMenu.Pill` — A small round control: a button, or a link with `href`. `external` adds an arrow and opens the link in a new tab. With only an `icon` it is a round icon pill and needs an `aria-label`.
 - `NavigationMenu.Group` — Rows under one small heading, given by `label`.
-- `NavigationMenu.Setting` — A labelled row with a control at its end, for preferences kept in the menu. Put a segmented [Tabs](/docs/web/components/tabs) or a [Switch](/docs/web/components/switch) in it.
+- `NavigationMenu.Setting` — A labelled row with a control at its end, for preferences kept in the menu. Put `NavigationMenu.Options` or a [Switch](/docs/web/components/switch) in it.
+- `NavigationMenu.Options` — A choice of a few options in one rounded track, for a preference kept in the menu. It is a radio group: the arrow keys move the choice.
+- `NavigationMenu.Option` — One option in a track. Give it a `value`.
 - `NavigationMenu.Separator` — A rule between parts of a panel.
 - `NavigationMenu.Footer` — The strip along a panel's foot, for keyboard hints.
 - `NavigationMenu.Hint` — One keyboard hint: each of its `keys` in a cap, then what they do.
@@ -88,6 +105,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `variant` | `NavigationMenuVariant` | `'island'` | `island` is a floating pill that grows into its panel; `dock` is the same with icon rows whose labels appear when pointed at; `bar` is a full-width header with a panel that hangs below it. Default `island`. |
 | `side` | `'top' \| 'bottom'` | `bottom` | Which way the panel opens. Default `bottom`, or `top` for `dock`. |
+| `openOn` | `'press' \| 'hover'` | — | What opens a panel. `press` waits for a click, Enter or Space, and keeps the panel open until it is dismissed, so a pointer drifting off it while someone types or chooses does not close it. `hover` also opens it under the pointer and closes it when the pointer leaves. Default `press` for `island` and `dock`, `hover` for `bar`. |
 | `className` | `string` | — | — |
 | `barClassName` | `string` | — | Classes for the bar that holds the list. |
 
@@ -158,15 +176,42 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `keys` | `readonly string[]` | **required** | The keys, each drawn in its own cap: `['⌘', 'K']`. |
 
+#### `NavigationMenuProfileProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `description` | `ReactNode` | — | A quieter line under the name: a role, a place, a plan. |
+| `status` | `ReactNode` | — | Something at the row's end, such as a Badge saying whether they are available. |
+
+#### `NavigationMenuValueProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `actions` | `ReactNode` | — | Pills at the row's end that act on the value: a copy, a share. |
+
+#### `NavigationMenuOptionsProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+
+#### `NavigationMenuOptionProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `className` | `string` | — | — |
+
 ## In a Server Component
 
-`NavigationMenu` is a client component. A Server Component cannot read `NavigationMenu.List` off the import, so import each part by name: `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, `NavigationMenuBrand`, `NavigationMenuActions`, `NavigationMenuCard`, `NavigationMenuGroup`, `NavigationMenuSetting`, `NavigationMenuSeparator`, `NavigationMenuFooter`, `NavigationMenuHint`.
+`NavigationMenu` is a client component. A Server Component cannot read `NavigationMenu.List` off the import, so import each part by name: `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, `NavigationMenuBrand`, `NavigationMenuActions`, `NavigationMenuCard`, `NavigationMenuGroup`, `NavigationMenuSetting`, `NavigationMenuSeparator`, `NavigationMenuFooter`, `NavigationMenuHint`, `NavigationMenuProfile`, `NavigationMenuValue`, `NavigationMenuPills`, `NavigationMenuPill`, `NavigationMenuOptions`, `NavigationMenuOption`.
 
 ## Notes
 
 #### Opening
 
-A trigger opens on a press, or after a short pause under the pointer; `delay` and `closeDelay` set the two pauses, 60 and 120 milliseconds by default. Moving from one trigger to the next while a panel is open swaps the panel's content without closing it. A press outside, Escape, or following a link closes it, and focus returns to the trigger.
+In `island` and `dock` a trigger opens on a press, and the panel stays open until a press outside, Escape or following a link closes it. A panel that holds a search field or settings must not close because the pointer drifted off it. In `bar` a trigger also opens after a short pause under the pointer, and the panel closes when the pointer leaves; `delay` and `closeDelay` set the two pauses, 60 and 120 milliseconds by default. Set `openOn` to choose either behaviour for any variant.
+
+Moving from one trigger to the next while a panel is open swaps the panel's content without closing it. Focus returns to the trigger when it closes.
 
 To open a panel from somewhere else, give its `NavigationMenu.Item` a `value` and hold `value` and `onValueChange` on the menu. That is how the Search example answers ⌘K.
 
@@ -184,7 +229,7 @@ With reduced motion set, the panel opens and changes size without animating, its
 
 #### Accessibility
 
-The root is a `<nav>` landmark, so give it an `aria-label` when the page has more than one. A link marked `active` carries `aria-current="page"`. Each trigger reports its panel with `aria-expanded`. In a dock the labels are always in the accessibility tree, so an icon-only row is never nameless. The highlight is decorative and hidden from assistive technology.
+The root is a `<nav>` landmark, so give it an `aria-label` when the page has more than one. A link marked `active` carries `aria-current="page"`. Each trigger reports its panel with `aria-expanded`. In a dock the labels are always in the accessibility tree, so an icon-only row is never nameless. `NavigationMenu.Options` is a radio group, and an icon-only `NavigationMenu.Pill` needs an `aria-label`. The highlight is decorative and hidden from assistive technology.
 
 #### Built on
 
@@ -195,13 +240,31 @@ Base UI's NavigationMenu, for the triggers, hover intent, keyboard model, focus 
 ```tsx
 'use client';
 
-import { BookOpenIcon, CoinsIcon, LayoutTemplateIcon, RocketIcon, ScrollTextIcon, SparklesIcon } from 'lucide-react';
+import { CheckIcon, CoinsIcon, ShareIcon, TerminalIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from '@/components/panelui/badge';
 import { NavigationMenu } from '@/components/panelui/navigation-menu';
 
+const COMMAND = 'npx panelui-cli init';
+
 export default function NavigationMenuOverview() {
+  const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState('system');
+  const [motion, setMotion] = useState('full');
+
+  const copy = () => {
+    void navigator.clipboard?.writeText(COMMAND);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
     <NavigationMenu aria-label="Main">
-      <NavigationMenu.Brand href="#" icon={<SparklesIcon />} aria-label="Home" />
+      <NavigationMenu.Brand
+        href="#"
+        aria-label="Home"
+        icon={<img src="https://avatars.githubusercontent.com/u/127331761?v=4" alt="" />}
+      />
       <NavigationMenu.List>
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#" active>
@@ -214,26 +277,66 @@ export default function NavigationMenuOverview() {
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#">Blocks</NavigationMenu.Link>
         </NavigationMenu.Item>
-        <NavigationMenu.Item value="explore">
-          <NavigationMenu.Trigger>Explore</NavigationMenu.Trigger>
-          <NavigationMenu.Content className="w-[22rem]">
-            <NavigationMenu.Card href="#" icon={<RocketIcon />} tone="primary" eyebrow="Start here">
-              Install in one command
+        <NavigationMenu.Item value="more">
+          <NavigationMenu.Trigger>v0.18</NavigationMenu.Trigger>
+          <NavigationMenu.Content className="w-[25rem]">
+            <NavigationMenu.Profile
+              description="Maintainer · PanelUI"
+              status={
+                <Badge variant="success" dot>
+                  Taking contributions
+                </Badge>
+              }
+            >
+              Khalid Abdi
+            </NavigationMenu.Profile>
+            <NavigationMenu.Card href="#" icon={<TerminalIcon />} tone="success" eyebrow="Start here">
+              Install PanelUI
             </NavigationMenu.Card>
-            <NavigationMenu.Card href="#" icon={<CoinsIcon />} tone="success" eyebrow="New in 0.18">
+            <NavigationMenu.Card href="#" icon={<CoinsIcon />} tone="info" eyebrow="New in 0.18">
               Currency Input
             </NavigationMenu.Card>
-            <NavigationMenu.Group label="Resources">
-              <NavigationMenu.Link href="#" icon={<LayoutTemplateIcon />} description="Whole screens to copy in">
-                Templates
-              </NavigationMenu.Link>
-              <NavigationMenu.Link href="#" icon={<ScrollTextIcon />} description="What changed in each release">
+            <NavigationMenu.Value
+              actions={
+                <>
+                  <NavigationMenu.Pill onClick={copy} icon={copied ? <CheckIcon /> : undefined}>
+                    {copied ? 'Copied' : 'Copy'}
+                  </NavigationMenu.Pill>
+                  <NavigationMenu.Pill icon={<ShareIcon />} aria-label="Share" />
+                </>
+              }
+            >
+              <code className="font-mono text-sm">{COMMAND}</code>
+            </NavigationMenu.Value>
+            <NavigationMenu.Pills>
+              <NavigationMenu.Pill href="https://github.com/panel-ui/PanelUI" external>
+                GitHub
+              </NavigationMenu.Pill>
+              <NavigationMenu.Pill href="https://www.npmjs.com/package/panelui-web" external>
+                npm
+              </NavigationMenu.Pill>
+              <NavigationMenu.Pill href="#" external>
                 Changelog
-              </NavigationMenu.Link>
-              <NavigationMenu.Link href="#" icon={<BookOpenIcon />} description="Long reads on how it is built">
-                Blog
-              </NavigationMenu.Link>
-            </NavigationMenu.Group>
+              </NavigationMenu.Pill>
+            </NavigationMenu.Pills>
+            <NavigationMenu.Separator />
+            <NavigationMenu.Setting label="Theme">
+              <NavigationMenu.Options aria-label="Theme" value={theme} onValueChange={(next) => setTheme(String(next))}>
+                <NavigationMenu.Option value="system">System</NavigationMenu.Option>
+                <NavigationMenu.Option value="light">Light</NavigationMenu.Option>
+                <NavigationMenu.Option value="dark">Dark</NavigationMenu.Option>
+              </NavigationMenu.Options>
+            </NavigationMenu.Setting>
+            <NavigationMenu.Setting label="Motion">
+              <NavigationMenu.Options
+                aria-label="Motion"
+                value={motion}
+                onValueChange={(next) => setMotion(String(next))}
+              >
+                <NavigationMenu.Option value="full">Full</NavigationMenu.Option>
+                <NavigationMenu.Option value="reduced">Reduced</NavigationMenu.Option>
+              </NavigationMenu.Options>
+            </NavigationMenu.Setting>
             <NavigationMenu.Footer>
               <NavigationMenu.Hint keys={['↑', '↓']}>Move</NavigationMenu.Hint>
               <NavigationMenu.Hint keys={['↵']}>Open</NavigationMenu.Hint>

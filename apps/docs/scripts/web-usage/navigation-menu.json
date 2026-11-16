@@ -2,23 +2,29 @@
   "slug": "navigation-menu",
   "demo": "overview",
   "demoOptions": {
-    "height": 560,
+    "height": 720,
     "align": "start"
   },
   "intro": "Use it for a site's or an app's top-level destinations, where some of them open a panel of further links: a docs header, a product site, an app's launcher.\n\nIn `island` the panel is the bar grown larger rather than a box that appears under it, and its contents arrive one after another behind the growth. `bar` is a full-width header whose panel hangs below the triggers and moves between them. `dock` is an island at the foot of the window, with icon rows whose labels appear when pointed at.\n\nFor a sidebar of destinations beside the page, use [Nav Rail](/docs/web/components/nav-rail). For a list of actions rather than places, use [Menu](/docs/web/components/menu).",
-  "usage": "<NavigationMenu aria-label=\"Main\">\n  <NavigationMenu.List>\n    <NavigationMenu.Item>\n      <NavigationMenu.Link href=\"/docs\" active>Docs</NavigationMenu.Link>\n    </NavigationMenu.Item>\n    <NavigationMenu.Item value=\"explore\">\n      <NavigationMenu.Trigger>Explore</NavigationMenu.Trigger>\n      <NavigationMenu.Content>\n        <NavigationMenu.Card href=\"/install\" eyebrow=\"Start here\">Install</NavigationMenu.Card>\n        <NavigationMenu.Link href=\"/blog\" description=\"Long reads\">Blog</NavigationMenu.Link>\n      </NavigationMenu.Content>\n    </NavigationMenu.Item>\n  </NavigationMenu.List>\n</NavigationMenu>",
-  "anatomy": "<NavigationMenu>\n  <NavigationMenu.Brand />\n  <NavigationMenu.List>\n    <NavigationMenu.Item>\n      <NavigationMenu.Link />\n    </NavigationMenu.Item>\n    <NavigationMenu.Item>\n      <NavigationMenu.Trigger />\n      <NavigationMenu.Content>\n        <NavigationMenu.Card />\n        <NavigationMenu.Group>\n          <NavigationMenu.Link />\n        </NavigationMenu.Group>\n        <NavigationMenu.Setting />\n        <NavigationMenu.Separator />\n        <NavigationMenu.Footer>\n          <NavigationMenu.Hint />\n        </NavigationMenu.Footer>\n      </NavigationMenu.Content>\n    </NavigationMenu.Item>\n  </NavigationMenu.List>\n  <NavigationMenu.Actions />\n</NavigationMenu>",
+  "usage": "<NavigationMenu aria-label=\"Main\">\n  <NavigationMenu.List>\n    <NavigationMenu.Item>\n      <NavigationMenu.Link href=\"/docs\" active>Docs</NavigationMenu.Link>\n    </NavigationMenu.Item>\n    <NavigationMenu.Item value=\"more\">\n      <NavigationMenu.Trigger>More</NavigationMenu.Trigger>\n      <NavigationMenu.Content>\n        <NavigationMenu.Card href=\"/install\" tone=\"success\" eyebrow=\"Start here\">Install</NavigationMenu.Card>\n        <NavigationMenu.Pills>\n          <NavigationMenu.Pill href=\"https://github.com\" external>GitHub</NavigationMenu.Pill>\n        </NavigationMenu.Pills>\n      </NavigationMenu.Content>\n    </NavigationMenu.Item>\n  </NavigationMenu.List>\n</NavigationMenu>",
+  "anatomy": "<NavigationMenu>\n  <NavigationMenu.Brand />\n  <NavigationMenu.List>\n    <NavigationMenu.Item>\n      <NavigationMenu.Link />\n    </NavigationMenu.Item>\n    <NavigationMenu.Item>\n      <NavigationMenu.Trigger />\n      <NavigationMenu.Content>\n        <NavigationMenu.Profile />\n        <NavigationMenu.Card />\n        <NavigationMenu.Value />\n        <NavigationMenu.Pills>\n          <NavigationMenu.Pill />\n        </NavigationMenu.Pills>\n        <NavigationMenu.Group>\n          <NavigationMenu.Link />\n        </NavigationMenu.Group>\n        <NavigationMenu.Separator />\n        <NavigationMenu.Setting>\n          <NavigationMenu.Options>\n            <NavigationMenu.Option />\n          </NavigationMenu.Options>\n        </NavigationMenu.Setting>\n        <NavigationMenu.Footer>\n          <NavigationMenu.Hint />\n        </NavigationMenu.Footer>\n      </NavigationMenu.Content>\n    </NavigationMenu.Item>\n  </NavigationMenu.List>\n  <NavigationMenu.Actions />\n</NavigationMenu>",
   "parts": {
-    "NavigationMenu": "The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, and `side` which way the panel opens. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.",
-    "Brand": "The product's mark at the start of the bar, drawn in a round tile. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.",
+    "NavigationMenu": "The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, `side` which way the panel opens, and `openOn` whether a trigger opens on a press only or also under the pointer. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.",
+    "Brand": "The mark at the start of the bar, drawn in a round tile: an avatar or a logo. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.",
     "List": "The destinations and triggers. A highlight rests on the current page, moves to an open trigger, and follows the pointer and the keyboard across the rest.",
     "Item": "One entry in the list. Give it a `value` when it holds a trigger you want to open from outside.",
     "Link": "A destination. In the bar it is a pill; mark the current page with `active`. Inside a panel it is a row, with an optional `icon` in a square of its own and a `description` under the label.",
-    "Trigger": "Opens its item's content, on a press or after a short pause under the pointer. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.",
+    "Trigger": "Opens its item's content. In an island it keeps a fill of its own, so it reads as a control rather than a destination. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.",
     "Content": "What a trigger opens. `className` lays out the panel: its width, a grid, its padding. Its children arrive one after another as it opens.",
-    "Card": "A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. Use one or two at the top of a panel for where most people are going.",
+    "Profile": "Who or what the panel is about: a name, a `description` under it, and a `status` at the end, such as a [Badge](/docs/web/components/badge).",
+    "Card": "A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. The card is washed with its tone from the tile's corner. Use one or two near the top of a panel, for where most people are going.",
+    "Value": "A value worth taking away, such as a command or an address, with `actions` at its end. Put a Copy pill there.",
+    "Pills": "A row of pills that wraps when it runs out of room.",
+    "Pill": "A small round control: a button, or a link with `href`. `external` adds an arrow and opens the link in a new tab. With only an `icon` it is a round icon pill and needs an `aria-label`.",
     "Group": "Rows under one small heading, given by `label`.",
-    "Setting": "A labelled row with a control at its end, for preferences kept in the menu. Put a segmented [Tabs](/docs/web/components/tabs) or a [Switch](/docs/web/components/switch) in it.",
+    "Setting": "A labelled row with a control at its end, for preferences kept in the menu. Put `NavigationMenu.Options` or a [Switch](/docs/web/components/switch) in it.",
+    "Options": "A choice of a few options in one rounded track, for a preference kept in the menu. It is a radio group: the arrow keys move the choice.",
+    "Option": "One option in a track. Give it a `value`.",
     "Separator": "A rule between parts of a panel.",
     "Footer": "The strip along a panel's foot, for keyboard hints.",
     "Hint": "One keyboard hint: each of its `keys` in a cap, then what they do.",
@@ -27,39 +33,39 @@
   "examples": [
     {
       "title": "Island",
-      "description": "Three destinations and a trigger. Pressing Explore grows the bar into a panel with two cards, a group of rows and a footer of hints.",
+      "description": "The bar holds an avatar, three destinations and a trigger. Pressing the trigger grows the bar into a panel: a profile, two cards, a command to copy, links out, two settings and a footer of hints.",
       "demo": "overview",
-      "height": 560,
+      "height": 720,
       "align": "start"
     },
     {
       "title": "Header",
-      "description": "`variant=\"bar\"` spans the page. The panel hangs below the triggers and, as the pointer crosses from one trigger to the next, moves under it, resizes to its content and slides that content in from the side the pointer came from. `NavigationMenu.Actions` holds the buttons at the end.",
+      "description": "`variant=\"bar\"` spans the page and opens on hover as well as on a press. The panel hangs below the triggers and, as the pointer crosses from one trigger to the next, moves under it, resizes to its content and slides that content in from the side the pointer came from. `NavigationMenu.Actions` holds the buttons at the end.",
       "demo": "mega",
       "height": 420,
       "align": "start"
     },
     {
       "title": "Search",
-      "description": "A trigger whose panel is a [Command](/docs/web/components/command), so the bar grows into a search field with its results under it. The demo opens it with ⌘K or Ctrl+K by holding `value` itself. Pass `bare` to the Command so the panel, not the Command, draws the surface.",
+      "description": "A trigger whose panel is a [Command](/docs/web/components/command), so the bar grows into a search field with its results under it. It stays open while the field is used, wherever the pointer goes. The demo opens it with ⌘K or Ctrl+K by holding `value` itself, and passes `bare` to the Command so the panel draws the surface.",
       "demo": "search",
-      "height": 480,
+      "height": 520,
       "align": "start"
     },
     {
       "title": "Dock",
-      "description": "`variant=\"dock\"` sits at the foot of an app window and opens upwards. Its rows are icons whose labels slide out when pointed at or reached with Tab, and a dot marks the current one.",
+      "description": "`variant=\"dock\"` sits at the foot of an app window and opens upwards. Its rows are icons; a label floats above each one when it is pointed at or reached with Tab, so the dock never changes width under the pointer. A dot marks the current one.",
       "demo": "dock",
       "height": 520
     },
     {
       "title": "Preferences",
-      "description": "A panel for the signed-in person: two cards for the account and billing, then `NavigationMenu.Setting` rows that hold segmented Tabs. The line under the menu reports what is chosen.",
+      "description": "A settings panel for the signed-in person: a profile with their plan, cards for the account and billing, then `NavigationMenu.Setting` rows that each hold `NavigationMenu.Options`. The line under the menu reports what is chosen.",
       "demo": "preferences",
-      "height": 560,
+      "height": 640,
       "align": "start"
     }
   ],
-  "notes": "### Opening\n\nA trigger opens on a press, or after a short pause under the pointer; `delay` and `closeDelay` set the two pauses, 60 and 120 milliseconds by default. Moving from one trigger to the next while a panel is open swaps the panel's content without closing it. A press outside, Escape, or following a link closes it, and focus returns to the trigger.\n\nTo open a panel from somewhere else, give its `NavigationMenu.Item` a `value` and hold `value` and `onValueChange` on the menu. That is how the Search example answers ⌘K.\n\n### Keyboard\n\nTab moves across the bar. Enter, Space or the Down arrow opens a trigger's panel, and Tab moves into it; there the arrow keys walk its links, and Escape closes it and returns focus to the trigger. The highlight follows focus from the keyboard as it follows the pointer.\n\n### The panel's width\n\nA panel is as wide as its content, and in `island` and `dock` never narrower than the bar it grows from. Set a width on `NavigationMenu.Content` to fix it, such as `w-[22rem]`. The panel stays inside the viewport and shrinks to fit a narrow one.\n\n### Reduced motion\n\nWith reduced motion set, the panel opens and changes size without animating, its contents arrive without the blur, and the highlight moves without travelling.\n\n### Accessibility\n\nThe root is a `<nav>` landmark, so give it an `aria-label` when the page has more than one. A link marked `active` carries `aria-current=\"page\"`. Each trigger reports its panel with `aria-expanded`. In a dock the labels are always in the accessibility tree, so an icon-only row is never nameless. The highlight is decorative and hidden from assistive technology.\n\n### Built on\n\nBase UI's NavigationMenu, for the triggers, hover intent, keyboard model, focus return and the size it measures for each panel. The panel's growth is a clip from the bar's measured shape to the panel's full size. Icons are whatever the app passes; the package does not ship an icon set.",
+  "notes": "### Opening\n\nIn `island` and `dock` a trigger opens on a press, and the panel stays open until a press outside, Escape or following a link closes it. A panel that holds a search field or settings must not close because the pointer drifted off it. In `bar` a trigger also opens after a short pause under the pointer, and the panel closes when the pointer leaves; `delay` and `closeDelay` set the two pauses, 60 and 120 milliseconds by default. Set `openOn` to choose either behaviour for any variant.\n\nMoving from one trigger to the next while a panel is open swaps the panel's content without closing it. Focus returns to the trigger when it closes.\n\nTo open a panel from somewhere else, give its `NavigationMenu.Item` a `value` and hold `value` and `onValueChange` on the menu. That is how the Search example answers ⌘K.\n\n### Keyboard\n\nTab moves across the bar. Enter, Space or the Down arrow opens a trigger's panel, and Tab moves into it; there the arrow keys walk its links, and Escape closes it and returns focus to the trigger. The highlight follows focus from the keyboard as it follows the pointer.\n\n### The panel's width\n\nA panel is as wide as its content, and in `island` and `dock` never narrower than the bar it grows from. Set a width on `NavigationMenu.Content` to fix it, such as `w-[22rem]`. The panel stays inside the viewport and shrinks to fit a narrow one.\n\n### Reduced motion\n\nWith reduced motion set, the panel opens and changes size without animating, its contents arrive without the blur, and the highlight moves without travelling.\n\n### Accessibility\n\nThe root is a `<nav>` landmark, so give it an `aria-label` when the page has more than one. A link marked `active` carries `aria-current=\"page\"`. Each trigger reports its panel with `aria-expanded`. In a dock the labels are always in the accessibility tree, so an icon-only row is never nameless. `NavigationMenu.Options` is a radio group, and an icon-only `NavigationMenu.Pill` needs an `aria-label`. The highlight is decorative and hidden from assistive technology.\n\n### Built on\n\nBase UI's NavigationMenu, for the triggers, hover intent, keyboard model, focus return and the size it measures for each panel. The panel's growth is a clip from the bar's measured shape to the panel's full size. Icons are whatever the app passes; the package does not ship an icon set.",
   "full": true
 }

@@ -6,7 +6,6 @@ import {
   BoxIcon,
   BrushIcon,
   GitPullRequestIcon,
-  LayersIcon,
   MessagesSquareIcon,
   PaletteIcon,
   ShapesIcon,
@@ -18,8 +17,8 @@ import { NavigationMenu } from 'panelui-web/navigation-menu';
 export default function NavigationMenuMega() {
   return (
     <NavigationMenu variant="bar" aria-label="Site">
-      <NavigationMenu.Brand href="#" icon={<LayersIcon />}>
-        Panel
+      <NavigationMenu.Brand href="#" className="ps-2">
+        PanelUI
       </NavigationMenu.Brand>
       <NavigationMenu.List>
         <NavigationMenu.Item value="library">

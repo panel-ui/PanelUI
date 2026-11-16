@@ -44,6 +44,8 @@
  * This file draws it.
  */
 import { NavigationMenu as BaseNavigationMenu } from '@base-ui/react/navigation-menu';
+import { Radio } from '@base-ui/react/radio';
+import { RadioGroup } from '@base-ui/react/radio-group';
 import {
   createContext,
   useCallback,
@@ -54,6 +56,7 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
@@ -81,7 +84,7 @@ const navigationMenuVariants = tv({
       'data-overflow:[mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]',
     ],
     highlight: [
-      'pointer-events-none absolute top-0.5 left-0 z-0 m-0 list-none h-[calc(100%-0.25rem)] rounded-full bg-foreground/[0.07]',
+      'pointer-events-none absolute top-0.5 left-0 z-0 m-0 list-none h-[calc(100%-0.25rem)] rounded-full bg-foreground/[0.08]',
       'translate-x-(--navigation-menu-highlight-x) w-(--navigation-menu-highlight-w) opacity-(--navigation-menu-highlight-o)',
       `transition-[translate,width,opacity] duration-300 ${EASE} motion-reduce:transition-none`,
       'data-instant:transition-none',
@@ -95,6 +98,7 @@ const navigationMenuVariants = tv({
       '[&_svg]:size-4 [&_svg]:shrink-0',
     ],
     linkLabel: '',
+    trigger: '',
     chevron: [
       'flex size-3.5 items-center justify-center text-muted-foreground transition-transform duration-300 data-popup-open:rotate-180',
       `${EASE} motion-reduce:transition-none [&_svg]:size-3.5`,
@@ -108,6 +112,11 @@ const navigationMenuVariants = tv({
       `transition-[width,height,clip-path,opacity,scale] duration-[420ms] ${EASE} motion-reduce:transition-none`,
     ],
     viewport: 'relative size-full overflow-hidden rounded-[inherit]',
+    // A soft sheen from the top edge, so the panel reads as lit from where it grew.
+    sheen: [
+      'pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-[inherit]',
+      'bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--foreground)_5%,transparent),transparent)]',
+    ],
     // The outer box keeps clear of the bar; the inner one is the layout, and
     // takes the className.
     content: [
@@ -119,7 +128,7 @@ const navigationMenuVariants = tv({
     ],
     contentInner: [
       // At least as wide as the panel, which is never narrower than the bar.
-      'flex min-w-full flex-col gap-1 p-2',
+      'flex min-w-full flex-col gap-2 p-2',
       // Each child arrives a beat after the one before it, out of a short blur.
       '*:transition-[opacity,filter,translate] *:duration-500 *:ease-out motion-reduce:*:transition-none',
       'group-data-starting-style/content:*:translate-y-1 group-data-starting-style/content:*:opacity-0 group-data-starting-style/content:*:blur-[6px]',
@@ -132,19 +141,27 @@ const navigationMenuVariants = tv({
       'flex shrink-0 items-center gap-2 rounded-full pe-2 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring',
     ],
     brandMark: [
-      'flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-background',
+      'flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-background',
       '[&_img]:size-full [&_img]:object-cover [&_svg]:size-4.5',
     ],
     actions: 'flex shrink-0 items-center gap-1',
+    // Washed with its tone from the tile's corner, so each card carries its
+    // own colour without a coloured border or background.
     card: [
-      'group/card relative flex min-h-16 cursor-pointer items-center gap-3 rounded-[18px] p-2.5 pe-4 text-start outline-none',
-      'bg-foreground/[0.04] transition-colors duration-150 hover:bg-foreground/[0.07] focus-visible:ring-2 focus-visible:ring-ring',
-      'data-active:bg-foreground/[0.07]',
+      'group/card relative isolate flex min-h-[4.5rem] cursor-pointer items-center gap-3.5 overflow-hidden rounded-[20px] p-3 pe-5 text-start outline-none',
+      'bg-foreground/[0.045] ring-1 ring-foreground/[0.04] ring-inset',
+      'transition-[background-color,box-shadow] duration-200 hover:bg-foreground/[0.07] hover:ring-foreground/[0.08]',
+      'focus-visible:ring-2 focus-visible:ring-ring data-active:bg-foreground/[0.07]',
     ],
-    cardMedia: 'flex size-11 shrink-0 items-center justify-center rounded-[13px] [&_svg]:size-5',
-    cardBody: 'flex min-w-0 flex-1 flex-col',
-    cardEyebrow: 'truncate text-xs text-muted-foreground',
-    cardTitle: 'truncate text-sm font-medium text-foreground',
+    cardWash: [
+      'pointer-events-none absolute inset-0 -z-10',
+      'bg-[radial-gradient(120%_160%_at_0%_0%,color-mix(in_oklab,var(--navigation-menu-tone)_24%,transparent),transparent_62%)]',
+      'opacity-80 transition-opacity duration-200 group-hover/card:opacity-100 motion-reduce:transition-none',
+    ],
+    cardMedia: 'flex size-12 shrink-0 items-center justify-center rounded-[14px] [&_svg]:size-5.5',
+    cardBody: 'flex min-w-0 flex-1 flex-col gap-0.5',
+    cardEyebrow: 'truncate text-[13px] leading-4 text-muted-foreground',
+    cardTitle: 'truncate text-[15px] leading-5 font-semibold text-foreground',
     cardArrow: [
       'size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/card:translate-x-0.5',
       'rtl:-scale-x-100 rtl:group-hover/card:-translate-x-0.5',
@@ -163,17 +180,40 @@ const navigationMenuVariants = tv({
     rowBody: 'flex min-w-0 flex-col',
     rowTitle: 'text-sm font-medium text-foreground',
     rowDescription: 'text-xs leading-5 text-muted-foreground',
-    setting: 'flex min-h-10 items-center justify-between gap-6 px-2.5 text-sm',
+    setting: 'flex min-h-11 items-center justify-between gap-6 ps-1 text-[15px]',
     settingLabel: 'text-muted-foreground',
-    separator: 'mx-2.5 my-1 h-px shrink-0 bg-foreground/[0.07]',
+    separator: 'mx-1 my-1 h-px shrink-0 bg-foreground/[0.07]',
     footer: [
-      'mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-foreground/[0.07] px-2.5 pt-2.5 pb-1',
-      'text-xs text-muted-foreground',
+      'flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-foreground/[0.07] px-1 pt-3 pb-0.5',
+      'text-[13px] text-muted-foreground',
     ],
     hint: 'inline-flex items-center gap-1.5',
     kbd: [
-      'inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-foreground/[0.07] px-1',
-      'font-sans text-[11px] font-medium text-foreground/80',
+      'inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-foreground/[0.08] px-1.5',
+      'font-sans text-xs font-medium text-foreground/80',
+    ],
+    profile: 'flex items-start justify-between gap-4 px-1 pt-1 pb-1',
+    profileBody: 'flex min-w-0 flex-col gap-0.5',
+    profileTitle: 'truncate text-[17px] leading-6 font-semibold text-foreground',
+    profileDescription: 'truncate text-sm text-muted-foreground',
+    profileStatus: 'shrink-0',
+    inline: 'flex min-h-11 items-center justify-between gap-3 ps-1 text-[15px] text-foreground',
+    inlineText: 'min-w-0 truncate',
+    inlineActions: 'flex shrink-0 items-center gap-2',
+    pills: 'flex flex-wrap gap-2',
+    pill: [
+      'inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-foreground/[0.07] px-4 text-sm font-medium text-foreground outline-none select-none',
+      'transition-[background-color,scale] duration-150 hover:bg-foreground/[0.11] active:scale-[0.97] motion-reduce:transition-none',
+      'focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+      'data-[icon-only]:w-9 data-[icon-only]:px-0 [&_svg]:size-4 [&_svg]:shrink-0',
+    ],
+    pillExternal: 'size-3.5! text-muted-foreground rtl:-scale-x-100',
+    options: 'flex shrink-0 items-center gap-0.5 rounded-full bg-foreground/[0.05] p-1',
+    option: [
+      'inline-flex h-8 cursor-pointer items-center justify-center rounded-full px-3.5 text-sm text-muted-foreground outline-none select-none',
+      'transition-[background-color,color] duration-200 hover:text-foreground motion-reduce:transition-none',
+      'focus-visible:ring-2 focus-visible:ring-ring data-checked:bg-foreground/[0.1] data-checked:font-medium data-checked:text-foreground',
+      'data-disabled:pointer-events-none data-disabled:opacity-50',
     ],
   },
   variants: {
@@ -181,37 +221,46 @@ const navigationMenuVariants = tv({
       island: {
         root: 'w-fit max-w-full flex-col items-center',
         bar: [
-          'h-12 gap-1 rounded-full bg-popover p-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_10px_30px_-14px_rgb(0_0_0/0.35)]',
+          'h-14 gap-1.5 rounded-[28px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_12px_32px_-14px_rgb(0_0_0/0.4)]',
           'ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
           // Open, the popup underneath is the surface, so the bar gives up its own.
-          'group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
+          'group-data-open/navigation-menu:bg-transparent group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
         ],
+        link: 'h-10 px-4 text-[15px]',
+        // A trigger is a control rather than a destination, so it keeps a fill of its own.
+        trigger: 'bg-foreground/[0.06] data-popup-open:bg-transparent',
         popup: [
-          'rounded-[24px] ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
-          'shadow-[0_2px_6px_rgb(0_0_0/0.05),0_30px_70px_-28px_rgb(0_0_0/0.5)]',
-          '[clip-path:inset(-80px_round_24px)]',
+          'rounded-[28px] ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
+          'shadow-[0_2px_6px_rgb(0_0_0/0.05),0_36px_80px_-30px_rgb(0_0_0/0.55)]',
+          '[clip-path:inset(-80px_round_28px)]',
         ],
         content: 'min-w-(--navigation-menu-bar-w) pt-[calc(var(--navigation-menu-bar-h)-0.25rem)]',
+        contentInner: 'p-3',
       },
       dock: {
         root: 'w-fit max-w-full flex-col items-center',
         bar: [
           'h-16 gap-1 rounded-[24px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_10px_30px_-14px_rgb(0_0_0/0.35)]',
           'ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
-          'group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
+          'group-data-open/navigation-menu:bg-transparent group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
         ],
         highlight: 'rounded-[16px]',
+        // Never scrolled, so the labels floating above the icons are not clipped.
+        list: 'overflow-visible',
         link: [
           'h-12 min-w-12 justify-center gap-0 rounded-[16px] px-3.5 [&_svg]:size-5',
           'data-active:after:absolute data-active:after:bottom-1 data-active:after:left-1/2 data-active:after:size-1 data-active:after:-translate-x-1/2 data-active:after:rounded-full data-active:after:bg-foreground',
         ],
-        // Icons only, until a row is pointed at or reached by the keyboard.
+        // Icons only. The label floats above the icon when it is pointed at or
+        // reached by the keyboard, so the dock never changes width under the pointer.
         linkLabel: [
-          'max-w-0 overflow-hidden opacity-0',
-          `transition-[max-width,opacity,margin] duration-300 ${EASE} motion-reduce:transition-none`,
-          'group-hover/link:ms-2 group-hover/link:max-w-32 group-hover/link:opacity-100',
-          'group-focus-visible/link:ms-2 group-focus-visible/link:max-w-32 group-focus-visible/link:opacity-100',
-          'group-data-popup-open/link:ms-2 group-data-popup-open/link:max-w-32 group-data-popup-open/link:opacity-100',
+          'pointer-events-none absolute bottom-[calc(100%+0.75rem)] left-1/2 -translate-x-1/2 translate-y-1 rounded-lg px-2.5 py-1',
+          'bg-foreground text-xs font-medium whitespace-nowrap text-background opacity-0 shadow-md',
+          `transition-[opacity,translate] duration-200 ${EASE} motion-reduce:transition-none`,
+          'group-hover/link:translate-y-0 group-hover/link:opacity-100',
+          'group-focus-visible/link:translate-y-0 group-focus-visible/link:opacity-100',
+          // Open, the panel is above the dock, so the label gives way to it.
+          'group-data-open/navigation-menu:opacity-0!',
         ],
         popup: [
           'rounded-[24px] ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
@@ -268,6 +317,16 @@ const navigationMenuVariants = tv({
   defaultVariants: { variant: 'island', side: 'bottom' },
 });
 
+/** The colour a card is washed with, by tone. */
+const TONE_COLOR: Record<NavigationMenuTone, string> = {
+  neutral: 'var(--foreground)',
+  primary: 'var(--primary)',
+  info: 'var(--info)',
+  success: 'var(--success)',
+  warning: 'var(--warning)',
+  destructive: 'var(--destructive)',
+};
+
 const TONE: Record<NavigationMenuTone, string> = {
   neutral: 'bg-foreground/[0.07] text-foreground',
   primary: 'bg-primary text-primary-foreground',
@@ -280,6 +339,7 @@ const TONE: Record<NavigationMenuTone, string> = {
 interface NavigationMenuContextValue {
   variant: NavigationMenuVariant;
   side: 'top' | 'bottom';
+  openOn: 'press' | 'hover';
 }
 const NavigationMenuContext = createContext<NavigationMenuContextValue | null>(null);
 /** True inside a panel, where a link is drawn as a row rather than a pill. */
@@ -305,6 +365,14 @@ export interface NavigationMenuProps extends Omit<
   variant?: NavigationMenuVariant;
   /** Which way the panel opens. Default `bottom`, or `top` for `dock`. */
   side?: 'top' | 'bottom';
+  /**
+   * What opens a panel. `press` waits for a click, Enter or Space, and keeps
+   * the panel open until it is dismissed, so a pointer drifting off it while
+   * someone types or chooses does not close it. `hover` also opens it under
+   * the pointer and closes it when the pointer leaves. Default `press` for
+   * `island` and `dock`, `hover` for `bar`.
+   */
+  openOn?: 'press' | 'hover';
   /** The brand, the list and any actions, in reading order. */
   children?: ReactNode;
   className?: string;
@@ -316,6 +384,7 @@ export interface NavigationMenuProps extends Omit<
 function NavigationMenuRoot({
   variant = 'island',
   side: sideProp,
+  openOn: openOnProp,
   value: valueProp,
   defaultValue,
   onValueChange,
@@ -328,21 +397,30 @@ function NavigationMenuRoot({
 }: NavigationMenuProps) {
   const side = sideProp ?? (variant === 'dock' ? 'top' : 'bottom');
   const slots = navigationMenuVariants({ variant, side });
-  const root = useRef<HTMLElement | null>(null);
+  // Held in state, so the portal mounts into the menu only once the menu is on
+  // the page; a ref read at the portal's first render can still be empty.
+  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
   const bar = useRef<HTMLDivElement>(null);
   const grows = variant !== 'bar';
+  const openOn = openOnProp ?? (grows ? 'press' : 'hover');
 
   // Open is mirrored here so the bar can hand its surface to the popup.
   const [innerValue, setInnerValue] = useState<unknown>(defaultValue ?? null);
   const value = valueProp !== undefined ? valueProp : innerValue;
   const open = value != null;
 
-  // The bar's box, written as variables the popup's opening clip is drawn from.
-  useIsomorphicLayoutEffect(() => {
-    const node = bar.current;
-    const host = root.current;
-    if (!node || !host || typeof ResizeObserver === 'undefined') return;
+  // The bar's box, written onto the menu as the variables the popup's opening
+  // clip and the panel's offset are drawn from. Attached to the bar itself, so
+  // it always measures the element on the page.
+  const observer = useRef<ResizeObserver | null>(null);
+  const measureBar = useCallback((node: HTMLDivElement | null) => {
+    bar.current = node;
+    observer.current?.disconnect();
+    observer.current = null;
+    if (!node || typeof ResizeObserver === 'undefined') return;
     const write = () => {
+      const host = node.parentElement;
+      if (!host) return;
       host.style.setProperty('--navigation-menu-bar-w', `${node.offsetWidth}px`);
       host.style.setProperty('--navigation-menu-bar-h', `${node.offsetHeight}px`);
       // A pill's radius is computed as an enormous length; the clip needs the one it draws.
@@ -350,21 +428,23 @@ function NavigationMenuRoot({
       host.style.setProperty('--navigation-menu-bar-r', `${radius}px`);
     };
     write();
-    const observer = new ResizeObserver(write);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [variant]);
+    observer.current = new ResizeObserver(write);
+    observer.current.observe(node);
+  }, []);
 
   return (
-    <NavigationMenuContext.Provider value={{ variant, side }}>
+    <NavigationMenuContext.Provider value={{ variant, side, openOn }}>
       <BaseNavigationMenu.Root
-        ref={root}
+        ref={setRootElement}
         data-slot="navigation-menu"
         data-variant={variant}
         data-side={side}
         data-open={open ? '' : undefined}
         value={value}
         onValueChange={(next, details) => {
+          // Opened by press only: the pointer passing over a trigger, or leaving
+          // the panel, changes nothing.
+          if (openOn === 'press' && details.reason === 'trigger-hover') return;
           if (valueProp === undefined) setInnerValue(next);
           onValueChange?.(next, details);
         }}
@@ -373,28 +453,32 @@ function NavigationMenuRoot({
         className={slots.root({ className })}
         {...props}
       >
-        <div ref={bar} data-slot="navigation-menu-bar" className={slots.bar({ className: barClassName })}>
+        <div ref={measureBar} data-slot="navigation-menu-bar" className={slots.bar({ className: barClassName })}>
           {children}
         </div>
-        <BaseNavigationMenu.Portal container={grows ? root : undefined}>
-          <BaseNavigationMenu.Positioner
-            data-slot="navigation-menu-positioner"
-            className={slots.positioner()}
-            // Grown from the bar, the popup is laid over it: same edge, same centre.
-            anchor={grows ? bar : undefined}
-            side={side}
-            // A header's panel starts under its trigger and runs on along the bar,
-            // so the first trigger's panel never hangs off the page's edge.
-            align={grows ? 'center' : 'start'}
-            sideOffset={grows ? (state) => -state.anchor.height : 8}
-            collisionPadding={12}
-            collisionAvoidance={{ side: 'none' }}
-          >
-            <BaseNavigationMenu.Popup data-slot="navigation-menu-popup" className={slots.popup()}>
-              <BaseNavigationMenu.Viewport data-slot="navigation-menu-viewport" className={slots.viewport()} />
-            </BaseNavigationMenu.Popup>
-          </BaseNavigationMenu.Positioner>
-        </BaseNavigationMenu.Portal>
+        {/* Grown from the bar, the popup is drawn inside the menu, beneath the bar. */}
+        {grows && !rootElement ? null : (
+          <BaseNavigationMenu.Portal container={grows ? rootElement : undefined}>
+            <BaseNavigationMenu.Positioner
+              data-slot="navigation-menu-positioner"
+              className={slots.positioner()}
+              // Grown from the bar, the popup is laid over it: same edge, same centre.
+              anchor={grows ? bar : undefined}
+              side={side}
+              // A header's panel starts under its trigger and runs on along the bar,
+              // so the first trigger's panel never hangs off the page's edge.
+              align={grows ? 'center' : 'start'}
+              sideOffset={grows ? (state) => -state.anchor.height : 8}
+              collisionPadding={12}
+              collisionAvoidance={{ side: 'none' }}
+            >
+              <BaseNavigationMenu.Popup data-slot="navigation-menu-popup" className={slots.popup()}>
+                {grows ? <span aria-hidden="true" className={slots.sheen()} /> : null}
+                <BaseNavigationMenu.Viewport data-slot="navigation-menu-viewport" className={slots.viewport()} />
+              </BaseNavigationMenu.Popup>
+            </BaseNavigationMenu.Positioner>
+          </BaseNavigationMenu.Portal>
+        )}
       </BaseNavigationMenu.Root>
     </NavigationMenuContext.Provider>
   );
@@ -470,7 +554,9 @@ function NavigationMenuList({
     });
     observer.observe(host, { attributes: true, subtree: true, attributeFilter: ['data-active', 'data-popup-open'] });
     const measure = () => {
-      host.toggleAttribute('data-overflow', host.scrollWidth > host.clientWidth + 1);
+      // Only a list that scrolls can overflow; a dock's labels float outside it on purpose.
+      const scrolls = getComputedStyle(host).overflowX !== 'visible';
+      host.toggleAttribute('data-overflow', scrolls && host.scrollWidth > host.clientWidth + 1);
       if (pointed.current) place(pointed.current);
       else rest();
     };
@@ -564,16 +650,23 @@ function NavigationMenuTrigger({
   hideChevron = false,
   className,
   children,
+  onMouseEnter,
   ...props
 }: NavigationMenuTriggerProps) {
-  const { variant, side } = useNavigationMenu('NavigationMenu.Trigger');
+  const { variant, side, openOn } = useNavigationMenu('NavigationMenu.Trigger');
   const slots = navigationMenuVariants({ variant, side });
   const chevron = !hideChevron && variant !== 'dock';
   return (
     <BaseNavigationMenu.Trigger
       data-slot="navigation-menu-trigger"
       data-navigation-menu-target=""
-      className={slots.link({ className })}
+      // Opened by press only, the pointer arriving must not open the panel, nor
+      // arm the short window in which a click after a hover-open is ignored.
+      onMouseEnter={(event) => {
+        if (openOn === 'press') event.preventBaseUIHandler();
+        onMouseEnter?.(event);
+      }}
+      className={slots.link({ className: [slots.trigger(), className] })}
       {...props}
     >
       {icon}
@@ -735,7 +828,17 @@ function NavigationMenuCard({
   const { variant, side } = useNavigationMenu('NavigationMenu.Card');
   const slots = navigationMenuVariants({ variant, side });
   return (
-    <BaseNavigationMenu.Link data-slot="navigation-menu-card" className={slots.card({ className })} {...props}>
+    <BaseNavigationMenu.Link
+      data-slot="navigation-menu-card"
+      data-tone={tone}
+      className={slots.card({ className })}
+      {...props}
+    >
+      <span
+        aria-hidden="true"
+        className={slots.cardWash()}
+        style={{ '--navigation-menu-tone': TONE_COLOR[tone] } as CSSProperties}
+      />
       {icon ? <span className={slots.cardMedia({ className: TONE[tone] })}>{icon}</span> : null}
       <span className={slots.cardBody()}>
         {eyebrow ? <span className={slots.cardEyebrow()}>{eyebrow}</span> : null}
@@ -851,6 +954,148 @@ function NavigationMenuHint({ keys, className, children, ...props }: NavigationM
 }
 NavigationMenuHint.displayName = 'NavigationMenu.Hint';
 
+export interface NavigationMenuProfileProps extends Omit<ComponentProps<'div'>, 'title'> {
+  /** A quieter line under the name: a role, a place, a plan. */
+  description?: ReactNode;
+  /** Something at the row's end, such as a Badge saying whether they are available. */
+  status?: ReactNode;
+}
+
+/** Who or what the panel is about, at its top: a name, a line under it and a status. */
+function NavigationMenuProfile({ description, status, className, children, ...props }: NavigationMenuProfileProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Profile');
+  const slots = navigationMenuVariants({ variant, side });
+  return (
+    <div data-slot="navigation-menu-profile" className={slots.profile({ className })} {...props}>
+      <div className={slots.profileBody()}>
+        <span className={slots.profileTitle()}>{children}</span>
+        {description ? <span className={slots.profileDescription()}>{description}</span> : null}
+      </div>
+      {status ? <div className={slots.profileStatus()}>{status}</div> : null}
+    </div>
+  );
+}
+NavigationMenuProfile.displayName = 'NavigationMenu.Profile';
+
+export interface NavigationMenuValueProps extends ComponentProps<'div'> {
+  /** Pills at the row's end that act on the value: a copy, a share. */
+  actions?: ReactNode;
+}
+
+/** A value worth taking away, such as an address or a command, with the pills that act on it. */
+function NavigationMenuValue({ actions, className, children, ...props }: NavigationMenuValueProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Value');
+  const slots = navigationMenuVariants({ variant, side });
+  return (
+    <div data-slot="navigation-menu-value" className={slots.inline({ className })} {...props}>
+      <span className={slots.inlineText()}>{children}</span>
+      {actions ? <span className={slots.inlineActions()}>{actions}</span> : null}
+    </div>
+  );
+}
+NavigationMenuValue.displayName = 'NavigationMenu.Value';
+
+export interface NavigationMenuPillsProps extends ComponentProps<'div'> {}
+
+/** A row of pills that wraps onto a second line when it runs out of room. */
+function NavigationMenuPills({ className, ...props }: NavigationMenuPillsProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Pills');
+  const slots = navigationMenuVariants({ variant, side });
+  return <div data-slot="navigation-menu-pills" className={slots.pills({ className })} {...props} />;
+}
+NavigationMenuPills.displayName = 'NavigationMenu.Pills';
+
+type PillOwnProps = {
+  /** Drawn before the label. Alone, with no label, it makes a round icon pill: pass `aria-label`. */
+  icon?: ReactNode;
+  /** Adds an arrow after the label and opens the link in a new tab. Only with `href`. */
+  external?: boolean;
+  className?: string;
+};
+
+export type NavigationMenuPillProps = PillOwnProps &
+  (
+    | ({ href: string } & Omit<ComponentProps<'a'>, 'className'>)
+    | ({ href?: undefined } & Omit<ComponentProps<'button'>, 'className'>)
+  );
+
+/**
+ * A small round control in a panel: a button such as Copy, or with `href`
+ * a link such as one to a profile elsewhere.
+ */
+function NavigationMenuPill({ icon, external = false, className, children, ...props }: NavigationMenuPillProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Pill');
+  const slots = navigationMenuVariants({ variant, side });
+  const iconOnly = icon != null && (children == null || children === false);
+  const inner = (
+    <>
+      {icon}
+      {children}
+      {external ? (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          className={slots.pillExternal()}
+        >
+          <path d="M7 17 17 7M8 7h9v9" />
+        </svg>
+      ) : null}
+    </>
+  );
+  const shared = {
+    'data-slot': 'navigation-menu-pill',
+    'data-icon-only': iconOnly ? '' : undefined,
+    className: slots.pill({ className }),
+  };
+  if (props.href !== undefined) {
+    const { href, ...rest } = props as ComponentProps<'a'>;
+    return (
+      <a {...shared} href={href} {...(external ? { target: '_blank', rel: 'noreferrer' } : null)} {...rest}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <button type="button" {...shared} {...(props as ComponentProps<'button'>)}>
+      {inner}
+    </button>
+  );
+}
+NavigationMenuPill.displayName = 'NavigationMenu.Pill';
+
+export interface NavigationMenuOptionsProps extends Omit<RadioGroup.Props, 'className'> {
+  className?: string;
+}
+
+/**
+ * A choice of a few options in one track, for a preference kept in the
+ * menu. Arrow keys move the choice; it is a radio group to assistive
+ * technology. Give it an `aria-label`, or put it in a `NavigationMenu.Setting`.
+ */
+function NavigationMenuOptions({ className, ...props }: NavigationMenuOptionsProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Options');
+  const slots = navigationMenuVariants({ variant, side });
+  return <RadioGroup data-slot="navigation-menu-options" className={slots.options({ className })} {...props} />;
+}
+NavigationMenuOptions.displayName = 'NavigationMenu.Options';
+
+export interface NavigationMenuOptionProps extends Omit<Radio.Root.Props, 'className'> {
+  className?: string;
+}
+
+/** One option in a `NavigationMenu.Options` track. */
+function NavigationMenuOption({ className, ...props }: NavigationMenuOptionProps) {
+  const { variant, side } = useNavigationMenu('NavigationMenu.Option');
+  const slots = navigationMenuVariants({ variant, side });
+  return <Radio.Root data-slot="navigation-menu-option" className={slots.option({ className })} {...props} />;
+}
+NavigationMenuOption.displayName = 'NavigationMenu.Option';
+
 export const NavigationMenu = Object.assign(NavigationMenuRoot, {
   List: NavigationMenuList,
   Item: NavigationMenuItem,
@@ -865,6 +1110,12 @@ export const NavigationMenu = Object.assign(NavigationMenuRoot, {
   Separator: NavigationMenuSeparator,
   Footer: NavigationMenuFooter,
   Hint: NavigationMenuHint,
+  Profile: NavigationMenuProfile,
+  Value: NavigationMenuValue,
+  Pills: NavigationMenuPills,
+  Pill: NavigationMenuPill,
+  Options: NavigationMenuOptions,
+  Option: NavigationMenuOption,
 });
 
 export {
@@ -881,5 +1132,11 @@ export {
   NavigationMenuSeparator,
   NavigationMenuFooter,
   NavigationMenuHint,
+  NavigationMenuProfile,
+  NavigationMenuValue,
+  NavigationMenuPills,
+  NavigationMenuPill,
+  NavigationMenuOptions,
+  NavigationMenuOption,
   navigationMenuVariants,
 };

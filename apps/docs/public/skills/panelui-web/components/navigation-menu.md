@@ -95,7 +95,7 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
 - `NavigationMenu.Footer` — The strip along a panel's foot, for keyboard hints.
 - `NavigationMenu.Hint` — One keyboard hint: each of its `keys` in a cap, then what they do.
 - `NavigationMenu.Actions` — Controls at the end of the bar that are not destinations, such as sign-in buttons. They sit outside the list, so the highlight does not visit them.
-- `NavigationMenu.Status` — A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` track. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set.
+- `NavigationMenu.Status` — A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` meter. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set.
 
 ## Props
 
@@ -210,7 +210,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `id` | `string` | `''` | Which status this is. When it changes, the strip tucks up behind the bar, changes what it says out of sight, and comes back down. Content that changes under the same `id`, such as `progress`, updates in place. |
 | `icon` | `ReactNode` | — | Drawn before the line: a project's mark, a coloured dot for a state. |
 | `action` | `ReactNode` | — | At the strip's end, after a rule: usually a link such as "See it". |
-| `progress` | `number` | — | How far along, from 0 to 1, drawn as a thin track along the strip's foot. Leave it out for none. |
+| `progress` | `number` | — | How far along, from 0 to 1, drawn as a short meter after the line. Leave it out for none. |
 | `hidden` | `boolean` | `false` | Tucks the strip away behind the bar, for example while the page scrolls. |
 
 ## In a Server Component

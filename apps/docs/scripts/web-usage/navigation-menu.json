@@ -29,7 +29,7 @@
     "Footer": "The strip along a panel's foot, for keyboard hints.",
     "Hint": "One keyboard hint: each of its `keys` in a cap, then what they do.",
     "Actions": "Controls at the end of the bar that are not destinations, such as sign-in buttons. They sit outside the list, so the highlight does not visit them.",
-    "Status": "A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` track. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set."
+    "Status": "A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` meter. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set."
   },
   "examples": [
     {
@@ -55,7 +55,7 @@
     },
     {
       "title": "Status",
-      "description": "`NavigationMenu.Status` hangs a strip under the bar. Here it moves through three statuses every few seconds, each with its own `id`: it tucks up into the bar, changes out of sight, and comes back down. The one in progress carries a `progress` track. While the page scrolls, `hidden` tucks it away, and it returns once the page settles.",
+      "description": "`NavigationMenu.Status` hangs a strip under the bar. Here it moves through three statuses every few seconds, each with its own `id`: it tucks up into the bar, changes out of sight, and comes back down. The one in progress carries a `progress` meter. While the page scrolls, `hidden` tucks it away, and it returns once the page settles.",
       "demo": "status",
       "height": 260,
       "align": "start"

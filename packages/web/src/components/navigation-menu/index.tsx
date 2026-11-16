@@ -196,13 +196,15 @@ const navigationMenuVariants = tv({
     statusIcon: 'flex size-4 shrink-0 items-center justify-center text-foreground [&_svg]:size-4',
     statusText: 'min-w-0 truncate',
     statusAction: [
-      'flex shrink-0 items-center gap-1 border-s border-foreground/10 ps-2 text-muted-foreground',
+      // A short rule before it, centred on the line rather than the strip's full height.
+      'relative flex shrink-0 items-center gap-1 ps-2.5 text-muted-foreground',
+      'before:absolute before:start-0 before:top-1/2 before:h-3.5 before:w-px before:-translate-y-1/2 before:bg-foreground/15',
       '[&_a]:outline-none [&_a]:transition-colors [&_a:hover]:text-foreground [&_a:focus-visible]:text-foreground [&_a:focus-visible]:underline',
     ],
-    statusTrack:
-      'pointer-events-none absolute inset-x-3.5 bottom-1 h-0.5 overflow-hidden rounded-full bg-foreground/[0.08]',
+    // A short meter after the line, not a rule along the strip's foot.
+    statusTrack: 'relative h-1 w-10 shrink-0 overflow-hidden rounded-full bg-foreground/[0.12]',
     statusFill: [
-      'h-full w-(--navigation-menu-status-progress) rounded-full bg-foreground/60',
+      'block h-full w-(--navigation-menu-status-progress) rounded-full bg-foreground/80',
       `transition-[width] duration-500 ${EASE} motion-reduce:transition-none`,
     ],
     kbd: [
@@ -1125,7 +1127,7 @@ export interface NavigationMenuStatusProps extends Omit<ComponentProps<'div'>, '
   children: ReactNode;
   /** At the strip's end, after a rule: usually a link such as "See it". */
   action?: ReactNode;
-  /** How far along, from 0 to 1, drawn as a thin track along the strip's foot. Leave it out for none. */
+  /** How far along, from 0 to 1, drawn as a short meter after the line. Leave it out for none. */
   progress?: number;
   /** Tucks the strip away behind the bar, for example while the page scrolls. */
   hidden?: boolean;
@@ -1190,7 +1192,6 @@ function NavigationMenuStatus({
     >
       {content.icon ? <span className={slots.statusIcon()}>{content.icon}</span> : null}
       <span className={slots.statusText()}>{content.children}</span>
-      {content.action ? <span className={slots.statusAction()}>{content.action}</span> : null}
       {content.amount === undefined ? null : (
         <span
           role="progressbar"
@@ -1203,6 +1204,7 @@ function NavigationMenuStatus({
           <span className={slots.statusFill()} />
         </span>
       )}
+      {content.action ? <span className={slots.statusAction()}>{content.action}</span> : null}
     </div>
   );
 }

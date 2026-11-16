@@ -72,6 +72,9 @@ export default function NavigationMenuStatusDemo() {
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#">Blocks</NavigationMenu.Link>
         </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#">Blog</NavigationMenu.Link>
+        </NavigationMenu.Item>
       </NavigationMenu.List>
       <NavigationMenu.Status
         id={status.id}

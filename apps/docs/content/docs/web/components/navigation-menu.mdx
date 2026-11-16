@@ -124,7 +124,7 @@ export default function NavigationMenuOverview() {
 
 Use it for a site's or an app's top-level destinations, where some of them open a panel of further links: a docs header, a product site, an app's launcher.
 
-In `island` the panel is the bar grown larger rather than a box that appears under it, and its contents arrive one after another behind the growth. `bar` is a full-width header whose panel hangs below the triggers and moves between them. `dock` is an island at the foot of the window, with icon rows whose labels appear when pointed at.
+In `island` the panel is the bar grown larger rather than a box that appears under it, and its contents fade in once it has room. `bar` is a full-width header whose panel hangs below the triggers and moves between them. `dock` is an island at the foot of the window, with icon rows whose labels appear when pointed at.
 
 For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/components/nav-rail). For a list of actions rather than places, use [Menu](/docs/web/components/menu).
 
@@ -242,9 +242,9 @@ import { NavigationMenu } from "@/components/panelui/navigation-menu"
 - **`NavigationMenu.Item`** — One entry in the list. Give it a `value` when it holds a trigger you want to open from outside.
 - **`NavigationMenu.Link`** — A destination. In the bar it is a pill; mark the current page with `active`. Inside a panel it is a row, with an optional `icon` in a square of its own and a `description` under the label.
 - **`NavigationMenu.Trigger`** — Opens its item's content. In an island it keeps a fill of its own, so it reads as a control rather than a destination. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.
-- **`NavigationMenu.Content`** — What a trigger opens. `className` lays out the panel: its width, a grid, its padding. Its children arrive one after another as it opens.
+- **`NavigationMenu.Content`** — What a trigger opens. `className` lays out the panel: its width, a grid, its padding. Its contents fade in together as the panel grows.
 - **`NavigationMenu.Profile`** — Who or what the panel is about: a name, a `description` under it, and a `status` at the end, such as a [Badge](/docs/web/components/badge).
-- **`NavigationMenu.Card`** — A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. The card is washed with its tone from the tile's corner. Use one or two near the top of a panel, for where most people are going.
+- **`NavigationMenu.Card`** — A featured destination: a tile in a theme `tone`, a small `eyebrow` line, the title and an arrow. Only the tile carries the colour. Use one or two near the top of a panel, for where most people are going.
 - **`NavigationMenu.Value`** — A value worth taking away, such as a command or an address, with `actions` at its end. Put a Copy pill there.
 - **`NavigationMenu.Pills`** — A row of pills that wraps when it runs out of room.
 - **`NavigationMenu.Pill`** — A small round control: a button, or a link with `href`. `external` adds an arrow and opens the link in a new tab. With only an `icon` it is a round icon pill and needs an `aria-label`.
@@ -827,7 +827,7 @@ A panel is as wide as its content, and in `island` and `dock` never narrower tha
 
 ### Reduced motion
 
-With reduced motion set, the panel opens and changes size without animating, its contents arrive without the blur, and the highlight moves without travelling.
+With reduced motion set, the panel opens and changes size without animating, its contents appear without fading, and the highlight moves without travelling.
 
 ### Accessibility
 

@@ -23,8 +23,8 @@
  * `dock` it is the bar, grown: the popup sits under the bar, the same colour
  * and the same corners, and opens from a clip shaped exactly like the bar to
  * the panel's full size. Closing it runs the same shape back. Its contents
- * come in a beat behind the surface, each one a little after the last, so the
- * eye reads the growth first and the contents second.
+ * fade in a beat behind the surface, so the eye reads the growth first and
+ * the contents second.
  *
  * `bar` is the ordinary header: the panel hangs below the triggers and
  * travels between them, resizing to each one's content and sliding it in
@@ -56,7 +56,6 @@ import {
   useRef,
   useState,
   type ComponentProps,
-  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
@@ -109,33 +108,22 @@ const navigationMenuVariants = tv({
     ],
     popup: [
       'relative h-(--popup-height) w-(--popup-width) origin-(--transform-origin) bg-popover text-popover-foreground outline-none',
-      `transition-[width,height,clip-path,opacity,scale] duration-[420ms] ${EASE} motion-reduce:transition-none`,
+      `transition-[width,height,clip-path,opacity,scale] duration-300 ${EASE} motion-reduce:transition-none`,
     ],
     viewport: 'relative size-full overflow-hidden rounded-[inherit]',
-    // A soft sheen from the top edge, so the panel reads as lit from where it grew.
-    sheen: [
-      'pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-[inherit]',
-      'bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--foreground)_5%,transparent),transparent)]',
-    ],
     // The outer box keeps clear of the bar; the inner one is the layout, and
     // takes the className.
     content: [
       'group/content w-max max-w-[min(var(--available-width),40rem)]',
-      `transition-[opacity,translate] duration-[350ms] ${EASE} motion-reduce:transition-none`,
-      'data-starting-style:opacity-0 data-ending-style:opacity-0',
+      // The contents fade in once, together, a beat after the surface starts to grow.
+      `transition-[opacity,translate] duration-200 ${EASE} motion-reduce:transition-none`,
+      'data-open:delay-75 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:delay-0',
       'data-starting-style:data-[activation-direction=left]:-translate-x-1/4 data-starting-style:data-[activation-direction=right]:translate-x-1/4',
       'data-ending-style:data-[activation-direction=left]:translate-x-1/4 data-ending-style:data-[activation-direction=right]:-translate-x-1/4',
     ],
     contentInner: [
       // At least as wide as the panel, which is never narrower than the bar.
       'flex min-w-full flex-col gap-2 p-2',
-      // Each child arrives a beat after the one before it, out of a short blur.
-      '*:transition-[opacity,filter,translate] *:duration-500 *:ease-out motion-reduce:*:transition-none',
-      'group-data-starting-style/content:*:translate-y-1 group-data-starting-style/content:*:opacity-0 group-data-starting-style/content:*:blur-[6px]',
-      'motion-reduce:group-data-starting-style/content:*:blur-none',
-      '[&>:nth-child(2)]:delay-[40ms] [&>:nth-child(3)]:delay-[80ms] [&>:nth-child(4)]:delay-[120ms] [&>:nth-child(5)]:delay-[160ms]',
-      '[&>:nth-child(6)]:delay-[200ms] [&>:nth-child(7)]:delay-[240ms] [&>:nth-child(n+8)]:delay-[280ms]',
-      'group-data-ending-style/content:*:delay-0 group-data-ending-style/content:*:duration-150',
     ],
     brand: [
       'flex shrink-0 items-center gap-2 rounded-full pe-2 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -145,18 +133,12 @@ const navigationMenuVariants = tv({
       '[&_img]:size-full [&_img]:object-cover [&_svg]:size-4.5',
     ],
     actions: 'flex shrink-0 items-center gap-1',
-    // Washed with its tone from the tile's corner, so each card carries its
-    // own colour without a coloured border or background.
+    // A plain fill: the tile carries the card's colour, and nothing else does.
     card: [
-      'group/card relative isolate flex min-h-[4.5rem] cursor-pointer items-center gap-3.5 overflow-hidden rounded-[20px] p-3 pe-5 text-start outline-none',
+      'group/card relative flex min-h-[4.5rem] cursor-pointer items-center gap-3.5 overflow-hidden rounded-[20px] p-3 pe-5 text-start outline-none',
       'bg-foreground/[0.045] ring-1 ring-foreground/[0.04] ring-inset',
       'transition-[background-color,box-shadow] duration-200 hover:bg-foreground/[0.07] hover:ring-foreground/[0.08]',
       'focus-visible:ring-2 focus-visible:ring-ring data-active:bg-foreground/[0.07]',
-    ],
-    cardWash: [
-      'pointer-events-none absolute inset-0 -z-10',
-      'bg-[radial-gradient(120%_160%_at_0%_0%,color-mix(in_oklab,var(--navigation-menu-tone)_24%,transparent),transparent_62%)]',
-      'opacity-80 transition-opacity duration-200 group-hover/card:opacity-100 motion-reduce:transition-none',
     ],
     cardMedia: 'flex size-12 shrink-0 items-center justify-center rounded-[14px] [&_svg]:size-5.5',
     cardBody: 'flex min-w-0 flex-1 flex-col gap-0.5',
@@ -317,16 +299,6 @@ const navigationMenuVariants = tv({
   defaultVariants: { variant: 'island', side: 'bottom' },
 });
 
-/** The colour a card is washed with, by tone. */
-const TONE_COLOR: Record<NavigationMenuTone, string> = {
-  neutral: 'var(--foreground)',
-  primary: 'var(--primary)',
-  info: 'var(--info)',
-  success: 'var(--success)',
-  warning: 'var(--warning)',
-  destructive: 'var(--destructive)',
-};
-
 const TONE: Record<NavigationMenuTone, string> = {
   neutral: 'bg-foreground/[0.07] text-foreground',
   primary: 'bg-primary text-primary-foreground',
@@ -473,7 +445,6 @@ function NavigationMenuRoot({
               collisionAvoidance={{ side: 'none' }}
             >
               <BaseNavigationMenu.Popup data-slot="navigation-menu-popup" className={slots.popup()}>
-                {grows ? <span aria-hidden="true" className={slots.sheen()} /> : null}
                 <BaseNavigationMenu.Viewport data-slot="navigation-menu-viewport" className={slots.viewport()} />
               </BaseNavigationMenu.Popup>
             </BaseNavigationMenu.Positioner>
@@ -698,7 +669,7 @@ export interface NavigationMenuContentProps extends Omit<BaseNavigationMenu.Cont
 }
 
 /**
- * What a trigger opens. Its children arrive one after another as it opens.
+ * What a trigger opens. Its contents fade in together as the panel grows.
  * `className` lays out the panel itself: its width, a grid, its padding.
  */
 function NavigationMenuContent({ className, children, ...props }: NavigationMenuContentProps) {
@@ -834,11 +805,6 @@ function NavigationMenuCard({
       className={slots.card({ className })}
       {...props}
     >
-      <span
-        aria-hidden="true"
-        className={slots.cardWash()}
-        style={{ '--navigation-menu-tone': TONE_COLOR[tone] } as CSSProperties}
-      />
       {icon ? <span className={slots.cardMedia({ className: TONE[tone] })}>{icon}</span> : null}
       <span className={slots.cardBody()}>
         {eyebrow ? <span className={slots.cardEyebrow()}>{eyebrow}</span> : null}

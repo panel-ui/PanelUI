@@ -385,14 +385,14 @@ function useIsBelow(breakpoint: string): boolean {
   const subscribe = useCallback(
     (onChange: () => void) => {
       if (typeof window === 'undefined') return () => {};
-      const query = window.matchMedia(`(max-width: ${breakpoint})`);
+      const query = window.matchMedia(`(width < ${breakpoint})`);
       query.addEventListener('change', onChange);
       return () => query.removeEventListener('change', onChange);
     },
     [breakpoint]
   );
   const read = useCallback(
-    () => typeof window !== 'undefined' && window.matchMedia(`(max-width: ${breakpoint})`).matches,
+    () => typeof window !== 'undefined' && window.matchMedia(`(width < ${breakpoint})`).matches,
     [breakpoint]
   );
   return useSyncExternalStore(subscribe, read, () => false);
@@ -1078,7 +1078,13 @@ export interface NavRailTriggerProps extends Omit<ComponentProps<'button'>, 'cla
   className?: string;
 }
 
-/** Folds and unfolds the rail. It says which it will do, and whether the rail is open. */
+/**
+ * Folds and unfolds the rail, or opens and closes the drawer on a phone. It says
+ * which it will do, and whether the rail is open. Its default glyph follows: a
+ * sidebar that turns as the rail folds, and a menu or a close mark for the
+ * drawer. With `render`, the element you pass draws the button, so a
+ * `<Button size="icon-lg" />` keeps its own size and shape.
+ */
 function NavRailTrigger({
   expandLabel = 'Expand navigation',
   collapseLabel = 'Collapse navigation',
@@ -1090,6 +1096,16 @@ function NavRailTrigger({
   const { collapsed, toggle, isMobile, mobileOpen, collapsible } = useNavRailPart('NavRail.Trigger');
   const slots = navRailVariants();
   const expanded = isMobile ? mobileOpen : !collapsed;
+  let glyph: ReactNode = (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d="M9 4v16" />
+      <path d="m15.5 9.5-2.5 2.5 2.5 2.5" />
+    </>
+  );
+  if (isMobile) {
+    glyph = mobileOpen ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />;
+  }
   const trigger = useRender({
     defaultTagName: 'button',
     render,
@@ -1100,7 +1116,8 @@ function NavRailTrigger({
         type: 'button',
         'aria-expanded': expanded,
         'aria-label': expanded ? collapseLabel : expandLabel,
-        className: slots.trigger({ className }),
+        // A rendered element brings its own box; the slot would override its size.
+        className: render ? className : slots.trigger({ className }),
         onClick: toggle,
         children: children ?? (
           <svg
@@ -1112,12 +1129,10 @@ function NavRailTrigger({
             strokeLinecap="round"
             strokeLinejoin="round"
             className={slots.triggerGlyph({
-              className: collapsed ? 'rotate-180' : undefined,
+              className: !isMobile && collapsed ? 'rotate-180' : undefined,
             })}
           >
-            <rect x="3" y="4" width="18" height="16" rx="3" />
-            <path d="M9 4v16" />
-            <path d="m15.5 9.5-2.5 2.5 2.5 2.5" />
+            {glyph}
           </svg>
         ),
       },

@@ -118,7 +118,8 @@ const navigationMenuVariants = tv({
       'data-ending-style:data-[activation-direction=left]:translate-x-1/4 data-ending-style:data-[activation-direction=right]:-translate-x-1/4',
     ],
     contentInner: [
-      'flex flex-col gap-1 p-2',
+      // At least as wide as the panel, which is never narrower than the bar.
+      'flex min-w-full flex-col gap-1 p-2',
       // Each child arrives a beat after the one before it, out of a short blur.
       '*:transition-[opacity,filter,translate] *:duration-500 *:ease-out motion-reduce:*:transition-none',
       'group-data-starting-style/content:*:translate-y-1 group-data-starting-style/content:*:opacity-0 group-data-starting-style/content:*:blur-[6px]',
@@ -382,7 +383,9 @@ function NavigationMenuRoot({
             // Grown from the bar, the popup is laid over it: same edge, same centre.
             anchor={grows ? bar : undefined}
             side={side}
-            align="center"
+            // A header's panel starts under its trigger and runs on along the bar,
+            // so the first trigger's panel never hangs off the page's edge.
+            align={grows ? 'center' : 'start'}
             sideOffset={grows ? (state) => -state.anchor.height : 8}
             collisionPadding={12}
             collisionAvoidance={{ side: 'none' }}

@@ -5,7 +5,7 @@ status: new
 full: true
 ---
 
-<ComponentPreview name="navigation-menu/overview" height={560}>
+<ComponentPreview name="navigation-menu/overview" height={560} align="start">
 
 ```tsx lineNumbers
 'use client';
@@ -188,7 +188,7 @@ import { NavigationMenu } from "@/components/panelui/navigation-menu"
 
 Three destinations and a trigger. Pressing Explore grows the bar into a panel with two cards, a group of rows and a footer of hints.
 
-<ComponentPreview name="navigation-menu/overview" height={560}>
+<ComponentPreview name="navigation-menu/overview" height={560} align="start">
 
 ```tsx lineNumbers
 'use client';
@@ -251,7 +251,7 @@ export default function NavigationMenuOverview() {
 
 `variant="bar"` spans the page. The panel hangs below the triggers and, as the pointer crosses from one trigger to the next, moves under it, resizes to its content and slides that content in from the side the pointer came from. `NavigationMenu.Actions` holds the buttons at the end.
 
-<ComponentPreview name="navigation-menu/mega" height={420}>
+<ComponentPreview name="navigation-menu/mega" height={420} align="start">
 
 ```tsx lineNumbers
 'use client';
@@ -343,7 +343,7 @@ export default function NavigationMenuMega() {
 
 A trigger whose panel is a [Command](/docs/web/components/command), so the bar grows into a search field with its results under it. The demo opens it with ⌘K or Ctrl+K by holding `value` itself. Pass `bare` to the Command so the panel, not the Command, draws the surface.
 
-<ComponentPreview name="navigation-menu/search" height={480}>
+<ComponentPreview name="navigation-menu/search" height={480} align="start">
 
 ```tsx lineNumbers
 'use client';
@@ -441,7 +441,8 @@ import { NavigationMenu } from '@/components/panelui/navigation-menu';
 
 export default function NavigationMenuDock() {
   return (
-    <div className="flex h-full w-full items-end justify-center pb-6">
+    // A stage tall enough for the panel to open upwards above the dock.
+    <div className="flex min-h-[26rem] w-full items-end justify-center">
       <NavigationMenu variant="dock" aria-label="Apps">
         <NavigationMenu.List>
           <NavigationMenu.Item>
@@ -491,7 +492,7 @@ export default function NavigationMenuDock() {
 
 A panel for the signed-in person: two cards for the account and billing, then `NavigationMenu.Setting` rows that hold segmented Tabs. The line under the menu reports what is chosen.
 
-<ComponentPreview name="navigation-menu/preferences" height={560}>
+<ComponentPreview name="navigation-menu/preferences" height={560} align="start">
 
 ```tsx lineNumbers
 'use client';

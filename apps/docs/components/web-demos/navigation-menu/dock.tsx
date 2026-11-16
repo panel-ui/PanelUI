@@ -14,7 +14,8 @@ import { NavigationMenu } from 'panelui-web/navigation-menu';
 
 export default function NavigationMenuDock() {
   return (
-    <div className="flex h-full w-full items-end justify-center pb-6">
+    // A stage tall enough for the panel to open upwards above the dock.
+    <div className="flex min-h-[26rem] w-full items-end justify-center">
       <NavigationMenu variant="dock" aria-label="Apps">
         <NavigationMenu.List>
           <NavigationMenu.Item>

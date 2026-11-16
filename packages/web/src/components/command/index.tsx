@@ -303,6 +303,11 @@ export interface CommandProps extends Omit<ComponentProps<'div'>, 'onChange'> {
   columns?: number;
   /** What a screen reader calls the list. Default `Commands`. */
   label?: string;
+  /**
+   * Leaves the surface to whatever holds it: no border, background, shadow or
+   * rounding. For a Command inside another panel, such as a NavigationMenu's.
+   */
+  bare?: boolean;
 }
 
 /** The launcher: a field, the list it filters and an optional footer. Put it in a `Command.Dialog`, or in the page. */
@@ -313,6 +318,7 @@ function CommandRoot({
   filter = true,
   columns = 5,
   label = 'Commands',
+  bare = false,
   className,
   children,
   ...props
@@ -382,10 +388,11 @@ function CommandRoot({
           data-variant={variant}
           aria-label={label}
           className={slots.root({
-            // Outside a dialog it draws the panel itself, so it can sit in the page.
+            // Outside a dialog it draws the panel itself, so it can sit in the
+            // page, unless something else already draws one around it.
             className: [
-              !dialog && variant !== 'inline' ? 'border bg-popover shadow-xl shadow-black/10' : '',
-              !dialog && variant !== 'inline' && variant !== 'spotlight' ? 'rounded-2xl' : '',
+              !dialog && !bare && variant !== 'inline' ? 'border bg-popover shadow-xl shadow-black/10' : '',
+              !dialog && !bare && variant !== 'inline' && variant !== 'spotlight' ? 'rounded-2xl' : '',
               className,
             ],
           })}

@@ -735,6 +735,16 @@
       "title": "Nav Rail"
     }
   ],
+  "navigation-menu": [
+    "NavigationMenu",
+    "A site's top-level destinations in a bar, with panels that grow out of it for the destinations that hold more.",
+    "react navigation menu header mega menu dropdown navbar component",
+    {
+      "addedIn": "0.18.0",
+      "category": "navigation",
+      "title": "Navigation Menu"
+    }
+  ],
   "table-of-contents": [
     "TableOfContents",
     "The sections of a long page as a quiet rail, with one mark that moves to what you are reading.",

@@ -1166,6 +1166,24 @@
       ]
     },
     {
+      "name": "navigation-menu",
+      "type": "registry:component",
+      "title": "Navigation Menu",
+      "description": "A site's top-level destinations in a bar, with panels that grow out of it for the destinations that hold more.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/navigation-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/navigation-menu.tsx"
+        }
+      ]
+    },
+    {
       "name": "not-found",
       "type": "registry:component",
       "title": "Not Found",

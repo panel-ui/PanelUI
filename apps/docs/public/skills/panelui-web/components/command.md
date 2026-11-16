@@ -93,6 +93,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `filter` | `boolean` | `true` | Whether items hide when they do not match. Turn it off for results already filtered elsewhere, such as by a server. Default `true`. |
 | `columns` | `number` | `5` | Tiles to a row, for the `grid` layout. Default `5`. |
 | `label` | `string` | `'Commands'` | What a screen reader calls the list. Default `Commands`. |
+| `bare` | `boolean` | `false` | Leaves the surface to whatever holds it: no border, background, shadow or rounding. For a Command inside another panel, such as a NavigationMenu's. |
 
 #### `CommandInputProps`
 

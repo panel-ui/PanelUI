@@ -517,6 +517,7 @@ export {
   NavigationMenuPill,
   NavigationMenuOptions,
   NavigationMenuOption,
+  NavigationMenuStatus,
   navigationMenuVariants,
   type NavigationMenuProps,
   type NavigationMenuListProps,
@@ -538,6 +539,7 @@ export {
   type NavigationMenuPillProps,
   type NavigationMenuOptionsProps,
   type NavigationMenuOptionProps,
+  type NavigationMenuStatusProps,
   type NavigationMenuVariant,
   type NavigationMenuTone,
 } from './components/navigation-menu';

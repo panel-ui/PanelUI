@@ -33,9 +33,9 @@
  *
  * ## The highlight
  *
- * A soft pill rests on the current destination and follows the pointer or
- * focus across the others, so the bar always shows one place: where you are,
- * or where you are about to go.
+ * Every destination is drawn at full strength. A soft pill appears under the
+ * one the pointer or the keyboard is on, travels between them, and is put
+ * away when neither is on the list.
  *
  * ## Built on
  *
@@ -47,7 +47,9 @@ import { NavigationMenu as BaseNavigationMenu } from '@base-ui/react/navigation-
 import { Radio } from '@base-ui/react/radio';
 import { RadioGroup } from '@base-ui/react/radio-group';
 import {
+  Children,
   createContext,
+  isValidElement,
   useCallback,
   useContext,
   useEffect,
@@ -56,6 +58,7 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { tv } from 'tailwind-variants';
@@ -86,12 +89,13 @@ const navigationMenuVariants = tv({
       'pointer-events-none absolute top-0.5 left-0 z-0 m-0 list-none h-[calc(100%-0.25rem)] rounded-full bg-foreground/[0.08]',
       'translate-x-(--navigation-menu-highlight-x) w-(--navigation-menu-highlight-w) opacity-(--navigation-menu-highlight-o)',
       `transition-[translate,width,opacity] duration-300 ${EASE} motion-reduce:transition-none`,
-      'data-instant:transition-none',
+      'data-instant:transition-[opacity]',
     ],
     item: 'relative z-10 m-0 list-none',
     link: [
       'group/link relative flex h-9 cursor-pointer items-center gap-2 rounded-full px-3.5 text-sm font-medium whitespace-nowrap outline-none select-none',
-      'text-muted-foreground transition-colors duration-150 hover:text-foreground',
+      // Every destination reads at full strength; the highlight, not the colour, says where the pointer is.
+      'text-foreground',
       'data-active:text-foreground data-popup-open:text-foreground',
       'focus-visible:ring-2 focus-visible:ring-ring',
       '[&_svg]:size-4 [&_svg]:shrink-0',
@@ -102,19 +106,20 @@ const navigationMenuVariants = tv({
       'flex size-3.5 items-center justify-center text-muted-foreground transition-transform duration-300 data-popup-open:rotate-180',
       `${EASE} motion-reduce:transition-none [&_svg]:size-3.5`,
     ],
-    positioner: [
-      'z-0 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width)',
-      `transition-[top,left,right,bottom] duration-[350ms] ${EASE} data-instant:transition-none motion-reduce:transition-none`,
-    ],
+    positioner: ['z-0 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width)'],
     popup: [
-      'relative h-(--popup-height) w-(--popup-width) origin-(--transform-origin) bg-popover text-popover-foreground outline-none',
-      `transition-[width,height,clip-path,opacity,scale] duration-300 ${EASE} motion-reduce:transition-none`,
+      'group/popup relative h-(--popup-height) w-(--popup-width) origin-(--transform-origin) bg-popover text-popover-foreground outline-none',
+      // A gentler ease than the bar's own, so the growth reads as a glide rather than a snap.
+      'transition-[width,height,clip-path,opacity,scale] duration-[360ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] motion-reduce:transition-none',
     ],
     viewport: 'relative size-full overflow-hidden rounded-[inherit]',
     // The outer box keeps clear of the bar; the inner one is the layout, and
     // takes the className.
     content: [
       'group/content w-max max-w-[min(var(--available-width),40rem)]',
+      // Hidden for as long as the panel is closing, not only for its own short fade:
+      // otherwise it comes back into view while the surface is still shrinking.
+      'group-data-ending-style/popup:opacity-0',
       // The contents fade in once, together, a beat after the surface starts to grow.
       `transition-[opacity,translate] duration-200 ${EASE} motion-reduce:transition-none`,
       'data-open:delay-75 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:delay-0',
@@ -170,6 +175,36 @@ const navigationMenuVariants = tv({
       'text-[13px] text-muted-foreground',
     ],
     hint: 'inline-flex items-center gap-1.5',
+    // A strip hanging from the bar's underside, in the bar's own colour, joined
+    // to it by inward-curving corners drawn with the bar's colour around a hole.
+    // It overlaps the bar's lower edge by a pixel, over the bar's border, so the two
+    // read as one surface; tucking it away clips it from the bottom up into that edge.
+    status: [
+      'absolute top-[calc(var(--navigation-menu-bar-h)-1px)] left-1/2 z-20 flex h-9 max-w-[calc(100%-1.5rem)] -translate-x-1/2 items-center gap-2 rounded-b-2xl bg-popover px-3.5 text-[13px] whitespace-nowrap text-foreground',
+      'border-x border-b border-foreground/[0.07] dark:border-foreground/10',
+      "before:pointer-events-none before:absolute before:top-0 before:right-full before:size-3 before:bg-[radial-gradient(circle_at_0_100%,transparent_0.7rem,var(--popover)_calc(0.7rem+0.5px))] before:content-['']",
+      "after:pointer-events-none after:absolute after:top-0 after:left-full after:size-3 after:bg-[radial-gradient(circle_at_100%_100%,transparent_0.7rem,var(--popover)_calc(0.7rem+0.5px))] after:content-['']",
+      // The clip reaches past the sides, so the curved corners are kept.
+      '[clip-path:inset(0_-1rem_-1rem_-1rem)]',
+      `transition-[clip-path,translate,opacity] duration-[260ms] ${EASE} motion-reduce:transition-none`,
+      // Tucked behind the bar while a panel is open, which grows over this space,
+      // while it changes what it says, and when hidden.
+      'group-data-open/navigation-menu:pointer-events-none group-data-open/navigation-menu:-translate-y-2 group-data-open/navigation-menu:opacity-0',
+      'group-data-open/navigation-menu:[clip-path:inset(0_-1rem_100%_-1rem)]',
+      'data-tucked:pointer-events-none data-tucked:-translate-y-2 data-tucked:[clip-path:inset(0_-1rem_100%_-1rem)]',
+    ],
+    statusIcon: 'flex size-4 shrink-0 items-center justify-center text-foreground [&_svg]:size-4',
+    statusText: 'min-w-0 truncate',
+    statusAction: [
+      'flex shrink-0 items-center gap-1 border-s border-foreground/10 ps-2 text-muted-foreground',
+      '[&_a]:outline-none [&_a]:transition-colors [&_a:hover]:text-foreground [&_a:focus-visible]:text-foreground [&_a:focus-visible]:underline',
+    ],
+    statusTrack:
+      'pointer-events-none absolute inset-x-3.5 bottom-1 h-0.5 overflow-hidden rounded-full bg-foreground/[0.08]',
+    statusFill: [
+      'h-full w-(--navigation-menu-status-progress) rounded-full bg-foreground/60',
+      `transition-[width] duration-500 ${EASE} motion-reduce:transition-none`,
+    ],
     kbd: [
       'inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-foreground/[0.08] px-1.5',
       'font-sans text-xs font-medium text-foreground/80',
@@ -257,6 +292,9 @@ const navigationMenuVariants = tv({
       },
       bar: {
         root: 'w-full',
+        // A header's panel travels from one trigger to the next. An island's never
+        // moves, so it has no transition here to slide in from where it was parked.
+        positioner: `transition-[top,left,right,bottom] duration-[350ms] ${EASE} data-instant:transition-none motion-reduce:transition-none`,
         bar: ['h-14 w-full gap-2 rounded-2xl bg-background px-3 ring-1 ring-foreground/[0.07] dark:ring-foreground/10'],
         link: 'rounded-lg px-3',
         highlight: 'rounded-lg',
@@ -317,6 +355,7 @@ interface NavigationMenuContextValue {
   variant: NavigationMenuVariant;
   side: 'top' | 'bottom';
   openOn: 'press' | 'hover';
+  open: boolean;
 }
 const NavigationMenuContext = createContext<NavigationMenuContextValue | null>(null);
 /** True inside a panel, where a link is drawn as a row rather than a pill. */
@@ -379,6 +418,11 @@ function NavigationMenuRoot({
   const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
   const bar = useRef<HTMLDivElement>(null);
   const grows = variant !== 'bar';
+  // A status strip hangs under the bar rather than sitting in it.
+  const parts = Children.toArray(children);
+  const isStatus = (child: ReactNode) => isValidElement(child) && child.type === NavigationMenuStatus;
+  const inBar = parts.filter((child) => !isStatus(child));
+  const underBar = parts.filter(isStatus);
   const openOn = openOnProp ?? (grows ? 'press' : 'hover');
 
   // Open is mirrored here so the bar can hand its surface to the popup.
@@ -410,7 +454,7 @@ function NavigationMenuRoot({
   }, []);
 
   return (
-    <NavigationMenuContext.Provider value={{ variant, side, openOn }}>
+    <NavigationMenuContext.Provider value={{ variant, side, openOn, open }}>
       <BaseNavigationMenu.Root
         ref={setRootElement}
         data-slot="navigation-menu"
@@ -431,11 +475,13 @@ function NavigationMenuRoot({
         {...props}
       >
         <div ref={measureBar} data-slot="navigation-menu-bar" className={slots.bar({ className: barClassName })}>
-          {children}
+          {inBar}
         </div>
+        {/* Beneath the bar, so it can tuck up behind it. */}
+        {underBar}
         {/* Grown from the bar, the popup is drawn inside the menu, beneath the bar. */}
         {grows && !rootElement ? null : (
-          <BaseNavigationMenu.Portal container={grows ? rootElement : undefined}>
+          <BaseNavigationMenu.Portal container={grows ? rootElement : undefined} keepMounted={grows}>
             <BaseNavigationMenu.Positioner
               data-slot="navigation-menu-positioner"
               className={slots.positioner()}
@@ -466,8 +512,8 @@ export interface NavigationMenuListProps extends Omit<BaseNavigationMenu.List.Pr
 }
 
 /**
- * The destinations and triggers. A highlight rests on the current one and
- * follows the pointer and focus across the rest.
+ * The destinations and triggers. A highlight follows the pointer and the
+ * keyboard across them, and is put away when neither is on the list.
  */
 function NavigationMenuList({
   className,
@@ -493,28 +539,27 @@ function NavigationMenuList({
       mark.style.setProperty('--navigation-menu-highlight-o', '0');
       return;
     }
-    // The first placement lands without travelling from the list's corner.
-    if (!placed.current) mark.setAttribute('data-instant', '');
+    // Shown again after being put away, it appears where it is needed rather than
+    // sliding over from where it last was; so does the very first placement.
+    const fresh = !placed.current || mark.style.getPropertyValue('--navigation-menu-highlight-o') === '0';
+    if (fresh) mark.setAttribute('data-instant', '');
     // Measured against the list, not the item it sits in.
     const box = target.getBoundingClientRect();
     const origin = host.getBoundingClientRect();
     mark.style.setProperty('--navigation-menu-highlight-x', `${box.left - origin.left + host.scrollLeft}px`);
     mark.style.setProperty('--navigation-menu-highlight-w', `${box.width}px`);
     mark.style.setProperty('--navigation-menu-highlight-o', '1');
-    if (!placed.current) {
+    if (fresh) {
       placed.current = true;
       requestAnimationFrame(() => mark.removeAttribute('data-instant'));
     }
   }, []);
 
   /** Where the highlight rests when nothing is pointed at: the open trigger, else the current page. */
+  // With nothing under the pointer or the keyboard, the highlight is put away:
+  // it marks where you are about to go, not a resting box.
   const rest = useCallback(() => {
-    const host = list.current;
-    if (!host) return;
-    const target =
-      host.querySelector<HTMLElement>(':scope > li > [data-popup-open]') ??
-      host.querySelector<HTMLElement>(':scope > li > [data-active]');
-    place(target);
+    place(null);
   }, [place]);
 
   useIsomorphicLayoutEffect(() => {
@@ -1067,6 +1112,102 @@ function NavigationMenuOption({ className, ...props }: NavigationMenuOptionProps
 }
 NavigationMenuOption.displayName = 'NavigationMenu.Option';
 
+export interface NavigationMenuStatusProps extends Omit<ComponentProps<'div'>, 'children' | 'id'> {
+  /**
+   * Which status this is. When it changes, the strip tucks up behind the bar,
+   * changes what it says out of sight, and comes back down. Content that changes
+   * under the same `id`, such as `progress`, updates in place.
+   */
+  id?: string;
+  /** Drawn before the line: a project's mark, a coloured dot for a state. */
+  icon?: ReactNode;
+  /** What the strip says: "In progress: Currency Input". */
+  children: ReactNode;
+  /** At the strip's end, after a rule: usually a link such as "See it". */
+  action?: ReactNode;
+  /** How far along, from 0 to 1, drawn as a thin track along the strip's foot. Leave it out for none. */
+  progress?: number;
+  /** Tucks the strip away behind the bar, for example while the page scrolls. */
+  hidden?: boolean;
+}
+
+/** How long the strip takes to tuck away, so the change happens out of sight. */
+const STATUS_TUCK_MS = 260;
+
+/**
+ * A strip hanging under the bar that says what is happening now: a release in
+ * progress, whether someone is available. It tucks up behind the bar while a
+ * panel is open, while it changes, and when hidden.
+ */
+function NavigationMenuStatus({
+  id = '',
+  icon,
+  action,
+  progress,
+  hidden = false,
+  className,
+  style,
+  children,
+  ...props
+}: NavigationMenuStatusProps) {
+  const { variant, side, open } = useNavigationMenu('NavigationMenu.Status');
+  const slots = navigationMenuVariants({ variant, side });
+  const amount = progress === undefined ? undefined : Math.min(1, Math.max(0, progress));
+  const current = { icon, action, children, amount };
+
+  // What the strip last said under its current id: shown while a new one waits
+  // for the strip to tuck away.
+  const [shownId, setShownId] = useState(id);
+  const shown = useRef(current);
+  useIsomorphicLayoutEffect(() => {
+    if (id === shownId) shown.current = current;
+  });
+  useEffect(() => {
+    if (id === shownId) return;
+    const timer = window.setTimeout(() => setShownId(id), STATUS_TUCK_MS);
+    return () => window.clearTimeout(timer);
+  }, [id, shownId]);
+
+  const changing = id !== shownId;
+  const content = changing ? shown.current : current;
+  const tucked = hidden || changing;
+  const away = tucked || open;
+
+  return (
+    <div
+      data-slot="navigation-menu-status"
+      role="status"
+      data-tucked={tucked ? '' : undefined}
+      aria-hidden={away || undefined}
+      inert={away || undefined}
+      className={slots.status({ className })}
+      style={
+        content.amount === undefined
+          ? style
+          : ({ ...style, '--navigation-menu-status-progress': `${content.amount * 100}%` } as CSSProperties)
+      }
+      {...props}
+    >
+      {content.icon ? <span className={slots.statusIcon()}>{content.icon}</span> : null}
+      <span className={slots.statusText()}>{content.children}</span>
+      {content.action ? <span className={slots.statusAction()}>{content.action}</span> : null}
+      {content.amount === undefined ? null : (
+        <span
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(content.amount * 100)}
+          aria-label="Progress"
+          className={slots.statusTrack()}
+        >
+          <span className={slots.statusFill()} />
+        </span>
+      )}
+    </div>
+  );
+}
+NavigationMenuStatus.displayName = 'NavigationMenu.Status';
+
 export const NavigationMenu = Object.assign(NavigationMenuRoot, {
   List: NavigationMenuList,
   Item: NavigationMenuItem,
@@ -1087,6 +1228,7 @@ export const NavigationMenu = Object.assign(NavigationMenuRoot, {
   Pill: NavigationMenuPill,
   Options: NavigationMenuOptions,
   Option: NavigationMenuOption,
+  Status: NavigationMenuStatus,
 });
 
 export {
@@ -1109,5 +1251,6 @@ export {
   NavigationMenuPill,
   NavigationMenuOptions,
   NavigationMenuOption,
+  NavigationMenuStatus,
   navigationMenuVariants,
 };

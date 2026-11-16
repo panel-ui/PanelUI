@@ -306,6 +306,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'navigation-menu/overview': dynamic(() => import('./navigation-menu/overview')),
   'navigation-menu/preferences': dynamic(() => import('./navigation-menu/preferences')),
   'navigation-menu/search': dynamic(() => import('./navigation-menu/search')),
+  'navigation-menu/status': dynamic(() => import('./navigation-menu/status')),
   'navigation-menu/thumb': dynamic(() => import('./navigation-menu/thumb')),
   'not-found/dissolve': dynamic(() => import('./not-found/dissolve')),
   'not-found/outline': dynamic(() => import('./not-found/outline')),

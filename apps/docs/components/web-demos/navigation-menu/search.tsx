@@ -1,7 +1,7 @@
 'use client';
 
 import { BoxIcon, FileTextIcon, HashIcon, SearchIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Command } from 'panelui-web/command';
 import { NavigationMenu } from 'panelui-web/navigation-menu';
 
@@ -15,6 +15,14 @@ const RESULTS = [
 
 export default function NavigationMenuSearch() {
   const [value, setValue] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+
+  // The field takes focus once the panel is open, so typing goes straight into it.
+  useEffect(() => {
+    if (value !== 'search') return;
+    const frame = requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
 
   // ⌘K or Ctrl+K grows the bar into the search, from anywhere on the page.
   useEffect(() => {
@@ -30,6 +38,11 @@ export default function NavigationMenuSearch() {
 
   return (
     <NavigationMenu aria-label="Main" value={value} onValueChange={setValue}>
+      <NavigationMenu.Brand
+        href="#"
+        aria-label="Home"
+        icon={<img src="https://avatars.githubusercontent.com/u/127331761?v=4" alt="" />}
+      />
       <NavigationMenu.List>
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#" active>
@@ -39,13 +52,17 @@ export default function NavigationMenuSearch() {
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#">Docs</NavigationMenu.Link>
         </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#">Blocks</NavigationMenu.Link>
+        </NavigationMenu.Item>
         <NavigationMenu.Item value="search">
           <NavigationMenu.Trigger icon={<SearchIcon />} hideChevron>
             Search
           </NavigationMenu.Trigger>
-          <NavigationMenu.Content className="w-[26rem]">
+          {/* As wide as the bar, so the bar only grows downwards. Kept mounted, so opening it does no work. */}
+          <NavigationMenu.Content keepMounted>
             <Command variant="compact" label="Search the docs" bare>
-              <Command.Input placeholder="Search pages, parts, tokens" autoFocus />
+              <Command.Input ref={input} placeholder="Search pages, parts, tokens" />
               <Command.List>
                 {RESULTS.map((result) => (
                   <Command.Item key={result.title} icon={result.icon} subtitle={result.where}>

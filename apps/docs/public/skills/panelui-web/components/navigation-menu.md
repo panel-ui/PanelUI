@@ -71,12 +71,13 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
     </NavigationMenu.Item>
   </NavigationMenu.List>
   <NavigationMenu.Actions />
+  <NavigationMenu.Status />
 </NavigationMenu>
 ```
 
 - `NavigationMenu.NavigationMenu` — The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, `side` which way the panel opens, and `openOn` whether a trigger opens on a press only or also under the pointer. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.
 - `NavigationMenu.Brand` — The mark at the start of the bar, drawn in a round tile: an avatar or a logo. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.
-- `NavigationMenu.List` — The destinations and triggers. A highlight rests on the current page, moves to an open trigger, and follows the pointer and the keyboard across the rest.
+- `NavigationMenu.List` — The destinations and triggers, every one at full strength. A highlight appears under the one the pointer or the keyboard is on, travels between them, and is put away when neither is on the list.
 - `NavigationMenu.Item` — One entry in the list. Give it a `value` when it holds a trigger you want to open from outside.
 - `NavigationMenu.Link` — A destination. In the bar it is a pill; mark the current page with `active`. Inside a panel it is a row, with an optional `icon` in a square of its own and a `description` under the label.
 - `NavigationMenu.Trigger` — Opens its item's content. In an island it keeps a fill of its own, so it reads as a control rather than a destination. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.
@@ -94,6 +95,7 @@ For a sidebar of destinations beside the page, use [Nav Rail](/docs/web/componen
 - `NavigationMenu.Footer` — The strip along a panel's foot, for keyboard hints.
 - `NavigationMenu.Hint` — One keyboard hint: each of its `keys` in a cap, then what they do.
 - `NavigationMenu.Actions` — Controls at the end of the bar that are not destinations, such as sign-in buttons. They sit outside the list, so the highlight does not visit them.
+- `NavigationMenu.Status` — A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` track. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set.
 
 ## Props
 
@@ -201,9 +203,19 @@ Every part also takes the props of the element it renders, and a `className`.
 | --- | --- | --- | --- |
 | `className` | `string` | — | — |
 
+#### `NavigationMenuStatusProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `id` | `string` | `''` | Which status this is. When it changes, the strip tucks up behind the bar, changes what it says out of sight, and comes back down. Content that changes under the same `id`, such as `progress`, updates in place. |
+| `icon` | `ReactNode` | — | Drawn before the line: a project's mark, a coloured dot for a state. |
+| `action` | `ReactNode` | — | At the strip's end, after a rule: usually a link such as "See it". |
+| `progress` | `number` | — | How far along, from 0 to 1, drawn as a thin track along the strip's foot. Leave it out for none. |
+| `hidden` | `boolean` | `false` | Tucks the strip away behind the bar, for example while the page scrolls. |
+
 ## In a Server Component
 
-`NavigationMenu` is a client component. A Server Component cannot read `NavigationMenu.List` off the import, so import each part by name: `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, `NavigationMenuBrand`, `NavigationMenuActions`, `NavigationMenuCard`, `NavigationMenuGroup`, `NavigationMenuSetting`, `NavigationMenuSeparator`, `NavigationMenuFooter`, `NavigationMenuHint`, `NavigationMenuProfile`, `NavigationMenuValue`, `NavigationMenuPills`, `NavigationMenuPill`, `NavigationMenuOptions`, `NavigationMenuOption`.
+`NavigationMenu` is a client component. A Server Component cannot read `NavigationMenu.List` off the import, so import each part by name: `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, `NavigationMenuBrand`, `NavigationMenuActions`, `NavigationMenuCard`, `NavigationMenuGroup`, `NavigationMenuSetting`, `NavigationMenuSeparator`, `NavigationMenuFooter`, `NavigationMenuHint`, `NavigationMenuProfile`, `NavigationMenuValue`, `NavigationMenuPills`, `NavigationMenuPill`, `NavigationMenuOptions`, `NavigationMenuOption`, `NavigationMenuStatus`.
 
 ## Notes
 
@@ -218,6 +230,10 @@ To open a panel from somewhere else, give its `NavigationMenu.Item` a `value` an
 #### Keyboard
 
 Tab moves across the bar. Enter, Space or the Down arrow opens a trigger's panel, and Tab moves into it; there the arrow keys walk its links, and Escape closes it and returns focus to the trigger. The highlight follows focus from the keyboard as it follows the pointer.
+
+#### The status strip
+
+`NavigationMenu.Status` goes inside `NavigationMenu`, after the list; it is drawn under the bar rather than in it. It is a live region, so a screen reader announces a new status, and while it is tucked away it leaves the accessibility tree. Keep the line short: the strip is never wider than the bar, and a longer line is cut off with an ellipsis.
 
 #### The panel's width
 

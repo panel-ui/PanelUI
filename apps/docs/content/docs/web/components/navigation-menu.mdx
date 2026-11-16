@@ -233,12 +233,13 @@ import { NavigationMenu } from "@/components/panelui/navigation-menu"
     </NavigationMenu.Item>
   </NavigationMenu.List>
   <NavigationMenu.Actions />
+  <NavigationMenu.Status />
 </NavigationMenu>
 ```
 
 - **`NavigationMenu.NavigationMenu`** — The menu: the bar, and the panel its triggers open. `variant` chooses island, bar or dock, `side` which way the panel opens, and `openOn` whether a trigger opens on a press only or also under the pointer. Pass `value` and `onValueChange` to open a panel yourself, for a keyboard shortcut.
 - **`NavigationMenu.Brand`** — The mark at the start of the bar, drawn in a round tile: an avatar or a logo. With `href` it is a link home; without children it is the mark alone and needs an `aria-label`.
-- **`NavigationMenu.List`** — The destinations and triggers. A highlight rests on the current page, moves to an open trigger, and follows the pointer and the keyboard across the rest.
+- **`NavigationMenu.List`** — The destinations and triggers, every one at full strength. A highlight appears under the one the pointer or the keyboard is on, travels between them, and is put away when neither is on the list.
 - **`NavigationMenu.Item`** — One entry in the list. Give it a `value` when it holds a trigger you want to open from outside.
 - **`NavigationMenu.Link`** — A destination. In the bar it is a pill; mark the current page with `active`. Inside a panel it is a row, with an optional `icon` in a square of its own and a `description` under the label.
 - **`NavigationMenu.Trigger`** — Opens its item's content. In an island it keeps a fill of its own, so it reads as a control rather than a destination. Pass `icon` to draw one before the label, and `hideChevron` to drop the chevron after it.
@@ -256,6 +257,7 @@ import { NavigationMenu } from "@/components/panelui/navigation-menu"
 - **`NavigationMenu.Footer`** — The strip along a panel's foot, for keyboard hints.
 - **`NavigationMenu.Hint`** — One keyboard hint: each of its `keys` in a cap, then what they do.
 - **`NavigationMenu.Actions`** — Controls at the end of the bar that are not destinations, such as sign-in buttons. They sit outside the list, so the highlight does not visit them.
+- **`NavigationMenu.Status`** — A strip hanging under the bar that says what is happening now: an `icon`, a line, an `action` link and an optional `progress` track. Give each status its own `id`: when the `id` changes, the strip tucks up into the bar, changes out of sight and comes back down. It also tucks away while a panel is open, and when `hidden` is set.
 
 ## Examples
 
@@ -473,7 +475,7 @@ export default function NavigationMenuMega() {
 
 ### Search
 
-A trigger whose panel is a [Command](/docs/web/components/command), so the bar grows into a search field with its results under it. It stays open while the field is used, wherever the pointer goes. The demo opens it with ⌘K or Ctrl+K by holding `value` itself, and passes `bare` to the Command so the panel draws the surface.
+A trigger whose panel is a [Command](/docs/web/components/command). The panel is as wide as the bar, so the bar only grows downwards into the search. `keepMounted` on the content mounts the Command with the page, so opening it does no work. The demo opens it with ⌘K or Ctrl+K by holding `value`, moves focus into the field when it opens, and passes `bare` to the Command so the panel draws the surface.
 
 <ComponentPreview name="navigation-menu/search" height={520} align="start">
 
@@ -481,7 +483,7 @@ A trigger whose panel is a [Command](/docs/web/components/command), so the bar g
 'use client';
 
 import { BoxIcon, FileTextIcon, HashIcon, SearchIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Command } from '@/components/panelui/command';
 import { NavigationMenu } from '@/components/panelui/navigation-menu';
 
@@ -495,6 +497,14 @@ const RESULTS = [
 
 export default function NavigationMenuSearch() {
   const [value, setValue] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+
+  // The field takes focus once the panel is open, so typing goes straight into it.
+  useEffect(() => {
+    if (value !== 'search') return;
+    const frame = requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
 
   // ⌘K or Ctrl+K grows the bar into the search, from anywhere on the page.
   useEffect(() => {
@@ -510,6 +520,11 @@ export default function NavigationMenuSearch() {
 
   return (
     <NavigationMenu aria-label="Main" value={value} onValueChange={setValue}>
+      <NavigationMenu.Brand
+        href="#"
+        aria-label="Home"
+        icon={<img src="https://avatars.githubusercontent.com/u/127331761?v=4" alt="" />}
+      />
       <NavigationMenu.List>
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#" active>
@@ -519,13 +534,17 @@ export default function NavigationMenuSearch() {
         <NavigationMenu.Item>
           <NavigationMenu.Link href="#">Docs</NavigationMenu.Link>
         </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#">Blocks</NavigationMenu.Link>
+        </NavigationMenu.Item>
         <NavigationMenu.Item value="search">
           <NavigationMenu.Trigger icon={<SearchIcon />} hideChevron>
             Search
           </NavigationMenu.Trigger>
-          <NavigationMenu.Content className="w-[26rem]">
+          {/* As wide as the bar, so the bar only grows downwards. Kept mounted, so opening it does no work. */}
+          <NavigationMenu.Content keepMounted>
             <Command variant="compact" label="Search the docs" bare>
-              <Command.Input placeholder="Search pages, parts, tokens" autoFocus />
+              <Command.Input ref={input} placeholder="Search pages, parts, tokens" />
               <Command.List>
                 {RESULTS.map((result) => (
                   <Command.Item key={result.title} icon={result.icon} subtitle={result.where}>
@@ -543,6 +562,109 @@ export default function NavigationMenuSearch() {
           </NavigationMenu.Content>
         </NavigationMenu.Item>
       </NavigationMenu.List>
+    </NavigationMenu>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Status
+
+`NavigationMenu.Status` hangs a strip under the bar. Here it moves through three statuses every few seconds, each with its own `id`: it tucks up into the bar, changes out of sight, and comes back down. The one in progress carries a `progress` track. While the page scrolls, `hidden` tucks it away, and it returns once the page settles.
+
+<ComponentPreview name="navigation-menu/status" height={260} align="start">
+
+```tsx lineNumbers
+'use client';
+
+import { ArrowRightIcon, HammerIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { NavigationMenu } from '@/components/panelui/navigation-menu';
+
+const STATUSES = [
+  {
+    id: 'open',
+    icon: <span className="size-2 rounded-full bg-success" />,
+    text: 'Taking contributions',
+    action: 'Open an issue',
+  },
+  {
+    id: 'building',
+    icon: <HammerIcon />,
+    text: 'In progress: Date Picker',
+    action: 'See it',
+    progress: 0.7,
+  },
+  {
+    id: 'soon',
+    icon: <span className="size-2 rounded-[3px] bg-info" />,
+    text: 'Coming soon: Data Grid',
+    action: 'Follow',
+  },
+];
+
+export default function NavigationMenuStatusDemo() {
+  const [index, setIndex] = useState(0);
+  const [scrolling, setScrolling] = useState(false);
+
+  // A new status every few seconds.
+  useEffect(() => {
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % STATUSES.length), 4000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  // Tucked away while the page moves, and back once it settles.
+  useEffect(() => {
+    let settle = 0;
+    const onScroll = () => {
+      setScrolling(true);
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => setScrolling(false), 500);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(settle);
+    };
+  }, []);
+
+  const status = STATUSES[index]!;
+
+  return (
+    <NavigationMenu aria-label="Main">
+      <NavigationMenu.Brand
+        href="#"
+        aria-label="Home"
+        icon={<img src="https://avatars.githubusercontent.com/u/127331761?v=4" alt="" />}
+      />
+      <NavigationMenu.List>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#" active>
+            Docs
+          </NavigationMenu.Link>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#">Components</NavigationMenu.Link>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Link href="#">Blocks</NavigationMenu.Link>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+      <NavigationMenu.Status
+        id={status.id}
+        icon={status.icon}
+        progress={status.progress}
+        hidden={scrolling}
+        action={
+          <a href="#" className="inline-flex items-center gap-1">
+            {status.action}
+            <ArrowRightIcon className="size-3.5 rtl:-scale-x-100" />
+          </a>
+        }
+      >
+        {status.text}
+      </NavigationMenu.Status>
     </NavigationMenu>
   );
 }
@@ -805,6 +927,16 @@ export default function NavigationMenuPreferences() {
 | --- | --- | --- | --- |
 | `className` | `string` | — |  |
 
+### NavigationMenu.Status
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | `''` | Which status this is. When it changes, the strip tucks up behind the bar, changes what it says out of sight, and comes back down. Content that changes under the same `id`, such as `progress`, updates in place. |
+| `icon` | `ReactNode` | — | Drawn before the line: a project's mark, a coloured dot for a state. |
+| `action` | `ReactNode` | — | At the strip's end, after a rule: usually a link such as "See it". |
+| `progress` | `number` | — | How far along, from 0 to 1, drawn as a thin track along the strip's foot. Leave it out for none. |
+| `hidden` | `boolean` | `false` | Tucks the strip away behind the bar, for example while the page scrolls. |
+
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
@@ -820,6 +952,10 @@ To open a panel from somewhere else, give its `NavigationMenu.Item` a `value` an
 ### Keyboard
 
 Tab moves across the bar. Enter, Space or the Down arrow opens a trigger's panel, and Tab moves into it; there the arrow keys walk its links, and Escape closes it and returns focus to the trigger. The highlight follows focus from the keyboard as it follows the pointer.
+
+### The status strip
+
+`NavigationMenu.Status` goes inside `NavigationMenu`, after the list; it is drawn under the bar rather than in it. It is a live region, so a screen reader announces a new status, and while it is tucked away it leaves the accessibility tree. Keep the line short: the strip is never wider than the bar, and a longer line is cut off with an ellipsis.
 
 ### The panel's width
 
@@ -842,5 +978,5 @@ Base UI's NavigationMenu, for the triggers, hover intent, keyboard model, focus 
 `NavigationMenu` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `NavigationMenu.List` off the import, so each part is also exported by name: `NavigationMenuList` is `NavigationMenu.List`, and so on for the others.
 
 ```tsx
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink, NavigationMenuBrand, NavigationMenuActions, NavigationMenuCard, NavigationMenuGroup, NavigationMenuSetting, NavigationMenuSeparator, NavigationMenuFooter, NavigationMenuHint, NavigationMenuProfile, NavigationMenuValue, NavigationMenuPills, NavigationMenuPill, NavigationMenuOptions, NavigationMenuOption } from "@/components/panelui/navigation-menu"
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink, NavigationMenuBrand, NavigationMenuActions, NavigationMenuCard, NavigationMenuGroup, NavigationMenuSetting, NavigationMenuSeparator, NavigationMenuFooter, NavigationMenuHint, NavigationMenuProfile, NavigationMenuValue, NavigationMenuPills, NavigationMenuPill, NavigationMenuOptions, NavigationMenuOption, NavigationMenuStatus } from "@/components/panelui/navigation-menu"
 ```

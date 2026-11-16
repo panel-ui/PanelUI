@@ -506,6 +506,7 @@
     "A launcher: type to find a page, an app or an action, and run it with Enter.",
     "react command palette launcher cmdk search menu component",
     {
+      "updatedIn": "0.18.0",
       "addedIn": "0.12.0",
       "category": "overlays"
     }
@@ -729,7 +730,7 @@
     "A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.",
     "react sidebar navigation collapsible nav rail sidebar menu",
     {
-      "updatedIn": "0.16.0",
+      "updatedIn": "0.18.0",
       "addedIn": "0.15.0",
       "category": "navigation",
       "title": "Nav Rail"

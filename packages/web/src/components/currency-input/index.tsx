@@ -44,6 +44,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -55,7 +56,7 @@ import {
 } from 'react';
 import { tv } from 'tailwind-variants';
 import { ScrollArea } from '../scroll-area';
-import { parseAmount } from './parse';
+import { normalizeTyped, parseAmount, roundTo } from './parse';
 
 /** A theme role for a currency's mark. */
 export type CurrencyColor =
@@ -276,18 +277,13 @@ const decimalsOf = (currency: CurrencyOption | undefined) => Math.max(0, Math.mi
  * LIST_HEIGHT is the list at its tallest: the header, a viewport of 18rem of
  * rows, the padding and the ring. LIST_CHROME is everything around the rows,
  * which is what comes off the room before the rows' cap is set. LIST_MARGIN
- * keeps a breath of the page visible under the list's edge.
+ * keeps a breath of the page visible under the list's edge. LIST_ROWS_MIN is
+ * one row: the list never shrinks below a row it could not show.
  */
 const LIST_HEIGHT = 344;
 const LIST_CHROME = 56;
-const LIST_ROWS_MIN = 96;
+const LIST_ROWS_MIN = 44;
 const LIST_MARGIN = 12;
-
-/** Rounds to a currency's minor unit, so the figure held is one that could be paid. */
-const roundTo = (amount: number, decimals: number) => {
-  const scale = 10 ** decimals;
-  return Math.round(amount * scale) / scale;
-};
 
 /**
  * The nearest ancestor that clips what it holds, between the card and the
@@ -365,8 +361,11 @@ function CurrencyInputRoot({
   const controlled = valueProp !== undefined;
   const value: Required<CurrencyValue> = controlled ? valueProp : inner;
 
-  const latest = useRef({ value, controlled, onValueChange });
-  latest.current = { value, controlled, onValueChange };
+  const latest = useRef({ value, controlled, onValueChange, disabled });
+  // Synced after commit, so a render React throws away never leaks into a handler.
+  useLayoutEffect(() => {
+    latest.current = { value, controlled, onValueChange, disabled };
+  });
   const commit = useCallback((next: Required<CurrencyValue>) => {
     if (!latest.current.controlled) setInner(next);
     latest.current.onValueChange?.(next);
@@ -417,7 +416,9 @@ function CurrencyInputRoot({
   }, []);
 
   const pickingBefore = useRef(picking);
-  pickingBefore.current = picking;
+  useLayoutEffect(() => {
+    pickingBefore.current = picking;
+  });
   const setPicking = useCallback(
     (open: boolean) => {
       // Measured with the open, so the list never paints first at full height.
@@ -428,21 +429,37 @@ function CurrencyInputRoot({
     [measureRoom]
   );
 
+  const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!picking) return;
     const measure = () => measureRoom();
+    // A press anywhere outside the control puts the list away, as any overlay does.
+    const onPointerDown = (event: PointerEvent) => {
+      if (root.current && !root.current.contains(event.target as Node)) setPicking(false);
+    };
     window.addEventListener('resize', measure);
     window.visualViewport?.addEventListener('resize', measure);
+    // Captured, so a scroll in any container the card sits in is heard.
+    window.addEventListener('scroll', measure, true);
+    document.addEventListener('pointerdown', onPointerDown);
     return () => {
       window.removeEventListener('resize', measure);
       window.visualViewport?.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+      document.removeEventListener('pointerdown', onPointerDown);
     };
-  }, [picking, measureRoom]);
+  }, [picking, measureRoom, setPicking]);
+
+  // Disabled while open: the list goes with the rest of the control.
+  useEffect(() => {
+    if (disabled && picking) setPicking(false);
+  }, [disabled, picking, setPicking]);
 
   const setAmount = useCallback((amount: number | null) => commit({ ...latest.current.value, amount }), [commit]);
 
   const choose = useCallback(
     (code: string) => {
+      if (latest.current.disabled) return;
       const current = latest.current.value;
       // The figure means something new now, so it holds only what the new
       // currency's minor unit can: 10.555 yen becomes 11.
@@ -486,7 +503,7 @@ function CurrencyInputRoot({
 
   return (
     <CurrencyInputContext.Provider value={context}>
-      <div data-slot="currency-input" role="group" className={slots.root({ className })} {...props}>
+      <div ref={root} data-slot="currency-input" role="group" className={slots.root({ className })} {...props}>
         <div
           // Out of the tab order and the reading order while the list covers it.
           ref={(node) => {
@@ -524,6 +541,7 @@ function CurrencyCardBody({
   const currency = byCode.get(value.code);
   const decimals = decimalsOf(currency);
   const labelId = useId();
+  const unitId = useId();
 
   // While a figure is being typed it is shown as typed; formatted once the field is left.
   const [draft, setDraft] = useState<string | null>(null);
@@ -539,7 +557,7 @@ function CurrencyCardBody({
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const text = event.target.value;
     // Holds back anything that is not a figure, rather than clearing what was typed.
-    const typed = text.replace(/,/g, '');
+    const typed = normalizeTyped(text);
     if (typed !== '' && !/^\d*\.?\d*$/.test(typed)) return;
     const [, fraction = ''] = typed.split('.');
     if (fraction.length > decimals) return;
@@ -560,11 +578,21 @@ function CurrencyCardBody({
           inputMode="decimal"
           autoComplete="off"
           spellCheck={false}
-          aria-label={`Amount in ${currency?.name ?? value.code}`}
-          aria-labelledby={label !== undefined ? labelId : undefined}
+          aria-label={label === undefined ? `Amount in ${currency?.name ?? value.code}` : undefined}
+          aria-labelledby={label !== undefined ? `${labelId} ${unitId}` : undefined}
           placeholder={placeholder}
           disabled={disabled}
-          value={draft ?? formatted}
+          // The draft is shown while it still says what the value says; a value
+          // replaced from outside, or an edit the owner refused, wins.
+          value={
+            draft === null
+              ? formatted
+              : parseAmount(draft) === value.amount
+                ? draft
+                : value.amount === null
+                  ? ''
+                  : String(value.amount)
+          }
           onChange={onChange}
           onFocus={(event) => {
             setDraft(value.amount === null ? '' : String(value.amount));
@@ -574,6 +602,11 @@ function CurrencyCardBody({
           onBlur={() => setDraft(null)}
           className={slots.amount()}
         />
+        {label !== undefined ? (
+          <span id={unitId} hidden>
+            in {currency?.name ?? value.code}
+          </span>
+        ) : null}
         <button
           ref={registerPill}
           type="button"

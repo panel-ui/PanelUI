@@ -44,11 +44,13 @@ Every part also takes the props of the element it renders, and a `className`.
 
 #### Typing an amount
 
-The field takes digits and one point, and no more decimals than the currency has. Grouping commas are added once the field is left and ignored while typing. Clearing the field reports `amount: null`.
+The field takes digits and one decimal mark, and no more decimals than the currency has. Grouping commas are added once the field is left. While typing, a single comma with no point is read as the decimal mark, so `1,50` from a keypad that offers a comma is one and a half; a pasted `1,250.50` keeps its grouping. Clearing the field reports `amount: null`.
+
+A `value` that changes while the field has focus replaces what is shown, so an owner that rounds or refuses an edit is seen at once.
 
 #### Choosing a currency
 
-The list takes over the card while it is open, and the card is out of the tab order behind it. Its header is the card's own label, so an open list is never unclear about which field it is choosing for. Choosing a currency keeps the amount and rounds it to that currency's minor unit — `10.555` becomes `11` in yen. Escape or the close button shuts the list and puts focus back on the pill.
+The list takes over the card while it is open, and the card is out of the tab order behind it. Its header is the card's own label, so an open list is never unclear about which field it is choosing for. Choosing a currency keeps the amount and rounds it to that currency's minor unit — `10.555` becomes `11` in yen. Escape, the close button or a press outside the control shuts the list and puts focus back on the pill. Setting `disabled` while the list is open closes it.
 
 #### A short viewport
 
@@ -56,7 +58,7 @@ The list opens towards whichever side of the container it sits in has room: over
 
 #### Figures
 
-Figures are written in `locale`, `en-US` by default, so the digits are Western whatever the device's language. Pass another locale to change how a finished figure is grouped. While typing, the decimal mark is always a point.
+Figures are written in `locale`, `en-US` by default, so the digits are Western whatever the device's language. Pass another locale to change how a finished figure is grouped.
 
 #### Reduced motion
 

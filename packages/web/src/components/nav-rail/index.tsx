@@ -163,8 +163,8 @@ const navRailVariants = tv({
       // surface, and leaves the tab order once the fade ends. An outside
       // trigger is what brings it back.
       'data-[collapsible=offcanvas]:data-[collapsed]:invisible data-[collapsible=offcanvas]:data-[collapsed]:w-0 data-[collapsible=offcanvas]:data-[collapsed]:gap-0 data-[collapsible=offcanvas]:data-[collapsed]:p-0 data-[collapsible=offcanvas]:data-[collapsed]:opacity-0 data-[collapsible=offcanvas]:data-[collapsed]:ring-0 data-[collapsible=offcanvas]:data-[collapsed]:pointer-events-none',
-      // In a drawer, the surface is the sheet: no width, no rounding, no ring.
-      'data-[mobile]:h-full data-[mobile]:w-full data-[mobile]:rounded-none data-[mobile]:p-3 data-[mobile]:ring-0',
+      // In a drawer, the sheet is the card: the rail fills it and takes its corners.
+      'data-[mobile]:h-full data-[mobile]:w-full data-[mobile]:rounded-[inherit] data-[mobile]:p-3 data-[mobile]:ring-0',
     ],
     header: [
       `sticky top-0 z-20 flex shrink-0 items-center gap-2 rounded-t-[inherit] px-0.5 pb-1 ${SURFACE}`,
@@ -212,7 +212,8 @@ const navRailVariants = tv({
       'group-data-[collapsed]/nav-rail:opacity-100',
     ],
     item: [
-      'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-medium outline-none select-none',
+      // A row without `href` is a button, which centres its text by default.
+      'group/item relative z-10 flex h-10 w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-start text-sm font-medium outline-none select-none',
       'text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground',
       'data-active:text-foreground data-active:hover:bg-foreground/[0.03]',
       'data-[holding]:text-foreground data-[holding]:hover:bg-foreground/[0.03]',
@@ -833,9 +834,8 @@ function NavRailRoot({
       <Sheet.Content
         aria-label={ariaLabel}
         data-slot="nav-rail-drawer"
-        detached={false}
         showClose={false}
-        className="w-[18rem] max-w-[85vw] bg-transparent p-0 shadow-none ring-0"
+        className="w-[18rem] max-w-[85vw] bg-transparent p-0"
       >
         {nav}
       </Sheet.Content>

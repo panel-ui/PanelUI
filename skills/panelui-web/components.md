@@ -40,6 +40,7 @@ Generated from the collection's source. Read a component's own file before using
 
 - [Breadcrumb](components/breadcrumb.md) — The trail of links back up a hierarchy to the page you are on, with the middle folded away when the path runs long.
 - [Nav Rail](components/nav-rail.md) — A collapsible sidebar of destinations that keeps one active pill sliding between rows, and folds to a column of icons with tooltips.
+- [Navigation Menu](components/navigation-menu.md) — A site's top-level destinations in a bar, with panels that grow out of it for the destinations that hold more.
 - [Pagination](components/pagination.md) — Page controls for a long result set: the pages near you, the gaps between them, and a way across.
 - [Scroll Header](components/scroll-header.md) — A page title with room around it that hands over to a compact sticky bar as the reader scrolls.
 - [Steps](components/steps.md) — A flow that moves one stop at a time, its numbered stops joined by a line that fills as far as you have got.

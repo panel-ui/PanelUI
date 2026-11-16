@@ -202,8 +202,9 @@ const navigationMenuVariants = tv({
     variant: {
       island: {
         root: 'w-fit max-w-full flex-col items-center',
+        positioner: 'drop-shadow-[0_6px_14px_rgb(0_0_0/0.12)]',
         bar: [
-          'h-14 gap-1.5 rounded-[28px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_12px_32px_-14px_rgb(0_0_0/0.4)]',
+          'h-14 gap-1.5 rounded-[28px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_4px_12px_-6px_rgb(0_0_0/0.14)]',
           'ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
           // Open, the popup underneath is the surface, so the bar gives up its own.
           'group-data-open/navigation-menu:bg-transparent group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
@@ -212,17 +213,19 @@ const navigationMenuVariants = tv({
         // A trigger is a control rather than a destination, so it keeps a fill of its own.
         trigger: 'bg-foreground/[0.06] data-popup-open:bg-transparent',
         popup: [
-          'rounded-[28px] ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
-          'shadow-[0_2px_6px_rgb(0_0_0/0.05),0_36px_80px_-30px_rgb(0_0_0/0.55)]',
-          '[clip-path:inset(-80px_round_28px)]',
+          // The clip ends exactly at the edge, so the whole curve is visible motion; the
+          // ring is inset so the clip keeps it, and the shadow is on the positioner.
+          'rounded-[28px] ring-1 ring-inset ring-foreground/[0.07] dark:ring-foreground/10',
+          '[clip-path:inset(0_round_28px)]',
         ],
         content: 'min-w-(--navigation-menu-bar-w) pt-[calc(var(--navigation-menu-bar-h)-0.25rem)]',
         contentInner: 'p-3',
       },
       dock: {
         root: 'w-fit max-w-full flex-col items-center',
+        positioner: 'drop-shadow-[0_6px_14px_rgb(0_0_0/0.12)]',
         bar: [
-          'h-16 gap-1 rounded-[24px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_10px_30px_-14px_rgb(0_0_0/0.35)]',
+          'h-16 gap-1 rounded-[24px] bg-popover p-2 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_4px_12px_-6px_rgb(0_0_0/0.14)]',
           'ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
           'group-data-open/navigation-menu:bg-transparent group-data-open/navigation-menu:shadow-none group-data-open/navigation-menu:ring-0',
         ],
@@ -245,9 +248,10 @@ const navigationMenuVariants = tv({
           'group-data-open/navigation-menu:opacity-0!',
         ],
         popup: [
-          'rounded-[24px] ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
-          'shadow-[0_2px_6px_rgb(0_0_0/0.05),0_30px_70px_-28px_rgb(0_0_0/0.5)]',
-          '[clip-path:inset(-80px_round_24px)]',
+          // The clip ends exactly at the edge, so the whole curve is visible motion; the
+          // ring is inset so the clip keeps it, and the shadow is on the positioner.
+          'rounded-[24px] ring-1 ring-inset ring-foreground/[0.07] dark:ring-foreground/10',
+          '[clip-path:inset(0_round_24px)]',
         ],
         content: 'min-w-(--navigation-menu-bar-w) pb-[calc(var(--navigation-menu-bar-h)-0.25rem)]',
       },
@@ -258,7 +262,7 @@ const navigationMenuVariants = tv({
         highlight: 'rounded-lg',
         popup: [
           'rounded-2xl ring-1 ring-foreground/[0.07] dark:ring-foreground/10',
-          'shadow-[0_2px_6px_rgb(0_0_0/0.05),0_24px_60px_-24px_rgb(0_0_0/0.45)]',
+          'shadow-[0_1px_2px_rgb(0_0_0/0.06),0_6px_16px_-8px_rgb(0_0_0/0.18)]',
           'data-starting-style:scale-[0.97] data-starting-style:opacity-0',
           'data-ending-style:scale-[0.97] data-ending-style:opacity-0 data-ending-style:duration-150',
         ],
@@ -299,13 +303,14 @@ const navigationMenuVariants = tv({
   defaultVariants: { variant: 'island', side: 'bottom' },
 });
 
+// The tile is always a quiet neutral; a tone tints only the glyph inside it.
 const TONE: Record<NavigationMenuTone, string> = {
   neutral: 'bg-foreground/[0.07] text-foreground',
-  primary: 'bg-primary text-primary-foreground',
-  info: 'bg-info text-white',
-  success: 'bg-success text-white',
-  warning: 'bg-warning text-black',
-  destructive: 'bg-destructive text-white',
+  primary: 'bg-foreground/[0.07] text-primary',
+  info: 'bg-foreground/[0.07] text-info',
+  success: 'bg-foreground/[0.07] text-success',
+  warning: 'bg-foreground/[0.07] text-warning',
+  destructive: 'bg-foreground/[0.07] text-destructive',
 };
 
 interface NavigationMenuContextValue {

@@ -19,10 +19,10 @@ export default function NavigationMenuThumb() {
           <NavigationMenu.Item value="explore">
             <NavigationMenu.Trigger>v0.18</NavigationMenu.Trigger>
             <NavigationMenu.Content className="w-64">
-              <NavigationMenu.Card href="#" icon={<TerminalIcon />} tone="success" eyebrow="Start here" onClick={stop}>
+              <NavigationMenu.Card href="#" icon={<TerminalIcon />} eyebrow="Start here" onClick={stop}>
                 Install
               </NavigationMenu.Card>
-              <NavigationMenu.Card href="#" icon={<CoinsIcon />} tone="info" eyebrow="New" onClick={stop}>
+              <NavigationMenu.Card href="#" icon={<CoinsIcon />} eyebrow="New" onClick={stop}>
                 Currency Input
               </NavigationMenu.Card>
             </NavigationMenu.Content>

@@ -41,7 +41,7 @@ export default function NavigationMenuMega() {
         <NavigationMenu.Item value="learn">
           <NavigationMenu.Trigger>Learn</NavigationMenu.Trigger>
           <NavigationMenu.Content className="w-[26rem]">
-            <NavigationMenu.Card href="#" icon={<TerminalIcon />} tone="primary" eyebrow="Ten minutes">
+            <NavigationMenu.Card href="#" icon={<TerminalIcon />} eyebrow="Ten minutes">
               Your first screen
             </NavigationMenu.Card>
             <NavigationMenu.Group label="Guides">

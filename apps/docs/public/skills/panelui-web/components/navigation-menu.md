@@ -290,10 +290,10 @@ export default function NavigationMenuOverview() {
             >
               Khalid Abdi
             </NavigationMenu.Profile>
-            <NavigationMenu.Card href="#" icon={<TerminalIcon />} tone="success" eyebrow="Start here">
+            <NavigationMenu.Card href="#" icon={<TerminalIcon />} eyebrow="Start here">
               Install PanelUI
             </NavigationMenu.Card>
-            <NavigationMenu.Card href="#" icon={<CoinsIcon />} tone="info" eyebrow="New in 0.18">
+            <NavigationMenu.Card href="#" icon={<CoinsIcon />} eyebrow="New in 0.18">
               Currency Input
             </NavigationMenu.Card>
             <NavigationMenu.Value

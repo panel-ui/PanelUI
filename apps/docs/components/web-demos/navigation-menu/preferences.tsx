@@ -27,10 +27,10 @@ export default function NavigationMenuPreferences() {
               <NavigationMenu.Profile description="mira@northwind.studio" status={<Badge variant="info">Team</Badge>}>
                 Mira Okafor
               </NavigationMenu.Profile>
-              <NavigationMenu.Card href="#" icon={<CircleUserRoundIcon />} tone="primary" eyebrow="Name, photo, email">
+              <NavigationMenu.Card href="#" icon={<CircleUserRoundIcon />} eyebrow="Name, photo, email">
                 Account
               </NavigationMenu.Card>
-              <NavigationMenu.Card href="#" icon={<CreditCardIcon />} tone="warning" eyebrow="6 of 8 seats used">
+              <NavigationMenu.Card href="#" icon={<CreditCardIcon />} eyebrow="6 of 8 seats used">
                 Billing
               </NavigationMenu.Card>
               <NavigationMenu.Separator />

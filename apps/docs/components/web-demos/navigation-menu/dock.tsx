@@ -41,13 +41,13 @@ export default function NavigationMenuDock() {
           <NavigationMenu.Item value="apps">
             <NavigationMenu.Trigger icon={<LayoutGridIcon />}>More apps</NavigationMenu.Trigger>
             <NavigationMenu.Content className="w-[20rem]">
-              <NavigationMenu.Card href="#" icon={<NotebookPenIcon />} tone="warning" eyebrow="Edited 2 min ago">
+              <NavigationMenu.Card href="#" icon={<NotebookPenIcon />} eyebrow="Edited 2 min ago">
                 Notes
               </NavigationMenu.Card>
-              <NavigationMenu.Card href="#" icon={<TimerIcon />} tone="info" eyebrow="25:00 focus">
+              <NavigationMenu.Card href="#" icon={<TimerIcon />} eyebrow="25:00 focus">
                 Timer
               </NavigationMenu.Card>
-              <NavigationMenu.Card href="#" icon={<MusicIcon />} tone="destructive" eyebrow="Paused">
+              <NavigationMenu.Card href="#" icon={<MusicIcon />} eyebrow="Paused">
                 Music
               </NavigationMenu.Card>
             </NavigationMenu.Content>

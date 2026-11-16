@@ -95,7 +95,7 @@ The rail can also be the side of a whole screen rather than a panel inside one. 
 - `NavRail.Header` — The strip across the top of the rail, where a brand and the trigger usually sit. It stays against the top while the destinations scroll. It becomes a column when the rail folds so the mark and the trigger each get their square.
 - `NavRail.Content` — The destinations between the header and the footer. The rail scrolls when they outgrow it, and the footer stays at the floor. Groups belong here.
 - `NavRail.Brand` — The product's mark and name. `icon` is the mark and is what remains when the rail folds; the children are the name. Give it an `href` to make it a link, and a `label` when the children are not plain text so the folded mark still has a name.
-- `NavRail.Trigger` — The button that folds and unfolds the rail, or opens the drawer on a phone. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon.
+- `NavRail.Trigger` — The button that folds and unfolds the rail, or opens the drawer on a phone. It says what pressing it will do and reports the state with `aria-expanded`; pass `expandLabel` or `collapseLabel` to word it differently, or children to draw your own icon. Its glyph is a sidebar beside the rail and a menu or a close mark for the drawer. Pass `render` to draw it as another button, such as a `<Button size="icon-lg" />` in a top bar; that element keeps its own size and shape.
 - `NavRail.Rail` — A thin grab handle down the rail's outer edge. Clicking it folds the rail. It is a pointer affordance and stays out of the tab order, where the trigger already does the job.
 - `NavRail.Inset` — The page beside the rail: the surface the work sits on. It fills the rest of the shell and keeps its own scroll, so the rail never slides away with the page.
 - `NavRail.Group` — A set of destinations under one `label`: the workspace, the account, the things you can do to it. Open, the label is a small uppercase heading; folded, it becomes a divider and stays the group's accessible name.
@@ -242,7 +242,7 @@ A parent with an active child keeps a quiet secondary marker — its icon tinted
 
 `NavRail.Provider` is optional: without it a rail keeps its own `collapsed` state, which is the shortest way to show one. Inside it, the rail reads the provider's state and ignores its own `collapsed`, `defaultCollapsed` and `onCollapsedChange`, so a `NavRail.Trigger` placed in the page header controls the same fold as the one in the rail. The provider adds three things a stand-alone rail does not have: the keyboard shortcut, the saved preference and the drawer.
 
-`shortcutKey` defaults to `'b'` and is pressed with the command or control modifier. Pass `false` for none. It is ignored while focus is in an input, textarea, select or editable region, so typing the letter still types it. `storageKey` remembers the fold in `localStorage`; the stored value is read after the first paint, so pass `collapsed` when the server already knows the preference. `mobileBreakpoint` defaults to `'48rem'`.
+`shortcutKey` defaults to `'b'` and is pressed with the command or control modifier. Pass `false` for none. It is ignored while focus is in an input, textarea, select or editable region, so typing the letter still types it. `storageKey` remembers the fold in `localStorage`; the stored value is read after the first paint, so pass `collapsed` when the server already knows the preference. `mobileBreakpoint` defaults to `'48rem'`. The drawer applies only below it, so at exactly that width the rail is a column, the same boundary as Tailwind's `md:` variant.
 
 `collapsible` decides what folding means. `icon` (the default) leaves the column of icon squares, `offcanvas` takes the rail out of the layout entirely, and `none` keeps it open and hides the trigger and the handle. `side` puts the handle and the drawer on the start or the end edge.
 
@@ -284,7 +284,7 @@ Counts live inside the row, so an open item is announced with its label and its 
 
 #### Built on
 
-Base UI's `useRender` and `mergeProps` for the element each part draws, and React state, refs and effects for the fold and the pill. The drawer is [Sheet](/docs/web/components/sheet), so a rail on a narrow screen inherits its swipe, focus trap and backdrop. There is no headless navigation primitive underneath. Icons are whatever the app passes; the package does not ship an icon set.
+Base UI's `useRender` and `mergeProps` for the element each part draws, and React state, refs and effects for the fold and the pill. The drawer is [Sheet](/docs/web/components/sheet), so a rail on a narrow screen inherits its swipe, focus trap and backdrop, and floats a few pixels off the screen edges with the sheet's rounded corners. There is no headless navigation primitive underneath. Icons are whatever the app passes; the package does not ship an icon set.
 
 #### Server rendering and width
 

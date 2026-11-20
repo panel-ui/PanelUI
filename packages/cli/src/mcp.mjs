@@ -221,7 +221,7 @@ function safeComponentsDir(cwd, config) {
   try {
     return projectPath(
       cwd,
-      aliasToDir(config.aliases?.components ?? '@/components/ui'),
+      aliasToDir(config.aliases?.components ?? '@/components/ui', cwd),
       'Components path'
     );
   } catch {

@@ -983,6 +983,9 @@ function BottomSheetContent({
              */
             entering={reducedMotion ? FadeIn.duration(150) : undefined}
             accessibilityViewIsModal
+            // VoiceOver's two-finger scrub closes a modal view, as it does
+            // everywhere else on iOS.
+            onAccessibilityEscape={dismissible ? close : undefined}
             className={sheetVariants({ detached, className })}
             {...props}
             // After the spread, and with the caller's own style folded in

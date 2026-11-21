@@ -20,7 +20,13 @@ import {
   writeConfig,
 } from './config.mjs';
 import { fetchItem } from './registry.mjs';
-import { installDependencies, patchCss, patchMetro, patchTypeScript } from './patch.mjs';
+import {
+  detectCssEntry,
+  installDependencies,
+  patchCss,
+  patchMetro,
+  patchTypeScript,
+} from './patch.mjs';
 import {
   TEMPLATES,
   THEMES,
@@ -89,6 +95,9 @@ export async function init(options) {
   }
 
   const config = defaultConfig(options.registry ?? DEFAULT_REGISTRY);
+  // Update the CSS entry the project already has, wherever it lives, and keep
+  // the tokens beside it.
+  config.css = detectCssEntry(cwd);
 
   if (!options.assumeYes && process.stdin.isTTY) {
     config.aliases.components = await ask('Where should components go?', config.aliases.components);
@@ -97,7 +106,8 @@ export async function init(options) {
     config.css = await ask('Which file is your CSS entry?', config.css);
   }
 
-  validateConfigPaths(config);
+  config.theme = siblingOf(config.css, 'theme.css');
+  validateConfigPaths(config, cwd);
 
   step(`Write ${CONFIG_FILE}`);
   if (!options.dryRun) {
@@ -116,6 +126,7 @@ export async function init(options) {
   } else {
     step(`Write ${config.theme} ${dim('(design tokens, all themes)')}`);
     if (!options.dryRun) {
+      fs.mkdirSync(path.dirname(themePath), { recursive: true });
       fs.writeFileSync(themePath, theme.files[0].content);
       success(`Wrote ${config.theme}`);
     }
@@ -128,7 +139,7 @@ export async function init(options) {
   const missing = BASE_DEPENDENCIES.filter((dep) => !(dep in project.deps));
   await installDependencies(cwd, missing, { ...options, isExpo: project.isExpo });
 
-  printNextSteps(config);
+  printNextSteps(cwd, config);
 }
 
 /**
@@ -230,8 +241,14 @@ function printCreated(projectName, template, theme, mode) {
   info('');
 }
 
-function printNextSteps(config) {
-  const componentsDir = aliasToDir(config.aliases.components);
+/** `theme.css` beside `src/global.css` is `src/theme.css`. */
+function siblingOf(file, name) {
+  const dir = path.posix.dirname(file.split(path.sep).join('/'));
+  return dir === '.' ? name : `${dir}/${name}`;
+}
+
+function printNextSteps(cwd, config) {
+  const componentsDir = aliasToDir(config.aliases.components, cwd);
 
   info('');
   info(bold('Almost there. Two things left:'));

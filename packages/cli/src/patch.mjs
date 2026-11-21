@@ -7,7 +7,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { aliasToDir, projectPath, validateConfigPaths } from './config.mjs';
+import {
+  aliasSourceRoot,
+  aliasToDir,
+  projectPath,
+  validateConfigPaths,
+  validateRelativePath,
+} from './config.mjs';
+import { readTsconfigPaths } from './tsconfig.mjs';
 import { confirm, dim, fail, printAddition, step, success, warn } from './ui.mjs';
 
 /**
@@ -19,7 +26,7 @@ import { confirm, dim, fail, printAddition, step, success, warn } from './ui.mjs
  * miserable thing to debug.
  */
 export async function patchCss(cwd, config, { assumeYes, dryRun }) {
-  validateConfigPaths(config);
+  validateConfigPaths(config, cwd);
   const cssPath = projectPath(cwd, config.css ?? 'global.css', 'CSS path');
   const exists = fs.existsSync(cssPath);
   const current = exists ? fs.readFileSync(cssPath, 'utf8') : '';
@@ -28,10 +35,10 @@ export async function patchCss(cwd, config, { assumeYes, dryRun }) {
   const sourceDirs = [
     ...new Set(
       Object.values(config.aliases ?? {})
-        .map(aliasToDir)
-        // Scan the top-level directory rather than the leaf, so a later
-        // `add` that creates a sibling folder is covered without re-running.
-        .map((dir) => dir.split(/[\\/]/)[0])
+        // Scan the alias's top-level directory rather than the leaf, so a
+        // later `add` that creates a sibling folder is covered without
+        // re-running.
+        .map((alias) => aliasSourceRoot(alias, cwd))
     ),
   ];
 
@@ -79,6 +86,60 @@ export async function patchCss(cwd, config, { assumeYes, dryRun }) {
 function relativeCssSpecifier(fromDir, targetPath) {
   const relative = path.relative(fromDir, targetPath).split(path.sep).join('/');
   return relative.startsWith('.') ? relative : `./${relative}`;
+}
+
+const METRO_FILES = ['metro.config.js', 'metro.config.cjs', 'metro.config.mjs', 'metro.config.ts'];
+const CSS_CANDIDATES = ['global.css', 'src/global.css', 'app/global.css', 'src/app/global.css'];
+
+/** A detected path, tidied, or null when it is not one this CLI may write to. */
+function safeRelative(value) {
+  const tidied = value.trim().replace(/^\.\//, '');
+  try {
+    return validateRelativePath(tidied, 'CSS path');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Which file the project's CSS entry is, so `init` updates it instead of
+ * creating a second one beside it.
+ *
+ * In order: the `cssEntryFile` the Metro config already passes to Uniwind; an
+ * existing CSS file in a usual place that imports Uniwind; any existing CSS
+ * file in a usual place; and finally `global.css` in the folder `@/` resolves
+ * to, which is `src/` in an app laid out that way.
+ */
+export function detectCssEntry(cwd) {
+  for (const name of METRO_FILES) {
+    const file = path.join(cwd, name);
+    if (!fs.existsSync(file)) continue;
+    const match = codeOnlyKeepingStrings(fs.readFileSync(file, 'utf8')).match(
+      /\bcssEntryFile\s*:\s*(['"`])([^'"`\n]+)\1/
+    );
+    const found = match && safeRelative(match[2]);
+    if (found) return found;
+  }
+
+  const existing = CSS_CANDIDATES.filter((file) => fs.existsSync(path.join(cwd, file)));
+  const withUniwind = existing.find((file) =>
+    /@import\s+['"]uniwind['"]/.test(fs.readFileSync(path.join(cwd, file), 'utf8'))
+  );
+  if (withUniwind ?? existing[0]) return withUniwind ?? existing[0];
+
+  try {
+    const root = aliasToDir('@/__panelui_probe__', cwd).replace(/\/?__panelui_probe__$/, '');
+    return root ? `${root}/global.css` : 'global.css';
+  } catch {
+    return 'global.css';
+  }
+}
+
+/** Blank out comments but keep string literals, so a commented-out option is not read. */
+function codeOnlyKeepingStrings(source) {
+  return source.replace(/\/\*[\s\S]*?\*\/|(^|[^:'"`\\])\/\/[^\n]*/g, (match, lead) =>
+    lead === undefined ? ' ' : `${lead} `
+  );
 }
 
 const METRO_TEMPLATE = `const { getDefaultConfig } = require('expo/metro-config');
@@ -247,20 +308,24 @@ export async function patchTypeScript(cwd, config, { assumeYes, dryRun }) {
     ['css.d.ts', "declare module '*.css';\n"],
   ].filter(([file]) => !fs.existsSync(path.join(cwd, file)));
 
-  const raw = fs.readFileSync(tsconfigPath, 'utf8');
-  // Deliberately not a full JSONC parser — tsconfig commonly has comments, and
-  // if this cannot read it cleanly it says so rather than mangling the file.
-  let tsconfig = null;
-  try {
-    tsconfig = JSON.parse(raw);
-  } catch {
-    warn('tsconfig.json has comments or trailing commas — not editing it.');
-  }
-
   const aliasPrefix = (config.aliases?.components ?? '@/components/ui').split('/')[0];
   const wildcard = `${aliasPrefix}/*`;
-  const needsPaths =
-    tsconfig !== null && !tsconfig.compilerOptions?.paths?.[wildcard];
+  // Read leniently (comments, trailing commas, `extends`) to learn whether the
+  // alias is already mapped — to `./src/*` as readily as to `./*`.
+  const mapped = Boolean(readTsconfigPaths(cwd)?.paths?.[wildcard]);
+
+  // Writing is strict: a file with comments would lose them on the way back
+  // out, so one this cannot parse plainly is reported rather than mangled.
+  let tsconfig = null;
+  if (!mapped) {
+    try {
+      tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+    } catch {
+      warn('tsconfig.json has comments or trailing commas — not editing it.');
+    }
+  }
+
+  const needsPaths = !mapped && tsconfig !== null;
 
   if (!declarations.length && !needsPaths) {
     success('TypeScript already set up');

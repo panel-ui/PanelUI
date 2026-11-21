@@ -199,6 +199,15 @@ A value-taking flag without its value prints its usage and exits with status 1. 
 
 Change the aliases and imports are rewritten to match on the way in.
 
+Aliases are import paths. The CLI writes them into the imports of every file it copies, and finds
+the folder each one points to through `compilerOptions.paths` in your `tsconfig.json`. With
+`"@/*": ["./src/*"]`, components go to `src/components/ui`. Without a matching entry, `@/` means the
+project root.
+
+`init` takes the CSS entry from the `cssEntryFile` your Metro config already passes to Uniwind, and
+puts `theme.css` beside it. Without one, it looks for `global.css` in the project root, `src/` and
+`app/`.
+
 `panelui-lock.json` records SHA-256 digests, requested roots, and each root's registry dependency
 closure. That lets a named update remove an untouched dependency only after no other requested root
 needs it. Locally edited files and dependencies shared with another root are always retained. Commit

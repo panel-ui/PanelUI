@@ -62,6 +62,15 @@ Every write shows you what it would add and asks first. Pass `--yes` to accept e
 
 Change the aliases and imports are rewritten to match on the way in.
 
+Aliases are import paths. The CLI writes them into the imports of every file it copies, and finds
+the folder each one points to through `compilerOptions.paths` in your `tsconfig.json`. With
+`"@/*": ["./src/*"]`, components go to `src/components/ui`. Without a matching entry, `@/` means the
+project root.
+
+`init` takes the CSS entry from the `cssEntryFile` your Metro config already passes to Uniwind, and
+puts `theme.css` beside it. Without one, it looks for `global.css` in the project root, `src/` and
+`app/`.
+
 Aliases are directories inside the project: letters, numbers, dots, dashes and underscores,
 separated by `/`, after an optional `@/`, `~/` or `./`. Anything else is refused. The alias is
 written between the quotes of every import in every file copied in, so it has to be a path and
@@ -177,6 +186,11 @@ import resolves, everything type-checks, and nothing is styled.
   }
 }
 ```
+
+**Components were written to the project root, not `src/`.** Older CLI versions read `@/` as the
+project root whatever `tsconfig.json` said. Move `components/`, `lib/` and `hooks/` into `src/`, and
+add `src/` to the start of each path in `panelui-lock.json` so `update` still recognises the files.
+Then run `npx panelui-cli@latest doctor` and fix any `@source` lines it reports.
 
 **`Property 'className' does not exist`.** `className` is not a React Native prop — Uniwind adds
 it. You need an ambient import somewhere in the project:

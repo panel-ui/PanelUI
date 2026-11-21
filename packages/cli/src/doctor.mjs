@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   CANONICAL_ALIASES,
   DEFAULT_REGISTRY,
+  aliasSourceRoot,
   aliasToDir,
   projectPath,
   validateConfigPaths,
@@ -28,7 +29,7 @@ function lockDiagnostics(cwd, config, aliases) {
   const lockFile = path.join(cwd, LOCK_FILE);
   if (!fs.existsSync(lockFile)) {
     const copiedRoots = Object.values(aliases)
-      .map(aliasToDir)
+      .map((alias) => aliasToDir(alias, cwd))
       .filter((directory) => fs.existsSync(path.join(cwd, directory)))
       .sort();
     return [
@@ -258,7 +259,7 @@ export function diagnose(cwd) {
         typeof config.aliases !== "object")
     )
       throw new Error("aliases must be an object");
-    validateConfigPaths(config);
+    validateConfigPaths(config, cwd);
     checks.push(check("config", "ok", "panelui.json is valid and contained"));
   } catch (error) {
     const message = fs.existsSync(configFile)
@@ -287,9 +288,7 @@ export function diagnose(cwd) {
     if (!themeImport.startsWith(".")) themeImport = `./${themeImport}`;
     required.push(`@import '${themeImport}'`);
     const sourceDirs = new Set(
-      Object.values(aliases)
-        .map(aliasToDir)
-        .map((dir) => dir.split(/[\\/]/)[0]),
+      Object.values(aliases).map((alias) => aliasSourceRoot(alias, cwd)),
     );
     for (const dir of sourceDirs) {
       let relative = path

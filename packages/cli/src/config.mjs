@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fail } from './ui.mjs';
+import { readTsconfigPaths, resolveAliasThroughPaths } from './tsconfig.mjs';
 
 export const CONFIG_FILE = 'panelui.json';
 export const DEFAULT_REGISTRY = 'https://panelui.dev/r';
@@ -95,12 +96,61 @@ export function validateAlias(alias) {
 }
 
 /**
- * Turn an alias into a real directory. `@/components/ui` → `components/ui`,
- * following the `@/*` → `./*` mapping Expo's base tsconfig already sets up.
+ * Turn an alias into a real directory, relative to the project root.
+ *
+ * Given the project's root (`cwd`), the alias is resolved through
+ * `compilerOptions.paths` in its tsconfig, so `@/components/ui` is
+ * `src/components/ui` where `@/*` maps to `./src/*`. The copied files keep the
+ * alias in their imports; this is only where they are written.
+ *
+ * Without a root, or when no `paths` entry covers the alias, the prefix is read
+ * as the project root: `@/components/ui` → `components/ui`.
  */
-export function aliasToDir(alias) {
+export function aliasToDir(alias, cwd) {
   const tidied = validateAlias(alias);
-  return tidied.replace(/^@\//, '').replace(/^~\//, '').replace(/^\.\//, '');
+  const fallback = tidied.replace(/^@\//, '').replace(/^~\//, '').replace(/^\.\//, '');
+  if (cwd === undefined) return fallback;
+
+  const mapping = readTsconfigPaths(cwd);
+  const resolved = resolveAliasThroughPaths(tidied, mapping);
+  if (!resolved) return fallback;
+
+  const root = path.resolve(cwd);
+  const relative = path.relative(root, resolved.dir).split(path.sep).join('/');
+  const where = `"${resolved.key}" in ${mapping.file}`;
+
+  /*
+   * The folder came from a project file, and it is about to be written into
+   * CSS (`@source '…'`) and used as a write destination, so it is held to the
+   * same characters an alias is. A mapping outside the app — a shared package
+   * in a monorepo — is refused rather than written into.
+   */
+  if (relative === '..' || relative.startsWith('../') || path.isAbsolute(relative)) {
+    fail(
+      `Alias "${tidied}" resolves outside the project through ${where}.`,
+      'Set an alias in panelui.json that resolves to a folder inside this app.'
+    );
+  }
+  if (relative && !relative.split('/').every((segment) => ALIAS_SEGMENT.test(segment))) {
+    fail(
+      `Alias "${tidied}" resolves to "${relative}" through ${where}, which is not a plain directory path.`,
+      'Use letters, numbers, dots, dashes and underscores, separated by /.'
+    );
+  }
+
+  return validateRelativePath(relative, 'Alias path', { allowEmpty: true });
+}
+
+/**
+ * The directory an alias's `@source` line scans: the alias's first segment,
+ * resolved. `@/components/ui` scans `components` (or `src/components`), so a
+ * later `add` that creates a sibling folder is covered without re-running init.
+ */
+export function aliasSourceRoot(alias, cwd) {
+  const tidied = validateAlias(alias);
+  const prefix = tidied.match(/^(?:@\/|~\/|\.\/)?/)[0];
+  const [first] = tidied.slice(prefix.length).split('/');
+  return aliasToDir(first ? `${prefix}${first}` : tidied, cwd);
 }
 
 /** Rejects paths that could escape a project on the current platform or Windows. */
@@ -197,11 +247,11 @@ export function validateProjectName(name) {
 }
 
 /** Validate every configured path before it reaches a filesystem write boundary. */
-export function validateConfigPaths(config) {
+export function validateConfigPaths(config, cwd) {
   const aliases = { ...CANONICAL_ALIASES, ...(config.aliases ?? {}) };
-  aliasToDir(aliases.components);
-  aliasToDir(aliases.lib);
-  aliasToDir(aliases.hooks);
+  aliasToDir(aliases.components, cwd);
+  aliasToDir(aliases.lib, cwd);
+  aliasToDir(aliases.hooks, cwd);
   validateRelativePath(config.css ?? 'global.css', 'CSS path');
   validateRelativePath(config.theme ?? 'theme.css', 'Theme path');
 }
@@ -227,7 +277,7 @@ export function targetPath(cwd, config, registryPath) {
   const alias =
     group === 'ui' ? aliases.components : group === 'lib' ? aliases.lib : aliases.hooks;
 
-  return projectPath(cwd, path.join(aliasToDir(alias), ...rest), 'Registry file path');
+  return projectPath(cwd, path.join(aliasToDir(alias, cwd), ...rest), 'Registry file path');
 }
 
 /**

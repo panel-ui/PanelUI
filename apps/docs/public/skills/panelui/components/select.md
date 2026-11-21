@@ -92,6 +92,8 @@ import { Select } from 'panelui-native';
 | `emptyMessage` | `string` | `No matches` | Shown in place of the list when the filter matches nothing. |
 | `native` | `boolean` | — | Render the platform's own picker instead of the trigger-and-list pair. Requires the optional `@expo/ui` package; without it this prop does nothing. **Theme tokens do not apply** — the platform draws the picker, so `className`, `title` and `presentation` are ignored. `Select.Item` children still declare the options. |
 | `nativeAppearance` | `'menu' \| 'wheel'` | `menu` | Native picker style. `menu` is a compact button opening a dropdown; `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere). |
+| `accessibilityLabel` | `string` | — | The field's name, read by screen readers and matched by voice control — usually the text of the label above it, such as "Priority". The chosen option, or the placeholder, is still read after it as the value. |
+| `accessibilityHint` | `string` | — | What opening the field does, when the name alone does not say. |
 | `children` | `ReactNode` | **required** | — |
 
 ### Example — Basic
@@ -223,6 +225,14 @@ data comes back empty.
 A caption, a divider or any other child you put among the options survives the
 filter untouched, for the same reason: a filter has no opinion about something
 that is not an option.
+
+### Accessibility
+
+Pass the field's label as `accessibilityLabel`. Without it, a screen reader reads only the trigger's text, which is the placeholder or the chosen option, and voice control has no name to match. With it, the label is the name and the chosen option is read as the value.
+
+On iOS the trigger and the options are announced as buttons, because VoiceOver has no trait for a combobox or a menu item. Android keeps those roles.
+
+When the options close, focus returns to the trigger.
 
 ---
 

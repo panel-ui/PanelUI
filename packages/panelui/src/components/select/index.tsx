@@ -40,6 +40,7 @@ import {
   isValidElement,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -47,6 +48,8 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  AccessibilityInfo,
+  Platform,
   Pressable,
   ScrollView,
   useWindowDimensions,
@@ -233,7 +236,7 @@ function SelectItem({ value, label, disabled, className, labelClassName }: Selec
 
   return (
     <Pressable
-      accessibilityRole="menuitem"
+      accessibilityRole={ITEM_ROLE}
       accessibilityState={{ selected, disabled: !!disabled }}
       disabled={disabled}
       onPress={() => context.onSelect(value)}
@@ -523,11 +526,35 @@ export interface SelectProps {
    * `wheel` is an always-visible rotor (iOS; falls back to `menu` elsewhere).
    */
   nativeAppearance?: 'menu' | 'wheel';
+  /**
+   * The field's name, read by screen readers and matched by voice control —
+   * usually the text of the label above it, such as "Priority". The chosen
+   * option, or the placeholder, is still read after it as the value.
+   */
+  accessibilityLabel?: string;
+  /** What opening the field does, when the name alone does not say. */
+  accessibilityHint?: string;
   children: ReactNode;
 }
 
 /** Space kept between a floating list and the side of the screen. */
 const OVERLAY_EDGE = 8;
+
+/*
+ * iOS gives `combobox` and `menuitem` no VoiceOver trait at all, so the trigger
+ * and its options were read as static text. There they are buttons — the
+ * trigger keeps `expanded`, an option keeps `selected` — and Android, where
+ * TalkBack understands both roles, keeps them.
+ */
+const TRIGGER_ROLE = Platform.OS === 'ios' ? 'button' : 'combobox';
+const ITEM_ROLE = Platform.OS === 'ios' ? 'button' : 'menuitem';
+
+/**
+ * How long after closing before focus goes back to the trigger. Long enough for
+ * the sheet's exit to finish, since a screen reader moves focus away from a
+ * view that is still on screen and leaving.
+ */
+const FOCUS_RETURN_DELAY = 400;
 
 /**
  * Where a floating list starts. It lines up with the trigger, and moves left
@@ -565,6 +592,8 @@ function SelectRoot({
   emptyMessage = 'No matches',
   native,
   nativeAppearance = 'menu',
+  accessibilityLabel,
+  accessibilityHint,
   children,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
@@ -618,6 +647,14 @@ function SelectRoot({
    */
   const noMatches = filtered !== null && filtered.seen > 0 && filtered.kept.length === 0;
 
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (focusTimer.current !== null) clearTimeout(focusTimer.current);
+    },
+    []
+  );
+
   const close = useCallback(() => {
     chevron.value = withTiming(0, { duration: 160 });
     setOpen(false);
@@ -625,6 +662,14 @@ function SelectRoot({
     // A filter left behind would be waiting the next time the list opens, with
     // most of the options missing and no obvious reason why.
     setQuery('');
+    // Put a screen reader back on the field it opened, rather than wherever
+    // focus lands once the options leave.
+    if (focusTimer.current !== null) clearTimeout(focusTimer.current);
+    focusTimer.current = setTimeout(() => {
+      focusTimer.current = null;
+      const node = triggerRef.current;
+      if (node) AccessibilityInfo.sendAccessibilityEvent(node, 'focus');
+    }, FOCUS_RETURN_DELAY);
   }, [chevron, onOpenChange]);
 
   // An open overlay list catches the Android back button, closing itself
@@ -705,13 +750,18 @@ function SelectRoot({
     <Pressable
       ref={triggerRef}
       /*
-       * A trigger that owns a list of options and reports whether that list is
-       * open is a combobox, not a button — and `expanded` only means anything
-       * on a role that can be expanded. Announced as "collapsed"/"expanded"
-       * rather than as a button whose state has nowhere to be read.
+       * A combobox where the platform reads one, a button with `expanded` on
+       * iOS, which has no trait for a combobox. See TRIGGER_ROLE.
        */
-      accessibilityRole="combobox"
+      accessibilityRole={TRIGGER_ROLE}
       accessibilityState={{ disabled: !!disabled, expanded: open }}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      // With a name of its own the trigger no longer reads its text, so the
+      // choice is handed over as the value instead.
+      accessibilityValue={
+        accessibilityLabel ? { text: selectedLabel ?? placeholder } : undefined
+      }
       hitSlop={size === 'xs' ? XS_TRIGGER_HIT_SLOP : undefined}
       disabled={disabled}
       onPress={toggle}

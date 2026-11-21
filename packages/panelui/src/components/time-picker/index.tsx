@@ -52,6 +52,7 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  Pressable,
   ScrollView,
   View,
   type AccessibilityActionEvent,
@@ -402,6 +403,21 @@ function Column<T>({
 
   useEffect(() => cancelTimer, [cancelTimer]);
 
+  /*
+   * A row you can see is a row you can tap. Dragging is not something every
+   * pointer can do reliably — a tremor, a head pointer, a switch — and the
+   * neighbouring rows are the ones being compared against anyway. The column
+   * scrolls there through the same effect a controlled value change uses.
+   */
+  const pick = useCallback(
+    (to: number) => {
+      if (disabled || moving.current || to === index) return;
+      selectionTick();
+      onIndexChange(to);
+    },
+    [disabled, index, onIndexChange]
+  );
+
   const selectedItem = items[index];
 
   const onAccessibilityAction = useCallback(
@@ -454,7 +470,7 @@ function Column<T>({
       onAccessibilityAction={onAccessibilityAction}
     >
       {items.map((item, i) => (
-        <ColumnRow key={i} offset={offset} index={i} selected={i === index}>
+        <ColumnRow key={i} offset={offset} index={i} selected={i === index} onPick={pick}>
           {label(item)}
         </ColumnRow>
       ))}
@@ -473,11 +489,13 @@ function ColumnRow({
   offset,
   index,
   selected,
+  onPick,
   children,
 }: {
   offset: SharedValue<number>;
   index: number;
   selected: boolean;
+  onPick: (index: number) => void;
   children: string;
 }) {
   const slots = timePickerVariants();
@@ -499,13 +517,20 @@ function ColumnRow({
   });
 
   return (
-    <Animated.View
-      style={[style, { height: ROW_HEIGHT }]}
-      className={slots.row()}
-    >
-      <Text className={cn(slots.rowLabel(), selected && slots.rowLabelSelected())}>
-        {children}
-      </Text>
+    <Animated.View style={[style, { height: ROW_HEIGHT }]}>
+      {/* Hidden from screen readers: the column is one adjustable control to
+          them, stepped with increment and decrement, not a list of buttons. */}
+      <Pressable
+        accessible={false}
+        importantForAccessibility="no"
+        onPress={() => onPick(index)}
+        className={slots.row()}
+        style={{ height: ROW_HEIGHT }}
+      >
+        <Text className={cn(slots.rowLabel(), selected && slots.rowLabelSelected())}>
+          {children}
+        </Text>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -958,6 +983,18 @@ function RulerFace({
 
   useEffect(() => cancelTimer, [cancelTimer]);
 
+  // Tapping a tick picks it, for the same reason a wheel's rows can be tapped.
+  const pick = useCallback(
+    (to: number) => {
+      if (disabled || moving.current || to === index) return;
+      const time = times[to];
+      if (!time) return;
+      selectionTick();
+      onValueChange(time);
+    },
+    [disabled, index, onValueChange, times]
+  );
+
   const stepsPerHour = Math.max(1, Math.round(60 / minuteStep));
 
   /*
@@ -1037,10 +1074,13 @@ function RulerFace({
           {times.slice(window.start, window.end).map((_, offset) => {
             const i = window.start + offset;
             return (
-              <View
+              <Pressable
                 key={i}
+                accessible={false}
+                importantForAccessibility="no"
+                onPress={() => pick(i)}
                 style={{ width: TICK_SPACING }}
-                className="items-center justify-center"
+                className="h-14 items-center justify-center"
               >
                 <View
                   className={cn(
@@ -1050,7 +1090,7 @@ function RulerFace({
                     i % stepsPerHour === 0 ? 'h-7 bg-muted-foreground' : 'h-4 bg-border'
                   )}
                 />
-              </View>
+              </Pressable>
             );
           })}
           <View style={{ width: (times.length - window.end) * TICK_SPACING }} />

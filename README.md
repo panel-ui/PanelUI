@@ -349,6 +349,7 @@ Thank you to everyone who has shipped something here. If you would like to join 
   <a href="https://github.com/Khalidabdi1" title="@Khalidabdi1"><img src="https://github.com/Khalidabdi1.png?size=112" width="56" height="56" alt="@Khalidabdi1" /></a>
   <a href="https://github.com/danestves" title="@danestves"><img src="https://github.com/danestves.png?size=112" width="56" height="56" alt="@danestves" /></a>
   <a href="https://github.com/hoanggbao00" title="@hoanggbao00"><img src="https://github.com/hoanggbao00.png?size=112" width="56" height="56" alt="@hoanggbao00" /></a>
+  <a href="https://github.com/zenithexe" title="@zenithexe"><img src="https://github.com/zenithexe.png?size=112" width="56" height="56" alt="@zenithexe" /></a>
 </p>
 
 ### Issue reporters
@@ -377,6 +378,7 @@ A clear bug report is how most fixes here start. Thank you to everyone who took 
   <a href="https://github.com/kirianL" title="@kirianL"><img src="https://github.com/kirianL.png?size=112" width="56" height="56" alt="@kirianL" /></a>
   <a href="https://github.com/goodParasyte" title="@goodParasyte"><img src="https://github.com/goodParasyte.png?size=112" width="56" height="56" alt="@goodParasyte" /></a>
   <a href="https://github.com/pras-wjy" title="@pras-wjy"><img src="https://github.com/pras-wjy.png?size=112" width="56" height="56" alt="@pras-wjy" /></a>
+  <a href="https://github.com/sherryaten" title="@sherryaten"><img src="https://github.com/sherryaten.png?size=112" width="56" height="56" alt="@sherryaten" /></a>
 </p>
 
 ## License

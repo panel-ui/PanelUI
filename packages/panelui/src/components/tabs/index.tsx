@@ -76,6 +76,8 @@ import { webDeps } from '../../primitives/web-deps';
 
 const SPRING = { damping: 24, stiffness: 300, mass: 0.7 } as const;
 
+const SCROLLER_STYLE = { flexGrow: 0, flexShrink: 0 } as const;
+
 /**
  * How far sideways a finger must travel before the panel takes the gesture
  * from whatever is scrolling above it, and how far up or down before it gives
@@ -942,6 +944,10 @@ function TabsList({
       // The row measures itself, and the indicator is positioned against it,
       // so the scroller must not stretch it to the viewport width.
       contentContainerStyle={{ flexGrow: 0 }}
+      // A ScrollView grows and shrinks on its main axis by default, and in a
+      // column with a fixed height that means the bar takes a share of the free
+      // space from the panel below it. The bar is as tall as its triggers.
+      style={SCROLLER_STYLE}
       onContentSizeChange={restore}
     >
       {scoped}

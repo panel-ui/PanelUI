@@ -138,7 +138,8 @@ const calendarVariants = tv({
 
 const dayVariants = tv({
   slots: {
-    cell: 'h-10 flex-1 items-center justify-center',
+    // 44pt tall, the smallest target the iOS guidelines allow.
+    cell: 'h-11 flex-1 items-center justify-center',
     /** The range band, drawn behind the number so it can run cell to cell. */
     band: 'absolute inset-y-0.5 bg-accent',
     /**

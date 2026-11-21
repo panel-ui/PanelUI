@@ -9,6 +9,59 @@ fix that leaves the API alone.
 
 Releases before 0.40.0 predate this file and are recorded only in the commit history.
 
+## [1.5.0] — 2026-11-21
+
+Accessibility fixes across Select, TimePicker, Calendar and BottomSheet from a WCAG 2.2 AA audit,
+and a scrollable tab bar that no longer takes half the screen. `panelui-cli` 0.8.1 ships alongside
+it and writes copied files where your `tsconfig.json` says the alias points.
+
+### Added
+
+- **Select takes an accessible name.** `accessibilityLabel` and `accessibilityHint` go on the
+  trigger. Pass the field's label, such as "Priority": without it a screen reader reads only the
+  placeholder or the chosen option, and voice control has no name to match. With it, the chosen
+  option is read as the value. Reported by @sherryaten in
+  [#318](https://github.com/panel-ui/PanelUI/issues/318).
+- **TimePicker rows and ticks can be tapped.** A visible row in a `wheel` or `clock` column, or a
+  tick on the `ruler`, picks that time when tapped. Dragging was the only way to change the time
+  with a pointer, which shut out anyone who cannot drag reliably. Screen readers keep the single
+  adjustable control. ([#318](https://github.com/panel-ui/PanelUI/issues/318))
+- **VoiceOver's escape gesture closes a BottomSheet.** The two-finger scrub closes a dismissible
+  sheet, as it closes a modal view everywhere else on iOS.
+  ([#318](https://github.com/panel-ui/PanelUI/issues/318))
+
+### Changed
+
+- **Select is announced as buttons on iOS.** iOS has no VoiceOver trait for `combobox` or
+  `menuitem`, so the trigger and its options were read as static text. On iOS they are now buttons,
+  the trigger keeping `expanded` and each option `selected`. Android keeps the original roles.
+  ([#318](https://github.com/panel-ui/PanelUI/issues/318))
+- **Calendar day cells are 44pt tall**, up from 40pt, the smallest target the iOS guidelines allow.
+  A month grid is 24pt taller. ([#318](https://github.com/panel-ui/PanelUI/issues/318))
+
+### Fixed
+
+- **Focus returns to the Select trigger** when the options close, instead of landing wherever the
+  screen reader puts it. ([#318](https://github.com/panel-ui/PanelUI/issues/318))
+- **A scrollable `Tabs.List` keeps its own height.** In a full-height root, the horizontal scroller
+  grew to share the free space with the panel, so the bar took about half the screen and the
+  underline sat in the middle of it. Reported by @techzealot in
+  [#319](https://github.com/panel-ui/PanelUI/issues/319).
+
+### CLI
+
+- **`panelui-cli` 0.8.1 resolves aliases through `tsconfig.json`.** In an app where `@/*` maps to
+  `./src/*`, `add` wrote components to the project root while the imports inside them pointed at
+  `src/`. Folders now come from `compilerOptions.paths`, with `baseUrl` and `extends` followed, and
+  the copied imports keep `@/…`. `init` updates the CSS entry your Metro config already passes to
+  Uniwind instead of creating a second `global.css`. A project whose files were already written to
+  the root keeps working; the [CLI page](https://panelui.dev/docs/cli) explains how to move them.
+  ([#320](https://github.com/panel-ui/PanelUI/issues/320))
+
+### Docs
+
+- The Select page has an Accessibility section, and the TimePicker page covers tapping.
+
 ## [1.4.0] — 2026-11-09
 
 Named themes now set the system appearance, so alerts, the keyboard and the native tab bar match

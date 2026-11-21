@@ -103,7 +103,7 @@
     "Draggable sheet anchored to the bottom of the screen.",
     "react native bottom sheet",
     {
-      "updatedIn": "1.2.0",
+      "updatedIn": "1.5.0",
       "category": "overlays"
     }
   ],
@@ -763,7 +763,7 @@
     "Picker shown in a bottom sheet, expanded in place, or floating over the page.",
     "expo select component",
     {
-      "updatedIn": "1.3.0",
+      "updatedIn": "1.5.0",
       "category": "forms"
     }
   ],
@@ -987,7 +987,7 @@
     "react native time picker",
     {
       "addedIn": "0.36.0",
-      "updatedIn": "0.65.0",
+      "updatedIn": "1.5.0",
       "category": "forms"
     }
   ],

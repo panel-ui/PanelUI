@@ -71,6 +71,10 @@ const [time, setTime] = useState<TimeValue>();
 
 **The sheet gets a Done button and the popover does not.** A popover is dismissed by tapping anywhere outside it, which is most of the screen; a sheet's outside is the strip above it, and a scale under your thumb needs somewhere deliberate to finish.
 
+### Tapping instead of dragging
+
+A visible row in a column, or a tick on the ruler, can be tapped to pick it. Dragging is not the only way to change the time, which matters for anyone whose pointer cannot drag reliably. Screen readers step each column with increment and decrement instead.
+
 ---
 
 Full page, with every example: https://panelui.dev/docs/components/time-picker

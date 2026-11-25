@@ -256,7 +256,8 @@ Every part also takes the props of the element it renders, and a `className`.
 | `status` | `PromptTaskStatus` | `'pending'` | `pending`, `active` (its words are lit while it runs), `waiting` (it needs someone before it can go on), `done` (a check) or `error`. Default `pending`. |
 | `icon` | `ReactNode` | — | For `timeline`: a glyph for what the task works in, such as the app or the file type. |
 | `state` | `ReactNode` | — | For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". |
-| `meta` | `ReactNode` | — | For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". |
+| `meta` | `ReactNode` | — | For `timeline`: the time at the row's end, such as how long it has taken: "34s". |
+| `tag` | `ReactNode` | — | For `timeline`: a flag on a task still to come, such as "Approval" for one that will stop for an answer. |
 | `expanded` | `boolean` | — | For `timeline`: whether its steps are shown, when the caller holds it. Uncontrolled, they are shown while the task runs or waits, and a finished task opens and closes when its row is pressed. |
 | `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the row is pressed to show or hide its steps. |
 
@@ -265,7 +266,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
 | `status` | `'done' \| 'active'` | `'idle'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
-| `meta` | `ReactNode` | — | A short reading at its end, set in mono: a file and line, a diff count, a test tally. |
+| `meta` | `ReactNode` | — | A short reading at its end: a file and line, a diff count, a test tally. |
 
 #### `PromptTaskApprovalProps`
 

@@ -499,7 +499,15 @@ A task whose `status` is `waiting` stops for an answer. Put a `Prompt.TaskApprov
 ```tsx lineNumbers
 'use client';
 
-import { BookTextIcon, BotIcon, CodeIcon, GitCompareArrowsIcon, RocketIcon, SearchIcon } from 'lucide-react';
+import {
+  BookOpen01Icon,
+  BotIcon,
+  GitCompareIcon,
+  Rocket01Icon,
+  Search01Icon,
+  SourceCodeIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Prompt, type PromptTaskStatus } from '@/components/panelui/prompt';
 import { useEffect, useState } from 'react';
 
@@ -524,14 +532,14 @@ interface Task {
 const TASKS: Task[] = [
   {
     label: 'Read the webhook handlers',
-    icon: <SearchIcon />,
+    icon: <HugeiconsIcon icon={Search01Icon} />,
     state: 'Reading',
     ticks: 2,
     steps: [{ text: 'Found 4 handlers', meta: 'webhooks/*.ts' }],
   },
   {
     label: 'Map events to the new API',
-    icon: <GitCompareArrowsIcon />,
+    icon: <HugeiconsIcon icon={GitCompareIcon} />,
     state: 'Mapping',
     ticks: 3,
     steps: [
@@ -541,7 +549,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Rewrite the handlers',
-    icon: <CodeIcon />,
+    icon: <HugeiconsIcon icon={SourceCodeIcon} />,
     state: 'Editing',
     ticks: 5,
     steps: [
@@ -553,7 +561,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Update the runbook',
-    icon: <BookTextIcon />,
+    icon: <HugeiconsIcon icon={BookOpen01Icon} />,
     state: 'Writing',
     ticks: 3,
     steps: [
@@ -563,7 +571,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Deploy to staging',
-    icon: <RocketIcon />,
+    icon: <HugeiconsIcon icon={Rocket01Icon} />,
     state: 'Deploying',
     ticks: 2,
     steps: [{ text: 'Build 7f3c is live on staging', meta: '41s' }],
@@ -579,6 +587,8 @@ export default function PromptTimeline() {
   const [running, setRunning] = useState(true);
   const [approved, setApproved] = useState(false);
   const [declined, setDeclined] = useState(false);
+  // Seconds the current task has been running, shown beside its live word.
+  const [elapsed, setElapsed] = useState(0);
 
   const task = TASKS[current];
   const waiting = task?.approval !== undefined && !approved && !declined;
@@ -588,13 +598,20 @@ export default function PromptTimeline() {
     if (!running || finished || waiting || declined) return;
     const timer = window.setTimeout(() => {
       if (tick + 1 >= task!.ticks) {
-        setTook((list) => [...list, task!.ticks * 6 + current * 3]);
+        setTook((list) => [...list, task!.ticks + 1 + current * 2]);
         setCurrent((index) => index + 1);
         setTick(0);
       } else setTick((count) => count + 1);
     }, 1100);
     return () => window.clearTimeout(timer);
   }, [running, finished, waiting, declined, tick, task, current]);
+
+  useEffect(() => setElapsed(0), [current]);
+  useEffect(() => {
+    if (!running || finished || waiting || declined) return;
+    const timer = window.setInterval(() => setElapsed((value) => value + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [running, finished, waiting, declined]);
 
   const restart = () => {
     setCurrent(0);
@@ -641,7 +658,7 @@ export default function PromptTimeline() {
           title={title}
           badge={
             <>
-              <BotIcon />
+              <HugeiconsIcon icon={BotIcon} />
               Ops agent
             </>
           }
@@ -656,7 +673,14 @@ export default function PromptTimeline() {
                 status={status}
                 icon={item.icon}
                 state={status === 'waiting' ? 'Needs you' : item.state}
-                meta={index < current ? `${took[index]}s` : undefined}
+                tag={item.approval && index > current ? 'Approval' : undefined}
+                meta={
+                  index < current
+                    ? `${took[index]}s`
+                    : index === current && status === 'active'
+                      ? `${elapsed}s`
+                      : undefined
+                }
               >
                 {item.label}
                 {shownSteps.map((step, stepIndex) => (
@@ -1411,7 +1435,8 @@ export default function PromptAttachments() {
 | `status` | `PromptTaskStatus` | `'pending'` | `pending`, `active` (its words are lit while it runs), `waiting` (it needs someone before it can go on), `done` (a check) or `error`. Default `pending`. |
 | `icon` | `ReactNode` | — | For `timeline`: a glyph for what the task works in, such as the app or the file type. |
 | `state` | `ReactNode` | — | For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". |
-| `meta` | `ReactNode` | — | For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". |
+| `meta` | `ReactNode` | — | For `timeline`: the time at the row's end, such as how long it has taken: "34s". |
+| `tag` | `ReactNode` | — | For `timeline`: a flag on a task still to come, such as "Approval" for one that will stop for an answer. |
 | `expanded` | `boolean` | — | For `timeline`: whether its steps are shown, when the caller holds it. Uncontrolled, they are shown while the task runs or waits, and a finished task opens and closes when its row is pressed. |
 | `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the row is pressed to show or hide its steps. |
 
@@ -1420,7 +1445,7 @@ export default function PromptAttachments() {
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `status` | `'done' \| 'active'` | `'idle'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
-| `meta` | `ReactNode` | — | A short reading at its end, set in mono: a file and line, a diff count, a test tally. |
+| `meta` | `ReactNode` | — | A short reading at its end: a file and line, a diff count, a test tally. |
 
 ### Prompt.TaskApproval
 

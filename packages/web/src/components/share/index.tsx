@@ -30,8 +30,9 @@
  *
  * ## The invite field
  *
- * An address becomes a chip when it is followed by Enter, a comma or a space,
- * or when the field is left, so several can be added before sending.
+ * An address becomes a badge above the field when it is followed by Enter, a
+ * comma or a space, or when the field is left, so several can be added before
+ * sending, and the field stays one line tall however many there are.
  * Backspace in an empty field takes the last chip back. The role select at
  * the field's end applies to everyone in it. Send stays disabled until there
  * is at least one address, chipped or typed.
@@ -62,16 +63,26 @@ const EASE = 'ease-[cubic-bezier(0.23,1,0.32,1)]';
 
 const shareVariants = tv({
   slots: {
+    // Who has access sits on a light tray of its own, and the action on a
+    // solid pill set into its end, so the faces never lie over the button.
     trigger: [
-      'group/share inline-flex h-9 items-center gap-2 rounded-full bg-primary ps-1 pe-3.5 text-sm font-medium text-primary-foreground shadow-xs outline-none',
-      'inset-shadow-[0_1px_0_rgb(255_255_255/0.12)] transition-[background-color,scale] duration-150',
-      'hover:bg-primary/90 active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/50',
-      'has-[[data-slot=share-faces]]:ps-1 not-has-[[data-slot=share-faces]]:ps-3.5',
+      'group/share inline-flex h-10 items-center gap-2 rounded-full p-1 text-sm font-medium outline-none',
+      'has-[[data-slot=share-faces]]:bg-card has-[[data-slot=share-faces]]:shadow-xs has-[[data-slot=share-faces]]:ring-1 has-[[data-slot=share-faces]]:ring-foreground/[0.08]',
+      'dark:has-[[data-slot=share-faces]]:bg-[color-mix(in_oklab,var(--card),white_4%)]',
+      'transition-[scale] duration-150 active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/50',
       'motion-reduce:transition-none [&_svg:not([class*=size-])]:size-4',
     ],
-    faces: 'flex items-center -space-x-1.5 pe-0.5',
+    triggerAction: [
+      'inline-flex h-8 items-center gap-2 rounded-full bg-primary px-3.5 text-primary-foreground shadow-xs inset-shadow-[0_1px_0_rgb(255_255_255/0.12)]',
+      'transition-colors duration-150 group-hover/share:bg-primary/90',
+    ],
+    faces: 'flex items-center -space-x-2 ps-0.5',
+    // Opaque, each ringed in the tray's colour, so an overlap reads as one
+    // face in front of another and nothing shows through.
     face: [
-      'inline-flex size-7 items-center justify-center overflow-hidden rounded-full bg-primary-foreground/15 text-[0.625rem] font-semibold text-primary-foreground ring-2 ring-primary',
+      'relative inline-flex size-7 items-center justify-center overflow-hidden rounded-full text-[0.625rem] font-semibold text-muted-foreground',
+      'bg-[color-mix(in_oklab,var(--muted-foreground)_16%,var(--card))] ring-2 ring-card',
+      'dark:bg-[color-mix(in_oklab,var(--muted-foreground)_22%,var(--card))] dark:ring-[color-mix(in_oklab,var(--card),white_4%)]',
       'transition-transform duration-200 group-hover/share:not-first:translate-x-0.5',
     ],
     backdrop:
@@ -97,18 +108,23 @@ const shareVariants = tv({
       'transition-[background-color,color,scale] duration-150 hover:bg-foreground/10 hover:text-foreground active:scale-95',
       'focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none [&_svg]:size-3.5',
     ],
-    invite: [
-      'flex min-h-10 items-center gap-1.5 rounded-2xl border bg-background py-1 ps-3 pe-1 text-sm transition-[border-color,box-shadow] duration-150',
+    invite: 'flex flex-col gap-2',
+    // Addresses already added sit above the field as a row of badges, so the
+    // field itself stays one line tall however many there are.
+    chips: 'flex flex-wrap gap-1.5',
+    field: [
+      'flex h-10 items-center gap-2 rounded-2xl border bg-background ps-3 pe-1 text-sm transition-[border-color,box-shadow] duration-150',
       'has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/30 dark:bg-input/30',
     ],
     inviteIcon: 'size-4 shrink-0 text-muted-foreground',
-    inviteList: 'flex min-w-0 flex-1 flex-wrap items-center gap-1',
-    input: 'h-8 min-w-24 flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
+    input: 'h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
     chip: [
-      'inline-flex h-7 max-w-full items-center gap-1 rounded-full bg-muted ps-2.5 pe-1 text-[0.8125rem]',
+      'inline-flex h-7 max-w-full items-center gap-1.5 rounded-full bg-muted ps-1 pe-1 text-[0.8125rem]',
       `transition-[opacity,scale] duration-200 ${EASE} starting:scale-90 starting:opacity-0 motion-reduce:transition-none`,
     ],
     chipText: 'truncate',
+    chipFace:
+      'inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-popover text-[0.5625rem] font-semibold uppercase text-muted-foreground ring-1 ring-foreground/[0.08]',
     chipRemove:
       'inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-foreground/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3',
     roleTrigger: [
@@ -363,8 +379,10 @@ function ShareTrigger({ people, children = 'Share', className, ...props }: Share
           ))}
         </span>
       ) : null}
-      <ShareGlyph />
-      {children}
+      <span data-slot="share-trigger-action" className={slots.triggerAction()}>
+        <ShareGlyph />
+        {children}
+      </span>
       {people && people.length > 0 ? <span className="sr-only">, with {people.length} people</span> : null}
     </Trigger>
   );
@@ -635,67 +653,75 @@ function ShareInvite({
   };
 
   return (
-    <div
-      data-slot="share-invite"
-      className={slots.invite({ className })}
-      onClick={(event) => {
-        if (!(event.target as HTMLElement).closest('button, input')) input.current?.focus();
-      }}
-      {...props}
-    >
-      <svg
-        className={slots.inviteIcon()}
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="m3 7 9 6 9-6" />
-      </svg>
-      <span className={slots.inviteList()}>
-        {emails.map((email) => (
-          <span key={email} data-slot="share-chip" className={slots.chip()}>
-            <span className={slots.chipText()}>{email}</span>
-            <button
-              type="button"
-              aria-label={`Remove ${email}`}
-              className={slots.chipRemove()}
-              onClick={() => {
-                setEmails((current) => current.filter((item) => item !== email));
-                input.current?.focus();
-              }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.4}
-                strokeLinecap="round"
+    <div data-slot="share-invite" className={slots.invite({ className })} {...props}>
+      {emails.length > 0 ? (
+        <div data-slot="share-chips" className={slots.chips()} aria-label="People to invite" role="list">
+          {emails.map((email) => (
+            <span key={email} role="listitem" data-slot="share-chip" className={slots.chip()}>
+              <span aria-hidden="true" className={slots.chipFace()}>
+                {email.charAt(0)}
+              </span>
+              <span className={slots.chipText()}>{email}</span>
+              <button
+                type="button"
+                aria-label={`Remove ${email}`}
+                className={slots.chipRemove()}
+                onClick={() => {
+                  setEmails((current) => current.filter((item) => item !== email));
+                  input.current?.focus();
+                }}
               >
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
-          </span>
-        ))}
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.4}
+                  strokeLinecap="round"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <div
+        className={slots.field()}
+        onClick={(event) => {
+          if (!(event.target as HTMLElement).closest('button, input')) input.current?.focus();
+        }}
+      >
+        <svg
+          className={slots.inviteIcon()}
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m3 7 9 6 9-6" />
+        </svg>
         <input
           ref={input}
-          type="email"
+          // Text rather than email: an email input trims and rejects a space,
+          // and the space is what turns an address into a badge.
+          type="text"
           inputMode="email"
           autoComplete="off"
+          autoCapitalize="off"
           spellCheck={false}
           value={draft}
-          placeholder={emails.length === 0 ? placeholder : undefined}
+          placeholder={emails.length === 0 ? placeholder : 'Add another'}
           aria-label="Email addresses"
           onChange={(event) => {
             const next = event.target.value;
-            // A pasted list is split at once.
+            // A pasted list, or an address followed by a separator, is split at once.
             if (/[,;\s]/.test(next) && next.split(/[,;\s]+/).some(isEmail)) commit(next);
-            else setDraft(next);
+            else setDraft(next.replace(/^\s+/, ''));
           }}
           onBlur={() => {
             if (isEmail(draft)) commit(draft);
@@ -703,10 +729,10 @@ function ShareInvite({
           onKeyDown={onKeyDown}
           className={slots.input()}
         />
-      </span>
-      {roles.length > 0 ? (
-        <ShareRoleSelect roles={roles} value={role} onValueChange={setRole} aria-label="Role for new people" />
-      ) : null}
+        {roles.length > 0 ? (
+          <ShareRoleSelect roles={roles} value={role} onValueChange={setRole} aria-label="Role for new people" />
+        ) : null}
+      </div>
     </div>
   );
 }

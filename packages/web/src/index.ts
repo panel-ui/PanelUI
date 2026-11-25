@@ -586,6 +586,9 @@ export {
   MessageStatus,
   MessageAttachments,
   MessageAttachment,
+  MessageCite,
+  MessageCitation,
+  MessageSources,
   type MessageFrom,
   type MessageProps,
   type MessageGroupProps,
@@ -601,6 +604,10 @@ export {
   type MessageStatusProps,
   type MessageAttachmentsProps,
   type MessageAttachmentProps,
+  type MessageCiteProps,
+  type MessageCitationProps,
+  type MessageSourcesProps,
+  type MessageSourceItem,
 } from './components/message';
 export {
   Soundwave,

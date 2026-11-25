@@ -1066,10 +1066,12 @@
       "registryDependencies": [],
       "cssVars": {
         "light": {
-          "success": "oklch(0.696 0.17 162.48)"
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
         },
         "dark": {
-          "success": "oklch(0.696 0.17 162.48)"
+          "success": "oklch(0.696 0.17 162.48)",
+          "info": "oklch(0.623 0.214 259.815)"
         }
       },
       "files": [

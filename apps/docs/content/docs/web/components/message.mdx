@@ -175,8 +175,12 @@ import { Message } from "@/components/panelui/message"
       </Message.Attachments>
       <Message.Status />
       <Message.Bubble>
-        <Message.BubbleContent />
+        <Message.BubbleContent>
+          <Message.Cite />
+          <Message.Citation />
+        </Message.BubbleContent>
       </Message.Bubble>
+      <Message.Sources />
       <Message.Footer />
       <Message.Actions>
         <Message.Branch />
@@ -196,6 +200,9 @@ import { Message } from "@/components/panelui/message"
 - **`Message.Status`** — What the assistant is doing before its first word, as a line that shimmers. It is a `role="status"`, so it is read out as it changes. Swap it for the bubble when the text starts.
 - **`Message.Bubble`** — The surface. A person's turn is drawn in a muted bubble; an assistant's draws nothing.
 - **`Message.BubbleContent`** — The text, set as prose. With `streaming` on the `Message`, a caret follows the last word.
+- **`Message.Cite`** — A sentence taken from a source. `source` names the source's `id`, or several. It is lit while that source's citation or its row in `Message.Sources` is pointed at or focused.
+- **`Message.Citation`** — A chip after a sentence naming where it came from: the site's mark and domain, and a count when there are several sources. Pointing at it or focusing it opens a card with the passage, and pages through the sources when there are several.
+- **`Message.Sources`** — Every source the answer cites, once each: a row of marks and a count that opens into a numbered list. Pointing at a row lights each sentence it backs.
 - **`Message.Footer`** — A line under the turn: seen, edited, how long it took.
 - **`Message.Actions`** — The row of actions under an answer. `reveal="hover"` hides it until the turn is hovered or focused, for answers before the latest; on a touch screen it always shows.
 - **`Message.Action`** — An icon button with a tooltip. `label` is required, because the button has no text. `copy` puts its text on the clipboard and shows a check for a moment. `pressed` makes it a toggle, such as a thumbs-up.
@@ -341,6 +348,225 @@ export default function MessageStreaming() {
       <Button variant="outline" size="sm" className="self-start" onClick={() => setRun(run + 1)}>
         <RotateCcwIcon /> Replay
       </Button>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Citations
+
+Wrap a sentence taken from a source in `Message.Cite` and follow it with a `Message.Citation` for that source. Point at a chip to light the sentence it supports and read the passage it came from. When a chip has more than one source, the card pages through them.
+
+Here the answer streams in after a moment of finding sources. Each chip appears once its sentence is complete, and `Message.Sources` appears when the answer ends.
+
+<ComponentPreview name="message/citations" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Message, type MessageSourceItem } from '@/components/panelui/message';
+
+const SOURCES: MessageSourceItem[] = [
+  {
+    id: 'store',
+    title: 'Why paved districts cool slowly',
+    url: 'https://example.org/heat/storage',
+    domain: 'cityclimate.org',
+    kind: 'Exact quote',
+    quote: (
+      <>
+        Masonry and asphalt <mark>absorb heat through the day and release it slowly overnight</mark>, keeping air near
+        the ground warm long after sunset.
+      </>
+    ),
+  },
+  {
+    id: 'atlas',
+    title: 'Night-time temperature gaps in 40 cities',
+    url: 'https://example.org/atlas/night-gap',
+    domain: 'heatatlas.net',
+    kind: 'Summary',
+    quote: (
+      <>
+        On still, cloudless nights the centre ran <mark>5 to 7 °C warmer</mark> than farmland at the city's edge.
+      </>
+    ),
+  },
+  {
+    id: 'survey',
+    title: 'A street-level temperature survey',
+    url: 'https://example.org/survey/2025',
+    domain: 'northfield.edu',
+    kind: 'Exact quote',
+    quote: (
+      <>
+        The difference <mark>peaked on calm, clear nights</mark> and nearly vanished under wind or cloud.
+      </>
+    ),
+  },
+  {
+    id: 'roofs',
+    title: 'Shade, albedo and surface heat',
+    url: 'https://example.org/roofs',
+    domain: 'greenroofs.io',
+    kind: 'Summary',
+    quote: (
+      <>
+        Tree cover and reflective roofs <mark>cut stored surface heat</mark> by shading it and by reflecting light
+        before it is absorbed.
+      </>
+    ),
+  },
+];
+
+const by = (...ids: string[]) => SOURCES.filter((source) => ids.includes(source.id));
+
+const PARTS = [
+  {
+    text: 'Cities stay warmer after dark because brick, asphalt and concrete soak up heat all day and give it back slowly through the night.',
+    sources: ['store'],
+  },
+  {
+    text: 'The gap is widest on calm, clear nights, when a dense centre can be 5 to 7 °C warmer than the fields around it.',
+    sources: ['atlas', 'survey'],
+  },
+  {
+    text: 'Trees and pale roofs narrow it: shade keeps surfaces from storing heat, and light colours reflect more of it before it is absorbed.',
+    sources: ['roofs'],
+  },
+];
+
+export default function MessageCitations() {
+  // How many characters of the answer have arrived; -1 while sources are being found.
+  const [shown, setShown] = useState(-1);
+  const total = PARTS.reduce((sum, part) => sum + part.text.length, 0);
+
+  useEffect(() => {
+    if (shown >= total) return;
+    const timer = window.setTimeout(
+      () => setShown((count) => (count < 0 ? 0 : Math.min(total, count + 6))),
+      shown < 0 ? 1400 : 28,
+    );
+    return () => window.clearTimeout(timer);
+  }, [shown, total]);
+
+  const streaming = shown < total;
+  let offset = 0;
+
+  return (
+    <div className="w-full max-w-xl">
+      <Message from="assistant" streaming={streaming && shown >= 0}>
+        <Message.Content>
+          {shown < 0 ? (
+            <Message.Status>Finding sources</Message.Status>
+          ) : (
+            <Message.Bubble>
+              <Message.BubbleContent>
+                <p>
+                  {PARTS.map((part) => {
+                    const start = offset;
+                    offset += part.text.length;
+                    const visible = part.text.slice(0, Math.max(0, shown - start));
+                    if (!visible) return null;
+                    const complete = visible.length === part.text.length;
+                    return (
+                      <span key={part.text}>
+                        <Message.Cite source={part.sources}>{visible}</Message.Cite>
+                        {complete ? <Message.Citation sources={by(...part.sources)} /> : null}{' '}
+                      </span>
+                    );
+                  })}
+                </p>
+              </Message.BubbleContent>
+            </Message.Bubble>
+          )}
+          {!streaming ? <Message.Sources sources={SOURCES} /> : null}
+        </Message.Content>
+      </Message>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### The sources list
+
+`Message.Sources` lists every source once, numbered in the order they are given. Open it, then point at a row: each sentence that source backs is lit in the text.
+
+<ComponentPreview name="message/sources" height={320}>
+
+```tsx lineNumbers
+'use client';
+
+import { Message, type MessageSourceItem } from '@/components/panelui/message';
+
+const SOURCES: MessageSourceItem[] = [
+  {
+    id: 'flour',
+    title: 'Hydration and flour strength',
+    url: 'https://example.org/flour',
+    domain: 'millersnotes.com',
+    kind: 'Exact quote',
+    quote: (
+      <>
+        Strong bread flours <mark>take up 70 to 75% water</mark> before the dough turns slack.
+      </>
+    ),
+  },
+  {
+    id: 'temp',
+    title: 'Proofing times by room temperature',
+    url: 'https://example.org/proof',
+    domain: 'breadlab.net',
+    kind: 'Summary',
+    quote: (
+      <>
+        At 24 °C a bulk ferment <mark>takes four to five hours</mark>; at 20 °C, closer to seven.
+      </>
+    ),
+  },
+  {
+    id: 'poke',
+    title: 'Reading the poke test',
+    url: 'https://example.org/poke',
+    domain: 'bakeschool.org',
+    kind: 'Exact quote',
+    quote: (
+      <>
+        A dent that <mark>springs back slowly and only part of the way</mark> means the loaf is ready to bake.
+      </>
+    ),
+  },
+];
+
+const by = (...ids: string[]) => SOURCES.filter((source) => ids.includes(source.id));
+
+export default function MessageSourcesDemo() {
+  return (
+    <div className="w-full max-w-xl">
+      <Message from="assistant">
+        <Message.Content>
+          <Message.Bubble>
+            <Message.BubbleContent>
+              <p>
+                <Message.Cite source="flour">Start at 72% water with a strong bread flour</Message.Cite>
+                <Message.Citation sources={by('flour')} /> and raise it once the dough handles well.{' '}
+                <Message.Cite source="temp">In a 24 °C kitchen the bulk rise takes four to five hours</Message.Cite>
+                <Message.Citation sources={by('temp')} />, longer if the room is cooler.{' '}
+                <Message.Cite source="poke">
+                  It is ready when a floured finger leaves a dent that fills back slowly
+                </Message.Cite>
+                <Message.Citation sources={by('poke')} />.
+              </p>
+            </Message.BubbleContent>
+          </Message.Bubble>
+          <Message.Sources sources={SOURCES} defaultOpen />
+        </Message.Content>
+      </Message>
     </div>
   );
 }
@@ -635,6 +861,28 @@ export default function MessageChat() {
 | `meta` | `string` | — | A line under the name: its type and size. |
 | `icon` | `ReactNode` | — | The glyph on a file's card. A page outline when left out. |
 
+### Message.Cite
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `source` | `string \| readonly string[]` | — | The id, or ids, of the sources this sentence comes from. |
+
+### Message.Citation
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sources` | `readonly MessageSourceItem[]` | — | The sources for the sentence before it. The chip names the first; the card pages through all of them. |
+| `delay` | `number` | — | How long the pointer rests on the chip before the card opens, in ms. Default `350`. |
+
+### Message.Sources
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sources` | `readonly MessageSourceItem[]` | — | Every source the answer cites, once each, in the order they are numbered. |
+| `open` | `boolean` | — | Whether the list is open, when the caller holds it. |
+| `defaultOpen` | `boolean` | `false` | Whether it starts open, when the caller does not hold it. Default `false`. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the toggle is pressed. |
+
 Every part also takes the props of the element it renders, and a `className`.
 
 ## Notes
@@ -651,10 +899,20 @@ With reduced motion turned on, the caret does not pulse and the status line does
 
 `Message.BubbleContent` styles the HTML that Markdown renders to: `p`, `ul`, `ol`, `li`, `strong`, `a`, `code`, `pre` and `h3`. Render the Markdown with the library you already use and put the result inside it.
 
+### Citations
+
+Sources are matched to sentences by `id`, so one source can back several sentences, and one sentence several sources. Give each source a `title`, and a `url` to make the chip, the card and the list row links. The `domain` is taken from the `url` when it is left out.
+
+The mark beside the domain is the source's `icon`, an `<img>` or a glyph, or its first letter when there is none. Nothing is fetched from the source's site.
+
+In the card, words inside `<mark>` in `quote` are set in the text's colour and the rest of the passage is muted, so the part the sentence relies on stands out.
+
+The chip is a link, named for screen readers as "Source:" and the titles. The card opens on focus as well as on hover, and the sentence is lit while the chip has focus.
+
 ### Server Components
 
 `Message` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Message.Group` off the import, so each part is also exported by name: `MessageGroup` is `Message.Group`, and so on for the others.
 
 ```tsx
-import { Message, MessageGroup, MessageAvatar, MessageContent, MessageHeader, MessageBubble, MessageBubbleContent, MessageFooter, MessageActions, MessageAction, MessageBranch, MessageStatus, MessageAttachments, MessageAttachment } from "@/components/panelui/message"
+import { Message, MessageGroup, MessageAvatar, MessageContent, MessageHeader, MessageBubble, MessageBubbleContent, MessageFooter, MessageActions, MessageAction, MessageBranch, MessageStatus, MessageAttachments, MessageAttachment, MessageCite, MessageCitation, MessageSources } from "@/components/panelui/message"
 ```

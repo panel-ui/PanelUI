@@ -6,7 +6,7 @@
   },
   "intro": "Use it for the turns of a conversation with an assistant. `from=\"user\"` is what the person wrote, in a bubble on the trailing side. `from=\"assistant\"` is the answer, set as prose across the full width with no bubble, because an answer is long and is the thing being read.\n\n`Message.BubbleContent` sets paragraphs, lists, inline code, code blocks and headings, so Markdown rendered to HTML can go straight in.\n\nIt lays turns out and does not scroll them. Put the turns in a scrolling column of your own, and the composer under it; [Prompt](/docs/web/components/prompt) is one.",
   "usage": "<Message from=\"user\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>How do I make it for six?</Message.BubbleContent>\n    </Message.Bubble>\n  </Message.Content>\n</Message>\n\n<Message from=\"assistant\">\n  <Message.Content>\n    <Message.Bubble>\n      <Message.BubbleContent>Multiply by 1.5…</Message.BubbleContent>\n    </Message.Bubble>\n    <Message.Actions>\n      <Message.Action label=\"Copy\" copy={answer} />\n    </Message.Actions>\n  </Message.Content>\n</Message>",
-  "anatomy": "<Message.Group>\n  <Message>\n    <Message.Avatar />\n    <Message.Content>\n      <Message.Header />\n      <Message.Attachments>\n        <Message.Attachment />\n      </Message.Attachments>\n      <Message.Status />\n      <Message.Bubble>\n        <Message.BubbleContent />\n      </Message.Bubble>\n      <Message.Footer />\n      <Message.Actions>\n        <Message.Branch />\n        <Message.Action />\n      </Message.Actions>\n    </Message.Content>\n  </Message>\n</Message.Group>",
+  "anatomy": "<Message.Group>\n  <Message>\n    <Message.Avatar />\n    <Message.Content>\n      <Message.Header />\n      <Message.Attachments>\n        <Message.Attachment />\n      </Message.Attachments>\n      <Message.Status />\n      <Message.Bubble>\n        <Message.BubbleContent>\n          <Message.Cite />\n          <Message.Citation />\n        </Message.BubbleContent>\n      </Message.Bubble>\n      <Message.Sources />\n      <Message.Footer />\n      <Message.Actions>\n        <Message.Branch />\n        <Message.Action />\n      </Message.Actions>\n    </Message.Content>\n  </Message>\n</Message.Group>",
   "parts": {
     "Group": "Turns in a row from the same side, set closer together. Its `from` applies to every `Message` in it.",
     "Avatar": "Optional: who the turn is from, beside its first line. An assistant's answer reads best without one, as plain text; use it where several people share a thread. Put an [Avatar](/docs/web/components/avatar) in it.",
@@ -17,6 +17,9 @@
     "Status": "What the assistant is doing before its first word, as a line that shimmers. It is a `role=\"status\"`, so it is read out as it changes. Swap it for the bubble when the text starts.",
     "Bubble": "The surface. A person's turn is drawn in a muted bubble; an assistant's draws nothing.",
     "BubbleContent": "The text, set as prose. With `streaming` on the `Message`, a caret follows the last word.",
+    "Cite": "A sentence taken from a source. `source` names the source's `id`, or several. It is lit while that source's citation or its row in `Message.Sources` is pointed at or focused.",
+    "Citation": "A chip after a sentence naming where it came from: the site's mark and domain, and a count when there are several sources. Pointing at it or focusing it opens a card with the passage, and pages through the sources when there are several.",
+    "Sources": "Every source the answer cites, once each: a row of marks and a count that opens into a numbered list. Pointing at a row lights each sentence it backs.",
     "Footer": "A line under the turn: seen, edited, how long it took.",
     "Actions": "The row of actions under an answer. `reveal=\"hover\"` hides it until the turn is hovered or focused, for answers before the latest; on a touch screen it always shows.",
     "Action": "An icon button with a tooltip. `label` is required, because the button has no text. `copy` puts its text on the clipboard and shows a check for a moment. `pressed` makes it a toggle, such as a thumbs-up.",
@@ -33,6 +36,18 @@
       "title": "While it is being written",
       "description": "`Message.Status` holds the place while the assistant works, then the text arrives with `streaming` set, which draws a caret after the last word and marks the turn busy. The actions appear when it is done.",
       "demo": "streaming",
+      "height": 320
+    },
+    {
+      "title": "Citations",
+      "description": "Wrap a sentence taken from a source in `Message.Cite` and follow it with a `Message.Citation` for that source. Point at a chip to light the sentence it supports and read the passage it came from. When a chip has more than one source, the card pages through them.\n\nHere the answer streams in after a moment of finding sources. Each chip appears once its sentence is complete, and `Message.Sources` appears when the answer ends.",
+      "demo": "citations",
+      "height": 340
+    },
+    {
+      "title": "The sources list",
+      "description": "`Message.Sources` lists every source once, numbered in the order they are given. Open it, then point at a row: each sentence that source backs is lit in the text.",
+      "demo": "sources",
       "height": 320
     },
     {
@@ -54,5 +69,5 @@
       "height": 560
     }
   ],
-  "notes": "### Accessibility\n\nA streaming turn is `aria-busy`, so a screen reader reads it once it is finished rather than a word at a time. `Message.Status` is a `role=\"status\"`. Each action has its `label` as its accessible name, and `Message.Actions` is a toolbar named \"Message actions\".\n\n### Reduced motion\n\nWith reduced motion turned on, the caret does not pulse and the status line does not shimmer.\n\n### Rendering Markdown\n\n`Message.BubbleContent` styles the HTML that Markdown renders to: `p`, `ul`, `ol`, `li`, `strong`, `a`, `code`, `pre` and `h3`. Render the Markdown with the library you already use and put the result inside it."
+  "notes": "### Accessibility\n\nA streaming turn is `aria-busy`, so a screen reader reads it once it is finished rather than a word at a time. `Message.Status` is a `role=\"status\"`. Each action has its `label` as its accessible name, and `Message.Actions` is a toolbar named \"Message actions\".\n\n### Reduced motion\n\nWith reduced motion turned on, the caret does not pulse and the status line does not shimmer.\n\n### Rendering Markdown\n\n`Message.BubbleContent` styles the HTML that Markdown renders to: `p`, `ul`, `ol`, `li`, `strong`, `a`, `code`, `pre` and `h3`. Render the Markdown with the library you already use and put the result inside it.\n\n### Citations\n\nSources are matched to sentences by `id`, so one source can back several sentences, and one sentence several sources. Give each source a `title`, and a `url` to make the chip, the card and the list row links. The `domain` is taken from the `url` when it is left out.\n\nThe mark beside the domain is the source's `icon`, an `<img>` or a glyph, or its first letter when there is none. Nothing is fetched from the source's site.\n\nIn the card, words inside `<mark>` in `quote` are set in the text's colour and the rest of the passage is muted, so the part the sentence relies on stands out.\n\nThe chip is a link, named for screen readers as \"Source:\" and the titles. The card opens on focus as well as on hover, and the sentence is lit while the chip has focus."
 }

@@ -52,8 +52,12 @@ It lays turns out and does not scroll them. Put the turns in a scrolling column 
       </Message.Attachments>
       <Message.Status />
       <Message.Bubble>
-        <Message.BubbleContent />
+        <Message.BubbleContent>
+          <Message.Cite />
+          <Message.Citation />
+        </Message.BubbleContent>
       </Message.Bubble>
+      <Message.Sources />
       <Message.Footer />
       <Message.Actions>
         <Message.Branch />
@@ -73,6 +77,9 @@ It lays turns out and does not scroll them. Put the turns in a scrolling column 
 - `Message.Status` — What the assistant is doing before its first word, as a line that shimmers. It is a `role="status"`, so it is read out as it changes. Swap it for the bubble when the text starts.
 - `Message.Bubble` — The surface. A person's turn is drawn in a muted bubble; an assistant's draws nothing.
 - `Message.BubbleContent` — The text, set as prose. With `streaming` on the `Message`, a caret follows the last word.
+- `Message.Cite` — A sentence taken from a source. `source` names the source's `id`, or several. It is lit while that source's citation or its row in `Message.Sources` is pointed at or focused.
+- `Message.Citation` — A chip after a sentence naming where it came from: the site's mark and domain, and a count when there are several sources. Pointing at it or focusing it opens a card with the passage, and pages through the sources when there are several.
+- `Message.Sources` — Every source the answer cites, once each: a row of marks and a count that opens into a numbered list. Pointing at a row lights each sentence it backs.
 - `Message.Footer` — A line under the turn: seen, edited, how long it took.
 - `Message.Actions` — The row of actions under an answer. `reveal="hover"` hides it until the turn is hovered or focused, for answers before the latest; on a touch screen it always shows.
 - `Message.Action` — An icon button with a tooltip. `label` is required, because the button has no text. `copy` puts its text on the clipboard and shows a check for a moment. `pressed` makes it a toggle, such as a thumbs-up.
@@ -168,9 +175,31 @@ Every part also takes the props of the element it renders, and a `className`.
 | `meta` | `string` | — | A line under the name: its type and size. |
 | `icon` | `ReactNode` | — | The glyph on a file's card. A page outline when left out. |
 
+#### `MessageCiteProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `source` | `string \| readonly string[]` | **required** | The id, or ids, of the sources this sentence comes from. |
+
+#### `MessageCitationProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `sources` | `readonly MessageSourceItem[]` | **required** | The sources for the sentence before it. The chip names the first; the card pages through all of them. |
+| `delay` | `number` | — | How long the pointer rests on the chip before the card opens, in ms. Default `350`. |
+
+#### `MessageSourcesProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `sources` | `readonly MessageSourceItem[]` | **required** | Every source the answer cites, once each, in the order they are numbered. |
+| `open` | `boolean` | — | Whether the list is open, when the caller holds it. |
+| `defaultOpen` | `boolean` | `false` | Whether it starts open, when the caller does not hold it. Default `false`. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the toggle is pressed. |
+
 ## In a Server Component
 
-`Message` is a client component. A Server Component cannot read `Message.Group` off the import, so import each part by name: `MessageGroup`, `MessageAvatar`, `MessageContent`, `MessageHeader`, `MessageBubble`, `MessageBubbleContent`, `MessageFooter`, `MessageActions`, `MessageAction`, `MessageBranch`, `MessageStatus`, `MessageAttachments`, `MessageAttachment`.
+`Message` is a client component. A Server Component cannot read `Message.Group` off the import, so import each part by name: `MessageGroup`, `MessageAvatar`, `MessageContent`, `MessageHeader`, `MessageBubble`, `MessageBubbleContent`, `MessageFooter`, `MessageActions`, `MessageAction`, `MessageBranch`, `MessageStatus`, `MessageAttachments`, `MessageAttachment`, `MessageCite`, `MessageCitation`, `MessageSources`.
 
 ## Notes
 
@@ -185,6 +214,16 @@ With reduced motion turned on, the caret does not pulse and the status line does
 #### Rendering Markdown
 
 `Message.BubbleContent` styles the HTML that Markdown renders to: `p`, `ul`, `ol`, `li`, `strong`, `a`, `code`, `pre` and `h3`. Render the Markdown with the library you already use and put the result inside it.
+
+#### Citations
+
+Sources are matched to sentences by `id`, so one source can back several sentences, and one sentence several sources. Give each source a `title`, and a `url` to make the chip, the card and the list row links. The `domain` is taken from the `url` when it is left out.
+
+The mark beside the domain is the source's `icon`, an `<img>` or a glyph, or its first letter when there is none. Nothing is fetched from the source's site.
+
+In the card, words inside `<mark>` in `quote` are set in the text's colour and the rest of the passage is muted, so the part the sentence relies on stands out.
+
+The chip is a link, named for screen readers as "Source:" and the titles. The card opens on focus as well as on hover, and the sentence is lit while the chip has focus.
 
 ## Example
 

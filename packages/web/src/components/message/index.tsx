@@ -45,12 +45,25 @@
  * `streaming` puts a caret after the last word and marks the turn busy, so a
  * screen reader waits for it to finish. Before the first word arrives,
  * `Message.Status` says what the assistant is doing, as a line that shimmers.
+ *
+ * ## Citations
+ *
+ * A sentence an answer takes from somewhere is wrapped in `Message.Cite`, and
+ * a `Message.Citation` after it names the source: a small chip with the
+ * site's mark and domain. Pointing at the chip, or focusing it, lights the
+ * sentence it supports and opens a card with the passage it was taken from.
+ * `Message.Sources` under the answer lists every source once; pointing at a
+ * row there lights every sentence that cites it. Sources are matched by `id`,
+ * so the same source can back several sentences.
  */
+import { PreviewCard } from '@base-ui/react/preview-card';
 import { Tooltip } from '@base-ui/react/tooltip';
 import {
   createContext,
   useContext,
   useEffect,
+  useId,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -123,6 +136,59 @@ const messageVariants = tv({
       'bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--muted-foreground)_40%,var(--foreground)_50%,var(--muted-foreground)_60%,var(--muted-foreground)_100%)] bg-[length:250%_100%] bg-clip-text text-transparent',
       'animate-[message-shimmer_2.2s_linear_infinite] motion-reduce:animate-none motion-reduce:bg-none motion-reduce:text-muted-foreground',
     ],
+    // The lit sentence: a wash and a hairline under it, carried across lines.
+    cite: [
+      'rounded-[3px] [box-decoration-break:clone] transition-[background-color,box-shadow,color] duration-200 motion-reduce:transition-none',
+      'data-lit:bg-info/12 data-lit:shadow-[inset_0_-1.5px_0_color-mix(in_oklab,var(--info)_70%,transparent)] data-lit:text-foreground',
+    ],
+    citation: [
+      'relative -top-px mx-0.5 inline-flex h-5 max-w-40 cursor-pointer items-center gap-1 rounded-md bg-muted ps-0.5 pe-1.5 align-middle',
+      'text-[0.6875rem] font-medium leading-none text-muted-foreground no-underline outline-none',
+      'transition-[background-color,color] duration-150 hover:bg-foreground/10 hover:text-foreground data-popup-open:bg-foreground/10 data-popup-open:text-foreground',
+      'focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none',
+      'starting:opacity-0 starting:scale-90 transition-[opacity,scale]',
+    ],
+    citationMore: 'text-muted-foreground/70 tabular-nums',
+    mark: [
+      'inline-flex size-4 shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-foreground text-[0.5625rem] font-semibold uppercase leading-none text-background',
+      '[&_img]:size-full [&_img]:object-cover [&_svg]:size-2.5',
+    ],
+    card: [
+      'z-50 w-80 origin-(--transform-origin) rounded-2xl border bg-popover p-1 text-popover-foreground shadow-lg outline-none',
+      'transition-[opacity,scale,translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
+      'data-starting-style:scale-[0.97] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100',
+      'motion-reduce:transition-none',
+    ],
+    cardBody: 'flex flex-col gap-2 rounded-xl px-3 pt-2.5 pb-3',
+    cardSite: 'flex items-center gap-1.5 text-xs text-muted-foreground',
+    cardKind: 'ms-auto rounded-full bg-info/10 px-1.5 py-0.5 text-[0.625rem] font-medium text-info-foreground',
+    cardTitle: 'text-sm font-medium leading-snug text-foreground',
+    // The passage hangs off a rail, the way a quotation is set.
+    cardQuote:
+      'border-s-2 border-info/40 ps-2.5 text-[0.8125rem] leading-relaxed text-muted-foreground [&_mark]:bg-transparent [&_mark]:font-medium [&_mark]:text-foreground',
+    cardFooter: 'flex h-9 items-center gap-1 rounded-xl bg-muted/60 px-1.5 text-xs text-muted-foreground',
+    cardPager: 'flex items-center tabular-nums',
+    cardPagerButton:
+      'inline-flex size-6 cursor-pointer items-center justify-center rounded-md outline-none hover:bg-foreground/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-35 [&_svg]:size-3.5',
+    cardOpen:
+      'ms-auto inline-flex h-6 items-center gap-1 rounded-md px-1.5 font-medium text-foreground no-underline outline-none hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3',
+    sources: 'flex flex-col',
+    sourcesToggle: [
+      '-ms-1 inline-flex h-8 w-fit cursor-pointer items-center gap-2 rounded-lg ps-1 pe-2 text-xs font-medium text-muted-foreground outline-none',
+      'transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+    ],
+    sourcesMarks: 'flex -space-x-1 [&>*]:ring-2 [&>*]:ring-background',
+    sourcesChevron: 'size-3.5 transition-transform duration-200 motion-reduce:transition-none',
+    sourcesFold:
+      'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+    sourcesList: 'flex flex-col pt-1',
+    source: [
+      'group/source grid h-8 grid-cols-[1.25rem_1rem_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-1.5 text-[0.8125rem] text-foreground no-underline outline-none',
+      'transition-colors duration-100 hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60',
+    ],
+    sourceIndex: 'text-end text-xs tabular-nums text-muted-foreground',
+    sourceTitle: 'truncate',
+    sourceDomain: 'ps-3 text-xs text-muted-foreground',
     attachments: 'flex flex-wrap gap-2',
     attachment: 'flex items-center gap-2.5 overflow-hidden rounded-xl border bg-background text-xs',
     attachmentImage: 'size-20 object-cover',
@@ -167,6 +233,14 @@ interface MessageContextValue {
 }
 
 const MessageContext = createContext<MessageContextValue>({ from: 'assistant', streaming: false });
+
+interface CitationContextValue {
+  /** The ids of the sources being pointed at, whose sentences are lit. */
+  lit: readonly string[];
+  setLit: (ids: readonly string[]) => void;
+}
+
+const CitationContext = createContext<CitationContextValue>({ lit: [], setLit: () => {} });
 const GroupContext = createContext<{ from: MessageFrom } | null>(null);
 
 /* -------------------------------------------------------------------------- */
@@ -184,17 +258,21 @@ export interface MessageProps extends ComponentProps<'div'> {
 function MessageRoot({ from: fromProp, streaming = false, className, ...props }: MessageProps) {
   const group = useContext(GroupContext);
   const from = fromProp ?? group?.from ?? 'assistant';
+  const [lit, setLit] = useState<readonly string[]>([]);
+  const citations = useMemo(() => ({ lit, setLit }), [lit]);
   return (
-    <MessageContext.Provider value={{ from, streaming }}>
-      <div
-        data-slot="message"
-        data-from={from}
-        data-streaming={streaming ? '' : undefined}
-        aria-busy={streaming || undefined}
-        className={messageVariants({ from }).root({ className })}
-        {...props}
-      />
-    </MessageContext.Provider>
+    <CitationContext.Provider value={citations}>
+      <MessageContext.Provider value={{ from, streaming }}>
+        <div
+          data-slot="message"
+          data-from={from}
+          data-streaming={streaming ? '' : undefined}
+          aria-busy={streaming || undefined}
+          className={messageVariants({ from }).root({ className })}
+          {...props}
+        />
+      </MessageContext.Provider>
+    </CitationContext.Provider>
   );
 }
 MessageRoot.displayName = 'Message';
@@ -615,6 +693,265 @@ function FileGlyph() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Citations                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface MessageSourceItem {
+  /** Matches the source to the sentences that cite it. */
+  id: string;
+  /** The page or document's title. */
+  title: string;
+  /** Where it is. The citation and the list link to it. */
+  url?: string;
+  /** The site's name as shown: "nature.com". Default the host of `url`. */
+  domain?: string;
+  /** The site's mark, as an `<img>` or a glyph. Default the domain's first letter. */
+  icon?: ReactNode;
+  /**
+   * The passage the sentence was taken from. Wrap the words that match it in
+   * `<mark>` and they are set in the text's colour, the rest muted.
+   */
+  quote?: ReactNode;
+  /** A word for what the passage is, at the card's top corner: "Exact quote", "Summary". */
+  kind?: ReactNode;
+}
+
+function domainOf(source: MessageSourceItem) {
+  if (source.domain) return source.domain;
+  if (!source.url) return '';
+  try {
+    return new URL(source.url).host.replace(/^www\./, '');
+  } catch {
+    return source.url;
+  }
+}
+
+/** The site's mark, or its first letter in a small tile. */
+function SourceMark({ source }: { source: MessageSourceItem }) {
+  const slots = messageVariants();
+  return (
+    <span className={slots.mark()} aria-hidden="true">
+      {source.icon ?? domainOf(source).charAt(0)}
+    </span>
+  );
+}
+
+export interface MessageCiteProps extends ComponentProps<'span'> {
+  /** The id, or ids, of the sources this sentence comes from. */
+  source: string | readonly string[];
+}
+
+/**
+ * A sentence taken from a source. It is lit while that source's citation or
+ * its row in `Message.Sources` is pointed at or focused.
+ */
+function MessageCite({ source, className, ...props }: MessageCiteProps) {
+  const { lit } = useContext(CitationContext);
+  const ids = typeof source === 'string' ? [source] : source;
+  const on = ids.some((id) => lit.includes(id));
+  return (
+    <span
+      data-slot="message-cite"
+      data-lit={on ? '' : undefined}
+      className={messageVariants().cite({ className })}
+      {...props}
+    />
+  );
+}
+MessageCite.displayName = 'Message.Cite';
+
+export interface MessageCitationProps extends Omit<ComponentProps<'a'>, 'children'> {
+  /** The sources for the sentence before it. The chip names the first; the card pages through all of them. */
+  sources: readonly MessageSourceItem[];
+  /** How long the pointer rests on the chip before the card opens, in ms. Default `350`. */
+  delay?: number;
+}
+
+/**
+ * A chip after a sentence naming where it came from. Pointing at it lights
+ * the sentence and opens a card with the passage; with several sources the
+ * card pages through them.
+ */
+function MessageCitation({ sources, delay = 350, className, ...props }: MessageCitationProps) {
+  const slots = messageVariants();
+  const { setLit } = useContext(CitationContext);
+  const [page, setPage] = useState(0);
+  const first = sources[0];
+  const current = sources[Math.min(page, sources.length - 1)];
+  const ids = useMemo(() => sources.map((source) => source.id), [sources]);
+  if (!first || !current) return null;
+
+  const show = (open: boolean) => {
+    setLit(open ? ids : []);
+    if (!open) setPage(0);
+  };
+
+  return (
+    <PreviewCard.Root onOpenChange={show}>
+      <PreviewCard.Trigger
+        delay={delay}
+        closeDelay={150}
+        href={first.url}
+        target={first.url ? '_blank' : undefined}
+        rel={first.url ? 'noreferrer' : undefined}
+        data-slot="message-citation"
+        className={slots.citation({ className })}
+        onFocus={() => setLit(ids)}
+        onBlur={() => setLit([])}
+        aria-label={`Source: ${sources.map((source) => source.title).join('; ')}`}
+        {...props}
+      >
+        <SourceMark source={first} />
+        <span className="truncate">{domainOf(first)}</span>
+        {sources.length > 1 ? <span className={slots.citationMore()}>+{sources.length - 1}</span> : null}
+      </PreviewCard.Trigger>
+      <PreviewCard.Portal>
+        <PreviewCard.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
+          <PreviewCard.Popup data-slot="message-citation-card" className={slots.card()}>
+            <div className={slots.cardBody()}>
+              <div className={slots.cardSite()}>
+                <SourceMark source={current} />
+                <span className="truncate">{domainOf(current)}</span>
+                {current.kind != null ? <span className={slots.cardKind()}>{current.kind}</span> : null}
+              </div>
+              <div className={slots.cardTitle()}>{current.title}</div>
+              {current.quote != null ? <blockquote className={slots.cardQuote()}>{current.quote}</blockquote> : null}
+            </div>
+            {sources.length > 1 || current.url ? (
+              <div className={slots.cardFooter()}>
+                {sources.length > 1 ? (
+                  <div className={slots.cardPager()}>
+                    <button
+                      type="button"
+                      aria-label="Previous source"
+                      disabled={page === 0}
+                      onClick={() => setPage((value) => Math.max(0, value - 1))}
+                      className={slots.cardPagerButton()}
+                    >
+                      <ChevronGlyph flip />
+                    </button>
+                    <span aria-live="polite" className="min-w-8 text-center">
+                      {page + 1}/{sources.length}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Next source"
+                      disabled={page === sources.length - 1}
+                      onClick={() => setPage((value) => Math.min(sources.length - 1, value + 1))}
+                      className={slots.cardPagerButton()}
+                    >
+                      <ChevronGlyph />
+                    </button>
+                  </div>
+                ) : null}
+                {current.url ? (
+                  <a href={current.url} target="_blank" rel="noreferrer" className={slots.cardOpen()}>
+                    Open source
+                    <svg viewBox="0 0 24 24" aria-hidden="true" {...STROKE}>
+                      <path d="M7 17 17 7M8 7h9v9" />
+                    </svg>
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </PreviewCard.Popup>
+        </PreviewCard.Positioner>
+      </PreviewCard.Portal>
+    </PreviewCard.Root>
+  );
+}
+MessageCitation.displayName = 'Message.Citation';
+
+export interface MessageSourcesProps extends Omit<ComponentProps<'div'>, 'children'> {
+  /** Every source the answer cites, once each, in the order they are numbered. */
+  sources: readonly MessageSourceItem[];
+  /** Whether the list is open, when the caller holds it. */
+  open?: boolean;
+  /** Whether it starts open, when the caller does not hold it. Default `false`. */
+  defaultOpen?: boolean;
+  /** Called when the toggle is pressed. */
+  onOpenChange?: (open: boolean) => void;
+}
+
+/**
+ * The answer's sources, as a row of marks and a count that opens into a
+ * numbered list. Pointing at a row lights every sentence it backs.
+ */
+function MessageSources({
+  sources,
+  open,
+  defaultOpen = false,
+  onOpenChange,
+  className,
+  ...props
+}: MessageSourcesProps) {
+  const slots = messageVariants();
+  const { setLit } = useContext(CitationContext);
+  const [inner, setInner] = useState(defaultOpen);
+  const isOpen = open ?? inner;
+  const listId = useId();
+  if (sources.length === 0) return null;
+  const toggle = () => {
+    if (open === undefined) setInner(!isOpen);
+    onOpenChange?.(!isOpen);
+  };
+  return (
+    <div data-slot="message-sources" className={slots.sources({ className })} {...props}>
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={listId}
+        onClick={toggle}
+        className={slots.sourcesToggle()}
+      >
+        <span className={slots.sourcesMarks()}>
+          {sources.slice(0, 3).map((source) => (
+            <SourceMark key={source.id} source={source} />
+          ))}
+        </span>
+        {sources.length === 1 ? '1 source' : `${sources.length} sources`}
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          {...STROKE}
+          className={slots.sourcesChevron({ className: isOpen ? 'rotate-180' : undefined })}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      <div
+        id={listId}
+        className={slots.sourcesFold({ className: isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] opacity-0' })}
+      >
+        <div className="min-h-0 overflow-hidden" inert={!isOpen}>
+          <ol className={slots.sourcesList()} onMouseLeave={() => setLit([])}>
+            {sources.map((source, index) => (
+              <li key={source.id}>
+                <a
+                  href={source.url}
+                  target={source.url ? '_blank' : undefined}
+                  rel={source.url ? 'noreferrer' : undefined}
+                  className={slots.source()}
+                  onMouseEnter={() => setLit([source.id])}
+                  onFocus={() => setLit([source.id])}
+                  onBlur={() => setLit([])}
+                >
+                  <span className={slots.sourceIndex()}>{index + 1}</span>
+                  <SourceMark source={source} />
+                  <span className={slots.sourceTitle()}>{source.title}</span>
+                  <span className={slots.sourceDomain()}>{domainOf(source)}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+}
+MessageSources.displayName = 'Message.Sources';
+
 export const Message = Object.assign(MessageRoot, {
   Group: MessageGroup,
   Avatar: MessageAvatar,
@@ -629,6 +966,9 @@ export const Message = Object.assign(MessageRoot, {
   Status: MessageStatus,
   Attachments: MessageAttachments,
   Attachment: MessageAttachment,
+  Cite: MessageCite,
+  Citation: MessageCitation,
+  Sources: MessageSources,
 });
 
 export {
@@ -645,4 +985,7 @@ export {
   MessageStatus,
   MessageAttachments,
   MessageAttachment,
+  MessageCite,
+  MessageCitation,
+  MessageSources,
 };

@@ -155,7 +155,7 @@ import { Toolbar } from "@/components/panelui/toolbar"
 </Toolbar>
 ```
 
-- **`Toolbar.Handle`** — A grip tucked into the strip's leading end that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
+- **`Toolbar.Handle`** — A darker tab behind the strip's leading end, with the strip's rounded end laid over it, that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
 - **`Toolbar.Group`** — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one. `tone="info"` fills the marker with the theme's blue instead of the primary colour.
 - **`Toolbar.Tool`** — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
 - **`Toolbar.Button`** — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip. `variant="inset"` makes it a labelled pill set into the strip, for the one action that finishes the work.
@@ -217,7 +217,7 @@ export default function ToolbarRail() {
 
 ### A review bar
 
-`shape="pill"` gives the strip fully round ends. `Toolbar.Handle` tucks a grip into its start. The group's `tone="info"` fills the chosen tool in blue.
+`shape="pill"` gives the strip fully round ends. `Toolbar.Handle` puts a darker tab with a grip behind its start, under the strip's rounded end. The group's `tone="info"` fills the chosen tool in blue.
 
 A dashed `Toolbar.Separator` sets off the last action, and `variant="inset"` makes that action a labelled pill set into the strip. Use it for the one action that finishes what the tools are for, such as copying every note.
 
@@ -227,7 +227,14 @@ A dashed `Toolbar.Separator` sets off the last action, and `variant="inset"` mak
 'use client';
 
 import { useState } from 'react';
-import { EyeIcon, EyeOffIcon, ListIcon, MessageCircleIcon, MousePointer2Icon } from 'lucide-react';
+import {
+  BubbleChatIcon,
+  Cursor01Icon,
+  LeftToRightListBulletIcon,
+  ViewIcon,
+  ViewOffIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from '@/components/panelui/toolbar';
 
 export default function ToolbarAnnotate() {
@@ -238,13 +245,13 @@ export default function ToolbarAnnotate() {
       <Toolbar.Handle />
       <Toolbar.Group defaultValue="select" tone="info" aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="comment" label="Comment" shortcut="C">
-          <MessageCircleIcon />
+          <HugeiconsIcon icon={BubbleChatIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="notes" label="All notes" shortcut="N">
-          <ListIcon />
+          <HugeiconsIcon icon={LeftToRightListBulletIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
       <Toolbar.Button
@@ -252,7 +259,7 @@ export default function ToolbarAnnotate() {
         aria-pressed={hidden}
         onClick={() => setHidden(!hidden)}
       >
-        {hidden ? <EyeOffIcon /> : <EyeIcon />}
+        {hidden ? <HugeiconsIcon icon={ViewOffIcon} /> : <HugeiconsIcon icon={ViewIcon} />}
       </Toolbar.Button>
       <Toolbar.Separator variant="dashed" />
       <Toolbar.Button
@@ -281,7 +288,8 @@ Drag the handle to move the toolbar, or focus the handle and use the arrow keys.
 'use client';
 
 import { useRef } from 'react';
-import { CircleIcon, MousePointer2Icon, PenLineIcon, SquareIcon, TypeIcon } from 'lucide-react';
+import { CircleIcon, Cursor01Icon, PencilEdit02Icon, SquareIcon, TextIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from '@/components/panelui/toolbar';
 
 export default function ToolbarDraggable() {
@@ -295,19 +303,19 @@ export default function ToolbarDraggable() {
         <Toolbar.Handle bounds={area} />
         <Toolbar.Group defaultValue="pen" aria-label="Tools">
           <Toolbar.Tool value="select" label="Select" shortcut="V">
-            <MousePointer2Icon />
+            <HugeiconsIcon icon={Cursor01Icon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="pen" label="Pen" shortcut="P">
-            <PenLineIcon />
+            <HugeiconsIcon icon={PencilEdit02Icon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="rect" label="Rectangle" shortcut="R">
-            <SquareIcon />
+            <HugeiconsIcon icon={SquareIcon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
-            <CircleIcon />
+            <HugeiconsIcon icon={CircleIcon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="text" label="Text" shortcut="T">
-            <TypeIcon />
+            <HugeiconsIcon icon={TextIcon} />
           </Toolbar.Tool>
         </Toolbar.Group>
       </Toolbar>

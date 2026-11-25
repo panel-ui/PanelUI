@@ -50,7 +50,7 @@ For a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons
 </Toolbar>
 ```
 
-- `Toolbar.Handle` — A grip tucked into the strip's leading end that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
+- `Toolbar.Handle` — A darker tab behind the strip's leading end, with the strip's rounded end laid over it, that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
 - `Toolbar.Group` — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one. `tone="info"` fills the marker with the theme's blue instead of the primary colour.
 - `Toolbar.Tool` — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
 - `Toolbar.Button` — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip. `variant="inset"` makes it a labelled pill set into the strip, for the one action that finishes the work.

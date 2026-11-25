@@ -31,8 +31,8 @@
  *
  * ## A handle to move it
  *
- * `Toolbar.Handle`, written first, is a grip tucked into the strip's leading
- * end. Dragging it moves the whole toolbar within its parent, and with focus
+ * `Toolbar.Handle`, written first, is a darker tab behind the strip's leading
+ * end, with the strip's rounded end laid over it. Dragging it moves the whole toolbar within its parent, and with focus
  * on it the arrow keys move it in steps. It is not one of the strip's stops:
  * the arrow keys move the toolbar there, not along it.
  *
@@ -106,17 +106,20 @@ const toolbarVariants = tv({
       'data-pressed:bg-transparent data-pressed:text-primary-foreground data-pressed:hover:bg-transparent',
       'group-data-[tone=info]/tools:data-pressed:text-white',
     ],
+    // A tab behind the strip's leading end: darker than the strip, peeking
+    // out to its start, with the strip's rounded end laid over it. The strip
+    // draws its surface as a layer that starts partway along the tab, so the
+    // tab can sit beneath it.
     handle: [
-      // Tucked into the strip's leading end: it runs to the strip's edge on
-      // three sides and takes its corners, a step darker than the strip.
-      '-my-(--toolbar-pad) -ms-(--toolbar-pad) me-1 flex shrink-0 cursor-grab touch-none items-center justify-center self-stretch rounded-s-[inherit] px-2.5 outline-none',
-      'bg-[color-mix(in_oklab,var(--popover),black_9%)] text-muted-foreground/70 dark:bg-[color-mix(in_oklab,var(--popover),black_28%)]',
-      'transition-colors duration-150 hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+      'absolute inset-y-0 start-0 -z-20 flex w-[calc(var(--toolbar-grip)+var(--toolbar-item)*0.5+var(--toolbar-pad))] cursor-grab touch-none items-center rounded-s-[inherit] outline-none',
+      'ps-[calc(var(--toolbar-grip)*0.5-5px)] text-muted-foreground/60 hover:text-foreground focus-visible:text-foreground',
+      'bg-[color-mix(in_oklab,var(--popover),black_7%)] shadow-[0_10px_30px_-14px_rgb(0_0_0/0.35)] ring-1 ring-foreground/[0.06]',
+      'dark:bg-[color-mix(in_oklab,var(--popover),black_40%)] dark:ring-foreground/[0.06]',
+      'transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-ring',
       'data-dragging:cursor-grabbing data-dragging:text-foreground',
-      'group-data-[orientation=vertical]/toolbar:-mx-(--toolbar-pad) group-data-[orientation=vertical]/toolbar:-mt-(--toolbar-pad) group-data-[orientation=vertical]/toolbar:mb-1 group-data-[orientation=vertical]/toolbar:ms-[calc(var(--toolbar-pad)*-1)] group-data-[orientation=vertical]/toolbar:rounded-s-none group-data-[orientation=vertical]/toolbar:rounded-t-[inherit] group-data-[orientation=vertical]/toolbar:px-0 group-data-[orientation=vertical]/toolbar:py-2.5',
     ],
     inset: [
-      'h-(--toolbar-item) w-auto rounded-full px-4 text-sm font-medium text-foreground',
+      'h-(--toolbar-item) w-auto rounded-full px-5 text-[0.9375rem] font-medium text-foreground',
       'bg-[color-mix(in_oklab,var(--popover),black_5%)] shadow-[inset_0_1px_2px_rgb(0_0_0/0.08)] ring-1 ring-foreground/[0.08]',
       'dark:bg-[color-mix(in_oklab,var(--popover),black_30%)] dark:ring-foreground/[0.1]',
       'hover:bg-[color-mix(in_oklab,var(--popover),black_9%)] dark:hover:bg-[color-mix(in_oklab,var(--popover),black_18%)]',
@@ -144,6 +147,15 @@ const toolbarVariants = tv({
         root: [
           'rounded-[calc(var(--toolbar-radius)+var(--toolbar-pad))] bg-popover p-(--toolbar-pad) text-popover-foreground',
           'shadow-[0_10px_30px_-12px_rgb(0_0_0/0.3)] ring-1 ring-foreground/[0.06] dark:ring-foreground/10',
+          // With a handle the surface moves to a layer that starts along the
+          // tab, so the tab can show beneath its rounded end.
+          'isolate [--toolbar-grip:calc(var(--toolbar-item)*0.85)]',
+          'has-[>[data-slot=toolbar-handle]]:bg-transparent has-[>[data-slot=toolbar-handle]]:shadow-none has-[>[data-slot=toolbar-handle]]:ring-0',
+          'has-[>[data-slot=toolbar-handle]]:ps-[calc(var(--toolbar-grip)+var(--toolbar-pad)*2)]',
+          "has-[>[data-slot=toolbar-handle]]:before:absolute has-[>[data-slot=toolbar-handle]]:before:inset-y-0 has-[>[data-slot=toolbar-handle]]:before:end-0 has-[>[data-slot=toolbar-handle]]:before:-z-10 has-[>[data-slot=toolbar-handle]]:before:content-['']",
+          'has-[>[data-slot=toolbar-handle]]:before:start-[var(--toolbar-grip)] has-[>[data-slot=toolbar-handle]]:before:rounded-[inherit] has-[>[data-slot=toolbar-handle]]:before:bg-popover',
+          'has-[>[data-slot=toolbar-handle]]:before:shadow-[0_10px_30px_-12px_rgb(0_0_0/0.3),0_0_0_1px_color-mix(in_oklab,var(--foreground)_7%,transparent)]',
+          'dark:has-[>[data-slot=toolbar-handle]]:before:bg-[color-mix(in_oklab,var(--popover),white_5%)]',
         ],
       },
       inline: {},

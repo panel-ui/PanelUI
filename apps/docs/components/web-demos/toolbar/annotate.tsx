@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { EyeIcon, EyeOffIcon, ListIcon, MessageCircleIcon, MousePointer2Icon } from 'lucide-react';
+import {
+  BubbleChatIcon,
+  Cursor01Icon,
+  LeftToRightListBulletIcon,
+  ViewIcon,
+  ViewOffIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from 'panelui-web/toolbar';
 
 export default function ToolbarAnnotate() {
@@ -12,13 +19,13 @@ export default function ToolbarAnnotate() {
       <Toolbar.Handle />
       <Toolbar.Group defaultValue="select" tone="info" aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="comment" label="Comment" shortcut="C">
-          <MessageCircleIcon />
+          <HugeiconsIcon icon={BubbleChatIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="notes" label="All notes" shortcut="N">
-          <ListIcon />
+          <HugeiconsIcon icon={LeftToRightListBulletIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
       <Toolbar.Button
@@ -26,7 +33,7 @@ export default function ToolbarAnnotate() {
         aria-pressed={hidden}
         onClick={() => setHidden(!hidden)}
       >
-        {hidden ? <EyeOffIcon /> : <EyeIcon />}
+        {hidden ? <HugeiconsIcon icon={ViewOffIcon} /> : <HugeiconsIcon icon={ViewIcon} />}
       </Toolbar.Button>
       <Toolbar.Separator variant="dashed" />
       <Toolbar.Button

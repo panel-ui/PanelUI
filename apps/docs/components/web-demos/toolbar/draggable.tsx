@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef } from 'react';
-import { CircleIcon, MousePointer2Icon, PenLineIcon, SquareIcon, TypeIcon } from 'lucide-react';
+import { CircleIcon, Cursor01Icon, PencilEdit02Icon, SquareIcon, TextIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from 'panelui-web/toolbar';
 
 export default function ToolbarDraggable() {
@@ -15,19 +16,19 @@ export default function ToolbarDraggable() {
         <Toolbar.Handle bounds={area} />
         <Toolbar.Group defaultValue="pen" aria-label="Tools">
           <Toolbar.Tool value="select" label="Select" shortcut="V">
-            <MousePointer2Icon />
+            <HugeiconsIcon icon={Cursor01Icon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="pen" label="Pen" shortcut="P">
-            <PenLineIcon />
+            <HugeiconsIcon icon={PencilEdit02Icon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="rect" label="Rectangle" shortcut="R">
-            <SquareIcon />
+            <HugeiconsIcon icon={SquareIcon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
-            <CircleIcon />
+            <HugeiconsIcon icon={CircleIcon} />
           </Toolbar.Tool>
           <Toolbar.Tool value="text" label="Text" shortcut="T">
-            <TypeIcon />
+            <HugeiconsIcon icon={TextIcon} />
           </Toolbar.Tool>
         </Toolbar.Group>
       </Toolbar>

@@ -6,12 +6,13 @@
   },
   "intro": "Use it for the tools of an editor: a drawing canvas, a photo editor, a video timeline. It holds two kinds of control. A `Toolbar.Tool` is a mode, such as the pen or the select tool; exactly one in its `Toolbar.Group` is on until another is chosen. A `Toolbar.Button` is an action, such as undo, that does its job and leaves nothing on.\n\nGive every tool and button a `label`. The buttons show only icons, so the label is their tooltip and what a screen reader reads.\n\nFor a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons that act on one thing together, such as a split button, use [Button Group](/docs/web/components/button-group).",
   "usage": "<Toolbar>\n  <Toolbar.Group defaultValue=\"select\" aria-label=\"Tools\">\n    <Toolbar.Tool value=\"select\" label=\"Select\" shortcut=\"V\">\n      <MousePointer2Icon />\n    </Toolbar.Tool>\n    <Toolbar.Tool value=\"pen\" label=\"Pen\" shortcut=\"P\">\n      <PenToolIcon />\n    </Toolbar.Tool>\n  </Toolbar.Group>\n  <Toolbar.Separator />\n  <Toolbar.Button label=\"Undo\" shortcut=\"⌘Z\" onClick={undo}>\n    <Undo2Icon />\n  </Toolbar.Button>\n</Toolbar>",
-  "anatomy": "<Toolbar>\n  <Toolbar.Group>\n    <Toolbar.Tool>\n      <Toolbar.Caret />\n    </Toolbar.Tool>\n  </Toolbar.Group>\n  <Toolbar.Separator />\n  <Toolbar.Button />\n</Toolbar>",
+  "anatomy": "<Toolbar>\n  <Toolbar.Handle />\n  <Toolbar.Group>\n    <Toolbar.Tool>\n      <Toolbar.Caret />\n    </Toolbar.Tool>\n  </Toolbar.Group>\n  <Toolbar.Separator />\n  <Toolbar.Button />\n</Toolbar>",
   "parts": {
-    "Group": "Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one.",
+    "Handle": "A grip tucked into the strip's leading end that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.",
+    "Group": "Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one. `tone=\"info\"` fills the marker with the theme's blue instead of the primary colour.",
     "Tool": "One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.",
-    "Button": "An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.",
-    "Separator": "A short line between sets of controls that belong apart, such as the tools and the history buttons.",
+    "Button": "An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip. `variant=\"inset\"` makes it a labelled pill set into the strip, for the one action that finishes the work.",
+    "Separator": "A short line between sets of controls that belong apart, such as the tools and the history buttons. `variant=\"dashed\"` is a lighter break.",
     "Caret": "A small chevron saying a button opens more choices. Beside an icon it marks that button; alone in a `Toolbar.Button`, it makes that button a slim chevron against the tool before it, muted until it is hovered or its menu is open."
   },
   "examples": [
@@ -20,6 +21,18 @@
       "description": "`orientation=\"vertical\"` stands the strip up beside a canvas. The marker moves up and down, the arrow keys follow the column, and tooltips open to the side.",
       "demo": "rail",
       "height": 380
+    },
+    {
+      "title": "A review bar",
+      "description": "`shape=\"pill\"` gives the strip fully round ends. `Toolbar.Handle` tucks a grip into its start. The group's `tone=\"info\"` fills the chosen tool in blue.\n\nA dashed `Toolbar.Separator` sets off the last action, and `variant=\"inset\"` makes that action a labelled pill set into the strip. Use it for the one action that finishes what the tools are for, such as copying every note.",
+      "demo": "annotate",
+      "height": 180
+    },
+    {
+      "title": "Moving it",
+      "description": "Drag the handle to move the toolbar, or focus the handle and use the arrow keys. `bounds` keeps the whole toolbar inside an element; without it, the toolbar stays inside its offset parent. `onMove` reports the offset after each move, so a position can be saved.",
+      "demo": "draggable",
+      "height": 340
     },
     {
       "title": "A tool with options",
@@ -46,5 +59,5 @@
       "height": 260
     }
   ],
-  "notes": "### Keyboard\n\nThe strip is one stop in the tab order. The arrow keys move along it, Home and End go to its ends, and Space or Enter chooses a tool or presses a button.\n\nA `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on. One written with a modifier, such as `⌘Z`, is only shown in the tooltip; handle that key yourself, because the page may already use it.\n\n### Floating or inline\n\n`floating`, the default, draws the strip on a raised surface of its own, for a strip laid over a canvas. `inline` draws the buttons only, for a strip inside a header or a panel that already has a surface.\n\nWith reduced motion turned on, the marker moves to the chosen tool without gliding."
+  "notes": "### Keyboard\n\nThe strip is one stop in the tab order. The arrow keys move along it, Home and End go to its ends, and Space or Enter chooses a tool or presses a button.\n\nA `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on. One written with a modifier, such as `⌘Z`, is only shown in the tooltip; handle that key yourself, because the page may already use it.\n\n### Floating or inline\n\n`floating`, the default, draws the strip on a raised surface of its own, for a strip laid over a canvas. `inline` draws the buttons only, for a strip inside a header or a panel that already has a surface.\n\nWith reduced motion turned on, the marker moves to the chosen tool without gliding.\n\n### Moving the toolbar\n\nThe handle moves the toolbar with the CSS `translate` property, measured from where the page laid it out, so the toolbar keeps its place in the document and in the tab order. The handle is not one of the strip's arrow-key stops. With focus on it, the arrow keys move the toolbar instead."
 }

@@ -29,6 +29,13 @@
  * zoom, and leaves nothing behind. Keeping the two apart is what lets the
  * strip say at a glance which mode the editor is in.
  *
+ * ## A handle to move it
+ *
+ * `Toolbar.Handle`, written first, is a grip tucked into the strip's leading
+ * end. Dragging it moves the whole toolbar within its parent, and with focus
+ * on it the arrow keys move it in steps. It is not one of the strip's stops:
+ * the arrow keys move the toolbar there, not along it.
+ *
  * ## The keyboard
  *
  * Arrow keys move along the strip and Home and End jump to its ends. Give a
@@ -72,7 +79,7 @@ const toolbarVariants = tv({
       'data-[orientation=vertical]:flex-col',
       'data-disabled:pointer-events-none data-disabled:opacity-50',
     ],
-    group: 'relative isolate flex items-center gap-0.5 group-data-[orientation=vertical]/toolbar:flex-col',
+    group: 'group/tools relative isolate flex items-center gap-0.5 group-data-[orientation=vertical]/toolbar:flex-col',
     marker: [
       'pointer-events-none absolute -z-10 rounded-(--toolbar-radius) bg-primary opacity-0 data-ready:opacity-100',
       'shadow-[0_1px_2px_rgb(0_0_0/0.18),inset_0_1px_0_rgb(255_255_255/0.18)]',
@@ -95,7 +102,25 @@ const toolbarVariants = tv({
       'has-[>[data-slot=toolbar-caret]:only-child]:data-popup-open:bg-transparent',
     ],
     // A chosen tool sits on the marker; the hover fill would hide it.
-    tool: 'data-pressed:bg-transparent data-pressed:text-primary-foreground data-pressed:hover:bg-transparent',
+    tool: [
+      'data-pressed:bg-transparent data-pressed:text-primary-foreground data-pressed:hover:bg-transparent',
+      'group-data-[tone=info]/tools:data-pressed:text-white',
+    ],
+    handle: [
+      // Tucked into the strip's leading end: it runs to the strip's edge on
+      // three sides and takes its corners, a step darker than the strip.
+      '-my-(--toolbar-pad) -ms-(--toolbar-pad) me-1 flex shrink-0 cursor-grab touch-none items-center justify-center self-stretch rounded-s-[inherit] px-2.5 outline-none',
+      'bg-[color-mix(in_oklab,var(--popover),black_9%)] text-muted-foreground/70 dark:bg-[color-mix(in_oklab,var(--popover),black_28%)]',
+      'transition-colors duration-150 hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+      'data-dragging:cursor-grabbing data-dragging:text-foreground',
+      'group-data-[orientation=vertical]/toolbar:-mx-(--toolbar-pad) group-data-[orientation=vertical]/toolbar:-mt-(--toolbar-pad) group-data-[orientation=vertical]/toolbar:mb-1 group-data-[orientation=vertical]/toolbar:ms-[calc(var(--toolbar-pad)*-1)] group-data-[orientation=vertical]/toolbar:rounded-s-none group-data-[orientation=vertical]/toolbar:rounded-t-[inherit] group-data-[orientation=vertical]/toolbar:px-0 group-data-[orientation=vertical]/toolbar:py-2.5',
+    ],
+    inset: [
+      'h-(--toolbar-item) w-auto rounded-full px-4 text-sm font-medium text-foreground',
+      'bg-[color-mix(in_oklab,var(--popover),black_5%)] shadow-[inset_0_1px_2px_rgb(0_0_0/0.08)] ring-1 ring-foreground/[0.08]',
+      'dark:bg-[color-mix(in_oklab,var(--popover),black_30%)] dark:ring-foreground/[0.1]',
+      'hover:bg-[color-mix(in_oklab,var(--popover),black_9%)] dark:hover:bg-[color-mix(in_oklab,var(--popover),black_18%)]',
+    ],
     separator: [
       'mx-1 h-[calc(var(--toolbar-item)*0.5)] w-px shrink-0 rounded-full bg-foreground/15',
       'data-[orientation=horizontal]:mx-0 data-[orientation=horizontal]:my-1 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-[calc(var(--toolbar-item)*0.5)]',
@@ -123,6 +148,11 @@ const toolbarVariants = tv({
       },
       inline: {},
     },
+    shape: {
+      rounded: {},
+      /** Fully round ends, for a strip that floats over a canvas. */
+      pill: { root: 'rounded-full' },
+    },
     size: {
       sm: {
         root: '[--toolbar-item:1.75rem] [--toolbar-icon:0.875rem] [--toolbar-radius:0.5rem] [--toolbar-pad:0.25rem]',
@@ -135,7 +165,7 @@ const toolbarVariants = tv({
       },
     },
   },
-  defaultVariants: { variant: 'floating', size: 'md' },
+  defaultVariants: { variant: 'floating', size: 'md', shape: 'rounded' },
 });
 
 type Orientation = 'horizontal' | 'vertical';
@@ -181,6 +211,8 @@ export interface ToolbarProps extends Omit<BaseToolbar.Root.Props, 'className' |
   shortcuts?: boolean;
   /** Which side of a button its tooltip opens on. Default below a row and beside a column. */
   tooltipSide?: 'top' | 'bottom' | 'left' | 'right';
+  /** `pill` gives a floating strip fully round ends. Default `rounded`. */
+  shape?: 'rounded' | 'pill';
   className?: string;
   style?: CSSProperties;
 }
@@ -193,12 +225,13 @@ function ToolbarRoot({
   size,
   shortcuts = false,
   tooltipSide,
+  shape,
   orientation = 'horizontal',
   className,
   children,
   ...props
 }: ToolbarProps) {
-  const slots = toolbarVariants({ variant, size });
+  const slots = toolbarVariants({ variant, size, shape });
   const bindings = useRef(new Map<string, () => void>());
 
   useEffect(() => {
@@ -261,6 +294,8 @@ export interface ToolbarGroupProps extends Omit<ComponentProps<'div'>, 'defaultV
   onValueChange?: (value: string) => void;
   /** Turns every tool in the group off. */
   disabled?: boolean;
+  /** The marker's fill: `primary`, or `info` for the theme's blue. Default `primary`. */
+  tone?: 'primary' | 'info';
 }
 
 /**
@@ -272,6 +307,7 @@ function ToolbarGroup({
   defaultValue,
   onValueChange,
   disabled,
+  tone = 'primary',
   className,
   children,
   ...props
@@ -327,10 +363,16 @@ function ToolbarGroup({
         }}
         orientation={orientation}
         disabled={disabled}
+        data-tone={tone}
         className={slots.group({ className })}
         {...props}
       >
-        <span ref={marker} aria-hidden data-slot="toolbar-marker" className={slots.marker()} />
+        <span
+          ref={marker}
+          aria-hidden
+          data-slot="toolbar-marker"
+          className={slots.marker({ className: tone === 'info' ? 'bg-info' : undefined })}
+        />
         {children}
       </ToggleGroup>
     </GroupContext.Provider>
@@ -420,12 +462,26 @@ export interface ToolbarButtonProps extends Omit<ComponentProps<'button'>, 'chil
    * opens from the strip and keeps its place in the arrow-key order.
    */
   render?: ReactElement;
-  /** Usually an icon. */
+  /**
+   * `default` is an icon on the strip. `inset` is a labelled pill set into
+   * the strip, for the one action that finishes what the tools were for:
+   * "Copy all", "Export". Default `default`.
+   */
+  variant?: 'default' | 'inset';
+  /** Usually an icon, or a word for `inset`. */
   children?: ReactNode;
 }
 
 /** An action on the strip: undo, zoom, export. It does not stay on. */
-function ToolbarButton({ label, shortcut, render, className, children, ...props }: ToolbarButtonProps) {
+function ToolbarButton({
+  label,
+  shortcut,
+  render,
+  variant = 'default',
+  className,
+  children,
+  ...props
+}: ToolbarButtonProps) {
   const slots = toolbarVariants();
   const self = useRef<HTMLButtonElement>(null);
   useShortcut(props.disabled ? undefined : shortcut, () => self.current?.click());
@@ -437,9 +493,10 @@ function ToolbarButton({ label, shortcut, render, className, children, ...props 
         <BaseToolbar.Button
           ref={self}
           data-slot="toolbar-button"
-          aria-label={label}
+          data-variant={variant}
+          aria-label={variant === 'inset' ? undefined : label}
           render={render}
-          className={slots.item({ className })}
+          className={slots.item({ className: [variant === 'inset' && slots.inset(), className] })}
           {...props}
         >
           {children}
@@ -451,15 +508,133 @@ function ToolbarButton({ label, shortcut, render, className, children, ...props 
 ToolbarButton.displayName = 'Toolbar.Button';
 
 export interface ToolbarSeparatorProps extends Omit<BaseToolbar.Separator.Props, 'className'> {
+  /** `dashed` for a lighter break, such as between the tools and the action that ends the strip. Default `solid`. */
+  variant?: 'solid' | 'dashed';
   className?: string;
 }
 
 /** A short line between groups of tools that belong apart. */
-function ToolbarSeparator({ className, ...props }: ToolbarSeparatorProps) {
+function ToolbarSeparator({ variant = 'solid', className, ...props }: ToolbarSeparatorProps) {
   const slots = toolbarVariants();
-  return <BaseToolbar.Separator data-slot="toolbar-separator" className={slots.separator({ className })} {...props} />;
+  return (
+    <BaseToolbar.Separator
+      data-slot="toolbar-separator"
+      data-variant={variant}
+      className={slots.separator({
+        className: [
+          variant === 'dashed' &&
+            'mx-1.5 h-[calc(var(--toolbar-item)*0.75)] rounded-none bg-transparent bg-[repeating-linear-gradient(to_bottom,var(--foreground)_0_3px,transparent_3px_6px)] opacity-20 data-[orientation=horizontal]:bg-[repeating-linear-gradient(to_right,var(--foreground)_0_3px,transparent_3px_6px)]',
+          className,
+        ],
+      })}
+      {...props}
+    />
+  );
 }
 ToolbarSeparator.displayName = 'Toolbar.Separator';
+
+export interface ToolbarHandleProps extends Omit<ComponentProps<'button'>, 'children'> {
+  /** What a screen reader calls it. Default "Move toolbar". */
+  label?: string;
+  /**
+   * The element the toolbar may be moved within. Default its offset parent.
+   * The toolbar is kept wholly inside it.
+   */
+  bounds?: HTMLElement | null | { current: HTMLElement | null };
+  /** Called with the toolbar's offset from where it was laid out, after each move. */
+  onMove?: (offset: { x: number; y: number }) => void;
+  /** Your own grip. Default six dots. */
+  children?: ReactNode;
+}
+
+/**
+ * A grip at the strip's leading end that moves the whole toolbar: drag it,
+ * or focus it and use the arrow keys (Shift for bigger steps).
+ */
+function ToolbarHandle({ label = 'Move toolbar', bounds, onMove, className, children, ...props }: ToolbarHandleProps) {
+  const slots = toolbarVariants();
+  const self = useRef<HTMLButtonElement>(null);
+  const offset = useRef({ x: 0, y: 0 });
+  const drag = useRef<{ x: number; y: number; from: { x: number; y: number } } | null>(null);
+  const [dragging, setDragging] = useState(false);
+
+  const place = (next: { x: number; y: number }) => {
+    const bar = self.current?.closest<HTMLElement>('[data-slot=toolbar]');
+    if (!bar) return;
+    const area = (bounds && 'current' in bounds ? bounds.current : bounds) ?? (bar.offsetParent as HTMLElement | null);
+    let { x, y } = next;
+    if (area) {
+      // Measured without the current offset, so the limits stay where they are.
+      const box = bar.getBoundingClientRect();
+      const left = box.left - offset.current.x;
+      const top = box.top - offset.current.y;
+      const room = area.getBoundingClientRect();
+      x = Math.min(room.right - box.width - left, Math.max(room.left - left, x));
+      y = Math.min(room.bottom - box.height - top, Math.max(room.top - top, y));
+    }
+    offset.current = { x, y };
+    bar.style.translate = `${x}px ${y}px`;
+    onMove?.({ x, y });
+  };
+
+  return (
+    <button
+      ref={self}
+      type="button"
+      data-slot="toolbar-handle"
+      data-dragging={dragging ? '' : undefined}
+      aria-label={label}
+      aria-roledescription="drag handle"
+      className={slots.handle({ className })}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        drag.current = { x: event.clientX, y: event.clientY, from: offset.current };
+        setDragging(true);
+      }}
+      onPointerMove={(event) => {
+        const start = drag.current;
+        if (!start) return;
+        place({ x: start.from.x + event.clientX - start.x, y: start.from.y + event.clientY - start.y });
+      }}
+      onPointerUp={() => {
+        drag.current = null;
+        setDragging(false);
+      }}
+      onPointerCancel={() => {
+        drag.current = null;
+        setDragging(false);
+      }}
+      onKeyDown={(event) => {
+        const step = event.shiftKey ? 40 : 10;
+        const move = {
+          ArrowLeft: [-step, 0],
+          ArrowRight: [step, 0],
+          ArrowUp: [0, -step],
+          ArrowDown: [0, step],
+        }[event.key];
+        if (!move) return;
+        // The strip's own arrow-key navigation does not run from here.
+        event.preventDefault();
+        event.stopPropagation();
+        place({ x: offset.current.x + move[0]!, y: offset.current.y + move[1]! });
+      }}
+      {...props}
+    >
+      {children ?? (
+        <svg viewBox="0 0 10 16" width="10" height="16" fill="currentColor" aria-hidden="true">
+          <circle cx="2.5" cy="3" r="1.4" />
+          <circle cx="7.5" cy="3" r="1.4" />
+          <circle cx="2.5" cy="8" r="1.4" />
+          <circle cx="7.5" cy="8" r="1.4" />
+          <circle cx="2.5" cy="13" r="1.4" />
+          <circle cx="7.5" cy="13" r="1.4" />
+        </svg>
+      )}
+    </button>
+  );
+}
+ToolbarHandle.displayName = 'Toolbar.Handle';
 
 export interface ToolbarCaretProps extends ComponentProps<'span'> {}
 
@@ -503,6 +678,7 @@ export const Toolbar = Object.assign(ToolbarRoot, {
   Button: ToolbarButton,
   Separator: ToolbarSeparator,
   Caret: ToolbarCaret,
+  Handle: ToolbarHandle,
 });
 
-export { ToolbarGroup, ToolbarTool, ToolbarButton, ToolbarSeparator, ToolbarCaret, toolbarVariants };
+export { ToolbarGroup, ToolbarTool, ToolbarButton, ToolbarSeparator, ToolbarCaret, ToolbarHandle, toolbarVariants };

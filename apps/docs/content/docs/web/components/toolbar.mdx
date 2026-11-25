@@ -144,6 +144,7 @@ import { Toolbar } from "@/components/panelui/toolbar"
 
 ```tsx
 <Toolbar>
+  <Toolbar.Handle />
   <Toolbar.Group>
     <Toolbar.Tool>
       <Toolbar.Caret />
@@ -154,10 +155,11 @@ import { Toolbar } from "@/components/panelui/toolbar"
 </Toolbar>
 ```
 
-- **`Toolbar.Group`** — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one.
+- **`Toolbar.Handle`** — A grip tucked into the strip's leading end that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
+- **`Toolbar.Group`** — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one. `tone="info"` fills the marker with the theme's blue instead of the primary colour.
 - **`Toolbar.Tool`** — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
-- **`Toolbar.Button`** — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.
-- **`Toolbar.Separator`** — A short line between sets of controls that belong apart, such as the tools and the history buttons.
+- **`Toolbar.Button`** — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip. `variant="inset"` makes it a labelled pill set into the strip, for the one action that finishes the work.
+- **`Toolbar.Separator`** — A short line between sets of controls that belong apart, such as the tools and the history buttons. `variant="dashed"` is a lighter break.
 - **`Toolbar.Caret`** — A small chevron saying a button opens more choices. Beside an icon it marks that button; alone in a `Toolbar.Button`, it makes that button a slim chevron against the tool before it, muted until it is hovered or its menu is open.
 
 ## Examples
@@ -206,6 +208,109 @@ export default function ToolbarRail() {
         <span className="block text-foreground">{current?.label}</span>
         tool chosen
       </p>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A review bar
+
+`shape="pill"` gives the strip fully round ends. `Toolbar.Handle` tucks a grip into its start. The group's `tone="info"` fills the chosen tool in blue.
+
+A dashed `Toolbar.Separator` sets off the last action, and `variant="inset"` makes that action a labelled pill set into the strip. Use it for the one action that finishes what the tools are for, such as copying every note.
+
+<ComponentPreview name="toolbar/annotate" height={180}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { EyeIcon, EyeOffIcon, ListIcon, MessageCircleIcon, MousePointer2Icon } from 'lucide-react';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+export default function ToolbarAnnotate() {
+  const [hidden, setHidden] = useState(false);
+  const [copied, setCopied] = useState(false);
+  return (
+    <Toolbar shape="pill" size="lg" aria-label="Review">
+      <Toolbar.Handle />
+      <Toolbar.Group defaultValue="select" tone="info" aria-label="Tools">
+        <Toolbar.Tool value="select" label="Select" shortcut="V">
+          <MousePointer2Icon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="comment" label="Comment" shortcut="C">
+          <MessageCircleIcon />
+        </Toolbar.Tool>
+        <Toolbar.Tool value="notes" label="All notes" shortcut="N">
+          <ListIcon />
+        </Toolbar.Tool>
+      </Toolbar.Group>
+      <Toolbar.Button
+        label={hidden ? 'Show notes' : 'Hide notes'}
+        aria-pressed={hidden}
+        onClick={() => setHidden(!hidden)}
+      >
+        {hidden ? <EyeOffIcon /> : <EyeIcon />}
+      </Toolbar.Button>
+      <Toolbar.Separator variant="dashed" />
+      <Toolbar.Button
+        variant="inset"
+        onClick={() => {
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 1400);
+        }}
+      >
+        {copied ? 'Copied' : 'Copy all'}
+      </Toolbar.Button>
+    </Toolbar>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Moving it
+
+Drag the handle to move the toolbar, or focus the handle and use the arrow keys. `bounds` keeps the whole toolbar inside an element; without it, the toolbar stays inside its offset parent. `onMove` reports the offset after each move, so a position can be saved.
+
+<ComponentPreview name="toolbar/draggable" height={340}>
+
+```tsx lineNumbers
+'use client';
+
+import { useRef } from 'react';
+import { CircleIcon, MousePointer2Icon, PenLineIcon, SquareIcon, TypeIcon } from 'lucide-react';
+import { Toolbar } from '@/components/panelui/toolbar';
+
+export default function ToolbarDraggable() {
+  const area = useRef<HTMLDivElement>(null);
+  return (
+    <div
+      ref={area}
+      className="relative flex h-72 w-full max-w-2xl items-start justify-center rounded-2xl border border-dashed p-4"
+    >
+      <Toolbar aria-label="Drawing tools">
+        <Toolbar.Handle bounds={area} />
+        <Toolbar.Group defaultValue="pen" aria-label="Tools">
+          <Toolbar.Tool value="select" label="Select" shortcut="V">
+            <MousePointer2Icon />
+          </Toolbar.Tool>
+          <Toolbar.Tool value="pen" label="Pen" shortcut="P">
+            <PenLineIcon />
+          </Toolbar.Tool>
+          <Toolbar.Tool value="rect" label="Rectangle" shortcut="R">
+            <SquareIcon />
+          </Toolbar.Tool>
+          <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="O">
+            <CircleIcon />
+          </Toolbar.Tool>
+          <Toolbar.Tool value="text" label="Text" shortcut="T">
+            <TypeIcon />
+          </Toolbar.Tool>
+        </Toolbar.Group>
+      </Toolbar>
     </div>
   );
 }
@@ -455,6 +560,7 @@ export default function ToolbarSizes() {
 | `size` | `ToolbarSize` | `md` | The size of every button in it. Default `md`. |
 | `shortcuts` | `boolean` | `false` | Answer single-key shortcuts anywhere on the page: a key in a tool's or button's `shortcut` chooses that tool or presses that button. Keys typed into a field are left alone. Off by default; turn it on for the one toolbar that owns the page. |
 | `tooltipSide` | `'top' \| 'bottom' \| 'left' \| 'right'` | — | Which side of a button its tooltip opens on. Default below a row and beside a column. |
+| `shape` | `'rounded' \| 'pill'` | `rounded` | `pill` gives a floating strip fully round ends. Default `rounded`. |
 | `className` | `string` | — |  |
 | `style` | `CSSProperties` | — |  |
 
@@ -466,6 +572,7 @@ export default function ToolbarSizes() {
 | `defaultValue` | `string` | — | The tool chosen at first, when the caller does not hold it. |
 | `onValueChange` | `(value: string) => void` | — | Called with the `value` of the tool that was chosen. |
 | `disabled` | `boolean` | — | Turns every tool in the group off. |
+| `tone` | `'primary' \| 'info'` | `'primary'` | The marker's fill: `primary`, or `info` for the theme's blue. Default `primary`. |
 
 ### Toolbar.Tool
 
@@ -482,12 +589,22 @@ export default function ToolbarSizes() {
 | `label` | `string` | — | What it does: its tooltip, and what a screen reader reads. |
 | `shortcut` | `string` | — | The key or keys that press it, shown in the tooltip, such as `⌘Z`. A single key is also answered. |
 | `render` | `ReactElement` | — | Another trigger to be the button, such as a `Menu.Trigger`, so a menu opens from the strip and keeps its place in the arrow-key order. |
+| `variant` | `'default' \| 'inset'` | `'default'` | `default` is an icon on the strip. `inset` is a labelled pill set into the strip, for the one action that finishes what the tools were for: "Copy all", "Export". Default `default`. |
 
 ### Toolbar.Separator
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
+| `variant` | `'solid' \| 'dashed'` | `floating` | `dashed` for a lighter break, such as between the tools and the action that ends the strip. Default `solid`. |
 | `className` | `string` | — |  |
+
+### Toolbar.Handle
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | What a screen reader calls it. Default "Move toolbar". |
+| `bounds` | `HTMLElement \| null \| { current: HTMLElement \| null }` | — | The element the toolbar may be moved within. Default its offset parent. The toolbar is kept wholly inside it. |
+| `onMove` | `(offset: { x: number; y: number }) => void` | — | Called with the toolbar's offset from where it was laid out, after each move. |
 
 ### Toolbar.Caret
 
@@ -513,10 +630,14 @@ A `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on
 
 With reduced motion turned on, the marker moves to the chosen tool without gliding.
 
+### Moving the toolbar
+
+The handle moves the toolbar with the CSS `translate` property, measured from where the page laid it out, so the toolbar keeps its place in the document and in the tab order. The handle is not one of the strip's arrow-key stops. With focus on it, the arrow keys move the toolbar instead.
+
 ### Server Components
 
 `Toolbar` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Toolbar.Group` off the import, so each part is also exported by name: `ToolbarGroup` is `Toolbar.Group`, and so on for the others.
 
 ```tsx
-import { Toolbar, ToolbarGroup, ToolbarTool, ToolbarButton, ToolbarSeparator, ToolbarCaret } from "@/components/panelui/toolbar"
+import { Toolbar, ToolbarGroup, ToolbarTool, ToolbarButton, ToolbarSeparator, ToolbarCaret, ToolbarHandle } from "@/components/panelui/toolbar"
 ```

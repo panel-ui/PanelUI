@@ -39,6 +39,7 @@ For a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons
 
 ```tsx
 <Toolbar>
+  <Toolbar.Handle />
   <Toolbar.Group>
     <Toolbar.Tool>
       <Toolbar.Caret />
@@ -49,10 +50,11 @@ For a few views of one panel, use [Tabs](/docs/web/components/tabs). For buttons
 </Toolbar>
 ```
 
-- `Toolbar.Group` — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one.
+- `Toolbar.Handle` — A grip tucked into the strip's leading end that moves the whole toolbar. Drag it, or focus it and use the arrow keys, with Shift for bigger steps. `bounds` keeps the toolbar inside an element.
+- `Toolbar.Group` — Tools of which exactly one is on. `value` and `onValueChange`, or `defaultValue`, hold which one, by its `value`. Choosing the tool that is already on leaves it on. A filled marker in the primary colour sits under the chosen tool and glides to the next one. `tone="info"` fills the marker with the theme's blue instead of the primary colour.
 - `Toolbar.Tool` — One tool in a group. `label` is its tooltip and its name for a screen reader, and `shortcut` shows its key in the tooltip.
-- `Toolbar.Button` — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip.
-- `Toolbar.Separator` — A short line between sets of controls that belong apart, such as the tools and the history buttons.
+- `Toolbar.Button` — An action: undo, zoom, export. `label` and `shortcut` work as on a tool. `render` makes another trigger the button, such as a `Menu.Trigger`, so a menu opens from the strip. `variant="inset"` makes it a labelled pill set into the strip, for the one action that finishes the work.
+- `Toolbar.Separator` — A short line between sets of controls that belong apart, such as the tools and the history buttons. `variant="dashed"` is a lighter break.
 - `Toolbar.Caret` — A small chevron saying a button opens more choices. Beside an icon it marks that button; alone in a `Toolbar.Button`, it makes that button a slim chevron against the tool before it, muted until it is hovered or its menu is open.
 
 ## Props
@@ -67,6 +69,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `size` | `ToolbarSize` | `md` | The size of every button in it. Default `md`. |
 | `shortcuts` | `boolean` | `false` | Answer single-key shortcuts anywhere on the page: a key in a tool's or button's `shortcut` chooses that tool or presses that button. Keys typed into a field are left alone. Off by default; turn it on for the one toolbar that owns the page. |
 | `tooltipSide` | `'top' \| 'bottom' \| 'left' \| 'right'` | — | Which side of a button its tooltip opens on. Default below a row and beside a column. |
+| `shape` | `'rounded' \| 'pill'` | `rounded` | `pill` gives a floating strip fully round ends. Default `rounded`. |
 | `className` | `string` | — | — |
 | `style` | `CSSProperties` | — | — |
 
@@ -78,6 +81,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `defaultValue` | `string` | — | The tool chosen at first, when the caller does not hold it. |
 | `onValueChange` | `(value: string) => void` | — | Called with the `value` of the tool that was chosen. |
 | `disabled` | `boolean` | — | Turns every tool in the group off. |
+| `tone` | `'primary' \| 'info'` | `'primary'` | The marker's fill: `primary`, or `info` for the theme's blue. Default `primary`. |
 
 #### `ToolbarToolProps`
 
@@ -94,12 +98,22 @@ Every part also takes the props of the element it renders, and a `className`.
 | `label` | `string` | — | What it does: its tooltip, and what a screen reader reads. |
 | `shortcut` | `string` | — | The key or keys that press it, shown in the tooltip, such as `⌘Z`. A single key is also answered. |
 | `render` | `ReactElement` | — | Another trigger to be the button, such as a `Menu.Trigger`, so a menu opens from the strip and keeps its place in the arrow-key order. |
+| `variant` | `'default' \| 'inset'` | `'default'` | `default` is an icon on the strip. `inset` is a labelled pill set into the strip, for the one action that finishes what the tools were for: "Copy all", "Export". Default `default`. |
 
 #### `ToolbarSeparatorProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
+| `variant` | `'solid' \| 'dashed'` | `floating` | `dashed` for a lighter break, such as between the tools and the action that ends the strip. Default `solid`. |
 | `className` | `string` | — | — |
+
+#### `ToolbarHandleProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `label` | `string` | — | What a screen reader calls it. Default "Move toolbar". |
+| `bounds` | `HTMLElement \| null \| { current: HTMLElement \| null }` | — | The element the toolbar may be moved within. Default its offset parent. The toolbar is kept wholly inside it. |
+| `onMove` | `(offset: { x: number; y: number }) => void` | — | Called with the toolbar's offset from where it was laid out, after each move. |
 
 #### `ToolbarCaretProps`
 
@@ -111,7 +125,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 ## In a Server Component
 
-`Toolbar` is a client component. A Server Component cannot read `Toolbar.Group` off the import, so import each part by name: `ToolbarGroup`, `ToolbarTool`, `ToolbarButton`, `ToolbarSeparator`, `ToolbarCaret`.
+`Toolbar` is a client component. A Server Component cannot read `Toolbar.Group` off the import, so import each part by name: `ToolbarGroup`, `ToolbarTool`, `ToolbarButton`, `ToolbarSeparator`, `ToolbarCaret`, `ToolbarHandle`.
 
 ## Notes
 
@@ -126,6 +140,10 @@ A `shortcut` written as one key, such as `V`, is answered when `shortcuts` is on
 `floating`, the default, draws the strip on a raised surface of its own, for a strip laid over a canvas. `inline` draws the buttons only, for a strip inside a header or a panel that already has a surface.
 
 With reduced motion turned on, the marker moves to the chosen tool without gliding.
+
+#### Moving the toolbar
+
+The handle moves the toolbar with the CSS `translate` property, measured from where the page laid it out, so the toolbar keeps its place in the document and in the tab order. The handle is not one of the strip's arrow-key stops. With focus on it, the arrow keys move the toolbar instead.
 
 ## Example
 

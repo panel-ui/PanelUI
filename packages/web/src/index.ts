@@ -722,6 +722,7 @@ export {
   ToolbarButton,
   ToolbarSeparator,
   ToolbarCaret,
+  ToolbarHandle,
   toolbarVariants,
   type ToolbarProps,
   type ToolbarVariant,
@@ -731,6 +732,7 @@ export {
   type ToolbarButtonProps,
   type ToolbarSeparatorProps,
   type ToolbarCaretProps,
+  type ToolbarHandleProps,
 } from './components/toolbar';
 export {
   XYPad,

@@ -1,6 +1,14 @@
 'use client';
 
-import { BookTextIcon, BotIcon, CodeIcon, GitCompareArrowsIcon, RocketIcon, SearchIcon } from 'lucide-react';
+import {
+  BookOpen01Icon,
+  BotIcon,
+  GitCompareIcon,
+  Rocket01Icon,
+  Search01Icon,
+  SourceCodeIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Prompt, type PromptTaskStatus } from 'panelui-web/prompt';
 import { useEffect, useState } from 'react';
 
@@ -25,14 +33,14 @@ interface Task {
 const TASKS: Task[] = [
   {
     label: 'Read the webhook handlers',
-    icon: <SearchIcon />,
+    icon: <HugeiconsIcon icon={Search01Icon} />,
     state: 'Reading',
     ticks: 2,
     steps: [{ text: 'Found 4 handlers', meta: 'webhooks/*.ts' }],
   },
   {
     label: 'Map events to the new API',
-    icon: <GitCompareArrowsIcon />,
+    icon: <HugeiconsIcon icon={GitCompareIcon} />,
     state: 'Mapping',
     ticks: 3,
     steps: [
@@ -42,7 +50,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Rewrite the handlers',
-    icon: <CodeIcon />,
+    icon: <HugeiconsIcon icon={SourceCodeIcon} />,
     state: 'Editing',
     ticks: 5,
     steps: [
@@ -54,7 +62,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Update the runbook',
-    icon: <BookTextIcon />,
+    icon: <HugeiconsIcon icon={BookOpen01Icon} />,
     state: 'Writing',
     ticks: 3,
     steps: [
@@ -64,7 +72,7 @@ const TASKS: Task[] = [
   },
   {
     label: 'Deploy to staging',
-    icon: <RocketIcon />,
+    icon: <HugeiconsIcon icon={Rocket01Icon} />,
     state: 'Deploying',
     ticks: 2,
     steps: [{ text: 'Build 7f3c is live on staging', meta: '41s' }],
@@ -80,6 +88,8 @@ export default function PromptTimeline() {
   const [running, setRunning] = useState(true);
   const [approved, setApproved] = useState(false);
   const [declined, setDeclined] = useState(false);
+  // Seconds the current task has been running, shown beside its live word.
+  const [elapsed, setElapsed] = useState(0);
 
   const task = TASKS[current];
   const waiting = task?.approval !== undefined && !approved && !declined;
@@ -89,13 +99,20 @@ export default function PromptTimeline() {
     if (!running || finished || waiting || declined) return;
     const timer = window.setTimeout(() => {
       if (tick + 1 >= task!.ticks) {
-        setTook((list) => [...list, task!.ticks * 6 + current * 3]);
+        setTook((list) => [...list, task!.ticks + 1 + current * 2]);
         setCurrent((index) => index + 1);
         setTick(0);
       } else setTick((count) => count + 1);
     }, 1100);
     return () => window.clearTimeout(timer);
   }, [running, finished, waiting, declined, tick, task, current]);
+
+  useEffect(() => setElapsed(0), [current]);
+  useEffect(() => {
+    if (!running || finished || waiting || declined) return;
+    const timer = window.setInterval(() => setElapsed((value) => value + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [running, finished, waiting, declined]);
 
   const restart = () => {
     setCurrent(0);
@@ -142,7 +159,7 @@ export default function PromptTimeline() {
           title={title}
           badge={
             <>
-              <BotIcon />
+              <HugeiconsIcon icon={BotIcon} />
               Ops agent
             </>
           }
@@ -157,7 +174,14 @@ export default function PromptTimeline() {
                 status={status}
                 icon={item.icon}
                 state={status === 'waiting' ? 'Needs you' : item.state}
-                meta={index < current ? `${took[index]}s` : undefined}
+                tag={item.approval && index > current ? 'Approval' : undefined}
+                meta={
+                  index < current
+                    ? `${took[index]}s`
+                    : index === current && status === 'active'
+                      ? `${elapsed}s`
+                      : undefined
+                }
               >
                 {item.label}
                 {shownSteps.map((step, stepIndex) => (

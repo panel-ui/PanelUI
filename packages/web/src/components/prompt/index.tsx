@@ -184,41 +184,49 @@ const promptVariants = tv({
     ],
     task: 'flex flex-wrap items-start gap-x-2.5 rounded-lg px-2 py-1 text-sm',
     tasksBadge:
-      'inline-flex h-5 shrink-0 items-center gap-1 rounded-md bg-card px-1.5 text-xs font-medium text-muted-foreground shadow-xs [&_svg]:size-3',
-    // The rail runs from under each mark to the top of the next, through any
-    // steps shown between them; the last task has none.
+      'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md bg-foreground/[0.05] px-2 text-xs font-medium text-muted-foreground [&_svg]:size-3.5',
+    /*
+     * The timeline. Columns, measured from the row's start: the mark is
+     * centred at 17px, the icon starts at 36px, and a step's text starts
+     * there too, with its dot at 27px, between the two.
+     */
     tlTask: [
       'relative flex flex-col text-sm',
-      "before:absolute before:start-[17px] before:top-[25px] before:-bottom-[7px] before:w-px before:bg-border before:content-[''] last:before:hidden",
-      'before:transition-colors before:duration-500 data-[status=done]:before:bg-info/50',
+      // The rail runs from under the mark to the top of the next one; a
+      // finished task's is drawn in the accent, the rest in the border colour.
+      "before:absolute before:start-[16.5px] before:top-[26px] before:-bottom-[8px] before:w-px before:bg-border before:content-[''] last:before:hidden",
+      'before:transition-colors before:duration-500 data-[status=done]:before:bg-info',
+      // With its steps open, the branch carries the rail instead.
+      'data-expanded:before:hidden',
     ],
     tlRow: [
-      'group/tl flex h-8 w-full items-center gap-2.5 rounded-lg px-2 text-start outline-none',
-      'enabled:cursor-pointer enabled:hover:bg-foreground/[0.04] focus-visible:ring-2 focus-visible:ring-ring/60',
+      'group/tl relative z-10 flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-start outline-none',
+      'transition-colors duration-150 enabled:cursor-pointer enabled:hover:bg-foreground/[0.04] focus-visible:ring-2 focus-visible:ring-ring/60',
+      'data-current:bg-foreground/[0.04]',
     ],
-    tlMark: 'relative z-10 flex size-[18px] shrink-0 items-center justify-center rounded-full bg-muted',
+    tlMark: 'relative flex size-[18px] shrink-0 items-center justify-center rounded-full bg-popover',
     tlIcon:
-      'flex size-5 shrink-0 items-center justify-center rounded-md bg-card text-foreground/80 shadow-xs ring-1 ring-foreground/[0.06] [&_svg]:size-3',
+      'flex size-6 shrink-0 items-center justify-center rounded-full bg-popover text-foreground ring-1 ring-border [&_svg]:size-3.5',
     tlLabel: 'min-w-0 flex-1 truncate',
-    tlEnd: 'ms-auto flex shrink-0 items-center gap-1.5 ps-2 text-xs tabular-nums',
+    tlEnd: 'ms-auto flex shrink-0 items-center gap-2 ps-2 text-xs tabular-nums',
     tlChevron:
-      'size-3 text-muted-foreground opacity-0 transition-[opacity,rotate] duration-200 group-hover/tl:opacity-100 group-focus-visible/tl:opacity-100 motion-reduce:transition-none',
+      'size-3.5 text-muted-foreground opacity-0 transition-[opacity,rotate] duration-200 group-hover/tl:opacity-100 group-focus-visible/tl:opacity-100 motion-reduce:transition-none',
+    tlTag:
+      'inline-flex h-6 items-center gap-1 rounded-md bg-warning/12 px-2 text-xs font-medium text-warning-foreground [&_svg]:size-3',
     tlStepsFold:
-      'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
-    // The steps hang off a branch of their own, set in from the rail.
-    tlSteps: [
-      'relative ms-[38px] flex flex-col py-0.5',
-      "before:absolute before:start-[3px] before:top-1 before:bottom-2.5 before:w-px before:bg-border before:content-['']",
-    ],
-    tlStep: 'relative flex h-6 items-center gap-2.5 text-xs text-muted-foreground',
-    tlStepDot:
-      'relative z-10 size-[7px] shrink-0 rounded-full border-2 border-popover bg-muted-foreground/50 box-content -ms-[2px]',
-    tlStepMeta: 'ms-auto shrink-0 ps-3 font-mono text-[0.6875rem] tabular-nums text-muted-foreground/80',
-    approval: [
-      'basis-full',
-      'mt-1.5 mb-1 flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-xs leading-relaxed text-muted-foreground shadow-xs',
-    ],
-    approvalActions: 'flex items-center justify-end gap-1.5',
+      'relative grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+    tlSteps: 'flex flex-col ps-[36px] pe-2 pt-0.5 pb-1',
+    tlStep: 'relative flex h-7 items-center text-[0.8125rem] text-muted-foreground',
+    tlStepDot: 'absolute -start-[12px] top-1/2 size-[7px] -translate-y-1/2 rounded-full bg-muted-foreground/45',
+    tlStepCurrent:
+      'absolute -start-[14.5px] top-1/2 flex size-3 -translate-y-1/2 items-center justify-center rounded-full bg-info/20 after:size-1.5 after:rounded-full after:bg-info after:content-[""]',
+    tlStepMeta: 'ms-auto shrink-0 ps-3 text-xs tabular-nums text-muted-foreground/80',
+    approval: 'basis-full flex flex-col gap-2 py-1 text-[0.8125rem] leading-snug text-muted-foreground',
+    approvalActions: 'flex items-center justify-end gap-1',
+    approvalDecline:
+      'inline-flex h-7 items-center rounded-full px-3 text-[0.8125rem] font-medium text-foreground outline-none transition-colors hover:bg-foreground/[0.06] focus-visible:ring-2 focus-visible:ring-ring',
+    approvalApprove:
+      'inline-flex h-7 items-center rounded-full bg-foreground px-3.5 text-[0.8125rem] font-medium text-background shadow-xs outline-none transition-[opacity,scale] hover:opacity-90 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring',
     taskMark: 'mt-0.5 flex size-4 shrink-0 items-center justify-center',
     // Pops in as the task finishes.
     taskDone:
@@ -1546,11 +1554,15 @@ function PromptTasks({
         aria-expanded={isExpanded}
         aria-controls={listId}
         onClick={toggle}
-        className={slots.tasksHeader()}
+        className={slots.tasksHeader({ className: variant === 'timeline' ? 'h-11' : undefined })}
       >
-        <ProgressRing done={done} total={tasks.length} />
+        {variant === 'timeline' ? null : <ProgressRing done={done} total={tasks.length} />}
         <span className={slots.tasksTitle()}>{title}</span>
-        {badge != null ? <span className={slots.tasksBadge()}>{badge}</span> : null}
+        {badge != null ? (
+          <span className={slots.tasksBadge({ className: variant === 'timeline' ? 'ms-auto' : undefined })}>
+            {badge}
+          </span>
+        ) : null}
         <span className={slots.tasksCount()}>
           {done}/{tasks.length}
         </span>
@@ -1562,7 +1574,9 @@ function PromptTasks({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={slots.tasksChevron({ className: isExpanded ? 'rotate-180' : undefined })}
+          className={slots.tasksChevron({
+            className: [isExpanded && 'rotate-180', variant === 'timeline' && badge != null && 'ms-0'],
+          })}
         >
           <path d="m6 9 6 6 6-6" />
         </svg>
@@ -1596,8 +1610,10 @@ export interface PromptTaskProps extends ComponentProps<'li'> {
   icon?: ReactNode;
   /** For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". */
   state?: ReactNode;
-  /** For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". */
+  /** For `timeline`: the time at the row's end, such as how long it has taken: "34s". */
   meta?: ReactNode;
+  /** For `timeline`: a flag on a task still to come, such as "Approval" for one that will stop for an answer. */
+  tag?: ReactNode;
   /**
    * For `timeline`: whether its steps are shown, when the caller holds it.
    * Uncontrolled, they are shown while the task runs or waits, and a finished
@@ -1623,6 +1639,7 @@ function CompactTask({
   icon: _icon,
   state: _state,
   meta: _meta,
+  tag: _tag,
   expanded: _expanded,
   onExpandedChange: _onExpandedChange,
   ...props
@@ -1701,16 +1718,18 @@ function TaskMark({ status }: { status: PromptTaskStatus }) {
   const slots = promptVariants();
   if (status === 'done')
     return (
-      <span className={slots.tlMark({ className: 'bg-info text-white' })}>
+      <span
+        className={slots.tlMark({ className: 'bg-[color-mix(in_oklab,var(--info)_16%,var(--popover))] text-info' })}
+      >
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="3.2"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="size-2.5 transition-[scale,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] starting:scale-50 starting:opacity-0 motion-reduce:transition-none"
+          className="size-[11px] transition-[scale,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] starting:scale-50 starting:opacity-0 motion-reduce:transition-none"
         >
           <path d="m5 12.5 4.5 4.5L19 7.5" />
         </svg>
@@ -1718,38 +1737,34 @@ function TaskMark({ status }: { status: PromptTaskStatus }) {
     );
   if (status === 'active')
     return (
-      <span className={slots.tlMark({ className: 'bg-popover' })}>
-        <svg aria-hidden="true" viewBox="0 0 18 18" className="size-[18px] animate-spin motion-reduce:animate-none">
-          <circle cx="9" cy="9" r="7.25" fill="none" stroke="var(--border)" strokeWidth="1.5" />
+      <span className={slots.tlMark()}>
+        <svg aria-hidden="true" viewBox="0 0 18 18" className="size-[18px]">
+          <circle cx="9" cy="9" r="7.75" fill="none" stroke="var(--border)" strokeWidth="1.5" />
           <path
-            d="M9 1.75a7.25 7.25 0 0 1 7.25 7.25"
+            d="M9 1.25a7.75 7.75 0 0 1 7.75 7.75"
             fill="none"
             stroke="var(--info)"
             strokeWidth="1.75"
             strokeLinecap="round"
+            className="origin-center animate-spin motion-reduce:animate-none"
           />
         </svg>
       </span>
     );
   if (status === 'waiting')
     return (
-      <span className={slots.tlMark({ className: 'bg-popover' })}>
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 18 18"
-          className="size-[18px] animate-[spin_6s_linear_infinite] motion-reduce:animate-none"
-        >
+      <span className={slots.tlMark()}>
+        <svg aria-hidden="true" viewBox="0 0 18 18" className="size-[18px]">
           <circle
             cx="9"
             cy="9"
-            r="7.25"
+            r="7.75"
             fill="none"
             stroke="var(--warning)"
             strokeWidth="1.5"
-            strokeDasharray="2.6 2.4"
+            strokeDasharray="2.4 2.2"
           />
         </svg>
-        <span className="absolute size-1.5 rounded-full bg-warning" />
       </span>
     );
   if (status === 'error')
@@ -1759,8 +1774,31 @@ function TaskMark({ status }: { status: PromptTaskStatus }) {
       </span>
     );
   return (
-    <span className={slots.tlMark({ className: 'bg-popover' })}>
-      <span className="size-[14px] rounded-full border-[1.5px] border-border" />
+    <span className={slots.tlMark()}>
+      <span className="size-[18px] rounded-full border-[1.5px] border-border" />
+    </span>
+  );
+}
+
+/**
+ * The rail where a task's steps are open: it leaves the mark, bends out to
+ * the steps' dots, runs down past them and bends back into the next mark,
+ * so the run still reads as one line.
+ */
+function Branch({ last }: { last: boolean }) {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 start-0 w-8">
+      <svg viewBox="0 0 32 14" width="32" height="14" className="absolute -top-[8px] start-0 overflow-visible">
+        <path d="M16.5 0 C16.5 8, 27.5 6, 27.5 14" fill="none" stroke="var(--border)" strokeWidth="1" />
+      </svg>
+      <span
+        className={['absolute start-[27px] top-[6px] w-px bg-border', last ? 'bottom-3' : 'bottom-[6px]'].join(' ')}
+      />
+      {last ? null : (
+        <svg viewBox="0 0 32 14" width="32" height="14" className="absolute -bottom-[8px] start-0 overflow-visible">
+          <path d="M27.5 0 C27.5 8, 16.5 6, 16.5 14" fill="none" stroke="var(--border)" strokeWidth="1" />
+        </svg>
+      )}
     </span>
   );
 }
@@ -1770,6 +1808,7 @@ function TimelineTask({
   icon,
   state,
   meta,
+  tag,
   expanded,
   onExpandedChange,
   className,
@@ -1782,13 +1821,18 @@ function TimelineTask({
   const live = status === 'active' || status === 'waiting';
   const text = useShimmer(status === 'active');
   const stepsId = useId();
-  // Uncontrolled, the steps follow the task: shown while it runs, folded when
-  // it finishes, unless somebody opened or closed them by hand since.
+  const self = useRef<HTMLLIElement>(null);
+  // Uncontrolled, the steps follow the task: shown while it runs or waits,
+  // folded when it finishes, unless somebody opened or closed them since.
   const [manual, setManual] = useState<boolean | null>(null);
   useEffect(() => setManual(null), [status]);
   const hasMore = steps.length > 0 || approval != null;
   const open = hasMore && (expanded ?? manual ?? live);
-  const canToggle = hasMore && !live;
+  const canToggle = hasMore && status !== 'active';
+  const [last, setLast] = useState(false);
+  useEffect(() => {
+    setLast(!self.current?.nextElementSibling);
+  });
 
   const toggle = () => {
     if (!canToggle) return;
@@ -1796,20 +1840,48 @@ function TimelineTask({
     onExpandedChange?.(!open);
   };
 
+  const chevron = (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={
+        status === 'waiting'
+          ? open
+            ? 'rotate-180'
+            : undefined
+          : slots.tlChevron({ className: open ? 'rotate-180' : undefined })
+      }
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+
   const end =
-    live && state != null ? (
-      <span
-        className={status === 'waiting' ? 'font-medium text-warning-foreground' : 'font-medium text-info-foreground'}
-      >
-        {state}
+    status === 'waiting' ? (
+      <span className={slots.tlTag({ className: 'ring-1 ring-warning/25' })}>
+        {state ?? 'Needs you'}
+        {hasMore ? chevron : null}
       </span>
-    ) : meta != null ? (
-      <span className="text-muted-foreground">{meta}</span>
-    ) : null;
+    ) : (
+      <>
+        {canToggle ? chevron : null}
+        {status === 'active' && state != null ? (
+          <span className="font-medium text-info-foreground">{state}</span>
+        ) : null}
+        {status === 'pending' && tag != null ? <span className={slots.tlTag()}>{tag}</span> : null}
+        {meta != null ? <span className="text-muted-foreground">{meta}</span> : null}
+      </>
+    );
 
   return useRender({
     defaultTagName: 'li',
     render,
+    ref: self,
     props: mergeProps(
       {
         'data-status': status,
@@ -1820,6 +1892,7 @@ function TimelineTask({
             <button
               type="button"
               disabled={!canToggle}
+              data-current={status === 'active' || status === 'waiting' ? '' : undefined}
               aria-expanded={hasMore ? open : undefined}
               aria-controls={hasMore ? stepsId : undefined}
               onClick={toggle}
@@ -1833,32 +1906,16 @@ function TimelineTask({
                   className:
                     status === 'active'
                       ? slots.statusText({ className: 'text-transparent' })
-                      : status === 'pending'
-                        ? 'text-muted-foreground'
-                        : status === 'error'
-                          ? 'text-destructive'
-                          : 'text-foreground',
+                      : status === 'error'
+                        ? 'text-destructive'
+                        : status === 'waiting'
+                          ? 'text-foreground'
+                          : 'text-muted-foreground',
                 })}
               >
                 {label}
               </span>
-              <span className={slots.tlEnd()}>
-                {canToggle ? (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.25"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={slots.tlChevron({ className: open ? 'rotate-180' : undefined })}
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                ) : null}
-                {end}
-              </span>
+              <span className={slots.tlEnd()}>{end}</span>
               <span className="sr-only">
                 {status === 'done'
                   ? ', done'
@@ -1876,9 +1933,10 @@ function TimelineTask({
                 id={stepsId}
                 className={slots.tlStepsFold({ className: open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] opacity-0' })}
               >
+                {open && steps.length > 0 ? <Branch last={last} /> : null}
                 <div className="min-h-0 overflow-hidden" inert={!open}>
                   {steps.length > 0 ? <ul className={slots.tlSteps()}>{steps}</ul> : null}
-                  {approval != null ? <div className="ms-[38px]">{approval}</div> : null}
+                  {approval != null ? <div className="ps-[36px] pe-2 pb-1">{approval}</div> : null}
                 </div>
               </div>
             ) : null}
@@ -1893,7 +1951,7 @@ function TimelineTask({
 export interface PromptTaskStepProps extends ComponentProps<'li'> {
   /** `done` greys it; `active` marks it as the step the task is on. Default `done`. */
   status?: 'done' | 'active';
-  /** A short reading at its end, set in mono: a file and line, a diff count, a test tally. */
+  /** A short reading at its end: a file and line, a diff count, a test tally. */
   meta?: ReactNode;
 }
 
@@ -1907,7 +1965,7 @@ function PromptTaskStep({ status = 'done', meta, className, children, ...props }
       className={slots.tlStep({ className: [status === 'active' && 'text-foreground', className] })}
       {...props}
     >
-      <span className={slots.tlStepDot({ className: status === 'active' ? 'bg-info' : undefined })} />
+      <span aria-hidden="true" className={status === 'active' ? slots.tlStepCurrent() : slots.tlStepDot()} />
       <span className="min-w-0 flex-1 truncate">{children}</span>
       {meta != null ? <span className={slots.tlStepMeta()}>{meta}</span> : null}
     </li>
@@ -1930,7 +1988,8 @@ export interface PromptTaskApprovalProps extends Omit<ComponentProps<'div'>, 'ch
 
 /**
  * What a waiting task asks for, with the two answers. Write it in a task
- * whose `status` is `waiting`; it opens under the task's row.
+ * whose `status` is `waiting`; it opens under the task's row, as a sentence
+ * and two buttons rather than a card, so the run still reads as one list.
  */
 function PromptTaskApproval({
   children,
@@ -1944,14 +2003,14 @@ function PromptTaskApproval({
   const slots = promptVariants();
   return (
     <div data-slot="prompt-task-approval" role="group" className={slots.approval({ className })} {...props}>
-      <div className="text-foreground/80">{children}</div>
+      <div>{children}</div>
       <div className={slots.approvalActions()}>
-        <Button type="button" variant="ghost" size="sm" shape="pill" onClick={onDecline}>
+        <button type="button" className={slots.approvalDecline()} onClick={onDecline}>
           {declineLabel}
-        </Button>
-        <Button type="button" size="sm" shape="pill" onClick={onApprove}>
+        </button>
+        <button type="button" className={slots.approvalApprove()} onClick={onApprove}>
           {approveLabel}
-        </Button>
+        </button>
       </div>
     </div>
   );

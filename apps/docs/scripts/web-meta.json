@@ -840,5 +840,14 @@
       "addedIn": "0.19.0",
       "category": "overlays"
     }
+  ],
+  "micro": [
+    "Micro",
+    "A pill holding one small reading or control: a count with its trend, a ring, a timecode, a stepper.",
+    "react micro widget pill badge stat stepper segmented control component",
+    {
+      "addedIn": "0.19.0",
+      "category": "data"
+    }
   ]
 }

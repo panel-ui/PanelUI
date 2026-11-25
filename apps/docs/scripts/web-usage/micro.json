@@ -1,0 +1,50 @@
+{
+  "slug": "micro",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 420
+  },
+  "intro": "Use it for the small readings and controls that sit around a piece of work rather than in a form: a count with its trend, a percentage, a timecode with play and skip, a speed, which section is showing, how far an export has got. Every pill has the same height and surface, so a row of them reads as one strip of instruments.\n\nA pill is built from parts written in the order they read. At an end that is a round button, a segmented choice or a ring, the pill pulls its padding in so the circle sits concentric with it.\n\nFor a single figure with a label and a badge, use [Stat](/docs/web/components/stat). For a status word, use [Badge](/docs/web/components/badge).",
+  "usage": "<Micro>\n  <Micro.Text value=\"12.4k\" label=\"listens · 30 days\" />\n  <Micro.Spark values={[4, 5, 4, 6, 7, 8, 11]} tone=\"info\" />\n  <Micro.Delta value={9} />\n</Micro>",
+  "anatomy": "<Micro>\n  <Micro.Text />\n  <Micro.Label />\n  <Micro.Mono />\n  <Micro.Spark />\n  <Micro.Ring />\n  <Micro.Delta />\n  <Micro.Pulse />\n  <Micro.Button />\n  <Micro.Separator />\n  <Micro.Segments>\n    <Micro.Segment />\n  </Micro.Segments>\n  <Micro.Stepper />\n  <Micro.Progress />\n  <Micro.Switch />\n  <Micro.Faces />\n  <Micro.Input />\n  <Micro.Kbd />\n</Micro>",
+  "parts": {
+    "Text": "A value over a muted line saying what it is.",
+    "Label": "One muted word or phrase on a single line, such as \"Speed\".",
+    "Mono": "A reading in mono figures, for times and counts that change in place. `muted` dims it, for the second half of a pair.",
+    "Spark": "A run of thin bars, oldest first. The newest is drawn in `tone`. They rise when first shown.",
+    "Ring": "A ring that sweeps to `value`, from 0 to 100. It is a meter, named by `label`.",
+    "Delta": "A change with its sign and an arrow, green when up and red when down. `inverted` swaps them, for a reading where lower is better.",
+    "Pulse": "A heartbeat line that beats while `live`, for a reading taken continuously.",
+    "Button": "A round button. `ghost` shows its circle only when pointed at, and `aria-pressed` fills it.",
+    "Separator": "A short upright rule between two groups.",
+    "Segments": "A choice of a few, with a marker that slides to the chosen one. The arrow keys move it.",
+    "Segment": "One choice, by its `value`.",
+    "Stepper": "A number between a minus and a plus, with `min`, `max` and `step`. Its digits roll as it changes, and the arrow keys move it.",
+    "Progress": "A label and a count over a row of ticks that fill as the work is done: one tick each, up to 16.",
+    "Switch": "A switch sized for the pill. Put a `Micro.Text` before it for what it turns on.",
+    "Faces": "Overlapping faces, with initials where there is no picture. Four show and the rest are counted.",
+    "Input": "A bare field that takes the pill's remaining width.",
+    "Kbd": "A key or a chord in a cap."
+  },
+  "examples": [
+    {
+      "title": "Readings",
+      "description": "A pill for a reading pairs `Micro.Text` or `Micro.Mono` with something that shows its shape: a `Micro.Spark` of recent values, a `Micro.Ring`, or a `Micro.Pulse` for a live measurement. `Micro.Delta` says how it moved.\n\nPass `inverted` to the delta when lower is better, as for latency. A rise is then drawn red.",
+      "demo": "readings",
+      "height": 160
+    },
+    {
+      "title": "Controls",
+      "description": "`Micro.Segments` is a choice of a few with a sliding marker. `Micro.Button`s with `variant=\"ghost\"` make a group of icon actions, and `Micro.Separator` divides it. `Micro.Stepper` holds a number between bounds.",
+      "demo": "controls",
+      "height": 160
+    },
+    {
+      "title": "Sizes",
+      "description": "`size=\"sm\"` is 40px tall and `md`, the default, is 48px. The parts inside follow the pill's size.",
+      "demo": "sizes",
+      "height": 140
+    }
+  ],
+  "notes": "### Tones\n\nBars, rings, ticks and the pulse are drawn in the text's colour unless `tone` names a theme colour: `info`, `success`, `warning` or `destructive`. Use a tone for what a reading means, not to decorate it.\n\n### Motion\n\nThe spark's bars rise once when they first show, the ring sweeps whenever its value changes, the stepper's digits roll, the segment marker slides, and ticks fill as progress is made. With reduced motion each change happens at once and the pulse stops.\n\n### Screen readers\n\n`Micro.Ring` is a meter and `Micro.Progress` a progress bar, both read with their values. `Micro.Segments` is a radio group and `Micro.Stepper` a spin button. A `Micro.Button` that holds only a glyph needs an `aria-label`, as does `Micro.Input`."
+}

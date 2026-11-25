@@ -36,6 +36,15 @@
  * speed, intelligence and price side by side as small meters. `detail` keeps
  * a pane beside the list describing the highlighted model.
  *
+ * ## Effort
+ *
+ * Given `efforts`, a `ModelPicker.Effort` in the content adds a band at the
+ * foot of the list for how hard the chosen model should think, as a row of
+ * rising bars with the level's name and what it trades. It applies to the
+ * chosen model and stays open while it changes; a model with
+ * `supportsEffort: false` greys it out. The trigger then names the level
+ * after the model.
+ *
  * ## Icons
  *
  * Each provider takes an `icon`, and a model shows its provider's unless it
@@ -99,6 +108,17 @@ export interface ModelPickerItem {
   price?: number;
   /** What it is good at, as chips: `Code`, `Vision`, `Long context`. */
   tags?: readonly string[];
+  /** Whether it takes an effort level. Default `true` when the picker has `efforts`. */
+  supportsEffort?: boolean;
+}
+
+export interface ModelPickerEffortLevel {
+  /** What `effort` and `onEffortChange` carry: `high`. */
+  value: string;
+  /** Its name: "High". */
+  label: string;
+  /** What it trades, in a few words: "Slower, for hard problems". */
+  description?: string;
 }
 
 const pickerVariants = tv({
@@ -111,6 +131,24 @@ const pickerVariants = tv({
     ],
     triggerIcon: 'flex size-4 shrink-0 items-center justify-center [&_svg]:size-4',
     triggerLabel: 'truncate',
+    triggerEffort:
+      "flex shrink-0 items-center gap-2 font-normal text-muted-foreground before:h-3 before:w-px before:bg-border before:content-['']",
+    effort: [
+      'flex shrink-0 items-center gap-3 border-t bg-muted/40 px-3.5 py-2.5',
+      'data-disabled:[&_[data-slot=model-picker-effort-bars]]:opacity-40',
+    ],
+    effortText: 'flex min-w-0 flex-1 flex-col leading-tight',
+    effortName: 'flex items-baseline gap-1.5 text-[0.8125rem] font-medium text-foreground',
+    effortHint: 'truncate text-xs text-muted-foreground',
+    effortBars: 'flex h-5 shrink-0 items-end gap-0.5 rounded-lg outline-none',
+    effortBar: [
+      'group/bar relative flex h-full w-3.5 cursor-pointer items-end justify-center rounded-sm outline-none',
+      'focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed',
+    ],
+    effortFill: [
+      'w-1 rounded-full bg-foreground/15 transition-[background-color,height] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]',
+      'group-hover/bar:bg-foreground/30 data-on:bg-foreground motion-reduce:transition-none',
+    ],
     chevron:
       'size-3.5 text-muted-foreground transition-transform duration-200 group-data-popup-open/model-trigger:rotate-180 motion-reduce:transition-none',
     positioner: 'z-50 outline-none',
@@ -336,6 +374,9 @@ interface PickerContextValue {
   instant: boolean;
   open: boolean;
   label: string;
+  efforts: readonly ModelPickerEffortLevel[] | null;
+  effort: string | null;
+  setEffort: (value: string) => void;
 }
 
 const PickerContext = createContext<PickerContextValue | null>(null);
@@ -378,6 +419,17 @@ export interface ModelPickerProps {
   onOpenChange?: (open: boolean) => void;
   /** What a screen reader calls the trigger and the list. Default `Model`. */
   label?: string;
+  /**
+   * The effort levels to offer, lowest first. With them, `ModelPicker.Effort`
+   * shows a control for them and the trigger names the chosen level.
+   */
+  efforts?: readonly ModelPickerEffortLevel[];
+  /** The chosen effort level's `value`, when the caller holds it. */
+  effort?: string | null;
+  /** The level chosen to begin with, when the caller does not hold it. Default the middle one. */
+  defaultEffort?: string | null;
+  /** Called with the level's `value` when another is chosen. */
+  onEffortChange?: (effort: string) => void;
   children?: ReactNode;
 }
 
@@ -397,8 +449,23 @@ function ModelPickerRoot({
   defaultOpen = false,
   onOpenChange,
   label = 'Model',
+  efforts,
+  effort: effortProp,
+  defaultEffort,
+  onEffortChange,
   children,
 }: ModelPickerProps) {
+  const [ownEffort, setOwnEffort] = useState<string | null>(
+    defaultEffort !== undefined ? defaultEffort : (efforts?.[Math.floor((efforts.length - 1) / 2)]?.value ?? null)
+  );
+  const effort = effortProp !== undefined ? effortProp : ownEffort;
+  const setEffort = useCallback(
+    (next: string) => {
+      if (effortProp === undefined) setOwnEffort(next);
+      onEffortChange?.(next);
+    },
+    [effortProp, onEffortChange]
+  );
   const [ownValue, setOwnValue] = useState<string | null>(defaultValue);
   const [ownFavorites, setOwnFavorites] = useState<readonly string[]>(defaultFavorites);
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
@@ -454,8 +521,11 @@ function ModelPickerRoot({
       instant,
       open,
       label,
+      efforts: efforts ?? null,
+      effort,
+      setEffort,
     };
-  }, [items, providers, value, valueProp, onValueChange, setOpen, favoriteList, favoritesProp, onFavoritesChange, variant, hotkey, instant, open, label]);
+  }, [items, providers, value, valueProp, onValueChange, setOpen, favoriteList, favoritesProp, onFavoritesChange, variant, hotkey, instant, open, label, efforts, effort, setEffort]);
 
   return (
     <PickerContext.Provider value={context}>
@@ -491,10 +561,11 @@ function ModelPickerTrigger({ appearance, placeholder = 'Choose a model', classN
   const slots = pickerVariants({ appearance });
   const chosen = picker.items.find((item) => item.value === picker.value);
   const icon = chosen ? (chosen.icon ?? picker.providers.get(chosen.provider)?.icon) : null;
+  const level = chosen && chosen.supportsEffort !== false ? picker.efforts?.find((entry) => entry.value === picker.effort) : undefined;
   const button = (
     <Popover.Trigger
       data-slot="model-picker-trigger"
-      aria-label={`${picker.label}: ${chosen?.label ?? 'none chosen'}`}
+      aria-label={`${picker.label}: ${chosen?.label ?? 'none chosen'}${level ? `, ${level.label} effort` : ''}`}
       className={slots.trigger({ className })}
       {...props}
     >
@@ -504,6 +575,11 @@ function ModelPickerTrigger({ appearance, placeholder = 'Choose a model', classN
         </span>
       ) : null}
       <span className={slots.triggerLabel()}>{chosen?.label ?? placeholder}</span>
+      {level ? (
+        <span data-slot="model-picker-trigger-effort" className={slots.triggerEffort()}>
+          {level.label}
+        </span>
+      ) : null}
       <ChevronIcon className={slots.chevron()} />
     </Popover.Trigger>
   );
@@ -832,6 +908,8 @@ export interface ModelPickerContentProps extends Omit<Popover.Popup.Props, 'chil
   emptyText?: ReactNode;
   /** Where in the document it is put. Default `document.body`. */
   container?: Popover.Portal.Props['container'];
+  /** A `ModelPicker.Effort`, set at the foot of the list. */
+  children?: ReactNode;
   className?: string;
 }
 
@@ -844,6 +922,7 @@ function ModelPickerContent({
   emptyText = 'No models match',
   container,
   className,
+  children,
   ...props
 }: ModelPickerContentProps) {
   const picker = usePicker('ModelPicker.Content');
@@ -1035,6 +1114,7 @@ function ModelPickerContent({
                 <div className={slots.empty()}>{emptyText}</div>
               </Autocomplete.Empty>
               {list}
+              {children}
             </div>
 
             {variant === 'detail' && shown ? <Pane item={shown} /> : null}
@@ -1083,9 +1163,114 @@ function RailButton({
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Effort                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface ModelPickerEffortProps {
+  /** The band's name. Default `Effort`. */
+  label?: ReactNode;
+  /** What it says when the chosen model takes no effort level. Default `Fixed for this model`. */
+  unsupportedText?: ReactNode;
+  className?: string;
+}
+
+/**
+ * How hard the chosen model thinks, as rising bars at the foot of the list.
+ * Put it inside `ModelPicker.Content`, with `efforts` on the root.
+ */
+function ModelPickerEffort({
+  label = 'Effort',
+  unsupportedText = 'Fixed for this model',
+  className,
+}: ModelPickerEffortProps) {
+  const picker = usePicker('ModelPicker.Effort');
+  const slots = pickerVariants();
+  const levels = picker.efforts;
+  const buttons = useRef<(HTMLButtonElement | null)[]>([]);
+  if (!levels || levels.length === 0) return null;
+  const chosen = picker.items.find((item) => item.value === picker.value);
+  const disabled = chosen?.supportsEffort === false;
+  const index = Math.max(
+    0,
+    levels.findIndex((level) => level.value === picker.effort)
+  );
+  const current = levels[index]!;
+
+  function move(event: KeyboardEvent<HTMLDivElement>) {
+    const step =
+      event.key === 'ArrowRight' || event.key === 'ArrowUp'
+        ? 1
+        : event.key === 'ArrowLeft' || event.key === 'ArrowDown'
+          ? -1
+          : 0;
+    if (!step || disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const next = Math.min(levels!.length - 1, Math.max(0, index + step));
+    picker.setEffort(levels![next]!.value);
+    buttons.current[next]?.focus();
+  }
+
+  return (
+    <div
+      data-slot="model-picker-effort"
+      data-disabled={disabled ? '' : undefined}
+      className={slots.effort({ className })}
+    >
+      <div className={slots.effortText()}>
+        <span className={slots.effortName()}>
+          {label}
+          <span className="font-normal text-muted-foreground">{disabled ? '' : current.label}</span>
+        </span>
+        <span aria-live="polite" className={slots.effortHint()}>
+          {disabled ? unsupportedText : current.description}
+        </span>
+      </div>
+      <div
+        role="radiogroup"
+        aria-label={typeof label === 'string' ? label : 'Effort'}
+        aria-disabled={disabled || undefined}
+        data-slot="model-picker-effort-bars"
+        className={slots.effortBars()}
+        onKeyDown={move}
+      >
+        {levels.map((level, position) => {
+          const on = !disabled && position <= index;
+          return (
+            <button
+              key={level.value}
+              ref={(element) => {
+                buttons.current[position] = element;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={position === index}
+              aria-label={level.label}
+              tabIndex={position === index && !disabled ? 0 : -1}
+              disabled={disabled}
+              className={slots.effortBar()}
+              onClick={() => picker.setEffort(level.value)}
+            >
+              <span
+                aria-hidden="true"
+                data-on={on ? '' : undefined}
+                className={slots.effortFill()}
+                style={{ height: `${30 + (70 * position) / Math.max(1, levels.length - 1)}%` }}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+ModelPickerEffort.displayName = 'ModelPicker.Effort';
+
 export const ModelPicker = Object.assign(ModelPickerRoot, {
   Trigger: ModelPickerTrigger,
   Content: ModelPickerContent,
+  Effort: ModelPickerEffort,
 });
 
-export { ModelPickerTrigger, ModelPickerContent };
+export { ModelPickerTrigger, ModelPickerContent, ModelPickerEffort };

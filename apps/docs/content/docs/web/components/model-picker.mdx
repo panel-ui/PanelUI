@@ -141,12 +141,15 @@ const models = [
 ```tsx
 <ModelPicker>
   <ModelPicker.Trigger />
-  <ModelPicker.Content />
+  <ModelPicker.Content>
+    <ModelPicker.Effort />
+  </ModelPicker.Content>
 </ModelPicker>
 ```
 
 - **`ModelPicker.Trigger`** — The button that opens the list, showing the chosen model's icon and name. `appearance` is `ghost`, with no box until hovered, for a composer, or `outline`, for a toolbar. With a `hotkey` on the root, its tooltip shows the keys.
 - **`ModelPicker.Content`** — The list, laid out as the root's `variant` says. `side` and `align` place it against the trigger, and `placeholder` and `emptyText` change what the search field and an empty list say.
+- **`ModelPicker.Effort`** — How hard the chosen model thinks, as a row of rising bars at the foot of the list, with the level's name and what it trades. It needs `efforts` on the root. It is greyed out for a model with `supportsEffort: false`.
 
 ## Examples
 
@@ -406,6 +409,68 @@ export default function ModelPickerDetail() {
 
 </ComponentPreview>
 
+### Effort
+
+Give the root `efforts`, lowest first, and put a `ModelPicker.Effort` in the content. A band at the foot of the list then sets how hard the chosen model works, and the trigger names the level after the model.
+
+Changing the level keeps the list open, so a model and a level can be set together. Here Gemini 3 Flash and Mistral Large 3 have `supportsEffort: false`, so the band is greyed out while either is chosen and the trigger leaves the level off.
+
+<ComponentPreview name="model-picker/effort" height={440}>
+
+```tsx lineNumbers
+'use client';
+
+import { ClaudeMark, GeminiMark, MistralMark, OpenAIMark } from '@/components/model-logos';
+import {
+  ModelPicker,
+  type ModelPickerEffortLevel,
+  type ModelPickerItem,
+  type ModelPickerProvider,
+} from '@/components/panelui/model-picker';
+
+const PROVIDERS: ModelPickerProvider[] = [
+  { value: 'openai', label: 'OpenAI', icon: <OpenAIMark /> },
+  { value: 'anthropic', label: 'Anthropic', icon: <ClaudeMark /> },
+  { value: 'google', label: 'Google', icon: <GeminiMark /> },
+  { value: 'mistral', label: 'Mistral', icon: <MistralMark /> },
+];
+
+const MODELS: ModelPickerItem[] = [
+  { value: 'gpt-5.5', label: 'GPT-5.5', provider: 'openai', contextWindow: 400_000 },
+  { value: 'claude-opus-5.5', label: 'Claude Opus 5.5', provider: 'anthropic', contextWindow: 1_000_000 },
+  { value: 'claude-sonnet-5.5', label: 'Claude Sonnet 5.5', provider: 'anthropic', contextWindow: 1_000_000 },
+  { value: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro', provider: 'google', contextWindow: 1_000_000 },
+  {
+    value: 'gemini-3-flash',
+    label: 'Gemini 3 Flash',
+    provider: 'google',
+    contextWindow: 1_000_000,
+    supportsEffort: false,
+  },
+  { value: 'mistral-large-3', label: 'Mistral Large 3', provider: 'mistral', contextWindow: 256_000, supportsEffort: false },
+];
+
+const EFFORTS: ModelPickerEffortLevel[] = [
+  { value: 'low', label: 'Low', description: 'Answers at once, for quick asks' },
+  { value: 'medium', label: 'Medium', description: 'Thinks briefly before answering' },
+  { value: 'high', label: 'High', description: 'Works longer on hard problems' },
+  { value: 'max', label: 'Max', description: 'Takes as long as it needs' },
+];
+
+export default function ModelPickerEffort() {
+  return (
+    <ModelPicker variant="list" items={MODELS} providers={PROVIDERS} efforts={EFFORTS} defaultEffort="high" defaultValue="claude-opus-5.5">
+      <ModelPicker.Trigger appearance="outline" />
+      <ModelPicker.Content>
+        <ModelPicker.Effort />
+      </ModelPicker.Content>
+    </ModelPicker>
+  );
+}
+```
+
+</ComponentPreview>
+
 ### Controlled
 
 `value` with `onValueChange`, and `favorites` with `onFavoritesChange`, hold the choice and the stars outside the picker, to keep them in a user's settings.
@@ -533,6 +598,10 @@ export default function ModelPickerPrompt() {
 | `defaultOpen` | `boolean` | `false` | Whether the list is open to begin with. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the list opens or closes. |
 | `label` | `string` | `'Model'` | What a screen reader calls the trigger and the list. Default `Model`. |
+| `efforts` | `readonly ModelPickerEffortLevel[]` | — | The effort levels to offer, lowest first. With them, `ModelPicker.Effort` shows a control for them and the trigger names the chosen level. |
+| `effort` | `string \| null` | — | The chosen effort level's `value`, when the caller holds it. |
+| `defaultEffort` | `string \| null` | — | The level chosen to begin with, when the caller does not hold it. Default the middle one. |
+| `onEffortChange` | `(effort: string) => void` | — | Called with the level's `value` when another is chosen. |
 
 ### ModelPicker.Trigger
 
@@ -552,6 +621,14 @@ export default function ModelPickerPrompt() {
 | `placeholder` | `string` | `'Search models…'` | What the search field says while empty. Default `Search models…`. |
 | `emptyText` | `ReactNode` | `'No models match'` | What the list says when nothing matches. Default `No models match`. |
 | `container` | `Popover.Portal.Props['container']` | — | Where in the document it is put. Default `document.body`. |
+| `className` | `string` | — |  |
+
+### ModelPicker.Effort
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | `'Effort'` | The band's name. Default `Effort`. |
+| `unsupportedText` | `ReactNode` | `'Fixed for this model'` | What it says when the chosen model takes no effort level. Default `Fixed for this model`. |
 | `className` | `string` | — |  |
 
 Every part also takes the props of the element it renders, and a `className`.
@@ -574,10 +651,16 @@ The search matches every word typed against a model's name, its provider's name,
 
 A page never receives the keys a browser keeps for itself: ⌘1 to ⌘9 and Ctrl+1 to Ctrl+9 switch tabs, and in Chrome on a Mac ⌘⇧M opens the profile menu. That is why the row numbers are on ⌥. Pick a `hotkey` the browser leaves alone, such as `alt+m`.
 
+### Effort
+
+`effort`, `defaultEffort` and `onEffortChange` hold the level, by `value`. Without `defaultEffort`, the middle level is chosen. The level belongs to the picker, not to a model, so it carries over when another model that takes it is chosen.
+
+The bars are a radio group: Tab reaches the chosen one, and the arrow keys move between levels. The line beside them is a live region, so the description is read as the level changes.
+
 ### Server Components
 
 `ModelPicker` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `ModelPicker.Trigger` off the import, so each part is also exported by name: `ModelPickerTrigger` is `ModelPicker.Trigger`, and so on for the others.
 
 ```tsx
-import { ModelPicker, ModelPickerTrigger, ModelPickerContent } from "@/components/panelui/model-picker"
+import { ModelPicker, ModelPickerTrigger, ModelPickerContent, ModelPickerEffort } from "@/components/panelui/model-picker"
 ```

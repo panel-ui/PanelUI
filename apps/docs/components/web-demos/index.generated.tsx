@@ -296,6 +296,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'model-picker/compare': dynamic(() => import('./model-picker/compare')),
   'model-picker/controlled': dynamic(() => import('./model-picker/controlled')),
   'model-picker/detail': dynamic(() => import('./model-picker/detail')),
+  'model-picker/effort': dynamic(() => import('./model-picker/effort')),
   'model-picker/list': dynamic(() => import('./model-picker/list')),
   'model-picker/overview': dynamic(() => import('./model-picker/overview')),
   'model-picker/prompt': dynamic(() => import('./model-picker/prompt')),

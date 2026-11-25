@@ -42,12 +42,15 @@ const models = [
 ```tsx
 <ModelPicker>
   <ModelPicker.Trigger />
-  <ModelPicker.Content />
+  <ModelPicker.Content>
+    <ModelPicker.Effort />
+  </ModelPicker.Content>
 </ModelPicker>
 ```
 
 - `ModelPicker.Trigger` — The button that opens the list, showing the chosen model's icon and name. `appearance` is `ghost`, with no box until hovered, for a composer, or `outline`, for a toolbar. With a `hotkey` on the root, its tooltip shows the keys.
 - `ModelPicker.Content` — The list, laid out as the root's `variant` says. `side` and `align` place it against the trigger, and `placeholder` and `emptyText` change what the search field and an empty list say.
+- `ModelPicker.Effort` — How hard the chosen model thinks, as a row of rising bars at the foot of the list, with the level's name and what it trades. It needs `efforts` on the root. It is greyed out for a model with `supportsEffort: false`.
 
 ## Props
 
@@ -71,6 +74,10 @@ Every part also takes the props of the element it renders, and a `className`.
 | `defaultOpen` | `boolean` | `false` | Whether the list is open to begin with. |
 | `onOpenChange` | `(open: boolean) => void` | — | Called when the list opens or closes. |
 | `label` | `string` | `'Model'` | What a screen reader calls the trigger and the list. Default `Model`. |
+| `efforts` | `readonly ModelPickerEffortLevel[]` | — | The effort levels to offer, lowest first. With them, `ModelPicker.Effort` shows a control for them and the trigger names the chosen level. |
+| `effort` | `string \| null` | — | The chosen effort level's `value`, when the caller holds it. |
+| `defaultEffort` | `string \| null` | — | The level chosen to begin with, when the caller does not hold it. Default the middle one. |
+| `onEffortChange` | `(effort: string) => void` | — | Called with the level's `value` when another is chosen. |
 
 #### `ModelPickerTriggerProps`
 
@@ -92,9 +99,17 @@ Every part also takes the props of the element it renders, and a `className`.
 | `container` | `Popover.Portal.Props['container']` | — | Where in the document it is put. Default `document.body`. |
 | `className` | `string` | — | — |
 
+#### `ModelPickerEffortProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | `'Effort'` | The band's name. Default `Effort`. |
+| `unsupportedText` | `ReactNode` | `'Fixed for this model'` | What it says when the chosen model takes no effort level. Default `Fixed for this model`. |
+| `className` | `string` | — | — |
+
 ## In a Server Component
 
-`ModelPicker` is a client component. A Server Component cannot read `ModelPicker.Trigger` off the import, so import each part by name: `ModelPickerTrigger`, `ModelPickerContent`.
+`ModelPicker` is a client component. A Server Component cannot read `ModelPicker.Trigger` off the import, so import each part by name: `ModelPickerTrigger`, `ModelPickerContent`, `ModelPickerEffort`.
 
 ## Notes
 
@@ -113,6 +128,12 @@ The search matches every word typed against a model's name, its provider's name,
 #### Choosing a hotkey
 
 A page never receives the keys a browser keeps for itself: ⌘1 to ⌘9 and Ctrl+1 to Ctrl+9 switch tabs, and in Chrome on a Mac ⌘⇧M opens the profile menu. That is why the row numbers are on ⌥. Pick a `hotkey` the browser leaves alone, such as `alt+m`.
+
+#### Effort
+
+`effort`, `defaultEffort` and `onEffortChange` hold the level, by `value`. Without `defaultEffort`, the middle level is chosen. The level belongs to the picker, not to a model, so it carries over when another model that takes it is chosen.
+
+The bars are a radio group: Tab reaches the chosen one, and the arrow keys move between levels. The line beside them is a live region, so the description is read as the level changes.
 
 ## Example
 

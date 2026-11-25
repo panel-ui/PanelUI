@@ -194,7 +194,7 @@ const promptVariants = tv({
       'relative flex flex-col text-sm',
       // The rail runs from under the mark to the top of the next one; a
       // finished task's is drawn in the accent, the rest in the border colour.
-      "before:absolute before:start-[16.5px] before:top-[26px] before:-bottom-[8px] before:w-px before:bg-border before:content-[''] last:before:hidden",
+      "before:absolute before:start-[16.25px] before:top-[26px] before:-bottom-[8px] before:w-[1.5px] before:rounded-full before:bg-foreground/20 before:content-[''] last:before:hidden",
       'before:transition-colors before:duration-500 data-[status=done]:before:bg-info',
       // With its steps open, the branch carries the rail instead.
       'data-expanded:before:hidden',
@@ -205,8 +205,7 @@ const promptVariants = tv({
       'data-current:bg-foreground/[0.04]',
     ],
     tlMark: 'relative flex size-[18px] shrink-0 items-center justify-center rounded-full bg-popover',
-    tlIcon:
-      'flex size-6 shrink-0 items-center justify-center rounded-full bg-popover text-foreground ring-1 ring-border [&_svg]:size-3.5',
+    tlIcon: 'flex size-5 shrink-0 items-center justify-center text-foreground/80 [&_svg]:size-4',
     tlLabel: 'min-w-0 flex-1 truncate',
     tlEnd: 'ms-auto flex shrink-0 items-center gap-2 ps-2 text-xs tabular-nums',
     tlChevron:
@@ -217,7 +216,12 @@ const promptVariants = tv({
       'relative grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
     tlSteps: 'flex flex-col ps-[36px] pe-2 pt-0.5 pb-1',
     tlStep: 'relative flex h-7 items-center text-[0.8125rem] text-muted-foreground',
-    tlStepDot: 'absolute -start-[12px] top-1/2 size-[7px] -translate-y-1/2 rounded-full bg-muted-foreground/45',
+    // A step that added or removed something is set on a tint of its own,
+    // green or red, reaching back under its dot.
+    tlStepChange:
+      "before:absolute before:inset-y-0.5 before:-start-1.5 before:-end-1.5 before:rounded-md before:content-[''] [&>*:not([aria-hidden])]:relative",
+    tlStepCount: 'tabular-nums',
+    tlStepDot: 'absolute -start-[12px] top-1/2 size-[7px] -translate-y-1/2 rounded-full bg-muted-foreground/55',
     tlStepCurrent:
       'absolute -start-[14.5px] top-1/2 flex size-3 -translate-y-1/2 items-center justify-center rounded-full bg-info/20 after:size-1.5 after:rounded-full after:bg-info after:content-[""]',
     tlStepMeta: 'ms-auto shrink-0 ps-3 text-xs tabular-nums text-muted-foreground/80',
@@ -1493,6 +1497,8 @@ export interface PromptTasksProps extends Omit<ComponentProps<'div'>, 'title'> {
   variant?: PromptTasksVariant;
   /** A small label beside the count, such as which agent is running: "Release bot". */
   badge?: ReactNode;
+  /** The model the agent runs on, written in the badge after its name: "Opus 5.5". */
+  model?: ReactNode;
 }
 
 /**
@@ -1510,6 +1516,7 @@ function PromptTasks({
   maxHeight,
   variant = 'compact',
   badge,
+  model,
   className,
   children,
   ...props
@@ -1558,9 +1565,11 @@ function PromptTasks({
       >
         {variant === 'timeline' ? null : <ProgressRing done={done} total={tasks.length} />}
         <span className={slots.tasksTitle()}>{title}</span>
-        {badge != null ? (
+        {badge != null || model != null ? (
           <span className={slots.tasksBadge({ className: variant === 'timeline' ? 'ms-auto' : undefined })}>
             {badge}
+            {badge != null && model != null ? <span aria-hidden="true" className="h-3 w-px bg-foreground/15" /> : null}
+            {model != null ? <span className="font-normal text-foreground/80">{model}</span> : null}
           </span>
         ) : null}
         <span className={slots.tasksCount()}>
@@ -1575,7 +1584,10 @@ function PromptTasks({
           strokeLinecap="round"
           strokeLinejoin="round"
           className={slots.tasksChevron({
-            className: [isExpanded && 'rotate-180', variant === 'timeline' && badge != null && 'ms-0'],
+            className: [
+              isExpanded && 'rotate-180',
+              variant === 'timeline' && (badge != null || model != null) && 'ms-0',
+            ],
           })}
         >
           <path d="m6 9 6 6 6-6" />
@@ -1739,7 +1751,14 @@ function TaskMark({ status }: { status: PromptTaskStatus }) {
     return (
       <span className={slots.tlMark()}>
         <svg aria-hidden="true" viewBox="0 0 18 18" className="size-[18px]">
-          <circle cx="9" cy="9" r="7.75" fill="none" stroke="var(--border)" strokeWidth="1.5" />
+          <circle
+            cx="9"
+            cy="9"
+            r="7.75"
+            fill="none"
+            stroke="color-mix(in oklab, var(--foreground) 18%, transparent)"
+            strokeWidth="1.5"
+          />
           <path
             d="M9 1.25a7.75 7.75 0 0 1 7.75 7.75"
             fill="none"
@@ -1789,14 +1808,27 @@ function Branch({ last }: { last: boolean }) {
   return (
     <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 start-0 w-8">
       <svg viewBox="0 0 32 14" width="32" height="14" className="absolute -top-[8px] start-0 overflow-visible">
-        <path d="M16.5 0 C16.5 8, 27.5 6, 27.5 14" fill="none" stroke="var(--border)" strokeWidth="1" />
+        <path
+          d="M16.5 0 C16.5 8, 27.5 6, 27.5 14"
+          fill="none"
+          stroke="color-mix(in oklab, var(--foreground) 20%, transparent)"
+          strokeWidth="1.5"
+        />
       </svg>
       <span
-        className={['absolute start-[27px] top-[6px] w-px bg-border', last ? 'bottom-3' : 'bottom-[6px]'].join(' ')}
+        className={[
+          'absolute start-[26.75px] top-[6px] w-[1.5px] bg-foreground/20',
+          last ? 'bottom-3' : 'bottom-[6px]',
+        ].join(' ')}
       />
       {last ? null : (
         <svg viewBox="0 0 32 14" width="32" height="14" className="absolute -bottom-[8px] start-0 overflow-visible">
-          <path d="M27.5 0 C27.5 8, 16.5 6, 16.5 14" fill="none" stroke="var(--border)" strokeWidth="1" />
+          <path
+            d="M27.5 0 C27.5 8, 16.5 6, 16.5 14"
+            fill="none"
+            stroke="color-mix(in oklab, var(--foreground) 20%, transparent)"
+            strokeWidth="1.5"
+          />
         </svg>
       )}
     </span>
@@ -1951,22 +1983,66 @@ function TimelineTask({
 export interface PromptTaskStepProps extends ComponentProps<'li'> {
   /** `done` greys it; `active` marks it as the step the task is on. Default `done`. */
   status?: 'done' | 'active';
+  /** What the step did to the work: `added` sets it on green, `removed` on red. */
+  change?: 'added' | 'removed';
+  /** Lines added, written green at its end: `18` becomes "+18". */
+  added?: number;
+  /** Lines removed, written red at its end: `3` becomes "−3". */
+  removed?: number;
   /** A short reading at its end: a file and line, a diff count, a test tally. */
   meta?: ReactNode;
 }
 
 /** One thing a task did on its way, shown under it in `timeline`. Write the steps after the task's label. */
-function PromptTaskStep({ status = 'done', meta, className, children, ...props }: PromptTaskStepProps) {
+function PromptTaskStep({
+  status = 'done',
+  change,
+  added,
+  removed,
+  meta,
+  className,
+  children,
+  ...props
+}: PromptTaskStepProps) {
   const slots = promptVariants();
   return (
     <li
       data-slot="prompt-task-step"
       data-status={status}
-      className={slots.tlStep({ className: [status === 'active' && 'text-foreground', className] })}
+      data-change={change}
+      className={slots.tlStep({
+        className: [
+          status === 'active' && 'text-foreground',
+          change && slots.tlStepChange(),
+          change === 'added' && 'text-success-foreground before:bg-success/12',
+          change === 'removed' && 'text-destructive-foreground before:bg-destructive/12',
+          className,
+        ],
+      })}
       {...props}
     >
-      <span aria-hidden="true" className={status === 'active' ? slots.tlStepCurrent() : slots.tlStepDot()} />
+      <span
+        aria-hidden="true"
+        className={
+          status === 'active'
+            ? slots.tlStepCurrent()
+            : slots.tlStepDot({
+                className: change === 'added' ? 'bg-success' : change === 'removed' ? 'bg-destructive' : undefined,
+              })
+        }
+      />
+      {change ? <span className="sr-only">{change === 'added' ? 'Added: ' : 'Removed: '}</span> : null}
       <span className="min-w-0 flex-1 truncate">{children}</span>
+      {added != null || removed != null ? (
+        <span className={slots.tlStepMeta({ className: 'flex gap-1.5' })}>
+          {added != null ? (
+            <span className={slots.tlStepCount({ className: 'text-success-foreground' })}>+{added}</span>
+          ) : null}
+          {removed != null ? (
+            <span className={slots.tlStepCount({ className: 'text-destructive-foreground' })}>−{removed}</span>
+          ) : null}
+        </span>
+      ) : null}
       {meta != null ? <span className={slots.tlStepMeta()}>{meta}</span> : null}
     </li>
   );

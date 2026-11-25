@@ -29,7 +29,7 @@
     "Context": "A strip under the field, inset from its edges, for where the message goes: a machine, a branch, a ticket. It folds away when `open` is false, or with `mode`, while the prompt is in another mode.",
     "ContextItem": "One fact in the strip, with an icon before it. `onSelect` makes it a button.",
     "Hint": "A quiet line under the prompt. Without children it says that Shift+Enter starts a new line.",
-    "TaskStep": "One thing a task did on its way, with a short mono reading at its end, such as a file and line or a test tally. Shown under its task in the `timeline` variant.",
+    "TaskStep": "One thing a task did on its way, shown under it in the `timeline` variant. `meta` is a short reading at its end. `added` and `removed` write line counts in green and red. `change=\"added\"` or `\"removed\"` sets the whole step on green or red, for a step that added or took something away.",
     "TaskApproval": "What a `waiting` task needs from you, with Approve and Decline. It opens under the task's row."
   },
   "examples": [
@@ -47,7 +47,7 @@
     },
     {
       "title": "Tasks as a timeline",
-      "description": "`variant=\"timeline\"` draws the tasks on a rail. Each `Prompt.Task` takes an `icon`, a `state` shown while it runs, such as \"Editing\", and a `meta` for its time, shown beside the state while it runs and on its own once it is done.\n\nThe task in progress opens into its `Prompt.TaskStep`s, and the rail bends out to run past them. When the task finishes they fold. Press a finished task's row to open them again.\n\nA task still to come can carry a `tag`, such as \"Approval\" for one that will stop for an answer. A task whose `status` is `waiting` shows a Needs you flag, and its `Prompt.TaskApproval` opens under the row as a sentence with Decline and Approve. Here the agent waits before deploying, and Decline stops the run.",
+      "description": "`variant=\"timeline\"` draws the tasks on a rail. `model` writes the model the agent runs on in the badge, after its name. Each `Prompt.Task` takes an `icon`, a `state` shown while it runs, such as \"Editing\", and a `meta` for its time, shown beside the state while it runs and on its own once it is done.\n\nThe task in progress opens into its `Prompt.TaskStep`s, and the rail bends out to run past them. A step that added something is set on green and one that removed something on red, and `added` and `removed` write its line counts in the same colours. When the task finishes they fold. Press a finished task's row to open them again.\n\nA task still to come can carry a `tag`, such as \"Approval\" for one that will stop for an answer. A task whose `status` is `waiting` shows a Needs you flag, and its `Prompt.TaskApproval` opens under the row as a sentence with Decline and Approve. Here the agent waits before deploying, and Decline stops the run.",
       "demo": "timeline",
       "height": 560
     },

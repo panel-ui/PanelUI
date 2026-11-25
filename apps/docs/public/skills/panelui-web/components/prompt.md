@@ -103,7 +103,7 @@ For one question asked from anywhere on a page, with the answer listed under it,
 - `Prompt.Context` — A strip under the field, inset from its edges, for where the message goes: a machine, a branch, a ticket. It folds away when `open` is false, or with `mode`, while the prompt is in another mode.
 - `Prompt.ContextItem` — One fact in the strip, with an icon before it. `onSelect` makes it a button.
 - `Prompt.Hint` — A quiet line under the prompt. Without children it says that Shift+Enter starts a new line.
-- `Prompt.TaskStep` — One thing a task did on its way, with a short mono reading at its end, such as a file and line or a test tally. Shown under its task in the `timeline` variant.
+- `Prompt.TaskStep` — One thing a task did on its way, shown under it in the `timeline` variant. `meta` is a short reading at its end. `added` and `removed` write line counts in green and red. `change="added"` or `"removed"` sets the whole step on green or red, for a step that added or took something away.
 - `Prompt.TaskApproval` — What a `waiting` task needs from you, with Approve and Decline. It opens under the task's row.
 
 ## Props
@@ -248,6 +248,7 @@ Every part also takes the props of the element it renders, and a `className`.
 | `maxHeight` | `string` | — | How tall the list grows before it scrolls, as a CSS length. Default `10rem`, or `20rem` for `timeline`. |
 | `variant` | `PromptTasksVariant` | `'compact'` | `compact` is a list of lines. `timeline` joins the tasks with a rail, gives each an icon and a reading at its end, and opens the one in progress into its steps. Default `compact`. |
 | `badge` | `ReactNode` | — | A small label beside the count, such as which agent is running: "Release bot". |
+| `model` | `ReactNode` | — | The model the agent runs on, written in the badge after its name: "Opus 5.5". |
 
 #### `PromptTaskProps`
 
@@ -265,7 +266,10 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `status` | `'done' \| 'active'` | `'idle'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
+| `status` | `'done' \| 'active'` | `'done'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
+| `change` | `'added' \| 'removed'` | — | What the step did to the work: `added` sets it on green, `removed` on red. |
+| `added` | `number` | — | Lines added, written green at its end: `18` becomes "+18". |
+| `removed` | `number` | — | Lines removed, written red at its end: `3` becomes "−3". |
 | `meta` | `ReactNode` | — | A short reading at its end: a file and line, a diff count, a test tally. |
 
 #### `PromptTaskApprovalProps`

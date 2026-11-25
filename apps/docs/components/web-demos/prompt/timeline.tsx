@@ -14,7 +14,11 @@ import { useEffect, useState } from 'react';
 
 interface Step {
   text: string;
-  meta: string;
+  meta?: string;
+  /** It added or removed something, and is drawn green or red. */
+  change?: 'added' | 'removed';
+  added?: number;
+  removed?: number;
 }
 
 interface Task {
@@ -44,7 +48,7 @@ const TASKS: Task[] = [
     state: 'Mapping',
     ticks: 3,
     steps: [
-      { text: 'Renamed 3 event types', meta: '+42 −17' },
+      { text: 'Renamed 3 event types', added: 42, removed: 17 },
       { text: 'Kept invoice.paid as it is', meta: 'events.ts:61' },
     ],
   },
@@ -52,10 +56,11 @@ const TASKS: Task[] = [
     label: 'Rewrite the handlers',
     icon: <HugeiconsIcon icon={SourceCodeIcon} />,
     state: 'Editing',
-    ticks: 5,
+    ticks: 6,
     steps: [
       { text: 'Moved the signature check into one place', meta: 'verify.ts:18' },
-      { text: 'Updated 4 handlers', meta: '+96 −71' },
+      { text: 'Removed the old retry queue', change: 'removed', removed: 58 },
+      { text: 'Updated 4 handlers', added: 96, removed: 71 },
       { text: 'Running the tests', meta: '38/52' },
       { text: 'All tests pass', meta: '52/52' },
     ],
@@ -66,7 +71,7 @@ const TASKS: Task[] = [
     state: 'Writing',
     ticks: 3,
     steps: [
-      { text: 'Added a rollback section', meta: 'RUNBOOK.md' },
+      { text: 'Added a rollback section', change: 'added', added: 24 },
       { text: 'Linked the migration ticket', meta: 'OPS-212' },
     ],
   },
@@ -156,6 +161,7 @@ export default function PromptTimeline() {
         <Prompt.Tasks
           variant="timeline"
           defaultExpanded
+          model="Opus 5.5"
           title={title}
           badge={
             <>
@@ -188,6 +194,9 @@ export default function PromptTimeline() {
                   <Prompt.TaskStep
                     key={step.text}
                     meta={step.meta}
+                    change={step.change}
+                    added={step.added}
+                    removed={step.removed}
                     status={index === current && stepIndex === shownSteps.length - 1 ? 'active' : 'done'}
                   >
                     {step.text}

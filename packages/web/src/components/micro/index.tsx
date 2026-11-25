@@ -127,7 +127,10 @@ const microVariants = tv({
     kbd: 'inline-flex h-7 shrink-0 items-center rounded-full bg-muted px-2.5 font-mono text-xs text-muted-foreground ring-1 ring-foreground/[0.06]',
     faces: 'flex shrink-0 items-center -space-x-2',
     face: [
-      'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-[0.625rem] font-semibold text-muted-foreground ring-2 ring-card',
+      // Opaque, so where two overlap one sits in front and nothing shows
+      // through; the muted token is translucent and cannot be used here.
+      'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.625rem] font-semibold text-muted-foreground ring-2 ring-card',
+      'bg-[color-mix(in_oklab,var(--muted-foreground)_16%,var(--card))] dark:bg-[color-mix(in_oklab,var(--muted-foreground)_24%,var(--card))]',
       'dark:ring-[color-mix(in_oklab,var(--card),white_3%)] [&_img]:size-full [&_img]:object-cover',
     ],
     input: 'h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground',

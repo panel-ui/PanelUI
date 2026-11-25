@@ -69,7 +69,7 @@ export function OgCard({ eyebrow, title, description, footer, art }: OgCardProps
     >
       {/* Masthead: the mark, the name, and the section it belongs to. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <img src={LOGO} width={64} height={64} alt="" />
+        {LOGO ? <img src={LOGO} width={64} height={64} alt="" /> : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', fontSize: 36, fontWeight: 600, letterSpacing: -0.5 }}>
             {site.name}

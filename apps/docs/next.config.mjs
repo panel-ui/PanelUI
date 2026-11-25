@@ -55,6 +55,16 @@ const config = {
    * - The dev server stays on Turbopack, with its loaders in worker threads
    *   rather than a child process each.
    */
+  /*
+   * The social card reads public/logo-dark.png from disk (lib/og-card.tsx). A
+   * prerendered page reads it at build, but a URL that matches no page renders
+   * in a server function, and Vercel leaves public/ out of a function's
+   * bundle unless it is named here. Without it, every missing docs and blog
+   * page answered 500 instead of 404.
+   */
+  outputFileTracingIncludes: {
+    '/**': ['./public/logo-dark.png'],
+  },
   experimental: {
     cpus: 3,
     turbopackPluginRuntimeStrategy: 'workerThreads',

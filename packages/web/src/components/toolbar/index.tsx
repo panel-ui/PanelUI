@@ -147,6 +147,8 @@ const toolbarVariants = tv({
         root: [
           'rounded-[calc(var(--toolbar-radius)+var(--toolbar-pad))] bg-popover p-(--toolbar-pad) text-popover-foreground',
           'shadow-[0_10px_30px_-12px_rgb(0_0_0/0.3)] ring-1 ring-foreground/[0.06] dark:ring-foreground/10',
+          // A step lighter than the page in dark, so the strip reads as raised.
+          'dark:bg-[color-mix(in_oklab,var(--popover),white_5%)]',
           // With a handle the surface moves to a layer that starts along the
           // tab, so the tab can show beneath its rounded end.
           'isolate [--toolbar-grip:calc(var(--toolbar-item)*0.85)]',

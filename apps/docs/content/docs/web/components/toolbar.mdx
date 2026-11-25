@@ -9,54 +9,56 @@ description: A strip of tools and actions for an editor, with one tool chosen at
 'use client';
 
 import {
+  BubbleChatIcon,
   CircleIcon,
+  Cursor01Icon,
   FrameIcon,
-  HandIcon,
-  MessageCircleIcon,
-  MousePointer2Icon,
-  PenToolIcon,
-  Redo2Icon,
+  HandGrabIcon,
+  PenTool01Icon,
+  Redo02Icon,
   SquareIcon,
-  TypeIcon,
-  Undo2Icon,
-} from 'lucide-react';
+  TextIcon,
+  Undo02Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from '@/components/panelui/toolbar';
 
 export default function ToolbarOverview() {
   return (
-    <Toolbar>
-      <Toolbar.Group defaultValue="select" aria-label="Tools">
+    <Toolbar shape="pill">
+      <Toolbar.Handle />
+      <Toolbar.Group tone="info" defaultValue="select" aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="hand" label="Pan" shortcut="H">
-          <HandIcon />
+          <HugeiconsIcon icon={HandGrabIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="frame" label="Frame" shortcut="F">
-          <FrameIcon />
+          <HugeiconsIcon icon={FrameIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="rectangle" label="Rectangle" shortcut="R">
-          <SquareIcon />
+          <HugeiconsIcon icon={SquareIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="E">
-          <CircleIcon />
+          <HugeiconsIcon icon={CircleIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="pen" label="Pen" shortcut="P">
-          <PenToolIcon />
+          <HugeiconsIcon icon={PenTool01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="text" label="Text" shortcut="T">
-          <TypeIcon />
+          <HugeiconsIcon icon={TextIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="comment" label="Comment" shortcut="C">
-          <MessageCircleIcon />
+          <HugeiconsIcon icon={BubbleChatIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
-      <Toolbar.Separator />
+      <Toolbar.Separator variant="dashed" />
       <Toolbar.Button label="Undo" shortcut="⌘Z">
-        <Undo2Icon />
+        <HugeiconsIcon icon={Undo02Icon} />
       </Toolbar.Button>
       <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled>
-        <Redo2Icon />
+        <HugeiconsIcon icon={Redo02Icon} />
       </Toolbar.Button>
     </Toolbar>
   );
@@ -173,17 +175,26 @@ import { Toolbar } from "@/components/panelui/toolbar"
 ```tsx lineNumbers
 'use client';
 
-import { BrushIcon, CropIcon, EraserIcon, PipetteIcon, Settings2Icon, SlidersHorizontalIcon, StampIcon } from 'lucide-react';
+import {
+  ColorPickerIcon,
+  CropIcon,
+  Eraser01Icon,
+  PaintBrush01Icon,
+  Settings02Icon,
+  SlidersHorizontalIcon,
+  StampIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Toolbar } from '@/components/panelui/toolbar';
 
 const TOOLS = [
   { value: 'crop', label: 'Crop and straighten', icon: CropIcon },
   { value: 'adjust', label: 'Adjust', icon: SlidersHorizontalIcon },
-  { value: 'brush', label: 'Brush', icon: BrushIcon },
-  { value: 'erase', label: 'Erase', icon: EraserIcon },
+  { value: 'brush', label: 'Brush', icon: PaintBrush01Icon },
+  { value: 'erase', label: 'Erase', icon: Eraser01Icon },
   { value: 'heal', label: 'Heal', icon: StampIcon },
-  { value: 'sample', label: 'Sample colour', icon: PipetteIcon },
+  { value: 'sample', label: 'Sample colour', icon: ColorPickerIcon },
 ];
 
 export default function ToolbarRail() {
@@ -191,17 +202,17 @@ export default function ToolbarRail() {
   const current = TOOLS.find((each) => each.value === tool);
   return (
     <div className="flex items-center gap-6">
-      <Toolbar orientation="vertical" aria-label="Photo tools">
-        <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+      <Toolbar shape="pill" orientation="vertical" aria-label="Photo tools">
+        <Toolbar.Group tone="info" value={tool} onValueChange={setTool} aria-label="Tools">
           {TOOLS.map(({ value, label, icon: Icon }) => (
             <Toolbar.Tool key={value} value={value} label={label}>
-              <Icon />
+              <HugeiconsIcon icon={Icon} />
             </Toolbar.Tool>
           ))}
         </Toolbar.Group>
-        <Toolbar.Separator />
+        <Toolbar.Separator variant="dashed" />
         <Toolbar.Button label="Editor settings">
-          <Settings2Icon />
+          <HugeiconsIcon icon={Settings02Icon} />
         </Toolbar.Button>
       </Toolbar>
       <p className="w-36 text-sm text-muted-foreground">
@@ -335,7 +346,16 @@ A `Toolbar.Button` holding only a `Toolbar.Caret` is drawn as a slim chevron aga
 ```tsx lineNumbers
 'use client';
 
-import { HexagonIcon, MousePointer2Icon, SquareIcon, StarIcon, TriangleIcon, TypeIcon, CircleIcon } from 'lucide-react';
+import {
+  CircleIcon,
+  Cursor01Icon,
+  HexagonIcon,
+  SquareIcon,
+  StarIcon,
+  TextIcon,
+  TriangleIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Menu } from '@/components/panelui/menu';
 import { Toolbar } from '@/components/panelui/toolbar';
@@ -355,14 +375,15 @@ export default function ToolbarMenu() {
   const [shape, setShape] = useState<Shape>('star');
   const Current = SHAPES[shape].icon;
   return (
-    <Toolbar>
-      <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+    <Toolbar shape="pill">
+      <Toolbar.Handle />
+      <Toolbar.Group tone="info" value={tool} onValueChange={setTool} aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         {/* The tool draws the last shape chosen; the caret beside it picks another. */}
         <Toolbar.Tool value="shape" label={SHAPES[shape].label}>
-          <Current />
+          <HugeiconsIcon icon={Current} />
         </Toolbar.Tool>
         <Menu>
           <Toolbar.Button label="More shapes" render={<Menu.Trigger />}>
@@ -378,7 +399,7 @@ export default function ToolbarMenu() {
             >
               {Object.entries(SHAPES).map(([value, { label, shortcut, icon: Icon }]) => (
                 <Menu.RadioItem key={value} value={value}>
-                  <Icon />
+                  <HugeiconsIcon icon={Icon} />
                   {label}
                   {shortcut ? <Menu.Shortcut>{shortcut}</Menu.Shortcut> : null}
                 </Menu.RadioItem>
@@ -387,7 +408,7 @@ export default function ToolbarMenu() {
           </Menu.Content>
         </Menu>
         <Toolbar.Tool value="text" label="Text" shortcut="T">
-          <TypeIcon />
+          <HugeiconsIcon icon={TextIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
     </Toolbar>
@@ -406,7 +427,8 @@ Actions sit beside other controls in the same strip. Here a `line` [Slider](/doc
 ```tsx lineNumbers
 'use client';
 
-import { Redo2Icon, Undo2Icon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
+import { Redo02Icon, Undo02Icon, ZoomInAreaIcon, ZoomOutAreaIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Slider } from '@/components/panelui/slider';
 import { Toolbar } from '@/components/panelui/toolbar';
@@ -424,14 +446,14 @@ export default function ToolbarHistory() {
   const [dragging, setDragging] = useState<number | null>(null);
 
   return (
-    <Toolbar size="sm" aria-label="View">
+    <Toolbar shape="pill" size="sm" aria-label="View">
       <Toolbar.Button label="Undo" shortcut="⌘Z" disabled={at === 0} onClick={() => setAt(at - 1)}>
-        <Undo2Icon />
+        <HugeiconsIcon icon={Undo02Icon} />
       </Toolbar.Button>
       <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled={at === steps.length - 1} onClick={() => setAt(at + 1)}>
-        <Redo2Icon />
+        <HugeiconsIcon icon={Redo02Icon} />
       </Toolbar.Button>
-      <Toolbar.Separator />
+      <Toolbar.Separator variant="dashed" />
       <div className="flex w-56 items-center px-1">
         <Slider
           variant="line"
@@ -446,11 +468,19 @@ export default function ToolbarHistory() {
             setDragging(null);
           }}
         >
-          <Slider.Step by={-25} aria-label="Zoom out" onClick={(event) => (event.preventDefault(), settle(Math.max(25, zoom - 25)))}>
-            <ZoomOutIcon />
+          <Slider.Step
+            by={-25}
+            aria-label="Zoom out"
+            onClick={(event) => (event.preventDefault(), settle(Math.max(25, zoom - 25)))}
+          >
+            <HugeiconsIcon icon={ZoomOutAreaIcon} />
           </Slider.Step>
-          <Slider.Step by={25} aria-label="Zoom in" onClick={(event) => (event.preventDefault(), settle(Math.min(400, zoom + 25)))}>
-            <ZoomInIcon />
+          <Slider.Step
+            by={25}
+            aria-label="Zoom in"
+            onClick={(event) => (event.preventDefault(), settle(Math.min(400, zoom + 25)))}
+          >
+            <HugeiconsIcon icon={ZoomInAreaIcon} />
           </Slider.Step>
         </Slider>
       </div>
@@ -471,27 +501,29 @@ With `shortcuts` on, a tool's single-key `shortcut` chooses it from anywhere on 
 ```tsx lineNumbers
 'use client';
 
-import { EraserIcon, HighlighterIcon, LassoSelectIcon, PencilIcon, ShapesIcon } from 'lucide-react';
+import { Eraser01Icon, HighlighterIcon, LassoTool01Icon, PencilIcon, ShapesIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Toolbar } from '@/components/panelui/toolbar';
 
 const TOOLS = [
-  { value: 'lasso', label: 'Lasso', shortcut: 'L', icon: LassoSelectIcon },
+  { value: 'lasso', label: 'Lasso', shortcut: 'L', icon: LassoTool01Icon },
   { value: 'pencil', label: 'Pencil', shortcut: 'B', icon: PencilIcon },
   { value: 'marker', label: 'Marker', shortcut: 'M', icon: HighlighterIcon },
   { value: 'shapes', label: 'Shapes', shortcut: 'S', icon: ShapesIcon },
-  { value: 'eraser', label: 'Eraser', shortcut: 'E', icon: EraserIcon },
+  { value: 'eraser', label: 'Eraser', shortcut: 'E', icon: Eraser01Icon },
 ];
 
 export default function ToolbarShortcuts() {
   const [tool, setTool] = useState('pencil');
   return (
     <div className="flex flex-col items-center gap-4">
-      <Toolbar shortcuts size="lg" aria-label="Sketch tools">
-        <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+      <Toolbar shape="pill" shortcuts size="lg" aria-label="Sketch tools">
+        <Toolbar.Handle />
+        <Toolbar.Group tone="info" value={tool} onValueChange={setTool} aria-label="Tools">
           {TOOLS.map(({ value, label, shortcut, icon: Icon }) => (
             <Toolbar.Tool key={value} value={value} label={label} shortcut={shortcut}>
-              <Icon />
+              <HugeiconsIcon icon={Icon} />
             </Toolbar.Tool>
           ))}
         </Toolbar.Group>
@@ -521,7 +553,14 @@ export default function ToolbarShortcuts() {
 ```tsx lineNumbers
 'use client';
 
-import { AlignCenterIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, ItalicIcon } from 'lucide-react';
+import {
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
+  TextBoldIcon,
+  TextItalicIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar, type ToolbarSize } from '@/components/panelui/toolbar';
 
 const SIZES: ToolbarSize[] = ['sm', 'md', 'lg'];
@@ -530,23 +569,23 @@ export default function ToolbarSizes() {
   return (
     <div className="flex flex-col items-center gap-4">
       {SIZES.map((size) => (
-        <Toolbar key={size} size={size} aria-label={`Text, ${size}`}>
+        <Toolbar shape="pill" key={size} size={size} aria-label={`Text, ${size}`}>
           <Toolbar.Button label="Bold">
-            <BoldIcon />
+            <HugeiconsIcon icon={TextBoldIcon} />
           </Toolbar.Button>
           <Toolbar.Button label="Italic">
-            <ItalicIcon />
+            <HugeiconsIcon icon={TextItalicIcon} />
           </Toolbar.Button>
-          <Toolbar.Separator />
-          <Toolbar.Group defaultValue="left" aria-label="Alignment">
+          <Toolbar.Separator variant="dashed" />
+          <Toolbar.Group tone="info" defaultValue="left" aria-label="Alignment">
             <Toolbar.Tool value="left" label="Align left">
-              <AlignLeftIcon />
+              <HugeiconsIcon icon={TextAlignLeftIcon} />
             </Toolbar.Tool>
             <Toolbar.Tool value="center" label="Centre">
-              <AlignCenterIcon />
+              <HugeiconsIcon icon={TextAlignCenterIcon} />
             </Toolbar.Tool>
             <Toolbar.Tool value="right" label="Align right">
-              <AlignRightIcon />
+              <HugeiconsIcon icon={TextAlignRightIcon} />
             </Toolbar.Tool>
           </Toolbar.Group>
         </Toolbar>

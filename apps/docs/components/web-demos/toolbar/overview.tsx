@@ -1,54 +1,56 @@
 'use client';
 
 import {
+  BubbleChatIcon,
   CircleIcon,
+  Cursor01Icon,
   FrameIcon,
-  HandIcon,
-  MessageCircleIcon,
-  MousePointer2Icon,
-  PenToolIcon,
-  Redo2Icon,
+  HandGrabIcon,
+  PenTool01Icon,
+  Redo02Icon,
   SquareIcon,
-  TypeIcon,
-  Undo2Icon,
-} from 'lucide-react';
+  TextIcon,
+  Undo02Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Toolbar } from 'panelui-web/toolbar';
 
 export default function ToolbarOverview() {
   return (
-    <Toolbar>
-      <Toolbar.Group defaultValue="select" aria-label="Tools">
+    <Toolbar shape="pill">
+      <Toolbar.Handle />
+      <Toolbar.Group tone="info" defaultValue="select" aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="hand" label="Pan" shortcut="H">
-          <HandIcon />
+          <HugeiconsIcon icon={HandGrabIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="frame" label="Frame" shortcut="F">
-          <FrameIcon />
+          <HugeiconsIcon icon={FrameIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="rectangle" label="Rectangle" shortcut="R">
-          <SquareIcon />
+          <HugeiconsIcon icon={SquareIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="ellipse" label="Ellipse" shortcut="E">
-          <CircleIcon />
+          <HugeiconsIcon icon={CircleIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="pen" label="Pen" shortcut="P">
-          <PenToolIcon />
+          <HugeiconsIcon icon={PenTool01Icon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="text" label="Text" shortcut="T">
-          <TypeIcon />
+          <HugeiconsIcon icon={TextIcon} />
         </Toolbar.Tool>
         <Toolbar.Tool value="comment" label="Comment" shortcut="C">
-          <MessageCircleIcon />
+          <HugeiconsIcon icon={BubbleChatIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
-      <Toolbar.Separator />
+      <Toolbar.Separator variant="dashed" />
       <Toolbar.Button label="Undo" shortcut="⌘Z">
-        <Undo2Icon />
+        <HugeiconsIcon icon={Undo02Icon} />
       </Toolbar.Button>
       <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled>
-        <Redo2Icon />
+        <HugeiconsIcon icon={Redo02Icon} />
       </Toolbar.Button>
     </Toolbar>
   );

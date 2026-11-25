@@ -1,6 +1,7 @@
 'use client';
 
-import { Redo2Icon, Undo2Icon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
+import { Redo02Icon, Undo02Icon, ZoomInAreaIcon, ZoomOutAreaIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Slider } from 'panelui-web/slider';
 import { Toolbar } from 'panelui-web/toolbar';
@@ -18,14 +19,14 @@ export default function ToolbarHistory() {
   const [dragging, setDragging] = useState<number | null>(null);
 
   return (
-    <Toolbar size="sm" aria-label="View">
+    <Toolbar shape="pill" size="sm" aria-label="View">
       <Toolbar.Button label="Undo" shortcut="⌘Z" disabled={at === 0} onClick={() => setAt(at - 1)}>
-        <Undo2Icon />
+        <HugeiconsIcon icon={Undo02Icon} />
       </Toolbar.Button>
       <Toolbar.Button label="Redo" shortcut="⇧⌘Z" disabled={at === steps.length - 1} onClick={() => setAt(at + 1)}>
-        <Redo2Icon />
+        <HugeiconsIcon icon={Redo02Icon} />
       </Toolbar.Button>
-      <Toolbar.Separator />
+      <Toolbar.Separator variant="dashed" />
       <div className="flex w-56 items-center px-1">
         <Slider
           variant="line"
@@ -40,11 +41,19 @@ export default function ToolbarHistory() {
             setDragging(null);
           }}
         >
-          <Slider.Step by={-25} aria-label="Zoom out" onClick={(event) => (event.preventDefault(), settle(Math.max(25, zoom - 25)))}>
-            <ZoomOutIcon />
+          <Slider.Step
+            by={-25}
+            aria-label="Zoom out"
+            onClick={(event) => (event.preventDefault(), settle(Math.max(25, zoom - 25)))}
+          >
+            <HugeiconsIcon icon={ZoomOutAreaIcon} />
           </Slider.Step>
-          <Slider.Step by={25} aria-label="Zoom in" onClick={(event) => (event.preventDefault(), settle(Math.min(400, zoom + 25)))}>
-            <ZoomInIcon />
+          <Slider.Step
+            by={25}
+            aria-label="Zoom in"
+            onClick={(event) => (event.preventDefault(), settle(Math.min(400, zoom + 25)))}
+          >
+            <HugeiconsIcon icon={ZoomInAreaIcon} />
           </Slider.Step>
         </Slider>
       </div>

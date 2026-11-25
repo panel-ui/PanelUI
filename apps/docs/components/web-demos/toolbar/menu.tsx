@@ -1,6 +1,15 @@
 'use client';
 
-import { HexagonIcon, MousePointer2Icon, SquareIcon, StarIcon, TriangleIcon, TypeIcon, CircleIcon } from 'lucide-react';
+import {
+  CircleIcon,
+  Cursor01Icon,
+  HexagonIcon,
+  SquareIcon,
+  StarIcon,
+  TextIcon,
+  TriangleIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Menu } from 'panelui-web/menu';
 import { Toolbar } from 'panelui-web/toolbar';
@@ -20,14 +29,15 @@ export default function ToolbarMenu() {
   const [shape, setShape] = useState<Shape>('star');
   const Current = SHAPES[shape].icon;
   return (
-    <Toolbar>
-      <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+    <Toolbar shape="pill">
+      <Toolbar.Handle />
+      <Toolbar.Group tone="info" value={tool} onValueChange={setTool} aria-label="Tools">
         <Toolbar.Tool value="select" label="Select" shortcut="V">
-          <MousePointer2Icon />
+          <HugeiconsIcon icon={Cursor01Icon} />
         </Toolbar.Tool>
         {/* The tool draws the last shape chosen; the caret beside it picks another. */}
         <Toolbar.Tool value="shape" label={SHAPES[shape].label}>
-          <Current />
+          <HugeiconsIcon icon={Current} />
         </Toolbar.Tool>
         <Menu>
           <Toolbar.Button label="More shapes" render={<Menu.Trigger />}>
@@ -43,7 +53,7 @@ export default function ToolbarMenu() {
             >
               {Object.entries(SHAPES).map(([value, { label, shortcut, icon: Icon }]) => (
                 <Menu.RadioItem key={value} value={value}>
-                  <Icon />
+                  <HugeiconsIcon icon={Icon} />
                   {label}
                   {shortcut ? <Menu.Shortcut>{shortcut}</Menu.Shortcut> : null}
                 </Menu.RadioItem>
@@ -52,7 +62,7 @@ export default function ToolbarMenu() {
           </Menu.Content>
         </Menu>
         <Toolbar.Tool value="text" label="Text" shortcut="T">
-          <TypeIcon />
+          <HugeiconsIcon icon={TextIcon} />
         </Toolbar.Tool>
       </Toolbar.Group>
     </Toolbar>

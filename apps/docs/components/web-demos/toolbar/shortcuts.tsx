@@ -1,26 +1,28 @@
 'use client';
 
-import { EraserIcon, HighlighterIcon, LassoSelectIcon, PencilIcon, ShapesIcon } from 'lucide-react';
+import { Eraser01Icon, HighlighterIcon, LassoTool01Icon, PencilIcon, ShapesIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 import { Toolbar } from 'panelui-web/toolbar';
 
 const TOOLS = [
-  { value: 'lasso', label: 'Lasso', shortcut: 'L', icon: LassoSelectIcon },
+  { value: 'lasso', label: 'Lasso', shortcut: 'L', icon: LassoTool01Icon },
   { value: 'pencil', label: 'Pencil', shortcut: 'B', icon: PencilIcon },
   { value: 'marker', label: 'Marker', shortcut: 'M', icon: HighlighterIcon },
   { value: 'shapes', label: 'Shapes', shortcut: 'S', icon: ShapesIcon },
-  { value: 'eraser', label: 'Eraser', shortcut: 'E', icon: EraserIcon },
+  { value: 'eraser', label: 'Eraser', shortcut: 'E', icon: Eraser01Icon },
 ];
 
 export default function ToolbarShortcuts() {
   const [tool, setTool] = useState('pencil');
   return (
     <div className="flex flex-col items-center gap-4">
-      <Toolbar shortcuts size="lg" aria-label="Sketch tools">
-        <Toolbar.Group value={tool} onValueChange={setTool} aria-label="Tools">
+      <Toolbar shape="pill" shortcuts size="lg" aria-label="Sketch tools">
+        <Toolbar.Handle />
+        <Toolbar.Group tone="info" value={tool} onValueChange={setTool} aria-label="Tools">
           {TOOLS.map(({ value, label, shortcut, icon: Icon }) => (
             <Toolbar.Tool key={value} value={value} label={label} shortcut={shortcut}>
-              <Icon />
+              <HugeiconsIcon icon={Icon} />
             </Toolbar.Tool>
           ))}
         </Toolbar.Group>

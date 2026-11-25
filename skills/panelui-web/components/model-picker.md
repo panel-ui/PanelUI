@@ -42,15 +42,14 @@ const models = [
 ```tsx
 <ModelPicker>
   <ModelPicker.Trigger />
-  <ModelPicker.Content>
-    <ModelPicker.Effort />
-  </ModelPicker.Content>
+  <ModelPicker.Effort />
+  <ModelPicker.Content />
 </ModelPicker>
 ```
 
 - `ModelPicker.Trigger` — The button that opens the list, showing the chosen model's icon and name. `appearance` is `ghost`, with no box until hovered, for a composer, or `outline`, for a toolbar. With a `hotkey` on the root, its tooltip shows the keys.
 - `ModelPicker.Content` — The list, laid out as the root's `variant` says. `side` and `align` place it against the trigger, and `placeholder` and `emptyText` change what the search field and an empty list say.
-- `ModelPicker.Effort` — How hard the chosen model thinks, as a row of rising bars at the foot of the list, with the level's name and what it trades. It needs `efforts` on the root. It is greyed out for a model with `supportsEffort: false`.
+- `ModelPicker.Effort` — How hard the chosen model works, beside the trigger. It shows a ring of one arc per level, lit up to the chosen one, and the level's name. Pressed, it opens a menu of the levels. It needs `efforts` on the root, and is disabled for a model with `supportsEffort: false`.
 
 ## Props
 
@@ -103,8 +102,10 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `label` | `ReactNode` | `'Effort'` | The band's name. Default `Effort`. |
-| `unsupportedText` | `ReactNode` | `'Fixed for this model'` | What it says when the chosen model takes no effort level. Default `Fixed for this model`. |
+| `label` | `ReactNode` | `'Effort'` | What the menu's heading says. Default `Effort`. |
+| `unsupportedText` | `ReactNode` | `'Fixed'` | What the trigger says when the chosen model takes no effort level. Default `Fixed`. |
+| `side` | `Menu.Positioner.Props['side']` | `'top'` | Which side of the trigger the menu opens on. Default `top`. |
+| `align` | `Menu.Positioner.Props['align']` | `'start'` | How the menu lines up with the trigger. Default `start`. |
 | `className` | `string` | — | — |
 
 ## In a Server Component
@@ -133,7 +134,7 @@ A page never receives the keys a browser keeps for itself: ⌘1 to ⌘9 and Ctrl
 
 `effort`, `defaultEffort` and `onEffortChange` hold the level, by `value`. Without `defaultEffort`, the middle level is chosen. The level belongs to the picker, not to a model, so it carries over when another model that takes it is chosen.
 
-The bars are a radio group: Tab reaches the chosen one, and the arrow keys move between levels. The line beside them is a live region, so the description is read as the level changes.
+The control is a menu button, and its levels are a radio group in the menu. Its accessible name includes the chosen level, such as "Effort: High".
 
 ## Example
 

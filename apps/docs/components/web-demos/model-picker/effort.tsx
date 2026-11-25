@@ -27,7 +27,13 @@ const MODELS: ModelPickerItem[] = [
     contextWindow: 1_000_000,
     supportsEffort: false,
   },
-  { value: 'mistral-large-3', label: 'Mistral Large 3', provider: 'mistral', contextWindow: 256_000, supportsEffort: false },
+  {
+    value: 'mistral-large-3',
+    label: 'Mistral Large 3',
+    provider: 'mistral',
+    contextWindow: 256_000,
+    supportsEffort: false,
+  },
 ];
 
 const EFFORTS: ModelPickerEffortLevel[] = [
@@ -39,11 +45,19 @@ const EFFORTS: ModelPickerEffortLevel[] = [
 
 export default function ModelPickerEffort() {
   return (
-    <ModelPicker variant="list" items={MODELS} providers={PROVIDERS} efforts={EFFORTS} defaultEffort="high" defaultValue="claude-opus-5.5">
-      <ModelPicker.Trigger appearance="outline" />
-      <ModelPicker.Content>
-        <ModelPicker.Effort />
-      </ModelPicker.Content>
+    <ModelPicker
+      variant="list"
+      items={MODELS}
+      providers={PROVIDERS}
+      efforts={EFFORTS}
+      defaultEffort="high"
+      defaultValue="claude-opus-5.5"
+    >
+      <div className="flex items-center gap-1">
+        <ModelPicker.Trigger appearance="outline" />
+        <ModelPicker.Effort side="bottom" />
+      </div>
+      <ModelPicker.Content />
     </ModelPicker>
   );
 }

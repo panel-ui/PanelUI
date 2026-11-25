@@ -11,17 +11,18 @@ status: new
 
 import { useEffect, useState } from 'react';
 import {
-  BookmarkIcon,
-  CheckIcon,
-  ClockIcon,
+  Add01Icon,
+  Bookmark01Icon,
+  Clock01Icon,
+  GoForward15SecIcon,
   PauseIcon,
   PlayIcon,
-  PlusIcon,
-  SearchIcon,
-  Share2Icon,
-  SkipBackIcon,
-  SkipForwardIcon,
-} from 'lucide-react';
+  GoBackward15SecIcon,
+  Search01Icon,
+  Share08Icon,
+  Tick02Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Micro } from '@/components/panelui/micro';
 
 const LENGTH = 52 * 60 + 10;
@@ -72,21 +73,21 @@ export default function MicroOverview() {
 
       <Micro>
         <Micro.Button aria-label={playing ? 'Pause' : 'Play'} onClick={() => setPlaying(!playing)}>
-          {playing ? <PauseIcon className="fill-current" /> : <PlayIcon className="fill-current" />}
+          {playing ? <HugeiconsIcon icon={PauseIcon} /> : <HugeiconsIcon icon={PlayIcon} />}
         </Micro.Button>
         <Micro.Button
           variant="ghost"
           aria-label="Back 15 seconds"
           onClick={() => setTime((value) => Math.max(0, value - 15))}
         >
-          <SkipBackIcon />
+          <HugeiconsIcon icon={GoBackward15SecIcon} />
         </Micro.Button>
         <Micro.Button
           variant="ghost"
           aria-label="Forward 15 seconds"
           onClick={() => setTime((value) => Math.min(LENGTH, value + 15))}
         >
-          <SkipForwardIcon />
+          <HugeiconsIcon icon={GoForward15SecIcon} />
         </Micro.Button>
         <Micro.Separator />
         <span>
@@ -100,7 +101,7 @@ export default function MicroOverview() {
           <Micro.Segment value="outro">Outro</Micro.Segment>
         </Micro.Segments>
         <Micro.Button variant="ghost" aria-label="Add a section">
-          <PlusIcon />
+          <HugeiconsIcon icon={Add01Icon} />
         </Micro.Button>
       </Micro>
       <Micro>
@@ -118,10 +119,10 @@ export default function MicroOverview() {
       </Micro>
       <Micro>
         <Micro.Button variant="ghost" aria-label="Bookmark">
-          <BookmarkIcon />
+          <HugeiconsIcon icon={Bookmark01Icon} />
         </Micro.Button>
         <Micro.Button variant="ghost" aria-label="Share">
-          <Share2Icon />
+          <HugeiconsIcon icon={Share08Icon} />
         </Micro.Button>
       </Micro>
 
@@ -143,11 +144,11 @@ export default function MicroOverview() {
           onClick={() => (exported >= 12 ? setExported(0) : setExporting(!exporting))}
         >
           {exported >= 12 ? (
-            <CheckIcon />
+            <HugeiconsIcon icon={Tick02Icon} />
           ) : exporting ? (
-            <PauseIcon className="fill-current" />
+            <HugeiconsIcon icon={PauseIcon} />
           ) : (
-            <PlayIcon className="fill-current" />
+            <HugeiconsIcon icon={PlayIcon} />
           )}
         </Micro.Button>
       </Micro>
@@ -160,11 +161,11 @@ export default function MicroOverview() {
           ]}
         />
         <Micro.Label className="text-foreground">Approved</Micro.Label>
-        <CheckIcon className="size-4 text-success-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Tick02Icon} className="size-4 text-success-foreground" aria-hidden="true" />
       </Micro>
 
       <Micro className="w-80">
-        <SearchIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Search01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <Micro.Input placeholder="Find a word in this episode" aria-label="Find in episode" />
         <Micro.Kbd>⌘F</Micro.Kbd>
       </Micro>
@@ -173,7 +174,7 @@ export default function MicroOverview() {
         <Micro.Switch checked={denoise} onCheckedChange={setDenoise} label="Remove noise" color="info" />
       </Micro>
       <Micro>
-        <ClockIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Clock01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <Micro.Mono>3,180</Micro.Mono>
         <Micro.Label>minutes left</Micro.Label>
       </Micro>
@@ -186,7 +187,7 @@ export default function MicroOverview() {
 
 Use it for the small readings and controls that sit around a piece of work rather than in a form: a count with its trend, a percentage, a timecode with play and skip, a speed, which section is showing, how far an export has got. Every pill has the same height and surface, so a row of them reads as one strip of instruments.
 
-A pill is built from parts written in the order they read. At an end that is a round button, a segmented choice or a ring, the pill pulls its padding in so the circle sits concentric with it.
+A pill is built from parts written in the order they read. Each pill in the board above has its own example further down this page. At an end that is a round button, a segmented choice or a ring, the pill pulls its padding in so the circle sits concentric with it.
 
 For a single figure with a label and a badge, use [Stat](/docs/web/components/stat). For a status word, use [Badge](/docs/web/components/badge).
 
@@ -301,33 +302,229 @@ import { Micro } from "@/components/panelui/micro"
 
 ## Examples
 
-### Readings
+### A count and its trend
 
-A pill for a reading pairs `Micro.Text` or `Micro.Mono` with something that shows its shape: a `Micro.Spark` of recent values, a `Micro.Ring`, or a `Micro.Pulse` for a live measurement. `Micro.Delta` says how it moved.
+`Micro.Text` gives the value and what it counts. `Micro.Spark` draws its recent values as bars, oldest first, with the newest in `tone`. `Micro.Delta` says how much it moved.
 
-Pass `inverted` to the delta when lower is better, as for latency. A rise is then drawn red.
-
-<ComponentPreview name="micro/readings" height={160}>
+<ComponentPreview name="micro/stat" height={150}>
 
 ```tsx lineNumbers
 import { Micro } from '@/components/panelui/micro';
 
-export default function MicroReadings() {
+export default function MicroStat() {
+  return (
+    <Micro>
+      <Micro.Text value="12.4k" label="listens · 30 days" />
+      <Micro.Spark values={[4, 5, 4, 6, 6, 7, 6, 8, 9, 11]} tone="info" />
+      <Micro.Delta value={9} />
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A percentage
+
+`Micro.Ring` sweeps to `value`, from 0 to 100. At the pill's start it is pulled in to sit concentric with the end. Give it a `label`, since it is read as a meter.
+
+<ComponentPreview name="micro/ring" height={150}>
+
+```tsx lineNumbers
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroRingDemo() {
+  return (
+    <Micro>
+      <Micro.Ring value={72} tone="info" label="Finish rate" />
+      <Micro.Text value="72%" label="finish rate" />
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Playback
+
+A solid `Micro.Button` for the main action and `variant="ghost"` buttons for the rest. `Micro.Separator` sets the time apart, and `Micro.Mono` keeps its figures from shifting as they change. `muted` dims the total.
+
+<ComponentPreview name="micro/transport" height={150}>
+
+```tsx lineNumbers
+'use client';
+
+import { useEffect, useState } from 'react';
+import { GoBackward15SecIcon, GoForward15SecIcon, PauseIcon, PlayIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+const LENGTH = 52 * 60 + 10;
+
+function clock(seconds: number) {
+  return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+export default function MicroTransport() {
+  const [playing, setPlaying] = useState(false);
+  const [time, setTime] = useState(18 * 60 + 42);
+
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => setTime((value) => Math.min(LENGTH, value + 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [playing]);
+
+  return (
+    <Micro>
+      <Micro.Button aria-label={playing ? 'Pause' : 'Play'} onClick={() => setPlaying(!playing)}>
+        <HugeiconsIcon icon={playing ? PauseIcon : PlayIcon} />
+      </Micro.Button>
+      <Micro.Button
+        variant="ghost"
+        aria-label="Back 15 seconds"
+        onClick={() => setTime((value) => Math.max(0, value - 15))}
+      >
+        <HugeiconsIcon icon={GoBackward15SecIcon} />
+      </Micro.Button>
+      <Micro.Button
+        variant="ghost"
+        aria-label="Forward 15 seconds"
+        onClick={() => setTime((value) => Math.min(LENGTH, value + 15))}
+      >
+        <HugeiconsIcon icon={GoForward15SecIcon} />
+      </Micro.Button>
+      <Micro.Separator />
+      <span>
+        <Micro.Mono>{clock(time)}</Micro.Mono> <Micro.Mono muted>/ {clock(LENGTH)}</Micro.Mono>
+      </span>
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A choice of a few
+
+`Micro.Segments` holds `Micro.Segment`s, with a marker that slides to the chosen one. The arrow keys move it. A ghost button after it adds to the choices.
+
+<ComponentPreview name="micro/segments" height={150}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Add01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroSegmentsDemo() {
+  const [part, setPart] = useState('interview');
+  return (
+    <Micro>
+      <Micro.Segments value={part} onValueChange={setPart} aria-label="Section">
+        <Micro.Segment value="intro">Intro</Micro.Segment>
+        <Micro.Segment value="interview">Interview</Micro.Segment>
+        <Micro.Segment value="outro">Outro</Micro.Segment>
+      </Micro.Segments>
+      <Micro.Button variant="ghost" aria-label="Add a section">
+        <HugeiconsIcon icon={Add01Icon} />
+      </Micro.Button>
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A number between bounds
+
+`Micro.Stepper` sits between a minus and a plus, with `min`, `max` and `step`. Its digits roll as it changes, and the arrow keys, Home and End move it once it has focus. `format` and `suffix` set how it is written.
+
+<ComponentPreview name="micro/stepper" height={150}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroStepperDemo() {
+  const [speed, setSpeed] = useState(1);
+  return (
+    <Micro>
+      <Micro.Label>Speed</Micro.Label>
+      <Micro.Stepper
+        value={speed}
+        onValueChange={setSpeed}
+        min={0.5}
+        max={2}
+        step={0.25}
+        suffix="×"
+        format={{ minimumFractionDigits: 1, maximumFractionDigits: 2 }}
+        label="Playback speed"
+      />
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A pair of actions
+
+Ghost buttons on their own make a pill of icon actions. `aria-pressed` fills a button that stays on, such as a bookmark.
+
+<ComponentPreview name="micro/actions" height={150}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Bookmark01Icon, Share08Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroActions() {
+  const [saved, setSaved] = useState(false);
+  return (
+    <Micro>
+      <Micro.Button variant="ghost" aria-label="Bookmark" aria-pressed={saved} onClick={() => setSaved(!saved)}>
+        <HugeiconsIcon icon={Bookmark01Icon} />
+      </Micro.Button>
+      <Micro.Separator />
+      <Micro.Button variant="ghost" aria-label="Share">
+        <HugeiconsIcon icon={Share08Icon} />
+      </Micro.Button>
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A live reading
+
+`Micro.Pulse` beats beside a reading taken continuously, in `tone`. `Micro.Delta` with `inverted` draws a rise in red, for a reading where lower is better.
+
+<ComponentPreview name="micro/live" height={150}>
+
+```tsx lineNumbers
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroLive() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
       <Micro>
-        <Micro.Text value="1,284" label="sign-ups · 7 days" />
-        <Micro.Spark values={[12, 15, 11, 18, 21, 19, 26]} tone="success" />
-        <Micro.Delta value={18} />
+        <Micro.Pulse tone="success" />
+        <Micro.Mono>−14</Micro.Mono>
+        <Micro.Label>LUFS</Micro.Label>
       </Micro>
       <Micro>
         <Micro.Pulse tone="warning" />
         <Micro.Mono>412 ms</Micro.Mono>
         <Micro.Delta value={9} unit=" ms" inverted />
-      </Micro>
-      <Micro>
-        <Micro.Ring value={38} tone="warning" label="Storage used" />
-        <Micro.Text value="38 GB" label="of 100 GB" />
       </Micro>
     </div>
   );
@@ -336,57 +533,150 @@ export default function MicroReadings() {
 
 </ComponentPreview>
 
-### Controls
+### Progress
 
-`Micro.Segments` is a choice of a few with a sliding marker. `Micro.Button`s with `variant="ghost"` make a group of icon actions, and `Micro.Separator` divides it. `Micro.Stepper` holds a number between bounds.
+`Micro.Progress` puts a label and a count over a row of ticks, one per unit up to 16, that fill as work is done. The tick being worked on is drawn a little longer. A button at the end pauses it.
 
-<ComponentPreview name="micro/controls" height={160}>
+<ComponentPreview name="micro/progress" height={150}>
+
+```tsx lineNumbers
+'use client';
+
+import { useEffect, useState } from 'react';
+import { PauseIcon, PlayIcon, Tick02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroProgressDemo() {
+  const [running, setRunning] = useState(true);
+  const [done, setDone] = useState(5);
+  const finished = done >= 12;
+
+  useEffect(() => {
+    if (!running || finished) return;
+    const timer = window.setTimeout(() => setDone((value) => value + 1), 1500);
+    return () => window.clearTimeout(timer);
+  }, [running, finished, done]);
+
+  return (
+    <Micro className="w-64">
+      <Micro.Progress
+        label={finished ? 'Exported' : 'Exporting'}
+        value={done}
+        max={12}
+        tone="info"
+        className="flex-1"
+      />
+      <Micro.Button
+        aria-label={finished ? 'Export again' : running ? 'Pause export' : 'Resume export'}
+        onClick={() => (finished ? setDone(0) : setRunning(!running))}
+      >
+        <HugeiconsIcon icon={finished ? Tick02Icon : running ? PauseIcon : PlayIcon} />
+      </Micro.Button>
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Who approved
+
+`Micro.Faces` overlaps up to four faces, with initials where there is no picture, and counts the rest. A `Micro.Label` and a glyph say what they did.
+
+<ComponentPreview name="micro/approval" height={150}>
+
+```tsx lineNumbers
+import { Tick02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+const PEOPLE = [
+  { name: 'Khalid Abdi', src: 'https://avatars.githubusercontent.com/u/127331761?v=4' },
+  { name: 'Ines Duarte' },
+  { name: 'Sam Whitlock' },
+];
+
+export default function MicroApproval() {
+  return (
+    <Micro>
+      <Micro.Faces people={PEOPLE} />
+      <Micro.Label className="text-foreground">Approved</Micro.Label>
+      <HugeiconsIcon icon={Tick02Icon} className="size-4 text-success-foreground" aria-hidden="true" />
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A search
+
+`Micro.Input` takes the pill's remaining width. Give the pill a width. `Micro.Kbd` shows the key that focuses it.
+
+<ComponentPreview name="micro/search" height={150}>
+
+```tsx lineNumbers
+import { Search01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroSearch() {
+  return (
+    <Micro className="w-80">
+      <HugeiconsIcon icon={Search01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <Micro.Input placeholder="Find a word in this episode" aria-label="Find in episode" />
+      <Micro.Kbd>⌘F</Micro.Kbd>
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A setting
+
+`Micro.Switch` is a switch sized for the pill. Put a `Micro.Text` before it saying what it turns on and where.
+
+<ComponentPreview name="micro/toggle" height={150}>
 
 ```tsx lineNumbers
 'use client';
 
 import { useState } from 'react';
-import { MinimizeIcon, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
 import { Micro } from '@/components/panelui/micro';
 
-export default function MicroControls() {
-  const [view, setView] = useState('split');
-  const [zoom, setZoom] = useState(100);
+export default function MicroToggle() {
+  const [on, setOn] = useState(true);
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3">
-      <Micro>
-        <Micro.Segments value={view} onValueChange={setView} aria-label="Layout">
-          <Micro.Segment value="editor">Editor</Micro.Segment>
-          <Micro.Segment value="split">Split</Micro.Segment>
-          <Micro.Segment value="preview">Preview</Micro.Segment>
-        </Micro.Segments>
-      </Micro>
-      <Micro>
-        <Micro.Button
-          variant="ghost"
-          aria-label="Zoom out"
-          onClick={() => setZoom((value) => Math.max(25, value - 25))}
-        >
-          <ZoomOutIcon />
-        </Micro.Button>
-        <Micro.Mono className="w-12 text-center">{zoom}%</Micro.Mono>
-        <Micro.Button
-          variant="ghost"
-          aria-label="Zoom in"
-          onClick={() => setZoom((value) => Math.min(400, value + 25))}
-        >
-          <ZoomInIcon />
-        </Micro.Button>
-        <Micro.Separator />
-        <Micro.Button variant="ghost" aria-label="Fit to screen" onClick={() => setZoom(100)}>
-          <MinimizeIcon />
-        </Micro.Button>
-      </Micro>
-      <Micro>
-        <Micro.Label>Columns</Micro.Label>
-        <Micro.Stepper defaultValue={3} min={1} max={6} label="Columns" />
-      </Micro>
-    </div>
+    <Micro>
+      <Micro.Text value="Remove noise" label="this episode only" />
+      <Micro.Switch checked={on} onCheckedChange={setOn} label="Remove noise" color="info" />
+    </Micro>
+  );
+}
+```
+
+</ComponentPreview>
+
+### A balance
+
+A glyph, a `Micro.Mono` figure and a `Micro.Label` for its unit.
+
+<ComponentPreview name="micro/counter" height={150}>
+
+```tsx lineNumbers
+import { Clock01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Micro } from '@/components/panelui/micro';
+
+export default function MicroCounter() {
+  return (
+    <Micro>
+      <HugeiconsIcon icon={Clock01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <Micro.Mono>3,180</Micro.Mono>
+      <Micro.Label>minutes left</Micro.Label>
+    </Micro>
   );
 }
 ```

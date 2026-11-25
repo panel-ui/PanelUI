@@ -4,7 +4,7 @@
   "demoOptions": {
     "height": 420
   },
-  "intro": "Use it for the small readings and controls that sit around a piece of work rather than in a form: a count with its trend, a percentage, a timecode with play and skip, a speed, which section is showing, how far an export has got. Every pill has the same height and surface, so a row of them reads as one strip of instruments.\n\nA pill is built from parts written in the order they read. At an end that is a round button, a segmented choice or a ring, the pill pulls its padding in so the circle sits concentric with it.\n\nFor a single figure with a label and a badge, use [Stat](/docs/web/components/stat). For a status word, use [Badge](/docs/web/components/badge).",
+  "intro": "Use it for the small readings and controls that sit around a piece of work rather than in a form: a count with its trend, a percentage, a timecode with play and skip, a speed, which section is showing, how far an export has got. Every pill has the same height and surface, so a row of them reads as one strip of instruments.\n\nA pill is built from parts written in the order they read. Each pill in the board above has its own example further down this page. At an end that is a round button, a segmented choice or a ring, the pill pulls its padding in so the circle sits concentric with it.\n\nFor a single figure with a label and a badge, use [Stat](/docs/web/components/stat). For a status word, use [Badge](/docs/web/components/badge).",
   "usage": "<Micro>\n  <Micro.Text value=\"12.4k\" label=\"listens · 30 days\" />\n  <Micro.Spark values={[4, 5, 4, 6, 7, 8, 11]} tone=\"info\" />\n  <Micro.Delta value={9} />\n</Micro>",
   "anatomy": "<Micro>\n  <Micro.Text />\n  <Micro.Label />\n  <Micro.Mono />\n  <Micro.Spark />\n  <Micro.Ring />\n  <Micro.Delta />\n  <Micro.Pulse />\n  <Micro.Button />\n  <Micro.Separator />\n  <Micro.Segments>\n    <Micro.Segment />\n  </Micro.Segments>\n  <Micro.Stepper />\n  <Micro.Progress />\n  <Micro.Switch />\n  <Micro.Faces />\n  <Micro.Input />\n  <Micro.Kbd />\n</Micro>",
   "parts": {
@@ -28,16 +28,76 @@
   },
   "examples": [
     {
-      "title": "Readings",
-      "description": "A pill for a reading pairs `Micro.Text` or `Micro.Mono` with something that shows its shape: a `Micro.Spark` of recent values, a `Micro.Ring`, or a `Micro.Pulse` for a live measurement. `Micro.Delta` says how it moved.\n\nPass `inverted` to the delta when lower is better, as for latency. A rise is then drawn red.",
-      "demo": "readings",
-      "height": 160
+      "title": "A count and its trend",
+      "description": "`Micro.Text` gives the value and what it counts. `Micro.Spark` draws its recent values as bars, oldest first, with the newest in `tone`. `Micro.Delta` says how much it moved.",
+      "demo": "stat",
+      "height": 150
     },
     {
-      "title": "Controls",
-      "description": "`Micro.Segments` is a choice of a few with a sliding marker. `Micro.Button`s with `variant=\"ghost\"` make a group of icon actions, and `Micro.Separator` divides it. `Micro.Stepper` holds a number between bounds.",
-      "demo": "controls",
-      "height": 160
+      "title": "A percentage",
+      "description": "`Micro.Ring` sweeps to `value`, from 0 to 100. At the pill's start it is pulled in to sit concentric with the end. Give it a `label`, since it is read as a meter.",
+      "demo": "ring",
+      "height": 150
+    },
+    {
+      "title": "Playback",
+      "description": "A solid `Micro.Button` for the main action and `variant=\"ghost\"` buttons for the rest. `Micro.Separator` sets the time apart, and `Micro.Mono` keeps its figures from shifting as they change. `muted` dims the total.",
+      "demo": "transport",
+      "height": 150
+    },
+    {
+      "title": "A choice of a few",
+      "description": "`Micro.Segments` holds `Micro.Segment`s, with a marker that slides to the chosen one. The arrow keys move it. A ghost button after it adds to the choices.",
+      "demo": "segments",
+      "height": 150
+    },
+    {
+      "title": "A number between bounds",
+      "description": "`Micro.Stepper` sits between a minus and a plus, with `min`, `max` and `step`. Its digits roll as it changes, and the arrow keys, Home and End move it once it has focus. `format` and `suffix` set how it is written.",
+      "demo": "stepper",
+      "height": 150
+    },
+    {
+      "title": "A pair of actions",
+      "description": "Ghost buttons on their own make a pill of icon actions. `aria-pressed` fills a button that stays on, such as a bookmark.",
+      "demo": "actions",
+      "height": 150
+    },
+    {
+      "title": "A live reading",
+      "description": "`Micro.Pulse` beats beside a reading taken continuously, in `tone`. `Micro.Delta` with `inverted` draws a rise in red, for a reading where lower is better.",
+      "demo": "live",
+      "height": 150
+    },
+    {
+      "title": "Progress",
+      "description": "`Micro.Progress` puts a label and a count over a row of ticks, one per unit up to 16, that fill as work is done. The tick being worked on is drawn a little longer. A button at the end pauses it.",
+      "demo": "progress",
+      "height": 150
+    },
+    {
+      "title": "Who approved",
+      "description": "`Micro.Faces` overlaps up to four faces, with initials where there is no picture, and counts the rest. A `Micro.Label` and a glyph say what they did.",
+      "demo": "approval",
+      "height": 150
+    },
+    {
+      "title": "A search",
+      "description": "`Micro.Input` takes the pill's remaining width. Give the pill a width. `Micro.Kbd` shows the key that focuses it.",
+      "demo": "search",
+      "height": 150
+    },
+    {
+      "title": "A setting",
+      "description": "`Micro.Switch` is a switch sized for the pill. Put a `Micro.Text` before it saying what it turns on and where.",
+      "demo": "toggle",
+      "height": 150
+    },
+    {
+      "title": "A balance",
+      "description": "A glyph, a `Micro.Mono` figure and a `Micro.Label` for its unit.",
+      "demo": "counter",
+      "height": 150
     },
     {
       "title": "Sizes",

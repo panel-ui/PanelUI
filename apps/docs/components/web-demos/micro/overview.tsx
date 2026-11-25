@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import {
-  BookmarkIcon,
-  CheckIcon,
-  ClockIcon,
+  Add01Icon,
+  Bookmark01Icon,
+  Clock01Icon,
+  GoForward15SecIcon,
   PauseIcon,
   PlayIcon,
-  PlusIcon,
-  SearchIcon,
-  Share2Icon,
-  SkipBackIcon,
-  SkipForwardIcon,
-} from 'lucide-react';
+  GoBackward15SecIcon,
+  Search01Icon,
+  Share08Icon,
+  Tick02Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Micro } from 'panelui-web/micro';
 
 const LENGTH = 52 * 60 + 10;
@@ -63,21 +64,21 @@ export default function MicroOverview() {
 
       <Micro>
         <Micro.Button aria-label={playing ? 'Pause' : 'Play'} onClick={() => setPlaying(!playing)}>
-          {playing ? <PauseIcon className="fill-current" /> : <PlayIcon className="fill-current" />}
+          {playing ? <HugeiconsIcon icon={PauseIcon} /> : <HugeiconsIcon icon={PlayIcon} />}
         </Micro.Button>
         <Micro.Button
           variant="ghost"
           aria-label="Back 15 seconds"
           onClick={() => setTime((value) => Math.max(0, value - 15))}
         >
-          <SkipBackIcon />
+          <HugeiconsIcon icon={GoBackward15SecIcon} />
         </Micro.Button>
         <Micro.Button
           variant="ghost"
           aria-label="Forward 15 seconds"
           onClick={() => setTime((value) => Math.min(LENGTH, value + 15))}
         >
-          <SkipForwardIcon />
+          <HugeiconsIcon icon={GoForward15SecIcon} />
         </Micro.Button>
         <Micro.Separator />
         <span>
@@ -91,7 +92,7 @@ export default function MicroOverview() {
           <Micro.Segment value="outro">Outro</Micro.Segment>
         </Micro.Segments>
         <Micro.Button variant="ghost" aria-label="Add a section">
-          <PlusIcon />
+          <HugeiconsIcon icon={Add01Icon} />
         </Micro.Button>
       </Micro>
       <Micro>
@@ -109,10 +110,10 @@ export default function MicroOverview() {
       </Micro>
       <Micro>
         <Micro.Button variant="ghost" aria-label="Bookmark">
-          <BookmarkIcon />
+          <HugeiconsIcon icon={Bookmark01Icon} />
         </Micro.Button>
         <Micro.Button variant="ghost" aria-label="Share">
-          <Share2Icon />
+          <HugeiconsIcon icon={Share08Icon} />
         </Micro.Button>
       </Micro>
 
@@ -134,11 +135,11 @@ export default function MicroOverview() {
           onClick={() => (exported >= 12 ? setExported(0) : setExporting(!exporting))}
         >
           {exported >= 12 ? (
-            <CheckIcon />
+            <HugeiconsIcon icon={Tick02Icon} />
           ) : exporting ? (
-            <PauseIcon className="fill-current" />
+            <HugeiconsIcon icon={PauseIcon} />
           ) : (
-            <PlayIcon className="fill-current" />
+            <HugeiconsIcon icon={PlayIcon} />
           )}
         </Micro.Button>
       </Micro>
@@ -151,11 +152,11 @@ export default function MicroOverview() {
           ]}
         />
         <Micro.Label className="text-foreground">Approved</Micro.Label>
-        <CheckIcon className="size-4 text-success-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Tick02Icon} className="size-4 text-success-foreground" aria-hidden="true" />
       </Micro>
 
       <Micro className="w-80">
-        <SearchIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Search01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <Micro.Input placeholder="Find a word in this episode" aria-label="Find in episode" />
         <Micro.Kbd>⌘F</Micro.Kbd>
       </Micro>
@@ -164,7 +165,7 @@ export default function MicroOverview() {
         <Micro.Switch checked={denoise} onCheckedChange={setDenoise} label="Remove noise" color="info" />
       </Micro>
       <Micro>
-        <ClockIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <HugeiconsIcon icon={Clock01Icon} className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <Micro.Mono>3,180</Micro.Mono>
         <Micro.Label>minutes left</Micro.Label>
       </Micro>

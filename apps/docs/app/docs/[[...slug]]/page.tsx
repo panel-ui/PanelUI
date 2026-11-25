@@ -172,16 +172,49 @@ function sectionOf(slug: string[] | undefined): string {
   return (slug?.[0] && SECTIONS[slug[0]]) || `${site.name} docs`;
 }
 
+/** Words a component's name spells in capitals. */
+const ACRONYMS = new Set(['ai', 'otp', 'fab', 'kpi', 'xy', 'pdf', 'qr', 'url', 'ui', 'csv', 'api']);
+
+/**
+ * The title a page shows in search results, before the site's name is added.
+ *
+ * A component page is headed with the component's name alone, which is right
+ * in a sidebar of components and says nothing in a list of results. What
+ * people search for is the platform and the thing — "react native bottom
+ * sheet", "react share component" — so that is what the result says, and the
+ * page's own heading is left alone. A page's `seoTitle` overrides this.
+ */
+function searchTitle(slug: string[] | undefined, heading: string, seoTitle?: string): string {
+  if (seoTitle) return seoTitle;
+  // Component pages are headed with the export's name, "BottomSheet" or
+  // "OtpInput"; a search is written in words, so the name is read off the
+  // URL instead: `bottom-sheet` is "Bottom Sheet", `otp-input` "OTP Input".
+  const last = slug?.[slug.length - 1];
+  const title = last
+    ? last
+        .split('-')
+        .map((word) => (ACRONYMS.has(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1)))
+        .join(' ')
+    : heading;
+  const [section, group] = slug ?? [];
+  if (slug?.length === 2 && (section === 'components' || section === 'charts' || section === 'ai-components'))
+    return `React Native ${title} for Expo`;
+  if (slug?.length === 2 && section === 'blocks') return `${title}: a React Native screen for Expo`;
+  if (slug?.length === 3 && section === 'web' && (group === 'components' || group === 'charts'))
+    return `React ${title} component`;
+  return heading;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const page = source.getPage(slug);
   if (!page) notFound();
 
   const url = absoluteUrl(page.url);
-  const title = page.data.title;
+  const title = searchTitle(slug, page.data.title, page.data.seoTitle);
   const description = page.data.description ?? site.description;
   const ogImage = absoluteUrl(
-    `/og?title=${encodeURIComponent(title)}` +
+    `/og?title=${encodeURIComponent(page.data.title)}` +
       `&description=${encodeURIComponent(description)}` +
       `&eyebrow=${encodeURIComponent(sectionOf(slug))}`
   );

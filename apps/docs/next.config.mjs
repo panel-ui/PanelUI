@@ -24,6 +24,9 @@ const cached = (source) => ({
  * and the MCP server card. The header is what makes them findable from a
  * single request to any page.
  */
+/** The site's own origin, for headers that must name a page absolutely. Matches `site.url` in lib/site.ts. */
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://panelui.dev';
+
 const AGENT_LINKS = [
   '</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"',
   '</openapi.json>; rel="service-desc"; type="application/openapi+json"',
@@ -64,6 +67,21 @@ const config = {
         source: '/((?!_next|previews|diagrams|r/|api/|llms).*)',
         headers: [{ key: 'Link', value: AGENT_LINKS }],
       },
+      /*
+       * Every docs page also has a markdown copy under /llms.mdx, for agents.
+       * Search Console found 23 of them crawled and set aside as duplicates of
+       * the page itself, each one a URL competing with the page for the same
+       * words. The header names the page as the one to index.
+       */
+      {
+        source: '/llms.mdx/:path*',
+        headers: [{ key: 'Link', value: `<${SITE}/docs/:path*>; rel="canonical"` }],
+      },
+      // Registry items are JSON for the CLI, with no page of their own to point at.
+      {
+        source: '/r/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+      },
       cached('/previews/:path*'),
       cached('/diagrams/:path*'),
       cached('/logo-light.png'),
@@ -82,6 +100,13 @@ const config = {
    */
   async redirects() {
     return [
+      // Glass was folded into Button, whose Liquid Glass version now shows
+      // the material. Search Console still finds the old page linked.
+      {
+        source: '/docs/components/glass',
+        destination: '/docs/components/button',
+        permanent: true,
+      },
       // Bar Chart shipped under Components in web 0.13.0, before the web
       // collection had a Charts section.
       {

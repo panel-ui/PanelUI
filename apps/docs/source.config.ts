@@ -16,6 +16,13 @@ export const docs = defineDocs({
        * description, and its `<Platform only="…">` blocks follow it.
        */
       platforms: z.boolean().optional(),
+      /*
+       * The title a search result shows, when it should say more than the
+       * heading. A heading of "Theming" sits in a sidebar that already says
+       * what it is theming; a search result does not, and at position 2 it
+       * drew under one click in a hundred. The heading stays as it is.
+       */
+      seoTitle: z.string().optional(),
     }),
   },
 });

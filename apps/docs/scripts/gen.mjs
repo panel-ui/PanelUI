@@ -456,6 +456,7 @@ const indexPage = [
    */
   `---
 title: Components
+seoTitle: React Native UI components for Expo
 description: Every component module in PanelUI, by what it is for — ${Object.keys(meta).length} component modules, each with its anatomy, props and variants.
 full: true
 ---`,

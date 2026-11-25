@@ -111,7 +111,12 @@ const shareVariants = tv({
     invite: 'flex flex-col gap-2',
     // Addresses already added sit above the field as a row of badges, so the
     // field itself stays one line tall however many there are.
-    chips: 'flex flex-wrap gap-1.5',
+    // One row that scrolls sideways, so the panel keeps its height however
+    // many are added. Its ends fade where there is more to scroll to.
+    chips: [
+      '-mx-1 flex snap-x scroll-px-1 gap-1.5 overflow-x-auto px-1 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+      'data-overflow:[mask-image:linear-gradient(to_right,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)]',
+    ],
     field: [
       'flex h-10 items-center gap-2 rounded-2xl border bg-background ps-3 pe-1 text-sm transition-[border-color,box-shadow] duration-150',
       'has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/30 dark:bg-input/30',
@@ -119,7 +124,7 @@ const shareVariants = tv({
     inviteIcon: 'size-4 shrink-0 text-muted-foreground',
     input: 'h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
     chip: [
-      'inline-flex h-7 max-w-full items-center gap-1.5 rounded-full bg-muted ps-1 pe-1 text-[0.8125rem]',
+      'inline-flex h-7 max-w-56 shrink-0 snap-start items-center gap-1.5 rounded-full bg-muted ps-1 pe-1 text-[0.8125rem]',
       `transition-[opacity,scale] duration-200 ${EASE} starting:scale-90 starting:opacity-0 motion-reduce:transition-none`,
     ],
     chipText: 'truncate',
@@ -627,6 +632,16 @@ function ShareInvite({
     if (roles.length > 0 && !roles.some((item) => item.value === role)) setRole(roles[0]!.value);
   }, [roles, role, setRole]);
 
+  // The newest badge is scrolled into view as it is added.
+  const chipRow = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  useEffect(() => {
+    const row = chipRow.current;
+    if (!row) return;
+    setOverflowing(row.scrollWidth > row.clientWidth + 1);
+    row.scrollTo({ left: row.scrollWidth, behavior: 'smooth' });
+  }, [emails.length]);
+
   const commit = (text: string) => {
     const parts = text.split(/[\s,;]+/).filter(Boolean);
     const good = parts.filter(isEmail);
@@ -655,7 +670,14 @@ function ShareInvite({
   return (
     <div data-slot="share-invite" className={slots.invite({ className })} {...props}>
       {emails.length > 0 ? (
-        <div data-slot="share-chips" className={slots.chips()} aria-label="People to invite" role="list">
+        <div
+          ref={chipRow}
+          data-slot="share-chips"
+          data-overflow={overflowing ? '' : undefined}
+          className={slots.chips()}
+          aria-label="People to invite"
+          role="list"
+        >
           {emails.map((email) => (
             <span key={email} role="listitem" data-slot="share-chip" className={slots.chip()}>
               <span aria-hidden="true" className={slots.chipFace()}>

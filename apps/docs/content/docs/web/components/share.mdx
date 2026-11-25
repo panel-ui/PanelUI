@@ -1,0 +1,399 @@
+---
+title: Share
+description: Invite people by email, choose what they can do, and copy the link.
+status: new
+---
+
+<ComponentPreview name="share/overview" height={200}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Share, type ShareInvitation } from '@/components/panelui/share';
+
+const ROLES = [
+  { value: 'viewer', label: 'Viewer', description: 'Can read and comment' },
+  { value: 'editor', label: 'Editor', description: 'Can change anything' },
+];
+
+const START = [
+  {
+    name: 'Khalid Abdi',
+    email: 'khalid@northwind.studio',
+    role: 'Owner',
+    src: 'https://avatars.githubusercontent.com/u/127331761?v=4',
+  },
+  { name: 'Ines Duarte', email: 'ines@northwind.studio', role: 'editor' },
+  { name: 'Sam Whitlock', email: 'sam@northwind.studio', role: 'viewer' },
+];
+
+/** "lena.ortiz@…" reads as "Lena Ortiz" until they set a name of their own. */
+function nameFrom(email: string) {
+  return email
+    .split('@')[0]!
+    .split(/[._-]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+export default function ShareOverview() {
+  const [people, setPeople] = useState(START);
+
+  const invite = ({ emails, role }: ShareInvitation) =>
+    new Promise<void>((resolve) =>
+      setTimeout(() => {
+        setPeople((current) => [...current, ...emails.map((email) => ({ name: nameFrom(email), email, role }))]);
+        resolve();
+      }, 900),
+    );
+
+  return (
+    <Share link="https://northwind.studio/d/spring-lookbook" onInvite={invite}>
+      <Share.Trigger people={people} />
+      <Share.Content title="Share “Spring lookbook”">
+        <Share.Invite roles={ROLES} />
+        <Share.People>
+          {people.map((person) => (
+            <Share.Person key={person.email} name={person.name} src={person.src} role={person.role} roles={ROLES} />
+          ))}
+        </Share.People>
+        <Share.Footer>
+          <Share.CopyLink />
+          <Share.Send />
+        </Share.Footer>
+      </Share.Content>
+    </Share>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it to give other people access to one document, board or file. The panel puts the job in the order it is done: who to add, who already has access, and the two ways to send it, an invitation or the link.
+
+Addresses typed into the field become chips, so several can be invited at once with one role. Sending and copying answer in the button that was pressed, which keeps its width while its label changes.
+
+It opens as a popover beside its trigger, or with `presentation="dialog"` in the middle of the screen. For a dialog with a different job, use [Dialog](/docs/web/components/dialog).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/share.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/share` instead of `@/components/panelui/share`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/share.tsx`:
+
+<RegistrySource name="share" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { Share } from "@/components/panelui/share"
+```
+
+```tsx
+<Share link={url} onInvite={({ emails, role }) => invite(emails, role)}>
+  <Share.Trigger people={members} />
+  <Share.Content title="Share “Spring lookbook”">
+    <Share.Invite roles={ROLES} />
+    <Share.People>
+      {members.map((member) => (
+        <Share.Person key={member.email} name={member.name} role={member.role} />
+      ))}
+    </Share.People>
+    <Share.Footer>
+      <Share.CopyLink />
+      <Share.Send />
+    </Share.Footer>
+  </Share.Content>
+</Share>
+```
+
+## Composition
+
+```tsx
+<Share>
+  <Share.Trigger />
+  <Share.Content>
+    <Share.Invite>
+      <Share.RoleSelect />
+    </Share.Invite>
+    <Share.Access />
+    <Share.People>
+      <Share.Person />
+    </Share.People>
+    <Share.Footer>
+      <Share.CopyLink />
+      <Share.Send />
+    </Share.Footer>
+  </Share.Content>
+</Share>
+```
+
+- **`Share.Trigger`** — The pill that opens it. `people` draws up to three faces at its start, so the button also says who has access already.
+- **`Share.Content`** — The panel and the band around it. `title` is the heading and what the panel is announced as. The close button is drawn for you.
+- **`Share.Invite`** — The field for addresses. Each one becomes a chip after Enter, a comma or a space, and Backspace in an empty field takes the last one back. `roles` sets the select at its end.
+- **`Share.RoleSelect`** — The compact role select used in the field and beside each person. Use it on its own for a role select of your own.
+- **`Share.Access`** — A row saying who can open it from the link alone, with a select of levels.
+- **`Share.People`** — Who already has access, under a heading. `label` changes the heading.
+- **`Share.Person`** — One person: initials or picture, name, an optional second line, and their role. With `roles` and `onRoleChange`, the role is a select.
+- **`Share.Footer`** — The buttons, as equal pills in the band under the panel, wherever it is written.
+- **`Share.CopyLink`** — Copies `link` and says "Copied" for a moment.
+- **`Share.Send`** — Calls `onInvite`. It shows Sending while the returned promise is pending, then Sent, then clears the field.
+
+## Examples
+
+### As a dialog
+
+`presentation="dialog"` opens the panel in the middle of the screen over a dimmed page. Use it when sharing is reached from a menu rather than from a button of its own.
+
+`Share.Access` adds a row for who can open it from the link alone.
+
+<ComponentPreview name="share/dialog" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Share } from '@/components/panelui/share';
+
+const ROLES = [
+  { value: 'viewer', label: 'Viewer' },
+  { value: 'commenter', label: 'Commenter' },
+  { value: 'editor', label: 'Editor' },
+];
+
+const LINK_ACCESS = [
+  { value: 'none', label: 'No access' },
+  { value: 'view', label: 'Can view' },
+  { value: 'edit', label: 'Can edit' },
+];
+
+export default function ShareDialog() {
+  const [access, setAccess] = useState('view');
+  return (
+    <Share presentation="dialog" link="https://northwind.studio/b/q1-roadmap">
+      <Share.Trigger />
+      <Share.Content title="Share “Q1 roadmap”">
+        <Share.Invite roles={ROLES} />
+        <Share.Access
+          title="Anyone with the link"
+          description={access === 'none' ? 'Only people added can open it' : 'No sign-in needed'}
+          options={LINK_ACCESS}
+          value={access}
+          onValueChange={setAccess}
+        />
+        <Share.Footer>
+          <Share.CopyLink />
+          <Share.Send />
+        </Share.Footer>
+      </Share.Content>
+    </Share>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Changing roles
+
+Give `Share.Person` the `roles` and an `onRoleChange`, and its role becomes a select. A role that cannot change, such as an owner's, is given as text with no `roles`.
+
+A footer with only `Share.CopyLink` suits a panel for managing access rather than adding to it.
+
+<ComponentPreview name="share/roles" height={160}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Share } from '@/components/panelui/share';
+
+const ROLES = [
+  { value: 'viewer', label: 'Viewer', description: 'Can read and comment' },
+  { value: 'editor', label: 'Editor', description: 'Can change anything' },
+  { value: 'admin', label: 'Admin', description: 'Can also share and delete' },
+];
+
+export default function ShareRoles() {
+  const [people, setPeople] = useState([
+    { name: 'Ines Duarte', email: 'ines@northwind.studio', role: 'admin' },
+    { name: 'Sam Whitlock', email: 'sam@northwind.studio', role: 'editor' },
+    { name: 'Priya Raman', email: 'priya@northwind.studio', role: 'viewer' },
+    { name: 'Tomás Reyes', email: 'tomas@northwind.studio', role: 'viewer' },
+  ]);
+
+  return (
+    <Share link="https://northwind.studio/f/brand-assets">
+      <Share.Trigger />
+      <Share.Content title="Share “Brand assets”" side="top">
+        <Share.People label="4 people with access">
+          {people.map((person) => (
+            <Share.Person
+              key={person.email}
+              name={person.name}
+              description={person.email}
+              role={person.role}
+              roles={ROLES}
+              onRoleChange={(role) =>
+                setPeople((current) => current.map((item) => (item.email === person.email ? { ...item, role } : item)))
+              }
+            />
+          ))}
+        </Share.People>
+        <Share.Footer>
+          <Share.CopyLink />
+        </Share.Footer>
+      </Share.Content>
+    </Share>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### Share
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `presentation` | `'popover' \| 'dialog'` | `'popover'` | `popover` opens beside the trigger; `dialog` in the middle of the screen. Default `popover`. |
+| `open` | `boolean` | — | Whether it is open, when the caller holds that. |
+| `defaultOpen` | `boolean` | — | Whether it starts open, when the caller does not hold it. |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when it opens or closes. |
+| `link` | `string` | — | The address `Share.CopyLink` copies. |
+| `onCopy` | `(link: string) => void` | — | Called after the link has been copied. |
+| `onInvite` | `(invitation: ShareInvitation) => void \| Promise<unknown>` | — | Called by `Share.Send` with the addresses and the role. Return a promise to keep the button spinning until it settles; a rejected promise puts the button back without clearing the field. |
+| `defaultRole` | `string` | `'viewer'` | The role the invite field starts on. Default the first in `Share.Invite`'s `roles`, or `viewer`. |
+| `sentDuration` | `number` | `1600` | How long "Sent" shows before the button is ready again, in ms. Default `1600`. |
+
+### Share.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `people` | `ShareFace[]` | — | Who already has access, drawn as overlapping faces at the button's start. Three show. |
+
+### Share.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | The heading: `Share “Launch notes”`. It is what the panel is announced as. |
+| `icon` | `ReactNode` | — | The glyph beside the title. Default the share glyph; `null` for none. |
+| `side` | `BasePopover.Positioner.Props['side']` | `'bottom'` | For a popover: which side of the trigger it opens on. Default `bottom`. |
+| `align` | `BasePopover.Positioner.Props['align']` | `'end'` | For a popover: how it lines up with the trigger. Default `end`. |
+| `sideOffset` | `number` | `8` | For a popover: the gap to the trigger, in px. Default `8`. |
+
+### Share.RoleSelect
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `roles` | `ShareRole[]` | — | The roles to choose from. |
+| `value` | `string` | — | The chosen role's `value`. |
+| `onValueChange` | `(value: string) => void` | — | Called with the new role's `value`. |
+| `disabled` | `boolean` | — |  |
+| `className` | `string` | — |  |
+
+### Share.Invite
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `roles` | `ShareRole[]` | — | The roles the field offers. Default Viewer and Editor. Pass `[]` for no role select. |
+| `placeholder` | `string` | `'Add people by email'` | The field's placeholder. Default "Add people by email". |
+
+### Share.People
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | — | The heading over the list. Default "People with access"; `null` for none. |
+
+### Share.Person
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | — | Their name. |
+| `description` | `ReactNode` | — | A second line, such as their email. |
+| `src` | `string` | — | A picture. Without it, the initials show. |
+| `role` | `string` | — | Their role's `value`, or text for a role that cannot be changed: "Owner". |
+| `roles` | `ShareRole[]` | — | The roles they can be given. With `onRoleChange`, the role becomes a select. |
+| `onRoleChange` | `(role: string) => void` | — | Called with the new role's `value`. |
+
+### Share.Access
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | — | The line: "Anyone with the link". |
+| `description` | `ReactNode` | — | A line under it: "Can open it without signing in". |
+| `icon` | `ReactNode` | — | The glyph at the start. Default a globe. |
+| `options` | `ShareRole[]` | — | The levels to choose from, such as No access, Can view, Can edit. |
+| `value` | `string` | — | The chosen level's `value`. |
+| `onValueChange` | `(value: string) => void` | — | Called with the new level's `value`. |
+
+### Share.CopyLink
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `copiedLabel` | `ReactNode` | `'Copied'` | The label once copied. Default "Copied". |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Sending
+
+`onInvite` is called with `{ emails, role }`. Everyone chipped in the field is included, and so is a complete address still being typed. Return a promise to keep the button spinning until it settles. When it resolves, the button shows Sent and the field is cleared. When it rejects, the button goes back to Send and the addresses stay, so they can be sent again.
+
+Adding the new people to `Share.People` is up to you. The first example does it in `onInvite`.
+
+### The keyboard
+
+Enter in the field turns the typed address into a chip. Enter in an empty field sends. Escape closes the panel and returns focus to the trigger.
+
+### Screen readers
+
+The panel is announced by its title. Both buttons announce what happened, "Invitation sent" and "Link copied", through a live region. Each person's role select is named for them, as "Role for Ines Duarte".
+
+### Server Components
+
+`Share` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Share.Trigger` off the import, so each part is also exported by name: `ShareTrigger` is `Share.Trigger`, and so on for the others.
+
+```tsx
+import { Share, ShareTrigger, ShareContent, ShareInvite, ShareRoleSelect, SharePeople, SharePerson, ShareAccess, ShareFooter, ShareCopyLink, ShareSend } from "@/components/panelui/share"
+```

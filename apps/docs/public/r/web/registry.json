@@ -1735,6 +1735,24 @@
       ]
     },
     {
+      "name": "share",
+      "type": "registry:component",
+      "title": "Share",
+      "description": "Invite people by email, choose what they can do, and copy the link.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/share.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/share.tsx"
+        }
+      ]
+    },
+    {
       "name": "sheet",
       "type": "registry:component",
       "title": "Sheet",

@@ -53,6 +53,7 @@ export {
   CardAction,
   CardContent,
   CardFooter,
+  CardMeta,
   type CardProps,
   type CardHeaderProps,
   type CardTitleProps,
@@ -60,6 +61,7 @@ export {
   type CardActionProps,
   type CardContentProps,
   type CardFooterProps,
+  type CardMetaProps,
 } from './components/card';
 export {
   Frame,

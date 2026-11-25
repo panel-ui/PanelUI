@@ -50,7 +50,10 @@ For a list of rows under a title, use [Frame](/docs/web/components/frame).
     <Card.Description />
     <Card.Action />
   </Card.Header>
-  <Card.Content />
+  <Card.Content>
+    <Card.Action />
+    <Card.Meta />
+  </Card.Content>
   <Card.Footer />
 </Card>
 ```
@@ -58,9 +61,10 @@ For a list of rows under a title, use [Frame](/docs/web/components/frame).
 - `Card.Header` — The title, the line under it, and the action. It switches to two columns when there is an action.
 - `Card.Title` — What the card is about. An `h3` by default; `as` picks another level to fit the page.
 - `Card.Description` — A line under the title.
-- `Card.Action` — A control for the whole card, held in the header's top trailing corner whatever order it is written in.
+- `Card.Action` — A control for the whole card, held in the header's top trailing corner whatever order it is written in. In an `inset` card it can also go inside `Card.Content`, where it sits in the well's top trailing corner.
 - `Card.Content` — The body. It starts with top padding of its own when the card has no header.
 - `Card.Footer` — The row at the bottom. `variant="panel"` makes it a darker band set into the card, for actions.
+- `Card.Meta` — A small reading pinned to the bottom trailing corner of the content, such as a count against a limit. `label` is the word over it. Put it last in `Card.Content`.
 
 ## Props
 
@@ -70,8 +74,9 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `size` | `'default' \| 'sm'` | — | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
-| `as` | `'div' \| 'article' \| 'section' \| 'li'` | — | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
+| `size` | `'default' \| 'sm'` | `'default'` | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
+| `as` | `'div' \| 'article' \| 'section' \| 'li'` | `'div'` | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
+| `variant` | `'default' \| 'inset'` | `'default'` | `default` is one surface. `inset` puts the header on the card's shell and the content in a raised well inside it, for a card whose header labels what the content holds. Default `default`. |
 
 #### `CardHeaderProps`
 
@@ -84,7 +89,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | — | The heading level, to fit the page around the card. Default `h3`. |
+| `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | `'div'` | The heading level, to fit the page around the card. Default `h3`. |
 
 #### `CardDescriptionProps`
 
@@ -111,17 +116,27 @@ Every part also takes the props of the element it renders, and a `className`.
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `variant` | `'plain' \| 'panel'` | — | `plain` continues the card. `panel` is a darker band set into its bottom, for actions. Default `plain`. |
+| `variant` | `'plain' \| 'panel'` | `'default'` | `plain` continues the card. `panel` is a darker band set into its bottom, for actions. Default `plain`. |
+
+#### `CardMetaProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | — | A small word over the value: "Characters", "Updated". |
 
 ## In a Server Component
 
-`Card` is a client component. A Server Component cannot read `Card.Header` off the import, so import each part by name: `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`.
+`Card` is a client component. A Server Component cannot read `Card.Header` off the import, so import each part by name: `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`, `CardMeta`.
 
 ## Notes
 
 `as` on the card renders it as a `div`, `article`, `section` or `li`. Use `article` for a card that makes sense on its own and `li` inside a list.
 
 `Card.Title` is a heading so the page outline includes it. Set its level with `as`, from `h2` to `h4`, or `div` for a card that should stay out of the outline.
+
+#### Inset
+
+In an `inset` card the well's radius is the card's less the shell's padding, so the two corners stay concentric. In light mode the shell is a step greyer than the well; in dark mode the well is a step lighter, so it reads as raised in both. A footer still goes on the shell, below the well.
 
 ## Example
 

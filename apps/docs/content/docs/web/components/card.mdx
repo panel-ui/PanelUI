@@ -141,7 +141,10 @@ import { Card } from "@/components/panelui/card"
     <Card.Description />
     <Card.Action />
   </Card.Header>
-  <Card.Content />
+  <Card.Content>
+    <Card.Action />
+    <Card.Meta />
+  </Card.Content>
   <Card.Footer />
 </Card>
 ```
@@ -149,9 +152,10 @@ import { Card } from "@/components/panelui/card"
 - **`Card.Header`** — The title, the line under it, and the action. It switches to two columns when there is an action.
 - **`Card.Title`** — What the card is about. An `h3` by default; `as` picks another level to fit the page.
 - **`Card.Description`** — A line under the title.
-- **`Card.Action`** — A control for the whole card, held in the header's top trailing corner whatever order it is written in.
+- **`Card.Action`** — A control for the whole card, held in the header's top trailing corner whatever order it is written in. In an `inset` card it can also go inside `Card.Content`, where it sits in the well's top trailing corner.
 - **`Card.Content`** — The body. It starts with top padding of its own when the card has no header.
 - **`Card.Footer`** — The row at the bottom. `variant="panel"` makes it a darker band set into the card, for actions.
+- **`Card.Meta`** — A small reading pinned to the bottom trailing corner of the content, such as a count against a limit. `label` is the word over it. Put it last in `Card.Content`.
 
 ## Examples
 
@@ -229,6 +233,243 @@ export default function CardFooterVariants() {
         </Card.Footer>
       </Card>
     </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Inset
+
+`variant="inset"` puts the header on the card's outer shell and the content in a raised well inside it. Use it when the header labels what the well holds, here a draft and its rewrite, with a select in the header choosing the tone.
+
+A `Card.Action` inside the content takes the well's top trailing corner, for clearing or copying what is in it. `Card.Meta` pins the character count to the bottom trailing corner.
+
+<ComponentPreview name="card/inset" height={400}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { CheckIcon, CopyIcon, XIcon } from 'lucide-react';
+import { Button } from '@/components/panelui/button';
+import { Card } from '@/components/panelui/card';
+import { Select } from '@/components/panelui/select';
+
+const LIMIT = 280;
+
+const TONES = {
+  plain: {
+    label: 'Plain',
+    main: 'The export runs overnight now, so the morning report is ready when you arrive.',
+    also: [
+      'Exports now run overnight. The morning report will be waiting.',
+      'We moved the export to night time; the report is ready by morning.',
+    ],
+  },
+  brief: {
+    label: 'Brief',
+    main: 'Exports now run overnight. Report ready by 8am.',
+    also: ['Overnight exports: report ready at 8.', 'Report now ready first thing.'],
+  },
+  warm: {
+    label: 'Warm',
+    main: 'Good news: the export now runs while you sleep, so your report is waiting with your coffee.',
+    also: ['Your morning report now arrives before you do.', 'No more waiting on exports. They finish overnight.'],
+  },
+} as const;
+
+type Tone = keyof typeof TONES;
+
+const TONE_ITEMS = (Object.keys(TONES) as Tone[]).map((value) => ({ value, label: TONES[value].label }));
+
+export default function CardInset() {
+  const [draft, setDraft] = useState(
+    'we changed it so that the export job happens during the night which means the report should be done in the morning',
+  );
+  const [tone, setTone] = useState<Tone>('plain');
+  const [copied, setCopied] = useState(false);
+  const result = TONES[tone];
+
+  return (
+    <div className="grid w-full max-w-3xl gap-3 sm:grid-cols-2">
+      <Card variant="inset" className="min-h-72">
+        <Card.Header>
+          <Card.Title as="div">Your draft</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <textarea
+            value={draft}
+            maxLength={LIMIT}
+            onChange={(event) => setDraft(event.target.value)}
+            aria-label="Draft"
+            placeholder="Write something to rewrite"
+            className="min-h-28 w-full flex-1 resize-none bg-transparent text-[0.9375rem] leading-relaxed outline-none placeholder:text-muted-foreground"
+          />
+          <Card.Action>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              shape="pill"
+              aria-label="Clear draft"
+              disabled={draft === ''}
+              onClick={() => setDraft('')}
+            >
+              <XIcon />
+            </Button>
+          </Card.Action>
+          <Card.Meta label="Characters">
+            {draft.length} / {LIMIT}
+          </Card.Meta>
+        </Card.Content>
+      </Card>
+
+      <Card variant="inset" className="min-h-72">
+        <Card.Header>
+          <Card.Title as="div">Rewrite</Card.Title>
+          <Card.Action>
+            <Select items={TONE_ITEMS} value={tone} onValueChange={(value) => setTone(value as Tone)}>
+              <Select.Trigger variant="ghost" size="sm" aria-label="Tone">
+                <Select.Value />
+              </Select.Trigger>
+              <Select.Content>
+                {(Object.keys(TONES) as Tone[]).map((key) => (
+                  <Select.Item key={key} value={key}>
+                    {TONES[key].label}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
+          </Card.Action>
+        </Card.Header>
+        <Card.Content>
+          <p className="text-[0.9375rem] leading-relaxed">{draft ? result.main : ''}</p>
+          <Card.Action>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              shape="pill"
+              aria-label={copied ? 'Copied' : 'Copy rewrite'}
+              disabled={!draft}
+              onClick={() => {
+                void navigator.clipboard?.writeText(result.main);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1400);
+              }}
+            >
+              {copied ? <CheckIcon /> : <CopyIcon />}
+            </Button>
+          </Card.Action>
+          {draft && (
+            <div className="mt-auto pt-8">
+              <p className="mb-2 text-xs text-muted-foreground">Other ways to say it</p>
+              <ul className="space-y-1.5 text-sm leading-snug">
+                {result.also.map((line) => (
+                  <li key={line}>
+                    <button
+                      type="button"
+                      onClick={() => setDraft(line)}
+                      className="text-left text-foreground/80 transition-colors hover:text-foreground"
+                    >
+                      {line}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Card.Content>
+      </Card>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Inset with a list
+
+The well holds whatever the content does. Here it is a ranked list, with the header's select changing the range and `Card.Meta` keeping the total in the corner.
+
+<ComponentPreview name="card/inset-list" height={380}>
+
+```tsx lineNumbers
+'use client';
+
+import { useState } from 'react';
+import { Card } from '@/components/panelui/card';
+import { Select } from '@/components/panelui/select';
+
+const RANGES = {
+  week: {
+    label: 'This week',
+    total: '38',
+    rows: [
+      ['api-gateway', 14, '2m ago'],
+      ['web', 11, '1h ago'],
+      ['billing-worker', 8, 'Tue'],
+      ['search-indexer', 5, 'Mon'],
+    ],
+  },
+  month: {
+    label: 'This month',
+    total: '152',
+    rows: [
+      ['web', 49, '1h ago'],
+      ['api-gateway', 47, '2m ago'],
+      ['billing-worker', 31, 'Tue'],
+      ['search-indexer', 25, 'Mon'],
+    ],
+  },
+} as const;
+
+type Range = keyof typeof RANGES;
+
+const RANGE_ITEMS = [
+  { value: 'week', label: 'This week' },
+  { value: 'month', label: 'This month' },
+];
+
+export default function CardInsetList() {
+  const [range, setRange] = useState<Range>('week');
+  const data = RANGES[range];
+  const max = Math.max(...data.rows.map((row) => row[1]));
+
+  return (
+    <Card variant="inset" className="w-full max-w-80">
+      <Card.Header>
+        <Card.Title as="div">Deploys</Card.Title>
+        <Card.Action>
+          <Select items={RANGE_ITEMS} value={range} onValueChange={(value) => setRange(value as Range)}>
+            <Select.Trigger variant="ghost" size="sm" aria-label="Range">
+              <Select.Value />
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="week">This week</Select.Item>
+              <Select.Item value="month">This month</Select.Item>
+            </Select.Content>
+          </Select>
+        </Card.Action>
+      </Card.Header>
+      <Card.Content>
+        <ul className="space-y-3">
+          {data.rows.map(([name, count, last]) => (
+            <li key={name} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5">
+              <span className="truncate text-sm">{name}</span>
+              <span className="text-sm tabular-nums">{count}</span>
+              <span className="h-1 overflow-hidden rounded-full bg-muted">
+                <span
+                  className="block h-full rounded-full bg-foreground/70 transition-[width] duration-500"
+                  style={{ width: `${(count / max) * 100}%` }}
+                />
+              </span>
+              <span className="text-xs text-muted-foreground">{last}</span>
+            </li>
+          ))}
+        </ul>
+        <Card.Meta label="Total">{data.total} deploys</Card.Meta>
+      </Card.Content>
+    </Card>
   );
 }
 ```
@@ -315,8 +556,9 @@ export default function CardList() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `size` | `'default' \| 'sm'` | — | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
-| `as` | `'div' \| 'article' \| 'section' \| 'li'` | — | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
+| `size` | `'default' \| 'sm'` | `'default'` | `sm` tightens the padding and the title, for a card in a dense grid. Default `default`. |
+| `as` | `'div' \| 'article' \| 'section' \| 'li'` | `'div'` | The element to render. `article` for a card that stands on its own, `li` for one in a list, `section` for one that groups a part of a page. |
+| `variant` | `'default' \| 'inset'` | `'default'` | `default` is one surface. `inset` puts the header on the card's shell and the content in a raised well inside it, for a card whose header labels what the content holds. Default `default`. |
 
 ### Card.Header
 
@@ -329,7 +571,7 @@ export default function CardList() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | — | The heading level, to fit the page around the card. Default `h3`. |
+| `as` | `'h2' \| 'h3' \| 'h4' \| 'div'` | `'div'` | The heading level, to fit the page around the card. Default `h3`. |
 
 ### Card.Description
 
@@ -356,7 +598,13 @@ export default function CardList() {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `variant` | `'plain' \| 'panel'` | — | `plain` continues the card. `panel` is a darker band set into its bottom, for actions. Default `plain`. |
+| `variant` | `'plain' \| 'panel'` | `'default'` | `plain` continues the card. `panel` is a darker band set into its bottom, for actions. Default `plain`. |
+
+### Card.Meta
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `ReactNode` | — | A small word over the value: "Characters", "Updated". |
 
 Every part also takes the props of the element it renders, and a `className`.
 
@@ -366,10 +614,14 @@ Every part also takes the props of the element it renders, and a `className`.
 
 `Card.Title` is a heading so the page outline includes it. Set its level with `as`, from `h2` to `h4`, or `div` for a card that should stay out of the outline.
 
+### Inset
+
+In an `inset` card the well's radius is the card's less the shell's padding, so the two corners stay concentric. In light mode the shell is a step greyer than the well; in dark mode the well is a step lighter, so it reads as raised in both. A footer still goes on the shell, below the well.
+
 ### Server Components
 
 `Card` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Card.Header` off the import, so each part is also exported by name: `CardHeader` is `Card.Header`, and so on for the others.
 
 ```tsx
-import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "@/components/panelui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, CardMeta } from "@/components/panelui/card"
 ```

@@ -6,14 +6,15 @@
   },
   "intro": "Use it to hold one thing on a page: a plan, a setting, a summary, an item in a grid. It is a bordered surface with a header, a body and a footer, and the header keeps a place in its top trailing corner for a control that belongs to the whole card.\n\nThe padding lives on the parts, not on the card. A picture that should reach the card's edges goes straight inside it with `overflow-hidden` on the card.\n\nIt has no state and no event handlers of its own, so it renders as a server component.\n\nFor a list of rows under a title, use [Frame](/docs/web/components/frame).",
   "usage": "<Card>\n  <Card.Header>\n    <Card.Title>Create a workspace</Card.Title>\n    <Card.Description>Start on the free plan and invite your team later.</Card.Description>\n    <Card.Action>\n      <Button variant=\"link\">Sign in</Button>\n    </Card.Action>\n  </Card.Header>\n  <Card.Content>\n    <Field>\n      <FieldLabel>Work email</FieldLabel>\n      <Input type=\"email\" />\n    </Field>\n  </Card.Content>\n  <Card.Footer variant=\"panel\">\n    <Button>Create workspace</Button>\n  </Card.Footer>\n</Card>",
-  "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title />\n    <Card.Description />\n    <Card.Action />\n  </Card.Header>\n  <Card.Content />\n  <Card.Footer />\n</Card>",
+  "anatomy": "<Card>\n  <Card.Header>\n    <Card.Title />\n    <Card.Description />\n    <Card.Action />\n  </Card.Header>\n  <Card.Content>\n    <Card.Action />\n    <Card.Meta />\n  </Card.Content>\n  <Card.Footer />\n</Card>",
   "parts": {
     "Header": "The title, the line under it, and the action. It switches to two columns when there is an action.",
     "Title": "What the card is about. An `h3` by default; `as` picks another level to fit the page.",
     "Description": "A line under the title.",
-    "Action": "A control for the whole card, held in the header's top trailing corner whatever order it is written in.",
+    "Action": "A control for the whole card, held in the header's top trailing corner whatever order it is written in. In an `inset` card it can also go inside `Card.Content`, where it sits in the well's top trailing corner.",
     "Content": "The body. It starts with top padding of its own when the card has no header.",
-    "Footer": "The row at the bottom. `variant=\"panel\"` makes it a darker band set into the card, for actions."
+    "Footer": "The row at the bottom. `variant=\"panel\"` makes it a darker band set into the card, for actions.",
+    "Meta": "A small reading pinned to the bottom trailing corner of the content, such as a count against a limit. `label` is the word over it. Put it last in `Card.Content`."
   },
   "examples": [
     {
@@ -29,6 +30,18 @@
       "height": 300
     },
     {
+      "title": "Inset",
+      "description": "`variant=\"inset\"` puts the header on the card's outer shell and the content in a raised well inside it. Use it when the header labels what the well holds, here a draft and its rewrite, with a select in the header choosing the tone.\n\nA `Card.Action` inside the content takes the well's top trailing corner, for clearing or copying what is in it. `Card.Meta` pins the character count to the bottom trailing corner.",
+      "demo": "inset",
+      "height": 400
+    },
+    {
+      "title": "Inset with a list",
+      "description": "The well holds whatever the content does. Here it is a ranked list, with the header's select changing the range and `Card.Meta` keeping the total in the corner.",
+      "demo": "inset-list",
+      "height": 380
+    },
+    {
       "title": "Image",
       "description": "A picture placed first in the card reaches its edges. Give the card `overflow-hidden` so the picture takes its top corners; the parts after it keep their own padding.",
       "demo": "image",
@@ -41,5 +54,5 @@
       "height": 200
     }
   ],
-  "notes": "`as` on the card renders it as a `div`, `article`, `section` or `li`. Use `article` for a card that makes sense on its own and `li` inside a list.\n\n`Card.Title` is a heading so the page outline includes it. Set its level with `as`, from `h2` to `h4`, or `div` for a card that should stay out of the outline."
+  "notes": "`as` on the card renders it as a `div`, `article`, `section` or `li`. Use `article` for a card that makes sense on its own and `li` inside a list.\n\n`Card.Title` is a heading so the page outline includes it. Set its level with `as`, from `h2` to `h4`, or `div` for a card that should stay out of the outline.\n\n### Inset\n\nIn an `inset` card the well's radius is the card's less the shell's padding, so the two corners stay concentric. In light mode the shell is a step greyer than the well; in dark mode the well is a step lighter, so it reads as raised in both. A footer still goes on the shell, below the well."
 }

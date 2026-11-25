@@ -1,0 +1,63 @@
+name: Accessibility report
+description: Something in PanelUI or on panelui.dev makes a task harder or impossible to do.
+title: '[accessibility]: '
+labels: ['accessibility', 'needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. You do not need to say anything about yourself or any
+        disability, and you do not need to send screenshots or recordings. Only the first two
+        questions are required.
+
+        How reports are handled is in [ACCESSIBILITY.md](https://github.com/panel-ui/PanelUI/blob/main/ACCESSIBILITY.md).
+
+  - type: textarea
+    id: task
+    attributes:
+      label: What were you trying to do?
+      description: The component or the page, and what you wanted to happen.
+      placeholder: I was trying to choose a date in DatePicker using only the keyboard.
+    validations:
+      required: true
+
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What got in the way?
+      description: What happened instead, in your own words.
+      placeholder: Focus moved into the calendar, but the arrow keys did nothing and I could not pick a day.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: library
+    attributes:
+      label: Where did it happen?
+      options:
+        - The app library (panelui-native, React Native / Expo)
+        - The web library (panelui-web)
+        - The documentation site (panelui.dev)
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: What were you using? (optional)
+      description: |
+        Only if you want to say. For example a screen reader, keyboard only, voice control,
+        switch access, a larger text size, zoom, high contrast or reduced motion, and the
+        device, browser or operating system.
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version (optional)
+      description: The package version, if you know it.
+      placeholder: panelui-native 1.5.0
+    validations:
+      required: false

@@ -33,7 +33,7 @@
     "fumadocs-mdx": "^15.2.0",
     "fumadocs-ui": "^16.11.5",
     "lucide-react": "^1.25.0",
-    "next": "^16.3.0",
+    "next": "^16.4.6",
     "next-themes": "^0.4.6",
     "panelui-web": "*",
     "react": "^19.2.3",

@@ -89,9 +89,9 @@ const cardVariants = tv({
         // A fixed height, so two inset cards side by side start their wells on
         // one line whether or not a header holds a select.
         header: [
-          'min-h-12 content-center items-center px-4.5 py-1.5 group-data-[size=sm]/card:min-h-10 group-data-[size=sm]/card:px-3.5 group-data-[size=sm]/card:py-1',
-          '[&_[data-slot=card-title]]:text-sm [&_[data-slot=card-title]]:font-medium [&_[data-slot=card-title]]:tracking-normal',
-          '[&>[data-slot=card-action]]:row-span-1 [&>[data-slot=card-action]]:-mr-2 [&>[data-slot=card-action]]:self-center',
+          'min-h-9 content-center items-center px-2.5 py-0.5 group-data-[size=sm]/card:min-h-8 group-data-[size=sm]/card:px-2',
+          '[&_[data-slot=card-title]]:text-[0.8125rem] [&_[data-slot=card-title]]:font-medium [&_[data-slot=card-title]]:tracking-normal',
+          '[&>[data-slot=card-action]]:row-span-1 [&>[data-slot=card-action]]:-me-1 [&>[data-slot=card-action]]:self-center',
         ],
         // The well. Its radius is the card's less the shell's padding, so the
         // two curves stay concentric.

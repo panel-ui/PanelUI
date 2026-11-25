@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckIcon, CopyIcon, XIcon } from 'lucide-react';
+import { Cancel01Icon, Copy01Icon, Tick02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from 'panelui-web/button';
 import { Card } from 'panelui-web/card';
 import { Select } from 'panelui-web/select';
@@ -65,7 +66,7 @@ export default function CardInset() {
               disabled={draft === ''}
               onClick={() => setDraft('')}
             >
-              <XIcon />
+              <HugeiconsIcon icon={Cancel01Icon} />
             </Button>
           </Card.Action>
           <Card.Meta label="Characters">
@@ -107,7 +108,7 @@ export default function CardInset() {
                 window.setTimeout(() => setCopied(false), 1400);
               }}
             >
-              {copied ? <CheckIcon /> : <CopyIcon />}
+              {copied ? <HugeiconsIcon icon={Tick02Icon} /> : <HugeiconsIcon icon={Copy01Icon} />}
             </Button>
           </Card.Action>
           {draft && (

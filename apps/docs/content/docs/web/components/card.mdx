@@ -251,7 +251,8 @@ A `Card.Action` inside the content takes the well's top trailing corner, for cle
 'use client';
 
 import { useState } from 'react';
-import { CheckIcon, CopyIcon, XIcon } from 'lucide-react';
+import { Cancel01Icon, Copy01Icon, Tick02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from '@/components/panelui/button';
 import { Card } from '@/components/panelui/card';
 import { Select } from '@/components/panelui/select';
@@ -315,7 +316,7 @@ export default function CardInset() {
               disabled={draft === ''}
               onClick={() => setDraft('')}
             >
-              <XIcon />
+              <HugeiconsIcon icon={Cancel01Icon} />
             </Button>
           </Card.Action>
           <Card.Meta label="Characters">
@@ -357,7 +358,7 @@ export default function CardInset() {
                 window.setTimeout(() => setCopied(false), 1400);
               }}
             >
-              {copied ? <CheckIcon /> : <CopyIcon />}
+              {copied ? <HugeiconsIcon icon={Tick02Icon} /> : <HugeiconsIcon icon={Copy01Icon} />}
             </Button>
           </Card.Action>
           {draft && (

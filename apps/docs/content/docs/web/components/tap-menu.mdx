@@ -7,7 +7,8 @@ status: new
 <ComponentPreview name="tap-menu/overview" height={260}>
 
 ```tsx lineNumbers
-import { CalendarPlusIcon, FileTextIcon, SparklesIcon, UserPlusIcon } from 'lucide-react';
+import { CalendarAdd01Icon, FileEditIcon, SparklesIcon, UserAdd01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { TapMenu } from '@/components/panelui/tap-menu';
 
 export default function TapMenuOverview() {
@@ -15,10 +16,10 @@ export default function TapMenuOverview() {
     <TapMenu>
       <TapMenu.Trigger aria-label="Create" />
       <TapMenu.Content align="center">
-        <TapMenu.Item icon={<CalendarPlusIcon />}>Book a session</TapMenu.Item>
-        <TapMenu.Item icon={<FileTextIcon />}>Send a quote</TapMenu.Item>
-        <TapMenu.Item icon={<UserPlusIcon />}>Add a client</TapMenu.Item>
-        <TapMenu.Item icon={<SparklesIcon />}>Plan with AI</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={CalendarAdd01Icon} />}>Book a session</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={FileEditIcon} />}>Send a quote</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={UserAdd01Icon} />}>Add a client</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={SparklesIcon} />}>Plan with AI</TapMenu.Item>
       </TapMenu.Content>
     </TapMenu>
   );
@@ -125,7 +126,8 @@ import { TapMenu } from "@/components/panelui/tap-menu"
 <ComponentPreview name="tap-menu/fan" height={380}>
 
 ```tsx lineNumbers
-import { CameraIcon, FolderPlusIcon, ImageUpIcon, StickyNoteIcon } from 'lucide-react';
+import { Camera01Icon, FolderAddIcon, ImageUpload01Icon, StickyNote01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { TapMenu } from '@/components/panelui/tap-menu';
 
 export default function TapMenuFan() {
@@ -134,10 +136,10 @@ export default function TapMenuFan() {
       <TapMenu variant="fan">
         <TapMenu.Trigger aria-label="Add to album" className="size-12 shadow-md" />
         <TapMenu.Content>
-          <TapMenu.Item icon={<CameraIcon />}>Take photo</TapMenu.Item>
-          <TapMenu.Item icon={<ImageUpIcon />}>Upload</TapMenu.Item>
-          <TapMenu.Item icon={<StickyNoteIcon />}>Add note</TapMenu.Item>
-          <TapMenu.Item icon={<FolderPlusIcon />}>New album</TapMenu.Item>
+          <TapMenu.Item icon={<HugeiconsIcon icon={Camera01Icon} />}>Take photo</TapMenu.Item>
+          <TapMenu.Item icon={<HugeiconsIcon icon={ImageUpload01Icon} />}>Upload</TapMenu.Item>
+          <TapMenu.Item icon={<HugeiconsIcon icon={StickyNote01Icon} />}>Add note</TapMenu.Item>
+          <TapMenu.Item icon={<HugeiconsIcon icon={FolderAddIcon} />}>New album</TapMenu.Item>
         </TapMenu.Content>
       </TapMenu>
     </div>
@@ -154,7 +156,8 @@ export default function TapMenuFan() {
 <ComponentPreview name="tap-menu/stack" height={340}>
 
 ```tsx lineNumbers
-import { ListChecksIcon, MicIcon, NotebookPenIcon, ScanLineIcon } from 'lucide-react';
+import { CheckListIcon, Mic01Icon, NoteEditIcon, ScanTextIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { TapMenu } from '@/components/panelui/tap-menu';
 
 export default function TapMenuStack() {
@@ -163,16 +166,16 @@ export default function TapMenuStack() {
       <TapMenu variant="stack">
         <TapMenu.Trigger aria-label="New" className="size-11" />
         <TapMenu.Content>
-          <TapMenu.Item icon={<NotebookPenIcon />} shortcut="⌘N">
+          <TapMenu.Item icon={<HugeiconsIcon icon={NoteEditIcon} />} shortcut="⌘N">
             Note
           </TapMenu.Item>
-          <TapMenu.Item icon={<ListChecksIcon />} shortcut="⌘L">
+          <TapMenu.Item icon={<HugeiconsIcon icon={CheckListIcon} />} shortcut="⌘L">
             Checklist
           </TapMenu.Item>
-          <TapMenu.Item icon={<MicIcon />} shortcut="⌘R">
+          <TapMenu.Item icon={<HugeiconsIcon icon={Mic01Icon} />} shortcut="⌘R">
             Voice memo
           </TapMenu.Item>
-          <TapMenu.Item icon={<ScanLineIcon />} shortcut="⌘D">
+          <TapMenu.Item icon={<HugeiconsIcon icon={ScanTextIcon} />} shortcut="⌘D">
             Scan a page
           </TapMenu.Item>
         </TapMenu.Content>
@@ -191,7 +194,15 @@ export default function TapMenuStack() {
 <ComponentPreview name="tap-menu/spotlight" height={260}>
 
 ```tsx lineNumbers
-import { BellIcon, CalendarPlusIcon, MapPinIcon, ReceiptIcon, SplitIcon, WalletIcon } from 'lucide-react';
+import {
+  CalendarAdd01Icon,
+  Invoice01Icon,
+  Location01Icon,
+  Notification01Icon,
+  SplitIcon,
+  Wallet01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { TapMenu } from '@/components/panelui/tap-menu';
 
 export default function TapMenuSpotlight() {
@@ -200,12 +211,12 @@ export default function TapMenuSpotlight() {
       <TapMenu.Trigger aria-label="Add" className="size-11" />
       <TapMenu.Content>
         <TapMenu.Heading>Add to the house account</TapMenu.Heading>
-        <TapMenu.Item icon={<ReceiptIcon />}>Expense</TapMenu.Item>
-        <TapMenu.Item icon={<SplitIcon />}>Split</TapMenu.Item>
-        <TapMenu.Item icon={<WalletIcon />}>Top up</TapMenu.Item>
-        <TapMenu.Item icon={<CalendarPlusIcon />}>Repeat</TapMenu.Item>
-        <TapMenu.Item icon={<MapPinIcon />}>Trip</TapMenu.Item>
-        <TapMenu.Item icon={<BellIcon />}>Reminder</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={Invoice01Icon} />}>Expense</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={SplitIcon} />}>Split</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={Wallet01Icon} />}>Top up</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={CalendarAdd01Icon} />}>Repeat</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={Location01Icon} />}>Trip</TapMenu.Item>
+        <TapMenu.Item icon={<HugeiconsIcon icon={Notification01Icon} />}>Reminder</TapMenu.Item>
       </TapMenu.Content>
     </TapMenu>
   );

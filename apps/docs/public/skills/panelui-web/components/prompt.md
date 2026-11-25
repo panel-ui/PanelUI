@@ -52,7 +52,10 @@ For one question asked from anywhere on a page, with the answer listed under it,
     <Prompt.BannerAction />
   </Prompt.Banner>
   <Prompt.Tasks>
-    <Prompt.Task />
+    <Prompt.Task>
+      <Prompt.TaskStep />
+      <Prompt.TaskApproval />
+    </Prompt.Task>
   </Prompt.Tasks>
   <Prompt.Commands />
   <Prompt.Field>
@@ -80,7 +83,7 @@ For one question asked from anywhere on a page, with the answer listed under it,
 ```
 
 - `Prompt.Banner` — A band above the field for something to do first, such as connecting an account. It folds under the field when `open` is false. With `mode`, it is open while the prompt is in that mode.
-- `Prompt.Tasks` — A band above the field with an agent's tasks. One line holds a ring that fills as they are done, the `title` and a count; pressed, it opens into the list, which scrolls past `maxHeight`. With `mode`, the band is open while the prompt is in that mode.
+- `Prompt.Tasks` — A band above the field with an agent's tasks. One line holds a ring that fills as they are done, the `title` and a count; pressed, it opens into the list, which scrolls past `maxHeight`. With `mode`, the band is open while the prompt is in that mode. `variant="timeline"` joins the tasks with a rail and opens the one in progress into its steps.
 - `Prompt.Task` — One task, `pending`, `active`, `done` or `error`. An active task's words are lit while it runs, and a done one is checked and struck through.
 - `Prompt.Commands` — A band above the field listing `items` while the text is the trigger and a word. Chosen with the keys or a press.
 - `Prompt.BannerAction` — The banner's button, at its end. It takes everything a [Button](/docs/web/components/button) does, `loading` included.
@@ -100,6 +103,8 @@ For one question asked from anywhere on a page, with the answer listed under it,
 - `Prompt.Context` — A strip under the field, inset from its edges, for where the message goes: a machine, a branch, a ticket. It folds away when `open` is false, or with `mode`, while the prompt is in another mode.
 - `Prompt.ContextItem` — One fact in the strip, with an icon before it. `onSelect` makes it a button.
 - `Prompt.Hint` — A quiet line under the prompt. Without children it says that Shift+Enter starts a new line.
+- `Prompt.TaskStep` — One thing a task did on its way, with a short mono reading at its end, such as a file and line or a test tally. Shown under its task in the `timeline` variant.
+- `Prompt.TaskApproval` — What a `waiting` task needs from you, with Approve and Decline. It opens under the task's row.
 
 ## Props
 
@@ -240,13 +245,36 @@ Every part also takes the props of the element it renders, and a `className`.
 | `expanded` | `boolean` | — | Whether the list is open under the title, when the caller holds it. |
 | `defaultExpanded` | `boolean` | `false` | Whether the list starts open, when the caller does not hold it. Default `false`. |
 | `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the title is pressed to open or close the list. |
-| `maxHeight` | `string` | `'10rem'` | How tall the list grows before it scrolls, as a CSS length. Default `10rem`. |
+| `maxHeight` | `string` | — | How tall the list grows before it scrolls, as a CSS length. Default `10rem`, or `20rem` for `timeline`. |
+| `variant` | `PromptTasksVariant` | `'compact'` | `compact` is a list of lines. `timeline` joins the tasks with a rail, gives each an icon and a reading at its end, and opens the one in progress into its steps. Default `compact`. |
+| `badge` | `ReactNode` | — | A small label beside the count, such as which agent is running: "Release bot". |
 
 #### `PromptTaskProps`
 
 | Prop | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `status` | `PromptTaskStatus` | `'idle'` | `pending`, `active` (its words are lit while it runs), `done` (a check) or `error`. Default `pending`. |
+| `status` | `PromptTaskStatus` | `'pending'` | `pending`, `active` (its words are lit while it runs), `waiting` (it needs someone before it can go on), `done` (a check) or `error`. Default `pending`. |
+| `icon` | `ReactNode` | — | For `timeline`: a glyph for what the task works in, such as the app or the file type. |
+| `state` | `ReactNode` | — | For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". |
+| `meta` | `ReactNode` | — | For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". |
+| `expanded` | `boolean` | — | For `timeline`: whether its steps are shown, when the caller holds it. Uncontrolled, they are shown while the task runs or waits, and a finished task opens and closes when its row is pressed. |
+| `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the row is pressed to show or hide its steps. |
+
+#### `PromptTaskStepProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `status` | `'done' \| 'active'` | `'idle'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
+| `meta` | `ReactNode` | — | A short reading at its end, set in mono: a file and line, a diff count, a test tally. |
+
+#### `PromptTaskApprovalProps`
+
+| Prop | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `onApprove` | `() => void` | — | Called when Approve is pressed. |
+| `onDecline` | `() => void` | — | Called when Decline is pressed. |
+| `approveLabel` | `ReactNode` | `'Approve'` | The approving button's label. Default "Approve". |
+| `declineLabel` | `ReactNode` | `'Decline'` | The declining button's label. Default "Decline". |
 
 #### `PromptCommandsProps`
 
@@ -272,7 +300,7 @@ Every part also takes the props of the element it renders, and a `className`.
 
 ## In a Server Component
 
-`Prompt` is a client component. A Server Component cannot read `Prompt.Banner` off the import, so import each part by name: `PromptBanner`, `PromptBannerAction`, `PromptField`, `PromptAttachments`, `PromptTextarea`, `PromptFooter`, `PromptTools`, `PromptTool`, `PromptAttach`, `PromptMenu`, `PromptAttachItem`, `PromptModel`, `PromptSubmit`, `PromptStatus`, `PromptTasks`, `PromptTask`, `PromptCommands`, `PromptRecorder`, `PromptContext`, `PromptContextItem`, `PromptHint`.
+`Prompt` is a client component. A Server Component cannot read `Prompt.Banner` off the import, so import each part by name: `PromptBanner`, `PromptBannerAction`, `PromptField`, `PromptAttachments`, `PromptTextarea`, `PromptFooter`, `PromptTools`, `PromptTool`, `PromptAttach`, `PromptMenu`, `PromptAttachItem`, `PromptModel`, `PromptSubmit`, `PromptStatus`, `PromptTasks`, `PromptTask`, `PromptTaskStep`, `PromptTaskApproval`, `PromptCommands`, `PromptRecorder`, `PromptContext`, `PromptContextItem`, `PromptHint`.
 
 ## Notes
 
@@ -314,7 +342,7 @@ While the command list is open, the arrow keys, Enter, Tab and Escape go to it r
 
 #### Tasks
 
-The count and the ring are worked out from the `status` of the `Prompt.Task` children, so keep the tasks as its direct children. The task in progress is scrolled to the middle of the list as it changes; the page itself does not scroll.
+The count and the ring are worked out from the `status` of the `Prompt.Task` children, so keep the tasks as its direct children. A task's own children are its label, then any `Prompt.TaskStep`s and one `Prompt.TaskApproval`, in any order after the label. The task in progress is scrolled to the middle of the list as it changes; the page itself does not scroll.
 
 ## Example
 

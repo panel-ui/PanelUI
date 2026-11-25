@@ -367,6 +367,7 @@ export const WEB_DEMOS: Record<string, ComponentType> = {
   'prompt/modes': dynamic(() => import('./prompt/modes')),
   'prompt/thinking': dynamic(() => import('./prompt/thinking')),
   'prompt/thumb': dynamic(() => import('./prompt/thumb')),
+  'prompt/timeline': dynamic(() => import('./prompt/timeline')),
   'prompt/voice': dynamic(() => import('./prompt/voice')),
   'prompt/workspace': dynamic(() => import('./prompt/workspace')),
   'pyramid-chart/between': dynamic(() => import('./pyramid-chart/between')),

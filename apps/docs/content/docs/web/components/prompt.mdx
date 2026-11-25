@@ -253,7 +253,10 @@ import { Prompt } from "@/components/panelui/prompt"
     <Prompt.BannerAction />
   </Prompt.Banner>
   <Prompt.Tasks>
-    <Prompt.Task />
+    <Prompt.Task>
+      <Prompt.TaskStep />
+      <Prompt.TaskApproval />
+    </Prompt.Task>
   </Prompt.Tasks>
   <Prompt.Commands />
   <Prompt.Field>
@@ -281,7 +284,7 @@ import { Prompt } from "@/components/panelui/prompt"
 ```
 
 - **`Prompt.Banner`** — A band above the field for something to do first, such as connecting an account. It folds under the field when `open` is false. With `mode`, it is open while the prompt is in that mode.
-- **`Prompt.Tasks`** — A band above the field with an agent's tasks. One line holds a ring that fills as they are done, the `title` and a count; pressed, it opens into the list, which scrolls past `maxHeight`. With `mode`, the band is open while the prompt is in that mode.
+- **`Prompt.Tasks`** — A band above the field with an agent's tasks. One line holds a ring that fills as they are done, the `title` and a count; pressed, it opens into the list, which scrolls past `maxHeight`. With `mode`, the band is open while the prompt is in that mode. `variant="timeline"` joins the tasks with a rail and opens the one in progress into its steps.
 - **`Prompt.Task`** — One task, `pending`, `active`, `done` or `error`. An active task's words are lit while it runs, and a done one is checked and struck through.
 - **`Prompt.Commands`** — A band above the field listing `items` while the text is the trigger and a word. Chosen with the keys or a press.
 - **`Prompt.BannerAction`** — The banner's button, at its end. It takes everything a [Button](/docs/web/components/button) does, `loading` included.
@@ -301,6 +304,8 @@ import { Prompt } from "@/components/panelui/prompt"
 - **`Prompt.Context`** — A strip under the field, inset from its edges, for where the message goes: a machine, a branch, a ticket. It folds away when `open` is false, or with `mode`, while the prompt is in another mode.
 - **`Prompt.ContextItem`** — One fact in the strip, with an icon before it. `onSelect` makes it a button.
 - **`Prompt.Hint`** — A quiet line under the prompt. Without children it says that Shift+Enter starts a new line.
+- **`Prompt.TaskStep`** — One thing a task did on its way, with a short mono reading at its end, such as a file and line or a test tally. Shown under its task in the `timeline` variant.
+- **`Prompt.TaskApproval`** — What a `waiting` task needs from you, with Approve and Decline. It opens under the task's row.
 
 ## Examples
 
@@ -469,6 +474,218 @@ export default function PromptAgent() {
                 <Prompt.AttachItem />
               </Prompt.Menu>
               <Prompt.Model items={MODELS} defaultValue="lumen-deep" variant="ghost" />
+            </Prompt.Tools>
+            <Prompt.Submit />
+          </Prompt.Footer>
+        </Prompt.Field>
+      </Prompt>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Tasks as a timeline
+
+`variant="timeline"` draws the tasks on a rail. Each `Prompt.Task` takes an `icon`, a `state` shown while it runs, such as "Editing", and a `meta` shown once it is done, such as how long it took.
+
+The task in progress opens into its `Prompt.TaskStep`s, which carry a short reading in mono at their end. When it finishes, they fold. Press a finished task's row to open them again.
+
+A task whose `status` is `waiting` stops for an answer. Put a `Prompt.TaskApproval` in it to show what will happen and the two buttons. Here the agent waits before deploying, and Decline stops the run.
+
+<ComponentPreview name="prompt/timeline" height={560}>
+
+```tsx lineNumbers
+'use client';
+
+import { BookTextIcon, BotIcon, CodeIcon, GitCompareArrowsIcon, RocketIcon, SearchIcon } from 'lucide-react';
+import { Prompt, type PromptTaskStatus } from '@/components/panelui/prompt';
+import { useEffect, useState } from 'react';
+
+interface Step {
+  text: string;
+  meta: string;
+}
+
+interface Task {
+  label: string;
+  icon: React.ReactNode;
+  /** The word shown while it runs. */
+  state: string;
+  /** How long it takes, in ticks of the demo's clock. */
+  ticks: number;
+  /** Its steps, revealed one a tick while it runs. */
+  steps: Step[];
+  /** It stops for an answer before running. */
+  approval?: string;
+}
+
+const TASKS: Task[] = [
+  {
+    label: 'Read the webhook handlers',
+    icon: <SearchIcon />,
+    state: 'Reading',
+    ticks: 2,
+    steps: [{ text: 'Found 4 handlers', meta: 'webhooks/*.ts' }],
+  },
+  {
+    label: 'Map events to the new API',
+    icon: <GitCompareArrowsIcon />,
+    state: 'Mapping',
+    ticks: 3,
+    steps: [
+      { text: 'Renamed 3 event types', meta: '+42 −17' },
+      { text: 'Kept invoice.paid as it is', meta: 'events.ts:61' },
+    ],
+  },
+  {
+    label: 'Rewrite the handlers',
+    icon: <CodeIcon />,
+    state: 'Editing',
+    ticks: 5,
+    steps: [
+      { text: 'Moved the signature check into one place', meta: 'verify.ts:18' },
+      { text: 'Updated 4 handlers', meta: '+96 −71' },
+      { text: 'Running the tests', meta: '38/52' },
+      { text: 'All tests pass', meta: '52/52' },
+    ],
+  },
+  {
+    label: 'Update the runbook',
+    icon: <BookTextIcon />,
+    state: 'Writing',
+    ticks: 3,
+    steps: [
+      { text: 'Added a rollback section', meta: 'RUNBOOK.md' },
+      { text: 'Linked the migration ticket', meta: 'OPS-212' },
+    ],
+  },
+  {
+    label: 'Deploy to staging',
+    icon: <RocketIcon />,
+    state: 'Deploying',
+    ticks: 2,
+    steps: [{ text: 'Build 7f3c is live on staging', meta: '41s' }],
+    approval: 'Deploy build 7f3c to staging: 4 files changed, 52 tests passing. Production is not touched.',
+  },
+];
+
+export default function PromptTimeline() {
+  // Which task is current, how many ticks it has run, and how long each finished one took.
+  const [current, setCurrent] = useState(0);
+  const [tick, setTick] = useState(0);
+  const [took, setTook] = useState<number[]>([]);
+  const [running, setRunning] = useState(true);
+  const [approved, setApproved] = useState(false);
+  const [declined, setDeclined] = useState(false);
+
+  const task = TASKS[current];
+  const waiting = task?.approval !== undefined && !approved && !declined;
+  const finished = current >= TASKS.length;
+
+  useEffect(() => {
+    if (!running || finished || waiting || declined) return;
+    const timer = window.setTimeout(() => {
+      if (tick + 1 >= task!.ticks) {
+        setTook((list) => [...list, task!.ticks * 6 + current * 3]);
+        setCurrent((index) => index + 1);
+        setTick(0);
+      } else setTick((count) => count + 1);
+    }, 1100);
+    return () => window.clearTimeout(timer);
+  }, [running, finished, waiting, declined, tick, task, current]);
+
+  const restart = () => {
+    setCurrent(0);
+    setTick(0);
+    setTook([]);
+    setApproved(false);
+    setDeclined(false);
+    setRunning(true);
+  };
+
+  const statusOf = (index: number): PromptTaskStatus =>
+    index < current
+      ? 'done'
+      : index > current
+        ? 'pending'
+        : declined
+          ? 'error'
+          : waiting
+            ? 'waiting'
+            : running
+              ? 'active'
+              : 'pending';
+
+  const title = finished
+    ? 'Webhooks are on the new API'
+    : declined
+      ? 'Stopped before deploying'
+      : waiting
+        ? 'Waiting for your go-ahead'
+        : running
+          ? 'Migrating the billing webhooks'
+          : 'Paused';
+
+  return (
+    <div className="w-full max-w-xl">
+      <Prompt
+        status={running && !finished && !waiting && !declined ? 'streaming' : 'idle'}
+        onStop={() => setRunning(false)}
+        onSubmit={() => (finished || declined ? restart() : setRunning(true))}
+      >
+        <Prompt.Tasks
+          variant="timeline"
+          defaultExpanded
+          title={title}
+          badge={
+            <>
+              <BotIcon />
+              Ops agent
+            </>
+          }
+        >
+          {TASKS.map((item, index) => {
+            const status = statusOf(index);
+            const shownSteps =
+              index < current ? item.steps : index === current && !waiting ? item.steps.slice(0, tick + 1) : [];
+            return (
+              <Prompt.Task
+                key={item.label}
+                status={status}
+                icon={item.icon}
+                state={status === 'waiting' ? 'Needs you' : item.state}
+                meta={index < current ? `${took[index]}s` : undefined}
+              >
+                {item.label}
+                {shownSteps.map((step, stepIndex) => (
+                  <Prompt.TaskStep
+                    key={step.text}
+                    meta={step.meta}
+                    status={index === current && stepIndex === shownSteps.length - 1 ? 'active' : 'done'}
+                  >
+                    {step.text}
+                  </Prompt.TaskStep>
+                ))}
+                {status === 'waiting' ? (
+                  <Prompt.TaskApproval onApprove={() => setApproved(true)} onDecline={() => setDeclined(true)}>
+                    {item.approval}
+                  </Prompt.TaskApproval>
+                ) : null}
+              </Prompt.Task>
+            );
+          })}
+        </Prompt.Tasks>
+        <Prompt.Field>
+          <Prompt.Textarea
+            placeholder={finished || declined ? 'Send anything to run it again' : 'Steer the agent while it works'}
+          />
+          <Prompt.Footer>
+            <Prompt.Tools>
+              <Prompt.Menu>
+                <Prompt.AttachItem />
+              </Prompt.Menu>
             </Prompt.Tools>
             <Prompt.Submit />
           </Prompt.Footer>
@@ -1183,13 +1400,36 @@ export default function PromptAttachments() {
 | `expanded` | `boolean` | — | Whether the list is open under the title, when the caller holds it. |
 | `defaultExpanded` | `boolean` | `false` | Whether the list starts open, when the caller does not hold it. Default `false`. |
 | `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the title is pressed to open or close the list. |
-| `maxHeight` | `string` | `'10rem'` | How tall the list grows before it scrolls, as a CSS length. Default `10rem`. |
+| `maxHeight` | `string` | — | How tall the list grows before it scrolls, as a CSS length. Default `10rem`, or `20rem` for `timeline`. |
+| `variant` | `PromptTasksVariant` | `'compact'` | `compact` is a list of lines. `timeline` joins the tasks with a rail, gives each an icon and a reading at its end, and opens the one in progress into its steps. Default `compact`. |
+| `badge` | `ReactNode` | — | A small label beside the count, such as which agent is running: "Release bot". |
 
 ### Prompt.Task
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `status` | `PromptTaskStatus` | `'idle'` | `pending`, `active` (its words are lit while it runs), `done` (a check) or `error`. Default `pending`. |
+| `status` | `PromptTaskStatus` | `'pending'` | `pending`, `active` (its words are lit while it runs), `waiting` (it needs someone before it can go on), `done` (a check) or `error`. Default `pending`. |
+| `icon` | `ReactNode` | — | For `timeline`: a glyph for what the task works in, such as the app or the file type. |
+| `state` | `ReactNode` | — | For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". |
+| `meta` | `ReactNode` | — | For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". |
+| `expanded` | `boolean` | — | For `timeline`: whether its steps are shown, when the caller holds it. Uncontrolled, they are shown while the task runs or waits, and a finished task opens and closes when its row is pressed. |
+| `onExpandedChange` | `(expanded: boolean) => void` | — | Called when the row is pressed to show or hide its steps. |
+
+### Prompt.TaskStep
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `status` | `'done' \| 'active'` | `'idle'` | `done` greys it; `active` marks it as the step the task is on. Default `done`. |
+| `meta` | `ReactNode` | — | A short reading at its end, set in mono: a file and line, a diff count, a test tally. |
+
+### Prompt.TaskApproval
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `onApprove` | `() => void` | — | Called when Approve is pressed. |
+| `onDecline` | `() => void` | — | Called when Decline is pressed. |
+| `approveLabel` | `ReactNode` | `'Approve'` | The approving button's label. Default "Approve". |
+| `declineLabel` | `ReactNode` | `'Decline'` | The declining button's label. Default "Decline". |
 
 ### Prompt.Commands
 
@@ -1255,12 +1495,12 @@ While the command list is open, the arrow keys, Enter, Tab and Escape go to it r
 
 ### Tasks
 
-The count and the ring are worked out from the `status` of the `Prompt.Task` children, so keep the tasks as its direct children. The task in progress is scrolled to the middle of the list as it changes; the page itself does not scroll.
+The count and the ring are worked out from the `status` of the `Prompt.Task` children, so keep the tasks as its direct children. A task's own children are its label, then any `Prompt.TaskStep`s and one `Prompt.TaskApproval`, in any order after the label. The task in progress is scrolled to the middle of the list as it changes; the page itself does not scroll.
 
 ### Server Components
 
 `Prompt` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `Prompt.Banner` off the import, so each part is also exported by name: `PromptBanner` is `Prompt.Banner`, and so on for the others.
 
 ```tsx
-import { Prompt, PromptBanner, PromptBannerAction, PromptField, PromptAttachments, PromptTextarea, PromptFooter, PromptTools, PromptTool, PromptAttach, PromptMenu, PromptAttachItem, PromptModel, PromptSubmit, PromptStatus, PromptTasks, PromptTask, PromptCommands, PromptRecorder, PromptContext, PromptContextItem, PromptHint } from "@/components/panelui/prompt"
+import { Prompt, PromptBanner, PromptBannerAction, PromptField, PromptAttachments, PromptTextarea, PromptFooter, PromptTools, PromptTool, PromptAttach, PromptMenu, PromptAttachItem, PromptModel, PromptSubmit, PromptStatus, PromptTasks, PromptTask, PromptTaskStep, PromptTaskApproval, PromptCommands, PromptRecorder, PromptContext, PromptContextItem, PromptHint } from "@/components/panelui/prompt"
 ```

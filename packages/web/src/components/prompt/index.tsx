@@ -182,7 +182,43 @@ const promptVariants = tv({
       // Rows fade out at the edges they scroll past, instead of being cut by them.
       '[mask-image:linear-gradient(to_bottom,transparent,black_0.75rem,black_calc(100%-0.75rem),transparent)]',
     ],
-    task: 'flex items-start gap-2.5 rounded-lg px-2 py-1 text-sm',
+    task: 'flex flex-wrap items-start gap-x-2.5 rounded-lg px-2 py-1 text-sm',
+    tasksBadge:
+      'inline-flex h-5 shrink-0 items-center gap-1 rounded-md bg-card px-1.5 text-xs font-medium text-muted-foreground shadow-xs [&_svg]:size-3',
+    // The rail runs from under each mark to the top of the next, through any
+    // steps shown between them; the last task has none.
+    tlTask: [
+      'relative flex flex-col text-sm',
+      "before:absolute before:start-[17px] before:top-[25px] before:-bottom-[7px] before:w-px before:bg-border before:content-[''] last:before:hidden",
+      'before:transition-colors before:duration-500 data-[status=done]:before:bg-info/50',
+    ],
+    tlRow: [
+      'group/tl flex h-8 w-full items-center gap-2.5 rounded-lg px-2 text-start outline-none',
+      'enabled:cursor-pointer enabled:hover:bg-foreground/[0.04] focus-visible:ring-2 focus-visible:ring-ring/60',
+    ],
+    tlMark: 'relative z-10 flex size-[18px] shrink-0 items-center justify-center rounded-full bg-muted',
+    tlIcon:
+      'flex size-5 shrink-0 items-center justify-center rounded-md bg-card text-foreground/80 shadow-xs ring-1 ring-foreground/[0.06] [&_svg]:size-3',
+    tlLabel: 'min-w-0 flex-1 truncate',
+    tlEnd: 'ms-auto flex shrink-0 items-center gap-1.5 ps-2 text-xs tabular-nums',
+    tlChevron:
+      'size-3 text-muted-foreground opacity-0 transition-[opacity,rotate] duration-200 group-hover/tl:opacity-100 group-focus-visible/tl:opacity-100 motion-reduce:transition-none',
+    tlStepsFold:
+      'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+    // The steps hang off a branch of their own, set in from the rail.
+    tlSteps: [
+      'relative ms-[38px] flex flex-col py-0.5',
+      "before:absolute before:start-[3px] before:top-1 before:bottom-2.5 before:w-px before:bg-border before:content-['']",
+    ],
+    tlStep: 'relative flex h-6 items-center gap-2.5 text-xs text-muted-foreground',
+    tlStepDot:
+      'relative z-10 size-[7px] shrink-0 rounded-full border-2 border-popover bg-muted-foreground/50 box-content -ms-[2px]',
+    tlStepMeta: 'ms-auto shrink-0 ps-3 font-mono text-[0.6875rem] tabular-nums text-muted-foreground/80',
+    approval: [
+      'basis-full',
+      'mt-1.5 mb-1 flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-xs leading-relaxed text-muted-foreground shadow-xs',
+    ],
+    approvalActions: 'flex items-center justify-end gap-1.5',
     taskMark: 'mt-0.5 flex size-4 shrink-0 items-center justify-center',
     // Pops in as the task finishes.
     taskDone:
@@ -1375,7 +1411,26 @@ const CheckCircle = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export type PromptTaskStatus = 'pending' | 'active' | 'done' | 'error';
+export type PromptTaskStatus = 'pending' | 'active' | 'waiting' | 'done' | 'error';
+
+/** How `Prompt.Tasks` draws its list. */
+export type PromptTasksVariant = 'compact' | 'timeline';
+
+const TasksVariantContext = createContext<PromptTasksVariant>('compact');
+
+/** The parts of a task's children that are not its label. */
+function splitTask(children: ReactNode) {
+  const label: ReactNode[] = [];
+  const steps: ReactNode[] = [];
+  let approval: ReactNode = null;
+  Children.forEach(children, (child) => {
+    const name = isValidElement(child) ? (child.type as { displayName?: string }).displayName : undefined;
+    if (name === 'Prompt.TaskStep') steps.push(child);
+    else if (name === 'Prompt.TaskApproval') approval = child;
+    else label.push(child);
+  });
+  return { label, steps, approval };
+}
 
 function reducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1420,8 +1475,16 @@ export interface PromptTasksProps extends Omit<ComponentProps<'div'>, 'title'> {
   defaultExpanded?: boolean;
   /** Called when the title is pressed to open or close the list. */
   onExpandedChange?: (expanded: boolean) => void;
-  /** How tall the list grows before it scrolls, as a CSS length. Default `10rem`. */
+  /** How tall the list grows before it scrolls, as a CSS length. Default `10rem`, or `20rem` for `timeline`. */
   maxHeight?: string;
+  /**
+   * `compact` is a list of lines. `timeline` joins the tasks with a rail, gives
+   * each an icon and a reading at its end, and opens the one in progress into
+   * its steps. Default `compact`.
+   */
+  variant?: PromptTasksVariant;
+  /** A small label beside the count, such as which agent is running: "Release bot". */
+  badge?: ReactNode;
 }
 
 /**
@@ -1436,7 +1499,9 @@ function PromptTasks({
   expanded,
   defaultExpanded = false,
   onExpandedChange,
-  maxHeight = '10rem',
+  maxHeight,
+  variant = 'compact',
+  badge,
   className,
   children,
   ...props
@@ -1449,13 +1514,13 @@ function PromptTasks({
   const list = useRef<HTMLOListElement>(null);
   const tasks = Children.toArray(children).filter(isValidElement) as ReactElement<PromptTaskProps>[];
   const done = tasks.filter((task) => task.props.status === 'done').length;
-  const active = tasks.findIndex((task) => task.props.status === 'active');
+  const active = tasks.findIndex((task) => task.props.status === 'active' || task.props.status === 'waiting');
 
   // The task in progress is kept in the middle of the list, so a long run can
   // be followed without scrolling. The list scrolls, never the page.
   useEffect(() => {
     const node = list.current;
-    const current = node?.querySelector<HTMLElement>('[data-status=active]');
+    const current = node?.querySelector<HTMLElement>('[data-status=active], [data-status=waiting]');
     if (!node || !current || !isExpanded) return;
     node.scrollTo({
       top: current.offsetTop - node.clientHeight / 2 + current.offsetHeight / 2,
@@ -1485,6 +1550,7 @@ function PromptTasks({
       >
         <ProgressRing done={done} total={tasks.length} />
         <span className={slots.tasksTitle()}>{title}</span>
+        {badge != null ? <span className={slots.tasksBadge()}>{badge}</span> : null}
         <span className={slots.tasksCount()}>
           {done}/{tasks.length}
         </span>
@@ -1503,8 +1569,15 @@ function PromptTasks({
       </button>
       <div className={slots.tasksBody({ className: isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]' })}>
         <div className="min-h-0 overflow-hidden">
-          <ol ref={list} id={listId} aria-label="Tasks" className={slots.tasksList()} style={{ maxHeight }}>
-            {children}
+          <ol
+            ref={list}
+            id={listId}
+            aria-label="Tasks"
+            data-variant={variant}
+            className={slots.tasksList({ className: variant === 'timeline' ? 'gap-0 px-2.5 pb-2' : undefined })}
+            style={{ maxHeight: maxHeight ?? (variant === 'timeline' ? '20rem' : '10rem') }}
+          >
+            <TasksVariantContext.Provider value={variant}>{children}</TasksVariantContext.Provider>
           </ol>
         </div>
       </div>
@@ -1514,13 +1587,48 @@ function PromptTasks({
 PromptTasks.displayName = 'Prompt.Tasks';
 
 export interface PromptTaskProps extends ComponentProps<'li'> {
-  /** `pending`, `active` (its words are lit while it runs), `done` (a check) or `error`. Default `pending`. */
+  /**
+   * `pending`, `active` (its words are lit while it runs), `waiting` (it needs
+   * someone before it can go on), `done` (a check) or `error`. Default `pending`.
+   */
   status?: PromptTaskStatus;
+  /** For `timeline`: a glyph for what the task works in, such as the app or the file type. */
+  icon?: ReactNode;
+  /** For `timeline`: the reading at the row's end while it runs or waits: "Editing", "Needs you". */
+  state?: ReactNode;
+  /** For `timeline`: the reading at the row's end otherwise, such as how long it took: "34s". */
+  meta?: ReactNode;
+  /**
+   * For `timeline`: whether its steps are shown, when the caller holds it.
+   * Uncontrolled, they are shown while the task runs or waits, and a finished
+   * task opens and closes when its row is pressed.
+   */
+  expanded?: boolean;
+  /** Called when the row is pressed to show or hide its steps. */
+  onExpandedChange?: (expanded: boolean) => void;
 }
 
-/** One task in `Prompt.Tasks`. */
-function PromptTask({ status = 'pending', className, children, render, ...props }: PromptTaskProps & RenderProp<'li'>) {
+/** One task in `Prompt.Tasks`. Its children are its label, then any `Prompt.TaskStep`s and a `Prompt.TaskApproval`. */
+function PromptTask(props: PromptTaskProps & RenderProp<'li'>) {
+  const variant = useContext(TasksVariantContext);
+  return variant === 'timeline' ? <TimelineTask {...props} /> : <CompactTask {...props} />;
+}
+PromptTask.displayName = 'Prompt.Task';
+
+function CompactTask({
+  status = 'pending',
+  className,
+  children,
+  render,
+  icon: _icon,
+  state: _state,
+  meta: _meta,
+  expanded: _expanded,
+  onExpandedChange: _onExpandedChange,
+  ...props
+}: PromptTaskProps & RenderProp<'li'>) {
   const slots = promptVariants();
+  const { label, approval } = splitTask(children);
   const text = useShimmer(status === 'active');
   return useRender({
     defaultTagName: 'li',
@@ -1548,6 +1656,8 @@ function PromptTask({ status = 'pending', className, children, render, ...props 
                 </svg>
               ) : status === 'error' ? (
                 <span className={slots.taskError()}>!</span>
+              ) : status === 'waiting' ? (
+                <span className={slots.taskPending({ className: 'border-warning' })} />
               ) : (
                 <span className={slots.taskPending()} />
               )}
@@ -1564,7 +1674,7 @@ function PromptTask({ status = 'pending', className, children, render, ...props 
                       : 'text-muted-foreground'
               }
             >
-              {children}
+              {label}
             </span>
             <span className="sr-only">
               {status === 'done'
@@ -1573,8 +1683,11 @@ function PromptTask({ status = 'pending', className, children, render, ...props 
                   ? ', in progress'
                   : status === 'error'
                     ? ', failed'
-                    : ''}
+                    : status === 'waiting'
+                      ? ', waiting for you'
+                      : ''}
             </span>
+            {approval}
           </>
         ),
       },
@@ -1582,7 +1695,268 @@ function PromptTask({ status = 'pending', className, children, render, ...props 
     ),
   });
 }
-PromptTask.displayName = 'Prompt.Task';
+CompactTask.displayName = 'Prompt.Task';
+
+function TaskMark({ status }: { status: PromptTaskStatus }) {
+  const slots = promptVariants();
+  if (status === 'done')
+    return (
+      <span className={slots.tlMark({ className: 'bg-info text-white' })}>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-2.5 transition-[scale,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] starting:scale-50 starting:opacity-0 motion-reduce:transition-none"
+        >
+          <path d="m5 12.5 4.5 4.5L19 7.5" />
+        </svg>
+      </span>
+    );
+  if (status === 'active')
+    return (
+      <span className={slots.tlMark({ className: 'bg-popover' })}>
+        <svg aria-hidden="true" viewBox="0 0 18 18" className="size-[18px] animate-spin motion-reduce:animate-none">
+          <circle cx="9" cy="9" r="7.25" fill="none" stroke="var(--border)" strokeWidth="1.5" />
+          <path
+            d="M9 1.75a7.25 7.25 0 0 1 7.25 7.25"
+            fill="none"
+            stroke="var(--info)"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+        </svg>
+      </span>
+    );
+  if (status === 'waiting')
+    return (
+      <span className={slots.tlMark({ className: 'bg-popover' })}>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 18 18"
+          className="size-[18px] animate-[spin_6s_linear_infinite] motion-reduce:animate-none"
+        >
+          <circle
+            cx="9"
+            cy="9"
+            r="7.25"
+            fill="none"
+            stroke="var(--warning)"
+            strokeWidth="1.5"
+            strokeDasharray="2.6 2.4"
+          />
+        </svg>
+        <span className="absolute size-1.5 rounded-full bg-warning" />
+      </span>
+    );
+  if (status === 'error')
+    return (
+      <span className={slots.tlMark({ className: 'bg-destructive text-[0.625rem] font-bold leading-none text-white' })}>
+        !
+      </span>
+    );
+  return (
+    <span className={slots.tlMark({ className: 'bg-popover' })}>
+      <span className="size-[14px] rounded-full border-[1.5px] border-border" />
+    </span>
+  );
+}
+
+function TimelineTask({
+  status = 'pending',
+  icon,
+  state,
+  meta,
+  expanded,
+  onExpandedChange,
+  className,
+  children,
+  render,
+  ...props
+}: PromptTaskProps & RenderProp<'li'>) {
+  const slots = promptVariants();
+  const { label, steps, approval } = splitTask(children);
+  const live = status === 'active' || status === 'waiting';
+  const text = useShimmer(status === 'active');
+  const stepsId = useId();
+  // Uncontrolled, the steps follow the task: shown while it runs, folded when
+  // it finishes, unless somebody opened or closed them by hand since.
+  const [manual, setManual] = useState<boolean | null>(null);
+  useEffect(() => setManual(null), [status]);
+  const hasMore = steps.length > 0 || approval != null;
+  const open = hasMore && (expanded ?? manual ?? live);
+  const canToggle = hasMore && !live;
+
+  const toggle = () => {
+    if (!canToggle) return;
+    if (expanded === undefined) setManual(!open);
+    onExpandedChange?.(!open);
+  };
+
+  const end =
+    live && state != null ? (
+      <span
+        className={status === 'waiting' ? 'font-medium text-warning-foreground' : 'font-medium text-info-foreground'}
+      >
+        {state}
+      </span>
+    ) : meta != null ? (
+      <span className="text-muted-foreground">{meta}</span>
+    ) : null;
+
+  return useRender({
+    defaultTagName: 'li',
+    render,
+    props: mergeProps(
+      {
+        'data-status': status,
+        'data-expanded': open ? '' : undefined,
+        className: slots.tlTask({ className }),
+        children: (
+          <>
+            <button
+              type="button"
+              disabled={!canToggle}
+              aria-expanded={hasMore ? open : undefined}
+              aria-controls={hasMore ? stepsId : undefined}
+              onClick={toggle}
+              className={slots.tlRow()}
+            >
+              <TaskMark status={status} />
+              {icon != null ? <span className={slots.tlIcon()}>{icon}</span> : null}
+              <span
+                ref={text}
+                className={slots.tlLabel({
+                  className:
+                    status === 'active'
+                      ? slots.statusText({ className: 'text-transparent' })
+                      : status === 'pending'
+                        ? 'text-muted-foreground'
+                        : status === 'error'
+                          ? 'text-destructive'
+                          : 'text-foreground',
+                })}
+              >
+                {label}
+              </span>
+              <span className={slots.tlEnd()}>
+                {canToggle ? (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={slots.tlChevron({ className: open ? 'rotate-180' : undefined })}
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                ) : null}
+                {end}
+              </span>
+              <span className="sr-only">
+                {status === 'done'
+                  ? ', done'
+                  : status === 'active'
+                    ? ', in progress'
+                    : status === 'waiting'
+                      ? ', waiting for you'
+                      : status === 'error'
+                        ? ', failed'
+                        : ''}
+              </span>
+            </button>
+            {hasMore ? (
+              <div
+                id={stepsId}
+                className={slots.tlStepsFold({ className: open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] opacity-0' })}
+              >
+                <div className="min-h-0 overflow-hidden" inert={!open}>
+                  {steps.length > 0 ? <ul className={slots.tlSteps()}>{steps}</ul> : null}
+                  {approval != null ? <div className="ms-[38px]">{approval}</div> : null}
+                </div>
+              </div>
+            ) : null}
+          </>
+        ),
+      },
+      props
+    ),
+  });
+}
+
+export interface PromptTaskStepProps extends ComponentProps<'li'> {
+  /** `done` greys it; `active` marks it as the step the task is on. Default `done`. */
+  status?: 'done' | 'active';
+  /** A short reading at its end, set in mono: a file and line, a diff count, a test tally. */
+  meta?: ReactNode;
+}
+
+/** One thing a task did on its way, shown under it in `timeline`. Write the steps after the task's label. */
+function PromptTaskStep({ status = 'done', meta, className, children, ...props }: PromptTaskStepProps) {
+  const slots = promptVariants();
+  return (
+    <li
+      data-slot="prompt-task-step"
+      data-status={status}
+      className={slots.tlStep({ className: [status === 'active' && 'text-foreground', className] })}
+      {...props}
+    >
+      <span className={slots.tlStepDot({ className: status === 'active' ? 'bg-info' : undefined })} />
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {meta != null ? <span className={slots.tlStepMeta()}>{meta}</span> : null}
+    </li>
+  );
+}
+PromptTaskStep.displayName = 'Prompt.TaskStep';
+
+export interface PromptTaskApprovalProps extends Omit<ComponentProps<'div'>, 'children'> {
+  /** What will happen if it is approved: "Open a pull request against main with 3 files". */
+  children: ReactNode;
+  /** Called when Approve is pressed. */
+  onApprove?: () => void;
+  /** Called when Decline is pressed. */
+  onDecline?: () => void;
+  /** The approving button's label. Default "Approve". */
+  approveLabel?: ReactNode;
+  /** The declining button's label. Default "Decline". */
+  declineLabel?: ReactNode;
+}
+
+/**
+ * What a waiting task asks for, with the two answers. Write it in a task
+ * whose `status` is `waiting`; it opens under the task's row.
+ */
+function PromptTaskApproval({
+  children,
+  onApprove,
+  onDecline,
+  approveLabel = 'Approve',
+  declineLabel = 'Decline',
+  className,
+  ...props
+}: PromptTaskApprovalProps) {
+  const slots = promptVariants();
+  return (
+    <div data-slot="prompt-task-approval" role="group" className={slots.approval({ className })} {...props}>
+      <div className="text-foreground/80">{children}</div>
+      <div className={slots.approvalActions()}>
+        <Button type="button" variant="ghost" size="sm" shape="pill" onClick={onDecline}>
+          {declineLabel}
+        </Button>
+        <Button type="button" size="sm" shape="pill" onClick={onApprove}>
+          {approveLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}
+PromptTaskApproval.displayName = 'Prompt.TaskApproval';
 
 /* --------------------------------------------------------------- commands */
 
@@ -1908,6 +2282,8 @@ export const Prompt = Object.assign(PromptRoot, {
   Status: PromptStatus,
   Tasks: PromptTasks,
   Task: PromptTask,
+  TaskStep: PromptTaskStep,
+  TaskApproval: PromptTaskApproval,
   Commands: PromptCommands,
   Recorder: PromptRecorder,
   Context: PromptContext,
@@ -1934,6 +2310,8 @@ export {
   PromptStatus,
   PromptTasks,
   PromptTask,
+  PromptTaskStep,
+  PromptTaskApproval,
   PromptCommands,
   PromptRecorder,
   PromptContext,

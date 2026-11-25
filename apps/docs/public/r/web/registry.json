@@ -1968,6 +1968,24 @@
       ]
     },
     {
+      "name": "tap-menu",
+      "type": "registry:component",
+      "title": "Tap Menu",
+      "description": "A button that opens a few actions as cards over a blurred screen.",
+      "dependencies": [
+        "@base-ui/react",
+        "tailwind-variants"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/panelui/tap-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/panelui/tap-menu.tsx"
+        }
+      ]
+    },
+    {
       "name": "textarea",
       "type": "registry:component",
       "title": "Textarea",

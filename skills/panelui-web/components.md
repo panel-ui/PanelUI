@@ -34,6 +34,7 @@ Generated from the collection's source. Read a component's own file before using
 - [Dialog](components/dialog.md) — A task done in a panel over the page, with its buttons in the band beneath it.
 - [Menu](components/menu.md) — A list of actions that opens from a button, with shortcuts, checks and submenus.
 - [Sheet](components/sheet.md) — A panel that rises from an edge of the screen, floating clear of it, and leaves with a swipe.
+- [Tap Menu](components/tap-menu.md) — A button that opens a few actions as cards over a blurred screen.
 - [Tooltip](components/tooltip.md) — A short hint about a control while it is hovered or focused: a pill, a card, its keys or a status.
 
 ## Navigation

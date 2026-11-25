@@ -1680,3 +1680,16 @@ export {
   type ComboboxItemProps,
   type ComboboxGroupProps,
 } from './components/combobox';
+export {
+  TapMenu,
+  TapMenuTrigger,
+  TapMenuContent,
+  TapMenuItem,
+  TapMenuHeading,
+  type TapMenuVariant,
+  type TapMenuProps,
+  type TapMenuTriggerProps,
+  type TapMenuContentProps,
+  type TapMenuItemProps,
+  type TapMenuHeadingProps,
+} from './components/tap-menu';

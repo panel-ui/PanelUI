@@ -1,0 +1,282 @@
+---
+title: Tap Menu
+description: A button that opens a few actions as cards over a blurred screen.
+status: new
+---
+
+<ComponentPreview name="tap-menu/overview" height={260}>
+
+```tsx lineNumbers
+import { CalendarPlusIcon, FileTextIcon, SparklesIcon, UserPlusIcon } from 'lucide-react';
+import { TapMenu } from '@/components/panelui/tap-menu';
+
+export default function TapMenuOverview() {
+  return (
+    <TapMenu>
+      <TapMenu.Trigger aria-label="Create" />
+      <TapMenu.Content align="center">
+        <TapMenu.Item icon={<CalendarPlusIcon />}>Book a session</TapMenu.Item>
+        <TapMenu.Item icon={<FileTextIcon />}>Send a quote</TapMenu.Item>
+        <TapMenu.Item icon={<UserPlusIcon />}>Add a client</TapMenu.Item>
+        <TapMenu.Item icon={<SparklesIcon />}>Plan with AI</TapMenu.Item>
+      </TapMenu.Content>
+    </TapMenu>
+  );
+}
+```
+
+</ComponentPreview>
+
+Use it for the three to six things somebody starts most often from a screen: a new booking, a new note, an upload. One button holds them, and pressing it opens each action as a card big enough to tap, while the screen behind blurs.
+
+It is a menu underneath. The arrow keys move between the cards, Enter picks one, and Escape closes it and returns focus to the button.
+
+For a longer list, or actions with checks and submenus, use [Menu](/docs/web/components/menu). For a search over every command, use [Command](/docs/web/components/command).
+
+## Installation
+
+<Tabs items={['CLI', 'npm', 'Manual']}>
+
+<Tab value="CLI">
+
+<InstallTabs kind="dlx" packages="shadcn@latest add https://panelui.dev/r/web/tap-menu.json" />
+
+The source is copied into `components/panelui/`, where you can edit it.
+
+</Tab>
+
+<Tab value="npm">
+
+<InstallTabs kind="add" packages="panelui-web" />
+
+Import from `panelui-web/tap-menu` instead of `@/components/panelui/tap-menu`. Tailwind needs one line to read the package's classes, which is on the [installation page](/docs/web/installation#from-npm).
+
+</Tab>
+
+<Tab value="Manual">
+
+<Steps>
+
+<Step>
+
+Install the packages it uses:
+
+<InstallTabs kind="add" packages="@base-ui/react tailwind-variants" />
+
+</Step>
+
+<Step>
+
+Copy the source into `components/panelui/tap-menu.tsx`:
+
+<RegistrySource name="tap-menu" />
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+</Tabs>
+
+## Usage
+
+```tsx
+import { TapMenu } from "@/components/panelui/tap-menu"
+```
+
+```tsx
+<TapMenu>
+  <TapMenu.Trigger aria-label="Create" />
+  <TapMenu.Content>
+    <TapMenu.Item icon={<CalendarPlusIcon />} onClick={book}>
+      Book a session
+    </TapMenu.Item>
+    <TapMenu.Item icon={<FileTextIcon />} onClick={quote}>
+      Send a quote
+    </TapMenu.Item>
+  </TapMenu.Content>
+</TapMenu>
+```
+
+## Composition
+
+```tsx
+<TapMenu>
+  <TapMenu.Trigger />
+  <TapMenu.Content>
+    <TapMenu.Heading />
+    <TapMenu.Item />
+  </TapMenu.Content>
+</TapMenu>
+```
+
+- **`TapMenu.Trigger`** — The round button. It shows a plus that turns into a cross while the menu is open, and the blur leaves a hole over it so it stays sharp. Give it an `aria-label`.
+- **`TapMenu.Content`** — The cards and the blurred backdrop. `container` keeps both inside an element instead of the whole page.
+- **`TapMenu.Heading`** — A small heading over the cards. Use it with `spotlight`, where the sheet opens away from the button.
+- **`TapMenu.Item`** — One action. `icon` goes in the card's top corner and the name in its bottom one. `shortcut` adds a key at the end of a `stack` row. Pressing it closes the menu.
+
+## Examples
+
+### Fan
+
+`variant="fan"` spreads the cards in an arc around a round button, each tilted a little, and straightens the one being pointed at. It suits a button in a corner. `arc` sets the angles the cards span, and `radius` sets how far they sit from the button.
+
+<ComponentPreview name="tap-menu/fan" height={380}>
+
+```tsx lineNumbers
+import { CameraIcon, FolderPlusIcon, ImageUpIcon, StickyNoteIcon } from 'lucide-react';
+import { TapMenu } from '@/components/panelui/tap-menu';
+
+export default function TapMenuFan() {
+  return (
+    <div className="flex size-full items-end justify-end p-6">
+      <TapMenu variant="fan">
+        <TapMenu.Trigger aria-label="Add to album" className="size-12 shadow-md" />
+        <TapMenu.Content>
+          <TapMenu.Item icon={<CameraIcon />}>Take photo</TapMenu.Item>
+          <TapMenu.Item icon={<ImageUpIcon />}>Upload</TapMenu.Item>
+          <TapMenu.Item icon={<StickyNoteIcon />}>Add note</TapMenu.Item>
+          <TapMenu.Item icon={<FolderPlusIcon />}>New album</TapMenu.Item>
+        </TapMenu.Content>
+      </TapMenu>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Stack
+
+`variant="stack"` raises the actions from a button at the bottom as a column of rows. The row nearest the button arrives first. Each row has room for a `shortcut`.
+
+<ComponentPreview name="tap-menu/stack" height={340}>
+
+```tsx lineNumbers
+import { ListChecksIcon, MicIcon, NotebookPenIcon, ScanLineIcon } from 'lucide-react';
+import { TapMenu } from '@/components/panelui/tap-menu';
+
+export default function TapMenuStack() {
+  return (
+    <div className="flex size-full items-end justify-end p-6">
+      <TapMenu variant="stack">
+        <TapMenu.Trigger aria-label="New" className="size-11" />
+        <TapMenu.Content>
+          <TapMenu.Item icon={<NotebookPenIcon />} shortcut="⌘N">
+            Note
+          </TapMenu.Item>
+          <TapMenu.Item icon={<ListChecksIcon />} shortcut="⌘L">
+            Checklist
+          </TapMenu.Item>
+          <TapMenu.Item icon={<MicIcon />} shortcut="⌘R">
+            Voice memo
+          </TapMenu.Item>
+          <TapMenu.Item icon={<ScanLineIcon />} shortcut="⌘D">
+            Scan a page
+          </TapMenu.Item>
+        </TapMenu.Content>
+      </TapMenu>
+    </div>
+  );
+}
+```
+
+</ComponentPreview>
+
+### Spotlight
+
+`variant="spotlight"` opens a sheet of larger tiles in the middle of the screen, three to a row. Use it on a narrow screen where the button is in a tab bar, far from where the cards would otherwise open. `TapMenu.Heading` says what the actions add to.
+
+<ComponentPreview name="tap-menu/spotlight" height={260}>
+
+```tsx lineNumbers
+import { BellIcon, CalendarPlusIcon, MapPinIcon, ReceiptIcon, SplitIcon, WalletIcon } from 'lucide-react';
+import { TapMenu } from '@/components/panelui/tap-menu';
+
+export default function TapMenuSpotlight() {
+  return (
+    <TapMenu variant="spotlight">
+      <TapMenu.Trigger aria-label="Add" className="size-11" />
+      <TapMenu.Content>
+        <TapMenu.Heading>Add to the house account</TapMenu.Heading>
+        <TapMenu.Item icon={<ReceiptIcon />}>Expense</TapMenu.Item>
+        <TapMenu.Item icon={<SplitIcon />}>Split</TapMenu.Item>
+        <TapMenu.Item icon={<WalletIcon />}>Top up</TapMenu.Item>
+        <TapMenu.Item icon={<CalendarPlusIcon />}>Repeat</TapMenu.Item>
+        <TapMenu.Item icon={<MapPinIcon />}>Trip</TapMenu.Item>
+        <TapMenu.Item icon={<BellIcon />}>Reminder</TapMenu.Item>
+      </TapMenu.Content>
+    </TapMenu>
+  );
+}
+```
+
+</ComponentPreview>
+
+## API Reference
+
+### TapMenu
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `TapMenuVariant` | — | How the cards are laid out and arrive: `tiles`, `fan`, `stack` or `spotlight`. Default `tiles`. |
+
+### TapMenu.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | — |  |
+
+### TapMenu.Content
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `container` | `HTMLElement \| null \| { current: HTMLElement \| null }` | — | The element the cards and the blur are put in. The blur stops at its edges; give it `position: relative`. Default the page, with the blur over the whole viewport. |
+| `backdrop` | `boolean` | `true` | Whether the screen behind is blurred. Default `true`. |
+| `side` | `BaseMenu.Positioner.Props['side']` | — | Which side of the trigger the cards open on, for `tiles` and `stack`. Default `bottom` for tiles, `top` for stack. |
+| `align` | `BaseMenu.Positioner.Props['align']` | — | How they line up with the trigger, for `tiles` and `stack`. Default `start` for tiles, `end` for stack. |
+| `sideOffset` | `number` | `10` | The gap between the trigger and the cards, in pixels. Default `10`. |
+| `arc` | `[number, number]` | — | For `fan`: the arc the cards are spread over, in degrees, where 0 points right and -90 points up. Default `[-180, -90]`, from left round to up, for a button in the bottom trailing corner. |
+| `radius` | `number` | `148` | For `fan`: how far the cards' centres are from the trigger's, in pixels. Default `148`. |
+| `className` | `string` | — |  |
+
+### TapMenu.Item
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `ReactNode` | — | The glyph in the card's top corner. |
+| `description` | `ReactNode` | — | A line under the name, for `stack` and `spotlight`. |
+| `shortcut` | `ReactNode` | — | A key or chord at the row's end, for `stack`: "⌘N". |
+| `className` | `string` | — |  |
+| `style` | `CSSProperties` | — |  |
+
+Every part also takes the props of the element it renders, and a `className`.
+
+## Notes
+
+### Where the blur goes
+
+Without `container`, the backdrop covers the viewport. Pass an element or a ref as `container` to keep the cards and the blur inside it. That element needs `position: relative`, and usually `overflow: hidden` and `isolation: isolate`.
+
+The backdrop leaves a round hole over the trigger, so the trigger stays sharp wherever it sits, and pressing it closes the menu. The hole is measured when the menu opens.
+
+### Placement
+
+`tiles` opens below the button and `stack` above it. Both take `side`, `align` and `sideOffset`, and move to the other side when there is no room. `fan` is always centred on the button. `spotlight` ignores where the button is.
+
+### Motion
+
+The cards arrive one after another, 35 ms apart, and all leave together in 150 ms. With reduced motion they appear and go without moving.
+
+### Screen readers
+
+The button is announced as a menu button and each card as a menu item named by its text. A card with only an icon needs an `aria-label`.
+
+### Server Components
+
+`TapMenu` is a client component. In a file that starts with `"use client"`, write its parts with a dot, as on this page. A Server Component cannot read `TapMenu.Trigger` off the import, so each part is also exported by name: `TapMenuTrigger` is `TapMenu.Trigger`, and so on for the others.
+
+```tsx
+import { TapMenu, TapMenuTrigger, TapMenuContent, TapMenuItem, TapMenuHeading } from "@/components/panelui/tap-menu"
+```

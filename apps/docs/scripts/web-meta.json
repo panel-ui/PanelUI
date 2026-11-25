@@ -821,5 +821,15 @@
       "addedIn": "0.17.0",
       "category": "forms"
     }
+  ],
+  "tap-menu": [
+    "TapMenu",
+    "A button that opens a few actions as cards over a blurred screen.",
+    "react action menu floating action button blur backdrop quick actions component",
+    {
+      "addedIn": "0.19.0",
+      "category": "overlays",
+      "title": "Tap Menu"
+    }
   ]
 }

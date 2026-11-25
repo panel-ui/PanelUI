@@ -1,0 +1,37 @@
+{
+  "slug": "tap-menu",
+  "demo": "overview",
+  "demoOptions": {
+    "height": 260
+  },
+  "intro": "Use it for the three to six things somebody starts most often from a screen: a new booking, a new note, an upload. One button holds them, and pressing it opens each action as a card big enough to tap, while the screen behind blurs.\n\nIt is a menu underneath. The arrow keys move between the cards, Enter picks one, and Escape closes it and returns focus to the button.\n\nFor a longer list, or actions with checks and submenus, use [Menu](/docs/web/components/menu). For a search over every command, use [Command](/docs/web/components/command).",
+  "usage": "<TapMenu>\n  <TapMenu.Trigger aria-label=\"Create\" />\n  <TapMenu.Content>\n    <TapMenu.Item icon={<CalendarPlusIcon />} onClick={book}>\n      Book a session\n    </TapMenu.Item>\n    <TapMenu.Item icon={<FileTextIcon />} onClick={quote}>\n      Send a quote\n    </TapMenu.Item>\n  </TapMenu.Content>\n</TapMenu>",
+  "anatomy": "<TapMenu>\n  <TapMenu.Trigger />\n  <TapMenu.Content>\n    <TapMenu.Heading />\n    <TapMenu.Item />\n  </TapMenu.Content>\n</TapMenu>",
+  "parts": {
+    "Trigger": "The round button. It shows a plus that turns into a cross while the menu is open, and the blur leaves a hole over it so it stays sharp. Give it an `aria-label`.",
+    "Content": "The cards and the blurred backdrop. `container` keeps both inside an element instead of the whole page.",
+    "Heading": "A small heading over the cards. Use it with `spotlight`, where the sheet opens away from the button.",
+    "Item": "One action. `icon` goes in the card's top corner and the name in its bottom one. `shortcut` adds a key at the end of a `stack` row. Pressing it closes the menu."
+  },
+  "examples": [
+    {
+      "title": "Fan",
+      "description": "`variant=\"fan\"` spreads the cards in an arc around a round button, each tilted a little, and straightens the one being pointed at. It suits a button in a corner. `arc` sets the angles the cards span, and `radius` sets how far they sit from the button.",
+      "demo": "fan",
+      "height": 380
+    },
+    {
+      "title": "Stack",
+      "description": "`variant=\"stack\"` raises the actions from a button at the bottom as a column of rows. The row nearest the button arrives first. Each row has room for a `shortcut`.",
+      "demo": "stack",
+      "height": 340
+    },
+    {
+      "title": "Spotlight",
+      "description": "`variant=\"spotlight\"` opens a sheet of larger tiles in the middle of the screen, three to a row. Use it on a narrow screen where the button is in a tab bar, far from where the cards would otherwise open. `TapMenu.Heading` says what the actions add to.",
+      "demo": "spotlight",
+      "height": 260
+    }
+  ],
+  "notes": "### Where the blur goes\n\nWithout `container`, the backdrop covers the viewport. Pass an element or a ref as `container` to keep the cards and the blur inside it. That element needs `position: relative`, and usually `overflow: hidden` and `isolation: isolate`.\n\nThe backdrop leaves a round hole over the trigger, so the trigger stays sharp wherever it sits, and pressing it closes the menu. The hole is measured when the menu opens.\n\n### Placement\n\n`tiles` opens below the button and `stack` above it. Both take `side`, `align` and `sideOffset`, and move to the other side when there is no room. `fan` is always centred on the button. `spotlight` ignores where the button is.\n\n### Motion\n\nThe cards arrive one after another, 35 ms apart, and all leave together in 150 ms. With reduced motion they appear and go without moving.\n\n### Screen readers\n\nThe button is announced as a menu button and each card as a menu item named by its text. A card with only an icon needs an `aria-label`."
+}

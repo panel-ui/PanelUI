@@ -131,6 +131,7 @@
     "A surface that holds one thing, with a heading, an action beside it and a footer.",
     "react card component header footer",
     {
+      "updatedIn": "0.19.0",
       "addedIn": "0.2.0",
       "category": "layout"
     }
@@ -208,9 +209,9 @@
     "A field for writing to an assistant, with its files, model and tools in one card.",
     "react prompt input chat composer ai component",
     {
+      "updatedIn": "0.19.0",
       "addedIn": "0.5.0",
-      "category": "ai",
-      "updatedIn": "0.8.0"
+      "category": "ai"
     }
   ],
   "menu": [
@@ -263,6 +264,7 @@
     "One turn of a conversation with an assistant: a person's bubble, or an answer set as prose with actions under it.",
     "react ai chat message bubble assistant component",
     {
+      "updatedIn": "0.19.0",
       "addedIn": "0.6.0",
       "category": "ai"
     }
@@ -349,6 +351,7 @@
     "A strip of tools and actions for an editor, with one tool chosen at a time.",
     "react toolbar component editor tools design app",
     {
+      "updatedIn": "0.19.0",
       "addedIn": "0.10.0",
       "category": "actions"
     }
@@ -496,6 +499,7 @@
     "A select for the model a message goes to, searched by name, filtered by provider and starred.",
     "react model picker ai model selector llm dropdown component",
     {
+      "updatedIn": "0.19.0",
       "addedIn": "0.12.0",
       "category": "ai",
       "title": "Model Picker"

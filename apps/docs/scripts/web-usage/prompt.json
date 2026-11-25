@@ -47,7 +47,7 @@
     },
     {
       "title": "Tasks as a timeline",
-      "description": "`variant=\"timeline\"` draws the tasks on a rail. Each `Prompt.Task` takes an `icon`, a `state` shown while it runs, such as \"Editing\", and a `meta` shown once it is done, such as how long it took.\n\nThe task in progress opens into its `Prompt.TaskStep`s, which carry a short reading in mono at their end. When it finishes, they fold. Press a finished task's row to open them again.\n\nA task whose `status` is `waiting` stops for an answer. Put a `Prompt.TaskApproval` in it to show what will happen and the two buttons. Here the agent waits before deploying, and Decline stops the run.",
+      "description": "`variant=\"timeline\"` draws the tasks on a rail. Each `Prompt.Task` takes an `icon`, a `state` shown while it runs, such as \"Editing\", and a `meta` for its time, shown beside the state while it runs and on its own once it is done.\n\nThe task in progress opens into its `Prompt.TaskStep`s, and the rail bends out to run past them. When the task finishes they fold. Press a finished task's row to open them again.\n\nA task still to come can carry a `tag`, such as \"Approval\" for one that will stop for an answer. A task whose `status` is `waiting` shows a Needs you flag, and its `Prompt.TaskApproval` opens under the row as a sentence with Decline and Approve. Here the agent waits before deploying, and Decline stops the run.",
       "demo": "timeline",
       "height": 560
     },
